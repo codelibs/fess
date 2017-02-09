@@ -49,7 +49,7 @@
 												key="labels.labeltype_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text property="name" styleClass="form-control" styleId="name" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.labeltype_value" /></label>
 										<div class="col-sm-9">
 											<la:errors property="value" />
-											<la:text property="value" styleClass="form-control" />
+											<la:text property="value" styleClass="form-control" styleId="paths" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -66,7 +66,7 @@
 										<div class="col-sm-9">
 											<la:errors property="includedPaths" />
 											<la:textarea property="includedPaths"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="includedPaths" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -75,7 +75,7 @@
 										<div class="col-sm-9">
 											<la:errors property="excludedPaths" />
 											<la:textarea property="excludedPaths"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="excludedPaths" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -83,7 +83,7 @@
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control"
+											<la:textarea property="permissions" styleClass="form-control" styleId="permissions"
 												rows="5" />
 										</div>
 									</div>

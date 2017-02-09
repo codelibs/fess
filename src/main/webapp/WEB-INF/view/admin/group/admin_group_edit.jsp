@@ -48,7 +48,7 @@
 										<div class="col-sm-9">
 											<c:if test="${crudMode == 1}">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text property="name" styleClass="form-control" styleId="name" />
 											</c:if><c:if test="${crudMode == 2}">
 											${f:h(name)}<la:hidden property="name" />
 											</c:if>
@@ -59,7 +59,7 @@
 												key="labels.group_gidNumber" /></label>
 										<div class="col-sm-9">
 											<la:errors property="attributes.gidNumber" />
-											<la:text property="attributes.gidNumber" styleClass="form-control" />
+											<la:text property="attributes.gidNumber" styleClass="form-control" styleId="gidNumber" />
 										</div>
 									</div>
 								</div>

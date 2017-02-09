@@ -43,7 +43,7 @@
 										<label for="targetVersion" class="col-sm-3 control-label"><la:message key="labels.target_version" /></label>
 										<div class="col-sm-9">
 											<la:errors property="targetVersion" />
-											<la:select property="targetVersion" styleClass="form-control">
+											<la:select property="targetVersion" styleClass="form-control" styleId="targetVersion">
 												<la:option value="">Not supported</la:option>
 											</la:select>
 										</div>

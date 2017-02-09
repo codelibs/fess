@@ -211,7 +211,7 @@
 												key="labels.design_file_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="designFileName" />
-											<la:text property="designFileName" styleClass="form-control" />
+											<la:text property="designFileName" styleClass="form-control" styleId="searchParams.url" />
 										</div>
 									</div>
 								</div>

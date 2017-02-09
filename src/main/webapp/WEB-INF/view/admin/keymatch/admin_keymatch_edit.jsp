@@ -49,7 +49,7 @@
 												key="labels.key_match_term" /></label>
 										<div class="col-sm-9">
 											<la:errors property="term" />
-											<la:text property="term" styleClass="form-control" />
+											<la:text property="term" styleClass="form-control" styleId="term" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.key_match_query" /></label>
 										<div class="col-sm-9">
 											<la:errors property="query" />
-											<la:text property="query" styleClass="form-control" />
+											<la:text property="query" styleClass="form-control" styleId="query" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -75,7 +75,7 @@
 												key="labels.key_match_boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text property="boost" styleClass="form-control" styleId="boost" />
 										</div>
 									</div>
 								</div>

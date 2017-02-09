@@ -47,7 +47,7 @@
 												key="labels.role_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text property="name" styleClass="form-control" styleId="name" />
 										</div>
 									</div>
 								</div>

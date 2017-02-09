@@ -137,7 +137,7 @@
 								</div>
 								<div class="modal-body">
 									<fieldset class="form-group">
-										<label for="contentNum"><la:message
+										<label for="numSearchOption"><la:message
 												key="labels.index_num" /></label>
 										<la:select property="num" styleId="numSearchOption"
 											styleClass="form-control">
@@ -153,7 +153,7 @@
 										</la:select>
 									</fieldset>
 									<fieldset class="form-group">
-										<label for="contentSort"><la:message
+										<label for="sortSearchOption"><la:message
 												key="labels.index_sort" /></label>
 										<la:select property="sort" styleId="sortSearchOption"
 											styleClass="form-control">
@@ -213,7 +213,7 @@
 										</la:select>
 									</fieldset>
 									<fieldset class="form-group">
-										<label for="contentLang"><la:message
+										<label for="langSearchOption"><la:message
 												key="labels.index_lang" /></label>
 										<la:select property="lang" styleId="langSearchOption"
 											multiple="true" styleClass="form-control">
@@ -226,7 +226,7 @@
 									</fieldset>
 									<c:if test="${displayLabelTypeItems}">
 										<fieldset class="form-group">
-											<label for="contentLabelType"><la:message
+											<label for="labelTypeSearchOption"><la:message
 													key="labels.index_label" /></label>
 											<la:select property="fields.label"
 												styleId="labelTypeSearchOption" multiple="true"

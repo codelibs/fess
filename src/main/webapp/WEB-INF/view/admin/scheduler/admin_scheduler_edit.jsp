@@ -49,7 +49,7 @@
 												key="labels.scheduledjob_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text property="name" styleClass="form-control" styleId="name" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.scheduledjob_target" /></label>
 										<div class="col-sm-9">
 											<la:errors property="target" />
-											<la:text property="target" styleClass="form-control" />
+											<la:text property="target" styleClass="form-control" styleId="target" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -65,7 +65,7 @@
 												key="labels.scheduledjob_cronExpression" /></label>
 										<div class="col-sm-9">
 											<la:errors property="cronExpression" />
-											<la:text property="cronExpression" styleClass="form-control" />
+											<la:text property="cronExpression" styleClass="form-control" styleId="cronExpression" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -73,7 +73,7 @@
 												key="labels.scheduledjob_scriptType" /></label>
 										<div class="col-sm-9">
 											<la:errors property="scriptType" />
-											<la:text property="scriptType" styleClass="form-control" />
+											<la:text property="scriptType" styleClass="form-control" styleId="scriptType" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -81,7 +81,7 @@
 												key="labels.scheduledjob_scriptData" /></label>
 										<div class="col-sm-9">
 											<la:errors property="scriptData" />
-											<la:textarea property="scriptData" styleClass="form-control"
+											<la:textarea property="scriptData" styleClass="form-control" styleId="scriptData"
 												rows="5" />
 										</div>
 									</div>
@@ -91,7 +91,7 @@
 										<div class="col-sm-9">
 											<la:errors property="jobLogging" />
 											<div class="checkbox">
-												<label> <la:checkbox property="jobLogging" /> <la:message
+												<label> <la:checkbox property="jobLogging" styleId="jobLogging" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -103,7 +103,7 @@
 										<div class="col-sm-9">
 											<la:errors property="crawler" />
 											<div class="checkbox">
-												<label> <la:checkbox property="crawler" /> <la:message
+												<label> <la:checkbox property="crawler" styleId="crawler" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -115,7 +115,7 @@
 										<div class="col-sm-9">
 											<la:errors property="available" />
 											<div class="checkbox">
-												<label> <la:checkbox property="available" /> <la:message
+												<label> <la:checkbox property="available" styleId="available" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>

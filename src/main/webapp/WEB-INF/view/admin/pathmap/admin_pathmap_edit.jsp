@@ -49,7 +49,7 @@
 												key="labels.regex" /></label>
 										<div class="col-sm-9">
 											<la:errors property="regex" />
-											<la:text property="regex" styleClass="form-control" />
+											<la:text property="regex" styleClass="form-control" styleId="regex" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.replacement" /></label>
 										<div class="col-sm-9">
 											<la:errors property="replacement" />
-											<la:text property="replacement" styleClass="form-control" />
+											<la:text property="replacement" styleClass="form-control" styleId="replacement" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -65,7 +65,7 @@
 												key="labels.processType" /></label>
 										<div class="col-sm-9">
 											<la:errors property="processType" />
-											<la:select property="processType" styleClass="form-control">
+											<la:select property="processType" styleClass="form-control" styleId="processType">
 												<la:option value="C">
 													<la:message key="labels.pathmap_pt_crawling" />
 												</la:option>
@@ -92,7 +92,7 @@
 										<label for="userAgent" class="col-sm-3 control-label"><la:message key="labels.userAgent" /></label>
 										<div class="col-sm-9">
 											<la:errors property="userAgent" />
-											<la:text property="userAgent" styleClass="form-control" />
+											<la:text property="userAgent" styleClass="form-control" styleId="userAgent" />
 										</div>
 									</div>
 								</div>
