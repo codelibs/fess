@@ -44,7 +44,7 @@
 										<label for="url" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_url" /></label>
 										<div class="col-sm-10">
-											<la:text property="url" styleClass="form-control"></la:text>
+											<la:text property="url" styleClass="form-control" styleId="url"></la:text>
 										</div>
 									</div>
 									<div class="form-group row">
@@ -68,7 +68,7 @@
 										<label for="errorName" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_name" /></label>
 										<div class="col-sm-10">
-											<la:text property="errorName" styleClass="form-control"></la:text>
+											<la:text property="errorName" styleClass="form-control" styleId="errorName"></la:text>
 										</div>
 									</div>
 									<div class="form-group">

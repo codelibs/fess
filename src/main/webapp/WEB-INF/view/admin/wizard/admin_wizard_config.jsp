@@ -50,7 +50,7 @@
 										<div class="col-sm-9">
 											<la:errors property="crawlingConfigName" />
 											<la:text property="crawlingConfigName"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="crawlingConfigName" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -59,7 +59,7 @@
 										<div class="col-sm-9">
 											<la:errors property="crawlingConfigPath" />
 											<la:text property="crawlingConfigPath"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="crawlingConfigPath" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -67,7 +67,7 @@
 												key="labels.maxAccessCount" /></label>
 										<div class="col-sm-9">
 											<la:errors property="maxAccessCount" />
-											<la:text property="maxAccessCount" styleClass="form-control" />
+											<la:text property="maxAccessCount" styleClass="form-control" styleId="maxAccessCount" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -75,7 +75,7 @@
 												key="labels.depth" /></label>
 										<div class="col-sm-9">
 											<la:errors property="depth" />
-											<la:text property="depth" styleClass="form-control" />
+											<la:text property="depth" styleClass="form-control" styleId="depth" />
 										</div>
 									</div>
 								</div>

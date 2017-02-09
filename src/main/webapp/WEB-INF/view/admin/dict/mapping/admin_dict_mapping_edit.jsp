@@ -97,7 +97,7 @@
 										<div class="col-sm-9">
 											<la:errors property="inputs" />
 											<la:textarea property="inputs" rows="5"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="term" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -105,7 +105,7 @@
 												key="labels.dict_mapping_target" /></label>
 										<div class="col-sm-9">
 											<la:errors property="output" />
-											<la:text property="output" styleClass="form-control" />
+											<la:text property="output" styleClass="form-control" styleId="output" />
 										</div>
 									</div>
 								</div>

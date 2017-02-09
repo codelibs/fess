@@ -82,7 +82,7 @@
 										<label for="doc_id" class="col-sm-3 control-label">doc_id</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.doc_id" />
-											<la:text property="doc.doc_id" styleClass="form-control"
+											<la:text property="doc.doc_id" styleClass="form-control" styleId="doc_id"
 												required="required" data-validation="custom"
 												data-validation-regexp="^([a-z0-9]+)$"
 												data-validation-help="[a-z] or [0-9]" />
@@ -92,7 +92,7 @@
 										<label for="url" class="col-sm-3 control-label">url</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.url" />
-											<la:text property="doc.url" styleClass="form-control"
+											<la:text property="doc.url" styleClass="form-control" styleId="url"
 												required="required" data-validation="required" />
 										</div>
 									</div>
@@ -100,7 +100,7 @@
 										<label for="title" class="col-sm-3 control-label">title</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.title" />
-											<la:text property="doc.title" styleClass="form-control"
+											<la:text property="doc.title" styleClass="form-control" styleId="title"
 												required="required" data-validation="required" />
 										</div>
 									</div>
@@ -108,7 +108,7 @@
 										<label for="role" class="col-sm-3 control-label">role</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.role" />
-											<la:textarea property="doc.role" styleClass="form-control"
+											<la:textarea property="doc.role" styleClass="form-control" styleId="role"
 												required="required" data-validation="custom"
 												data-validation-regexp="^[1|2|R](\w+)$"
 												data-validation-help="1(username) | 2(groupname) | R(rolename)  e.g. Rguest" />
@@ -118,7 +118,7 @@
 										<label for="boost" class="col-sm-3 control-label">boost</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.boost" />
-											<la:text property="doc.boost" styleClass="form-control"
+											<la:text property="doc.boost" styleClass="form-control" styleId="boost"
 												title="Floating point number" required="required"
 												data-validation="custom"
 												data-validation-regexp="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
@@ -129,112 +129,112 @@
 										<label for="label" class="col-sm-3 control-label">label</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.label" />
-											<la:textarea property="doc.label" styleClass="form-control" />
+											<la:textarea property="doc.label" styleClass="form-control" styleId="label" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="version" class="col-sm-3 control-label">version</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.version" />
-											<la:text property="doc.version" styleClass="form-control" />
+											<la:text property="doc.version" styleClass="form-control" styleId="version" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="lang" class="col-sm-3 control-label">lang</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.lang" />
-											<la:textarea property="doc.lang" styleClass="form-control" />
+											<la:textarea property="doc.lang" styleClass="form-control" styleId="long" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="mimetype" class="col-sm-3 control-label">mimetype</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.mimetype" />
-											<la:text property="doc.mimetype" styleClass="form-control" />
+											<la:text property="doc.mimetype" styleClass="form-control" styleId="mimetype" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="filetype" class="col-sm-3 control-label">filetype</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.filetype" />
-											<la:text property="doc.filetype" styleClass="form-control" />
+											<la:text property="doc.filetype" styleClass="form-control" styleId="filetype" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="filename" class="col-sm-3 control-label">filename</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.filename" />
-											<la:text property="doc.filename" styleClass="form-control" />
+											<la:text property="doc.filename" styleClass="form-control" styleId="filename" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="content" class="col-sm-3 control-label">content</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.content" />
-											<la:text property="doc.content" styleClass="form-control" />
+											<la:text property="doc.content" styleClass="form-control" styleId="content" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="has_cache" class="col-sm-3 control-label">has_cache</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.has_cache" />
-											<la:text property="doc.has_cache" styleClass="form-control" />
+											<la:text property="doc.has_cache" styleClass="form-control" styleId="has_cache" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="cache" class="col-sm-3 control-label">cache</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.cache" />
-											<la:text property="doc.cache" styleClass="form-control" />
+											<la:text property="doc.cache" styleClass="form-control" styleId="cache" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="digest" class="col-sm-3 control-label">digest</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.digest" />
-											<la:text property="doc.digest" styleClass="form-control" />
+											<la:text property="doc.digest" styleClass="form-control" styleId="digest" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="host" class="col-sm-3 control-label">host</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.host" />
-											<la:text property="doc.host" styleClass="form-control" />
+											<la:text property="doc.host" styleClass="form-control" styleId="host" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="site" class="col-sm-3 control-label">site</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.site" />
-											<la:text property="doc.site" styleClass="form-control" />
+											<la:text property="doc.site" styleClass="form-control" styleId="site" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="segment" class="col-sm-3 control-label">segment</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.segment" />
-											<la:text property="doc.segment" styleClass="form-control" />
+											<la:text property="doc.segment" styleClass="form-control" styleId="segment" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="config_id" class="col-sm-3 control-label">config_id</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.config_id" />
-											<la:text property="doc.config_id" styleClass="form-control" />
+											<la:text property="doc.config_id" styleClass="form-control" styleId="config_id" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="_id" class="col-sm-3 control-label">_id</label>
 										<div class="col-sm-9">
 											<la:errors property="doc._id" />
-											<la:text property="doc._id" styleClass="form-control" />
+											<la:text property="doc._id" styleClass="form-control" styleId="_id" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="parent_id" class="col-sm-3 control-label">parent_id</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.parent_id" />
-											<la:text property="doc.parent_id" styleClass="form-control" />
+											<la:text property="doc.parent_id" styleClass="form-control" styleId="parent_id" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -242,7 +242,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.content_title" />
 											<la:text property="doc.content_title"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="content_title" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -251,7 +251,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.content_description" />
 											<la:text property="doc.content_description"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="content_description" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -259,7 +259,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.content_length" />
 											<la:text property="doc.content_length"
-												styleClass="form-control" title="Integer"
+												styleClass="form-control" styleId="content_length" title="Integer"
 												data-validation="custom" data-validation-regexp="^(\d+)?$"
 												data-validation-help="number (Integer)" />
 										</div>
@@ -268,14 +268,14 @@
 										<label for="url_link" class="col-sm-3 control-label">url_link</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.url_link" />
-											<la:text property="doc.url_link" styleClass="form-control" />
+											<la:text property="doc.url_link" styleClass="form-control" styleId="url_link" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="site_path" class="col-sm-3 control-label">site_path</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.site_path" />
-											<la:text property="doc.site_path" styleClass="form-control" />
+											<la:text property="doc.site_path" styleClass="form-control" styleId="site_path" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -283,7 +283,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.favorite_count" />
 											<la:text property="doc.favorite_count"
-												styleClass="form-control" title="Integer"
+												styleClass="form-control" styleId="favorite_count" title="Integer"
 												data-validation="custom" data-validation-regexp="^(\d+)?$"
 												data-validation-help="number (Integer)" />
 										</div>
@@ -292,7 +292,7 @@
 										<label for="click_count" class="col-sm-3 control-label">click_count</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.click_count" />
-											<la:text property="doc.click_count" styleClass="form-control"
+											<la:text property="doc.click_count" styleClass="form-control" styleId="click_count"
 												title="Integer" data-validation="custom" data-validation-regexp="^(\d+)?$"
 												data-validation-help="number (Integer)" />
 										</div>
@@ -301,7 +301,7 @@
 										<label for="created" class="col-sm-3 control-label">created</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.created" />
-											<la:text property="doc.created" styleClass="form-control"
+											<la:text property="doc.created" styleClass="form-control" styleId="created"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 												data-validation="custom"
 												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
@@ -312,7 +312,7 @@
 										<label for="timestamp" class="col-sm-3 control-label">timestamp</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.timestamp" />
-											<la:text property="doc.timestamp" styleClass="form-control"
+											<la:text property="doc.timestamp" styleClass="form-control" styleId="timestamp"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 												data-validation="custom"
 												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
@@ -323,7 +323,7 @@
 										<label for="last_modified" class="col-sm-3 control-label">last_modified</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.last_modified" />
-											<la:text property="doc.last_modified" styleClass="form-control"
+											<la:text property="doc.last_modified" styleClass="form-control" styleId="last_modified"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 												data-validation="custom"
 												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
@@ -334,7 +334,7 @@
 										<label for="expires" class="col-sm-3 control-label">expires</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.expires" />
-											<la:text property="doc.expires" styleClass="form-control"
+											<la:text property="doc.expires" styleClass="form-control" styleId="expires"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 												data-validation="custom"
 												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"

@@ -49,7 +49,7 @@
 												key="labels.access_token_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control"/>
+											<la:text property="name" styleClass="form-control" styleId="name" />
 										</div>
 									</div>
 									<c:if test="${crudMode==2}">
@@ -66,7 +66,7 @@
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control"
+											<la:textarea property="permissions" styleClass="form-control" styleId="permissions"
 												rows="5" />
 										</div>
 									</div>
@@ -75,7 +75,7 @@
 												key="labels.access_token_parameter_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="parameterName" />
-											<la:text property="parameterName" styleClass="form-control"/>
+											<la:text property="parameterName" styleClass="form-control" styleId="name" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -83,7 +83,7 @@
 												key="labels.access_token_expires" /></label>
 										<div class="col-sm-9">
 											<la:errors property="expires" />
-											<la:text property="expires" styleClass="form-control"/>
+											<la:text property="expires" styleClass="form-control" styleId="name"/>
 										</div>
 									</div>
 								</div>

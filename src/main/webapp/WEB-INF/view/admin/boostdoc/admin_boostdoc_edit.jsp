@@ -49,7 +49,7 @@
 												key="labels.boost_document_rule_url_expr" /></label>
 										<div class="col-sm-9">
 											<la:errors property="urlExpr" />
-											<la:textarea property="urlExpr" styleClass="form-control" rows="5"/>
+											<la:textarea property="urlExpr" styleClass="form-control" styleId="urlExpr" rows="5"/>
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.boost_document_rule_boost_expr" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boostExpr" />
-											<la:textarea property="boostExpr" styleClass="form-control" rows="5"/>
+											<la:textarea property="boostExpr" styleClass="form-control" styleId="boostExpr" rows="5"/>
 										</div>
 									</div>
 									<div class="form-group">

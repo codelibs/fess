@@ -97,7 +97,7 @@
 										<div class="col-sm-9">
 											<la:errors property="inputs" />
 											<la:textarea property="inputs" rows="5"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="term" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -106,7 +106,7 @@
 										<div class="col-sm-9">
 											<la:errors property="outputs" />
 											<la:textarea property="outputs" rows="5"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="outputs" />
 										</div>
 									</div>
 								</div>

@@ -52,7 +52,7 @@
 								<la:form action="/admin/searchlist" styleClass="form-inline" method="GET">
 									<div class="form-group">
 										<label class="sr-only" for="sessionIdSearchBtn"></label>
-										<la:text styleClass="query form-control" property="q"
+										<la:text styleClass="query form-control" styleId="sessionIdSearchBtn" property="q"
 											title="Search" size="50" maxlength="1000"
 											placeholder="Type a search query" />
 									</div>

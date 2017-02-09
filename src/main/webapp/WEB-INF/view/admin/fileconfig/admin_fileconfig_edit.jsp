@@ -50,7 +50,7 @@
 												key="labels.name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text property="name" styleClass="form-control" styleId="name" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -58,7 +58,7 @@
 												key="labels.paths" /></label>
 										<div class="col-sm-9">
 											<la:errors property="paths" />
-											<la:textarea property="paths" styleClass="form-control"
+											<la:textarea property="paths" styleClass="form-control" styleId="paths"
 												rows="5" />
 										</div>
 									</div>
@@ -68,7 +68,7 @@
 										<div class="col-sm-9">
 											<la:errors property="includedPaths" />
 											<la:textarea property="includedPaths"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="includedPaths" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -77,7 +77,7 @@
 										<div class="col-sm-9">
 											<la:errors property="excludedPaths" />
 											<la:textarea property="excludedPaths"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="excludedPaths" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -86,7 +86,7 @@
 										<div class="col-sm-9">
 											<la:errors property="includedDocPaths" />
 											<la:textarea property="includedDocPaths"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="includedDocPaths" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -95,7 +95,7 @@
 										<div class="col-sm-9">
 											<la:errors property="excludedDocPaths" />
 											<la:textarea property="excludedDocPaths"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="excludedDocPaths" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -104,7 +104,7 @@
 										<div class="col-sm-9">
 											<la:errors property="configParameter" />
 											<la:textarea property="configParameter"
-												styleClass="form-control" rows="5" />
+												styleClass="form-control" styleId="configParameter" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -153,7 +153,7 @@
 												key="labels.boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text property="boost" styleClass="form-control" styleId="boost" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -161,7 +161,7 @@
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control"
+											<la:textarea property="permissions" styleClass="form-control" styleId="permissions"
 												rows="5" />
 										</div>
 									</div>
@@ -171,7 +171,7 @@
 										<div class="col-sm-9">
 											<la:errors property="labelTypeIds" />
 											<la:select property="labelTypeIds" multiple="true"
-												styleClass="form-control">
+												styleClass="form-control" styleId="labelTypeIds">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
 												</c:forEach>
@@ -183,7 +183,7 @@
 												key="labels.available" /></label>
 										<div class="col-sm-9">
 											<la:errors property="available" />
-											<la:select property="available" styleClass="form-control">
+											<la:select property="available" styleClass="form-control" styleId="available">
 												<la:option value="true">
 													<la:message key="labels.enabled" />
 												</la:option>
@@ -198,7 +198,7 @@
 												key="labels.description" /></label>
 										<div class="col-sm-9">
 											<la:errors property="description" />
-											<la:textarea property="description" styleClass="form-control"
+											<la:textarea property="description" styleClass="form-control" styleId="permissions"
 												rows="5" />
 										</div>
 									</div>

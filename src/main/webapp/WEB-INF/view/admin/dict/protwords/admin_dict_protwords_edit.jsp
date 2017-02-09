@@ -97,7 +97,7 @@
 										<div class="col-sm-9">
 											<la:errors property="input" />
 											<la:text property="input"
-												styleClass="form-control" />
+												styleClass="form-control" styleId="term" />
 										</div>
 									</div>
 								</div>

@@ -6,7 +6,7 @@
 	<property name="kopf.branch" value="fess-5.0" />
 
 	<!-- Maven Repository -->
-	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/releases" />
 	<property name="maven.release.repo.url" value="http://central.maven.org/maven2" />
 
 	<target name="install.plugins">

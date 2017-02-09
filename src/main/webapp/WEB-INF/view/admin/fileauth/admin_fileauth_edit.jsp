@@ -49,7 +49,7 @@
 												key="labels.file_auth_hostname" /></label>
 										<div class="col-sm-9">
 											<la:errors property="hostname" />
-											<la:text property="hostname" styleClass="form-control" />
+											<la:text property="hostname" styleClass="form-control" styleId="hostname" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.file_auth_port" /></label>
 										<div class="col-sm-9">
 											<la:errors property="port" />
-											<la:text property="port" styleClass="form-control" />
+											<la:text property="port" styleClass="form-control" styleId="port" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -66,7 +66,7 @@
 										<div class="col-sm-9">
 											<la:errors property="protocolScheme" />
 											<la:select property="protocolScheme"
-												styleClass="form-control">
+												styleClass="form-control" styleId="protocolScheme">
 												<c:forEach var="item" items="${protocolSchemeItems}">
 													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 												</c:forEach>
@@ -78,7 +78,7 @@
 												key="labels.file_auth_username" /></label>
 										<div class="col-sm-9">
 											<la:errors property="username" />
-											<la:text property="username" styleClass="form-control" />
+											<la:text property="username" styleClass="form-control" styleId="username" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -86,7 +86,7 @@
 												key="labels.file_auth_password" /></label>
 										<div class="col-sm-9">
 											<la:errors property="password" />
-											<la:password property="password" styleClass="form-control" />
+											<la:password property="password" styleClass="form-control" styleId="password" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -94,7 +94,7 @@
 												key="labels.file_auth_parameters" /></label>
 										<div class="col-sm-9">
 											<la:errors property="parameters" />
-											<la:textarea property="parameters" styleClass="form-control"
+											<la:textarea property="parameters" styleClass="form-control" styleId="parameters"
 												rows="5" />
 										</div>
 									</div>
@@ -103,7 +103,7 @@
 												key="labels.file_auth_file_crawling_config" /></label>
 										<div class="col-sm-9">
 											<la:errors property="fileConfigId" />
-											<la:select property="fileConfigId" styleClass="form-control">
+											<la:select property="fileConfigId" styleClass="form-control" styleId="fileConfigId">
 												<c:forEach var="item" items="${fileConfigItems}">
 													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 												</c:forEach>

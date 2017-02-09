@@ -90,7 +90,7 @@
 												key="labels.elevate_word_suggest_word" /></label>
 										<div class="col-sm-9">
 											<la:errors property="suggestWord" />
-											<la:text property="suggestWord" styleClass="form-control" />
+											<la:text property="suggestWord" styleClass="form-control" styleId="word" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -98,7 +98,7 @@
 												key="labels.elevate_word_reading" /></label>
 										<div class="col-sm-9">
 											<la:errors property="reading" />
-											<la:text property="reading" styleClass="form-control" />
+											<la:text property="reading" styleClass="form-control" styleId="reading" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -106,7 +106,7 @@
 												key="labels.elevate_word_permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control" rows="5" />
+											<la:textarea property="permissions" styleClass="form-control" styleId="permissions" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -115,7 +115,7 @@
 										<div class="col-sm-9">
 											<la:errors property="labelTypeIds" />
 											<la:select property="labelTypeIds" multiple="true"
-												styleClass="form-control">
+												styleClass="form-control" styleId="labelTypeIds">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
 												</c:forEach>
@@ -127,7 +127,7 @@
 												key="labels.elevate_word_boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text property="boost" styleClass="form-control" styleId="boost" />
 										</div>
 									</div>
 								</div>

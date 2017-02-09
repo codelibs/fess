@@ -50,7 +50,7 @@
 												key="labels.regular_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="regularName" />
-											<la:text property="regularName" styleClass="form-control" />
+											<la:text property="regularName" styleClass="form-control" styleId="regularName" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -58,7 +58,7 @@
 												key="labels.duplicate_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="duplicateHostName" />
-											<la:text property="duplicateHostName" styleClass="form-control" />
+											<la:text property="duplicateHostName" styleClass="form-control" styleId="duplicateHostName" />
 										</div>
 									</div>
 								</div>
