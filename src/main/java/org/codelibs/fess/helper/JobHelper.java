@@ -27,6 +27,7 @@ import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
+import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.job.ScheduledJobException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -67,11 +68,13 @@ public class JobHelper {
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final CronParamsSupplier paramsOp = () -> {
-            final Map<String, Object> params = new HashMap<>();
-            params.put(Constants.SCHEDULED_JOB, scheduledJob);
-            return params;
-        };
+        final CronParamsSupplier paramsOp =
+                () -> {
+                    final Map<String, Object> params = new HashMap<>();
+                    params.put(Constants.SCHEDULED_JOB, ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(scheduledJob.getId())
+                            .orElseThrow(() -> new JobNotFoundException(scheduledJob)));
+                    return params;
+                };
         findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
             if (!job.isUnscheduled()) {
                 if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
