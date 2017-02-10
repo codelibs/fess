@@ -100,6 +100,11 @@ public class SuggestHelper {
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(
                         field -> suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field)));
         suggester.createIndexIfNothing();
+
+        final Set<String> undefinedAnalyzer = suggester.settings().analyzer().checkAnalyzer();
+        if (undefinedAnalyzer.size() > 0) {
+            logger.warn("Undefined lang analyzer. " + undefinedAnalyzer.toString());
+        }
     }
 
     public Suggester suggester() {
