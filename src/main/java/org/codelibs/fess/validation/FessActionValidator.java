@@ -17,7 +17,6 @@ package org.codelibs.fess.validation;
 
 import java.util.Locale;
 
-import org.codelibs.fess.util.ComponentUtil;
 import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.message.UserMessages;
@@ -36,7 +35,7 @@ public class FessActionValidator<MESSAGES extends UserMessages> extends ActionVa
     @Override
     protected ResourceBundleLocator newResourceBundleLocator() {
         return locale -> {
-            final Locale userLocale = ComponentUtil.getRequestManager().getUserLocale();
+            final Locale userLocale = messageLocaleProvider.provide();
             return newHookedResourceBundle(userLocale == null ? locale : userLocale);
         };
     }
