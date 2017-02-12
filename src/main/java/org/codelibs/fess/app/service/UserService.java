@@ -67,6 +67,12 @@ public class UserService {
         });
     }
 
+    public OptionalEntity<User> getUserByName(final String username) {
+        return userBhv.selectEntity(cb -> {
+            cb.query().setName_Equal(username);
+        });
+    }
+
     public void store(final User user) {
         if (StringUtil.isBlank(user.getSurname())) {
             user.setSurname(user.getName());
