@@ -23,6 +23,7 @@ import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.time.TimeManager;
@@ -100,6 +101,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Override
     public void hookFinally(final ActionRuntime runtime) {
+        if (runtime.getActionType().asSubclass(FessBaseAction.class) != null) {
+            ComponentUtil.getViewHelper().registerUserData(runtime);
+        }
         super.hookFinally(runtime);
     }
 

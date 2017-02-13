@@ -62,6 +62,7 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -644,6 +645,9 @@ public class ViewHelper {
 
     public List<FacetQueryView> getFacetQueryViewList() {
         return facetQueryViewList;
+    }
+
+    public void registerUserData(final ActionRuntime runtime) {
     }
 
 }
