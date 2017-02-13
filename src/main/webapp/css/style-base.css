@@ -3802,14 +3802,14 @@ input[type="button"].btn-block {
   }
 }
 
-.navbar-nav .nav-item {
+.navbar-nav {
   float: left;
-}
-
-.navbar-nav .nav-link {
-  display: block;
   padding-top: .425rem;
   padding-bottom: .425rem;
+}
+
+.navbar-nav .nav-item {
+  float: left;
 }
 
 .navbar-nav .nav-link + .nav-link {
