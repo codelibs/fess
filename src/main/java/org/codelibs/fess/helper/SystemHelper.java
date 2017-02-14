@@ -21,7 +21,11 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,6 +51,7 @@ import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.ruts.message.MessagesCreator;
@@ -142,6 +147,25 @@ public class SystemHelper {
 
     public LocalDateTime getCurrentTimeAsLocalDateTime() {
         return LocalDateTime.now();
+    }
+
+    public LocalDateTime toLocalDateTime(Object value) {
+        if (value != null && StringUtil.equals(ComponentUtil.getFessConfig().getIndexLogDateFieldType(), StringUtils.lowerCase("utc"))) {
+            Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
+            LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+            return date;
+        }
+        return DfTypeUtil.toLocalDateTime(value);
+    }
+
+    public Object convertDateTime(final Object value) {
+        if (value instanceof LocalDateTime
+                && StringUtil.equals(ComponentUtil.getFessConfig().getIndexLogDateFieldType(), StringUtils.lowerCase("utc"))) {
+            final LocalDateTime ldt = (LocalDateTime) value;
+            final ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
+            return DateTimeFormatter.ISO_INSTANT.format(zdt);
+        }
+        return value;
     }
 
     public String getLogFilePath() {

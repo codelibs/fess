@@ -15,11 +15,33 @@
  */
 package org.codelibs.fess.es.log.exbhv;
 
+import java.util.Map;
+
 import org.codelibs.fess.es.log.bsbhv.BsFavoriteLogBhv;
+import org.codelibs.fess.es.log.exentity.FavoriteLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.exception.IllegalBehaviorStateException;
+import org.dbflute.util.DfTypeUtil;
 
 /**
  * @author FreeGen
  */
 public class FavoriteLogBhv extends BsFavoriteLogBhv {
-
+    @Override
+    protected <RESULT extends FavoriteLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+        try {
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final RESULT result = entityType.newInstance();
+            result.setCreatedAt(systemHelper.toLocalDateTime(source.get("createdAt")));
+            result.setUrl(DfTypeUtil.toString(source.get("url")));
+            result.setDocId(DfTypeUtil.toString(source.get("docId")));
+            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
+            result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            final String msg = "Cannot create a new instance: " + entityType.getName();
+            throw new IllegalBehaviorStateException(msg, e);
+        }
+    }
 }

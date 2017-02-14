@@ -17,13 +17,16 @@ package org.codelibs.fess.es.log.exentity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.log.bsentity.BsSearchLog;
 import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
@@ -103,6 +106,64 @@ public class SearchLog extends BsSearchLog {
     public void setUserInfoId(final String value) {
         userInfo = null;
         super.setUserInfoId(value);
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (accessType != null) {
+            sourceMap.put("accessType", accessType);
+        }
+        if (user != null) {
+            sourceMap.put("user", user);
+        }
+        if (roles != null) {
+            sourceMap.put("roles", roles);
+        }
+        if (queryId != null) {
+            sourceMap.put("queryId", queryId);
+        }
+        if (clientIp != null) {
+            sourceMap.put("clientIp", clientIp);
+        }
+        if (hitCount != null) {
+            sourceMap.put("hitCount", hitCount);
+        }
+        if (queryOffset != null) {
+            sourceMap.put("queryOffset", queryOffset);
+        }
+        if (queryPageSize != null) {
+            sourceMap.put("queryPageSize", queryPageSize);
+        }
+        if (referer != null) {
+            sourceMap.put("referer", referer);
+        }
+        if (requestedAt != null) {
+            sourceMap.put("requestedAt", systemHelper.convertDateTime(requestedAt));
+        }
+        if (responseTime != null) {
+            sourceMap.put("responseTime", responseTime);
+        }
+        if (queryTime != null) {
+            sourceMap.put("queryTime", queryTime);
+        }
+        if (searchWord != null) {
+            sourceMap.put("searchWord", searchWord);
+        }
+        if (userAgent != null) {
+            sourceMap.put("userAgent", userAgent);
+        }
+        if (userInfoId != null) {
+            sourceMap.put("userInfoId", userInfoId);
+        }
+        if (userSessionId != null) {
+            sourceMap.put("userSessionId", userSessionId);
+        }
+        if (languages != null) {
+            sourceMap.put("languages", languages);
+        }
+        return sourceMap;
     }
 
     @Override

@@ -15,11 +15,46 @@
  */
 package org.codelibs.fess.es.log.exbhv;
 
+import java.util.Map;
+
 import org.codelibs.fess.es.log.bsbhv.BsSearchLogBhv;
+import org.codelibs.fess.es.log.exentity.SearchLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.exception.IllegalBehaviorStateException;
+import org.dbflute.util.DfTypeUtil;
 
 /**
  * @author FreeGen
  */
 public class SearchLogBhv extends BsSearchLogBhv {
 
+    @Override
+    protected <RESULT extends SearchLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        try {
+            final RESULT result = entityType.newInstance();
+            result.setAccessType(DfTypeUtil.toString(source.get("accessType")));
+            result.setUser(DfTypeUtil.toString(source.get("user")));
+            result.setRoles(toStringArray(source.get("roles")));
+            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
+            result.setClientIp(DfTypeUtil.toString(source.get("clientIp")));
+            result.setHitCount(DfTypeUtil.toLong(source.get("hitCount")));
+            result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
+            result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
+            result.setReferer(DfTypeUtil.toString(source.get("referer")));
+            result.setRequestedAt(systemHelper.toLocalDateTime(source.get("requestedAt")));
+            result.setResponseTime(DfTypeUtil.toLong(source.get("responseTime")));
+            result.setQueryTime(DfTypeUtil.toLong(source.get("queryTime")));
+            result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));
+            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
+            result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
+            result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
+            result.setLanguages(DfTypeUtil.toString(source.get("languages")));
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            final String msg = "Cannot create a new instance: " + entityType.getName();
+            throw new IllegalBehaviorStateException(msg, e);
+        }
+    }
 }

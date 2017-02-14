@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.log.bsbhv.BsClickLogBhv;
 import org.codelibs.fess.es.log.exentity.ClickLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
 
@@ -40,8 +42,15 @@ public class ClickLogBhv extends BsClickLogBhv {
     @Override
     protected <RESULT extends ClickLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final RESULT result = entityType.newInstance();
-            result.setDocId(DfTypeUtil.toString(source.get(DOC_ID)));
+            result.setQueryRequestedAt(systemHelper.toLocalDateTime(source.get("queryRequestedAt")));
+            result.setRequestedAt(DfTypeUtil.toLocalDateTime(source.get("requestedAt")));
+            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
+            result.setDocId(DfTypeUtil.toString(source.get("docId")));
+            result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
+            result.setUrl(DfTypeUtil.toString(source.get("url")));
+            result.setOrder(DfTypeUtil.toInteger(source.get("order")));
             result.setAttributes(source.entrySet().stream().filter(e -> isAttribute(e.getKey()))
                     .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
                     .collect(Collectors.toMap(t -> t.getFirst(), t -> t.getSecond())));

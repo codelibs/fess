@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.bsentity.BsClickLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
@@ -55,12 +57,13 @@ public class ClickLog extends BsClickLog {
 
     @Override
     public Map<String, Object> toSource() {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         Map<String, Object> sourceMap = new HashMap<>();
         if (queryRequestedAt != null) {
-            sourceMap.put("queryRequestedAt", queryRequestedAt);
+            sourceMap.put("queryRequestedAt", systemHelper.convertDateTime(queryRequestedAt));
         }
         if (requestedAt != null) {
-            sourceMap.put("requestedAt", requestedAt);
+            sourceMap.put("requestedAt", systemHelper.convertDateTime(requestedAt));
         }
         if (queryId != null) {
             sourceMap.put("queryId", queryId);

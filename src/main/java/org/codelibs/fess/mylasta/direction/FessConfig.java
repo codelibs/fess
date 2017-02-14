@@ -552,6 +552,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
+    /** The key of the configuration. e.g. utc */
+    String INDEX_LOG_DATE_FIELD_TYPE = "index.log.date.field.type";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
@@ -2698,6 +2701,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupTargets();
+
+    /**
+     * Get the value for the key 'index.log.date.field.type'. <br>
+     * The value is, e.g. utc <br>
+     * comment: date field type
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexLogDateFieldType();
 
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
@@ -5312,6 +5323,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexBackupTargets() {
             return get(FessConfig.INDEX_BACKUP_TARGETS);
+        }
+
+        public String getIndexLogDateFieldType() {
+            return get(FessConfig.INDEX_LOG_DATE_FIELD_TYPE);
         }
 
         public String getAuthenticationAdminUsers() {

@@ -15,7 +15,12 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codelibs.fess.es.log.bsentity.BsFavoriteLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
@@ -38,6 +43,28 @@ public class FavoriteLog extends BsFavoriteLog {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (createdAt != null) {
+            sourceMap.put("createdAt", systemHelper.convertDateTime(createdAt));
+        }
+        if (url != null) {
+            sourceMap.put("url", url);
+        }
+        if (docId != null) {
+            sourceMap.put("docId", docId);
+        }
+        if (queryId != null) {
+            sourceMap.put("queryId", queryId);
+        }
+        if (userInfoId != null) {
+            sourceMap.put("userInfoId", userInfoId);
+        }
+        return sourceMap;
     }
 
     @Override
