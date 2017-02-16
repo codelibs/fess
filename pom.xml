@@ -57,15 +57,15 @@
 		<utflute.version>0.6.6</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.1.0</crawler.version>
+		<crawler.version>1.2.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>5.2.0</suggest.version>
+		<suggest.version>5.2.1-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.2.0</elasticsearch.version>
+		<elasticsearch.version>5.2.1</elasticsearch.version>
 		<elasticsearch.min.version>5.1.0</elasticsearch.min.version>
-		<cluster.runner.version>5.2.0.1</cluster.runner.version>
+		<cluster.runner.version>5.2.1.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.11</tomcat.version>
