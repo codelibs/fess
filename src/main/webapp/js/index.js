@@ -19,6 +19,7 @@ $(function() {
 	});
 
 	$("[data-toggle='control-options']").click(function(e) {
+		e.preventDefault();
 		var target = $(this).attr('data-target') || $(this).attr('href');
 		if (target) {
 			$(target).toggleClass("active");
