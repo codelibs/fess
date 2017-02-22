@@ -126,22 +126,22 @@
 			</div>
 			<jsp:include page="footer.jsp" />
 		</div>
-	<div id="searchOptions" class="control-options">
-		<div class="container">
-			<jsp:include page="common/searchOptions.jsp" />
-			<div>
-				<button type="button" class="btn btn-secondary" id="searchOptionsClearButton">
-					<la:message key="labels.search_options_clear" />
-				</button>
-				<button type="button" class="btn btn-secondary pull-right"
-					data-toggle="control-options" data-target="#searchOptions"
-					id="searchOptionsCloseButton">
-					<i class="fa fa-times-circle"></i>
-					<la:message key="labels.search_options_close" />
-				</button>
+		<div id="searchOptions" class="control-options">
+			<div class="container">
+				<jsp:include page="common/searchOptions.jsp" />
+				<div>
+					<button type="button" class="btn btn-secondary" id="searchOptionsClearButton">
+						<la:message key="labels.search_options_clear" />
+					</button>
+					<button type="button" class="btn btn-secondary pull-right"
+						data-toggle="control-options" data-target="#searchOptions"
+						id="searchOptionsCloseButton">
+						<i class="fa fa-times-circle"></i>
+						<la:message key="labels.search_options_close" />
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
