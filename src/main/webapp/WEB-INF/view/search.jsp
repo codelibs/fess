@@ -20,7 +20,7 @@
 </head>
 <body class="search">
 	<jsp:include page="header.jsp" />
-	<div class="container">
+	<div id="content" class="container">
 		<div class="row">
 			<div class="col-md-12">
 				<ul class="searchOptionLabels">

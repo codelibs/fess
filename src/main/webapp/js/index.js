@@ -12,6 +12,19 @@ $(function() {
 		return true;
 	});
 
+	$(document).on('click touchend', function(e) {
+		if (!$(e.target).closest('#searchOptions, #searchOptionsButton').length) {
+			$('#searchOptions').removeClass('active');
+		}
+	});
+
+	$("[data-toggle='control-options']").click(function(e) {
+		var target = $(this).attr('data-target') || $(this).attr('href');
+		if (target) {
+			$(target).toggleClass("active");
+		}
+	});
+
 	$('#searchOptionsClearButton').on('click', function(e) {
 		$('#labelTypeSearchOption').prop('selectedIndex', -1);
 		$('#langSearchOption').prop('selectedIndex', 0);

@@ -13,6 +13,12 @@ $(function() {
 		return true;
 	});
 
+	$('#content').on('click touchend', function(e) {
+		if (!$(e.target).closest("#searchOptions, [data-toggle='control-options']").length) {
+			$('#searchOptions').removeClass('active');
+		}
+	});
+
 	$("[data-toggle='control-options']").click(function(e) {
 		e.preventDefault();
 		var target = $(this).attr('data-target') || $(this).attr('href');
