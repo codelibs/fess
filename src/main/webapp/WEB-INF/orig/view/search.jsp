@@ -20,7 +20,7 @@
 </head>
 <body class="search">
 	<jsp:include page="header.jsp" />
-	<div class="container">
+	<div id="content" class="container">
 		<div class="row">
 			<div class="col-md-12">
 				<ul class="searchOptionLabels">
@@ -30,6 +30,10 @@
 								<la:message key="labels.searchoptions_score" />
 							</c:if> <c:if test="${sort=='score.desc'}">
 								<la:message key="labels.searchoptions_score" />
+							</c:if> <c:if test="${sort=='filename.asc'}">
+								<la:message key="labels.search_result_sort_filename_asc" />
+							</c:if> <c:if test="${sort=='filename.desc'}">
+								<la:message key="labels.search_result_sort_filename_desc" />
 							</c:if> <c:if test="${sort=='created.asc'}">
 								<la:message key="labels.search_result_sort_created_asc" />
 							</c:if> <c:if test="${sort=='created.desc'}">
