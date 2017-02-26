@@ -170,6 +170,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.highlight.HighlightBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.lastaflute.core.message.UserMessages;
 import org.slf4j.Logger;
@@ -976,8 +977,10 @@ public class FessEsClient implements Client {
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
 
             // highlighting
-            queryHelper.highlightedFields(stream -> stream.forEach(hf -> searchRequestBuilder.addHighlightedField(hf,
-                    fessConfig.getQueryHighlightFragmentSizeAsInteger(), fessConfig.getQueryHighlightNumberOfFragmentsAsInteger())));
+            queryHelper.highlightedFields(stream -> stream.forEach(hf -> searchRequestBuilder
+                    .addHighlightedField(new HighlightBuilder.Field(hf).highlighterType(fessConfig.getQueryHighlightType())
+                            .fragmentSize(fessConfig.getQueryHighlightFragmentSizeAsInteger())
+                            .numOfFragments(fessConfig.getQueryHighlightNumberOfFragmentsAsInteger()))));
 
             // facets
             if (facetInfo != null) {

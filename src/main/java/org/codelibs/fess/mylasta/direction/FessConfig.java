@@ -450,6 +450,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5 */
     String QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "query.highlight.number.of.fragments";
 
+    /** The key of the configuration. e.g. fvh */
+    String QUERY_HIGHLIGHT_TYPE = "query.highlight.type";
+
     /** The key of the configuration. e.g. 100000 */
     String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
@@ -552,7 +555,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
-    /** The key of the configuration. e.g. utc */
+    /** The key of the configuration. e.g.  */
     String INDEX_LOG_DATE_FIELD_TYPE = "index.log.date.field.type";
 
     /** The key of the configuration. e.g. admin */
@@ -2397,6 +2400,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getQueryHighlightNumberOfFragmentsAsInteger();
 
     /**
+     * Get the value for the key 'query.highlight.type'. <br>
+     * The value is, e.g. fvh <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightType();
+
+    /**
      * Get the value for the key 'query.max.search.result.offset'. <br>
      * The value is, e.g. 100000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2704,11 +2714,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.log.date.field.type'. <br>
-     * The value is, e.g. utc <br>
-     * comment: date field type
+     * The value is, e.g.  <br>
+     * comment: log date field type
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexLogDateFieldType();
+
+    /**
+     * Get the value for the key 'index.log.date.field.type' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: log date field type
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexLogDateFieldTypeAsInteger();
 
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
@@ -5189,6 +5208,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
         }
 
+        public String getQueryHighlightType() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TYPE);
+        }
+
         public String getQueryMaxSearchResultOffset() {
             return get(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
         }
@@ -5327,6 +5350,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexLogDateFieldType() {
             return get(FessConfig.INDEX_LOG_DATE_FIELD_TYPE);
+        }
+
+        public Integer getIndexLogDateFieldTypeAsInteger() {
+            return getAsInteger(FessConfig.INDEX_LOG_DATE_FIELD_TYPE);
         }
 
         public String getAuthenticationAdminUsers() {
