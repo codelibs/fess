@@ -873,8 +873,9 @@ public class FessEsClient implements Client {
 
             // highlighting
             final HighlightBuilder highlightBuilder = new HighlightBuilder();
-            queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(hf,
-                    fessConfig.getQueryHighlightFragmentSizeAsInteger(), fessConfig.getQueryHighlightNumberOfFragmentsAsInteger())));
+            queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf)
+                    .highlighterType(fessConfig.getQueryHighlightType()).fragmentSize(fessConfig.getQueryHighlightFragmentSizeAsInteger())
+                    .numOfFragments(fessConfig.getQueryHighlightNumberOfFragmentsAsInteger()))));
             searchRequestBuilder.highlighter(highlightBuilder);
 
             // facets

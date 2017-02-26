@@ -450,6 +450,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5 */
     String QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "query.highlight.number.of.fragments";
 
+    /** The key of the configuration. e.g. fvh */
+    String QUERY_HIGHLIGHT_TYPE = "query.highlight.type";
+
     /** The key of the configuration. e.g. 100000 */
     String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
@@ -2425,6 +2428,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryHighlightNumberOfFragmentsAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.type'. <br>
+     * The value is, e.g. fvh <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightType();
 
     /**
      * Get the value for the key 'query.max.search.result.offset'. <br>
@@ -5350,6 +5360,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getQueryHighlightNumberOfFragmentsAsInteger() {
             return getAsInteger(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
+        }
+
+        public String getQueryHighlightType() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TYPE);
         }
 
         public String getQueryMaxSearchResultOffset() {
