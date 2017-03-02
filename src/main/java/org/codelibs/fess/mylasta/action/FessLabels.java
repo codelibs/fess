@@ -1487,6 +1487,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Results Page (No Result) */
     public static final String LABELS_design_file_searchNoResult = "{labels.design_file_searchNoResult}";
 
+    /** The key of the message: Search Options Page */
+    public static final String LABELS_design_file_searchOptions = "{labels.design_file_searchOptions}";
+
     /** The key of the message: Help Page (Content) */
     public static final String LABELS_design_file_help = "{labels.design_file_help}";
 

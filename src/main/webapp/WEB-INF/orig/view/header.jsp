@@ -73,7 +73,7 @@ ${fe:facetForm()}${fe:geoForm()}
 	</nav>
 	<div id="searchOptions" class="control-options">
 		<div class="container">
-			<jsp:include page="common/searchOptions.jsp" />
+			<jsp:include page="searchOptions.jsp" />
 			<div>
 				<button type="button" class="btn btn-secondary" id="searchOptionsClearButton">
 					<la:message key="labels.search_options_clear" />
