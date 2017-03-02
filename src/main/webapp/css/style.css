@@ -219,7 +219,7 @@ ul.searchOptionLabels li {
 
 #searchOptions.active .container {
 	height: auto;
-	overflow-y: scroll;
+	overflow-y: auto;
 	top: 0;
 	right: 0;
 	bottom: 0;
