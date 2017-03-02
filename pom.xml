@@ -63,9 +63,9 @@
 		<suggest.version>5.2.1-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.2.1</elasticsearch.version>
+		<elasticsearch.version>5.2.2</elasticsearch.version>
 		<elasticsearch.min.version>5.1.0</elasticsearch.min.version>
-		<cluster.runner.version>5.2.1.0</cluster.runner.version>
+		<cluster.runner.version>5.2.2.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.11</tomcat.version>
