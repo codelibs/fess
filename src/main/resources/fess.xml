@@ -52,6 +52,10 @@
 			<arg>"searchNoResult.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
+			<arg>"searchOptions"</arg>
+			<arg>"searchOptions.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
 			<arg>"help"</arg>
 			<arg>"help.jsp"</arg>
 		</postConstruct>

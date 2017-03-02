@@ -127,6 +127,9 @@
 											<la:option value="searchNoResult">
 												<la:message key="labels.design_file_searchNoResult" />
 											</la:option>
+											<la:option value="searchOptions">
+												<la:message key="labels.design_file_searchOptions" />
+											</la:option>
 											<la:option value="help">
 												<la:message key="labels.design_file_help" />
 											</la:option>
