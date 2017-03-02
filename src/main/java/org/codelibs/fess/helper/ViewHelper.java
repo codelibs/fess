@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +64,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.taglib.function.LaFunctions;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -131,6 +135,8 @@ public class ViewHelper {
     private String escapedHighlightPre = null;
 
     private String escapedHighlightPost = null;
+
+    protected ActionHook actionHook = new ActionHook();
 
     @PostConstruct
     public void init() {
@@ -650,4 +656,34 @@ public class ViewHelper {
         return facetQueryViewList;
     }
 
+    public ActionHook getActionHook() {
+        return actionHook;
+    }
+
+    public void setActionHook(ActionHook actionHook) {
+        this.actionHook = actionHook;
+    }
+
+    public static class ActionHook {
+
+        public ActionResponse godHandPrologue(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+            return func.apply(runtime);
+        }
+
+        public ActionResponse godHandMonologue(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+            return func.apply(runtime);
+        }
+
+        public void godHandEpilogue(ActionRuntime runtime, Consumer<ActionRuntime> consumer) {
+            consumer.accept(runtime);
+        }
+
+        public ActionResponse hookBefore(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+            return func.apply(runtime);
+        }
+
+        public void hookFinally(ActionRuntime runtime, Consumer<ActionRuntime> consumer) {
+            consumer.accept(runtime);
+        }
+    }
 }
