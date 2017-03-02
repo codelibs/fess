@@ -141,8 +141,8 @@ public class GoAction extends FessSearchAction {
                     }
                     return response;
                 } catch (final Exception e) {
-                    logger.debug("Failed to load: " + doc, e);
-                    saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, e.getLocalizedMessage()));
+                    logger.warn("Failed to load: " + doc, e);
+                    saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
                     return redirect(ErrorAction.class);
                 }
             } else {
