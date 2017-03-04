@@ -8,13 +8,13 @@
 <title><la:message key="labels.search_title" /></title>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
-		href="${f:url('/osdd')}"
+		href="${fe:url('/osdd')}"
 		title="<la:message key="labels.index_osdd_title" />" />
 </c:if>
-<link href="${f:url('/css/style-base.css')}" rel="stylesheet"
+<link href="${fe:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
-<link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
-<link href="${f:url('/css/font-awesome.min.css')}" rel="stylesheet"
+<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet"
 	type="text/css" />
 </head>
 <body>
@@ -71,7 +71,7 @@
 			<div class="row content">
 				<div class="center-block searchFormBox">
 					<h1 class="mainLogo">
-						<img src="${f:url('/images/logo.png')}"
+						<img src="${fe:url('/images/logo.png')}"
 							alt="<la:message key="labels.index_title" />" />
 					</h1>
 					<div class="notification">${notification}</div>
@@ -145,9 +145,9 @@
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
-		src="${f:url('/js/jquery-2.2.4.min.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/index.js')}"></script>
+		src="${fe:url('/js/jquery-2.2.4.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/index.js')}"></script>
 </body>
 </html>
