@@ -6,27 +6,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <title><la:message key="labels.login.title" /></title>
-<link href="${f:url('/css/style-base.css')}" rel="stylesheet"
+<link href="${fe:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
-<link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
-<link href="${f:url('/css/admin/style.css')}" rel="stylesheet"
+<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/style.css')}" rel="stylesheet"
 	type="text/css" />
-<link href="${f:url('/css/admin/font-awesome.min.css')}"
+<link href="${fe:url('/css/admin/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
-<link href="${f:url('/css/admin/AdminLTE.min.css')}" rel="stylesheet"
+<link href="${fe:url('/css/admin/AdminLTE.min.css')}" rel="stylesheet"
 	type="text/css" />
-<link href="${f:url('/css/admin/skins/skin-blue.min.css')}"
+<link href="${fe:url('/css/admin/skins/skin-blue.min.css')}"
 	rel="stylesheet" type="text/css" />
 <!--[if lt IE 9]>
-<script src="${f:url('/css/admin/html5shiv.min.js')}"></script>
-<script src="${f:url('/css/admin/respond.min.js')}"></script>
+<script src="${fe:url('/css/admin/html5shiv.min.js')}"></script>
+<script src="${fe:url('/css/admin/respond.min.js')}"></script>
 <![endif]-->
 </head>
 <body class="hold-transition login-page">
 	<div class="login-box">
 		<div class="login-logo">
 			<la:link href="/">
-				<img src="${f:url('/images/logo-top.png')}"
+				<img src="${fe:url('/images/logo-top.png')}"
 					alt="<la:message key="labels.header_brand_name" />" />
 			</la:link>
 		</div>
@@ -95,8 +95,8 @@
 
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
-		src="${f:url('/js/jquery-2.2.4.min.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/admin/admin.js')}"></script>
+		src="${fe:url('/js/jquery-2.2.4.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/admin/admin.js')}"></script>
 </body>
 </html>

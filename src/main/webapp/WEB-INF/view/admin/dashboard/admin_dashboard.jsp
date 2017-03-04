@@ -20,6 +20,6 @@
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-	<script src="${f:url('/js/admin/dashboard.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/dashboard.js')}" type="text/javascript"></script>
 </body>
 </html>

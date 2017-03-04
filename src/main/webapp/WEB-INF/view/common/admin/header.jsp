@@ -7,7 +7,7 @@
 			src="${f:url('/images/logo-head.png')}"
 			alt="<la:message key="labels.header_brand_name" />" /></span>
 		<span class="logo-lg"><img
-			src="${f:url('/images/logo-head.png')}"
+			src="${fe:url('/images/logo-head.png')}"
 			alt="<la:message key="labels.header_brand_name" />" /></span>
 	</la:link>
 	<!-- Header Navbar -->
