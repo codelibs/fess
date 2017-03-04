@@ -378,7 +378,7 @@
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-	<script src="${f:url('/js/admin/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin/load-validator.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/load-validator.js')}" type="text/javascript"></script>
 </body>
 </html>

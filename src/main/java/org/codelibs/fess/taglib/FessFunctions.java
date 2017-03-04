@@ -17,6 +17,9 @@ package org.codelibs.fess.taglib;
 
 import java.io.File;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +31,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,13 +45,37 @@ import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class FessFunctions {
+    private static final Logger logger = LoggerFactory.getLogger(FessFunctions.class);
 
     private static final String GEO_PREFIX = "geo.";
 
     private static final String FACET_PREFIX = "facet.";
+
+    private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
+            .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
+                @Override
+                public Long load(String key) throws Exception {
+                    try {
+                        final Path path = Paths.get(LaServletContextUtil.getServletContext().getRealPath(key));
+                        if (Files.exists(path)) {
+                            return Files.getLastModifiedTime(path).toMillis();
+                        }
+                    } catch (Exception e) {
+                        logger.debug("Failed to access " + key, e);
+                    }
+                    return 0L;
+                }
+            });
 
     protected FessFunctions() {
         // nothing
@@ -231,4 +260,29 @@ public class FessFunctions {
         return file.exists();
     }
 
+    public static String url(String input) {
+        if (input == null) {
+            String msg = "The argument 'input' should not be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (!input.startsWith("/")) {
+            String msg = "The argument 'input' should start with slash '/': " + input;
+            throw new IllegalArgumentException(msg);
+        }
+        final String contextPath = LaRequestUtil.getRequest().getContextPath();
+        final StringBuilder sb = new StringBuilder();
+        if (contextPath.length() > 1) {
+            sb.append(contextPath);
+        }
+        sb.append(input);
+        if (input.indexOf('?') == -1) {
+            try {
+                final String t = resourceHashCache.get(input).toString();
+                sb.append("?t=").append(t);
+            } catch (ExecutionException e) {
+                logger.debug("Failed to access " + input, e);
+            }
+        }
+        return LaResponseUtil.getResponse().encodeURL(sb.toString());
+    }
 }

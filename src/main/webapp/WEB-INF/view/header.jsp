@@ -4,7 +4,7 @@
 ${fe:facetForm()}${fe:geoForm()}
 <nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
 		<la:link styleClass="navbar-brand" href="/">
-			<img src="${f:url('/images/logo-head.png')}"
+			<img src="${fe:url('/images/logo-head.png')}"
 				alt="<la:message key="labels.header_brand_name" />" />
 		</la:link>
 		<div

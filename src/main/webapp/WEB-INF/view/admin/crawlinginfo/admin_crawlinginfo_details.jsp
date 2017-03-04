@@ -76,7 +76,7 @@
 												<th><la:message
 														key="labels.crawling_info_session_id" /></th>
 												<td><a
-													href="${f:url('/admin/searchlist/search')}?q=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
+													href="${fe:url('/admin/searchlist/search')}?q=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
 													<la:hidden property="sessionId" /></td>
 											</tr>
 											<c:forEach var="info" items="${crawlingInfoParamItems}">
