@@ -67,7 +67,7 @@ public class FessFunctions {
                 public Long load(String key) throws Exception {
                     try {
                         final Path path = Paths.get(LaServletContextUtil.getServletContext().getRealPath(key));
-                        if (Files.exists(path)) {
+                        if (Files.isRegularFile(path)) {
                             return Files.getLastModifiedTime(path).toMillis();
                         }
                     } catch (Exception e) {
@@ -277,8 +277,10 @@ public class FessFunctions {
         sb.append(input);
         if (input.indexOf('?') == -1) {
             try {
-                final String t = resourceHashCache.get(input).toString();
-                sb.append("?t=").append(t);
+                final Long value = resourceHashCache.get(input);
+                if (value.longValue() > 0) {
+                    sb.append("?t=").append(value.toString());
+                }
             } catch (ExecutionException e) {
                 logger.debug("Failed to access " + input, e);
             }
