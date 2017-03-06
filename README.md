@@ -15,15 +15,15 @@ Fess is Elasticsearch based search server, but knowledge/experience about Elasti
 ## Issues/Questions
 
 Please file an [issue](https://github.com/codelibs/fess/issues "issue").
-(Japanese forum is [here](https://github.com/codelibs/codelibs-ja-forum "here").)
-For submitted questions, see [label:question](https://github.com/codelibs/fess/issues?q=label%3Aquestion%20 "label:question").
+(Korean forum is [here](https://github.com/nocode2k/fess-kr-forum "here").)
 
 ## Getting Started
 
 ### Download
 
 Fess 11.0 is available.
-The release page is [HERE](https://github.com/codelibs/fess/releases "download").
+The release page is [HERE](https://github.com/nocode2k/fess/releases "download").
+Korean manual is [HERE](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf "download").
 
 ### Install/Run Fess
 
@@ -35,8 +35,14 @@ For the details, see [Installation Guide](http://fess.codelibs.org/11.0/install/
 
 ### Access Fess
 
-- Search UI: http://localhost:8080/
-- Admin UI: http://localhost:8080/admin/ (username/password is admin/admin)
+
+- **Search UI**: http://localhost:8080/
+
+![Search UI](doc/images/screenshot-search-page.png)
+
+- **Admin UI**: http://localhost:8080/admin/ (username/password is admin/admin)
+
+![Admin UI](doc/images/screenshot-admin-page.png)
 
 You can register crawling targets on Web/File System/Data Store of admin pages, and then start Crawler on Scheduler page manually.
 
@@ -52,7 +58,7 @@ For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess
 First of all, clone Fess's repositories:
 
     $ cd ~/workspace
-    $ git clone https://github.com/codelibs/fess.git
+    $ git clone https://github.com/nocode2k/fess.git
 
 and then imports it as Maven project on eclipse or ohter IDE.
 
@@ -85,7 +91,7 @@ Run package goal and then the release file is created in target/releases.
 Fess is internationalized software, and supports the following languages at the moment:
 
 * English
-* Japanese
+* Korean
 
 If you want to add labels/messages for your language, please translate properties file and then rename to fess\_*_[lang].properties.
 
