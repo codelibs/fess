@@ -126,6 +126,12 @@
 		</postConstruct>
 		<!-- .fess_config index -->
 		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/access_token"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/bad_word"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/boost_document_rule"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
@@ -142,6 +148,15 @@
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/data_config_to_role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/duplicate_host"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/elevate_word"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/elevate_word_to_label"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/failure_url"</arg>
@@ -171,9 +186,6 @@
 			<arg>".fess_config/label_type"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/duplicate_host"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/path_mapping"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
@@ -186,13 +198,7 @@
 			<arg>".fess_config/scheduled_job"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/bad_word"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/elevate_word"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/elevate_word_to_label"</arg>
+			<arg>".fess_config/thumbnail_queue"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_authentication"</arg>
@@ -205,9 +211,6 @@
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_config_to_role"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/thumbnail_queue"</arg>
 		</postConstruct>
 		<!-- .fess_user index -->
 		<postConstruct name="addIndexConfig">
