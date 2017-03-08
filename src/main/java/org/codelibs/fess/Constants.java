@@ -24,7 +24,7 @@ import org.codelibs.core.lang.StringUtil;
 public class Constants extends CoreLibConstants {
     public static final int MAJOR_VERSION = 11;
 
-    public static final int MINOR_VERSION = 0;
+    public static final int MINOR_VERSION = 1;
 
     public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION) + "." + String.valueOf(MINOR_VERSION);
 
