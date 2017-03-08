@@ -124,6 +124,9 @@
 		</postConstruct>
 		<!-- .fess_config index -->
 		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/access_token"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/boost_document_rule"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
