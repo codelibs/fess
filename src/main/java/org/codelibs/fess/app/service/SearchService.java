@@ -239,20 +239,22 @@ public class SearchService {
     }
 
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
-            final OptionalThing<FessUserBean> userBean) {
+            final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
         return fessEsClient.getDocumentList(
                 fessConfig.getIndexDocumentSearchIndex(),
                 fessConfig.getIndexDocumentType(),
                 builder -> {
                     final BoolQueryBuilder boolQuery =
                             QueryBuilders.boolQuery().must(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
-                    final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
-                    if (!roleSet.isEmpty()) {
-                        final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
-                        roleSet.stream().forEach(name -> {
-                            roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
-                        });
-                        boolQuery.filter(roleQuery);
+                    if (searchRequestType != SearchRequestType.ADMIN_SEARCH) {
+                        final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
+                        if (!roleSet.isEmpty()) {
+                            final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
+                            roleSet.stream().forEach(name -> {
+                                roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
+                            });
+                            boolQuery.filter(roleQuery);
+                        }
                     }
                     builder.setQuery(boolQuery);
                     builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());

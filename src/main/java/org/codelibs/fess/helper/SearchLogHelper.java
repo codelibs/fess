@@ -34,6 +34,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
@@ -311,7 +312,8 @@ public class SearchLogHelper {
                 searchService.bulkUpdate(builder -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                            new String[] { fessConfig.getIndexFieldDocId() }, OptionalThing.of(FessUserBean.empty())).forEach(
+                            new String[] { fessConfig.getIndexFieldDocId() }, OptionalThing.of(FessUserBean.empty()),
+                            SearchRequestType.ADMIN_SEARCH).forEach(
                             doc -> {
                                 final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                 final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
