@@ -9,13 +9,11 @@ Fess is Elasticsearch based search server, but knowledge/experience about Elasti
 
 ## Web Sites
 
- - [English](http://fess.codelibs.org/)
- - [Japanese](http://fess.codelibs.org/ja/)
+ - [fess.codelibs.org](http://fess.codelibs.org/)
 
 ## Issues/Questions
 
 Please file an [issue](https://github.com/codelibs/fess/issues "issue").
-(Korean forum is [here](https://github.com/nocode2k/fess-kr-forum "here").)
 
 ## Getting Started
 
@@ -35,7 +33,6 @@ For the details, see [Installation Guide](http://fess.codelibs.org/11.0/install/
 
 ### Access Fess
 
-
 - **Search UI**: http://localhost:8080/
 
 ![Search UI](doc/images/screenshot-search-page.png)
@@ -50,6 +47,12 @@ You can register crawling targets on Web/File System/Data Store of admin pages, 
 
 We provide Docker image on Docker Hub. 
 For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess/).
+
+## Localization
+
+ - [Japanese](http://fess.codelibs.org/ja/)
+ - [Korean PDF Document](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf)
+ - [Korean Forum](https://github.com/nocode2k/fess-kr-forum)
 
 ## Development Information
 
@@ -86,12 +89,9 @@ Run package goal and then the release file is created in target/releases.
     $ mvn dbflute:freegen
     $ mvn license:format
 
-## Localization
+### Translate In Your Language
 
-Fess is internationalized software, and supports the following languages at the moment:
-
-* English
-* Korean
+Fess is internationalized software.
 
 If you want to add labels/messages for your language, please translate properties file and then rename to fess\_*_[lang].properties.
 

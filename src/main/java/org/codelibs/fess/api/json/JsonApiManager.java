@@ -503,7 +503,7 @@ public class JsonApiManager extends BaseJsonApiManager {
                     searchService.getDocumentListByDocIds(
                             docIds,
                             new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
-                                    fessConfig.getIndexFieldFavoriteCount() }, OptionalThing.empty());
+                                    fessConfig.getIndexFieldFavoriteCount() }, OptionalThing.empty(), SearchRequestType.JSON);
             List<String> urlList = new ArrayList<>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final String urlObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
