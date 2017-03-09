@@ -15,8 +15,11 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
+import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
+import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.api.ApiFailureHook;
 import org.lastaflute.web.api.ApiFailureResource;
@@ -40,18 +43,16 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     //                                                                    ================
     @Override
     public ApiResponse handleValidationError(final ApiFailureResource resource) {
-        return asJson(createFailureBean(resource)).httpStatus(HTTP_BAD_REQUEST);
+        return asJson(createFailureBean(Status.BAD_REQUEST, createMessage(resource, null))).httpStatus(HTTP_BAD_REQUEST);
     }
 
     @Override
     public ApiResponse handleApplicationException(final ApiFailureResource resource, final RuntimeException cause) {
-        final int status;
         if (cause instanceof LoginUnauthorizedException) {
-            status = HTTP_UNAUTHORIZED; // unauthorized
+            return asJson(createFailureBean(Status.UNAUTHORIZED, "Unauthorized request.")).httpStatus(HTTP_UNAUTHORIZED);
         } else {
-            status = HTTP_BAD_REQUEST; // bad request
+            return asJson(createFailureBean(Status.BAD_REQUEST, createMessage(resource, cause))).httpStatus(HTTP_BAD_REQUEST);
         }
-        return asJson(createFailureBean(resource)).httpStatus(status);
     }
 
     // ===================================================================================
@@ -70,22 +71,22 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected JsonResponse<TooSimpleFailureBean> asJson(final TooSimpleFailureBean bean) {
+    protected JsonResponse<ApiResult> asJson(final ApiResult bean) {
         return new JsonResponse<>(bean);
     }
 
-    protected TooSimpleFailureBean createFailureBean(final ApiFailureResource resource) {
-        return new TooSimpleFailureBean(resource.getMessageList());
+    protected ApiResult createFailureBean(final Status status, final String message) {
+        return new ApiErrorResponse().message(message).status(status).result();
     }
 
-    public static class TooSimpleFailureBean {
-
-        public final String notice = "[Attension] tentative JSON so you should change it: " + FessApiFailureHook.class;
-
-        public final List<String> messageList;
-
-        public TooSimpleFailureBean(final List<String> messageList) {
-            this.messageList = messageList;
+    protected String createMessage(final ApiFailureResource resource, final RuntimeException cause) {
+        if (!resource.getMessageList().isEmpty()) {
+            return resource.getMessageList().stream().collect(Collectors.joining(" "));
         }
+        if (cause != null) {
+            return cause.getMessage();
+        }
+        return "Unknown error";
     }
+
 }

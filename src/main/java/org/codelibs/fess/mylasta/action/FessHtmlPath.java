@@ -387,6 +387,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /searchNoResult.jsp */
     HtmlNext path_SearchNoResultJsp = new HtmlNext("/searchNoResult.jsp");
 
+    /** The path of the HTML: /searchOptions.jsp */
+    HtmlNext path_SearchOptionsJsp = new HtmlNext("/searchOptions.jsp");
+
     /** The path of the HTML: /searchResults.jsp */
     HtmlNext path_SearchResultsJsp = new HtmlNext("/searchResults.jsp");
 }

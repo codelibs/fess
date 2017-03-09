@@ -15,17 +15,26 @@
  */
 package org.codelibs.fess.app.service;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.AccessTokenPager;
 import org.codelibs.fess.es.config.cbean.AccessTokenCB;
 import org.codelibs.fess.es.config.exbhv.AccessTokenBhv;
 import org.codelibs.fess.es.config.exentity.AccessToken;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.taglib.FessFunctions;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -82,10 +91,28 @@ public class AccessTokenService {
 
     }
 
-    public OptionalEntity<AccessToken> getAccessTokenByToken(final String token) {
-        return accessTokenBhv.selectEntity(cb -> {
-            cb.query().setToken_Term(token);
-        });
+    public OptionalEntity<Set<String>> getPermissions(final HttpServletRequest request) {
+        final String token = request.getHeader("Authorization");
+        if (StringUtil.isNotBlank(token)) {
+            return accessTokenBhv
+                    .selectEntity(cb -> {
+                        cb.query().setToken_Term(token);
+                    })
+                    .map(accessToken -> {
+                        final Set<String> permissionSet = new HashSet<>();
+                        final Long expiredTime = accessToken.getExpiredTime();
+                        if (expiredTime != null && expiredTime.longValue() > 0
+                                && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
+                            throw new InvalidAccessTokenException("invalid_token", "The token is expired("
+                                    + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
+                        }
+                        stream(accessToken.getPermissions()).of(stream -> stream.forEach(permissionSet::add));
+                        final String name = accessToken.getParameterName();
+                        stream(request.getParameterValues(name)).of(
+                                stream -> stream.filter(StringUtil::isNotBlank).forEach(permissionSet::add));
+                        return OptionalEntity.of(permissionSet);
+                    }).orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "Invalid token: " + token));
+        }
+        return OptionalEntity.empty();
     }
-
 }

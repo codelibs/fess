@@ -323,6 +323,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Could not delete logged in user. */
     public static final String ERRORS_could_not_delete_logged_in_user = "{errors.could_not_delete_logged_in_user}";
 
+    /** The key of the message: Unauthorized request. */
+    public static final String ERRORS_unauthorized_request = "{errors.unauthorized_request}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -1883,6 +1886,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsCouldNotDeleteLoggedInUser(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_could_not_delete_logged_in_user));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.unauthorized_request' with parameters.
+     * <pre>
+     * message: Unauthorized request.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsUnauthorizedRequest(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_unauthorized_request));
         return this;
     }
 
