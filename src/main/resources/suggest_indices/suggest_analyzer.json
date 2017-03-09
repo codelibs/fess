@@ -10,6 +10,12 @@
         "type" : "fess_japanese_tokenizer",
         "mode" : "normal",
         "discard_punctuation" : "false"
+      },
+      "fess_korean_normal": {
+        "type": "fess_korean_tokenizer",
+        "index_eojeol": false,
+        "pos_tagging": false,
+        "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
       }
     },
     "analyzer" : {
@@ -95,11 +101,11 @@
       },
       "reading_analyzer_ko" : {
         "type" : "custom",
-        "tokenizer" : "fess_korean_tokenizer"
+        "tokenizer" : "fess_korean_normal"
       },
       "reading_term_analyzer_ko" : {
         "type" : "custom",
-        "tokenizer" : "fess_korean_tokenizer"
+        "tokenizer" : "fess_korean_normal"
       },
       "normalize_analyzer_ko" : {
         "type" : "custom",
@@ -109,13 +115,13 @@
       },
       "contents_analyzer_ko" : {
         "type" : "custom",
-        "tokenizer" : "fess_korean_tokenizer",
+        "tokenizer" : "fess_korean_normal",
         "char_filter" : ["mapping_char"],
         "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
       },
       "contents_reading_analyzer_ko" : {
         "type" : "custom",
-        "tokenizer" : "fess_korean_tokenizer",
+        "tokenizer" : "fess_korean_normal",
         "char_filter" : ["mapping_char"],
         "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
       },
