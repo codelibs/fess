@@ -115,25 +115,6 @@ public class SuggestApiManager extends BaseJsonApiManager {
                         buf.append('\"').append(StringEscapeUtils.escapeJson(item.getTags()[i])).append('\"');
                     }
                     buf.append(']');
-
-                    buf.append(",\"roles\":[");
-                    for (int i = 0; i < item.getRoles().length; i++) {
-                        if (i > 0) {
-                            buf.append(',');
-                        }
-                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getRoles()[i])).append('\"');
-                    }
-                    buf.append(']');
-
-                    buf.append(",\"fields\":[");
-                    for (int i = 0; i < item.getFields().length; i++) {
-                        if (i > 0) {
-                            buf.append(',');
-                        }
-                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getFields()[i])).append('\"');
-                    }
-                    buf.append(']');
-
                     buf.append('}');
                 }
                 buf.append(']');
