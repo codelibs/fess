@@ -203,11 +203,11 @@
     </example>
   </function>
 
-	<function>
-		<description>Calculates URL.</description>
-		<name>url</name>
-		<function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-		<function-signature>java.lang.String url(java.lang.String)</function-signature>
-		<example>&lt;a href="${f:url(param:info)}" ...</example>
-	</function>
+  <function>
+    <description>Calculates URL.</description>
+    <name>url</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String url(java.lang.String)</function-signature>
+    <example>&lt;a href="${fe:url(param:info)}" ...</example>
+  </function>
 </taglib>
