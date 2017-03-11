@@ -58,6 +58,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String USER_CODE_PATTERN = "userCodePattern";
+
     public static final String API_ADMIN_ACCESS_PERMISSION_SET = "apiAdminAccessPermissionSet";
 
     public static final String CRAWLER_DOCUMENT_SPACE_CHARS = "crawlerDocumentSpaceChars";
@@ -1487,5 +1489,19 @@ public interface FessProp {
 
     public default boolean isApiAdminAccessAllowed(final Set<String> accessPermissions) {
         return getApiAdminAccessPermissionSet().stream().anyMatch(s -> accessPermissions.contains(s));
+    }
+
+    String getUserCodePattern();
+
+    public default boolean isValidUserCode(final String userCode) {
+        if (userCode == null) {
+            return false;
+        }
+        Pattern pattern = (Pattern) propMap.get(USER_CODE_PATTERN);
+        if (pattern == null) {
+            pattern = Pattern.compile(getUserCodePattern());
+            propMap.put(USER_CODE_PATTERN, pattern);
+        }
+        return pattern.matcher(userCode).matches();
     }
 }

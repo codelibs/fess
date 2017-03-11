@@ -53,15 +53,20 @@ public class UserInfoHelper {
         final HttpServletRequest request = LaRequestUtil.getRequest();
 
         String userCode = (String) request.getAttribute(Constants.USER_CODE);
+        if (StringUtil.isNotBlank(userCode)) {
+            return userCode;
+        }
 
-        if (StringUtil.isBlank(userCode)) {
-            userCode = getUserCodeFromCookie(request);
+        userCode = getUserCodeFromRequest(request);
+        if (StringUtil.isNotBlank(userCode)) {
+            return userCode;
         }
 
         if (!request.isRequestedSessionIdValid()) {
             return null;
         }
 
+        userCode = getUserCodeFromCookie(request);
         if (StringUtil.isBlank(userCode)) {
             userCode = getId();
         }
@@ -70,6 +75,26 @@ public class UserInfoHelper {
             updateUserSessionId(userCode);
         }
         return userCode;
+    }
+
+    protected String getUserCodeFromRequest(final HttpServletRequest request) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String userCode = request.getParameter(fessConfig.getUserCodeRequestParameter());
+        if (StringUtil.isBlank(userCode)) {
+            return null;
+        }
+
+        final int length = userCode.length();
+        if (fessConfig.getUserCodeMinLengthAsInteger().intValue() > length
+                || fessConfig.getUserCodeMaxLengthAsInteger().intValue() < length) {
+            return null;
+        }
+
+        if (fessConfig.isValidUserCode(userCode)) {
+            request.setAttribute(Constants.USER_CODE, userCode);
+            return userCode;
+        }
+        return null;
     }
 
     protected String getId() {
