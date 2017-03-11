@@ -97,6 +97,6 @@
 	<script type="text/javascript"
 		src="${fe:url('/js/jquery-2.2.4.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/admin/admin.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/login.js')}"></script>
 </body>
 </html>
