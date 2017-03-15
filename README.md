@@ -21,7 +21,7 @@ Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 
 Fess 11.0 is available.
 The release page is [HERE](https://github.com/nocode2k/fess/releases "download").
-Korean manual is [HERE](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf "download").
+Korean manual is [HERE](https://github.com/nocode2k/fess/releases/download/11.0.1-ko/Fess-ko_11.0.1_manual.pdf "download").
 
 ### Install/Run Fess
 
@@ -51,7 +51,7 @@ For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess
 ## Localization
 
  - [Japanese](http://fess.codelibs.org/ja/)
- - [Korean PDF Document](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf)
+ - [Korean PDF Document](https://github.com/nocode2k/fess/releases/download/11.0.1-ko/Fess-ko_11.0.1_manual.pdf)
  - [Korean Forum](https://github.com/nocode2k/fess-kr-forum)
 
 ## Development Information
