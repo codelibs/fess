@@ -9,7 +9,7 @@ Fess is Elasticsearch based search server, but knowledge/experience about Elasti
 
 ## Web Sites
 
- - [fess.codelibs.org](http://fess.codelibs.org/)
+[fess.codelibs.org](http://fess.codelibs.org/)
 
 ## Issues/Questions
 
@@ -34,11 +34,11 @@ For the details, see [Installation Guide](http://fess.codelibs.org/11.0/install/
 
 - **Search UI**: http://localhost:8080/
 
-![Search UI](doc/images/screenshot-search-page.png)
+![Search UI](http://fess.codelibs.org/_images/fess_search_result1.png)
 
 - **Admin UI**: http://localhost:8080/admin/ (username/password is admin/admin)
 
-![Admin UI](doc/images/screenshot-admin-page.png)
+![Admin UI](http://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
 You can register crawling targets on Web/File System/Data Store of admin pages, and then start Crawler on Scheduler page manually.
 
@@ -49,9 +49,14 @@ For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess
 
 ## Localization
 
- - [Japanese](http://fess.codelibs.org/ja/)
- - [Korean PDF Document](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf)
- - [Korean Forum](https://github.com/nocode2k/fess-kr-forum)
+### Japanese
+
+ - [Web Site](http://fess.codelibs.org/ja/)
+
+### Korean
+
+ - [PDF Document](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf)
+ - [Forum](https://github.com/nocode2k/fess-kr-forum)
 
 ## Development Information
 
