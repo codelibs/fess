@@ -35,7 +35,6 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -158,28 +157,7 @@ public class RoleQueryHelper {
     }
 
     protected void processAccessToken(final HttpServletRequest request, final Set<String> roleSet) {
-        final String token = request.getHeader("Authorization");
-        if (StringUtil.isNotBlank(token)) {
-            final AccessTokenService accessTokenService = ComponentUtil.getComponent(AccessTokenService.class);
-            accessTokenService
-                    .getAccessTokenByToken(token)
-                    .ifPresent(
-                            accessToken -> {
-                                final Long expiredTime = accessToken.getExpiredTime();
-                                if (expiredTime != null && expiredTime.longValue() > 0
-                                        && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
-                                    throw new InvalidAccessTokenException("invalid_token", "The token is expired("
-                                            + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
-                                }
-                                stream(accessToken.getPermissions()).of(stream -> stream.forEach(roleSet::add));
-                                final String name = accessToken.getParameterName();
-                                stream(request.getParameterValues(name)).of(
-                                        stream -> stream.filter(StringUtil::isNotBlank).forEach(roleSet::add));
-                            }).orElse(() -> {
-                        throw new InvalidAccessTokenException("invalid_token", "Invalid token: " + token);
-                    });
-        }
-
+        ComponentUtil.getComponent(AccessTokenService.class).getPermissions(request).ifPresent(p -> p.forEach(roleSet::add));
     }
 
     protected String getAccessToken(final HttpServletRequest request) {

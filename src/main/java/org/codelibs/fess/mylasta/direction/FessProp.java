@@ -58,6 +58,10 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String USER_CODE_PATTERN = "userCodePattern";
+
+    public static final String API_ADMIN_ACCESS_PERMISSION_SET = "apiAdminAccessPermissionSet";
+
     public static final String CRAWLER_DOCUMENT_SPACE_CHARS = "crawlerDocumentSpaceChars";
 
     public static final String INDEX_ADMIN_ARRAY_FIELD_SET = "indexAdminArrayFieldSet";
@@ -1469,4 +1473,35 @@ public interface FessProp {
 
     }
 
+    String getApiAdminAccessPermissions();
+
+    public default Set<String> getApiAdminAccessPermissionSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(API_ADMIN_ACCESS_PERMISSION_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    split(getApiAdminAccessPermissions(), ",").get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(API_ADMIN_ACCESS_PERMISSION_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    public default boolean isApiAdminAccessAllowed(final Set<String> accessPermissions) {
+        return getApiAdminAccessPermissionSet().stream().anyMatch(s -> accessPermissions.contains(s));
+    }
+
+    String getUserCodePattern();
+
+    public default boolean isValidUserCode(final String userCode) {
+        if (userCode == null) {
+            return false;
+        }
+        Pattern pattern = (Pattern) propMap.get(USER_CODE_PATTERN);
+        if (pattern == null) {
+            pattern = Pattern.compile(getUserCodePattern());
+            propMap.put(USER_CODE_PATTERN, pattern);
+        }
+        return pattern.matcher(userCode).matches();
+    }
 }

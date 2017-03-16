@@ -133,6 +133,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String API_ACCESS_TOKEN_REQUIRED = "api.access.token.required";
 
+    /** The key of the configuration. e.g. Radmin-api */
+    String API_ADMIN_ACCESS_PERMISSIONS = "api.admin.access.permissions";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -716,6 +719,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. false */
     String THUMBNAIL_CRAWLER_ENABLED = "thumbnail.crawler.enabled";
+
+    /** The key of the configuration. e.g. userCode */
+    String USER_CODE_REQUEST_PARAMETER = "user.code.request.parameter";
+
+    /** The key of the configuration. e.g. 20 */
+    String USER_CODE_MIN_LENGTH = "user.code.min.length";
+
+    /** The key of the configuration. e.g. 100 */
+    String USER_CODE_MAX_LENGTH = "user.code.max.length";
+
+    /** The key of the configuration. e.g. [a-zA-Z0-9_]+ */
+    String USER_CODE_PATTERN = "user.code.pattern";
 
     /** The key of the configuration. e.g. Administrator */
     String MAIL_FROM_NAME = "mail.from.name";
@@ -1401,6 +1416,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiAccessTokenRequired();
+
+    /**
+     * Get the value for the key 'api.admin.access.permissions'. <br>
+     * The value is, e.g. Radmin-api <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiAdminAccessPermissions();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -3495,6 +3517,51 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isThumbnailCrawlerEnabled();
 
     /**
+     * Get the value for the key 'user.code.request.parameter'. <br>
+     * The value is, e.g. userCode <br>
+     * comment: user
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserCodeRequestParameter();
+
+    /**
+     * Get the value for the key 'user.code.min.length'. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserCodeMinLength();
+
+    /**
+     * Get the value for the key 'user.code.min.length' as {@link Integer}. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserCodeMinLengthAsInteger();
+
+    /**
+     * Get the value for the key 'user.code.max.length'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserCodeMaxLength();
+
+    /**
+     * Get the value for the key 'user.code.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserCodeMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'user.code.pattern'. <br>
+     * The value is, e.g. [a-zA-Z0-9_]+ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserCodePattern();
+
+    /**
      * Get the value for the key 'mail.from.name'. <br>
      * The value is, e.g. Administrator <br>
      * comment: From
@@ -4798,6 +4865,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_ACCESS_TOKEN_REQUIRED);
         }
 
+        public String getApiAdminAccessPermissions() {
+            return get(FessConfig.API_ADMIN_ACCESS_PERMISSIONS);
+        }
+
         public String getCrawlerDocumentMaxSiteLength() {
             return get(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH);
         }
@@ -5896,6 +5967,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isThumbnailCrawlerEnabled() {
             return is(FessConfig.THUMBNAIL_CRAWLER_ENABLED);
+        }
+
+        public String getUserCodeRequestParameter() {
+            return get(FessConfig.USER_CODE_REQUEST_PARAMETER);
+        }
+
+        public String getUserCodeMinLength() {
+            return get(FessConfig.USER_CODE_MIN_LENGTH);
+        }
+
+        public Integer getUserCodeMinLengthAsInteger() {
+            return getAsInteger(FessConfig.USER_CODE_MIN_LENGTH);
+        }
+
+        public String getUserCodeMaxLength() {
+            return get(FessConfig.USER_CODE_MAX_LENGTH);
+        }
+
+        public Integer getUserCodeMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.USER_CODE_MAX_LENGTH);
+        }
+
+        public String getUserCodePattern() {
+            return get(FessConfig.USER_CODE_PATTERN);
         }
 
         public String getMailFromName() {
