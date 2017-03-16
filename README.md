@@ -1,3 +1,44 @@
+Enterprise Search Server: Fess 
+====
+
+## Overview
+
+Fess is very powerful and easily deployable Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.
+
+Fess is Elasticsearch based search server, but knowledge/experience about Elasticsearch is NOT needed because of All-in-One Enterprise Search Server. Fess provides Administration GUI to configure the system on your browser. Fess also contains a crawler, which can crawl documents on Web/FileSystem/DB and supports many file formats, such as MS Office, pdf and zip.
+
+## Web Sites
+
+ - [English](http://fess.codelibs.org/)
+ - [Japanese](http://fess.codelibs.org/ja/)
+
+## Issues/Questions
+
+Please file an [issue](https://github.com/codelibs/fess/issues "issue").
+(Japanese forum is [here](https://github.com/codelibs/codelibs-ja-forum "here").)
+For submitted questions, see [label:question](https://github.com/codelibs/fess/issues?q=label%3Aquestion%20 "label:question").
+
+## Getting Started
+
+### Download
+
+Fess 11.0 is available.
+The release page is [HERE](https://github.com/codelibs/fess/releases "download").
+
+### Install/Run Fess
+
+    $ unzip fess-11.0.x.zip
+    $ cd fess-11.0.x
+    $ ./bin/fess
+
+For the details, see [Installation Guide](http://fess.codelibs.org/11.0/install/index.html).
+
+### Access Fess
+
+- Search UI: http://localhost:8080/
+- Admin UI: http://localhost:8080/admin/ (username/password is admin/admin)
+
+You can register crawling targets on Web/File System/Data Store of admin pages, and then start Crawler on Scheduler page manually.
 
 ## Fess on Docker Hub
 
