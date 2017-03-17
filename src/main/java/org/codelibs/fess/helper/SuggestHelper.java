@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -232,8 +231,8 @@ public class SuggestHelper {
         }
 
         suggester.indexer().addElevateWord(
-                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Collections.singletonList(reading), contentFieldList,
-                        labelList, roleList));
+                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(reading.replace("　", TEXT_SEP)
+                        .replaceAll(TEXT_SEP + "+", TEXT_SEP).split(TEXT_SEP)), contentFieldList, labelList, roleList));
     }
 
     public void deleteAllBadWords() {
