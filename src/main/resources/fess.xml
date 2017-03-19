@@ -68,10 +68,6 @@
 			<arg>"error/header.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
-			<arg>"errorFooter"</arg>
-			<arg>"error/footer.jsp"</arg>
-		</postConstruct>
-		<postConstruct name="addDesignJspFileName">
 			<arg>"errorNotFound"</arg>
 			<arg>"error/notFound.jsp"</arg>
 		</postConstruct>

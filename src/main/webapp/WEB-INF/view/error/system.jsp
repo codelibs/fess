@@ -27,7 +27,7 @@
 				</div>
 			</div>
 		</div>
-		<jsp:include page="footer.jsp" />
+		<jsp:include page="../footer.jsp" />
 	</div>
 	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"

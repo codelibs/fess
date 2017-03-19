@@ -1505,9 +1505,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Error Page (Header) */
     public static final String LABELS_design_file_errorHeader = "{labels.design_file_errorHeader}";
 
-    /** The key of the message: Error Page (Footer) */
-    public static final String LABELS_design_file_errorFooter = "{labels.design_file_errorFooter}";
-
     /** The key of the message: Error Page (Not Found) */
     public static final String LABELS_design_file_errorNotFound = "{labels.design_file_errorNotFound}";
 
