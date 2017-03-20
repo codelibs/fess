@@ -143,9 +143,6 @@
 											<la:option value="errorHeader">
 												<la:message key="labels.design_file_errorHeader" />
 											</la:option>
-											<la:option value="errorFooter">
-												<la:message key="labels.design_file_errorFooter" />
-											</la:option>
 											<la:option value="errorNotFound">
 												<la:message key="labels.design_file_errorNotFound" />
 											</la:option>
