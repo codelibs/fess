@@ -98,15 +98,7 @@
 		<!-- /.login-box-body -->
 	</div>
 	<!-- /.login-box -->
-
-	<footer class="footer bd-footer text-muted" role="contentinfo">
-		<div class="container center">
-			<p class="text-muted">
-				<la:message key="labels.footer.copyright" />
-			</p>
-		</div>
-	</footer>
-
+	<jsp:include page="../footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
 		src="${fe:url('/js/jquery-2.2.4.min.js')}"></script>
