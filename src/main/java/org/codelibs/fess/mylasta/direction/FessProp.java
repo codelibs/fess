@@ -48,7 +48,7 @@ import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.lastaflute.job.LaJob;
-import org.lastaflute.job.subsidiary.ConcurrentExec;
+import org.lastaflute.job.subsidiary.JobConcurrentExec;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.RequiredValidator;
 import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
@@ -750,8 +750,8 @@ public interface FessProp {
 
     String getSchedulerConcurrentExecMode();
 
-    public default ConcurrentExec getSchedulerConcurrentExecModeAsEnum() {
-        return ConcurrentExec.valueOf(getSchedulerConcurrentExecMode());
+    public default JobConcurrentExec getSchedulerConcurrentExecModeAsEnum() {
+        return JobConcurrentExec.valueOf(getSchedulerConcurrentExecMode());
     }
 
     String getCrawlerMetadataContentExcludes();
