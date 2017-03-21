@@ -15,7 +15,7 @@
 	rel="stylesheet" type="text/css" />
 </head>
 <body class="error">
-	<jsp:include page="header.jsp" />
+	<jsp:include page="../header.jsp" />
 	<div class="container">
 		<div class="content">
 			<div class="center row">

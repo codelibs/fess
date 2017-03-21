@@ -1,8 +1,8 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <la:form action="/search" method="get" styleId="searchForm"
 	role="search">
-${fe:facetForm()}${fe:geoForm()}
-<nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
+	${fe:facetForm()}${fe:geoForm()}
+	<nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
 		<la:link styleClass="navbar-brand" href="/">
 			<img src="${fe:url('/images/logo-head.png')}"
 				alt="<la:message key="labels.header_brand_name" />" />
@@ -73,7 +73,7 @@ ${fe:facetForm()}${fe:geoForm()}
 	</nav>
 	<div id="searchOptions" class="control-options">
 		<div class="container">
-			<jsp:include page="searchOptions.jsp" />
+			<jsp:include page="/WEB-INF/view/searchOptions.jsp" />
 			<div>
 				<button type="button" class="btn btn-secondary" id="searchOptionsClearButton">
 					<la:message key="labels.search_options_clear" />

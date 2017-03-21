@@ -64,10 +64,6 @@
 			<arg>"error/error.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
-			<arg>"errorHeader"</arg>
-			<arg>"error/header.jsp"</arg>
-		</postConstruct>
-		<postConstruct name="addDesignJspFileName">
 			<arg>"errorNotFound"</arg>
 			<arg>"error/notFound.jsp"</arg>
 		</postConstruct>
