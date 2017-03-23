@@ -44,11 +44,11 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminAccesstokenAction extends FessAdminAction {
 
-    private static final String TOKEN = "token";
+    public static final String TOKEN = "token";
 
-    private static final String EXPIRES = "expires";
+    public static final String EXPIRES = "expires";
 
-    private static final String EXPIRED_TIME = "expiredTime";
+    public static final String EXPIRED_TIME = "expiredTime";
 
     // ===================================================================================
     //                                                                           Attribute

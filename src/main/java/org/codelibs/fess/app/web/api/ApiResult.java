@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.api;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -59,11 +60,49 @@ public class ApiResult {
         }
     }
 
-    public static class ApiConfigResponse extends ApiResponse {
-        protected Object config;
+    public static class ApiUpdateResponse extends ApiResponse {
+        protected String id;
+        protected boolean created;
 
-        public ApiConfigResponse config(Object config) {
-            this.config = config;
+        public ApiUpdateResponse id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public ApiUpdateResponse created(boolean created) {
+            this.created = created;
+            return this;
+        }
+
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiConfigResponse extends ApiResponse {
+        protected Object setting;
+
+        public ApiConfigResponse setting(Object setting) {
+            this.setting = setting;
+            return this;
+        }
+
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiConfigsResponse<T> extends ApiResponse {
+        protected List<T> settings;
+        protected long total = 0;
+
+        public ApiConfigsResponse<T> settings(List<T> settings) {
+            this.settings = settings;
+            return this;
+        }
+
+        public ApiConfigsResponse<T> total(long total) {
+            this.total = total;
             return this;
         }
 

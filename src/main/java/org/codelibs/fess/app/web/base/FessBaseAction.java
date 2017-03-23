@@ -15,8 +15,12 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import java.util.function.Consumer;
+
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -183,5 +187,19 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         final FessMessages messages = createMessages();
         validationMessagesLambda.message(messages);
         sessionManager.errors().saveMessages(messages);
+    }
+
+    protected void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
+        BeanUtil.copyBeanToBean(src, dest, option);
+    }
+
+    protected String buildThrowableMessage(final Throwable t) {
+        final StringBuilder buf = new StringBuilder(100);
+        Throwable current = t;
+        while (current != null) {
+            buf.append(current.getLocalizedMessage()).append(' ');
+            current = current.getCause();
+        }
+        return buf.toString();
     }
 }

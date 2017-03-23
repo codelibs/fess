@@ -47,7 +47,7 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
         final EditBody form = new EditBody();
         AdminGeneralAction.updateForm(fessConfig, form);
         form.ldapAdminSecurityCredentials = null;
-        return asJson(new ApiConfigResponse().config(form).status(Status.OK).result());
+        return asJson(new ApiConfigResponse().setting(form).status(Status.OK).result());
     }
 
     // POST /api/admin/general

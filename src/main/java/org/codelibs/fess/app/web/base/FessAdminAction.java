@@ -15,12 +15,8 @@
  */
 package org.codelibs.fess.app.web.base;
 
-import java.util.function.Consumer;
-
 import javax.servlet.ServletContext;
 
-import org.codelibs.core.beans.util.BeanUtil;
-import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
@@ -49,22 +45,8 @@ public abstract class FessAdminAction extends FessBaseAction {
         LdiFileUtil.write(path, data);
     }
 
-    protected void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
-        BeanUtil.copyBeanToBean(src, dest, option);
-    }
-
     protected ServletContext getServletContext() {
         return LaServletContextUtil.getServletContext();
-    }
-
-    protected String buildThrowableMessage(final Throwable t) {
-        final StringBuilder buf = new StringBuilder(100);
-        Throwable current = t;
-        while (current != null) {
-            buf.append(current.getLocalizedMessage()).append(' ');
-            current = current.getCause();
-        }
-        return buf.toString();
     }
 
     // ===================================================================================
