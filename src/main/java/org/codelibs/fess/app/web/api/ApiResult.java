@@ -59,6 +59,19 @@ public class ApiResult {
         }
     }
 
+    public static class ApiConfigResponse extends ApiResponse {
+        protected Object config;
+
+        public ApiConfigResponse config(Object config) {
+            this.config = config;
+            return this;
+        }
+
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
     public static class ApiErrorResponse extends ApiResponse {
         protected String message;
 

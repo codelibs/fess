@@ -26,6 +26,7 @@ import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainBeforeHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainFinallyHook;
+import org.codelibs.fess.mylasta.direction.sponsor.FessJsonResourceProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessListedClassificationProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMailDeliveryDepartmentCreator;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMultipartRequestHandler;
@@ -85,6 +86,11 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directSecurity(createSecurityResourceProvider());
         direction.directTime(createTimeResourceProvider());
         direction.directMail(createFessMailDeliveryDepartmentCreator().create());
+        direction.directJson(createJsonResourceProvider());
+    }
+
+    protected FessJsonResourceProvider createJsonResourceProvider() {
+        return new FessJsonResourceProvider();
     }
 
     protected FessCurtainBeforeHook createCurtainBeforeHook() {

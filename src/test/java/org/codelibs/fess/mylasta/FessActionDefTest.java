@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.mylasta;
 
+import java.io.File;
+
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.lastaflute.police.NonActionExtendsActionPolice;
 import org.dbflute.utflute.lastaflute.police.NonWebHasWebReferencePolice;
@@ -40,6 +42,16 @@ public class FessActionDefTest extends UnitFessTestCase {
     }
 
     public void test_webPackageNinjaReferencePolice() throws Exception {
-        policeStoryOfJavaClassChase(new WebPackageNinjaReferencePolice());
+        policeStoryOfJavaClassChase(new WebPackageNinjaReferencePolice() {
+            public void handle(File srcFile, Class<?> clazz) {
+                final String webPackageKeyword = getWebPackageKeyword();
+                if (!clazz.getName().contains(webPackageKeyword) ||
+                // exclude app.web.api.admin packages
+                        clazz.getName().contains(".app.web.api.admin.")) {
+                    return;
+                }
+                check(srcFile, clazz, webPackageKeyword);
+            }
+        });
     }
 }
