@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.api.admin.accesstoken;
+package org.codelibs.fess.app.web.api.admin.boostdoc;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 

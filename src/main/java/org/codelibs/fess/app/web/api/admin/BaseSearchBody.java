@@ -13,10 +13,21 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.api.admin.accesstoken;
+package org.codelibs.fess.app.web.api.admin;
 
-import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.validation.Required;
 
-public class SearchBody extends BaseSearchBody {
+public class BaseSearchBody {
+
+    @Required
+    public Integer size = ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
+    @Required
+    public Integer page = Constants.DEFAULT_ADMIN_PAGE_NUMBER;
+
+    public BaseSearchBody() {
+        super();
+    }
 
 }

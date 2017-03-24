@@ -15,6 +15,20 @@
  */
 package org.codelibs.fess.app.web.api.admin.badword;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -23,6 +37,7 @@ import org.codelibs.fess.app.web.admin.badword.CreateForm;
 import org.codelibs.fess.app.web.admin.badword.EditForm;
 import org.codelibs.fess.app.web.admin.badword.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
@@ -31,13 +46,6 @@ import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
-
-import javax.annotation.Resource;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ApiAdminBadwordAction extends FessApiAdminAction {
 
@@ -50,7 +58,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     // GET /api/admin/badword
     // POST /api/admin/badword
     @Execute
-    public JsonResponse<ApiResult> settings(SearchBody body) {
+    public JsonResponse<ApiResult> settings(BaseSearchBody body) {
         validateApi(body, messages -> {});
         final BadWordPager pager = new BadWordPager();
         pager.setPageSize(body.size);
