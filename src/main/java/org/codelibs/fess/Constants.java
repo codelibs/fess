@@ -339,9 +339,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DATA_CRAWLER_TYPE = "data_crawling";
 
-    // TODO remove searchParams
-    public static final String[] COMMON_CONVERSION_RULE = new String[] { "searchParams", "crudMode", "createdBy", "createdTime",
-            "updatedBy", "updatedTime" };
+    public static final String[] COMMON_CONVERSION_RULE =
+            new String[] { "crudMode", "createdBy", "createdTime", "updatedBy", "updatedTime" };
 
     public static final String USER_INFO = "LoginInfo";
 

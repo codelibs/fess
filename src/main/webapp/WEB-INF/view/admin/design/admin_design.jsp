@@ -194,8 +194,7 @@
 								<!-- /.box-header -->
 								<div class="box-body">
 									<div class="form-group row">
-										<label for="searchParams.url"
-											class="col-sm-3 form-control-label"><la:message
+										<label class="col-sm-3 form-control-label"><la:message
 												key="labels.design_file" /></label>
 										<div class="col-sm-9">
 											<la:errors property="designFile" />
@@ -203,8 +202,7 @@
 										</div>
 									</div>
 									<div class="form-group row">
-										<label for="searchParams.url"
-											class="col-sm-3 form-control-label"><la:message
+										<label class="col-sm-3 form-control-label"><la:message
 												key="labels.design_file_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="designFileName" />

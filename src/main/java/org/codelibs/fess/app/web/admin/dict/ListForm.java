@@ -15,13 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.dict;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Keiichi Watanabe
  */
 public class ListForm {
 
-    public Map<String, String> searchParams = new HashMap<>();
 }

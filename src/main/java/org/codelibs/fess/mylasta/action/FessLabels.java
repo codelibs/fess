@@ -431,9 +431,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Term */
     public static final String LABELS_TERM = "{labels.term}";
 
-    /** The key of the message: Search Parameters */
-    public static final String LABELS_SEARCH_PARAMS = "{labels.searchParams}";
-
     /** The key of the message: Fields */
     public static final String LABELS_FIELDS = "{labels.fields}";
 
