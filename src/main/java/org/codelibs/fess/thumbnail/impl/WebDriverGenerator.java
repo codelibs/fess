@@ -144,7 +144,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                 try {
                     webDriver.get(url);
                     if (webDriver instanceof JavascriptExecutor) {
-                        Dimension dim = webDriver.findElement(By.tagName("body")).getSize();
+                        final Dimension dim = webDriver.findElement(By.tagName("body")).getSize();
                         if (dim.height >= fessConfig.getThumbnailHtmlPhantomjsMaxHeightAsInteger()) {
                             if (logger.isInfoEnabled()) {
                                 logger.info("Skpped Thumbnail generation " + dim + " for " + url);

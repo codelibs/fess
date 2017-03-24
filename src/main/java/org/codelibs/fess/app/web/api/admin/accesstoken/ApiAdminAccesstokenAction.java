@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.accesstoken;
 
-import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
+import static org.codelibs.fess.app.web.admin.accesstoken.AdminAccesstokenAction.getAccessToken;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,8 +29,6 @@ import org.codelibs.fess.app.pager.AccessTokenPager;
 import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.accesstoken.AdminAccesstokenAction;
-import org.codelibs.fess.app.web.admin.accesstoken.CreateForm;
-import org.codelibs.fess.app.web.admin.accesstoken.EditForm;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiConfigResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiConfigsResponse;
@@ -41,7 +39,6 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.AccessToken;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
@@ -63,7 +60,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     // GET /api/admin/accesstoken
     // POST /api/admin/accesstoken
     @Execute
-    public JsonResponse<ApiResult> settings(SearchBody body) {
+    public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
         final AccessTokenPager pager = new AccessTokenPager();
         pager.setPageSize(body.size);
@@ -76,7 +73,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
 
     // GET /api/admin/accesstoken/setting/{id}
     @Execute
-    public JsonResponse<ApiResult> get$setting(String id) {
+    public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse()
                 .setting(accessTokenService.getAccessToken(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
@@ -86,7 +83,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
 
     // PUT /api/admin/accesstoken/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(CreateBody body) {
+    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
@@ -125,7 +122,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
 
     // DELETE /api/admin/accesstoken/setting/{id}
     @Execute
-    public JsonResponse<ApiResult> delete$setting(String id) {
+    public JsonResponse<ApiResult> delete$setting(final String id) {
         accessTokenService.getAccessToken(id).ifPresent(entity -> {
             try {
                 accessTokenService.delete(entity);
@@ -140,56 +137,16 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     }
 
     protected EditBody createEditBody(final AccessToken entity) {
-        final EditBody form = new EditBody();
-        copyBeanToBean(entity, form, copyOp -> copyOp.exclude(Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME).excludeNull()
+        final EditBody body = new EditBody();
+        copyBeanToBean(entity, body, copyOp -> copyOp.exclude(Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME).excludeNull()
                 .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, AdminAccesstokenAction.EXPIRES));
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        form.permissions =
+        body.permissions =
                 stream(entity.getPermissions()).get(
                         stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
                                 .collect(Collectors.joining("\n")));
-        form.crudMode = null;
-        return form;
+        body.crudMode = null;
+        return body;
 
-    }
-
-    protected OptionalEntity<AccessToken> getAccessToken(final CreateForm body) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
-        return getEntity(body, username, currentTime).map(
-                entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(
-                            body,
-                            entity,
-                            op -> op.exclude(Constants.COMMON_API_CONVERSION_RULE)
-                                    .exclude(AdminAccesstokenAction.TOKEN, Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME)
-                                    .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, AdminAccesstokenAction.EXPIRES));
-                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setPermissions(split(body.permissions, "\n").get(
-                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
-                                    .toArray(n -> new String[n])));
-                    return entity;
-                });
-    }
-
-    private OptionalEntity<AccessToken> getEntity(final CreateForm form, final String username, final long currentTime) {
-        switch (form.crudMode) {
-        case CrudMode.CREATE:
-            return OptionalEntity.of(new AccessToken()).map(entity -> {
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                return entity;
-            });
-        case CrudMode.EDIT:
-            if (form instanceof EditForm) {
-                return accessTokenService.getAccessToken(((EditForm) form).id);
-            }
-            break;
-        default:
-            break;
-        }
-        return OptionalEntity.empty();
     }
 }

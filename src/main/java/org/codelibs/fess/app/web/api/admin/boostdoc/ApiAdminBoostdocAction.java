@@ -54,7 +54,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
     // GET /api/admin/boostdoc
     // POST /api/admin/boostdoc
     @Execute
-    public JsonResponse<ApiResult> settings(SearchBody body) {
+    public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
         final BoostDocPager pager = new BoostDocPager();
         pager.setPageSize(body.size);
@@ -67,7 +67,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
 
     // GET /api/admin/boostdoc/setting/{id}
     @Execute
-    public JsonResponse<ApiResult> get$setting(String id) {
+    public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse()
                 .setting(boostDocumentRuleService.getBoostDocumentRule(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
@@ -77,7 +77,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
 
     // PUT /api/admin/boostdoc/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(CreateBody body) {
+    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final BoostDocumentRule boostDoc = getBoostDocumentRule(body).map(entity -> {
@@ -115,7 +115,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
 
     // DELETE /api/admin/boostdoc/setting/{id}
     @Execute
-    public JsonResponse<ApiResult> delete$setting(String id) {
+    public JsonResponse<ApiResult> delete$setting(final String id) {
         boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
             try {
                 boostDocumentRuleService.delete(entity);

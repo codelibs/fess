@@ -333,7 +333,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     private ExtractData getExtractData(final Extractor extractor, final InputStream in, final Map<String, String> params) {
         try {
             return extractor.getText(in, params);
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             if (!fessConfig.isCrawlerIgnoreContentException()) {
                 throw e;
             }

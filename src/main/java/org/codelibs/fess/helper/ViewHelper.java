@@ -660,29 +660,29 @@ public class ViewHelper {
         return actionHook;
     }
 
-    public void setActionHook(ActionHook actionHook) {
+    public void setActionHook(final ActionHook actionHook) {
         this.actionHook = actionHook;
     }
 
     public static class ActionHook {
 
-        public ActionResponse godHandPrologue(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+        public ActionResponse godHandPrologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
-        public ActionResponse godHandMonologue(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+        public ActionResponse godHandMonologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
-        public void godHandEpilogue(ActionRuntime runtime, Consumer<ActionRuntime> consumer) {
+        public void godHandEpilogue(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
 
-        public ActionResponse hookBefore(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+        public ActionResponse hookBefore(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
-        public void hookFinally(ActionRuntime runtime, Consumer<ActionRuntime> consumer) {
+        public void hookFinally(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
     }

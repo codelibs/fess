@@ -29,7 +29,7 @@ public class ApiResult {
 
     protected ApiResponse response = null;
 
-    public ApiResult(ApiResponse response) {
+    public ApiResult(final ApiResponse response) {
         this.response = response;
     }
 
@@ -50,7 +50,7 @@ public class ApiResult {
         protected String version = Constants.WEB_API_VERSION;
         protected int status;
 
-        public ApiResponse status(Status status) {
+        public ApiResponse status(final Status status) {
             this.status = status.getId();
             return this;
         }
@@ -64,16 +64,17 @@ public class ApiResult {
         protected String id;
         protected boolean created;
 
-        public ApiUpdateResponse id(String id) {
+        public ApiUpdateResponse id(final String id) {
             this.id = id;
             return this;
         }
 
-        public ApiUpdateResponse created(boolean created) {
+        public ApiUpdateResponse created(final boolean created) {
             this.created = created;
             return this;
         }
 
+        @Override
         public ApiResult result() {
             return new ApiResult(this);
         }
@@ -82,11 +83,12 @@ public class ApiResult {
     public static class ApiConfigResponse extends ApiResponse {
         protected Object setting;
 
-        public ApiConfigResponse setting(Object setting) {
+        public ApiConfigResponse setting(final Object setting) {
             this.setting = setting;
             return this;
         }
 
+        @Override
         public ApiResult result() {
             return new ApiResult(this);
         }
@@ -96,16 +98,17 @@ public class ApiResult {
         protected List<T> settings;
         protected long total = 0;
 
-        public ApiConfigsResponse<T> settings(List<T> settings) {
+        public ApiConfigsResponse<T> settings(final List<T> settings) {
             this.settings = settings;
             return this;
         }
 
-        public ApiConfigsResponse<T> total(long total) {
+        public ApiConfigsResponse<T> total(final long total) {
             this.total = total;
             return this;
         }
 
+        @Override
         public ApiResult result() {
             return new ApiResult(this);
         }
@@ -114,13 +117,13 @@ public class ApiResult {
     public static class ApiErrorResponse extends ApiResponse {
         protected String message;
 
-        public ApiErrorResponse message(String message) {
+        public ApiErrorResponse message(final String message) {
             this.message = message;
             return this;
         }
 
-        public ApiErrorResponse message(VaMessenger<FessMessages> validationMessagesLambda) {
-            FessMessages messages = new FessMessages();
+        public ApiErrorResponse message(final VaMessenger<FessMessages> validationMessagesLambda) {
+            final FessMessages messages = new FessMessages();
             validationMessagesLambda.message(messages);
             message =
                     ComponentUtil.getMessageManager()

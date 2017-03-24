@@ -228,7 +228,7 @@ public class AdminBoostdocAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    public static OptionalEntity<BoostDocumentRule> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<BoostDocumentRule> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new BoostDocumentRule()).map(entity -> {

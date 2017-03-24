@@ -104,13 +104,13 @@ public class User extends BsUser implements FessUser {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(final Map<String, String> attributes) {
         this.attributes = attributes;
     }
 
     @Override
     public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
+        final Map<String, Object> sourceMap = new HashMap<>();
         if (name != null) {
             sourceMap.put("name", name);
         }

@@ -35,7 +35,7 @@ public class UserBhv extends BsUserBhv {
     private static final String NAME = "name";
 
     @Override
-    protected <RESULT extends User> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends User> RESULT createEntity(final Map<String, Object> source, final Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             result.setName(DfTypeUtil.toString(source.get(NAME)));

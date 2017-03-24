@@ -323,10 +323,10 @@ public class SystemHelper {
         return previousClusterState.getAndSet(status) != status;
     }
 
-    public ActionValidator<FessMessages> createValidator(MessageManager messageManager, MessageLocaleProvider messageLocaleProvider,
-            UserMessagesCreator<FessMessages> userMessagesCreator, VaErrorHook apiFailureHook, Class<?>... runtimeGroups) {
-        return new FessActionValidator<FessMessages>(messageManager, messageLocaleProvider, userMessagesCreator, apiFailureHook,
-                runtimeGroups);
+    public ActionValidator<FessMessages> createValidator(final MessageManager messageManager,
+            final MessageLocaleProvider messageLocaleProvider, final UserMessagesCreator<FessMessages> userMessagesCreator,
+            final VaErrorHook apiFailureHook, final Class<?>... runtimeGroups) {
+        return new FessActionValidator<>(messageManager, messageLocaleProvider, userMessagesCreator, apiFailureHook, runtimeGroups);
     }
 
 }

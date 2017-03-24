@@ -777,7 +777,7 @@ public class QueryHelper {
 
     protected FieldSortBuilder createFieldSortBuilder(final String field, final SortOrder order) {
         final String fieldName = SCORE_FIELD.equals(field) ? ES_SCORE_FIELD : field;
-        FieldSortBuilder builder = SortBuilders.fieldSort(fieldName);
+        final FieldSortBuilder builder = SortBuilders.fieldSort(fieldName);
         if (ES_SCORE_FIELD.equals(fieldName)) {
             builder.unmappedType("float");
         }

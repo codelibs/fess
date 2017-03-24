@@ -30,7 +30,7 @@ import org.dbflute.util.DfTypeUtil;
 public class GroupBhv extends BsGroupBhv {
 
     @Override
-    protected <RESULT extends Group> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends Group> RESULT createEntity(final Map<String, Object> source, final Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             result.setName(DfTypeUtil.toString(source.get("name")));

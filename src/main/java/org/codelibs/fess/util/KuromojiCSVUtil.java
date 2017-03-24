@@ -114,7 +114,7 @@ public final class KuromojiCSVUtil {
 
     /**
      * Quote and escape input value for CSV
-     * 
+     *
      * @param original Original text.
      * @return Escaped text.
      */

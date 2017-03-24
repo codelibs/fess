@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.badword;
 
+import static org.codelibs.fess.app.web.admin.badword.AdminBadwordAction.getBadWord;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStream;
@@ -29,12 +31,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
-import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.badword.CreateForm;
-import org.codelibs.fess.app.web.admin.badword.EditForm;
 import org.codelibs.fess.app.web.admin.badword.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
@@ -42,7 +40,6 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
-import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
@@ -58,7 +55,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     // GET /api/admin/badword
     // POST /api/admin/badword
     @Execute
-    public JsonResponse<ApiResult> settings(BaseSearchBody body) {
+    public JsonResponse<ApiResult> settings(final BaseSearchBody body) {
         validateApi(body, messages -> {});
         final BadWordPager pager = new BadWordPager();
         pager.setPageSize(body.size);
@@ -71,7 +68,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
 
     // PUT /api/admin/badword/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         final BadWord entity = getBadWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -90,7 +87,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
 
     // POST /api/admin/badword/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(EditBody body) {
+    public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
         final BadWord entity = getBadWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -109,7 +106,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
 
     // DELETE /api/admin/badword/setting/{id}
     @Execute
-    public JsonResponse<ApiResult> delete$setting(String id) {
+    public JsonResponse<ApiResult> delete$setting(final String id) {
         try {
             badWordService.getBadWord(id).ifPresent(entity -> {
                 try {
@@ -130,10 +127,10 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
 
     // POST /api/admin/badword/upload
     @Execute
-    public JsonResponse<ApiResult> post$upload(UploadForm form) {
-        validateApi(form, messages -> {});
+    public JsonResponse<ApiResult> post$upload(final UploadForm body) {
+        validateApi(body, messages -> {});
         new Thread(() -> {
-            try (Reader reader = new BufferedReader(new InputStreamReader(form.badWordFile.getInputStream(), getCsvEncoding()))) {
+            try (Reader reader = new BufferedReader(new InputStreamReader(body.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords();
             } catch (final Exception e) {
@@ -145,7 +142,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
 
     // GET /api/admin/badword/download
     @Execute
-    public StreamResponse get$download(DownloadBody body) {
+    public StreamResponse get$download(final DownloadBody body) {
         validateApi(body, messages -> {});
         return asStream("badword.csv").contentTypeOctetStream().stream(out -> {
             final Path tempFile = Files.createTempFile(null, null);
@@ -164,8 +161,8 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         });
     }
 
-    protected EditBody createEditBody(BadWord entity) {
-        EditBody body = new EditBody();
+    protected EditBody createEditBody(final BadWord entity) {
+        final EditBody body = new EditBody();
         body.id = entity.getId();
         body.versionNo = entity.getVersionNo();
         body.createdBy = entity.getCreatedBy();
@@ -174,36 +171,6 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         body.updatedBy = entity.getUpdatedBy();
         body.updatedTime = entity.getUpdatedTime();
         return body;
-    }
-
-    protected OptionalEntity<BadWord> getBadWord(final CreateForm form) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
-        return getEntity(form, username, currentTime).map(entity -> {
-            entity.setUpdatedBy(username);
-            entity.setUpdatedTime(currentTime);
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            return entity;
-        });
-    }
-
-    private OptionalEntity<BadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
-        switch (form.crudMode) {
-        case CrudMode.CREATE:
-            return OptionalEntity.of(new BadWord()).map(entity -> {
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                return entity;
-            });
-        case CrudMode.EDIT:
-            if (form instanceof EditForm) {
-                return badWordService.getBadWord(((EditForm) form).id);
-            }
-            break;
-        default:
-            break;
-        }
-        return OptionalEntity.empty();
     }
 
     private String getCsvEncoding() {

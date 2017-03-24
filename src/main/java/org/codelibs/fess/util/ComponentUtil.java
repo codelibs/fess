@@ -425,7 +425,7 @@ public final class ComponentUtil {
 
     /**
      * For test purpose only.
-     * 
+     *
      * @param fessConfig fessConfig instance
      */
     public static void setFessConfig(final FessConfig fessConfig) {

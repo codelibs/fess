@@ -38,7 +38,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
 
     // POST /api/admin/scheduler/{id}/start
     @Execute(urlPattern = "{}/@word")
-    public JsonResponse<ApiResult> post$start(String id) {
+    public JsonResponse<ApiResult> post$start(final String id) {
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             if (!entity.isEnabled() || entity.isRunning()) {
                 throwValidationErrorApi(messages -> {
@@ -62,7 +62,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
 
     // POST /api/admin/scheduler/{id}/stop
     @Execute(urlPattern = "{}/@word")
-    public JsonResponse<ApiResult> post$stop(String id) {
+    public JsonResponse<ApiResult> post$stop(final String id) {
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
                 entity.stop();

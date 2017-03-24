@@ -64,13 +64,13 @@ public class FessFunctions {
     private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
                 @Override
-                public Long load(String key) throws Exception {
+                public Long load(final String key) throws Exception {
                     try {
                         final Path path = Paths.get(LaServletContextUtil.getServletContext().getRealPath(key));
                         if (Files.isRegularFile(path)) {
                             return Files.getLastModifiedTime(path).toMillis();
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.debug("Failed to access " + key, e);
                     }
                     return 0L;
@@ -260,13 +260,13 @@ public class FessFunctions {
         return file.exists();
     }
 
-    public static String url(String input) {
+    public static String url(final String input) {
         if (input == null) {
-            String msg = "The argument 'input' should not be null.";
+            final String msg = "The argument 'input' should not be null.";
             throw new IllegalArgumentException(msg);
         }
         if (!input.startsWith("/")) {
-            String msg = "The argument 'input' should start with slash '/': " + input;
+            final String msg = "The argument 'input' should start with slash '/': " + input;
             throw new IllegalArgumentException(msg);
         }
         final String contextPath = LaRequestUtil.getRequest().getContextPath();
@@ -281,7 +281,7 @@ public class FessFunctions {
                 if (value.longValue() > 0) {
                     sb.append("?t=").append(value.toString());
                 }
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 logger.debug("Failed to access " + input, e);
             }
         }

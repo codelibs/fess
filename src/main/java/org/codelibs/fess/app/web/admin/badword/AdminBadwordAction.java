@@ -27,6 +27,7 @@ import java.nio.file.Path;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -35,6 +36,8 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -297,7 +300,7 @@ public class AdminBadwordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<BadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<BadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new BadWord()).map(entity -> {
@@ -307,7 +310,7 @@ public class AdminBadwordAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return badWordService.getBadWord(((EditForm) form).id);
+                return ComponentUtil.getComponent(BadWordService.class).getBadWord(((EditForm) form).id);
             }
             break;
         default:
@@ -316,13 +319,14 @@ public class AdminBadwordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<BadWord> getBadWord(final CreateForm form) {
+    public static OptionalEntity<BadWord> getBadWord(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
             entity.setUpdatedBy(username);
             entity.setUpdatedTime(currentTime);
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;
         });
     }

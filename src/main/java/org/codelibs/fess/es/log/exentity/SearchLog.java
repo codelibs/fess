@@ -112,7 +112,7 @@ public class SearchLog extends BsSearchLog {
 
     @Override
     public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = super.toSource();
+        final Map<String, Object> sourceMap = super.toSource();
         if (fields != null) {
             sourceMap.putAll(fields);
         }

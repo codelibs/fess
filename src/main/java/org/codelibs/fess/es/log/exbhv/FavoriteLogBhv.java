@@ -33,11 +33,11 @@ public class FavoriteLogBhv extends BsFavoriteLogBhv {
     private static final Logger logger = LoggerFactory.getLogger(FavoriteLogBhv.class);
 
     @Override
-    protected LocalDateTime toLocalDateTime(Object value) {
+    protected LocalDateTime toLocalDateTime(final Object value) {
         if (value != null) {
             try {
-                Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
-                LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                final Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
+                final LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 return date;
             } catch (final DateTimeParseException e) {
                 logger.debug("Invalid date format: " + value, e);

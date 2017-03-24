@@ -21,7 +21,7 @@ public class JobNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public JobNotFoundException(ScheduledJob scheduledJob) {
+    public JobNotFoundException(final ScheduledJob scheduledJob) {
         super(scheduledJob.toString());
     }
 

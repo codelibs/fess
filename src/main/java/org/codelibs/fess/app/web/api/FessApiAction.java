@@ -62,7 +62,7 @@ public abstract class FessApiAction extends FessBaseAction {
         return super.godHandPrologue(runtime);
     }
 
-    protected String getMessage(VaMessenger<FessMessages> validationMessagesLambda) {
+    protected String getMessage(final VaMessenger<FessMessages> validationMessagesLambda) {
         final FessMessages messages = new FessMessages();
         validationMessagesLambda.message(messages);
         return messageManager.toMessageList(request.getLocale() == null ? Locale.ENGLISH : request.getLocale(), messages).stream()

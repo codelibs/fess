@@ -29,7 +29,7 @@ import org.dbflute.util.DfTypeUtil;
  */
 public class RoleBhv extends BsRoleBhv {
     @Override
-    protected <RESULT extends Role> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends Role> RESULT createEntity(final Map<String, Object> source, final Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             result.setName(DfTypeUtil.toString(source.get("name")));

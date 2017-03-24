@@ -337,7 +337,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             logger.warn("Failed to access to " + wikiUrl, e);
         }
 
-        for (String page : pageList) {
+        for (final String page : pageList) {
             // FIXME: URL encoding (e.g. page name that contains spaces)
             final String pageUrl = wikiUrl + "/contents/" + page + ".md";
             final String viewUrl = rootURL + owner + "/" + name + "/wiki/" + page;
