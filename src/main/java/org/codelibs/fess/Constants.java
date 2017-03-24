@@ -342,6 +342,8 @@ public class Constants extends CoreLibConstants {
     public static final String[] COMMON_CONVERSION_RULE =
             new String[] { "crudMode", "createdBy", "createdTime", "updatedBy", "updatedTime" };
 
+    public static final String[] COMMON_API_CONVERSION_RULE = new String[] { "crudMode" };
+
     public static final String USER_INFO = "LoginInfo";
 
     public static final String ES_API_ACCESS_TOKEN = "esApiAccessToken";

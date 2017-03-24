@@ -163,7 +163,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
                     copyBeanToBean(
                             body,
                             entity,
-                            op -> op.exclude(Constants.COMMON_CONVERSION_RULE)
+                            op -> op.exclude(Constants.COMMON_API_CONVERSION_RULE)
                                     .exclude(AdminAccesstokenAction.TOKEN, Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME)
                                     .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, AdminAccesstokenAction.EXPIRES));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
