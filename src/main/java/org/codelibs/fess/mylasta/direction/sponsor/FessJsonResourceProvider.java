@@ -15,71 +15,23 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.json.JsonMappingOption;
+import org.lastaflute.core.json.JsonMappingOption.JsonFieldNaming;
 import org.lastaflute.core.json.JsonResourceProvider;
-import org.lastaflute.core.json.bind.JsonYourCollectionResource;
-import org.lastaflute.core.json.engine.GsonJsonEngine;
-import org.lastaflute.core.json.engine.RealJsonEngine;
-
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.GsonBuilder;
-import com.google.gson.internal.bind.LaYourCollectionTypeAdapterFactory;
 
 public class FessJsonResourceProvider implements JsonResourceProvider {
+    @Override
     public boolean isNullsSuppressed() {
         return true;
     }
 
+    @Override
     public boolean isPrettyPrintSuppressed() {
         return false;
     }
 
-    public JsonMappingOption provideOption() {
-        return null;
-    }
-
-    public List<JsonYourCollectionResource> provideYourCollections() {
-        return Collections.emptyList();
-    }
-
-    public RealJsonEngine swtichJsonEngine() {
-        final boolean serializeNulls = !isNullsSuppressed();
-        final boolean prettyPrinting = !isPrettyPrintSuppressed();
-        final OptionalThing<JsonMappingOption> mappingOption =
-                provideOption() != null ? OptionalThing.of(provideOption()) : OptionalThing.empty();
-        return new GsonJsonEngine(builder -> {
-            setupSerializeNullsSettings(builder, serializeNulls);
-            setupPrettyPrintingSettings(builder, prettyPrinting);
-            setupYourCollectionSettings(builder);
-            builder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
-        }, op -> {
-            mappingOption.ifPresent(another -> op.acceptAnother(another));
-        });
-    }
-
-    protected void setupSerializeNullsSettings(GsonBuilder builder, boolean serializeNulls) {
-        if (serializeNulls) {
-            builder.serializeNulls();
-        }
-    }
-
-    protected void setupPrettyPrintingSettings(GsonBuilder builder, boolean prettyPrinting) {
-        if (prettyPrinting) {
-            builder.setPrettyPrinting();
-        }
-    }
-
-    protected void setupYourCollectionSettings(GsonBuilder builder) {
-        for (JsonYourCollectionResource resource : provideYourCollections()) {
-            builder.registerTypeAdapterFactory(createYourCollectionTypeAdapterFactory(resource));
-        }
-    }
-
-    protected LaYourCollectionTypeAdapterFactory createYourCollectionTypeAdapterFactory(JsonYourCollectionResource resource) {
-        return new LaYourCollectionTypeAdapterFactory(resource.getYourType(), resource.getYourCollectionCreator());
+    @Override
+    public JsonMappingOption provideMappingOption() {
+        return new JsonMappingOption().asFieldNaming(JsonFieldNaming.CAMEL_TO_LOWER_SNAKE);
     }
 }
