@@ -42,7 +42,7 @@
 		<dbflute.version>1.1.2</dbflute.version>
 		<lastaflute.version>0.9.2</lastaflute.version>
 		<lasta.taglib.version>0.7.1</lasta.taglib.version>
-		<lasta.job.version>0.4.1</lasta.job.version>
+		<lasta.job.version>0.4.2</lasta.job.version>
 		<mailflute.version>0.5.2</mailflute.version>
 
 		<!-- Partner Library -->
