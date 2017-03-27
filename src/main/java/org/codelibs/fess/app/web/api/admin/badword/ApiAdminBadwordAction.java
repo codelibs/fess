@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.badword.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
@@ -69,6 +70,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
+        body.crudMode = CrudMode.CREATE;
         final BadWord entity = getBadWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
                 messages.addErrorsCrudFailedToCreateInstance(GLOBAL);
@@ -84,13 +86,14 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/badword/setting
+    // POST /api/admin/user/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
+        body.crudMode = CrudMode.EDIT;
         final BadWord entity = getBadWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance(GLOBAL);
+                messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
             });
             return null;
         });
@@ -100,7 +103,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
-        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
     }
 
     // DELETE /api/admin/badword/setting/{id}
@@ -121,7 +124,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
-        return asJson(new ApiResult.ApiUpdateResponse().id(id).created(true).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
     // POST /api/admin/badword/upload

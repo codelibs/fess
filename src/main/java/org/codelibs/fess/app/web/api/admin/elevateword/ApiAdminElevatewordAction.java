@@ -1,5 +1,3 @@
-package org.codelibs.fess.app.web.api.admin.elevateword;
-
 /*
  * Copyright 2012-2017 CodeLibs Project and the Others.
  *
@@ -15,10 +13,12 @@ package org.codelibs.fess.app.web.api.admin.elevateword;
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+package org.codelibs.fess.app.web.api.admin.elevateword;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.elevateword.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
@@ -85,6 +85,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
+        body.crudMode = CrudMode.CREATE;
         final ElevateWord entity = getElevateWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
                 messages.addErrorsCrudFailedToCreateInstance(GLOBAL);
@@ -105,9 +106,10 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
+        body.crudMode = CrudMode.EDIT;
         final ElevateWord entity = getElevateWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance(GLOBAL);
+                messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
             });
             return null;
         });
@@ -118,7 +120,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
-        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
     }
 
     // DELETE /api/admin/elevateword/setting/{id}
@@ -139,7 +141,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
-        return asJson(new ApiResult.ApiUpdateResponse().id(id).created(true).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
     // POST /api/admin/elevateword/upload

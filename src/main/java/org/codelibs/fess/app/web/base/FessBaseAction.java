@@ -189,7 +189,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         sessionManager.errors().saveMessages(messages);
     }
 
-    protected void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
+    protected static void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
         BeanUtil.copyBeanToBean(src, dest, option);
     }
 
