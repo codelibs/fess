@@ -37,6 +37,6 @@ public class EditForm extends CreateForm {
 
     @Required
     @ValidateTypeFailure
-    public Integer versionNo;
+    public Long versionNo;
 
 }

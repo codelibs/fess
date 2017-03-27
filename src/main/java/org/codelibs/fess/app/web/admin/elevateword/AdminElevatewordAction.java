@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
@@ -43,6 +44,7 @@ import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -333,7 +335,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new ElevateWord()).map(entity -> {
@@ -343,7 +345,7 @@ public class AdminElevatewordAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return elevateWordService.getElevateWord(((EditForm) form).id);
+                return ComponentUtil.getComponent(ElevateWordService.class).getElevateWord(((EditForm) form).id);
             }
             break;
         default:
@@ -352,7 +354,8 @@ public class AdminElevatewordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ElevateWord> getElevateWord(final CreateForm form) {
+    public static OptionalEntity<ElevateWord> getElevateWord(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
 
@@ -360,7 +363,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                    BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
                             Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(split(form.permissions, "\n").get(
