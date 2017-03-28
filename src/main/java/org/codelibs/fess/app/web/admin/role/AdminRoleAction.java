@@ -25,6 +25,7 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Role;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -188,7 +189,7 @@ public class AdminRoleAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<Role> getEntity(final CreateForm form) {
+    private static OptionalEntity<Role> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new Role()).map(entity -> {
@@ -197,7 +198,7 @@ public class AdminRoleAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return roleService.getRole(((EditForm) form).id);
+                return ComponentUtil.getComponent(RoleService.class).getRole(((EditForm) form).id);
             }
             break;
         default:
@@ -206,7 +207,7 @@ public class AdminRoleAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<Role> getRole(final CreateForm form) {
+    public static OptionalEntity<Role> getRole(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;
