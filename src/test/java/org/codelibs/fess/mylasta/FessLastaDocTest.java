@@ -16,6 +16,7 @@
 package org.codelibs.fess.mylasta;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.lastaflute.doc.DocumentGenerator;
 
 public class FessLastaDocTest extends UnitFessTestCase {
 
@@ -51,4 +52,8 @@ public class FessLastaDocTest extends UnitFessTestCase {
         saveLastaDocMeta();
     }
 
+    @Override
+    protected DocumentGenerator createDocumentGenerator() {
+        return super.createDocumentGenerator().suppressJobDoc();
+    }
 }
