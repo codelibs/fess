@@ -526,5 +526,10 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return SearchRequestType.GSA;
         }
 
+        @Override
+        public String getSimilarHash() {
+            return request.getParameter("sh");
+        }
+
     }
 }

@@ -68,6 +68,9 @@ public class EditForm {
     public String loginRequired;
 
     @Size(max = 10)
+    public String resultCollapsed;
+
+    @Size(max = 10)
     public String loginLink;
 
     @Size(max = 10)

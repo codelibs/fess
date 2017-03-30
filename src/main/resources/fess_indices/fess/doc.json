@@ -456,6 +456,14 @@
         "analyzer": "standard_analyzer",
         "term_vector": "with_positions_offsets"
       },
+      "content_minhash": {
+        "type": "minhash",
+        "minhash_analyzer": "minhash_analyzer",
+        "copy_bits_to": "content_minhash_bits"
+      },
+      "content_minhash_bits": {
+        "type": "keyword"
+      },
       "content_length": {
         "type": "long"
       },

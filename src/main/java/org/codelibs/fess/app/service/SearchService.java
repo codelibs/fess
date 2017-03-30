@@ -104,7 +104,8 @@ public class SearchService {
                             return SearchConditionBuilder.builder(searchRequestBuilder)
                                     .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
                                     .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
-                                    .responseFields(queryHelper.getResponseFields()).searchRequestType(params.getType()).build();
+                                    .similarHash(params.getSimilarHash()).responseFields(queryHelper.getResponseFields())
+                                    .searchRequestType(params.getType()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
                             final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
                             queryResponseList.init(searchResponse, pageStart, pageSize);

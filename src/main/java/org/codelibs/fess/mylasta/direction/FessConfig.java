@@ -342,6 +342,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. content */
     String INDEX_FIELD_CONTENT = "index.field.content";
 
+    /** The key of the configuration. e.g. content_minhash */
+    String INDEX_FIELD_content_minhash = "index.field.content_minhash";
+
+    /** The key of the configuration. e.g. content_minhash_bits */
+    String INDEX_FIELD_content_minhash_bits = "index.field.content_minhash_bits";
+
     /** The key of the configuration. e.g. cache */
     String INDEX_FIELD_CACHE = "index.field.cache";
 
@@ -482,6 +488,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g.  */
     String QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS = "query.additional.not.analyzed.fields";
+
+    /** The key of the configuration. e.g. 4 */
+    String QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS = "query.collapse.max.concurrent.group.results";
+
+    /** The key of the configuration. e.g. similar_docs */
+    String QUERY_COLLAPSE_INNER_HITS_NAME = "query.collapse.inner.hits.name";
+
+    /** The key of the configuration. e.g. 0 */
+    String QUERY_COLLAPSE_INNER_HITS_SIZE = "query.collapse.inner.hits.size";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_COLLAPSE_INNER_HITS_SORTS = "query.collapse.inner.hits.sorts";
 
     /** The key of the configuration. e.g.  */
     String QUERY_DEFAULT_LANGUAGES = "query.default.languages";
@@ -2141,6 +2159,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexFieldContent();
 
     /**
+     * Get the value for the key 'index.field.content_minhash'. <br>
+     * The value is, e.g. content_minhash <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldContentMinhash();
+
+    /**
+     * Get the value for the key 'index.field.content_minhash_bits'. <br>
+     * The value is, e.g. content_minhash_bits <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldContentMinhashBits();
+
+    /**
      * Get the value for the key 'index.field.cache'. <br>
      * The value is, e.g. cache <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2592,6 +2624,58 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryAdditionalNotAnalyzedFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.collapse.max.concurrent.group.results'. <br>
+     * The value is, e.g. 4 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryCollapseMaxConcurrentGroupResults();
+
+    /**
+     * Get the value for the key 'query.collapse.max.concurrent.group.results' as {@link Integer}. <br>
+     * The value is, e.g. 4 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryCollapseMaxConcurrentGroupResultsAsInteger();
+
+    /**
+     * Get the value for the key 'query.collapse.inner.hits.name'. <br>
+     * The value is, e.g. similar_docs <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryCollapseInnerHitsName();
+
+    /**
+     * Get the value for the key 'query.collapse.inner.hits.size'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryCollapseInnerHitsSize();
+
+    /**
+     * Get the value for the key 'query.collapse.inner.hits.size' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryCollapseInnerHitsSizeAsInteger();
+
+    /**
+     * Get the value for the key 'query.collapse.inner.hits.sorts'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryCollapseInnerHitsSorts();
+
+    /**
+     * Get the value for the key 'query.collapse.inner.hits.sorts' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryCollapseInnerHitsSortsAsInteger();
 
     /**
      * Get the value for the key 'query.default.languages'. <br>
@@ -5261,6 +5345,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_CONTENT);
         }
 
+        public String getIndexFieldContentMinhash() {
+            return get(FessConfig.INDEX_FIELD_content_minhash);
+        }
+
+        public String getIndexFieldContentMinhashBits() {
+            return get(FessConfig.INDEX_FIELD_content_minhash_bits);
+        }
+
         public String getIndexFieldCache() {
             return get(FessConfig.INDEX_FIELD_CACHE);
         }
@@ -5507,6 +5599,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getQueryAdditionalNotAnalyzedFieldsAsInteger() {
             return getAsInteger(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS);
+        }
+
+        public String getQueryCollapseMaxConcurrentGroupResults() {
+            return get(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS);
+        }
+
+        public Integer getQueryCollapseMaxConcurrentGroupResultsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS);
+        }
+
+        public String getQueryCollapseInnerHitsName() {
+            return get(FessConfig.QUERY_COLLAPSE_INNER_HITS_NAME);
+        }
+
+        public String getQueryCollapseInnerHitsSize() {
+            return get(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE);
+        }
+
+        public Integer getQueryCollapseInnerHitsSizeAsInteger() {
+            return getAsInteger(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE);
+        }
+
+        public String getQueryCollapseInnerHitsSorts() {
+            return get(FessConfig.QUERY_COLLAPSE_INNER_HITS_SORTS);
+        }
+
+        public Integer getQueryCollapseInnerHitsSortsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_COLLAPSE_INNER_HITS_SORTS);
         }
 
         public String getQueryDefaultLanguages() {

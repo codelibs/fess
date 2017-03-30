@@ -406,6 +406,12 @@
         "alphanum_word_filter" : {
           "type" : "alphanum_word",
           "max_token_length" : 20
+        },
+        "minhash_filter" : {
+          "type" : "minhash",
+          "seed" : 1,
+          "bit" : 2,
+          "size" : 64
         }
       },
       "tokenizer": {
@@ -755,6 +761,21 @@
             "stopword_en_filter",
             "lowercase",
             "stemmer_en_filter"
+          ]
+        },
+        "minhash_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "mapping_ja_filter"
+          ],
+          "tokenizer": "unigram_synonym_tokenizer",
+          "filter": [
+            "alphanum_word_filter",
+            "cjk_bigram",
+            "stopword_en_filter",
+            "lowercase",
+            "stemmer_en_filter",
+            "minhash_filter"
           ]
         }
       }

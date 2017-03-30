@@ -113,6 +113,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
 
+    public static final String RESULT_COLLAPSED_PROPERTY = "result.collapsed";
+
     public static final String LOGIN_LINK_ENALBED_PROPERTY = "login.link.enabled";
 
     public static final String THUMBNAIL_ENALBED_PROPERTY = "thumbnail.enabled";

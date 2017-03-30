@@ -55,6 +55,9 @@ public class SearchForm implements SearchRequestParams {
     @ValidateTypeFailure
     public Integer pn;
 
+    @Size(max = 1000)
+    public String sh;
+
     // advance
 
     @Override
@@ -135,5 +138,10 @@ public class SearchForm implements SearchRequestParams {
     @Override
     public SearchRequestType getType() {
         return SearchRequestType.SEARCH;
+    }
+
+    @Override
+    public String getSimilarHash() {
+        return sh;
     }
 }

@@ -244,5 +244,10 @@ public class SuggestApiManager extends BaseJsonApiManager {
         public SearchRequestType getType() {
             return SearchRequestType.SUGGEST;
         }
+
+        @Override
+        public String getSimilarHash() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

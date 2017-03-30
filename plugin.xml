@@ -67,6 +67,15 @@
 			<param name="plugin.version" value="5.3.0-SNAPSHOT" />
 			<param name="plugin.zip.version" value="5.3.0-20170330.022144-1" />
 		</antcall>
+		<!-- minhash -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="minhash" />
+			<param name="plugin.version" value="5.3.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="5.3.0-20170330.072432-2" />
+		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}/kopf.zip">
 			<url url="https://github.com/codelibs/elasticsearch-kopf/archive/${kopf.branch}.zip" />
@@ -105,6 +114,7 @@
 				<include name="dataformat/stax-api-*" />
 				<include name="dataformat/xmlbeans-*" />
 				<include name="langfield/jackson-*" />
+				<include name="minhash/guava-*" />
 			</fileset>
 		</delete>
 	</target>

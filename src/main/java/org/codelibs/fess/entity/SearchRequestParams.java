@@ -50,6 +50,8 @@ public interface SearchRequestParams {
 
     SearchRequestType getType();
 
+    String getSimilarHash();
+
     public default String[] simplifyArray(final String[] values) {
         return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }

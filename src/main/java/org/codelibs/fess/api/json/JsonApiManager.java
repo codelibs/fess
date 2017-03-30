@@ -667,5 +667,10 @@ public class JsonApiManager extends BaseJsonApiManager {
             return SearchRequestType.JSON;
         }
 
+        @Override
+        public String getSimilarHash() {
+            return request.getParameter("sh");
+        }
+
     }
 }

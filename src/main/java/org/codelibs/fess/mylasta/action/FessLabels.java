@@ -680,6 +680,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Cache */
     public static final String LABELS_search_result_cache = "{labels.search_result_cache}";
 
+    /** The key of the message: Similar Results ({0}) */
+    public static final String LABELS_search_result_similar = "{labels.search_result_similar}";
+
     /** The key of the message: Label */
     public static final String LABELS_facet_label_title = "{labels.facet_label_title}";
 
@@ -1126,6 +1129,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Login Required */
     public static final String LABELS_login_required = "{labels.login_required}";
+
+    /** The key of the message: Similar Result Collapsed */
+    public static final String LABELS_result_collapsed = "{labels.result_collapsed}";
 
     /** The key of the message: Login Link */
     public static final String LABELS_login_link = "{labels.login_link}";

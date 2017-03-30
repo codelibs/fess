@@ -137,7 +137,9 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.InnerHitBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -145,6 +147,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -800,6 +803,7 @@ public class FessEsClient implements Client {
         private int size = Constants.DEFAULT_PAGE_SIZE;
         private GeoInfo geoInfo;
         private FacetInfo facetInfo;
+        private String similarHash;
         private SearchRequestType searchRequestType = SearchRequestType.SEARCH;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
@@ -840,6 +844,13 @@ public class FessEsClient implements Client {
             return this;
         }
 
+        public SearchConditionBuilder similarHash(final String similarHash) {
+            if (StringUtil.isNotBlank(similarHash)) {
+                this.similarHash = similarHash;
+            }
+            return this;
+        }
+
         public SearchConditionBuilder facetInfo(final FacetInfo facetInfo) {
             this.facetInfo = facetInfo;
             return this;
@@ -860,14 +871,18 @@ public class FessEsClient implements Client {
             final QueryContext queryContext = queryHelper.build(searchRequestType, query, context -> {
                 if (SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
                     context.skipRoleQuery();
+                } else if (similarHash != null) {
+                    context.addQuery(boolQuery -> {
+                        boolQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldContentMinhashBits(), similarHash));
+                    });
                 }
-                // geo
-                    if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
-                        context.addQuery(boolQuery -> {
-                            boolQuery.filter(geoInfo.toQueryBuilder());
-                        });
-                    }
-                });
+
+                if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
+                    context.addQuery(boolQuery -> {
+                        boolQuery.filter(geoInfo.toQueryBuilder());
+                    });
+                }
+            });
 
             searchRequestBuilder.setFrom(offset).setSize(size);
 
@@ -924,8 +939,22 @@ public class FessEsClient implements Client {
                         }));
             }
 
+            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && fessConfig.isResultCollapsed() && similarHash == null) {
+                searchRequestBuilder.setCollapse(getCollapseBuilder(fessConfig));
+            }
+
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
             return true;
+        }
+
+        protected CollapseBuilder getCollapseBuilder(final FessConfig fessConfig) {
+            final InnerHitBuilder innerHitBuilder =
+                    new InnerHitBuilder().setName(fessConfig.getQueryCollapseInnerHitsName()).setSize(
+                            fessConfig.getQueryCollapseInnerHitsSizeAsInteger());
+            fessConfig.getQueryCollapseInnerHitsSortBuilders().ifPresent(
+                    builders -> stream(builders).of(stream -> stream.forEach(innerHitBuilder::addSort)));
+            return new CollapseBuilder(fessConfig.getIndexFieldContentMinhashBits()).setMaxConcurrentGroupRequests(
+                    fessConfig.getQueryCollapseMaxConcurrentGroupResultsAsInteger()).setInnerHits(innerHitBuilder);
         }
     }
 

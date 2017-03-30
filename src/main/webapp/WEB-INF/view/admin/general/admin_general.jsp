@@ -70,6 +70,18 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="resultCollapsed" class="col-sm-3 control-label"><la:message
+												key="labels.result_collapsed" /></label>
+										<div class="col-sm-9">
+											<la:errors property="resultCollapsed" />
+											<div class="checkbox">
+												<label> <la:checkbox property="resultCollapsed" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="thumbnail" class="col-sm-3 control-label"><la:message
 												key="labels.thumbnail" /></label>
 										<div class="col-sm-9">

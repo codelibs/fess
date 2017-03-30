@@ -47,6 +47,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.JobConcurrentExec;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -57,6 +60,8 @@ import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
+
+    public static final String QUERY_COLLAPSE_INNER_HITS_SORTS = "queryCollapseInnerHitsSorts";
 
     public static final String USER_CODE_PATTERN = "userCodePattern";
 
@@ -267,6 +272,14 @@ public interface FessProp {
 
     public default boolean isLoginRequired() {
         return getSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, false);
+    }
+
+    public default void setResultCollapsed(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, value);
+    }
+
+    public default boolean isResultCollapsed() {
+        return getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
     }
 
     public default void setLoginLinkEnabled(final boolean value) {
@@ -1504,4 +1517,36 @@ public interface FessProp {
         }
         return pattern.matcher(userCode).matches();
     }
+
+    String getQueryCollapseInnerHitsSorts();
+
+    @SuppressWarnings("rawtypes")
+    public default OptionalThing<SortBuilder[]> getQueryCollapseInnerHitsSortBuilders() {
+        @SuppressWarnings("unchecked")
+        OptionalThing<SortBuilder[]> ot = (OptionalThing<SortBuilder[]>) propMap.get(QUERY_COLLAPSE_INNER_HITS_SORTS);
+        if (ot == null) {
+            String sorts = getQueryCollapseInnerHitsSorts();
+            if (StringUtil.isBlank(sorts)) {
+                ot = OptionalThing.empty();
+            } else {
+                SortBuilder[] sortBuilders =
+                        split(sorts, ",").get(
+                                stream -> stream
+                                        .filter(StringUtil::isNotBlank)
+                                        .map(s -> {
+                                            final String[] values = s.split(":");
+                                            if (values.length > 1) {
+                                                return SortBuilders.fieldSort(values[0]).order(
+                                                        values[0].equalsIgnoreCase("desc") ? SortOrder.DESC : SortOrder.ASC);
+                                            } else {
+                                                return SortBuilders.fieldSort(values[0]).order(SortOrder.ASC);
+                                            }
+                                        }).toArray(n -> new SortBuilder[n]));
+                ot = OptionalThing.of(sortBuilders);
+            }
+            propMap.put(QUERY_COLLAPSE_INNER_HITS_SORTS, ot);
+        }
+        return ot;
+    }
+
 }

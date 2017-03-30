@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.user;
 
+import static org.codelibs.fess.app.web.admin.user.AdminUserAction.getUser;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,8 +31,6 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
-
-import static org.codelibs.fess.app.web.admin.user.AdminUserAction.*;
 
 public class ApiAdminUserAction extends FessApiAdminAction {
 

@@ -128,6 +128,9 @@ public class AdminGeneralAction extends FessAdminAction {
         if (form.loginRequired != null) {
             fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
         }
+        if (form.resultCollapsed != null) {
+            fessConfig.setResultCollapsed(Constants.ON.equalsIgnoreCase(form.resultCollapsed));
+        }
         if (form.loginLink != null) {
             fessConfig.setLoginLinkEnabled(Constants.ON.equalsIgnoreCase(form.loginLink));
         }
@@ -235,6 +238,7 @@ public class AdminGeneralAction extends FessAdminAction {
 
     public static void updateForm(final FessConfig fessConfig, final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
+        form.resultCollapsed = fessConfig.isResultCollapsed() ? Constants.TRUE : Constants.FALSE;
         form.loginLink = fessConfig.isLoginLinkEnabled() ? Constants.TRUE : Constants.FALSE;
         form.thumbnail = fessConfig.isThumbnailEnabled() ? Constants.TRUE : Constants.FALSE;
         form.incrementalCrawling = fessConfig.isIncrementalCrawling() ? Constants.TRUE : Constants.FALSE;

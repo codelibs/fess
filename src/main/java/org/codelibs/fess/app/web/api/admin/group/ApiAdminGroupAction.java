@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.group;
 
+import static org.codelibs.fess.app.web.admin.group.AdminGroupAction.getGroup;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,8 +32,6 @@ import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.es.user.exentity.User;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
-
-import static org.codelibs.fess.app.web.admin.group.AdminGroupAction.*;
 
 public class ApiAdminGroupAction extends FessApiAdminAction {
 

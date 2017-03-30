@@ -15,6 +15,23 @@
  */
 package org.codelibs.fess.app.web.api.admin.elevateword;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+import static org.codelibs.fess.app.web.admin.elevateword.AdminElevatewordAction.getElevateWord;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
@@ -30,16 +47,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
-
-import javax.annotation.Resource;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.codelibs.core.stream.StreamUtil.stream;
-import static org.codelibs.fess.app.web.admin.elevateword.AdminElevatewordAction.*;
 
 public class ApiAdminElevatewordAction extends FessApiAdminAction {
 

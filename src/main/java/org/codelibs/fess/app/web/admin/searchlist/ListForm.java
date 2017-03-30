@@ -58,6 +58,8 @@ public class ListForm implements SearchRequestParams {
 
     public String[] ex_q;
 
+    public String sh;
+
     @Override
     public String getQuery() {
         return q;
@@ -138,5 +140,10 @@ public class ListForm implements SearchRequestParams {
     @Override
     public SearchRequestType getType() {
         return SearchRequestType.ADMIN_SEARCH;
+    }
+
+    @Override
+    public String getSimilarHash() {
+        return sh;
     }
 }
