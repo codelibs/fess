@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.api.admin.general;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.admin.general.AdminGeneralAction;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -54,8 +55,10 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$index(final EditBody body) {
         validateApi(body, messages -> {});
-        // TODO skip null
-        AdminGeneralAction.updateConfig(fessConfig, body);
+        final EditBody newBody = new EditBody();
+        AdminGeneralAction.updateForm(fessConfig, newBody);
+        BeanUtil.copyBeanToBean(body, newBody, op -> op.excludeNull());
+        AdminGeneralAction.updateConfig(fessConfig, newBody);
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 

@@ -125,112 +125,43 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     public static void updateConfig(final FessConfig fessConfig, final EditForm form) {
-        if (form.loginRequired != null) {
-            fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
-        }
-        if (form.resultCollapsed != null) {
-            fessConfig.setResultCollapsed(Constants.ON.equalsIgnoreCase(form.resultCollapsed));
-        }
-        if (form.loginLink != null) {
-            fessConfig.setLoginLinkEnabled(Constants.ON.equalsIgnoreCase(form.loginLink));
-        }
-        if (form.thumbnail != null) {
-            fessConfig.setThumbnailEnabled(Constants.ON.equalsIgnoreCase(form.thumbnail));
-        }
-        if (form.incrementalCrawling != null) {
-            fessConfig.setIncrementalCrawling(Constants.ON.equalsIgnoreCase(form.incrementalCrawling));
-        }
-        if (form.dayForCleanup != null) {
-            fessConfig.setDayForCleanup(form.dayForCleanup);
-        }
-        if (form.crawlingThreadCount != null) {
-            fessConfig.setCrawlingThreadCount(form.crawlingThreadCount);
-        }
-        if (form.searchLog != null) {
-            fessConfig.setSearchLog(Constants.ON.equalsIgnoreCase(form.searchLog));
-        }
-        if (form.userInfo != null) {
-            fessConfig.setUserInfo(Constants.ON.equalsIgnoreCase(form.userInfo));
-        }
-        if (form.userFavorite != null) {
-            fessConfig.setUserFavorite(Constants.ON.equalsIgnoreCase(form.userFavorite));
-        }
-        if (form.webApiJson != null) {
-            fessConfig.setWebApiJson(Constants.ON.equalsIgnoreCase(form.webApiJson));
-        }
-        if (form.defaultLabelValue != null) {
-            fessConfig.setDefaultLabelValue(form.defaultLabelValue);
-        }
-        if (form.defaultSortValue != null) {
-            fessConfig.setDefaultSortValue(form.defaultSortValue);
-        }
-        if (form.appendQueryParameter != null) {
-            fessConfig.setAppendQueryParameter(Constants.ON.equalsIgnoreCase(form.appendQueryParameter));
-        }
-        if (form.ignoreFailureType != null) {
-            fessConfig.setIgnoreFailureType(form.ignoreFailureType);
-        }
-        if (form.failureCountThreshold != null) {
-            fessConfig.setFailureCountThreshold(form.failureCountThreshold);
-        }
-        if (form.popularWord != null) {
-            fessConfig.setWebApiPopularWord(Constants.ON.equalsIgnoreCase(form.popularWord));
-        }
-        if (form.csvFileEncoding != null) {
-            fessConfig.setCsvFileEncoding(form.csvFileEncoding);
-        }
-        if (form.purgeSearchLogDay != null) {
-            fessConfig.setPurgeSearchLogDay(form.purgeSearchLogDay);
-        }
-        if (form.purgeJobLogDay != null) {
-            fessConfig.setPurgeJobLogDay(form.purgeJobLogDay);
-        }
-        if (form.purgeUserInfoDay != null) {
-            fessConfig.setPurgeUserInfoDay(form.purgeUserInfoDay);
-        }
-        if (form.purgeByBots != null) {
-            fessConfig.setPurgeByBots(form.purgeByBots);
-        }
-        if (form.notificationTo != null) {
-            fessConfig.setNotificationTo(form.notificationTo);
-        }
-        if (form.suggestSearchLog != null) {
-            fessConfig.setSuggestSearchLog(Constants.ON.equalsIgnoreCase(form.suggestSearchLog));
-        }
-        if (form.suggestDocuments != null) {
-            fessConfig.setSuggestDocuments(Constants.ON.equalsIgnoreCase(form.suggestDocuments));
-        }
-        if (form.purgeSuggestSearchLogDay != null) {
-            fessConfig.setPurgeSuggestSearchLogDay(form.purgeSuggestSearchLogDay);
-        }
-        if (form.ldapProviderUrl != null) {
-            fessConfig.setLdapProviderUrl(form.ldapProviderUrl);
-        }
-        if (form.ldapSecurityPrincipal != null) {
-            fessConfig.setLdapSecurityPrincipal(form.ldapSecurityPrincipal);
-        }
-        if (form.ldapAdminSecurityPrincipal != null) {
-            fessConfig.setLdapAdminSecurityPrincipal(form.ldapAdminSecurityPrincipal);
-        }
-        if (form.ldapAdminSecurityCredentials != null && form.ldapAdminSecurityCredentials != null
-                && StringUtil.isNotBlank(form.ldapAdminSecurityCredentials.replace("*", " "))) {
+        fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
+        fessConfig.setResultCollapsed(Constants.ON.equalsIgnoreCase(form.resultCollapsed));
+        fessConfig.setLoginLinkEnabled(Constants.ON.equalsIgnoreCase(form.loginLink));
+        fessConfig.setThumbnailEnabled(Constants.ON.equalsIgnoreCase(form.thumbnail));
+        fessConfig.setIncrementalCrawling(Constants.ON.equalsIgnoreCase(form.incrementalCrawling));
+        fessConfig.setDayForCleanup(form.dayForCleanup);
+        fessConfig.setCrawlingThreadCount(form.crawlingThreadCount);
+        fessConfig.setSearchLog(Constants.ON.equalsIgnoreCase(form.searchLog));
+        fessConfig.setUserInfo(Constants.ON.equalsIgnoreCase(form.userInfo));
+        fessConfig.setUserFavorite(Constants.ON.equalsIgnoreCase(form.userFavorite));
+        fessConfig.setWebApiJson(Constants.ON.equalsIgnoreCase(form.webApiJson));
+        fessConfig.setDefaultLabelValue(form.defaultLabelValue);
+        fessConfig.setDefaultSortValue(form.defaultSortValue);
+        fessConfig.setAppendQueryParameter(Constants.ON.equalsIgnoreCase(form.appendQueryParameter));
+        fessConfig.setIgnoreFailureType(form.ignoreFailureType);
+        fessConfig.setFailureCountThreshold(form.failureCountThreshold);
+        fessConfig.setWebApiPopularWord(Constants.ON.equalsIgnoreCase(form.popularWord));
+        fessConfig.setCsvFileEncoding(form.csvFileEncoding);
+        fessConfig.setPurgeSearchLogDay(form.purgeSearchLogDay);
+        fessConfig.setPurgeJobLogDay(form.purgeJobLogDay);
+        fessConfig.setPurgeUserInfoDay(form.purgeUserInfoDay);
+        fessConfig.setPurgeByBots(form.purgeByBots);
+        fessConfig.setNotificationTo(form.notificationTo);
+        fessConfig.setSuggestSearchLog(Constants.ON.equalsIgnoreCase(form.suggestSearchLog));
+        fessConfig.setSuggestDocuments(Constants.ON.equalsIgnoreCase(form.suggestDocuments));
+        fessConfig.setPurgeSuggestSearchLogDay(form.purgeSuggestSearchLogDay);
+        fessConfig.setLdapProviderUrl(form.ldapProviderUrl);
+        fessConfig.setLdapSecurityPrincipal(form.ldapSecurityPrincipal);
+        fessConfig.setLdapAdminSecurityPrincipal(form.ldapAdminSecurityPrincipal);
+        if (form.ldapAdminSecurityCredentials != null && StringUtil.isNotBlank(form.ldapAdminSecurityCredentials.replace("*", " "))) {
             fessConfig.setLdapAdminSecurityCredentials(form.ldapAdminSecurityCredentials);
         }
-        if (form.ldapBaseDn != null) {
-            fessConfig.setLdapBaseDn(form.ldapBaseDn);
-        }
-        if (form.ldapAccountFilter != null) {
-            fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
-        }
-        if (form.ldapMemberofAttribute != null) {
-            fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute);
-        }
-        if (form.notificationLogin != null) {
-            fessConfig.setNotificationLogin(form.notificationLogin);
-        }
-        if (form.notificationSearchTop != null) {
-            fessConfig.setNotificationSearchTop(form.notificationSearchTop);
-        }
+        fessConfig.setLdapBaseDn(form.ldapBaseDn);
+        fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
+        fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute);
+        fessConfig.setNotificationLogin(form.notificationLogin);
+        fessConfig.setNotificationSearchTop(form.notificationSearchTop);
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
