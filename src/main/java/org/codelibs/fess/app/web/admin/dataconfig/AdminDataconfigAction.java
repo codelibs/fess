@@ -38,6 +38,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -270,7 +271,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<DataConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<DataConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new DataConfig()).map(entity -> {
@@ -280,7 +281,7 @@ public class AdminDataconfigAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return dataConfigService.getDataConfig(((EditForm) form).id);
+                return ComponentUtil.getComponent(DataConfigService.class).getDataConfig(((EditForm) form).id);
             }
             break;
         default:
@@ -289,7 +290,8 @@ public class AdminDataconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<DataConfig> getDataConfig(final CreateForm form) {
+    public static OptionalEntity<DataConfig> getDataConfig(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(
