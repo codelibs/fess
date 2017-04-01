@@ -668,8 +668,8 @@ public class JsonApiManager extends BaseJsonApiManager {
         }
 
         @Override
-        public String getSimilarHash() {
-            return request.getParameter("sh");
+        public String getSimilarDocHash() {
+            return request.getParameter("sdh");
         }
 
     }

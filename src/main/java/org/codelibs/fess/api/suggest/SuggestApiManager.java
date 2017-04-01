@@ -246,7 +246,7 @@ public class SuggestApiManager extends BaseJsonApiManager {
         }
 
         @Override
-        public String getSimilarHash() {
+        public String getSimilarDocHash() {
             throw new UnsupportedOperationException();
         }
     }

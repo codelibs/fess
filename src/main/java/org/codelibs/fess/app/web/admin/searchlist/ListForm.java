@@ -58,7 +58,7 @@ public class ListForm implements SearchRequestParams {
 
     public String[] ex_q;
 
-    public String sh;
+    public String sdh;
 
     @Override
     public String getQuery() {
@@ -143,7 +143,7 @@ public class ListForm implements SearchRequestParams {
     }
 
     @Override
-    public String getSimilarHash() {
-        return sh;
+    public String getSimilarDocHash() {
+        return sdh;
     }
 }

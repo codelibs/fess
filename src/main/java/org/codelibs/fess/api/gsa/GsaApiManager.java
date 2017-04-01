@@ -527,8 +527,8 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
 
         @Override
-        public String getSimilarHash() {
-            return request.getParameter("sh");
+        public String getSimilarDocHash() {
+            return request.getParameter("sdh");
         }
 
     }

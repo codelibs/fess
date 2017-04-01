@@ -56,11 +56,11 @@
 											</la:link>
 										</small>
 									</c:if>
-									<c:if test="${doc.similar_docs_count!=null}">
+									<c:if test="${doc.similar_docs_count!=null&&doc.similar_docs_count>1}">
 										<small class="hidden-md-down"> <la:link
-												href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sh=${f:u(doc.similar_docs_hash)}${fe:facetQuery()}${fe:geoQuery()}">
+												href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(doc.similar_docs_hash)}${fe:facetQuery()}${fe:geoQuery()}">
 												<la:message key="labels.search_result_similar"
-															arg0="${fe:formatNumber(doc.similar_docs_count)}" />
+															arg0="${fe:formatNumber(doc.similar_docs_count-1)}" />
 											</la:link>
 										</small>
 									</c:if>
@@ -138,7 +138,7 @@
 							<c:if
 								test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 								<li class="list-group-item"><la:link
-										href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}&sh=${f:u(sh)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+										href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}&sdh=${f:u(sh)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 											${f:h(fe:label(countEntry.key))} 
 											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>
 									</la:link></li>
@@ -155,7 +155,7 @@
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 							<li class="list-group-item p-l-md"><la:link
-									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sh=${f:u(sh)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
+									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(sh)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
 									<la:message key="${queryEntry.key}" />
 									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
 								</la:link></li>

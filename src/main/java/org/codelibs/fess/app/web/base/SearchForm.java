@@ -56,7 +56,7 @@ public class SearchForm implements SearchRequestParams {
     public Integer pn;
 
     @Size(max = 1000)
-    public String sh;
+    public String sdh;
 
     // advance
 
@@ -141,7 +141,7 @@ public class SearchForm implements SearchRequestParams {
     }
 
     @Override
-    public String getSimilarHash() {
-        return sh;
+    public String getSimilarDocHash() {
+        return sdh;
     }
 }
