@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -342,7 +343,7 @@ public class AdminDictMappingAction extends FessAdminAction {
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return charMappingService.getCharMappingItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(CharMappingService.class).getCharMappingItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -351,7 +352,7 @@ public class AdminDictMappingAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
+    public OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
             validateMappingString(newInputs, "inputs", hook);
@@ -391,7 +392,7 @@ public class AdminDictMappingAction extends FessAdminAction {
         }
     }
 
-    private String[] splitLine(final String value) {
+    private static String[] splitLine(final String value) {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }

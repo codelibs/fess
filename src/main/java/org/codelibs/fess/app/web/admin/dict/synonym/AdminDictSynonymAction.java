@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.synonym.SynonymItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -342,7 +343,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return synonymService.getSynonymItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(SynonymService.class).getSynonymItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -351,7 +352,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form, final VaErrorHook hook) {
+    public OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
             validateSynonymString(newInputs, "inputs", hook);

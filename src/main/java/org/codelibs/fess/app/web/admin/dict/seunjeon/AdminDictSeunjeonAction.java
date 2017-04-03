@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.seunjeon.SeunjeonItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -319,7 +320,7 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return seunjeonService.getSeunjeonItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(SeunjeonService.class).getSeunjeonItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -328,7 +329,7 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<SeunjeonItem> createSeunjeonItem(final CreateForm form, final VaErrorHook hook) {
+    public OptionalEntity<SeunjeonItem> createSeunjeonItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
             validateSeunjeonString(newInputs, "inputs", hook);

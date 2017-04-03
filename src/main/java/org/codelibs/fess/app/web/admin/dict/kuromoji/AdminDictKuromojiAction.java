@@ -30,6 +30,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -331,14 +332,14 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<KuromojiItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<KuromojiItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final KuromojiItem entity = new KuromojiItem(0, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return kuromojiService.getKuromojiItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(KuromojiService.class).getKuromojiItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -347,7 +348,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
+    public static OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
         return getEntity(form).map(entity -> {
             entity.setNewToken(form.token);
             entity.setNewSegmentation(form.segmentation);

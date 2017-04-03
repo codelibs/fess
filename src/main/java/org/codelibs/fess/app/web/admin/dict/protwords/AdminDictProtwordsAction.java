@@ -30,6 +30,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.protwords.ProtwordsItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -309,14 +310,14 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<ProtwordsItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<ProtwordsItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final ProtwordsItem entity = new ProtwordsItem(0, StringUtil.EMPTY);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return protwordsService.getProtwordsItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(ProtwordsService.class).getProtwordsItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -325,7 +326,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
+    public static OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String newInput = form.input;
             validateProtwordsString(newInput, "input", hook);
@@ -345,7 +346,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         }
     }
 
-    private void validateProtwordsString(final String values, final String propertyName, final VaErrorHook hook) {
+    private static void validateProtwordsString(final String values, final String propertyName, final VaErrorHook hook) {
         if (values.length() == 0) {
             return;
         }
