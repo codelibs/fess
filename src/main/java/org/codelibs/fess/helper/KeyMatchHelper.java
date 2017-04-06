@@ -124,6 +124,20 @@ public class KeyMatchHelper {
         });
     }
 
+    public List<Map<String, Object>> getBoostedDocumentList(final String term, final int size) {
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(term));
+        if (pair == null) {
+            return Collections.emptyList();
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+                searchRequestBuilder -> {
+                    searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).setQuery(pair.getFirst()).setSize(size);
+                    return true;
+                });
+    }
+
     private String toLowerCase(final String term) {
         return term != null ? term.toLowerCase(Locale.ROOT) : term;
     }
