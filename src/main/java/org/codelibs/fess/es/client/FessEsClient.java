@@ -56,6 +56,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.exception.SearchQueryException;
+import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -803,7 +804,7 @@ public class FessEsClient implements Client {
         private int size = Constants.DEFAULT_PAGE_SIZE;
         private GeoInfo geoInfo;
         private FacetInfo facetInfo;
-        private String similarHash;
+        private String similarDocHash;
         private SearchRequestType searchRequestType = SearchRequestType.SEARCH;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
@@ -844,9 +845,9 @@ public class FessEsClient implements Client {
             return this;
         }
 
-        public SearchConditionBuilder similarHash(final String similarHash) {
-            if (StringUtil.isNotBlank(similarHash)) {
-                this.similarHash = similarHash;
+        public SearchConditionBuilder similarDocHash(final String similarDocHash) {
+            if (StringUtil.isNotBlank(similarDocHash)) {
+                this.similarDocHash = similarDocHash;
             }
             return this;
         }
@@ -868,21 +869,24 @@ public class FessEsClient implements Client {
                 throw new ResultOffsetExceededException("The number of result size is exceeded.");
             }
 
-            final QueryContext queryContext = queryHelper.build(searchRequestType, query, context -> {
-                if (SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
-                    context.skipRoleQuery();
-                } else if (similarHash != null) {
-                    context.addQuery(boolQuery -> {
-                        boolQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldContentMinhashBits(), similarHash));
-                    });
-                }
+            final QueryContext queryContext =
+                    queryHelper.build(searchRequestType, query, context -> {
+                        if (SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
+                            context.skipRoleQuery();
+                        } else if (similarDocHash != null) {
+                            final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
+                            context.addQuery(boolQuery -> {
+                                boolQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldContentMinhashBits(),
+                                        documentHelper.decodeSimilarDocHash(similarDocHash)));
+                            });
+                        }
 
-                if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
-                    context.addQuery(boolQuery -> {
-                        boolQuery.filter(geoInfo.toQueryBuilder());
+                        if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
+                            context.addQuery(boolQuery -> {
+                                boolQuery.filter(geoInfo.toQueryBuilder());
+                            });
+                        }
                     });
-                }
-            });
 
             searchRequestBuilder.setFrom(offset).setSize(size);
 
@@ -939,7 +943,7 @@ public class FessEsClient implements Client {
                         }));
             }
 
-            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && fessConfig.isResultCollapsed() && similarHash == null) {
+            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && fessConfig.isResultCollapsed() && similarDocHash == null) {
                 searchRequestBuilder.setCollapse(getCollapseBuilder(fessConfig));
             }
 

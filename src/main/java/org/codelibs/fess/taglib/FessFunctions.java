@@ -287,4 +287,11 @@ public class FessFunctions {
         }
         return LaResponseUtil.getResponse().encodeURL(sb.toString());
     }
+
+    public static String sdh(final String input) {
+        if (StringUtil.isBlank(input)) {
+            return input;
+        }
+        return ComponentUtil.getDocumentHelper().encodeSimilarDocHash(input);
+    }
 }

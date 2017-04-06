@@ -15,16 +15,26 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.io.ReaderUtil;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -44,8 +54,14 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentHelper {
+    private static final Logger logger = LoggerFactory.getLogger(DocumentHelper.class);
+
+    private static final String SIMILAR_DOC_HASH_PREFIX = "$";
+
     public String getContent(final ResponseData responseData, final String content, final Map<String, Object> dataMap) {
         if (content == null) {
             return StringUtil.EMPTY; // empty
@@ -155,6 +171,33 @@ public class DocumentHelper {
         } catch (final Exception e) {
             throw new CrawlingAccessException("Failed to parse " + url, e);
         }
+    }
+
+    public String decodeSimilarDocHash(String hash) {
+        if (hash != null && hash.startsWith(SIMILAR_DOC_HASH_PREFIX) && hash.length() > SIMILAR_DOC_HASH_PREFIX.length()) {
+            byte[] decode = Base64.getUrlDecoder().decode(hash.substring(SIMILAR_DOC_HASH_PREFIX.length()));
+            try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(decode)), Constants.UTF_8))) {
+                return ReaderUtil.readText(reader);
+            } catch (IOException e) {
+                logger.warn("Failed to decode " + hash, e);
+            }
+        }
+        return hash;
+    }
+
+    public String encodeSimilarDocHash(String hash) {
+        if (hash != null && !hash.startsWith(SIMILAR_DOC_HASH_PREFIX)) {
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                try (GZIPOutputStream gos = new GZIPOutputStream(baos)) {
+                    gos.write(hash.getBytes(Constants.UTF_8));
+                }
+                return SIMILAR_DOC_HASH_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
+            } catch (IOException e) {
+                logger.warn("Failed to encode " + hash, e);
+            }
+        }
+        return hash;
     }
 
 }
