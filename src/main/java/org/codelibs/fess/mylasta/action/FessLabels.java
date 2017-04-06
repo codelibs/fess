@@ -1439,6 +1439,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Boost */
     public static final String LABELS_key_match_boost = "{labels.key_match_boost}";
 
+    /** The key of the message: Urls */
+    public static final String LABELS_key_match_urls = "{labels.key_match_urls}";
+
     /** The key of the message: Key Match */
     public static final String LABELS_key_match_title_details = "{labels.key_match_title_details}";
 

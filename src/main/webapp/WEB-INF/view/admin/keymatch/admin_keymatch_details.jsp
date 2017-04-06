@@ -65,6 +65,13 @@
 												<th><la:message key="labels.key_match_boost" /></th>
 												<td>${f:h(boost)}<la:hidden property="boost" /></td>
 											</tr>
+											<tr>
+												<th><la:message key="labels.key_match_urls" /></th>
+												<td><c:forEach var="doc" varStatus="s"
+														items="${docs}">
+														${f:h(doc.url)}<br/>
+													</c:forEach></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>
