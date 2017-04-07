@@ -216,7 +216,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
         // canonical
-        if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCannonicalXpath())) {
+        if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCanonicalXpath())) {
             final String canonicalUrl = getCanonicalUrl(responseData, document);
             if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl())) {
                 final Set<RequestData> childUrlSet = new HashSet<>();
@@ -400,7 +400,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
-        final String canonicalUrl = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlCannonicalXpath(), false);
+        final String canonicalUrl = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlCanonicalXpath(), false);
         if (StringUtil.isBlank(canonicalUrl)) {
             return null;
         }

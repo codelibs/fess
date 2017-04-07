@@ -196,7 +196,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_DOCUMENT_HTML_DIGEST_XPATH = "crawler.document.html.digest.xpath";
 
     /** The key of the configuration. e.g. //LINK[@rel='canonical']/@href */
-    String CRAWLER_DOCUMENT_HTML_CANNONICAL_XPATH = "crawler.document.html.cannonical.xpath";
+    String CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH = "crawler.document.html.canonical.xpath";
 
     /** The key of the configuration. e.g. noscript,script,style */
     String CRAWLER_DOCUMENT_HTML_PRUNED_TAGS = "crawler.document.html.pruned.tags";
@@ -1614,11 +1614,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getCrawlerDocumentHtmlDigestXpath();
 
     /**
-     * Get the value for the key 'crawler.document.html.cannonical.xpath'. <br>
+     * Get the value for the key 'crawler.document.html.canonical.xpath'. <br>
      * The value is, e.g. //LINK[@rel='canonical']/@href <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getCrawlerDocumentHtmlCannonicalXpath();
+    String getCrawlerDocumentHtmlCanonicalXpath();
 
     /**
      * Get the value for the key 'crawler.document.html.pruned.tags'. <br>
@@ -4914,8 +4914,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH);
         }
 
-        public String getCrawlerDocumentHtmlCannonicalXpath() {
-            return get(FessConfig.CRAWLER_DOCUMENT_HTML_CANNONICAL_XPATH);
+        public String getCrawlerDocumentHtmlCanonicalXpath() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH);
         }
 
         public String getCrawlerDocumentHtmlPrunedTags() {
