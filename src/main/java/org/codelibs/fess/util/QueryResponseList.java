@@ -186,6 +186,11 @@ public class QueryResponseList implements List<Map<String, Object>> {
         existPrevPage = start > 0;
         existNextPage = start < (long) (allPageCount - 1) * (long) pageSize;
         currentPageNumber = start / pageSize + 1;
+        if (existNextPage && size() < pageSize) {
+            // collapsing
+            existNextPage = false;
+            allPageCount = currentPageNumber;
+        }
         currentStartRecordNumber = allRecordCount != 0 ? (currentPageNumber - 1) * pageSize + 1 : 0;
         currentEndRecordNumber = (long) currentPageNumber * pageSize;
         currentEndRecordNumber = allRecordCount < currentEndRecordNumber ? allRecordCount : currentEndRecordNumber;
@@ -203,7 +208,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
         for (int i = startPageRangeSize; i <= endPageRangeSize; i++) {
             pageNumberList.add(String.valueOf(i));
         }
-
     }
 
     @Override

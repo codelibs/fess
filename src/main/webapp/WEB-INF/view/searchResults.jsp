@@ -11,6 +11,11 @@
 				<la:message key="labels.search_result_time" arg0="${f:h(execTime)}" />
 			</c:if>
 		</p>
+		<c:if test="${! empty sdh }">
+		<p>
+			<la:message key="labels.similar_doc_result_status" />
+		</p>
+		</c:if>
 	</div>
 </div>
 <c:if test="${partialResults}">
