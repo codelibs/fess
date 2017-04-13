@@ -161,11 +161,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @SuppressWarnings("unchecked")
     @Override
     public ActionValidator<FessMessages> createValidator() {
-        return systemHelper.createValidator(messageManager // to get validation message
-                , () -> requestManager.getUserLocale() // used with messageManager
-                , () -> createMessages() // for new user messages
-                , () -> handleApiValidationError() // apiFailureHook
-                , myValidationGroups());
+        return systemHelper.createValidator(requestManager, () -> createMessages(), myValidationGroups());
     }
 
     @Override
