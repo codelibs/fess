@@ -238,23 +238,6 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="content_title" class="col-sm-3 control-label">content_title</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.content_title" />
-											<la:text property="doc.content_title"
-												styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="content_description"
-											class="col-sm-3 control-label">content_description</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.content_description" />
-											<la:text property="doc.content_description"
-												styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
 										<label for="content_length" class="col-sm-3 control-label">content_length</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.content_length" />
@@ -262,20 +245,6 @@
 												styleClass="form-control" title="Integer"
 												data-validation="custom" data-validation-regexp="^(\d+)?$"
 												data-validation-help="number (Integer)" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="url_link" class="col-sm-3 control-label">url_link</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.url_link" />
-											<la:text property="doc.url_link" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="site_path" class="col-sm-3 control-label">site_path</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.site_path" />
-											<la:text property="doc.site_path" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
