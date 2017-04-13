@@ -2658,6 +2658,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: No match */
     public static final String LABELS_facet_is_not_found = "{labels.facet_is_not_found}";
 
+    /** The key of the message: Score:  */
+    public static final String LABELS_doc_score = "{labels.doc_score}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

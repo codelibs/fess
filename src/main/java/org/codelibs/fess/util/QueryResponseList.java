@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 
 public class QueryResponseList implements List<Map<String, Object>> {
 
+    private static final String SCORE = "score";
+
     private static final Logger logger = LoggerFactory.getLogger(QueryResponseList.class);
 
     private final List<Map<String, Object>> parent;
@@ -176,6 +178,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
             docMap.put(fessConfig.getResponseFieldContentDescription(), viewHelper.getContentDescription(docMap));
             docMap.put(fessConfig.getResponseFieldUrlLink(), viewHelper.getUrlLink(docMap));
             docMap.put(fessConfig.getResponseFieldSitePath(), viewHelper.getSitePath(docMap));
+        }
+
+        if (!docMap.containsKey(SCORE)) {
+            docMap.put(SCORE, searchHit.getScore());
         }
         return docMap;
     }

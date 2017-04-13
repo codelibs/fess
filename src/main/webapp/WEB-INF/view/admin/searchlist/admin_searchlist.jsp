@@ -89,8 +89,10 @@
 															<a href="${doc.url_link}">${f:h(doc.content_title)}</a>
 														</h3>
 														<div class="body col-sm-10">
-															${doc.content_description}</div>
+															${doc.content_description}
+														</div>
 														<div class="body col-sm-2 text-right">
+															<la:message key="labels.doc_score" />${f:h(doc.score)}<br>
 															<la:link href="/admin/searchlist/edit?crudMode=2&amp;docId=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
 																styleClass="btn btn-xs btn-warning">
 																<i class="fa fa-pencil"></i>
