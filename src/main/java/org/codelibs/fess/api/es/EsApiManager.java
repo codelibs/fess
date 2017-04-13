@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.codelibs.core.io.CopyUtil;
-import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl.Method;
 import org.codelibs.elasticsearch.runner.net.CurlRequest;
@@ -133,24 +132,26 @@ public class EsApiManager extends BaseApiManager {
                 }
             }
         }).execute(con -> {
-            try (InputStream in = con.getInputStream(); ServletOutputStream out = response.getOutputStream()) {
-                response.setStatus(con.getResponseCode());
-                CopyUtil.copy(in, out);
+            try (ServletOutputStream out = response.getOutputStream()) {
+                try (InputStream in = con.getInputStream()) {
+                    response.setStatus(con.getResponseCode());
+                    CopyUtil.copy(in, out);
+                } catch (final Exception e) {
+                    response.setStatus(con.getResponseCode());
+                    try (InputStream err = con.getErrorStream()) {
+                        CopyUtil.copy(err, out);
+                    }
+                }
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final Exception e) {
                 if (e.getCause() instanceof ClientAbortException) {
                     logger.debug("Client aborts this request.", e);
                 } else {
-                    try (InputStream err = con.getErrorStream()) {
-                        logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
-                    } catch (final IOException e1) {
-                        // ignore
+                    throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+                }
             }
-            throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-        }
-    }
-}       );
+        });
     }
 
     private void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
