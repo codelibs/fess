@@ -576,6 +576,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
+    /** The key of the configuration. e.g. click_log.csv,favorite_log.csv,search_log.csv,search_field_log.csv,user_info.csv */
+    String INDEX_BACKUP_LOG_TARGETS = "index.backup.log.targets";
+
     /** The key of the configuration. e.g. 4000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
 
@@ -2847,6 +2850,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupTargets();
+
+    /**
+     * Get the value for the key 'index.backup.log.targets'. <br>
+     * The value is, e.g. click_log.csv,favorite_log.csv,search_log.csv,search_field_log.csv,user_info.csv <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexBackupLogTargets();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -5691,6 +5701,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexBackupTargets() {
             return get(FessConfig.INDEX_BACKUP_TARGETS);
+        }
+
+        public String getIndexBackupLogTargets() {
+            return get(FessConfig.INDEX_BACKUP_LOG_TARGETS);
         }
 
         public String getFormAdminMaxInputSize() {

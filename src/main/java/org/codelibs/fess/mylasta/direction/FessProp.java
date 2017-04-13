@@ -673,8 +673,11 @@ public interface FessProp {
 
     String getIndexBackupTargets();
 
-    public default String[] getIndexBackupTargetsAsArray() {
-        return getIndexBackupTargets().split(",");
+    String getIndexBackupLogTargets();
+
+    public default String[] getIndexBackupAllTargets() {
+        return split(getIndexBackupTargets() + "," + getIndexBackupLogTargets(), ",").get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
     }
 
     String getJobSystemJobIds();
