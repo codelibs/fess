@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -50,6 +49,7 @@ import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.UndefinedResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ public class AdminBackupAction extends FessAdminAction {
 
     private static final String CSV_EXTENTION = ".csv";
 
-    private static final DateTimeFormatter ISO_8601_FORMATTER = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+    private static final DateTimeFormatter ISO_8601_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     @Resource
     private AsyncManager asyncManager;
@@ -137,7 +137,7 @@ public class AdminBackupAction extends FessAdminAction {
                 String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     writeSearchLogCsvResponse(id);
-                    return redirect(getClass()); // no-op
+                    return HtmlResponse.asEmptyBody();
                 } else if ("user_info".equals(id)) {
                     // TODO user_info=createdAt,updatedAt
                 }
