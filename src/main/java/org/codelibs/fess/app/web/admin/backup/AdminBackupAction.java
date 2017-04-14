@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -41,7 +42,11 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
+import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
+import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
+import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
@@ -49,7 +54,6 @@ import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.UndefinedResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,12 +142,19 @@ public class AdminBackupAction extends FessAdminAction {
                 if ("search_log".equals(name)) {
                     writeSearchLogCsvResponse(id);
                     return HtmlResponse.asEmptyBody();
+                } else if ("search_field_log".equals(id)) {
+                    writeSearchFieldLogCsvResponse(id);
+                    return HtmlResponse.asEmptyBody();
                 } else if ("user_info".equals(id)) {
-                    // TODO user_info=createdAt,updatedAt
+                    writeUserInfoCsvResponse(id);
+                    return HtmlResponse.asEmptyBody();
+                } else if ("click_log".equals(id)) {
+                    writeClickLogCsvResponse(id);
+                    return HtmlResponse.asEmptyBody();
+                } else if ("favorite_log".equals(id)) {
+                    writeFavoriteLogCsvResponse(id);
+                    return HtmlResponse.asEmptyBody();
                 }
-                // TODO search_field_log=name,searchLogId,value
-                // TODO favorite_log=queryId,userInfoId,docId,url,createdAt
-                // TODO click_log=queryId,userSessionId,docId,url,order,queryRequestedAt,requestedAt
             } else {
                 final String index;
                 final String filename;
@@ -170,19 +181,28 @@ public class AdminBackupAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    private void writeSearchLogCsvResponse(final String id) {
+    private void writeCsvResponse(final String id, final Consumer<CsvWriter> writeCall) {
         writeCsvResponseHeader(id);
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);
         cfg.setQuoteDisabled(false);
         try (final CsvWriter writer =
                 new CsvWriter(new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), fessConfig.getCsvFileEncoding())), cfg)) {
-            SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
-            searchLogBhv.selectCursor(cb -> {
+            writeCall.accept(writer);
+            writer.flush();
+        } catch (final Exception e) {
+            logger.warn("Failed to write " + id + " to response.", e);
+        }
+    }
+
+    private void writeSearchLogCsvResponse(final String id) {
+        writeCsvResponse(id, writer -> {
+            final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
+            bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
             }, entity -> {
-                List<String> list = new ArrayList<>();
+                final List<String> list = new ArrayList<>();
                 addToList(entity.getQueryId(), list);
                 addToList(entity.getUserInfoId(), list);
                 addToList(entity.getUserSessionId(), list);
@@ -206,10 +226,92 @@ public class AdminBackupAction extends FessAdminAction {
                     throw new RuntimeIOException(e);
                 }
             });
-            writer.flush();
-        } catch (final Exception e) {
-            logger.warn("Failed to write " + id + " to response.", e);
-        }
+        });
+    }
+
+    private void writeUserInfoCsvResponse(String id) {
+        writeCsvResponse(id, writer -> {
+            final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_CreatedAt_Asc();
+            }, entity -> {
+                final List<String> list = new ArrayList<>();
+                addToList(entity.getCreatedAt(), list);
+                addToList(entity.getUpdatedAt(), list);
+                try {
+                    writer.writeValues(list);
+                } catch (IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        });
+    }
+
+    private void writeFavoriteLogCsvResponse(String id) {
+        writeCsvResponse(id, writer -> {
+            final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_CreatedAt_Asc();
+            }, entity -> {
+                final List<String> list = new ArrayList<>();
+                addToList(entity.getQueryId(), list);
+                addToList(entity.getUserInfoId(), list);
+                addToList(entity.getDocId(), list);
+                addToList(entity.getUrl(), list);
+                addToList(entity.getCreatedAt(), list);
+                try {
+                    writer.writeValues(list);
+                } catch (IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        });
+    }
+
+    private void writeClickLogCsvResponse(String id) {
+        writeCsvResponse(id, writer -> {
+            final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_RequestedAt_Asc();
+            }, entity -> {
+                final List<String> list = new ArrayList<>();
+                addToList(entity.getQueryId(), list);
+                addToList(entity.getUserSessionId(), list);
+                addToList(entity.getDocId(), list);
+                addToList(entity.getUrl(), list);
+                addToList(entity.getOrder(), list);
+                addToList(entity.getQueryRequestedAt(), list);
+                addToList(entity.getRequestedAt(), list);
+                try {
+                    writer.writeValues(list);
+                } catch (IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        });
+    }
+
+    private void writeSearchFieldLogCsvResponse(String id) {
+        writeCsvResponse(id, writer -> {
+            final SearchFieldLogBhv bhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_SearchLogId_Asc();
+            }, entity -> {
+                final List<String> list = new ArrayList<>();
+                addToList(entity.getSearchLogId(), list);
+                addToList(entity.getName(), list);
+                addToList(entity.getValue(), list);
+                try {
+                    writer.writeValues(list);
+                } catch (IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        });
     }
 
     private void addToList(final Object value, final List<String> list) {
