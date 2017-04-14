@@ -68,7 +68,7 @@
 		<cluster.runner.version>2.4.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.5</tomcat.version>
+		<tomcat.version>8.5.13</tomcat.version>
 		<tomcat.boot.version>0.5.0</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
