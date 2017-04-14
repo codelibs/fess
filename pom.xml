@@ -54,7 +54,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<utflute.version>0.7.2</utflute.version>
+		<utflute.version>0.7.3-RC2</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>1.2.0-SNAPSHOT</crawler.version>
