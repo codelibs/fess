@@ -34,7 +34,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
@@ -54,6 +53,7 @@ import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +75,6 @@ public class AdminBackupAction extends FessAdminAction {
 
     @Resource
     private AsyncManager asyncManager;
-
-    @Resource
-    private HttpServletResponse response;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -140,20 +137,15 @@ public class AdminBackupAction extends FessAdminAction {
             } else if (id.endsWith(CSV_EXTENTION)) {
                 String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
-                    writeSearchLogCsvResponse(id);
-                    return HtmlResponse.asEmptyBody();
-                } else if ("search_field_log".equals(id)) {
-                    writeSearchFieldLogCsvResponse(id);
-                    return HtmlResponse.asEmptyBody();
-                } else if ("user_info".equals(id)) {
-                    writeUserInfoCsvResponse(id);
-                    return HtmlResponse.asEmptyBody();
-                } else if ("click_log".equals(id)) {
-                    writeClickLogCsvResponse(id);
-                    return HtmlResponse.asEmptyBody();
-                } else if ("favorite_log".equals(id)) {
-                    writeFavoriteLogCsvResponse(id);
-                    return HtmlResponse.asEmptyBody();
+                    return writeSearchLogCsvResponse(id);
+                } else if ("search_field_log".equals(name)) {
+                    return writeSearchFieldLogCsvResponse(id);
+                } else if ("user_info".equals(name)) {
+                    return writeUserInfoCsvResponse(id);
+                } else if ("click_log".equals(name)) {
+                    return writeClickLogCsvResponse(id);
+                } else if ("favorite_log".equals(name)) {
+                    return writeFavoriteLogCsvResponse(id);
                 }
             } else {
                 final String index;
@@ -181,22 +173,28 @@ public class AdminBackupAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    private void writeCsvResponse(final String id, final Consumer<CsvWriter> writeCall) {
-        writeCsvResponseHeader(id);
-        final CsvConfig cfg = new CsvConfig(',', '"', '"');
-        cfg.setEscapeDisabled(false);
-        cfg.setQuoteDisabled(false);
-        try (final CsvWriter writer =
-                new CsvWriter(new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), fessConfig.getCsvFileEncoding())), cfg)) {
-            writeCall.accept(writer);
-            writer.flush();
-        } catch (final Exception e) {
-            logger.warn("Failed to write " + id + " to response.", e);
-        }
+    private StreamResponse writeCsvResponse(final String id, final Consumer<CsvWriter> writeCall) {
+        return asStream(id)
+                .contentTypeOctetStream()
+                .header("Pragma", "no-cache")
+                .header("Cache-Control", "no-cache")
+                .header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT")
+                .stream(out -> {
+                    final CsvConfig cfg = new CsvConfig(',', '"', '"');
+                    cfg.setEscapeDisabled(false);
+                    cfg.setQuoteDisabled(false);
+                    try (final CsvWriter writer =
+                            new CsvWriter(new BufferedWriter(new OutputStreamWriter(out.writer(), fessConfig.getCsvFileEncoding())), cfg)) {
+                        writeCall.accept(writer);
+                        writer.flush();
+                    } catch (final Exception e) {
+                        logger.warn("Failed to write " + id + " to response.", e);
+                    }
+                });
     }
 
-    private void writeSearchLogCsvResponse(final String id) {
-        writeCsvResponse(id, writer -> {
+    private StreamResponse writeSearchLogCsvResponse(final String id) {
+        return writeCsvResponse(id, writer -> {
             final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -229,8 +227,8 @@ public class AdminBackupAction extends FessAdminAction {
         });
     }
 
-    private void writeUserInfoCsvResponse(String id) {
-        writeCsvResponse(id, writer -> {
+    private StreamResponse writeUserInfoCsvResponse(String id) {
+        return writeCsvResponse(id, writer -> {
             final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -248,8 +246,8 @@ public class AdminBackupAction extends FessAdminAction {
         });
     }
 
-    private void writeFavoriteLogCsvResponse(String id) {
-        writeCsvResponse(id, writer -> {
+    private StreamResponse writeFavoriteLogCsvResponse(String id) {
+        return writeCsvResponse(id, writer -> {
             final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -270,8 +268,8 @@ public class AdminBackupAction extends FessAdminAction {
         });
     }
 
-    private void writeClickLogCsvResponse(String id) {
-        writeCsvResponse(id, writer -> {
+    private StreamResponse writeClickLogCsvResponse(String id) {
+        return writeCsvResponse(id, writer -> {
             final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -294,8 +292,8 @@ public class AdminBackupAction extends FessAdminAction {
         });
     }
 
-    private void writeSearchFieldLogCsvResponse(String id) {
-        writeCsvResponse(id, writer -> {
+    private StreamResponse writeSearchFieldLogCsvResponse(String id) {
+        return writeCsvResponse(id, writer -> {
             final SearchFieldLogBhv bhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -324,14 +322,6 @@ public class AdminBackupAction extends FessAdminAction {
         } else {
             list.add(value.toString());
         }
-    }
-
-    private void writeCsvResponseHeader(final String id) {
-        response.setContentType("application/octet-stream");
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + id + "\"");
-        response.addHeader("Pragma", "no-cache");
-        response.addHeader("Cache-Control", "no-cache");
-        response.addHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
     }
 
     private List<Map<String, String>> getBackupItems() {
