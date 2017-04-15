@@ -65,7 +65,7 @@ For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess
 First of all, clone Fess's repositories:
 
     $ cd ~/workspace
-    $ git clone https://github.com/nocode2k/fess.git
+    $ git clone https://github.com/codelibs/fess.git
 
 and then imports it as Maven project on eclipse or ohter IDE.
 
