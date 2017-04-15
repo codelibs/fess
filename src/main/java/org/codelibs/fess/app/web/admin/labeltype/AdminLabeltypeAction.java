@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -268,7 +269,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<LabelType> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<LabelType> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new LabelType()).map(entity -> {
@@ -278,7 +279,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return labelTypeService.getLabelType(((EditForm) form).id);
+                return ComponentUtil.getComponent(LabelTypeService.class).getLabelType(((EditForm) form).id);
             }
             break;
         default:
@@ -287,7 +288,8 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<LabelType> getLabelType(final CreateForm form) {
+    public static OptionalEntity<LabelType> getLabelType(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(
