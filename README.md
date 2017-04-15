@@ -77,7 +77,7 @@ Run antrun:run to download plugins into plugins directory:
 
 ### Run Fess
 
-Run or debug org.codelibs.fess.FessBoot on IDE, and then access http://localhost:8080/fess/
+Run or debug org.codelibs.fess.FessBoot on IDE, and then access http://localhost:8080/
 
 ### Build Package
 
@@ -97,7 +97,7 @@ Run package goal and then the release file is created in target/releases.
 
 Fess is internationalized software.
 
-If you want to add labels/messages for your language, please translate properties file and then rename to fess\_*_[lang].properties.
+If you want to add labels/messages for your language, please translate properties file and then rename to fess\_\*\_[lang].properties.
 
 * [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
 * [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
