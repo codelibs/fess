@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.Execute;
@@ -74,7 +76,8 @@ public class AdminLogAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    private List<Map<String, Object>> getLogFileItems() {
+    public static List<Map<String, Object>> getLogFileItems() {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final List<Map<String, Object>> logFileItems = new ArrayList<>();
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {

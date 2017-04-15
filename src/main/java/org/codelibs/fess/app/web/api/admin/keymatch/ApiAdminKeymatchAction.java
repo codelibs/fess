@@ -13,9 +13,9 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.api.admin.webconfig;
+package org.codelibs.fess.app.web.api.admin.keymatch;
 
-import static org.codelibs.fess.app.web.admin.webconfig.AdminWebconfigAction.getWebConfig;
+import static org.codelibs.fess.app.web.admin.keymatch.AdminKeymatchAction.getKeyMatch;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.WebConfigPager;
-import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.app.pager.KeyMatchPager;
+import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiConfigResponse;
@@ -32,56 +32,56 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.config.exentity.WebConfig;
+import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
 /**
  * @author Keiichi Watanabe
  */
-public class ApiAdminWebconfigAction extends FessApiAdminAction {
+public class ApiAdminKeymatchAction extends FessApiAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private WebConfigService webConfigService;
+    private KeyMatchService keyMatchService;
 
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
 
-    // GET /api/admin/webconfig/settings
-    // POST /api/admin/webconfig/settings
+    // GET /api/admin/keymatch/settings
+    // POST /api/admin/keymatch/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final WebConfigPager pager = new WebConfigPager();
+        final KeyMatchPager pager = new KeyMatchPager();
         copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        final List<WebConfig> list = webConfigService.getWebConfigList(pager);
+        final List<KeyMatch> list = keyMatchService.getKeyMatchList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
                 .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
-    // GET /api/admin/webconfig/setting/{id}
+    // GET /api/admin/keymatch/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse()
-                .setting(webConfigService.getWebConfig(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
+                .setting(keyMatchService.getKeyMatch(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
                     return null;
                 })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/webconfig/setting
+    // PUT /api/admin/keymatch/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
-        final WebConfig webConfig = getWebConfig(body).map(entity -> {
+        final KeyMatch keyMatch = getKeyMatch(body).map(entity -> {
             try {
-                webConfigService.store(entity);
+                keyMatchService.store(entity);
             } catch (final Exception e) {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
@@ -91,17 +91,17 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
             return null;
         });
 
-        return asJson(new ApiUpdateResponse().id(webConfig.getId()).created(true).status(Status.OK).result());
+        return asJson(new ApiUpdateResponse().id(keyMatch.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/webconfig/setting
+    // POST /api/admin/keymatch/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final WebConfig webConfig = getWebConfig(body).map(entity -> {
+        final KeyMatch keyMatch = getKeyMatch(body).map(entity -> {
             try {
-                webConfigService.store(entity);
+                keyMatchService.store(entity);
             } catch (final Exception e) {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
@@ -110,15 +110,15 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id));
             return null;
         });
-        return asJson(new ApiUpdateResponse().id(webConfig.getId()).created(false).status(Status.OK).result());
+        return asJson(new ApiUpdateResponse().id(keyMatch.getId()).created(false).status(Status.OK).result());
     }
 
-    // DELETE /api/admin/webconfig/setting/{id}
+    // DELETE /api/admin/keymatch/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
-        webConfigService.getWebConfig(id).ifPresent(entity -> {
+        keyMatchService.getKeyMatch(id).ifPresent(entity -> {
             try {
-                webConfigService.delete(entity);
+                keyMatchService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
@@ -129,7 +129,7 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
-    protected EditBody createEditBody(final WebConfig entity) {
+    protected EditBody createEditBody(final KeyMatch entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
             copyOp.excludeNull();

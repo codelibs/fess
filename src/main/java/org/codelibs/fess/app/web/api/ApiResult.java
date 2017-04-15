@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.api;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.codelibs.fess.Constants;
@@ -104,6 +105,60 @@ public class ApiResult {
         }
 
         public ApiConfigsResponse<T> total(final long total) {
+            this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiLogResponse extends ApiResponse {
+        protected Object log;
+
+        public ApiLogResponse log(final Object log) {
+            this.log = log;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiLogsResponse<T> extends ApiResponse {
+        protected List<T> logs;
+        protected long total = 0;
+
+        public ApiLogsResponse<T> logs(final List<T> logs) {
+            this.logs = logs;
+            return this;
+        }
+
+        public ApiLogsResponse<T> total(final long total) {
+            this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiLogFilesResponse extends ApiResponse {
+        protected List<Map<String, Object>> logfiles;
+        protected long total = 0;
+
+        public ApiLogFilesResponse logfiles(final List<Map<String, Object>> logfiles) {
+            this.logfiles = logfiles;
+            return this;
+        }
+
+        public ApiLogFilesResponse total(final long total) {
             this.total = total;
             return this;
         }
