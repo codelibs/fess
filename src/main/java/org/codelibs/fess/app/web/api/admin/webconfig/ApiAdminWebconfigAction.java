@@ -51,8 +51,8 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
-    // GET /api/admin/webconfig
-    // POST /api/admin/webconfig
+    // GET /api/admin/webconfig/settings
+    // POST /api/admin/webconfig/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
