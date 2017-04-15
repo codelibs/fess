@@ -23,6 +23,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.EsAccessResult;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
@@ -76,6 +77,8 @@ import org.slf4j.LoggerFactory;
 public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
     private static final String THUMBNAIL_MANAGER = "thumbnailManager";
 
@@ -376,6 +379,10 @@ public final class ComponentUtil {
 
     public static ThumbnailManager getThumbnailManager() {
         return getComponent(THUMBNAIL_MANAGER);
+    }
+
+    public static AuthenticationManager getAuthenticationManager() {
+        return getComponent(AUTHENTICATION_MANAGER);
     }
 
     public static PrimaryCipher getPrimaryCipher() {
