@@ -23,6 +23,8 @@ import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -225,7 +227,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<DuplicateHost> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<DuplicateHost> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new DuplicateHost()).map(entity -> {
@@ -235,7 +237,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return duplicateHostService.getDuplicateHost(((EditForm) form).id);
+                return ComponentUtil.getComponent(DuplicateHostService.class).getDuplicateHost(((EditForm) form).id);
             }
             break;
         default:
@@ -244,7 +246,8 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<DuplicateHost> getDuplicateHost(final CreateForm form) {
+    public static OptionalEntity<DuplicateHost> getDuplicateHost(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
