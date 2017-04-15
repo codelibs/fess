@@ -321,7 +321,6 @@
 						<arg>"labels.facet_filetype_others"</arg>
 						<arg>"filetype:others"</arg>
 					</postConstruct>
-
 				</component>
 			</arg>
 		</postConstruct>
@@ -331,6 +330,38 @@
 	<component name="popularWordHelper" class="org.codelibs.fess.helper.PopularWordHelper">
 	</component>
 	<component name="userInfoHelper" class="org.codelibs.fess.helper.UserInfoHelper">
+	</component>
+	<component name="authenticationManager" class="org.codelibs.fess.auth.AuthenticationManager">
+		<!--
+		<postConstruct name="addChain">
+			<arg>
+				<component class="org.codelibs.fess.auth.chain.CommandChain">
+					<property name="updateCommand">[
+					"/usr/sbin/htpasswd",
+					"-b",
+					"/tmp/test.txt",
+					"$USERNAME",
+					"$PASSWORD"
+					]</property>
+					<property name="deleteCommand">[
+					"/usr/sbin/htpasswd",
+					"-D",
+					"/tmp/test.txt",
+					"$USERNAME"
+					]</property>
+					<property name="targetUsers">[
+					"admin"
+					]</property>
+				</component>
+			</arg>
+		</postConstruct>
+		 -->
+		<postConstruct name="addChain">
+			<arg>
+				<component class="org.codelibs.fess.auth.chain.LdapChain">
+				</component>
+			</arg>
+		</postConstruct>
 	</component>
 	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
