@@ -114,6 +114,40 @@ public class ApiResult {
         }
     }
 
+    public static class ApiLogResponse extends ApiResponse {
+        protected Object log;
+
+        public ApiLogResponse log(final Object log) {
+            this.log = log;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiLogsResponse<T> extends ApiResponse {
+        protected List<T> logs;
+        protected long total = 0;
+
+        public ApiLogsResponse<T> logs(final List<T> logs) {
+            this.logs = logs;
+            return this;
+        }
+
+        public ApiLogsResponse<T> total(final long total) {
+            this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
     public static class ApiErrorResponse extends ApiResponse {
         protected String message;
 
