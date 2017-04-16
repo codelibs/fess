@@ -184,7 +184,7 @@ public class AdminBackupAction extends FessAdminAction {
                     cfg.setEscapeDisabled(false);
                     cfg.setQuoteDisabled(false);
                     try (final CsvWriter writer =
-                            new CsvWriter(new BufferedWriter(new OutputStreamWriter(out.writer(), fessConfig.getCsvFileEncoding())), cfg)) {
+                            new CsvWriter(new BufferedWriter(new OutputStreamWriter(out.stream(), fessConfig.getCsvFileEncoding())), cfg)) {
                         writeCall.accept(writer);
                         writer.flush();
                     } catch (final Exception e) {
