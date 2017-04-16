@@ -17,14 +17,23 @@ package org.codelibs.fess.app.web.api.admin.scheduler;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.JsonResponse;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.codelibs.fess.app.web.admin.scheduler.AdminSchedulerAction.getScheduledJob;
 
 public class ApiAdminSchedulerAction extends FessApiAdminAction {
 
@@ -77,6 +86,90 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
             });
         });
         return asJson(new ApiResponse().status(Status.OK).result());
+    }
+
+    // GET /api/admin/scheduler
+    // POST /api/admin/scheduler
+    @Execute
+    public JsonResponse<ApiResult> settings(final SearchBody body) {
+        validateApi(body, messages -> {});
+        final SchedulerPager pager = new SchedulerPager();
+        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final List<ScheduledJob> list = scheduledJobService.getScheduledJobList(pager);
+        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
+                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
+                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+    }
+
+    // GET /api/admin/scheduler/setting/{id}
+    @Execute
+    public JsonResponse<ApiResult> get$setting(final String id) {
+        return asJson(new ApiResult.ApiConfigResponse()
+                .setting(scheduledJobService.getScheduledJob(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
+                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+                    return null;
+                })).status(ApiResult.Status.OK).result());
+    }
+
+    // PUT /api/admin/scheduler/setting
+    @Execute
+    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+        validateApi(body, messages -> {});
+        body.crudMode = CrudMode.CREATE;
+        final ScheduledJob entity = getScheduledJob(body).orElseGet(() -> {
+            throwValidationErrorApi(messages -> {
+                messages.addErrorsCrudFailedToCreateInstance(GLOBAL);
+            });
+            return null;
+        });
+        try {
+            scheduledJobService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        } catch (final Exception e) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
+        }
+        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
+    }
+
+    // POST /api/admin/scheduler/setting
+    @Execute
+    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+        validateApi(body, messages -> {});
+        body.crudMode = CrudMode.EDIT;
+        final ScheduledJob entity = getScheduledJob(body).orElseGet(() -> {
+            throwValidationErrorApi(messages -> {
+                messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
+            });
+            return null;
+        });
+        try {
+            scheduledJobService.store(entity);
+        } catch (final Exception e) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
+        }
+        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
+    }
+
+    // DELETE /api/admin/scheduler/setting/{id}
+    @Execute
+    public JsonResponse<ApiResult> delete$setting(final String id) {
+        final ScheduledJob entity = scheduledJobService.getScheduledJob(id).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        });
+        try {
+            scheduledJobService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        } catch (final Exception e) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
+        }
+        return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
+    }
+
+    protected EditBody createEditBody(final ScheduledJob entity) {
+        final EditBody body = new EditBody();
+        copyBeanToBean(entity, body, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+        return body;
     }
 
 }

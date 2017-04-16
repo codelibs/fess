@@ -27,6 +27,8 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.ProcessHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -321,7 +323,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         form.available = entity.isEnabled() ? Constants.ON : null;
     }
 
-    private OptionalEntity<ScheduledJob> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<ScheduledJob> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new ScheduledJob()).map(entity -> {
@@ -331,7 +333,7 @@ public class AdminSchedulerAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return scheduledJobService.getScheduledJob(((EditForm) form).id);
+                return ComponentUtil.getComponent(ScheduledJobService.class).getScheduledJob(((EditForm) form).id);
             }
             break;
         default:
@@ -340,7 +342,8 @@ public class AdminSchedulerAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ScheduledJob> getScheduledJob(final CreateForm form) {
+    public static OptionalEntity<ScheduledJob> getScheduledJob(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
