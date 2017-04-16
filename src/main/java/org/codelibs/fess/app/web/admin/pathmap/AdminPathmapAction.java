@@ -23,6 +23,8 @@ import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.PathMapping;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -226,7 +228,7 @@ public class AdminPathmapAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<PathMapping> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<PathMapping> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new PathMapping()).map(entity -> {
@@ -236,7 +238,7 @@ public class AdminPathmapAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return pathMappingService.getPathMapping(((EditForm) form).id);
+                return ComponentUtil.getComponent(PathMappingService.class).getPathMapping(((EditForm) form).id);
             }
             break;
         default:
@@ -245,7 +247,8 @@ public class AdminPathmapAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<PathMapping> getPathMapping(final CreateForm form) {
+    public static OptionalEntity<PathMapping> getPathMapping(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
