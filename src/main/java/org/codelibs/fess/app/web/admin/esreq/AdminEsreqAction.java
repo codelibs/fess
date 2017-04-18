@@ -82,7 +82,7 @@ public class AdminEsreqAction extends FessAdminAction {
                 return asListHtml(() -> saveToken());
             });
         } else {
-            try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
+            try (final CurlResponse response = curlRequest.header("Content-Type", "application/json").body(buf.toString()).execute()) {
                 final File tempFile = File.createTempFile("esreq_", ".json");
                 try (final InputStream in = response.getContentAsStream()) {
                     CopyUtil.copy(in, tempFile);

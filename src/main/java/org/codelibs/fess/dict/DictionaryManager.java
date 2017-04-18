@@ -50,8 +50,9 @@ public class DictionaryManager {
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         try (CurlResponse response =
-                Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("fields", "path,@timestamp")
-                        .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
+                Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").header("Content-Type", "application/json")
+                        .param("fields", "path,@timestamp").param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize())
+                        .execute()) {
             final Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
@@ -96,8 +97,8 @@ public class DictionaryManager {
 
             // TODO use stream
                 try (CurlResponse response =
-                        Curl.post(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", dictFile.getPath())
-                                .body(FileUtil.readUTF8(file)).execute()) {
+                        Curl.post(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").header("Content-Type", "application/json")
+                                .param("path", dictFile.getPath()).body(FileUtil.readUTF8(file)).execute()) {
                     final Map<String, Object> contentMap = response.getContentAsMap();
                     if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                         throw new DictionaryException("Failed to update " + dictFile.getPath());
@@ -113,8 +114,8 @@ public class DictionaryManager {
 
     public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
         try {
-            return Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute()
-                    .getContentAsStream();
+            return Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").header("Content-Type", "application/json")
+                    .param("path", dictFile.getPath()).execute().getContentAsStream();
         } catch (final IOException e) {
             throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
         }

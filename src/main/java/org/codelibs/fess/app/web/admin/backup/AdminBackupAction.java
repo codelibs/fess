@@ -81,14 +81,16 @@ public class AdminBackupAction extends FessAdminAction {
                     logger.warn("Failed to process system.properties file: " + form.bulkFile.getFileName(), e);
                 }
             } else {
-                try (CurlResponse response = Curl.post(ResourceUtil.getElasticsearchHttpUrl() + "/_bulk").onConnect((req, con) -> {
-                    con.setDoOutput(true);
-                    try (InputStream in = form.bulkFile.getInputStream(); OutputStream out = con.getOutputStream()) {
-                        CopyUtil.copy(in, out);
-                    } catch (IOException e) {
-                        throw new IORuntimeException(e);
-                    }
-                }).execute()) {
+                try (CurlResponse response =
+                        Curl.post(ResourceUtil.getElasticsearchHttpUrl() + "/_bulk").header("Content-Type", "application/json")
+                                .onConnect((req, con) -> {
+                                    con.setDoOutput(true);
+                                    try (InputStream in = form.bulkFile.getInputStream(); OutputStream out = con.getOutputStream()) {
+                                        CopyUtil.copy(in, out);
+                                    } catch (IOException e) {
+                                        throw new IORuntimeException(e);
+                                    }
+                                }).execute()) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Bulk Response:\n" + response.getContentAsString());
                     }
@@ -127,8 +129,8 @@ public class AdminBackupAction extends FessAdminAction {
                 return asStream(filename).contentTypeOctetStream().stream(
                         out -> {
                             try (CurlResponse response =
-                                    Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/" + index + "/_data").param("format", "json")
-                                            .execute()) {
+                                    Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/" + index + "/_data")
+                                            .header("Content-Type", "application/json").param("format", "json").execute()) {
                                 out.write(response.getContentAsStream());
                             }
                         });
