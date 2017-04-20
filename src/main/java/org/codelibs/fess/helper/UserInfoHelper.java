@@ -28,8 +28,11 @@ import javax.servlet.http.HttpSession;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.core.security.PrimaryCipher;
+import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
@@ -37,22 +40,27 @@ public class UserInfoHelper {
     @Resource
     protected SearchLogHelper searchLogHelper;
 
-    public int resultDocIdsCacheSize = 20;
+    protected int resultDocIdsCacheSize = 20;
 
-    public String cookieName = "fsid";
+    protected String cookieName = "fsid";
 
-    public String cookieDomain;
+    protected String cookieDomain;
 
-    public int cookieMaxAge = 30 * 24 * 60 * 60;// 1 month
+    protected int cookieMaxAge = 30 * 24 * 60 * 60;// 1 month
 
-    public String cookiePath;
+    protected String cookiePath = "/";
 
-    public Boolean cookieSecure;
+    protected Boolean cookieSecure;
 
     public String getUserCode() {
         final HttpServletRequest request = LaRequestUtil.getRequest();
 
         String userCode = (String) request.getAttribute(Constants.USER_CODE);
+        if (StringUtil.isNotBlank(userCode)) {
+            return userCode;
+        }
+
+        userCode = getUserCodeFromUserBean(request);
         if (StringUtil.isNotBlank(userCode)) {
             return userCode;
         }
@@ -73,6 +81,33 @@ public class UserInfoHelper {
 
         if (StringUtil.isNotBlank(userCode)) {
             updateUserSessionId(userCode);
+        }
+        return userCode;
+    }
+
+    protected String getUserCodeFromUserBean(final HttpServletRequest request) {
+        final LoginManager loginManager = ComponentUtil.getComponent(LoginManager.class);
+        if (loginManager == null) {
+            return null;
+        }
+
+        String userCode =
+                loginManager.getSavedUserBean().filter(u -> !FessUserBean.EMPTY_USER_ID.equals(u.getUserId()))
+                        .map(u -> u.getUserId().toString()).orElse(StringUtil.EMPTY);
+        if (StringUtil.isBlank(userCode)) {
+            return null;
+        }
+
+        final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
+        if (cipher == null) {
+            return null;
+        }
+
+        userCode = cipher.encrypt(userCode);
+        request.setAttribute(Constants.USER_CODE, userCode);
+        final String cookieValue = getUserCodeFromCookie(request);
+        if (cookieValue != null) {
+            updateCookie(cookieValue, 0);
         }
         return userCode;
     }
@@ -107,8 +142,12 @@ public class UserInfoHelper {
         final HttpServletRequest request = LaRequestUtil.getRequest();
         request.setAttribute(Constants.USER_CODE, userCode);
 
+        updateCookie(userCode, cookieMaxAge);
+    }
+
+    protected void updateCookie(final String userCode, final int age) {
         final Cookie cookie = new Cookie(cookieName, userCode);
-        cookie.setMaxAge(cookieMaxAge);
+        cookie.setMaxAge(age);
         if (StringUtil.isNotBlank(cookieDomain)) {
             cookie.setDomain(cookieDomain);
         }
@@ -173,5 +212,29 @@ public class UserInfoHelper {
             session.setAttribute(Constants.RESULT_DOC_ID_CACHE, resultDocIdsCache);
         }
         return resultDocIdsCache;
+    }
+
+    public void setResultDocIdsCacheSize(int resultDocIdsCacheSize) {
+        this.resultDocIdsCacheSize = resultDocIdsCacheSize;
+    }
+
+    public void setCookieName(String cookieName) {
+        this.cookieName = cookieName;
+    }
+
+    public void setCookieDomain(String cookieDomain) {
+        this.cookieDomain = cookieDomain;
+    }
+
+    public void setCookieMaxAge(int cookieMaxAge) {
+        this.cookieMaxAge = cookieMaxAge;
+    }
+
+    public void setCookiePath(String cookiePath) {
+        this.cookiePath = cookiePath;
+    }
+
+    public void setCookieSecure(Boolean cookieSecure) {
+        this.cookieSecure = cookieSecure;
     }
 }

@@ -31,6 +31,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                          ==========
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
+    public static final String EMPTY_USER_ID = "<empty>";
     private final FessUser user;
 
     // ===================================================================================
@@ -99,7 +100,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
             @Override
             public String getUserId() {
-                return "<empty>";
+                return EMPTY_USER_ID;
             }
 
             @Override
