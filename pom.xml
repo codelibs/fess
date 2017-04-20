@@ -54,6 +54,9 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
+		<junit.jupiter.version>5.0.0-M4</junit.jupiter.version>
+		<junit.vintage.version>${junit.version}.0-M4</junit.vintage.version>
+		<junit.platform.version>1.0.0-M4</junit.platform.version>
 		<utflute.version>0.7.3</utflute.version>
 
 		<!-- Crawler -->
@@ -90,6 +93,23 @@
 		<packaging.fess.dictionary.dir>/var/lib/elasticsearch/config</packaging.fess.dictionary.dir>
 
 	</properties>
+	<profiles>
+		<profile>
+			<id>build</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<test.include.path>**/*Test.java</test.include.path>
+			</properties>
+		</profile>
+		<profile>
+			<id>integrationTests</id>
+			<properties>
+				<test.include.path>**/*Tests.java</test.include.path>
+			</properties>
+		</profile>
+	</profiles>
 	<build>
 		<finalName>fess</finalName>
 		<resources>
@@ -158,6 +178,32 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<includes>
+						<include>${test.include.path}</include>
+					</includes>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.junit.platform</groupId>
+						<artifactId>junit-platform-surefire-provider</artifactId>
+						<version>${junit.platform.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+						<version>${junit.jupiter.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.vintage</groupId>
+						<artifactId>junit-vintage-engine</artifactId>
+						<version>${junit.vintage.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -1340,6 +1386,12 @@
 
 		<!-- test -->
 		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
@@ -1349,6 +1401,12 @@
 			<groupId>org.dbflute.utflute</groupId>
 			<artifactId>utflute-lastaflute</artifactId>
 			<version>${utflute.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>3.0.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
