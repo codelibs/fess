@@ -45,7 +45,7 @@ public class UserInfoHelper {
 
     public int cookieMaxAge = 30 * 24 * 60 * 60;// 1 month
 
-    public String cookiePath;
+    public String cookiePath = "/";
 
     public Boolean cookieSecure;
 
