@@ -45,7 +45,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        KuromojiPager pager = new KuromojiPager();
+        final KuromojiPager pager = new KuromojiPager();
         if (body.pageNumber != null) {
             pager.setCurrentPageNumber(body.pageNumber);
         }

@@ -43,7 +43,7 @@ public class ApiAdminDictAction extends FessApiAdminAction {
                 .status(ApiResult.Status.OK).result());
     }
 
-    protected ListBody createListBody(DictionaryFile<? extends DictionaryItem> dictionaryFile) {
+    protected ListBody createListBody(final DictionaryFile<? extends DictionaryItem> dictionaryFile) {
         final ListBody body = new ListBody();
         body.id = dictionaryFile.getId();
         body.type = dictionaryFile.getType();

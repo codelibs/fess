@@ -45,7 +45,7 @@ public class ApiAdminLogAction extends FessApiAdminAction {
     // GET /api/admin/log/logfiles
     @Execute
     public JsonResponse<ApiResult> logfiles() {
-        List<Map<String, Object>> list = getLogFileItems();
+        final List<Map<String, Object>> list = getLogFileItems();
         return asJson(new ApiResult.ApiLogFilesResponse().logfiles(list).total(list.size()).status(ApiResult.Status.OK).result());
     }
 

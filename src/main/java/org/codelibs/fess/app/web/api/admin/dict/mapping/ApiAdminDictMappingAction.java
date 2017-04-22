@@ -44,7 +44,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        CharMappingPager pager = new CharMappingPager();
+        final CharMappingPager pager = new CharMappingPager();
         if (body.pageNumber != null) {
             pager.setCurrentPageNumber(body.pageNumber);
         }

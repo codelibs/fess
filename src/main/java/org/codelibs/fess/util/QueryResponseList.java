@@ -108,10 +108,11 @@ public class QueryResponseList implements List<Map<String, Object>> {
                         if (innerHits != null) {
                             final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
                             if (innerSearchHits != null) {
-                                long totalHits = innerSearchHits.getTotalHits();
+                                final long totalHits = innerSearchHits.getTotalHits();
                                 if (totalHits > 1) {
                                     docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
-                                    SearchHitField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
+                                    final SearchHitField bitsField =
+                                            searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
                                     if (bitsField != null && !bitsField.getValues().isEmpty()) {
                                         docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
                                     }

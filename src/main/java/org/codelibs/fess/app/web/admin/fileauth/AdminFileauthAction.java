@@ -242,7 +242,7 @@ public class AdminFileauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    static public OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new FileAuthentication()).map(entity -> {
@@ -261,7 +261,7 @@ public class AdminFileauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    static public OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
+    public static OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();

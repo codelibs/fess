@@ -214,27 +214,27 @@ public class UserInfoHelper {
         return resultDocIdsCache;
     }
 
-    public void setResultDocIdsCacheSize(int resultDocIdsCacheSize) {
+    public void setResultDocIdsCacheSize(final int resultDocIdsCacheSize) {
         this.resultDocIdsCacheSize = resultDocIdsCacheSize;
     }
 
-    public void setCookieName(String cookieName) {
+    public void setCookieName(final String cookieName) {
         this.cookieName = cookieName;
     }
 
-    public void setCookieDomain(String cookieDomain) {
+    public void setCookieDomain(final String cookieDomain) {
         this.cookieDomain = cookieDomain;
     }
 
-    public void setCookieMaxAge(int cookieMaxAge) {
+    public void setCookieMaxAge(final int cookieMaxAge) {
         this.cookieMaxAge = cookieMaxAge;
     }
 
-    public void setCookiePath(String cookiePath) {
+    public void setCookiePath(final String cookiePath) {
         this.cookiePath = cookiePath;
     }
 
-    public void setCookieSecure(Boolean cookieSecure) {
+    public void setCookieSecure(final Boolean cookieSecure) {
         this.cookieSecure = cookieSecure;
     }
 }

@@ -61,18 +61,17 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
         copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         final List<FailureUrl> list = failureUrlService.getFailureUrlList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>()
-                .logs(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .logs(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/failureurl/log/{id}
     @Execute
     public JsonResponse<ApiResult> get$log(final String id) {
-        return asJson(new ApiLogResponse()
-                .log(failureUrlService.getFailureUrl(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(Status.OK).result());
+        return asJson(new ApiLogResponse().log(failureUrlService.getFailureUrl(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(Status.OK).result());
     }
 
     // DELETE /api/admin/failureurl/log/{id}

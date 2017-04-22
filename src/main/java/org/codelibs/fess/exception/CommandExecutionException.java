@@ -19,11 +19,11 @@ public class CommandExecutionException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public CommandExecutionException(String message) {
+    public CommandExecutionException(final String message) {
         super(message);
     }
 
-    public CommandExecutionException(String message, Throwable e) {
+    public CommandExecutionException(final String message, final Throwable e) {
         super(message, e);
     }
 

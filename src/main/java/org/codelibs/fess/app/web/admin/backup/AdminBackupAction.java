@@ -137,7 +137,7 @@ public class AdminBackupAction extends FessAdminAction {
                     }
                 });
             } else if (id.endsWith(CSV_EXTENTION)) {
-                String name = id.substring(0, id.length() - CSV_EXTENTION.length());
+                final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     return writeSearchLogCsvResponse(id);
                 } else if ("search_field_log".equals(name)) {
@@ -222,14 +222,14 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getRequestedAt(), list);
                 try {
                     writer.writeValues(list);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new RuntimeIOException(e);
                 }
             });
         });
     }
 
-    private StreamResponse writeUserInfoCsvResponse(String id) {
+    private StreamResponse writeUserInfoCsvResponse(final String id) {
         return writeCsvResponse(id, writer -> {
             final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
             bhv.selectCursor(cb -> {
@@ -241,14 +241,14 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getUpdatedAt(), list);
                 try {
                     writer.writeValues(list);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new RuntimeIOException(e);
                 }
             });
         });
     }
 
-    private StreamResponse writeFavoriteLogCsvResponse(String id) {
+    private StreamResponse writeFavoriteLogCsvResponse(final String id) {
         return writeCsvResponse(id, writer -> {
             final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
             bhv.selectCursor(cb -> {
@@ -263,14 +263,14 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getCreatedAt(), list);
                 try {
                     writer.writeValues(list);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new RuntimeIOException(e);
                 }
             });
         });
     }
 
-    private StreamResponse writeClickLogCsvResponse(String id) {
+    private StreamResponse writeClickLogCsvResponse(final String id) {
         return writeCsvResponse(id, writer -> {
             final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
             bhv.selectCursor(cb -> {
@@ -287,14 +287,14 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getRequestedAt(), list);
                 try {
                     writer.writeValues(list);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new RuntimeIOException(e);
                 }
             });
         });
     }
 
-    private StreamResponse writeSearchFieldLogCsvResponse(String id) {
+    private StreamResponse writeSearchFieldLogCsvResponse(final String id) {
         return writeCsvResponse(id, writer -> {
             final SearchFieldLogBhv bhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
             bhv.selectCursor(cb -> {
@@ -307,7 +307,7 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getValue(), list);
                 try {
                     writer.writeValues(list);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new RuntimeIOException(e);
                 }
             });

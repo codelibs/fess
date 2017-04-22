@@ -32,7 +32,7 @@ public class LdapChain implements AuthenticationChain {
 
     @Override
     public boolean changePassword(final String username, final String password) {
-        boolean changed = ComponentUtil.getLdapManager().changePassword(username, password);
+        final boolean changed = ComponentUtil.getLdapManager().changePassword(username, password);
         return !changed || ComponentUtil.getFessConfig().isLdapAdminSyncPassword();
     }
 

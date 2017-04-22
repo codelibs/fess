@@ -74,7 +74,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
 
-        ElevateWord entity = elevateWordService.getElevateWord(id).orElseGet(() -> {
+        final ElevateWord entity = elevateWordService.getElevateWord(id).orElseGet(() -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
             return null;
         });

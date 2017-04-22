@@ -145,7 +145,7 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         return body;
     }
 
-    protected Boolean isValidWebConfigId(String webconfigId) {
+    protected Boolean isValidWebConfigId(final String webconfigId) {
         return webConfigService.getWebConfig(webconfigId).isPresent();
     }
 }

@@ -145,7 +145,7 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         return body;
     }
 
-    protected Boolean isValidFileConfigId(String fileconfigId) {
+    protected Boolean isValidFileConfigId(final String fileconfigId) {
         return fileConfigService.getFileConfig(fileconfigId).isPresent();
     }
 }

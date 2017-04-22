@@ -96,7 +96,7 @@ public class CommandChain implements AuthenticationChain {
             logger.info("Command: " + String.join(" ", commands));
         }
 
-        final ProcessBuilder pb = new ProcessBuilder((String[]) stream(commands).get(stream -> stream.map(s -> {
+        final String[] cmds = stream(commands).get(stream -> stream.map(s -> {
             if ("$USERNAME".equals(s)) {
                 return username;
             } else if ("$PASSWORD".equals(s)) {
@@ -104,7 +104,8 @@ public class CommandChain implements AuthenticationChain {
             } else {
                 return s;
             }
-        }).toArray(n -> new String[n])));
+        }).toArray(n -> new String[n]));
+        final ProcessBuilder pb = new ProcessBuilder(cmds);
         if (workingDirectory != null) {
             pb.directory(workingDirectory);
         }

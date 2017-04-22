@@ -240,7 +240,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    static public OptionalEntity<RequestHeader> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<RequestHeader> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new RequestHeader()).map(entity -> {
@@ -259,7 +259,7 @@ public class AdminReqheaderAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    static public OptionalEntity<RequestHeader> getRequestHeader(final CreateForm form) {
+    public static OptionalEntity<RequestHeader> getRequestHeader(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();

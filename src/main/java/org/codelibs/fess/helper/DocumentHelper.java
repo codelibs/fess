@@ -172,27 +172,27 @@ public class DocumentHelper {
         }
     }
 
-    public String decodeSimilarDocHash(String hash) {
+    public String decodeSimilarDocHash(final String hash) {
         if (hash != null && hash.startsWith(SIMILAR_DOC_HASH_PREFIX) && hash.length() > SIMILAR_DOC_HASH_PREFIX.length()) {
-            byte[] decode = Base64.getUrlDecoder().decode(hash.substring(SIMILAR_DOC_HASH_PREFIX.length()));
+            final byte[] decode = Base64.getUrlDecoder().decode(hash.substring(SIMILAR_DOC_HASH_PREFIX.length()));
             try (BufferedReader reader =
                     new BufferedReader(new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(decode)), Constants.UTF_8))) {
                 return ReaderUtil.readText(reader);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.warn("Failed to decode " + hash, e);
             }
         }
         return hash;
     }
 
-    public String encodeSimilarDocHash(String hash) {
+    public String encodeSimilarDocHash(final String hash) {
         if (hash != null && !hash.startsWith(SIMILAR_DOC_HASH_PREFIX)) {
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                 try (GZIPOutputStream gos = new GZIPOutputStream(baos)) {
                     gos.write(hash.getBytes(Constants.UTF_8));
                 }
                 return SIMILAR_DOC_HASH_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.warn("Failed to encode " + hash, e);
             }
         }

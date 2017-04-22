@@ -1528,11 +1528,11 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         OptionalThing<SortBuilder[]> ot = (OptionalThing<SortBuilder[]>) propMap.get(QUERY_COLLAPSE_INNER_HITS_SORTS);
         if (ot == null) {
-            String sorts = getQueryCollapseInnerHitsSorts();
+            final String sorts = getQueryCollapseInnerHitsSorts();
             if (StringUtil.isBlank(sorts)) {
                 ot = OptionalThing.empty();
             } else {
-                SortBuilder[] sortBuilders =
+                final SortBuilder[] sortBuilders =
                         split(sorts, ",").get(
                                 stream -> stream
                                         .filter(StringUtil::isNotBlank)
