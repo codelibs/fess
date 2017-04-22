@@ -156,7 +156,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asHtml(path_AdminReqheader_AdminReqheaderDetailsJsp).useForm(EditForm.class, op -> {
+        return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
                 requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
