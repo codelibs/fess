@@ -31,6 +31,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
 import org.codelibs.fess.es.config.exentity.FileConfig;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -241,7 +242,7 @@ public class AdminFileauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
+    static public OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new FileAuthentication()).map(entity -> {
@@ -251,7 +252,7 @@ public class AdminFileauthAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return fileAuthenticationService.getFileAuthentication(((EditForm) form).id);
+                return ComponentUtil.getComponent(FileAuthenticationService.class).getFileAuthentication(((EditForm) form).id);
             }
             break;
         default:
@@ -260,7 +261,8 @@ public class AdminFileauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
+    static public OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
