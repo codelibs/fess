@@ -1,0 +1,61 @@
+/*
+ * Copyright 2012-2017 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.it;
+
+import static io.restassured.RestAssured.given;
+
+public class ITBase {
+    public static final String DEFAULT_FESS_URL = "http://localhost:8080";
+    public static final String DEFAULT_ES_URL = "http://localhost:9200";
+    public static final String DEFAULT_TEST_TOKEN = "E44TjYrJQadtGBFFuECA0SBqqVtqj7lRGmhYep53ixNdvlRxnkhwqCVCpRoO";
+    public static final String DEFAULT_TEST_TOKEN_ID = "testToken";
+
+    public static String getTestToken() {
+        return System.getProperty("test.token", DEFAULT_TEST_TOKEN);
+    }
+
+    public static String settingTestToken() {
+        final String testToken = System.getProperty("test.token");
+        if (testToken != null) {
+            return testToken;
+        }
+
+        given().body(
+                "{\"index\":{\"_index\":\".fess_config\",\"_type\":\"access_token\",\"_id\":\""
+                        + DEFAULT_TEST_TOKEN_ID
+                        + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
+                        + DEFAULT_TEST_TOKEN + "\"}\n").when().post(getEsUrl() + "/_bulk");
+        given().when().post(getEsUrl() + "/_refresh");
+        return DEFAULT_TEST_TOKEN;
+    }
+
+    public static void deleteTestToken() {
+        final String testToken = System.getProperty("test.token");
+        if (testToken != null) {
+            return;
+        }
+        given().delete(getEsUrl() + "/.fess_config/access_token/" + DEFAULT_TEST_TOKEN_ID);
+    }
+
+    public static String getFessUrl() {
+        return System.getProperty("test.fess.url", DEFAULT_FESS_URL);
+    }
+
+    public static String getEsUrl() {
+        return System.getProperty("test.es.url", DEFAULT_ES_URL);
+    }
+
+}

@@ -45,11 +45,9 @@ public class CreateForm {
     @Pattern(regexp = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
     public String expires;
 
-    @Required
     @Size(max = 1000)
     public String createdBy;
 
-    @Required
     @ValidateTypeFailure
     public Long createdTime;
 
