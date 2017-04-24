@@ -95,10 +95,6 @@ public class UserInfoHelper {
         }
 
         final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
-        if (cipher == null) {
-            return null;
-        }
-
         userCode = cipher.encrypt(userCode);
         request.setAttribute(Constants.USER_CODE, userCode);
         deleteUserCodeFromCookie(request);
