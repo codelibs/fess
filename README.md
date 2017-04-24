@@ -13,7 +13,7 @@ Fess is Elasticsearch based search server, but knowledge/experience about Elasti
 
 ## Issues/Questions
 
-Please file an [issue](https://github.com/codelibs/fess/issues "issue").
+Please check filed [questions](https://github.com/codelibs/fess/issues?q=label%3Aquestion), and then file an [issue](https://github.com/codelibs/fess/issues "issue") if not filed.
 
 ## Getting Started
 
@@ -32,11 +32,11 @@ For the details, see [Installation Guide](http://fess.codelibs.org/11.0/install/
 
 ### Access Fess
 
-- **Search UI**: http://localhost:8080/
+- Search UI: http://localhost:8080/
 
 ![Search UI](http://fess.codelibs.org/_images/fess_search_result1.png)
 
-- **Admin UI**: http://localhost:8080/admin/ (username/password is admin/admin)
+- Admin UI: http://localhost:8080/admin/ (username/password is admin/admin)
 
 ![Admin UI](http://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
@@ -89,9 +89,15 @@ Run package goal and then the release file is created in target/releases.
 
 ### Generate Source Code
 
-    $ mvn antrun:run # (one time command)
+    $ mvn dbflute:download # (one time command)
     $ mvn dbflute:freegen
     $ mvn license:format
+
+### Integration Tests
+
+Lunch Fess Server and run the following command:
+
+    mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201"
 
 ### Translate In Your Language
 
