@@ -73,8 +73,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="5.3.0" />
-			<param name="plugin.zip.version" value="5.3.0" />
+			<param name="plugin.version" value="5.3.1" />
+			<param name="plugin.zip.version" value="5.3.1" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}/kopf.zip">
