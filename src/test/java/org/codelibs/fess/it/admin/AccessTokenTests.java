@@ -43,7 +43,6 @@ public class AccessTokenTests extends ITBase {
     static void initAll() {
         RestAssured.baseURI = getFessUrl();
         settingTestToken();
-        clearTestData(NUM);
     }
 
     @BeforeEach
@@ -52,11 +51,11 @@ public class AccessTokenTests extends ITBase {
 
     @AfterEach
     void tearDown() {
+        clearTestData(NUM);
     }
 
     @AfterAll
     static void tearDownAll() {
-        clearTestData(NUM);
         deleteTestToken();
     }
 
@@ -68,7 +67,13 @@ public class AccessTokenTests extends ITBase {
         testDelete(NUM);
     }
 
+    @Test
+    void functionTest() {
+        testPermission();
+    }
+
     private void testCreate(int num) {
+        // Test: create setting api.
         for (int i = 0; i < num; i++) {
             final String name = NAME_PREFIX + i;
             final Map<String, Object> requestBody = new HashMap<>();
@@ -79,6 +84,7 @@ public class AccessTokenTests extends ITBase {
                     .body("response.status", equalTo(0));
         }
 
+        // Test: number of settings.
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", num * 2);
         given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
@@ -87,19 +93,32 @@ public class AccessTokenTests extends ITBase {
     }
 
     private void testRead(int num) {
+        // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", num * 2);
         String response =
                 given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
                         .get("/api/admin/accesstoken/settings").asString();
-        List<String> nameList = JsonPath.from(response).getList("response.settings.name");
-        assertEquals(num + 1, nameList.size());
-
+        List<String> nameList =
+                JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.name");
+        assertEquals(num, nameList.size());
         for (int i = 0; i < num; i++) {
             final String name = NAME_PREFIX + i;
             assertTrue(nameList.contains(name), name);
         }
 
+        response =
+                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
+                        .get("/api/admin/accesstoken/settings").asString();
+        List<String> idList = JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        idList.forEach(id -> {
+            // Test: get setting api
+            given().header("Authorization", getTestToken()).get("/api/admin/accesstoken/setting/" + id).then()
+                    .body("response.setting.id", equalTo(id)).body("response.setting.name", startsWith(NAME_PREFIX))
+                    .body("response.setting.token.length()", greaterThan(0));
+        });
+
+        // Test: paging
         searchBody.put("size", 1);
         for (int i = 0; i < num + 1; i++) {
             searchBody.put("page", i + 1);
@@ -109,6 +128,7 @@ public class AccessTokenTests extends ITBase {
     }
 
     private void testUpdate(int num) {
+        // Test: update settings api
         Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", num * 2);
         String response =
@@ -148,13 +168,33 @@ public class AccessTokenTests extends ITBase {
                         .get("/api/admin/accesstoken/settings").asString();
         List<String> idList = JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.id");
         idList.forEach(id -> {
+            //Test: delete setting api
             given().header("Authorization", getTestToken()).delete("/api/admin/accesstoken/setting/" + id).then()
                     .body("response.status", equalTo(0));
         });
 
+        // Test: number of settings.
         given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
                 .get("/api/admin/accesstoken/settings").then()
                 .body("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.size()", equalTo(0));
+    }
+
+    private void testPermission() {
+        // Create access token
+        final String name = NAME_PREFIX + 0;
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("name", name);
+        requestBody.put("permissions", "Radmin-api");
+        String response =
+                given().header("Authorization", getTestToken()).body(requestBody, ObjectMapperType.JACKSON_2).when()
+                        .put("/api/admin/accesstoken/setting").asString();
+
+        // Test: access admin api using a new token
+        String id = JsonPath.from(response).get("response.id");
+        response = given().header("Authorization", getTestToken()).when().get("/api/admin/accesstoken/setting/" + id).asString();
+        String token = JsonPath.from(response).get("response.setting.token");
+        given().header("Authorization", token).when().get("/api/admin/accesstoken/setting/" + id).then()
+                .body("response.setting.name", equalTo(name)).body("response.setting.token", equalTo(token));
     }
 
     private static void clearTestData(int num) {
