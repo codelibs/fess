@@ -407,4 +407,6 @@ public class Constants extends CoreLibConstants {
     public static final String CIPHER_PREFIX = "{cipher}";
 
     public static final String SYSTEM_USER = "system";
+
+    public static final String EMPTY_USER_ID = "<empty>";
 }

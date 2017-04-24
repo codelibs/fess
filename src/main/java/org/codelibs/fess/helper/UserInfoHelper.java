@@ -28,15 +28,17 @@ import javax.servlet.http.HttpSession;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.security.PrimaryCipher;
-import org.lastaflute.web.login.LoginManager;
+import org.lastaflute.web.login.TypicalUserBean;
+import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public class UserInfoHelper {
+    private static final String USER_BEAN = "lastaflute.action.USER_BEAN.FessUserBean";
+
     @Resource
     protected SearchLogHelper searchLogHelper;
 
@@ -60,11 +62,6 @@ public class UserInfoHelper {
             return userCode;
         }
 
-        userCode = getUserCodeFromUserBean(request);
-        if (StringUtil.isNotBlank(userCode)) {
-            return userCode;
-        }
-
         userCode = getUserCodeFromRequest(request);
         if (StringUtil.isNotBlank(userCode)) {
             return userCode;
@@ -76,7 +73,10 @@ public class UserInfoHelper {
 
         userCode = getUserCodeFromCookie(request);
         if (StringUtil.isBlank(userCode)) {
-            userCode = getId();
+            userCode = getUserCodeFromUserBean(request);
+            if (StringUtil.isBlank(userCode)) {
+                userCode = getId();
+            }
         }
 
         if (StringUtil.isNotBlank(userCode)) {
@@ -86,13 +86,9 @@ public class UserInfoHelper {
     }
 
     protected String getUserCodeFromUserBean(final HttpServletRequest request) {
-        final LoginManager loginManager = ComponentUtil.getComponent(LoginManager.class);
-        if (loginManager == null) {
-            return null;
-        }
-
+        final SessionManager sessionManager = ComponentUtil.getComponent(SessionManager.class);
         String userCode =
-                loginManager.getSavedUserBean().filter(u -> !FessUserBean.EMPTY_USER_ID.equals(u.getUserId()))
+                sessionManager.getAttribute(USER_BEAN, TypicalUserBean.class).filter(u -> !Constants.EMPTY_USER_ID.equals(u.getUserId()))
                         .map(u -> u.getUserId().toString()).orElse(StringUtil.EMPTY);
         if (StringUtil.isBlank(userCode)) {
             return null;
@@ -105,11 +101,15 @@ public class UserInfoHelper {
 
         userCode = cipher.encrypt(userCode);
         request.setAttribute(Constants.USER_CODE, userCode);
+        deleteUserCodeFromCookie(request);
+        return userCode;
+    }
+
+    public void deleteUserCodeFromCookie(final HttpServletRequest request) {
         final String cookieValue = getUserCodeFromCookie(request);
         if (cookieValue != null) {
             updateCookie(cookieValue, 0);
         }
-        return userCode;
     }
 
     protected String getUserCodeFromRequest(final HttpServletRequest request) {

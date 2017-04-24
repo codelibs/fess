@@ -53,6 +53,7 @@ public class LoginAction extends FessLoginAction {
         try {
             return fessLoginAssist.loginRedirect(new UserPasswordCredential(username, password), op -> {}, () -> {
                 activityHelper.login(getUserBean());
+                userInfoHelper.deleteUserCodeFromCookie(request);
                 return getHtmlResponse();
             });
         } catch (final LoginFailureException lfe) {

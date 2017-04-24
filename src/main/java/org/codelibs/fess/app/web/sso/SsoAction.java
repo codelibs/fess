@@ -55,6 +55,7 @@ public class SsoAction extends FessLoginAction {
         try {
             return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {
                 activityHelper.login(getUserBean());
+                userInfoHelper.deleteUserCodeFromCookie(request);
                 return getHtmlResponse();
             });
         } catch (final LoginFailureException lfe) {

@@ -43,6 +43,7 @@ public class LogoutAction extends FessSearchAction {
         getUserBean().map(u -> u.getUserId()).orElse("-");
         activityHelper.logout(getUserBean());
         fessLoginAssist.logout();
+        userInfoHelper.deleteUserCodeFromCookie(request);
         return redirect(LoginAction.class);
     }
 

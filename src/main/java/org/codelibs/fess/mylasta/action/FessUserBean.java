@@ -18,6 +18,7 @@ package org.codelibs.fess.mylasta.action;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.lastaflute.web.login.TypicalUserBean;
 
@@ -31,7 +32,6 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                          ==========
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
-    public static final String EMPTY_USER_ID = "<empty>";
     private final FessUser user;
 
     // ===================================================================================
@@ -100,7 +100,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
             @Override
             public String getUserId() {
-                return EMPTY_USER_ID;
+                return Constants.EMPTY_USER_ID;
             }
 
             @Override
