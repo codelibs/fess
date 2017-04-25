@@ -212,6 +212,10 @@
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
 					<charset>UTF-8</charset>
+					<locale>en_US</locale>
+					<windowtitle>Open Source Enterprise Search: Fess API</windowtitle>
+					<header>&lt;a href="http://fess.codelibs.org/"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
+					<footer>&lt;a href="http://fess.codelibs.org/"&gt;Open Source Enterprise Search Server: Fess&lt;/a&gt;</footer>
 				</configuration>
 			</plugin>
 			<plugin>
