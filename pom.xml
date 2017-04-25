@@ -18,7 +18,7 @@
 	</licenses>
 	<organization>
 		<name>CodeLibs</name>
-		<url>http://www.codelibs.org/</url>
+		<url>http://fess.codelibs.org/</url>
 	</organization>
 	<issueManagement>
 		<url>https://github.com/codelibs/fess/issues</url>
@@ -214,8 +214,16 @@
 					<charset>UTF-8</charset>
 					<locale>en_US</locale>
 					<windowtitle>Open Source Enterprise Search: Fess API</windowtitle>
-					<header>&lt;a href="http://fess.codelibs.org/"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
-					<footer>&lt;a href="http://fess.codelibs.org/"&gt;Open Source Enterprise Search Server: Fess&lt;/a&gt;</footer>
+					<header>&lt;a href="http://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
+					<footer>&lt;a href="http://fess.codelibs.org/" target="_blank"&gt;Open Source Enterprise Search Server: Fess&lt;/a&gt;</footer>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<docTitle>&lt;a href="http://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess Reference&lt;/a&gt;</docTitle>
+					<windowTitle>Open Source Enterprise Search: Fess Source Code Reference</windowTitle>
 				</configuration>
 			</plugin>
 			<plugin>
