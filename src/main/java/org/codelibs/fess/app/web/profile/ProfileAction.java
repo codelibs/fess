@@ -96,7 +96,7 @@ public class ProfileAction extends FessSearchAction {
     }
 
     protected HtmlResponse asIndexHtml() {
-        return getUserBean().map(u -> asHtml(path_Profile_IndexJsp).useForm(ProfileForm.class))
-                .orElseGet(() -> redirect(LoginAction.class));
+        return getUserBean().map(u -> asHtml(virtualHost(path_Profile_IndexJsp)).useForm(ProfileForm.class)).orElseGet(
+                () -> redirect(LoginAction.class));
     }
 }

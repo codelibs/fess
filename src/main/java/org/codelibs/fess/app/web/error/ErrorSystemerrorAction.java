@@ -35,6 +35,6 @@ public class ErrorSystemerrorAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index(final ErrorForm form) {
-        return asHtml(path_Error_SystemJsp);
+        return asHtml(virtualHost(path_Error_SystemJsp));
     }
 }

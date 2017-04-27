@@ -47,7 +47,7 @@ public class CacheAction extends FessSearchAction {
     //                                                                      ==============
     @Execute
     public ActionResponse index(final CacheForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
+        validate(form, messages -> {}, () -> asHtml(virtualHost(path_Error_ErrorJsp)));
         if (isLoginRequired()) {
             return redirectToLogin();
         }

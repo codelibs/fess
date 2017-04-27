@@ -37,7 +37,7 @@ public class LoginAction extends FessLoginAction {
         if (form != null) {
             form.clearSecurityInfo();
         }
-        return asHtml(path_Login_IndexJsp).renderWith(data -> {
+        return asHtml(virtualHost(path_Login_IndexJsp)).renderWith(data -> {
             RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
             saveToken();
         });

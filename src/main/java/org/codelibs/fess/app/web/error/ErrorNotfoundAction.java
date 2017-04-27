@@ -35,6 +35,6 @@ public class ErrorNotfoundAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index(final ErrorForm form) {
-        return asHtml(path_Error_NotFoundJsp);
+        return asHtml(virtualHost(path_Error_NotFoundJsp));
     }
 }

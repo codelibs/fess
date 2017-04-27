@@ -40,7 +40,7 @@ public class RootAction extends FessSearchAction {
             return redirectToLogin();
         }
 
-        return asHtml(path_IndexJsp).useForm(SearchForm.class, op -> {
+        return asHtml(virtualHost(path_IndexJsp)).useForm(SearchForm.class, op -> {
             op.setup(form -> {
                 buildFormParams(form);
             });

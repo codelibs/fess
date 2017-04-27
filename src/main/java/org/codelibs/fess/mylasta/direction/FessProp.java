@@ -52,6 +52,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.JobConcurrentExec;
+import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.RequiredValidator;
 import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
@@ -60,6 +61,8 @@ import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
+
+    public static final String VIRTUAL_HOST_HEADERS = "virtualHostHeaders";
 
     public static final String QUERY_COLLAPSE_INNER_HITS_SORTS = "queryCollapseInnerHitsSorts";
 
@@ -1552,4 +1555,33 @@ public interface FessProp {
         return ot;
     }
 
+    String getVirtualHostHeaders();
+
+    @SuppressWarnings("unchecked")
+    public default HtmlNext getVirtualHostPath(final HtmlNext page) {
+        Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
+        if (hosts == null) {
+            hosts = split(getVirtualHostHeaders(), "\n").get(stream -> stream.map(s -> {
+                final String[] v1 = s.split("=");
+                if (v1.length == 2) {
+                    final String[] v2 = v1[0].split(":");
+                    if (v2.length == 2) {
+                        return new Tuple3<String, String, String>(v2[0].trim(), v2[0].trim(), "/" + v1[1].trim());
+                    }
+                }
+                return null;
+            }).filter(v -> v != null).toArray(n -> new Tuple3[n]));
+            propMap.put(VIRTUAL_HOST_HEADERS, hosts);
+        }
+        final Tuple3<String, String, String>[] vHosts = hosts;
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            for (Tuple3<String, String, String> host : vHosts) {
+                final String headerValue = req.getHeader(host.getValue1());
+                if (host.getValue2().equalsIgnoreCase(headerValue)) {
+                    return new HtmlNext(host.getValue3() + page.getRoutingPath());
+                }
+            }
+            return page;
+        }).orElse(page);
+    }
 }

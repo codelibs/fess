@@ -21,7 +21,7 @@ import org.lastaflute.web.response.HtmlResponse;
 
 public abstract class FessLoginAction extends FessSearchAction {
     protected HtmlResponse getHtmlResponse() {
-        return getUserBean().map(user -> redirectByUser(user)).orElse(asHtml(path_Login_IndexJsp));
+        return getUserBean().map(user -> redirectByUser(user)).orElse(asHtml(virtualHost(path_Login_IndexJsp)));
     }
 
     protected HtmlResponse redirectByUser(final FessUserBean user) {

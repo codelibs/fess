@@ -136,6 +136,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. Radmin-api */
     String API_ADMIN_ACCESS_PERMISSIONS = "api.admin.access.permissions";
 
+    /** The key of the configuration. e.g.  */
+    String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -1444,6 +1447,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiAdminAccessPermissions();
+
+    /**
+     * Get the value for the key 'virtual.host.headers'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getVirtualHostHeaders();
+
+    /**
+     * Get the value for the key 'virtual.host.headers' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getVirtualHostHeadersAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -4961,6 +4979,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getApiAdminAccessPermissions() {
             return get(FessConfig.API_ADMIN_ACCESS_PERMISSIONS);
+        }
+
+        public String getVirtualHostHeaders() {
+            return get(FessConfig.VIRTUAL_HOST_HEADERS);
+        }
+
+        public Integer getVirtualHostHeadersAsInteger() {
+            return getAsInteger(FessConfig.VIRTUAL_HOST_HEADERS);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {

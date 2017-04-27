@@ -98,7 +98,7 @@ public class SearchAction extends FessSearchAction {
     }
 
     protected HtmlResponse doSearch(final SearchForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_SearchJsp));
+        validate(form, messages -> {}, () -> asHtml(virtualHost(path_SearchJsp)));
         if (isLoginRequired()) {
             return redirectToLogin();
         }
@@ -126,7 +126,7 @@ public class SearchAction extends FessSearchAction {
             request.setAttribute(Constants.REQUEST_QUERIES, form.q);
             final WebRenderData renderData = new WebRenderData();
             searchService.search(form, renderData, getUserBean());
-            return asHtml(path_SearchJsp).renderWith(data -> {
+            return asHtml(virtualHost(path_SearchJsp)).renderWith(data -> {
                 renderData.register(data);
                 // favorite or thumbnail
                     if (favoriteSupport || thumbnailSupport) {

@@ -34,6 +34,6 @@ public class ErrorAction extends FessSearchAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final ErrorForm form) {
-        return asHtml(path_Error_ErrorJsp);
+        return asHtml(virtualHost(path_Error_ErrorJsp));
     }
 }

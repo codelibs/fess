@@ -45,7 +45,7 @@ public class HelpAction extends FessSearchAction {
             return redirectToLogin();
         }
 
-        return asHtml(path_HelpJsp).useForm(SearchForm.class, op -> {
+        return asHtml(virtualHost(path_HelpJsp)).useForm(SearchForm.class, op -> {
             op.setup(form -> {
                 buildFormParams(form);
             });
