@@ -9,6 +9,9 @@
 		<postConstruct name="add">
 			<arg>msofficeThumbnailGenerator</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>pdfThumbnailGenerator</arg>
+		</postConstruct>
 	</component>
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.WebDriverGenerator">
 		<property name="name">"htmlThumbnailGenerator"</property>
@@ -94,6 +97,23 @@
 		<postConstruct name="addCondition">
 			<arg>"mimetype"</arg>
 			<arg>"application/rtf"
+			</arg>
+		</postConstruct>
+	</component>
+	<component name="pdfThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+		<property name="name">"pdfThumbnailGenerator"</property>
+		<property name="commandList">
+			["${path}/generate-thumbnail",
+			"pdf",
+			"${url}",
+			"${outputFile}"]
+		</property>
+		<property name="generatorList">
+			["${path}/generate-thumbnail"]
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/pdf"
 			</arg>
 		</postConstruct>
 	</component>
