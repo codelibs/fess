@@ -74,11 +74,11 @@ public class Constants extends CoreLibConstants {
 
     public static final int DEFAULT_INTERVAL_TIME_FOR_FS = 1000;
 
-    public static final int DEFAULT_INTERVAL_TIME_FOR_WEB = 30000;
+    public static final int DEFAULT_INTERVAL_TIME_FOR_WEB = 10000;
 
     public static final int DEFAULT_NUM_OF_THREAD_FOR_FS = 5;
 
-    public static final int DEFAULT_NUM_OF_THREAD_FOR_WEB = 3;
+    public static final int DEFAULT_NUM_OF_THREAD_FOR_WEB = 1;
 
     public static final long DEFAULT_CRAWLING_EXECUTION_INTERVAL = 5000L;
 
