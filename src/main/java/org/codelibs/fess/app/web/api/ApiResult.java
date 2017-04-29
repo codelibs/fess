@@ -150,16 +150,68 @@ public class ApiResult {
     }
 
     public static class ApiLogFilesResponse extends ApiResponse {
-        protected List<Map<String, Object>> logfiles;
+        protected List<Map<String, Object>> files;
         protected long total = 0;
 
-        public ApiLogFilesResponse logfiles(final List<Map<String, Object>> logfiles) {
-            this.logfiles = logfiles;
+        public ApiLogFilesResponse files(final List<Map<String, Object>> files) {
+            this.files = files;
             return this;
         }
 
         public ApiLogFilesResponse total(final long total) {
             this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiBackupFilesResponse extends ApiResponse {
+        protected List<Map<String, String>> files;
+        protected long total = 0;
+
+        public ApiBackupFilesResponse files(final List<Map<String, String>> files) {
+            this.files = files;
+            return this;
+        }
+
+        public ApiBackupFilesResponse total(final long total) {
+            this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiSystemInfoResponse extends ApiResponse {
+        protected List<Map<String, String>> envProps;
+        protected List<Map<String, String>> systemProps;
+        protected List<Map<String, String>> fessProps;
+        protected List<Map<String, String>> bugReportProps;
+
+        public ApiSystemInfoResponse envProps(final List<Map<String, String>> envProps) {
+            this.envProps = envProps;
+            return this;
+        }
+
+        public ApiSystemInfoResponse systemProps(final List<Map<String, String>> systemProps) {
+            this.systemProps = systemProps;
+            return this;
+        }
+
+        public ApiSystemInfoResponse fessProps(final List<Map<String, String>> fessProps) {
+            this.fessProps = fessProps;
+            return this;
+        }
+
+        public ApiSystemInfoResponse bugReportProps(final List<Map<String, String>> bugReportProps) {
+            this.bugReportProps = bugReportProps;
             return this;
         }
 
