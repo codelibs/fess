@@ -150,11 +150,11 @@ public class ApiResult {
     }
 
     public static class ApiLogFilesResponse extends ApiResponse {
-        protected List<Map<String, Object>> logfiles;
+        protected List<Map<String, Object>> files;
         protected long total = 0;
 
-        public ApiLogFilesResponse logfiles(final List<Map<String, Object>> logfiles) {
-            this.logfiles = logfiles;
+        public ApiLogFilesResponse files(final List<Map<String, Object>> files) {
+            this.files = files;
             return this;
         }
 
@@ -169,16 +169,16 @@ public class ApiResult {
         }
     }
 
-    public static class ApiFilesResponse extends ApiResponse {
+    public static class ApiBackupFilesResponse extends ApiResponse {
         protected List<Map<String, String>> files;
         protected long total = 0;
 
-        public ApiFilesResponse backupfiles(final List<Map<String, String>> files) {
+        public ApiBackupFilesResponse files(final List<Map<String, String>> files) {
             this.files = files;
             return this;
         }
 
-        public ApiFilesResponse total(final long total) {
+        public ApiBackupFilesResponse total(final long total) {
             this.total = total;
             return this;
         }

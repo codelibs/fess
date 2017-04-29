@@ -42,16 +42,16 @@ public class ApiAdminLogAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
-    // GET /api/admin/log/logfiles
+    // GET /api/admin/log/files
     @Execute
-    public JsonResponse<ApiResult> logfiles() {
+    public JsonResponse<ApiResult> files() {
         final List<Map<String, Object>> list = getLogFileItems();
-        return asJson(new ApiResult.ApiLogFilesResponse().logfiles(list).total(list.size()).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiLogFilesResponse().files(list).total(list.size()).status(ApiResult.Status.OK).result());
     }
 
-    // GET /api/admin/log/logfile/{id}
+    // GET /api/admin/log/file/{id}
     @Execute
-    public StreamResponse get$logfile(final String id) {
+    public StreamResponse get$file(final String id) {
         final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {

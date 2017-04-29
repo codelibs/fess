@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.api.ApiResult;
-import org.codelibs.fess.app.web.api.ApiResult.ApiFilesResponse;
+import org.codelibs.fess.app.web.api.ApiResult.ApiBackupFilesResponse;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -57,7 +57,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> files() {
         final List<Map<String, String>> list = getBackupItems();
-        return asJson(new ApiFilesResponse().backupfiles(list).total(list.size()).status(ApiResult.Status.OK).result());
+        return asJson(new ApiBackupFilesResponse().files(list).total(list.size()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/backup/file/{id}
