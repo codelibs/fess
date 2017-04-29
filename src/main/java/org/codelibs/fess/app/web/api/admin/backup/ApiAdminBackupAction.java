@@ -1,0 +1,132 @@
+/*
+ * Copyright 2012-2017 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.app.web.api.admin.backup;
+
+import static org.codelibs.core.stream.StreamUtil.stream;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.CSV_EXTENTION;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getBackupItems;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getClickLogCsvWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFavoriteLogCsvWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchFieldLogCsvWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchLogCsvWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getUserInfoCsvWriteCall;
+
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import org.codelibs.elasticsearch.runner.net.Curl;
+import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.api.ApiResult.ApiFilesResponse;
+import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ResourceUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.response.JsonResponse;
+import org.lastaflute.web.response.StreamResponse;
+
+import com.orangesignal.csv.CsvConfig;
+import com.orangesignal.csv.CsvWriter;
+
+/**
+ * @author Keiichi Watanabe
+ */
+public class ApiAdminBackupAction extends FessApiAdminAction {
+
+    // GET /api/admin/backup/files
+    @Execute
+    public JsonResponse<ApiResult> files() {
+        final List<Map<String, String>> list = getBackupItems();
+        return asJson(new ApiFilesResponse().backupfiles(list).total(list.size()).status(ApiResult.Status.OK).result());
+    }
+
+    // GET /api/admin/backup/file/{id}
+    @Execute
+    public StreamResponse get$file(final String id) {
+        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
+            if (id.equals("system.properties")) {
+                return asStream(id).contentTypeOctetStream().stream(out -> {
+                    try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                        ComponentUtil.getSystemProperties().store(baos, id);
+                        try (final InputStream in = new ByteArrayInputStream(baos.toByteArray())) {
+                            out.write(in);
+                        }
+                    }
+                });
+            } else if (id.endsWith(CSV_EXTENTION)) {
+                final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
+                if ("search_log".equals(name)) {
+                    return writeCsvResponse(id, getSearchLogCsvWriteCall());
+                } else if ("search_field_log".equals(name)) {
+                    return writeCsvResponse(id, getSearchFieldLogCsvWriteCall());
+                } else if ("user_info".equals(name)) {
+                    return writeCsvResponse(id, getUserInfoCsvWriteCall());
+                } else if ("click_log".equals(name)) {
+                    return writeCsvResponse(id, getClickLogCsvWriteCall());
+                } else if ("favorite_log".equals(name)) {
+                    return writeCsvResponse(id, getFavoriteLogCsvWriteCall());
+                }
+            } else {
+                final String index;
+                final String filename;
+                if (id.endsWith(".bulk")) {
+                    index = id.substring(0, id.length() - 5);
+                    filename = id;
+                } else {
+                    index = id;
+                    filename = id + ".bulk";
+                }
+                return asStream(filename).contentTypeOctetStream().stream(
+                        out -> {
+                            try (CurlResponse response =
+                                    Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/" + index + "/_data")
+                                            .header("Content-Type", "application/json").param("format", "json").execute()) {
+                                out.write(response.getContentAsStream());
+                            }
+                        });
+            }
+        }
+
+        throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL));
+        return StreamResponse.asEmptyBody(); // no-op
+    }
+
+    private StreamResponse writeCsvResponse(final String id, final Consumer<CsvWriter> writeCall) {
+        return asStream(id)
+                .contentTypeOctetStream()
+                .header("Pragma", "no-cache")
+                .header("Cache-Control", "no-cache")
+                .header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT")
+                .stream(out -> {
+                    final CsvConfig cfg = new CsvConfig(',', '"', '"');
+                    cfg.setEscapeDisabled(false);
+                    cfg.setQuoteDisabled(false);
+                    try (final CsvWriter writer =
+                            new CsvWriter(new BufferedWriter(new OutputStreamWriter(out.stream(), fessConfig.getCsvFileEncoding())), cfg)) {
+                        writeCall.accept(writer);
+                        writer.flush();
+                    }
+                });
+    }
+}

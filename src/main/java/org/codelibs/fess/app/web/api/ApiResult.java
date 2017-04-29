@@ -169,6 +169,26 @@ public class ApiResult {
         }
     }
 
+    public static class ApiFilesResponse extends ApiResponse {
+        protected List<Map<String, String>> files;
+        protected long total = 0;
+
+        public ApiFilesResponse backupfiles(final List<Map<String, String>> files) {
+            this.files = files;
+            return this;
+        }
+
+        public ApiFilesResponse total(final long total) {
+            this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
     public static class ApiErrorResponse extends ApiResponse {
         protected String message;
 

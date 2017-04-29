@@ -46,6 +46,7 @@ import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
@@ -69,7 +70,7 @@ public class AdminBackupAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminBackupAction.class);
 
-    private static final String CSV_EXTENTION = ".csv";
+    public static final String CSV_EXTENTION = ".csv";
 
     private static final DateTimeFormatter ISO_8601_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
@@ -139,15 +140,15 @@ public class AdminBackupAction extends FessAdminAction {
             } else if (id.endsWith(CSV_EXTENTION)) {
                 final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
-                    return writeSearchLogCsvResponse(id);
+                    return writeCsvResponse(id, getSearchLogCsvWriteCall());
                 } else if ("search_field_log".equals(name)) {
-                    return writeSearchFieldLogCsvResponse(id);
+                    return writeCsvResponse(id, getSearchFieldLogCsvWriteCall());
                 } else if ("user_info".equals(name)) {
-                    return writeUserInfoCsvResponse(id);
+                    return writeCsvResponse(id, getUserInfoCsvWriteCall());
                 } else if ("click_log".equals(name)) {
-                    return writeClickLogCsvResponse(id);
+                    return writeCsvResponse(id, getClickLogCsvWriteCall());
                 } else if ("favorite_log".equals(name)) {
-                    return writeFavoriteLogCsvResponse(id);
+                    return writeCsvResponse(id, getFavoriteLogCsvWriteCall());
                 }
             } else {
                 final String index;
@@ -195,8 +196,8 @@ public class AdminBackupAction extends FessAdminAction {
                 });
     }
 
-    private StreamResponse writeSearchLogCsvResponse(final String id) {
-        return writeCsvResponse(id, writer -> {
+    public static Consumer<CsvWriter> getSearchLogCsvWriteCall() {
+        return writer -> {
             final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -226,11 +227,11 @@ public class AdminBackupAction extends FessAdminAction {
                     throw new RuntimeIOException(e);
                 }
             });
-        });
+        };
     }
 
-    private StreamResponse writeUserInfoCsvResponse(final String id) {
-        return writeCsvResponse(id, writer -> {
+    public static Consumer<CsvWriter> getUserInfoCsvWriteCall() {
+        return writer -> {
             final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -245,11 +246,11 @@ public class AdminBackupAction extends FessAdminAction {
                     throw new RuntimeIOException(e);
                 }
             });
-        });
+        };
     }
 
-    private StreamResponse writeFavoriteLogCsvResponse(final String id) {
-        return writeCsvResponse(id, writer -> {
+    public static Consumer<CsvWriter> getFavoriteLogCsvWriteCall() {
+        return writer -> {
             final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -267,11 +268,11 @@ public class AdminBackupAction extends FessAdminAction {
                     throw new RuntimeIOException(e);
                 }
             });
-        });
+        };
     }
 
-    private StreamResponse writeClickLogCsvResponse(final String id) {
-        return writeCsvResponse(id, writer -> {
+    public static Consumer<CsvWriter> getClickLogCsvWriteCall() {
+        return writer -> {
             final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -291,11 +292,11 @@ public class AdminBackupAction extends FessAdminAction {
                     throw new RuntimeIOException(e);
                 }
             });
-        });
+        };
     }
 
-    private StreamResponse writeSearchFieldLogCsvResponse(final String id) {
-        return writeCsvResponse(id, writer -> {
+    public static Consumer<CsvWriter> getSearchFieldLogCsvWriteCall() {
+        return writer -> {
             final SearchFieldLogBhv bhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
@@ -311,10 +312,10 @@ public class AdminBackupAction extends FessAdminAction {
                     throw new RuntimeIOException(e);
                 }
             });
-        });
+        };
     }
 
-    private void addToList(final Object value, final List<String> list) {
+    private static void addToList(final Object value, final List<String> list) {
         if (value == null) {
             list.add(StringUtil.EMPTY);
         } else if (value instanceof LocalDateTime) {
@@ -326,7 +327,8 @@ public class AdminBackupAction extends FessAdminAction {
         }
     }
 
-    private List<Map<String, String>> getBackupItems() {
+    static public List<Map<String, String>> getBackupItems() {
+        FessConfig fessConfig = ComponentUtil.getFessConfig();
         return stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.map(name -> {
             final Map<String, String> map = new HashMap<>();
             map.put("id", name);
