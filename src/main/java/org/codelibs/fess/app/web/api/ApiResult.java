@@ -189,6 +189,38 @@ public class ApiResult {
         }
     }
 
+    public static class ApiSystemInfoResponse extends ApiResponse {
+        protected List<Map<String, String>> envProps;
+        protected List<Map<String, String>> systemProps;
+        protected List<Map<String, String>> fessProps;
+        protected List<Map<String, String>> bugReportProps;
+
+        public ApiSystemInfoResponse envProps(final List<Map<String, String>> envProps) {
+            this.envProps = envProps;
+            return this;
+        }
+
+        public ApiSystemInfoResponse systemProps(final List<Map<String, String>> systemProps) {
+            this.systemProps = systemProps;
+            return this;
+        }
+
+        public ApiSystemInfoResponse fessProps(final List<Map<String, String>> fessProps) {
+            this.fessProps = fessProps;
+            return this;
+        }
+
+        public ApiSystemInfoResponse bugReportProps(final List<Map<String, String>> bugReportProps) {
+            this.bugReportProps = bugReportProps;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
     public static class ApiErrorResponse extends ApiResponse {
         protected String message;
 
