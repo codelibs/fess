@@ -105,11 +105,9 @@ public class CreateForm {
     @ValidateTypeFailure
     public Integer sortOrder;
 
-    @Required
     @Size(max = 1000)
     public String createdBy;
 
-    @Required
     @ValidateTypeFailure
     public Long createdTime;
 

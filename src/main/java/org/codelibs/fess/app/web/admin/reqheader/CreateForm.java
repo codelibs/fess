@@ -44,11 +44,9 @@ public class CreateForm {
     @Size(max = 1000)
     public String webConfigId;
 
-    @Required
     @Size(max = 1000)
     public String createdBy;
 
-    @Required
     @ValidateTypeFailure
     public Long createdTime;
 

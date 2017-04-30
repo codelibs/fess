@@ -56,7 +56,6 @@ public class CreateForm {
     @Size(max = 255)
     public String createdBy;
 
-    @Required
     @ValidateTypeFailure
     public Long createdTime;
 

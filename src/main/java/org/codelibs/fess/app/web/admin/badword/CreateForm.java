@@ -33,11 +33,9 @@ public class CreateForm {
     @Required
     public String suggestWord;
 
-    @Required
     @Size(max = 1000)
     public String createdBy;
 
-    @Required
     @ValidateTypeFailure
     public Long createdTime;
 
