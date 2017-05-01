@@ -48,7 +48,7 @@
 										<div class="col-sm-9">
 											<c:if test="${crudMode == 1}">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text styleId="name" property="name" styleClass="form-control" />
 											</c:if><c:if test="${crudMode == 2}">
 											${f:h(name)}<la:hidden property="name" />
 											</c:if>

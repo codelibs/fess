@@ -96,7 +96,7 @@
 												key="labels.dict_protwords_source" /></label>
 										<div class="col-sm-9">
 											<la:errors property="input" />
-											<la:text property="input"
+											<la:text styleId="input" property="input"
 												styleClass="form-control" />
 										</div>
 									</div>

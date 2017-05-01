@@ -49,7 +49,7 @@
 												key="labels.reqheader_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.reqheader_value" /></label>
 										<div class="col-sm-9">
 											<la:errors property="value" />
-											<la:text property="value" styleClass="form-control" />
+											<la:text styleId="value" property="value" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -65,7 +65,7 @@
 												key="labels.reqheader_web_crawling_config" /></label>
 										<div class="col-sm-9">
 											<la:errors property="webConfigId" />
-											<la:select property="webConfigId" styleClass="form-control">
+											<la:select styleId="webConfigId" property="webConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${webConfigItems}">
 													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 												</c:forEach>

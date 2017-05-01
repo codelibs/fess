@@ -96,7 +96,7 @@
 												key="labels.dict_mapping_source" /></label>
 										<div class="col-sm-9">
 											<la:errors property="inputs" />
-											<la:textarea property="inputs" rows="5"
+											<la:textarea styleId="inputs" property="inputs" rows="5"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -105,7 +105,7 @@
 												key="labels.dict_mapping_target" /></label>
 										<div class="col-sm-9">
 											<la:errors property="output" />
-											<la:text property="output" styleClass="form-control" />
+											<la:text styleId="output" property="output" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

@@ -41,7 +41,7 @@
 										<h4>${f:h(fileName)}</h4>
 										<div>
 											<la:errors property="content" />
-											<la:textarea property="content" rows="20"
+											<la:textarea styleId="content" property="content" rows="20"
 												styleClass="form-control"></la:textarea>
 										</div>
 									</div>

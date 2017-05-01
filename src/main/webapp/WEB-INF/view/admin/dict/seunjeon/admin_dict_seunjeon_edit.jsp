@@ -96,7 +96,7 @@
 												key="labels.dict_seunjeon_source" /></label>
 										<div class="col-sm-9">
 											<la:errors property="inputs" />
-											<la:text property="inputs"
+											<la:text styleId="inputs" property="inputs"
 												styleClass="form-control" />
 										</div>
 									</div>

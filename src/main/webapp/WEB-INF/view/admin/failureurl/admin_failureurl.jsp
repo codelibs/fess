@@ -44,7 +44,7 @@
 										<label for="url" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_url" /></label>
 										<div class="col-sm-10">
-											<la:text property="url" styleClass="form-control"></la:text>
+											<la:text styleId="url" property="url" styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group row">
@@ -52,14 +52,14 @@
 												key="labels.failure_url_search_error_count" /></label>
 										<div class="col-xs-2">
 											<la:errors property="errorCountMin" />
-											<input type="number" name="errorCountMin"
+											<input type="number" name="errorCountMin" id="errorCountMin"
 												value="${f:h(errorCountMin)}" class="form-control"
 												min="0" max="100000">
 										</div>
 										<div class="pull-left">-</div>
 										<div class="col-xs-2">
 											<la:errors property="errorCountMax" />
-											<input type="number" name="errorCountMax"
+											<input type="number" name="errorCountMax" id="errorCountMax"
 												value="${f:h(errorCountMax)}" class="form-control"
 												min="0" max="100000">
 										</div>
@@ -68,7 +68,7 @@
 										<label for="errorName" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_name" /></label>
 										<div class="col-sm-10">
-											<la:text property="errorName" styleClass="form-control"></la:text>
+											<la:text styleId="errorName" property="errorName" styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group">

@@ -96,7 +96,7 @@
 												key="labels.dict_kuromoji_token" /></label>
 										<div class="col-sm-9">
 											<la:errors property="token" />
-											<la:text property="token" styleClass="form-control" />
+											<la:text styleId="token" property="token" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -104,7 +104,7 @@
 												key="labels.dict_kuromoji_segmentation" /></label>
 										<div class="col-sm-9">
 											<la:errors property="segmentation" />
-											<la:text property="segmentation" styleClass="form-control" />
+											<la:text styleId="segmentation" property="segmentation" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -112,7 +112,7 @@
 												key="labels.dict_kuromoji_reading" /></label>
 										<div class="col-sm-9">
 											<la:errors property="reading" />
-											<la:text property="reading" styleClass="form-control" />
+											<la:text styleId="reading" property="reading" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -120,7 +120,7 @@
 												key="labels.dict_kuromoji_pos" /></label>
 										<div class="col-sm-9">
 											<la:errors property="pos" />
-											<la:text property="pos" styleClass="form-control" />
+											<la:text styleId="pos" property="pos" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

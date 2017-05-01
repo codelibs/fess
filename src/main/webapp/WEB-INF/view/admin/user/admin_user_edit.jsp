@@ -48,7 +48,7 @@
 										<div class="col-sm-9">
 											<la:errors property="name" />
 											<c:if test="${crudMode==1}">
-												<la:text property="name" styleClass="form-control" />
+												<la:text styleId="name" property="name" styleClass="form-control" />
 											</c:if>
 											<c:if test="${crudMode==2}">
 											${f:h(name)}
@@ -61,7 +61,7 @@
 												key="labels.user_password" /></label>
 										<div class="col-sm-9">
 											<la:errors property="password" />
-											<la:password property="password" styleClass="form-control" />
+											<la:password styleId="password" property="password" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -69,7 +69,7 @@
 												key="labels.user_confirm_password" /></label>
 										<div class="col-sm-9">
 											<la:errors property="confirmPassword" />
-											<la:password property="confirmPassword"
+											<la:password styleId="confirmPassword" property="confirmPassword"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -368,7 +368,7 @@
 												key="labels.roles" /></label>
 										<div class="col-sm-9">
 											<la:errors property="roles" />
-											<la:select property="roles" multiple="true"
+											<la:select styleId="roles" property="roles" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${roleItems}">
 													<la:option value="${l.id}">${f:h(l.name)}</la:option>
@@ -381,7 +381,7 @@
 												key="labels.groups" /></label>
 										<div class="col-sm-9">
 											<la:errors property="groups" />
-											<la:select property="groups" multiple="true"
+											<la:select styleId="groups" property="groups" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${groupItems}">
 													<la:option value="${l.id}">${f:h(l.name)}</la:option>

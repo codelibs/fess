@@ -39,7 +39,7 @@
 								<div class="box-body">
 									<div class="form-group">
 										<la:errors property="fileName" />
-										<la:select property="fileName" styleClass="form-control">
+										<la:select styleId="fileName" property="fileName" styleClass="form-control">
 											<c:forEach var="item" varStatus="s" items="${fileNameItems}">
 												<la:option value="${item}">${f:h(item)}</la:option>
 											</c:forEach>
@@ -108,7 +108,7 @@
 								<div class="box-body">
 									<div class="form-group">
 										<la:errors property="fileName" />
-										<la:select property="fileName" styleClass="form-control">
+										<la:select styleId="fileName" property="fileName" styleClass="form-control">
 											<la:option value="index">
 												<la:message key="labels.design_file_index" />
 											</la:option>
@@ -206,7 +206,7 @@
 												key="labels.design_file_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="designFileName" />
-											<la:text property="designFileName" styleClass="form-control" />
+											<la:text styleId="designFileName" property="designFileName" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

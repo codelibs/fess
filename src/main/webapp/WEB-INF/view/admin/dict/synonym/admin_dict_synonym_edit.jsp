@@ -96,7 +96,7 @@
 												key="labels.dict_synonym_source" /></label>
 										<div class="col-sm-9">
 											<la:errors property="inputs" />
-											<la:textarea property="inputs" rows="5"
+											<la:textarea styleId="inputs" property="inputs" rows="5"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -105,7 +105,7 @@
 												key="labels.dict_synonym_target" /></label>
 										<div class="col-sm-9">
 											<la:errors property="outputs" />
-											<la:textarea property="outputs" rows="5"
+											<la:textarea styleId="outputs" property="outputs" rows="5"
 												styleClass="form-control" />
 										</div>
 									</div>
