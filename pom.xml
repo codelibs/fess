@@ -40,9 +40,9 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.2</dbflute.version>
-		<lastaflute.version>0.9.5</lastaflute.version>
+		<lastaflute.version>0.9.6</lastaflute.version>
 		<lasta.taglib.version>0.7.1</lasta.taglib.version>
-		<lasta.job.version>0.4.5</lasta.job.version>
+		<lasta.job.version>0.4.6</lasta.job.version>
 		<mailflute.version>0.5.2</mailflute.version>
 
 		<!-- Partner Library -->
@@ -57,7 +57,7 @@
 		<junit.jupiter.version>5.0.0-M4</junit.jupiter.version>
 		<junit.vintage.version>${junit.version}.0-M4</junit.vintage.version>
 		<junit.platform.version>1.0.0-M4</junit.platform.version>
-		<utflute.version>0.7.3</utflute.version>
+		<utflute.version>0.7.5</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>1.2.0-SNAPSHOT</crawler.version>
@@ -71,8 +71,8 @@
 		<cluster.runner.version>5.3.2.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.13</tomcat.version>
-		<tomcat.boot.version>0.5.1</tomcat.boot.version>
+		<tomcat.version>8.5.14</tomcat.version>
+		<tomcat.boot.version>0.5.4</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
