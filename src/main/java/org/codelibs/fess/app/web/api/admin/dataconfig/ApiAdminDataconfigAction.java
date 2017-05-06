@@ -57,6 +57,8 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
         final DataConfigPager pager = new DataConfigPager();
+        pager.setPageSize(body.size);
+        pager.setCurrentPageNumber(body.page);
         copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         final List<DataConfig> list = dataConfigService.getDataConfigList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
