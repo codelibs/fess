@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.webconfig;
 
-import org.codelibs.fess.app.web.admin.webconfig.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
 
 }
