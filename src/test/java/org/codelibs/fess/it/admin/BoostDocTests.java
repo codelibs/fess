@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,123 +24,111 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.it.ITBase;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import io.restassured.RestAssured;
-import io.restassured.mapper.ObjectMapperType;
-import io.restassured.path.json.JsonPath;
-
 @Tag("it")
-public class BoostDocTests extends ITBase {
-    private static final String NAME_PREFIX = "boostDocTest_";
+public class BoostDocTests extends CrudTestBase {
+
     private static final int NUM = 20;
 
-    @BeforeAll
-    static void initAll() {
-        RestAssured.baseURI = getFessUrl();
-        settingTestToken();
+    private static final String NAME_PREFIX = "boostDocTest_";
+    private static final String API_PATH = "/api/admin/boostdoc";
+    private static final String LIST_ENDPOINT_SUFFIX = "settings";
+    private static final String ITEM_ENDPOINT_SUFFIX = "setting";
+
+    private static final String KEY_PROPERTY = "url_expr";
+
+    @Override
+    protected String getNamePrefix() {
+        return NAME_PREFIX;
     }
 
-    @BeforeEach
-    void init() {
+    @Override
+    protected String getApiPath() {
+        return API_PATH;
     }
 
-    @AfterEach
-    void tearDown() {
-        clearTestData(NUM);
+    @Override
+    protected String getKeyProperty() {
+        return KEY_PROPERTY;
     }
 
-    @AfterAll
-    static void tearDownAll() {
-        deleteTestToken();
+    @Override
+    protected String getListEndpointSuffix() {
+        return LIST_ENDPOINT_SUFFIX;
+    }
+
+    @Override
+    protected String getItemEndpointSuffix() {
+        return ITEM_ENDPOINT_SUFFIX;
     }
 
     @Test
     void crudTest() {
-        testCreate(NUM);
-        testRead(NUM);
-        testUpdate(NUM);
-        testDelete(NUM);
+        testCreate();
+        testRead();
+        testUpdate();
+        testDelete();
     }
 
-    @Test
-    void functionTest() {
-        // TODO
-    }
-
-    private void testCreate(int num) {
+    @Override
+    protected void testCreate() {
         // Test: create setting api.
-        for (int i = 0; i < num; i++) {
-            final String url_expr = NAME_PREFIX + i;
+        for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
+            final String url_expr = NAME_PREFIX + i;
             requestBody.put("url_expr", url_expr);
             requestBody.put("boost_expr", new Integer(i).toString());
             requestBody.put("sort_order", i);
-            requestBody.put("created_time", 0); // Dummy
-            requestBody.put("created_by", "IntegrationTest");
-            given().header("Authorization", getTestToken()).body(requestBody, ObjectMapperType.JACKSON_2).when()
-                    .put("/api/admin/boostdoc/setting").then().body("response.created", equalTo(true)).body("response.status", equalTo(0));
+
+            checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
+                    .body("response.status", equalTo(0));
         }
 
         // Test: number of settings.
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                .get("/api/admin/boostdoc/settings").then()
-                .body("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.size()", equalTo(num));
+        searchBody.put("size", NUM * 2);
+        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(NUM));
     }
 
-    private void testRead(int num) {
+    @Override
+    protected void testRead() {
         // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/boostdoc/settings").asString();
-        List<String> nameList =
-                JsonPath.from(response).getList("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.url_expr");
-        assertEquals(num, nameList.size());
-        for (int i = 0; i < num; i++) {
+        searchBody.put("size", NUM * 2);
+        List<String> nameList = getPropList(searchBody, "url_expr");
+
+        assertEquals(NUM, nameList.size());
+        for (int i = 0; i < NUM; i++) {
             final String name = NAME_PREFIX + i;
             assertTrue(nameList.contains(name), name);
         }
 
-        response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/boostdoc/settings").asString();
-        List<String> idList =
-                JsonPath.from(response).getList("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        List<String> idList = getPropList(searchBody, "id");
         idList.forEach(id -> {
             // Test: get setting api
-            given().header("Authorization", getTestToken()).get("/api/admin/boostdoc/setting/" + id).then()
-                    .body("response.setting.id", equalTo(id)).body("response.setting.url_expr", startsWith(NAME_PREFIX));
+            checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".url_expr", startsWith(NAME_PREFIX));
         });
 
         // Test: paging
         searchBody.put("size", 1);
-        for (int i = 0; i < num; i++) {
+        for (int i = 0; i < NUM; i++) {
             searchBody.put("page", i + 1);
-            given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                    .get("/api/admin/boostdoc/settings").then().body("response.settings.size()", equalTo(1));
+            checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body("response." + LIST_ENDPOINT_SUFFIX + ".size()", equalTo(1));
         }
 
     }
 
-    private void testUpdate(int num) {
+    @Override
+    protected void testUpdate() {
         // Test: update settings api
         Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/boostdoc/settings").asString();
-        List<Map<String, Object>> settings =
-                JsonPath.from(response).getList("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}");
+        searchBody.put("size", NUM * 2);
+        List<Map<String, Object>> settings = getItemList(searchBody);
 
         final String newBoostExpr = "new_boost_expr";
         for (Map<String, Object> setting : settings) {
@@ -150,55 +137,42 @@ public class BoostDocTests extends ITBase {
             requestBody.put("url_expr", setting.get("url_expr"));
             requestBody.put("boost_expr", newBoostExpr);
             requestBody.put("sort_order", setting.get("sort_order"));
-            requestBody.put("created_by", setting.get("created_by"));
-            requestBody.put("created_time", setting.get("created_time"));
             requestBody.put("version_no", 1);
-            given().header("Authorization", getTestToken()).body(requestBody, ObjectMapperType.JACKSON_2).when()
-                    .post("/api/admin/boostdoc/setting").then().body("response.status", equalTo(0));
+
+            checkPostMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.status", equalTo(0));
         }
 
         searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/boostdoc/settings").asString();
-        List<String> boostExprList =
-                JsonPath.from(response).getList("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.boost_expr");
+        searchBody.put("size", NUM * 2);
+        List<String> boostExprList = getPropList(searchBody, "boost_expr");
         for (String boostExpr : boostExprList) {
             assertEquals(boostExpr, newBoostExpr);
         }
     }
 
-    private void testDelete(int num) {
+    @Override
+    protected void testDelete() {
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/boostdoc/settings").asString();
-        List<String> idList =
-                JsonPath.from(response).getList("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        searchBody.put("size", NUM * 2);
+        List<String> idList = getPropList(searchBody, "id");
+
         idList.forEach(id -> {
             //Test: delete setting api
-            given().header("Authorization", getTestToken()).delete("/api/admin/boostdoc/setting/" + id).then()
-                    .body("response.status", equalTo(0));
+            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id).then().body("response.status", equalTo(0));
         });
 
-        // Test: number of settings.
-        given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                .get("/api/admin/boostdoc/settings").then()
-                .body("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.size()", equalTo(0));
+        // Test: NUMber of settings.
+        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(0));
     }
 
-    private static void clearTestData(int num) {
+    @Override
+    protected void clearTestData() {
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 10);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/boostdoc/settings").asString();
-        List<String> idList =
-                JsonPath.from(response).getList("response.settings.findAll {it.url_expr.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        searchBody.put("size", NUM * 10);
+        List<String> idList = getPropList(searchBody, "id");
         idList.forEach(id -> {
-            given().header("Authorization", getTestToken()).delete("/api/admin/boostdoc/setting/" + id);
+            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id);
         });
     }
+
 }

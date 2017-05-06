@@ -15,56 +15,64 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import io.restassured.RestAssured;
-import io.restassured.mapper.ObjectMapperType;
-import io.restassured.path.json.JsonPath;
-import org.codelibs.fess.it.ITBase;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.it.CrudTestBase;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import io.restassured.path.json.JsonPath;
+
 @Tag("it")
-public class AccessTokenTests extends ITBase {
-    private static final String NAME_PREFIX = "accessTokenTest_";
+public class AccessTokenTests extends CrudTestBase {
     private static final int NUM = 20;
 
-    @BeforeAll
-    static void initAll() {
-        RestAssured.baseURI = getFessUrl();
-        settingTestToken();
+    private static final String NAME_PREFIX = "accessTokenTest_";
+    private static final String API_PATH = "/api/admin/accesstoken";
+    private static final String LIST_ENDPOINT_SUFFIX = "settings";
+    private static final String ITEM_ENDPOINT_SUFFIX = "setting";
+
+    private static final String KEY_PROPERTY = "name";
+
+    @Override
+    protected String getNamePrefix() {
+        return NAME_PREFIX;
     }
 
-    @BeforeEach
-    void init() {
+    @Override
+    protected String getApiPath() {
+        return API_PATH;
     }
 
-    @AfterEach
-    void tearDown() {
-        clearTestData(NUM);
+    @Override
+    protected String getKeyProperty() {
+        return KEY_PROPERTY;
     }
 
-    @AfterAll
-    static void tearDownAll() {
-        deleteTestToken();
+    @Override
+    protected String getListEndpointSuffix() {
+        return LIST_ENDPOINT_SUFFIX;
+    }
+
+    @Override
+    protected String getItemEndpointSuffix() {
+        return ITEM_ENDPOINT_SUFFIX;
     }
 
     @Test
     void crudTest() {
-        testCreate(NUM);
-        testRead(NUM);
-        testUpdate(NUM);
-        testDelete(NUM);
+        testCreate();
+        testRead();
+        testUpdate();
+        testDelete();
     }
 
     @Test
@@ -72,70 +80,61 @@ public class AccessTokenTests extends ITBase {
         testPermission();
     }
 
-    private void testCreate(int num) {
+    @Override
+    protected void testCreate() {
         // Test: create setting api.
-        for (int i = 0; i < num; i++) {
+        for (int i = 0; i < NUM; i++) {
             final String name = NAME_PREFIX + i;
             final Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("name", name);
             requestBody.put("permissions", "Radmin-api");
-            given().header("Authorization", getTestToken()).body(requestBody, ObjectMapperType.JACKSON_2).when()
-                    .put("/api/admin/accesstoken/setting").then().body("response.created", equalTo(true))
+
+            checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
                     .body("response.status", equalTo(0));
         }
 
-        // Test: number of settings.
+        // Test: NUMber of settings.
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                .get("/api/admin/accesstoken/settings").then()
-                .body("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.size()", equalTo(num));
+        searchBody.put("size", NUM * 2);
+        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(NUM));
     }
 
-    private void testRead(int num) {
+    @Override
+    protected void testRead() {
         // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/accesstoken/settings").asString();
-        List<String> nameList =
-                JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.name");
-        assertEquals(num, nameList.size());
-        for (int i = 0; i < num; i++) {
+        searchBody.put("size", NUM * 2);
+        List<String> nameList = getPropList(searchBody, "name");
+        assertEquals(NUM, nameList.size());
+
+        for (int i = 0; i < NUM; i++) {
             final String name = NAME_PREFIX + i;
             assertTrue(nameList.contains(name), name);
         }
 
-        response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/accesstoken/settings").asString();
-        List<String> idList = JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        List<String> idList = getPropList(searchBody, "id");
         idList.forEach(id -> {
             // Test: get setting api
-            given().header("Authorization", getTestToken()).get("/api/admin/accesstoken/setting/" + id).then()
-                    .body("response.setting.id", equalTo(id)).body("response.setting.name", startsWith(NAME_PREFIX))
-                    .body("response.setting.token.length()", greaterThan(0));
+            checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".name", startsWith(NAME_PREFIX))
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".token.length()", greaterThan(0));
         });
 
         // Test: paging
         searchBody.put("size", 1);
-        for (int i = 0; i < num + 1; i++) {
+        for (int i = 0; i < NUM + 1; i++) {
             searchBody.put("page", i + 1);
-            given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                    .get("/api/admin/accesstoken/settings").then().body("response.settings.size()", equalTo(1));
+            checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body("response." + LIST_ENDPOINT_SUFFIX + ".size()", equalTo(1));
         }
     }
 
-    private void testUpdate(int num) {
+    @Override
+    protected void testUpdate() {
         // Test: update settings api
         Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/accesstoken/settings").asString();
-        List<Map<String, Object>> settings =
-                JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}");
+        searchBody.put("size", NUM * 2);
+        List<Map<String, Object>> settings = getItemList(searchBody);
 
         String newPermission = "Radmin-api2";
         for (Map<String, Object> setting : settings) {
@@ -144,39 +143,30 @@ public class AccessTokenTests extends ITBase {
             requestBody.put("name", setting.get("name"));
             requestBody.put("permissions", newPermission);
             requestBody.put("version_no", 1);
-            given().header("Authorization", getTestToken()).body(requestBody, ObjectMapperType.JACKSON_2).when()
-                    .post("/api/admin/accesstoken/setting").then().body("response.status", equalTo(0));
+
+            checkPostMethod(requestBody, "setting").then().body("response.status", equalTo(0));
         }
 
         searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/accesstoken/settings").asString();
-        List<String> permissionsList =
-                JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.permissions");
+        searchBody.put("size", NUM * 2);
+        List<String> permissionsList = getPropList(searchBody, "permissions");
         for (String permissions : permissionsList) {
             assertEquals(newPermission.replace("R", "{role}"), permissions);
         }
     }
 
-    private void testDelete(int num) {
+    @Override
+    protected void testDelete() {
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 2);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/accesstoken/settings").asString();
-        List<String> idList = JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        searchBody.put("size", NUM * 2);
+        List<String> idList = getPropList(searchBody, "id");
         idList.forEach(id -> {
             //Test: delete setting api
-            given().header("Authorization", getTestToken()).delete("/api/admin/accesstoken/setting/" + id).then()
-                    .body("response.status", equalTo(0));
+            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id).then().body("response.status", equalTo(0));
         });
 
-        // Test: number of settings.
-        given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                .get("/api/admin/accesstoken/settings").then()
-                .body("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.size()", equalTo(0));
+        // Test: NUMber of settings.
+        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(0));
     }
 
     private void testPermission() {
@@ -185,27 +175,24 @@ public class AccessTokenTests extends ITBase {
         final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("name", name);
         requestBody.put("permissions", "Radmin-api");
-        String response =
-                given().header("Authorization", getTestToken()).body(requestBody, ObjectMapperType.JACKSON_2).when()
-                        .put("/api/admin/accesstoken/setting").asString();
+        String response = checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).asString();
 
         // Test: access admin api using a new token
         String id = JsonPath.from(response).get("response.id");
-        response = given().header("Authorization", getTestToken()).when().get("/api/admin/accesstoken/setting/" + id).asString();
+        response = checkGetMethod(requestBody, ITEM_ENDPOINT_SUFFIX + "/" + id).asString();
         String token = JsonPath.from(response).get("response.setting.token");
-        given().header("Authorization", token).when().get("/api/admin/accesstoken/setting/" + id).then()
-                .body("response.setting.name", equalTo(name)).body("response.setting.token", equalTo(token));
+        checkGetMethod(requestBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
+                .body("response." + ITEM_ENDPOINT_SUFFIX + ".name", equalTo(name))
+                .body("response." + ITEM_ENDPOINT_SUFFIX + ".token", equalTo(token));
     }
 
-    private static void clearTestData(int num) {
+    @Override
+    protected void clearTestData() {
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", num * 10);
-        String response =
-                given().header("Authorization", getTestToken()).body(searchBody, ObjectMapperType.JACKSON_2).when()
-                        .get("/api/admin/accesstoken/settings").asString();
-        List<String> idList = JsonPath.from(response).getList("response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}.id");
+        searchBody.put("size", NUM * 10);
+        List<String> idList = getPropList(searchBody, "id");
         idList.forEach(id -> {
-            given().header("Authorization", getTestToken()).delete("/api/admin/accesstoken/setting/" + id);
+            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id);
         });
     }
 }
