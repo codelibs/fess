@@ -154,7 +154,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         });
 
         list.setPageSize(size);
-        list.setAllRecordCount((int) searchHits.totalHits());
+        list.setAllRecordCount((int) searchHits.getTotalHits());
         list.setCurrentPageNumber(cb.getFetchPageNumber());
 
         list.setTook(response.getTookInMillis());
