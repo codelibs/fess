@@ -27,7 +27,7 @@ public class GeoInfoTest extends UnitFessTestCase {
 
         final GeoInfo geoInfo = new GeoInfo(request);
         String result =
-                "{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":10000.0,\"distance_type\":\"sloppy_arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}}";
+                "{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":10000.0,\"distance_type\":\"arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}}";
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 
@@ -38,7 +38,7 @@ public class GeoInfoTest extends UnitFessTestCase {
 
         final GeoInfo geoInfo = new GeoInfo(request);
         String result =
-                "{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":10000.0,\"distance_type\":\"sloppy_arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}}";
+                "{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":10000.0,\"distance_type\":\"arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}}";
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 
@@ -51,7 +51,7 @@ public class GeoInfoTest extends UnitFessTestCase {
 
         final GeoInfo geoInfo = new GeoInfo(request);
         String result =
-                "{\"bool\":{\"should\":[{\"geo_distance\":{\"location\":[151.0,35.0],\"distance\":1000.0,\"distance_type\":\"sloppy_arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}},{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":10000.0,\"distance_type\":\"sloppy_arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}}],\"disable_coord\":false,\"adjust_pure_negative\":true,\"boost\":1.0}}";
+                "{\"bool\":{\"should\":[{\"geo_distance\":{\"location\":[151.0,35.0],\"distance\":1000.0,\"distance_type\":\"arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}},{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":10000.0,\"distance_type\":\"arc\",\"validation_method\":\"STRICT\",\"ignore_unmapped\":false,\"boost\":1.0}}],\"disable_coord\":false,\"adjust_pure_negative\":true,\"boost\":1.0}}";
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 

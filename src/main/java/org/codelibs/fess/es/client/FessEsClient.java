@@ -69,6 +69,8 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.DocWriteRequest.OpType;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
@@ -100,7 +102,6 @@ import org.elasticsearch.action.get.MultiGetRequest;
 import org.elasticsearch.action.get.MultiGetRequestBuilder;
 import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexRequest.OpType;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.ClearScrollRequest;
@@ -135,6 +136,7 @@ import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -318,7 +320,7 @@ public class FessEsClient implements Client {
                                 source = FileUtil.readUTF8(filePath);
                                 try (CurlResponse response =
                                         Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file")
-                                                .param("path", path).body(source).execute()) {
+                                                .header("Content-Type", "application/json").param("path", path).body(source).execute()) {
                                     if (response.getHttpStatusCode() == 200) {
                                         logger.info("Register " + path + " to " + configIndex);
                                     } else {
@@ -335,7 +337,8 @@ public class FessEsClient implements Client {
                             }
                         });
                 try (CurlResponse response =
-                        Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/flush").execute()) {
+                        Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/flush")
+                                .header("Content-Type", "application/json").execute()) {
                     if (response.getHttpStatusCode() == 200) {
                         logger.info("Flushed config files.");
                     } else {
@@ -357,7 +360,8 @@ public class FessEsClient implements Client {
                     final String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
                     source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
                     final CreateIndexResponse indexResponse =
-                            client.admin().indices().prepareCreate(createdIndexName).setSource(source).execute()
+                            client.admin().indices().prepareCreate(createdIndexName)
+                                    .setSource(source, XContentFactory.xContentType(source)).execute()
                                     .actionGet(fessConfig.getIndexIndicesTimeout());
                     if (indexResponse.isAcknowledged()) {
                         logger.info("Created " + createdIndexName + " index.");
@@ -426,7 +430,8 @@ public class FessEsClient implements Client {
                 }
                 try {
                     final PutMappingResponse putMappingResponse =
-                            client.admin().indices().preparePutMapping(updatedIndexName).setType(configType).setSource(source).execute()
+                            client.admin().indices().preparePutMapping(updatedIndexName).setType(configType)
+                                    .setSource(source, XContentFactory.xContentType(source)).execute()
                                     .actionGet(fessConfig.getIndexIndicesTimeout());
                     if (putMappingResponse.isAcknowledged()) {
                         logger.info("Created " + updatedIndexName + "/" + configType + " mapping.");
@@ -478,7 +483,8 @@ public class FessEsClient implements Client {
                                         });
                                 if (result.keySet().contains("index")) {
                                     final IndexRequestBuilder requestBuilder =
-                                            client.prepareIndex(configIndex, configType, result.get("index").get("_id")).setSource(line);
+                                            client.prepareIndex(configIndex, configType, result.get("index").get("_id")).setSource(line,
+                                                    XContentFactory.xContentType(line));
                                     builder.add(requestBuilder);
                                 }
                             }
@@ -507,8 +513,8 @@ public class FessEsClient implements Client {
 
     private void waitForConfigSyncStatus() {
         try (CurlResponse response =
-                Curl.get(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/wait").param("status", "green")
-                        .execute()) {
+                Curl.get(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/wait")
+                        .header("Content-Type", "application/json").param("status", "green").execute()) {
             if (response.getHttpStatusCode() == 200) {
                 logger.info("ConfigSync is ready.");
             } else {
@@ -768,13 +774,14 @@ public class FessEsClient implements Client {
         final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
         if (response.hasFailures()) {
             if (logger.isDebugEnabled()) {
-                final List<ActionRequest> requests = bulkRequestBuilder.request().requests();
+                @SuppressWarnings("rawtypes")
+                final List<DocWriteRequest> requests = bulkRequestBuilder.request().requests();
                 final BulkItemResponse[] items = response.getItems();
                 if (requests.size() == items.length) {
                     for (int i = 0; i < requests.size(); i++) {
                         final BulkItemResponse resp = items[i];
                         if (resp.isFailed() && resp.getFailure() != null) {
-                            final ActionRequest req = requests.get(i);
+                            final DocWriteRequest<?> req = requests.get(i);
                             final Failure failure = resp.getFailure();
                             logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
                         }
@@ -924,6 +931,7 @@ public class FessEsClient implements Client {
 
     public boolean store(final String index, final String type, final Object obj) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        @SuppressWarnings("unchecked")
         final Map<String, Object> source = obj instanceof Map ? (Map<String, Object>) obj : BeanUtil.copyBeanToNewMap(obj);
         final String id = (String) source.remove(fessConfig.getIndexFieldId());
         final Long version = (Long) source.remove(fessConfig.getIndexFieldVersion());
