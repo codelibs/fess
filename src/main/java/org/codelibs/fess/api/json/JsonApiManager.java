@@ -147,6 +147,15 @@ public class JsonApiManager extends BaseJsonApiManager {
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
             final String queryId = data.getQueryId();
+            final String highlightParams = data.getAppendHighlightParams();
+            final boolean nextPage = data.isExistNextPage();
+            final boolean prevPage = data.isExistPrevPage();
+            final long startRecordNumber = data.getCurrentStartRecordNumber();
+            final long endRecordNumber = data.getCurrentEndRecordNumber();
+            final List<String> pageNumbers = data.getPageNumberList();
+            final boolean partial = data.isPartialResults();
+            final String searchQuery = data.getSearchQuery();
+            final long requestedTime = data.getRequestedTime();
 
             buf.append("\"q\":");
             buf.append(escapeJson(query));
@@ -168,6 +177,24 @@ public class JsonApiManager extends BaseJsonApiManager {
             buf.append(',');
             buf.append("\"page_count\":");
             buf.append(allPageCount);
+            buf.append(",\"highlight_params\":");
+            buf.append(escapeJson(highlightParams));
+            buf.append(",\"next_page\":");
+            buf.append(escapeJson(nextPage));
+            buf.append(",\"prev_page\":");
+            buf.append(escapeJson(prevPage));
+            buf.append(",\"start_record_number\":");
+            buf.append(startRecordNumber);
+            buf.append(",\"end_record_number\":");
+            buf.append(escapeJson(endRecordNumber));
+            buf.append(",\"page_numbers\":");
+            buf.append(escapeJson(pageNumbers));
+            buf.append(",\"partial\":");
+            buf.append(escapeJson(partial));
+            buf.append(",\"search_query\":");
+            buf.append(escapeJson(searchQuery));
+            buf.append(",\"requested_time\":");
+            buf.append(requestedTime);
             if (!documentItems.isEmpty()) {
                 buf.append(',');
                 buf.append("\"result\":[");

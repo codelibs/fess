@@ -138,8 +138,16 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
                 buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
             }
             buf.append('}');
-        } else if (obj instanceof Number) {
-            buf.append(obj);
+        } else if (obj instanceof Integer) {
+            buf.append(((Integer) obj).intValue());
+        } else if (obj instanceof Long) {
+            buf.append(((Long) obj).longValue());
+        } else if (obj instanceof Float) {
+            buf.append(((Float) obj).floatValue());
+        } else if (obj instanceof Double) {
+            buf.append(((Double) obj).doubleValue());
+        } else if (obj instanceof Boolean) {
+            buf.append(obj.toString());
         } else if (obj instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND, Locale.ROOT);
             buf.append('\"').append(StringEscapeUtils.escapeJson(sdf.format(obj))).append('\"');

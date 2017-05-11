@@ -15,14 +15,17 @@
  */
 package org.codelibs.fess.app.web.api;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.FacetResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -81,6 +84,20 @@ public class ApiResult {
         }
     }
 
+    public static class ApiDeleteResponse extends ApiResponse {
+        protected long count = 1;
+
+        public ApiDeleteResponse count(final long count) {
+            this.count = count;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
     public static class ApiConfigResponse extends ApiResponse {
         protected Object setting;
 
@@ -106,6 +123,95 @@ public class ApiResult {
 
         public ApiConfigsResponse<T> total(final long total) {
             this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiDocResponse extends ApiResponse {
+        protected Object doc;
+
+        public ApiDocResponse doc(final Object doc) {
+            this.doc = doc;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiDocsResponse extends ApiResponse {
+        protected String queryId;
+        protected List<Map<String, Object>> result;
+        protected String highlightParams;
+        protected String execTime;
+        protected int pageSize;
+        protected int pageNumber;
+        protected long recordCount;
+        protected int pageCount;
+        protected boolean nextPage;
+        protected boolean prevPage;
+        protected long startRecordNumber;
+        protected long endRecordNumber;
+        protected List<String> pageNumbers;
+        protected boolean partial;
+        protected long queryTime;
+        protected String searchQuery;
+        protected long requestedTime;
+        protected List<Map<String, Object>> facetField;
+        protected List<Map<String, Object>> facetQuery;
+
+        public ApiDocsResponse renderData(final SearchRenderData data) {
+            queryId = data.getQueryId();
+            result = data.getDocumentItems();
+            highlightParams = data.getAppendHighlightParams();
+            execTime = data.getExecTime();
+            pageSize = data.getPageSize();
+            pageNumber = data.getCurrentPageNumber();
+            recordCount = data.getAllRecordCount();
+            pageCount = data.getAllPageCount();
+            nextPage = data.isExistNextPage();
+            prevPage = data.isExistPrevPage();
+            startRecordNumber = data.getCurrentStartRecordNumber();
+            endRecordNumber = data.getCurrentEndRecordNumber();
+            pageNumbers = data.getPageNumberList();
+            partial = data.isPartialResults();
+            queryTime = data.getQueryTime();
+            searchQuery = data.getSearchQuery();
+            requestedTime = data.getRequestedTime();
+            final FacetResponse facetResponse = data.getFacetResponse();
+            if (facetResponse != null && facetResponse.hasFacetResponse()) {
+                // facet field
+                if (facetResponse.getFieldList() != null) {
+                    facetField = facetResponse.getFieldList().stream().map(field -> {
+                        Map<String, Object> fieldMap = new HashMap<>(2, 1f);
+                        fieldMap.put("name", field.getName());
+                        fieldMap.put("result", field.getValueCountMap().entrySet().stream().map(e -> {
+                            Map<String, Object> valueCount = new HashMap<>(2, 1f);
+                            valueCount.put("value", e.getKey());
+                            valueCount.put("count", e.getValue());
+                            return valueCount;
+                        }).collect(Collectors.toList()));
+                        return fieldMap;
+                    }).collect(Collectors.toList());
+                }
+                // facet q
+                if (facetResponse.getQueryCountMap() != null) {
+                    facetQuery = facetResponse.getQueryCountMap().entrySet().stream().map(e -> {
+                        Map<String, Object> valueCount = new HashMap<>(2, 1f);
+                        valueCount.put("value", e.getKey());
+                        valueCount.put("count", e.getValue());
+                        return valueCount;
+                    }).collect(Collectors.toList());
+
+                }
+            }
             return this;
         }
 
