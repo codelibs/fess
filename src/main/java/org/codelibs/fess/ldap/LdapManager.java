@@ -71,6 +71,9 @@ public class LdapManager {
         env.put(Context.PROVIDER_URL, providerUrl);
         env.put(Context.SECURITY_PRINCIPAL, principal);
         env.put(Context.SECURITY_CREDENTIALS, credntials);
+        if (providerUrl != null && providerUrl.startsWith("ldaps://")) {
+            env.put(Context.SECURITY_PROTOCOL, "ssl");
+        }
         return env;
     }
 
