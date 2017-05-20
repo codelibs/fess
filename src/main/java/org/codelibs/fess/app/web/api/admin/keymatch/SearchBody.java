@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.keymatch;
 
-import org.codelibs.fess.app.web.admin.keymatch.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
 
 }

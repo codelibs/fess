@@ -52,7 +52,6 @@ public class CreateForm {
     @ValidateTypeFailure
     public Float boost;
 
-    @Required
     @Size(max = 255)
     public String createdBy;
 
