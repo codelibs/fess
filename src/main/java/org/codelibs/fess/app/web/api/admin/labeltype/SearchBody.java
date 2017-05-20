@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.labeltype;
 
-import org.codelibs.fess.app.web.admin.labeltype.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
 
 }
