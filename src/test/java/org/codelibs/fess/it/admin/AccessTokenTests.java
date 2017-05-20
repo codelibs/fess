@@ -84,9 +84,9 @@ public class AccessTokenTests extends CrudTestBase {
     protected void testCreate() {
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
-            final String name = NAME_PREFIX + i;
+            final String keyProp = NAME_PREFIX + i;
             final Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("name", name);
+            requestBody.put(KEY_PROPERTY, keyProp);
             requestBody.put("permissions", "Radmin-api");
 
             checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
@@ -104,12 +104,12 @@ public class AccessTokenTests extends CrudTestBase {
         // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", NUM * 2);
-        List<String> nameList = getPropList(searchBody, "name");
-        assertEquals(NUM, nameList.size());
+        List<String> propList = getPropList(searchBody, KEY_PROPERTY);
+        assertEquals(NUM, propList.size());
 
         for (int i = 0; i < NUM; i++) {
-            final String name = NAME_PREFIX + i;
-            assertTrue(nameList.contains(name), name);
+            final String prop = NAME_PREFIX + i;
+            assertTrue(propList.contains(prop), prop);
         }
 
         List<String> idList = getPropList(searchBody, "id");
@@ -117,7 +117,7 @@ public class AccessTokenTests extends CrudTestBase {
             // Test: get setting api
             checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
                     .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".name", startsWith(NAME_PREFIX))
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + "." + KEY_PROPERTY, startsWith(NAME_PREFIX))
                     .body("response." + ITEM_ENDPOINT_SUFFIX + ".token.length()", greaterThan(0));
         });
 
@@ -140,7 +140,7 @@ public class AccessTokenTests extends CrudTestBase {
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("id", setting.get("id"));
-            requestBody.put("name", setting.get("name"));
+            requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
             requestBody.put("permissions", newPermission);
             requestBody.put("version_no", 1);
 

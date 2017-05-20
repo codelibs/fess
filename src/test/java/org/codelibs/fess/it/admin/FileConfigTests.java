@@ -78,9 +78,9 @@ public class FileConfigTests extends CrudTestBase {
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
-            final String name = NAME_PREFIX + i;
+            final String keyProp = NAME_PREFIX + i;
             final String paths = "file:///" + NAME_PREFIX + i;
-            requestBody.put("name", name);
+            requestBody.put(KEY_PROPERTY, keyProp);
             requestBody.put("paths", paths);
             requestBody.put("num_of_thread", 5);
             requestBody.put("interval_time", 1000);
@@ -103,12 +103,12 @@ public class FileConfigTests extends CrudTestBase {
         // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", NUM * 2);
-        List<String> nameList = getPropList(searchBody, KEY_PROPERTY);
+        List<String> propList = getPropList(searchBody, KEY_PROPERTY);
 
-        assertEquals(NUM, nameList.size());
+        assertEquals(NUM, propList.size());
         for (int i = 0; i < NUM; i++) {
-            final String name = NAME_PREFIX + i;
-            assertTrue(nameList.contains(name), name);
+            final String prop = NAME_PREFIX + i;
+            assertTrue(propList.contains(prop), prop);
         }
 
         List<String> idList = getPropList(searchBody, "id");
@@ -140,7 +140,7 @@ public class FileConfigTests extends CrudTestBase {
             final Map<String, Object> requestBody = new HashMap<>();
 
             requestBody.put("id", setting.get("id"));
-            requestBody.put("name", setting.get("name"));
+            requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
             requestBody.put("paths", newPaths);
             requestBody.put("num_of_thread", setting.get("num_of_thread"));
             requestBody.put("interval_time", setting.get("interval_time"));

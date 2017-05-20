@@ -78,9 +78,9 @@ public class DataConfigTests extends CrudTestBase {
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
-            final String name = NAME_PREFIX + i;
+            final String keyProp = NAME_PREFIX + i;
+            requestBody.put(KEY_PROPERTY, keyProp);
             final String handlerName = "DatabaseDataStore";
-            requestBody.put("name", name);
             requestBody.put("handler_name", handlerName);
             requestBody.put("boost", i);
             requestBody.put("available", true);
@@ -137,7 +137,7 @@ public class DataConfigTests extends CrudTestBase {
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("id", setting.get("id"));
-            requestBody.put("name", setting.get("name"));
+            requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
             requestBody.put("handler_name", newHandlerName);
             requestBody.put("boost", setting.get("boost"));
             requestBody.put("available", true);
