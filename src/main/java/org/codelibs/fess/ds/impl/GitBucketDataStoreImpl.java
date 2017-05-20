@@ -41,6 +41,9 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * @author Keiichi Watanabe
  */
@@ -310,8 +313,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             logger.warn("Failed to access to " + issueUrl, e);
         }
 
-        // FIXME: Get issue comments from `commentsUrl`
-        // How to parse JSON-style list?
+        final String commentsStr = String.join("\n", getIssueComments(issueUrl, authToken));
+        contentStr += "\n" + commentsStr;
 
         dataMap.put("content", contentStr);
         dataMap.put("url", viewUrl);
@@ -323,6 +326,27 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         callback.store(paramMap, dataMap);
 
         return;
+    }
+
+    private List<String> getIssueComments(final String issueUrl, final String authToken) {
+        final String commentsUrl = issueUrl + "/comments";
+        final List<String> commentList = new ArrayList<String>();
+
+        try (CurlResponse curlResponse = Curl.get(commentsUrl).header("Authorization", "token " + authToken).execute()) {
+            final String commentsJson = curlResponse.getContentAsString();
+            List<Map<String, Object>> comments = new ObjectMapper().readValue(commentsJson, new TypeReference<List<Map<String, Object>>>() {
+            });
+
+            for (Map<String, Object> comment : comments) {
+                if (comment.containsKey("body")) {
+                    commentList.add((String) comment.get("body"));
+                }
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + issueUrl, e);
+        }
+
+        return commentList;
     }
 
     @SuppressWarnings("unchecked")
