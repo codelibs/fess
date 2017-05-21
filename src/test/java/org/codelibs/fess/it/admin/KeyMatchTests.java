@@ -29,16 +29,15 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("it")
-public class FileConfigTests extends CrudTestBase {
-
+public class KeyMatchTests extends CrudTestBase {
     private static final int NUM = 20;
 
-    private static final String NAME_PREFIX = "fileConfigTest_";
-    private static final String API_PATH = "/api/admin/fileconfig";
+    private static final String NAME_PREFIX = "keyMatchTest_";
+    private static final String API_PATH = "/api/admin/keymatch";
     private static final String LIST_ENDPOINT_SUFFIX = "settings";
     private static final String ITEM_ENDPOINT_SUFFIX = "setting";
 
-    private static final String KEY_PROPERTY = "name";
+    private static final String KEY_PROPERTY = "term";
 
     @Override
     protected String getNamePrefix() {
@@ -79,14 +78,10 @@ public class FileConfigTests extends CrudTestBase {
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
             final String keyProp = NAME_PREFIX + i;
-            final String paths = "file:///" + NAME_PREFIX + i;
             requestBody.put(KEY_PROPERTY, keyProp);
-            requestBody.put("paths", paths);
-            requestBody.put("num_of_thread", 5);
-            requestBody.put("interval_time", 1000);
-            requestBody.put("boost", i);
-            requestBody.put("available", true);
-            requestBody.put("sort_order", i);
+            requestBody.put("query", "query" + i);
+            requestBody.put("max_size", new Integer(i).toString());
+            requestBody.put("boost", 100);
 
             checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
                     .body("response.status", equalTo(0));
@@ -107,8 +102,8 @@ public class FileConfigTests extends CrudTestBase {
 
         assertEquals(NUM, propList.size());
         for (int i = 0; i < NUM; i++) {
-            final String prop = NAME_PREFIX + i;
-            assertTrue(propList.contains(prop), prop);
+            final String keyProp = NAME_PREFIX + i;
+            assertTrue(propList.contains(keyProp), keyProp);
         }
 
         List<String> idList = getPropList(searchBody, "id");
@@ -135,18 +130,14 @@ public class FileConfigTests extends CrudTestBase {
         searchBody.put("size", NUM * 2);
         List<Map<String, Object>> settings = getItemList(searchBody);
 
-        final String newPaths = "file:///new/" + NAME_PREFIX;
+        final String newQuery = "new_query";
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>();
-
             requestBody.put("id", setting.get("id"));
             requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
-            requestBody.put("paths", newPaths);
-            requestBody.put("num_of_thread", setting.get("num_of_thread"));
-            requestBody.put("interval_time", setting.get("interval_time"));
+            requestBody.put("query", newQuery);
+            requestBody.put("max_size", setting.get("max_size"));
             requestBody.put("boost", setting.get("boost"));
-            requestBody.put("available", true);
-            requestBody.put("sort_order", setting.get("sort_order"));
             requestBody.put("version_no", 1);
 
             checkPostMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.status", equalTo(0));
@@ -154,9 +145,9 @@ public class FileConfigTests extends CrudTestBase {
 
         searchBody = new HashMap<>();
         searchBody.put("size", NUM * 2);
-        List<String> valList = getPropList(searchBody, "paths");
-        for (String val : valList) {
-            assertEquals(val, newPaths);
+        List<String> valueList = getPropList(searchBody, "query");
+        for (String value : valueList) {
+            assertEquals(value, newQuery);
         }
     }
 

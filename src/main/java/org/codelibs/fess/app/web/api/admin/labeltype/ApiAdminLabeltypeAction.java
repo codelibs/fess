@@ -57,6 +57,8 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
         final LabelTypePager pager = new LabelTypePager();
+        pager.setPageSize(body.size);
+        pager.setCurrentPageNumber(body.page);
         copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         final List<LabelType> list = labelTypeService.getLabelTypeList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()

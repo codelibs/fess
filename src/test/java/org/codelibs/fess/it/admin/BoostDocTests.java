@@ -78,8 +78,8 @@ public class BoostDocTests extends CrudTestBase {
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
-            final String url_expr = NAME_PREFIX + i;
-            requestBody.put("url_expr", url_expr);
+            final String keyProp = NAME_PREFIX + i;
+            requestBody.put(KEY_PROPERTY, keyProp);
             requestBody.put("boost_expr", new Integer(i).toString());
             requestBody.put("sort_order", i);
 
@@ -98,7 +98,7 @@ public class BoostDocTests extends CrudTestBase {
         // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", NUM * 2);
-        List<String> nameList = getPropList(searchBody, "url_expr");
+        List<String> nameList = getPropList(searchBody, KEY_PROPERTY);
 
         assertEquals(NUM, nameList.size());
         for (int i = 0; i < NUM; i++) {
@@ -111,7 +111,7 @@ public class BoostDocTests extends CrudTestBase {
             // Test: get setting api
             checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
                     .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".url_expr", startsWith(NAME_PREFIX));
+                    .body("response." + ITEM_ENDPOINT_SUFFIX + "." + KEY_PROPERTY, startsWith(NAME_PREFIX));
         });
 
         // Test: paging
@@ -134,7 +134,7 @@ public class BoostDocTests extends CrudTestBase {
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("id", setting.get("id"));
-            requestBody.put("url_expr", setting.get("url_expr"));
+            requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
             requestBody.put("boost_expr", newBoostExpr);
             requestBody.put("sort_order", setting.get("sort_order"));
             requestBody.put("version_no", 1);
