@@ -41,6 +41,9 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * @author Keiichi Watanabe
  */
@@ -184,32 +187,37 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    protected List<String> getSourceLabelList(final String rootURL, final String authToken) {
-        final String url = rootURL + "api/v3/fess/label";
-        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
-            final Map<String, Object> map = curlResponse.getContentAsMap();
-            assert (map.containsKey("source_label"));
-            @SuppressWarnings("unchecked")
-            final List<String> sourceLabels = (List<String>) map.get("source_label");
-            return sourceLabels;
-        } catch (final Exception e) {
-            logger.warn("Failed to access to " + rootURL, e);
-            return Collections.emptyList();
-        }
-    }
-
     protected List<Map<String, Object>> getRepositoryList(final String rootURL, final String authToken) {
         final String url = rootURL + "api/v3/fess/repos";
-        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
-            final Map<String, Object> map = curlResponse.getContentAsMap();
-            assert (map.containsKey("repositories"));
-            @SuppressWarnings("unchecked")
-            final List<Map<String, Object>> repoList = (List<Map<String, Object>>) map.get("repositories");
-            return repoList;
-        } catch (final Exception e) {
-            logger.warn("Failed to access to " + rootURL, e);
-            return Collections.emptyList();
-        }
+        int totalCount = -1; // initialize with dummy value
+        final List<Map<String, Object>> repoList = new ArrayList<>();
+
+        do {
+            final String urlWithOffset = url + "?offset=" + repoList.size();
+
+            try (CurlResponse curlResponse = Curl.get(urlWithOffset).header("Authorization", "token " + authToken).execute()) {
+                final Map<String, Object> map = curlResponse.getContentAsMap();
+
+                assert (map.containsKey("total_count"));
+                assert (map.containsKey("response_count"));
+                assert (map.containsKey("repositories"));
+
+                totalCount = (int) map.get("total_count");
+                int responseCount = (int) map.get("response_count");
+                if (responseCount == 0)
+                    break;
+
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> repos = (ArrayList<Map<String, Object>>) map.get("repositories");
+                repoList.addAll(repos);
+            } catch (final Exception e) {
+                logger.warn("Failed to access to " + rootURL, e);
+                break;
+            }
+        } while (repoList.size() < totalCount);
+
+        logger.info("There exist " + repoList.size() + " repositories");
+        return repoList;
     }
 
     protected String getGitRef(final String rootURL, final String authToken, final String owner, final String name, final String branch) {
@@ -305,8 +313,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             logger.warn("Failed to access to " + issueUrl, e);
         }
 
-        // FIXME: Get issue comments from `commentsUrl`
-        // How to parse JSON-style list?
+        final String commentsStr = String.join("\n", getIssueComments(issueUrl, authToken));
+        contentStr += "\n" + commentsStr;
 
         dataMap.put("content", contentStr);
         dataMap.put("url", viewUrl);
@@ -318,6 +326,27 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         callback.store(paramMap, dataMap);
 
         return;
+    }
+
+    private List<String> getIssueComments(final String issueUrl, final String authToken) {
+        final String commentsUrl = issueUrl + "/comments";
+        final List<String> commentList = new ArrayList<String>();
+
+        try (CurlResponse curlResponse = Curl.get(commentsUrl).header("Authorization", "token " + authToken).execute()) {
+            final String commentsJson = curlResponse.getContentAsString();
+            List<Map<String, Object>> comments = new ObjectMapper().readValue(commentsJson, new TypeReference<List<Map<String, Object>>>() {
+            });
+
+            for (Map<String, Object> comment : comments) {
+                if (comment.containsKey("body")) {
+                    commentList.add((String) comment.get("body"));
+                }
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + issueUrl, e);
+        }
+
+        return commentList;
     }
 
     @SuppressWarnings("unchecked")
