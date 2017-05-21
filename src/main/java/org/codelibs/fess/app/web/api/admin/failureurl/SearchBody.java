@@ -15,8 +15,14 @@
  */
 package org.codelibs.fess.app.web.api.admin.failureurl;
 
-import org.codelibs.fess.app.web.admin.failureurl.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
+    public String url;
 
+    public Integer errorCountMin;
+
+    public Integer errorCountMax;
+
+    public String errorName;
 }

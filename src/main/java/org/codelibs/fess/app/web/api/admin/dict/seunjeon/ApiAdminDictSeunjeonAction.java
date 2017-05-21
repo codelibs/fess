@@ -44,10 +44,7 @@ public class ApiAdminDictSeunjeonAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        final SeunjeonPager pager = new SeunjeonPager();
-        if (body.pageNumber != null) {
-            pager.setCurrentPageNumber(body.pageNumber);
-        }
+        final SeunjeonPager pager = copyBeanToNewBean(body, SeunjeonPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(
                         seunjeonService.getSeunjeonList(body.dictId, pager).stream()

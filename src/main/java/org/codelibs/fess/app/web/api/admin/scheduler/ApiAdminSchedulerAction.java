@@ -93,8 +93,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final SchedulerPager pager = new SchedulerPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final SchedulerPager pager = copyBeanToNewBean(body, SchedulerPager.class);
         final List<ScheduledJob> list = scheduledJobService.getScheduledJobList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

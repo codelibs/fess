@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -43,8 +42,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final GroupPager pager = new GroupPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final GroupPager pager = copyBeanToNewBean(body, GroupPager.class);
         final List<Group> list = groupService.getGroupList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

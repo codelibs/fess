@@ -15,7 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.pathmap;
 
-import org.codelibs.fess.app.web.admin.pathmap.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
+    public String id;
 }

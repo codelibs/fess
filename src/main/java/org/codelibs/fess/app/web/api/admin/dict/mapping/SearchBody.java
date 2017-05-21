@@ -15,8 +15,7 @@
  */
 package org.codelibs.fess.app.web.api.admin.dict.mapping;
 
-import org.codelibs.fess.app.web.admin.dict.mapping.SearchForm;
+import org.codelibs.fess.app.web.api.admin.dict.BaseSearchDictBody;
 
-public class SearchBody extends SearchForm {
-    public Integer pageNumber;
+public class SearchBody extends BaseSearchDictBody {
 }

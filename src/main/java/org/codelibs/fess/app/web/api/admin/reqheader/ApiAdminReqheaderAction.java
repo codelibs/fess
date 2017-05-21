@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ReqHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebConfigService;
@@ -60,8 +59,7 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final ReqHeaderPager pager = new ReqHeaderPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final ReqHeaderPager pager = copyBeanToNewBean(body, ReqHeaderPager.class);
         final List<RequestHeader> list = reqHeaderService.getRequestHeaderList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

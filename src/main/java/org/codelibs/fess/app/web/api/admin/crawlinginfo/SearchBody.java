@@ -15,8 +15,9 @@
  */
 package org.codelibs.fess.app.web.api.admin.crawlinginfo;
 
-import org.codelibs.fess.app.web.admin.crawlinginfo.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
+    public String sessionId;
 
 }

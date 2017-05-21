@@ -61,9 +61,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final ElevateWordPager pager = new ElevateWordPager();
-        pager.setPageSize(body.size);
-        pager.setCurrentPageNumber(body.page);
+        final ElevateWordPager pager = copyBeanToNewBean(body, ElevateWordPager.class);
         final List<ElevateWord> list = elevateWordService.getElevateWordList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

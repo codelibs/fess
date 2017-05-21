@@ -44,10 +44,7 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        final ProtwordsPager pager = new ProtwordsPager();
-        if (body.pageNumber != null) {
-            pager.setCurrentPageNumber(body.pageNumber);
-        }
+        final ProtwordsPager pager = copyBeanToNewBean(body, ProtwordsPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(
                         protwordsService.getProtwordsList(body.dictId, pager).stream()

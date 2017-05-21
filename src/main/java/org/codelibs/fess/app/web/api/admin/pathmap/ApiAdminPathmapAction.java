@@ -42,8 +42,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final PathMapPager pager = new PathMapPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final PathMapPager pager = copyBeanToNewBean(body, PathMapPager.class);
         final List<PathMapping> list = pathMappingService.getPathMappingList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

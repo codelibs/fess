@@ -44,10 +44,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        final SynonymPager pager = new SynonymPager();
-        if (body.pageNumber != null) {
-            pager.setCurrentPageNumber(body.pageNumber);
-        }
+        final SynonymPager pager = copyBeanToNewBean(body, SynonymPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(
                         synonymService.getSynonymList(body.dictId, pager).stream()

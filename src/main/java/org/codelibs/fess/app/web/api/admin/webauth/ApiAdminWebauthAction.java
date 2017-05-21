@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.app.service.WebConfigService;
@@ -60,8 +59,7 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final WebAuthPager pager = new WebAuthPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final WebAuthPager pager = copyBeanToNewBean(body, WebAuthPager.class);
         final List<WebAuthentication> list = webAuthService.getWebAuthenticationList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

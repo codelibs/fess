@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -44,8 +43,6 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     @Resource
     private CrawlingInfoService crawlingInfoService;
     @Resource
-    private CrawlingInfoPager crawlingInfoPager;
-    @Resource
     protected ProcessHelper processHelper;
 
     // ===================================================================================
@@ -57,8 +54,7 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});
-        final CrawlingInfoPager pager = new CrawlingInfoPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final CrawlingInfoPager pager = copyBeanToNewBean(body, CrawlingInfoPager.class);
         final List<CrawlingInfo> list = crawlingInfoService.getCrawlingInfoList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>()
                 .logs(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList())).total(pager.getAllRecordCount())
@@ -96,7 +92,6 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> delete$all() {
         try {
             crawlingInfoService.deleteOldSessions(processHelper.getRunningSessionIdSet());
-            crawlingInfoPager.clear();
             saveInfo(messages -> messages.addSuccessCrawlingInfoDeleteAll(GLOBAL));
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));

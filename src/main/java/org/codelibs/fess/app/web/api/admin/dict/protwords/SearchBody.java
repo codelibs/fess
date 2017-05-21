@@ -15,8 +15,7 @@
  */
 package org.codelibs.fess.app.web.api.admin.dict.protwords;
 
-import org.codelibs.fess.app.web.admin.dict.protwords.SearchForm;
+import org.codelibs.fess.app.web.api.admin.dict.BaseSearchDictBody;
 
-public class SearchBody extends SearchForm {
-    public Integer pageNumber;
+public class SearchBody extends BaseSearchDictBody {
 }

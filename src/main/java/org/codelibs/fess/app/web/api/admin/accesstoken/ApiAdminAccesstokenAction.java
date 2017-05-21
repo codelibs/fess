@@ -62,9 +62,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final AccessTokenPager pager = new AccessTokenPager();
-        pager.setPageSize(body.size);
-        pager.setCurrentPageNumber(body.page);
+        final AccessTokenPager pager = copyBeanToNewBean(body, AccessTokenPager.class);
         final List<AccessToken> list = accessTokenService.getAccessTokenList(pager);
         return asJson(new ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

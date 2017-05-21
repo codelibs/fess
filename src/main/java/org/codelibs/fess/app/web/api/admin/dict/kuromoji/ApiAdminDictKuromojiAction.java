@@ -45,10 +45,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        final KuromojiPager pager = new KuromojiPager();
-        if (body.pageNumber != null) {
-            pager.setCurrentPageNumber(body.pageNumber);
-        }
+        final KuromojiPager pager = copyBeanToNewBean(body, KuromojiPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(
                         kuromojiService.getKuromojiList(body.dictId, pager).stream()

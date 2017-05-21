@@ -56,9 +56,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final BoostDocPager pager = new BoostDocPager();
-        pager.setPageSize(body.size);
-        pager.setCurrentPageNumber(body.page);
+        final BoostDocPager pager = copyBeanToNewBean(body, BoostDocPager.class);
         final List<BoostDocumentRule> list = boostDocumentRuleService.getBoostDocumentRuleList(pager);
         return asJson(new ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

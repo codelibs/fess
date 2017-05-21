@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -56,10 +55,7 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final LabelTypePager pager = new LabelTypePager();
-        pager.setPageSize(body.size);
-        pager.setCurrentPageNumber(body.page);
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final LabelTypePager pager = copyBeanToNewBean(body, LabelTypePager.class);
         final List<LabelType> list = labelTypeService.getLabelTypeList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

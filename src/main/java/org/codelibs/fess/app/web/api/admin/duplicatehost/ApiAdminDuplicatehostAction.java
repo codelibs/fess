@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DuplicateHostPager;
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -56,8 +55,7 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final DuplicateHostPager pager = new DuplicateHostPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final DuplicateHostPager pager = copyBeanToNewBean(body, DuplicateHostPager.class);
         final List<DuplicateHost> list = duplicateHostService.getDuplicateHostList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -51,8 +50,7 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});
-        final JobLogPager pager = new JobLogPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final JobLogPager pager = copyBeanToNewBean(body, JobLogPager.class);
         final List<JobLog> list = jobLogService.getJobLogList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>()
                 .logs(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList())).total(pager.getAllRecordCount())

@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -57,8 +56,7 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});
-        final FailureUrlPager pager = new FailureUrlPager();
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final FailureUrlPager pager = copyBeanToNewBean(body, FailureUrlPager.class);
         final List<FailureUrl> list = failureUrlService.getFailureUrlList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>()
                 .logs(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList())).total(pager.getAllRecordCount())

@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebConfigPager;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -56,10 +55,7 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final WebConfigPager pager = new WebConfigPager();
-        pager.setPageSize(body.size);
-        pager.setCurrentPageNumber(body.page);
-        copyBeanToBean(body, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        final WebConfigPager pager = copyBeanToNewBean(body, WebConfigPager.class);
         final List<WebConfig> list = webConfigService.getWebConfigList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

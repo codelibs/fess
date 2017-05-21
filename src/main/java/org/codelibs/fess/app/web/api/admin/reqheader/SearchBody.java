@@ -15,8 +15,9 @@
  */
 package org.codelibs.fess.app.web.api.admin.reqheader;
 
-import org.codelibs.fess.app.web.admin.reqheader.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
+    public String id;
 
 }

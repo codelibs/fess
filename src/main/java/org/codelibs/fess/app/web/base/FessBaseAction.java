@@ -189,6 +189,10 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         BeanUtil.copyBeanToBean(src, dest, option);
     }
 
+    protected static <T> T copyBeanToNewBean(final Object src, final Class<T> destClass) {
+        return BeanUtil.copyBeanToNewBean(src, destClass);
+    }
+
     protected String buildThrowableMessage(final Throwable t) {
         final StringBuilder buf = new StringBuilder(100);
         Throwable current = t;

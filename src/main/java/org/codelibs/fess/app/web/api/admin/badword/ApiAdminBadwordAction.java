@@ -57,9 +57,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
-        final BadWordPager pager = new BadWordPager();
-        pager.setPageSize(body.size);
-        pager.setCurrentPageNumber(body.page);
+        final BadWordPager pager = copyBeanToNewBean(body, BadWordPager.class);
         final List<BadWord> list = badWordService.getBadWordList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))

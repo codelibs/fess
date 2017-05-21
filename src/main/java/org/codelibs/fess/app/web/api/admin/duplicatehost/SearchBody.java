@@ -15,8 +15,9 @@
  */
 package org.codelibs.fess.app.web.api.admin.duplicatehost;
 
-import org.codelibs.fess.app.web.admin.duplicatehost.SearchForm;
+import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
-public class SearchBody extends SearchForm {
+public class SearchBody extends BaseSearchBody {
+    public String id;
 
 }
