@@ -15,24 +15,12 @@
  */
 package org.codelibs.fess.exception;
 
-public class FessSystemException extends RuntimeException {
+public class ContentNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public FessSystemException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public FessSystemException(final String message) {
-        super(message);
-    }
-
-    public FessSystemException(final Throwable cause) {
-        super(cause);
-    }
-
-    protected FessSystemException(final String message, final boolean enableSuppression, final boolean writableStackTrace) {
-        super(message, null, enableSuppression, writableStackTrace);
+    public ContentNotFoundException(String url) {
+        super("Not Found: " + url, false, false);
     }
 
 }

@@ -62,6 +62,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String CRAWLER_FAILURE_URL_STATUS_CODES = "crawlerFailureUrlStatusCodes";
+
     public static final String VIRTUAL_HOST_HEADERS = "virtualHostHeaders";
 
     public static final String QUERY_COLLAPSE_INNER_HITS_SORTS = "queryCollapseInnerHitsSorts";
@@ -1584,4 +1586,23 @@ public interface FessProp {
             return page;
         }).orElse(page);
     }
+
+    String getCrawlerFailureUrlStatusCodes();
+
+    public default boolean isCrawlerFailureUrlStatusCodes(final int code) {
+        int[] codes = (int[]) propMap.get(CRAWLER_FAILURE_URL_STATUS_CODES);
+        if (codes == null) {
+            codes =
+                    split(getCrawlerFailureUrlStatusCodes(), ",").get(
+                            stream -> stream.filter(StringUtil::isNotBlank).mapToInt(Integer::parseInt).toArray());
+            propMap.put(CRAWLER_FAILURE_URL_STATUS_CODES, codes);
+        }
+        for (int v : codes) {
+            if (v == code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

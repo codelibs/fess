@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
@@ -39,6 +40,7 @@ import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
+import org.codelibs.fess.exception.ContentNotFoundException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
@@ -236,5 +238,21 @@ public class FessCrawlerThread extends CrawlerThread {
             }
         }
         return urlSet;
+    }
+
+    @Override
+    protected void processResponse(final UrlQueue<?> urlQueue, final ResponseData responseData) {
+        super.processResponse(urlQueue, responseData);
+
+        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isCrawlerFailureUrlStatusCodes(responseData.getHttpStatusCode())) {
+            String sessionId = crawlerContext.getSessionId();
+            final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().get(sessionId);
+            final String url = urlQueue.getUrl();
+
+            final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
+            failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url, new ContentNotFoundException(
+                    url));
+        }
     }
 }

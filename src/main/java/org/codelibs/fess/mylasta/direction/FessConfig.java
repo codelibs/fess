@@ -184,6 +184,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_IGNORE_CONTENT_EXCEPTION = "crawler.ignore.content.exception";
 
+    /** The key of the configuration. e.g. 404 */
+    String CRAWLER_FAILURE_URL_STATUS_CODES = "crawler.failure.url.status.codes";
+
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
@@ -1635,6 +1638,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerIgnoreContentException();
+
+    /**
+     * Get the value for the key 'crawler.failure.url.status.codes'. <br>
+     * The value is, e.g. 404 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerFailureUrlStatusCodes();
+
+    /**
+     * Get the value for the key 'crawler.failure.url.status.codes' as {@link Integer}. <br>
+     * The value is, e.g. 404 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerFailureUrlStatusCodesAsInteger();
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
@@ -5083,6 +5101,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerIgnoreContentException() {
             return is(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION);
+        }
+
+        public String getCrawlerFailureUrlStatusCodes() {
+            return get(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES);
+        }
+
+        public Integer getCrawlerFailureUrlStatusCodesAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES);
         }
 
         public String getCrawlerMetadataContentExcludes() {
