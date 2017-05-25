@@ -573,6 +573,6 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
 
     @FunctionalInterface
     public interface ScoreFunctionCreator<T extends EsAbstractConditionQuery> {
-        void filter(final OperatorCall<T> cqLambda, final ScoreFunctionBuilder scoreFunctionBuilder);
+        void filter(final OperatorCall<T> cqLambda, final ScoreFunctionBuilder<?> scoreFunctionBuilder);
     }
 }
