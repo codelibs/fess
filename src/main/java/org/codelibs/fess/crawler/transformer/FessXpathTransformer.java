@@ -404,15 +404,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         if (StringUtil.isBlank(canonicalUrl)) {
             return null;
         }
-        if (canonicalUrl.startsWith("/")) {
-            return normalizeCanonicalUrl(responseData.getUrl(), canonicalUrl);
-        }
-        return canonicalUrl;
+        return normalizeCanonicalUrl(responseData.getUrl(), canonicalUrl);
     }
 
     protected String normalizeCanonicalUrl(final String baseUrl, final String canonicalUrl) {
         try {
-            return new URL(new URL(baseUrl), canonicalUrl).toString();
+            final URL u = new URL(baseUrl);
+            return new URL(u, canonicalUrl.startsWith(":") ? u.getProtocol() + canonicalUrl : canonicalUrl).toString();
         } catch (final MalformedURLException e) {
             logger.warn("Invalid canonical url: " + baseUrl + " : " + canonicalUrl, e);
         }
@@ -580,7 +578,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
         try {
-            final URL url = new URL(baseHref != null ? baseHref : responseData.getUrl());
+            final URL url = getBaseUrl(responseData.getUrl(), baseHref);
             for (final Map.Entry<String, String> entry : childUrlRuleMap.entrySet()) {
                 for (final String u : getUrlFromTagAttribute(url, document, entry.getKey(), entry.getValue(), responseData.getCharSet())) {
                     anchorList.add(RequestDataBuilder.newRequestData().get().url(u).build());
@@ -589,8 +587,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             anchorList = convertChildUrlList(anchorList);
         } catch (final Exception e) {
             logger.warn("Could not parse anchor tags.", e);
-            //        } finally {
-            //            xpathAPI.remove();
         }
 
         final List<String> urlList = new ArrayList<>(anchorList.size());
@@ -598,6 +594,22 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             urlList.add(requestData.getUrl());
         }
         return urlList;
+    }
+
+    protected URL getBaseUrl(final String currentUrl, final String baseHref) throws MalformedURLException {
+        if (baseHref != null) {
+            if (baseHref.startsWith("://")) {
+                final String protocol = currentUrl.split(":")[0];
+                return new URL(protocol + baseHref);
+            } else if (baseHref.startsWith("//")) {
+                final String protocol = currentUrl.split(":")[0];
+                return new URL(protocol + ":" + baseHref);
+            } else if (baseHref.startsWith("/")) {
+                return new URL(new URL(currentUrl), baseHref);
+            }
+            return new URL(baseHref);
+        }
+        return new URL(currentUrl);
     }
 
     @Override
@@ -638,7 +650,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         URL childUrl;
         String u = null;
         try {
-            childUrl = new URL(url, urlValue);
+            childUrl = new URL(url, urlValue.startsWith(":") ? url.getProtocol() + urlValue : urlValue);
             u = encodeUrl(normalizeUrl(childUrl.toExternalForm()), encoding);
         } catch (final MalformedURLException e) {
             final int pos = urlValue.indexOf(':');
