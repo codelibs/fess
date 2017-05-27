@@ -197,6 +197,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldSegment(), //
+                    fessConfig.getIndexFieldAnchor(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldLang());
