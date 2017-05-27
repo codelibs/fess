@@ -185,7 +185,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return map;
 
         } catch (final Exception e) {
-            logger.warn("Failed to access to " + rootURL, e);
+            logger.warn("Failed to access to " + url, e);
             return Collections.emptyMap();
         }
     }
@@ -214,7 +214,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 List<Map<String, Object>> repos = (ArrayList<Map<String, Object>>) map.get("repositories");
                 repoList.addAll(repos);
             } catch (final Exception e) {
-                logger.warn("Failed to access to " + rootURL, e);
+                logger.warn("Failed to access to " + urlWithOffset, e);
                 break;
             }
         } while (repoList.size() < totalCount);
@@ -234,7 +234,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             assert (objmap.containsKey("sha"));
             return objmap.get("sha");
         } catch (final Exception e) {
-            logger.warn("Failed to access to " + rootURL, e);
+            logger.warn("Failed to access to " + url, e);
             return branch;
         }
     }
