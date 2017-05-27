@@ -16,6 +16,8 @@
 package org.codelibs.fess.ds.impl;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.codelibs.fess.crawler.client.http.RequestHeader;
@@ -182,7 +185,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return map;
 
         } catch (final Exception e) {
-            logger.warn("Failed to access to " + rootURL, e);
+            logger.warn("Failed to access to " + url, e);
             return Collections.emptyMap();
         }
     }
@@ -211,7 +214,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 List<Map<String, Object>> repos = (ArrayList<Map<String, Object>>) map.get("repositories");
                 repoList.addAll(repos);
             } catch (final Exception e) {
-                logger.warn("Failed to access to " + rootURL, e);
+                logger.warn("Failed to access to " + urlWithOffset, e);
                 break;
             }
         } while (repoList.size() < totalCount);
@@ -221,7 +224,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected String getGitRef(final String rootURL, final String authToken, final String owner, final String name, final String branch) {
-        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/git/refs/heads/" + branch;
+        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/git/refs/heads/" + encode(branch);
+
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
             final Map<String, Object> map = curlResponse.getContentAsMap();
             assert (map.containsKey("object"));
@@ -230,7 +234,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             assert (objmap.containsKey("sha"));
             return objmap.get("sha");
         } catch (final Exception e) {
-            logger.warn("Failed to access to " + rootURL, e);
+            logger.warn("Failed to access to " + url, e);
             return branch;
         }
     }
@@ -292,7 +296,6 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final Map<String, Object> defaultDataMap) {
 
         final String issueUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/issues/" + issueId.toString();
-        // final String commentsUrl = issueUrl + "/comments";
         final String viewUrl = rootURL + owner + "/" + name + "/issues/" + issueId.toString();
 
         if (logger.isInfoEnabled()) {
@@ -402,7 +405,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return;
         }
 
-        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path + "?ref=" + refStr;
+        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + encode(path) + "?ref=" + refStr;
 
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
             final InputStream iStream = curlResponse.getContentAsStream();
@@ -411,7 +414,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             for (int i = 0; i < fileList.size(); ++i) {
                 @SuppressWarnings("unchecked")
                 final Map<String, String> file = (Map<String, String>) fileList.get(i);
-                final String newPath = path.isEmpty() ? file.get("name") : path + "/" + file.get("name");
+                final String fname = encode(file.get("name"));
+                final String newPath = path.isEmpty() ? fname : path + "/" + fname;
                 switch (file.get("type")) {
                 case "file":
                     consumer.accept(newPath);
@@ -426,6 +430,16 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             }
         } catch (final Exception e) {
             logger.warn("Failed to access to " + url, e);
+        }
+    }
+
+    private String encode(final String s) {
+        try {
+            final String encoded = URLEncoder.encode(s, Constants.UTF_8);
+            return encoded;
+        } catch (UnsupportedEncodingException e) {
+            logger.warn("Failed to encode \"" + s + "\"", e);
+            return s;
         }
     }
 }
