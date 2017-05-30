@@ -116,9 +116,14 @@ public class IndexingHelper {
         }
     }
 
-    public void deleteDocument(final FessEsClient fessEsClient, final String id) {
+    public boolean updateDocument(final FessEsClient fessEsClient, final String id, final String field, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, 0);
+        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, field, value);
+    }
+
+    public boolean deleteDocument(final FessEsClient fessEsClient, final String id) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, 0);
     }
 
     public int deleteDocumentByUrl(final FessEsClient fessEsClient, final String url) {

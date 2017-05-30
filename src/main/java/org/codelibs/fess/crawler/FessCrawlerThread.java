@@ -125,8 +125,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Date expires = DocumentUtil.getValue(document, fessConfig.getIndexFieldExpires(), Date.class);
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
-                    if (idValue != null) {
-                        indexingHelper.deleteDocument(fessEsClient, idValue.toString());
+                    if (idValue != null && !indexingHelper.deleteDocument(fessEsClient, idValue.toString())) {
+                        logger.debug("Failed to delete expired document: " + url);
                     }
                     return true;
                 }
@@ -152,7 +152,9 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
-                    indexingHelper.deleteDocument(fessEsClient, id);
+                    if (!indexingHelper.deleteDocument(fessEsClient, id)) {
+                        logger.debug("Failed to delete 404 document: " + url);
+                    }
                     return false;
                 } else if (responseData.getLastModified() == null) {
                     return true;
@@ -167,6 +169,12 @@ public class FessCrawlerThread extends CrawlerThread {
                     processResponse(urlQueue, responseData);
 
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
+
+                    final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
+                    if (documentExpires != null
+                            && !indexingHelper.updateDocument(fessEsClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
+                        logger.debug("Failed to update " + fessConfig.getIndexFieldExpires() + " at " + url);
+                    }
 
                     return false;
                 }
