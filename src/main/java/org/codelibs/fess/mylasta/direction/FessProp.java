@@ -1605,4 +1605,26 @@ public interface FessProp {
         return false;
     }
 
+    Integer getThumbnailHtmlImageMinWidthAsInteger();
+
+    Integer getThumbnailHtmlImageMinHeightAsInteger();
+
+    java.math.BigDecimal getThumbnailHtmlImageMaxAspectRatioAsDecimal();
+
+    public default boolean validateThumbnailSize(final int width, final int height) {
+        if (width <= 0 || height <= 0) {
+            return false;
+        }
+
+        if (width < getThumbnailHtmlImageMinWidthAsInteger().intValue() || height < getThumbnailHtmlImageMinHeightAsInteger().intValue()) {
+            return false;
+        }
+
+        final float ratio = getThumbnailHtmlImageMaxAspectRatioAsDecimal().floatValue();
+        if (((float) width) / ((float) height) > ratio || ((float) height) / ((float) width) > ratio) {
+            return false;
+        }
+
+        return true;
+    }
 }

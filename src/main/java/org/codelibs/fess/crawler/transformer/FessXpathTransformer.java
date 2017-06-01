@@ -68,12 +68,17 @@ import org.cyberneko.html.parsers.DOMParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
     private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformer.class);
+
+    private static final String META_NAME_THUMBNAIL_CONTENT = "//META[@name=\"thumbnail\" or @name=\"THUMBNAIL\"]/@content";
+
+    private static final String META_PROPERTY_OGIMAGE_CONTENT = "//META[@property=\"og:image\"]/@content";
 
     private static final String META_NAME_ROBOTS_CONTENT = "//META[@name=\"robots\" or @name=\"ROBOTS\"]/@content";
 
@@ -360,6 +365,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingInfoHelper.generateId(dataMap));
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url); // set again
         }
+        // thumbnail
+        final String thumbnailUrl = getThumbnailUrl(responseData, document);
+        if (StringUtil.isNotBlank(thumbnailUrl)) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldThumbnail(), thumbnailUrl);
+        }
 
         // from config
         final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);
@@ -598,16 +608,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected URL getBaseUrl(final String currentUrl, final String baseHref) throws MalformedURLException {
         if (baseHref != null) {
-            if (baseHref.startsWith("://")) {
-                final String protocol = currentUrl.split(":")[0];
-                return new URL(protocol + baseHref);
-            } else if (baseHref.startsWith("//")) {
-                final String protocol = currentUrl.split(":")[0];
-                return new URL(protocol + ":" + baseHref);
-            } else if (baseHref.startsWith("/")) {
-                return new URL(new URL(currentUrl), baseHref);
-            }
-            return new URL(baseHref);
+            return getURL(currentUrl, baseHref);
         }
         return new URL(currentUrl);
     }
@@ -687,4 +688,87 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         this.useGoogleOffOn = useGoogleOffOn;
     }
 
+    protected String getThumbnailUrl(final ResponseData responseData, final Document document) {
+        // TODO PageMap
+        try {
+            // meta thumbnail
+            final Node thumbnailNode = getXPathAPI().selectSingleNode(document, META_NAME_THUMBNAIL_CONTENT);
+            if (thumbnailNode != null) {
+                final URL thumbnailUrl = getURL(responseData.getUrl(), thumbnailNode.getTextContent());
+                if (thumbnailUrl != null) {
+                    return thumbnailUrl.toExternalForm();
+                }
+            }
+
+            // meta og:image
+            final Node ogImageNode = getXPathAPI().selectSingleNode(document, META_PROPERTY_OGIMAGE_CONTENT);
+            if (ogImageNode != null) {
+                final URL thumbnailUrl = getURL(responseData.getUrl(), ogImageNode.getTextContent());
+                if (thumbnailUrl != null) {
+                    return thumbnailUrl.toExternalForm();
+                }
+            }
+
+            final NodeList imgNodeList = getXPathAPI().selectNodeList(document, "//IMG");
+            Node firstSrcNode = null;
+            for (int i = 0; i < imgNodeList.getLength(); i++) {
+                final Node imgNode = imgNodeList.item(i);
+                final NamedNodeMap attributes = imgNode.getAttributes();
+                final Node heightAttr = attributes.getNamedItem("height");
+                final Node widthAttr = attributes.getNamedItem("width");
+                if (heightAttr != null && widthAttr != null) {
+                    try {
+                        final int height = Integer.parseInt(heightAttr.getTextContent());
+                        final int width = Integer.parseInt(widthAttr.getTextContent());
+                        if (fessConfig.validateThumbnailSize(width, height)) {
+                            final Node srcNode = attributes.getNamedItem("src");
+                            if (srcNode != null) {
+                                final URL thumbnailUrl = getURL(responseData.getUrl(), srcNode.getTextContent());
+                                if (thumbnailUrl != null) {
+                                    return thumbnailUrl.toExternalForm();
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.debug("Failed to parse " + imgNode + " at " + responseData.getUrl(), e);
+                    }
+                } else if (firstSrcNode == null) {
+                    final Node srcNode = attributes.getNamedItem("src");
+                    if (srcNode != null) {
+                        firstSrcNode = srcNode;
+                    }
+                }
+            }
+
+            if (firstSrcNode != null) {
+                try {
+                    final URL thumbnailUrl = getURL(responseData.getUrl(), firstSrcNode.getTextContent());
+                    if (thumbnailUrl != null) {
+                        return thumbnailUrl.toExternalForm();
+                    }
+                } catch (Exception e) {
+                    logger.debug("Failed to parse " + firstSrcNode + " at " + responseData.getUrl(), e);
+                }
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to retrieve thumbnail url from " + responseData.getUrl(), e);
+        }
+        return null;
+    }
+
+    protected URL getURL(final String currentUrl, final String url) throws MalformedURLException {
+        if (url != null) {
+            if (url.startsWith("://")) {
+                final String protocol = currentUrl.split(":")[0];
+                return new URL(protocol + url);
+            } else if (url.startsWith("//")) {
+                final String protocol = currentUrl.split(":")[0];
+                return new URL(protocol + ":" + url);
+            } else if (url.startsWith("/") || url.indexOf(':') == -1) {
+                return new URL(new URL(currentUrl), url);
+            }
+            return new URL(url);
+        }
+        return null;
+    }
 }

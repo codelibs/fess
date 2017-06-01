@@ -642,5 +642,81 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         value = transformer.getBaseUrl("https://hoge.com/", "//hoge.com/aaa/");
         assertEquals("https://hoge.com/aaa/", value.toExternalForm());
+
+        value = transformer.getBaseUrl("https://hoge.com/", "aaa/");
+        assertEquals("https://hoge.com/aaa/", value.toExternalForm());
+    }
+
+    public void test_getThumbnailUrl_no() throws Exception {
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        String data = "<html><body>foo</body></html>";
+        assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"x\" height=\"x\">";
+        assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"10\" height=\"100\">";
+        assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"100\" height=\"10\">";
+        assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"400\" height=\"100\">";
+        assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"100\" height=\"400\">";
+        assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
+    }
+
+    public void test_getThumbnailUrl() throws Exception {
+        String data = "<meta property=\"og:image\" content=\"http://example/foo.jpg\" />";
+        String expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<meta property=\"og:image\" content=\"://example/foo.jpg\" />";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<meta property=\"og:image\" content=\"http://example/foo.jpg\" />";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<meta property=\"og:image\" content=\"/foo.jpg\" />";
+        expected = "http://example.com/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<img src=\"http://example/foo.jpg\">";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<img src=\"http://example/foo.jpg\">" //
+                + "<img src=\"http://example/bar.jpg\">";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<img src=\"http://example/foo.jpg\">" //
+                + "<img src=\"http://example/bar.jpg\" width=\"100\" height=\"100\">";
+        expected = "http://example/bar.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"100\" height=\"100\">";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+    }
+
+    private void assertGetThumbnailUrl(String data, String expected) throws Exception {
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        assertEquals(expected, transformer.getThumbnailUrl(responseData, document));
     }
 }

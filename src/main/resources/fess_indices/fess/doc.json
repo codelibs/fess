@@ -532,6 +532,9 @@
         "analyzer": "standard_analyzer",
         "term_vector": "with_positions_offsets"
       },
+      "thumbnail": {
+        "type": "keyword"
+      },
       "url": {
         "type": "keyword"
       }

@@ -226,13 +226,13 @@ public class ThumbnailManager {
     }
 
     public void offer(final Map<String, Object> docMap) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         for (final ThumbnailGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
-                final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
                 final String path = getImageFilename(docMap);
-                final Tuple3<String, String, String> task = new Tuple3<>(generator.getName(), url, path);
-                thumbnailTaskQueue.offer(task);
+                final Tuple3<String, String, String> task = generator.createTask(path, docMap);
+                if (task != null) {
+                    thumbnailTaskQueue.offer(task);
+                }
                 break;
             }
         }

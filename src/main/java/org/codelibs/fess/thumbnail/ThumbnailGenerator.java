@@ -18,6 +18,8 @@ package org.codelibs.fess.thumbnail;
 import java.io.File;
 import java.util.Map;
 
+import org.codelibs.core.misc.Tuple3;
+
 public interface ThumbnailGenerator {
 
     String getName();
@@ -29,4 +31,6 @@ public interface ThumbnailGenerator {
     boolean isAvailable();
 
     void destroy();
+
+    Tuple3<String, String, String> createTask(String path, Map<String, Object> docMap);
 }

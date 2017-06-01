@@ -378,6 +378,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. filename */
     String INDEX_FIELD_FILENAME = "index.field.filename";
 
+    /** The key of the configuration. e.g. thumbnail */
+    String INDEX_FIELD_THUMBNAIL = "index.field.thumbnail";
+
     /** The key of the configuration. e.g. content_title */
     String RESPONSE_FIELD_content_title = "response.field.content_title";
 
@@ -717,7 +720,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGING_SEARCH_PAGE_MAX_SIZE = "paging.search.page.max.size";
 
-    /** The key of the configuration. e.g. true */
+    /** The key of the configuration. e.g. false */
     String THUMBNAIL_HTML_PHANTOMJS_ENABLED = "thumbnail.html.phantomjs.enabled";
 
     /** The key of the configuration. e.g. 20000 */
@@ -740,6 +743,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. png */
     String THUMBNAIL_HTML_PHANTOMJS_FORMAT = "thumbnail.html.phantomjs.format";
+
+    /** The key of the configuration. e.g. 50 */
+    String THUMBNAIL_HTML_IMAGE_MIN_WIDTH = "thumbnail.html.image.min.width";
+
+    /** The key of the configuration. e.g. 50 */
+    String THUMBNAIL_HTML_IMAGE_MIN_HEIGHT = "thumbnail.html.image.min.height";
+
+    /** The key of the configuration. e.g. 3.0 */
+    String THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO = "thumbnail.html.image.max.aspect.ratio";
+
+    /** The key of the configuration. e.g. 1200 */
+    String THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH = "thumbnail.html.image.window.width";
+
+    /** The key of the configuration. e.g. 800 */
+    String THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT = "thumbnail.html.image.window.height";
+
+    /** The key of the configuration. e.g. 160 */
+    String THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH = "thumbnail.html.image.thumbnail.width";
+
+    /** The key of the configuration. e.g. 160 */
+    String THUMBNAIL_HTML_IMAGE_THUMBNAIL_HEIGHT = "thumbnail.html.image.thumbnail.height";
+
+    /** The key of the configuration. e.g. png */
+    String THUMBNAIL_HTML_IMAGE_FORMAT = "thumbnail.html.image.format";
 
     /** The key of the configuration. e.g. all */
     String THUMBNAIL_GENERATOR_TARGETS = "thumbnail.generator.targets";
@@ -2268,6 +2295,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexFieldFilename();
 
     /**
+     * Get the value for the key 'index.field.thumbnail'. <br>
+     * The value is, e.g. thumbnail <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldThumbnail();
+
+    /**
      * Get the value for the key 'response.field.content_title'. <br>
      * The value is, e.g. content_title <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -3516,14 +3550,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.phantomjs.enabled'. <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlPhantomjsEnabled();
 
     /**
      * Is the property for the key 'thumbnail.html.phantomjs.enabled' true? <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isThumbnailHtmlPhantomjsEnabled();
@@ -3624,6 +3658,118 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlPhantomjsFormat();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.min.width'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageMinWidth();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.min.width' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailHtmlImageMinWidthAsInteger();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.min.height'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageMinHeight();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.min.height' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailHtmlImageMinHeightAsInteger();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.max.aspect.ratio'. <br>
+     * The value is, e.g. 3.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageMaxAspectRatio();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.max.aspect.ratio' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 3.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getThumbnailHtmlImageMaxAspectRatioAsDecimal();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.window.width'. <br>
+     * The value is, e.g. 1200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageWindowWidth();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.window.width' as {@link Integer}. <br>
+     * The value is, e.g. 1200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailHtmlImageWindowWidthAsInteger();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.window.height'. <br>
+     * The value is, e.g. 800 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageWindowHeight();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.window.height' as {@link Integer}. <br>
+     * The value is, e.g. 800 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailHtmlImageWindowHeightAsInteger();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.thumbnail.width'. <br>
+     * The value is, e.g. 160 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageThumbnailWidth();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.thumbnail.width' as {@link Integer}. <br>
+     * The value is, e.g. 160 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailHtmlImageThumbnailWidthAsInteger();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.thumbnail.height'. <br>
+     * The value is, e.g. 160 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageThumbnailHeight();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.thumbnail.height' as {@link Integer}. <br>
+     * The value is, e.g. 160 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailHtmlImageThumbnailHeightAsInteger();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.format'. <br>
+     * The value is, e.g. png <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageFormat();
 
     /**
      * Get the value for the key 'thumbnail.generator.targets'. <br>
@@ -5447,6 +5593,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_FILENAME);
         }
 
+        public String getIndexFieldThumbnail() {
+            return get(FessConfig.INDEX_FIELD_THUMBNAIL);
+        }
+
         public String getResponseFieldContentTitle() {
             return get(FessConfig.RESPONSE_FIELD_content_title);
         }
@@ -6141,6 +6291,66 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getThumbnailHtmlPhantomjsFormat() {
             return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_FORMAT);
+        }
+
+        public String getThumbnailHtmlImageMinWidth() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH);
+        }
+
+        public Integer getThumbnailHtmlImageMinWidthAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH);
+        }
+
+        public String getThumbnailHtmlImageMinHeight() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT);
+        }
+
+        public Integer getThumbnailHtmlImageMinHeightAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT);
+        }
+
+        public String getThumbnailHtmlImageMaxAspectRatio() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO);
+        }
+
+        public java.math.BigDecimal getThumbnailHtmlImageMaxAspectRatioAsDecimal() {
+            return getAsDecimal(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO);
+        }
+
+        public String getThumbnailHtmlImageWindowWidth() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH);
+        }
+
+        public Integer getThumbnailHtmlImageWindowWidthAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH);
+        }
+
+        public String getThumbnailHtmlImageWindowHeight() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT);
+        }
+
+        public Integer getThumbnailHtmlImageWindowHeightAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT);
+        }
+
+        public String getThumbnailHtmlImageThumbnailWidth() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH);
+        }
+
+        public Integer getThumbnailHtmlImageThumbnailWidthAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH);
+        }
+
+        public String getThumbnailHtmlImageThumbnailHeight() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_HEIGHT);
+        }
+
+        public Integer getThumbnailHtmlImageThumbnailHeightAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_HEIGHT);
+        }
+
+        public String getThumbnailHtmlImageFormat() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_FORMAT);
         }
 
         public String getThumbnailGeneratorTargets() {

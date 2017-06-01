@@ -13,6 +13,14 @@
 			<arg>pdfThumbnailGenerator</arg>
 		</postConstruct>
 	</component>
+	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.HtmlTagBasedGenerator">
+		<property name="name">"htmlThumbnailGenerator"</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</postConstruct>
+	</component>
+<!--
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.WebDriverGenerator">
 		<property name="name">"htmlThumbnailGenerator"</property>
 		<property name="generatorList">
@@ -31,7 +39,6 @@
 			<arg>"text/html"</arg>
 		</postConstruct>
 	</component>
-<!--
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"htmlThumbnailGenerator"</property>
 		<property name="commandList">

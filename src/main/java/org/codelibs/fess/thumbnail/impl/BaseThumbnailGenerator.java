@@ -23,7 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.core.misc.Tuple3;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.thumbnail.ThumbnailGenerator;
+import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 
 public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
@@ -82,6 +86,13 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             }).allMatch(s -> new File(s).isFile());
         }
         return true;
+    }
+
+    @Override
+    public Tuple3<String, String, String> createTask(final String path, final Map<String, Object> docMap) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
+        return new Tuple3<>(getName(), url, path);
     }
 
     public void setDirectoryNameLength(final int directoryNameLength) {
