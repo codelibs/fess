@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import java.util.function.Consumer;
+
 import javax.annotation.Resource;
 
 import org.codelibs.fess.app.service.ScheduledJobService;
@@ -32,6 +34,14 @@ import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -45,7 +55,9 @@ public class AdminUpgradeAction extends FessAdminAction {
     //
     private static final Logger logger = LoggerFactory.getLogger(AdminUpgradeAction.class);
 
-    private static final String VERSION_11_0 = "10.0";
+    private static final String VERSION_11_0 = "11.0";
+
+    private static final String VERSION_11_1 = "11.1";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -123,12 +135,100 @@ public class AdminUpgradeAction extends FessAdminAction {
         verifyToken(() -> asIndexHtml());
 
         if (VERSION_11_0.equals(form.targetVersion)) {
-            // for future release...
-            saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
+            try {
+                upgradeFrom11_0();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_0, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_11_1.equals(form.targetVersion)) {
+            try {
+                upgradeFrom11_0();
+                upgradeFrom11_1();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_1, e.getLocalizedMessage()));
+            }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
         }
         return redirect(getClass());
     }
 
+    private void upgradeFrom11_0() {
+    }
+
+    private void upgradeFrom11_1() {
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String configIndex = ".fess_config";
+
+        // update mapping
+        addFieldMapping(indicesClient, configIndex, "thumbnail_queue", "thumbnail_id",
+                "{\"properties\":{\"thumbnail_id\":{\"type\":\"keyword\"}}}");
+    }
+
+    private void upgradeFromAll() {
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
+
+        // .crawler
+        if (existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
+            deleteIndex(indicesClient, crawlerIndex, response -> {});
+        }
+    }
+
+    private void addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String field,
+            final String source) {
+        final GetFieldMappingsResponse gfmResponse =
+                indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
+        final FieldMappingMetaData fieldMappings = gfmResponse.fieldMappings(index, type, field);
+        if (fieldMappings == null || fieldMappings.isNull()) {
+            try {
+                final PutMappingResponse pmResponse =
+                        indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
+                if (!pmResponse.isAcknowledged()) {
+                    logger.warn("Failed to add " + field + " to " + index + "/" + type);
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
+            }
+        }
+    }
+
+    private boolean existsIndex(final IndicesAdminClient indicesClient, final String index, final IndicesOptions options) {
+        try {
+            final IndicesExistsResponse response =
+                    indicesClient.prepareExists(index).setIndicesOptions(options).execute().actionGet(fessConfig.getIndexSearchTimeout());
+            return response.isExists();
+        } catch (final Exception e) {
+            // ignore
+        }
+        return false;
+    }
+
+    private void deleteIndex(final IndicesAdminClient indicesClient, final String index, final Consumer<DeleteIndexResponse> comsumer) {
+        indicesClient.prepareDelete(index).execute(new ActionListener<DeleteIndexResponse>() {
+
+            @Override
+            public void onResponse(final DeleteIndexResponse response) {
+                logger.info("Deleted " + index + " index.");
+                comsumer.accept(response);
+            }
+
+            @Override
+            public void onFailure(final Exception e) {
+                logger.warn("Failed to delete " + index + " index.", e);
+            }
+        });
+    }
 }
