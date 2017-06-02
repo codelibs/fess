@@ -1030,6 +1030,228 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setThumbnailId_Equal(String thumbnailId) {
+        setThumbnailId_Term(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Equal(String thumbnailId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setThumbnailId_Term(thumbnailId, opLambda);
+    }
+
+    public void setThumbnailId_Term(String thumbnailId) {
+        setThumbnailId_Term(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Term(String thumbnailId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_NotEqual(String thumbnailId) {
+        setThumbnailId_NotTerm(thumbnailId, null);
+    }
+
+    public void setThumbnailId_NotTerm(String thumbnailId) {
+        setThumbnailId_NotTerm(thumbnailId, null);
+    }
+
+    public void setThumbnailId_NotEqual(String thumbnailId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setThumbnailId_NotTerm(thumbnailId, opLambda);
+    }
+
+    public void setThumbnailId_NotTerm(String thumbnailId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setThumbnailId_Term(thumbnailId), opLambda);
+    }
+
+    public void setThumbnailId_Terms(Collection<String> thumbnailIdList) {
+        setThumbnailId_Terms(thumbnailIdList, null);
+    }
+
+    public void setThumbnailId_Terms(Collection<String> thumbnailIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("thumbnail_id", thumbnailIdList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_InScope(Collection<String> thumbnailIdList) {
+        setThumbnailId_Terms(thumbnailIdList, null);
+    }
+
+    public void setThumbnailId_InScope(Collection<String> thumbnailIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setThumbnailId_Terms(thumbnailIdList, opLambda);
+    }
+
+    public void setThumbnailId_Match(String thumbnailId) {
+        setThumbnailId_Match(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Match(String thumbnailId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_MatchPhrase(String thumbnailId) {
+        setThumbnailId_MatchPhrase(thumbnailId, null);
+    }
+
+    public void setThumbnailId_MatchPhrase(String thumbnailId, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_MatchPhrasePrefix(String thumbnailId) {
+        setThumbnailId_MatchPhrasePrefix(thumbnailId, null);
+    }
+
+    public void setThumbnailId_MatchPhrasePrefix(String thumbnailId, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Fuzzy(String thumbnailId) {
+        setThumbnailId_Fuzzy(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Fuzzy(String thumbnailId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Prefix(String thumbnailId) {
+        setThumbnailId_Prefix(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Prefix(String thumbnailId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Wildcard(String thumbnailId) {
+        setThumbnailId_Wildcard(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Wildcard(String thumbnailId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Regexp(String thumbnailId) {
+        setThumbnailId_Regexp(thumbnailId, null);
+    }
+
+    public void setThumbnailId_Regexp(String thumbnailId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_SpanTerm(String thumbnailId) {
+        setThumbnailId_SpanTerm("thumbnail_id", null);
+    }
+
+    public void setThumbnailId_SpanTerm(String thumbnailId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_GreaterThan(String thumbnailId) {
+        setThumbnailId_GreaterThan(thumbnailId, null);
+    }
+
+    public void setThumbnailId_GreaterThan(String thumbnailId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = thumbnailId;
+        RangeQueryBuilder builder = regRangeQ("thumbnail_id", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_LessThan(String thumbnailId) {
+        setThumbnailId_LessThan(thumbnailId, null);
+    }
+
+    public void setThumbnailId_LessThan(String thumbnailId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = thumbnailId;
+        RangeQueryBuilder builder = regRangeQ("thumbnail_id", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_GreaterEqual(String thumbnailId) {
+        setThumbnailId_GreaterEqual(thumbnailId, null);
+    }
+
+    public void setThumbnailId_GreaterEqual(String thumbnailId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = thumbnailId;
+        RangeQueryBuilder builder = regRangeQ("thumbnail_id", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_LessEqual(String thumbnailId) {
+        setThumbnailId_LessEqual(thumbnailId, null);
+    }
+
+    public void setThumbnailId_LessEqual(String thumbnailId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = thumbnailId;
+        RangeQueryBuilder builder = regRangeQ("thumbnail_id", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Exists() {
+        setThumbnailId_Exists(null);
+    }
+
+    public void setThumbnailId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_CommonTerms(String thumbnailId) {
+        setThumbnailId_CommonTerms(thumbnailId, null);
+    }
+
+    public void setThumbnailId_CommonTerms(String thumbnailId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("thumbnail_id", thumbnailId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsThumbnailQueueCQ addOrderBy_ThumbnailId_Asc() {
+        regOBA("thumbnail_id");
+        return this;
+    }
+
+    public BsThumbnailQueueCQ addOrderBy_ThumbnailId_Desc() {
+        regOBD("thumbnail_id");
+        return this;
+    }
+
     public void setPath_Equal(String path) {
         setPath_Term(path, null);
     }

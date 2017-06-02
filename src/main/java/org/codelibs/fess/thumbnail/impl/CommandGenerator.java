@@ -61,7 +61,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public boolean generate(final String url, final File outputFile) {
+    public boolean generate(final String thumbnailId, final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
             logger.debug("Generate Thumbnail: " + url);
         }
@@ -143,6 +143,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         if (logger.isDebugEnabled()) {
             logger.debug("Thumbnail File: " + outputPath);
         }
+        updateThumbnailField(thumbnailId, url, url);
         return true;
     }
 

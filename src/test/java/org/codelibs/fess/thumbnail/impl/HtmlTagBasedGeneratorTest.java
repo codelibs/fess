@@ -38,55 +38,55 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 106);
+        assertImageSize(outputFile, 100, 66);
 
         imagePath = "thumbnail/600x400.gif";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 106);
+        assertImageSize(outputFile, 100, 66);
 
         imagePath = "thumbnail/600x400.jpg";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 106);
+        assertImageSize(outputFile, 100, 66);
 
         imagePath = "thumbnail/400x400.png";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 160);
+        assertImageSize(outputFile, 100, 100);
 
         imagePath = "thumbnail/400x400.gif";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 160);
+        assertImageSize(outputFile, 100, 100);
 
         imagePath = "thumbnail/400x400.jpg";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 160);
+        assertImageSize(outputFile, 100, 100);
 
         imagePath = "thumbnail/400x600.png";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 160);
+        assertImageSize(outputFile, 100, 100);
 
         imagePath = "thumbnail/400x600.gif";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 160);
+        assertImageSize(outputFile, 100, 100);
 
         imagePath = "thumbnail/400x600.jpg";
         try (ImageInputStream input = ImageIO.createImageInputStream(classLoader.getResourceAsStream(imagePath))) {
             generator.saveImage(input, outputFile);
         }
-        assertImageSize(outputFile, 160, 160);
+        assertImageSize(outputFile, 100, 100);
 
     }
 

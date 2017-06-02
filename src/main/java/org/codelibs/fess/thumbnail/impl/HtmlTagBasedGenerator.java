@@ -29,7 +29,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Tuple3;
+import org.codelibs.core.misc.Tuple4;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -46,17 +46,18 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public Tuple3<String, String, String> createTask(final String path, final Map<String, Object> docMap) {
+    public Tuple4<String, String, String, String> createTask(final String path, final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
         final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldThumbnail(), String.class);
         if (StringUtil.isBlank(url)) {
             return null;
         }
-        return new Tuple3<>(getName(), url, path);
+        return new Tuple4<>(getName(), thumbnailId, url, path);
     }
 
     @Override
-    public boolean generate(final String url, final File outputFile) {
+    public boolean generate(final String thumbnailId, final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
             logger.debug("Generate Thumbnail: " + url);
         }
@@ -82,6 +83,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 saveImage(input, outputFile);
             } catch (final Throwable t) {
                 logger.warn("Failed to convert " + url, t);
+                updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
             }
         });
 

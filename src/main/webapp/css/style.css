@@ -251,8 +251,6 @@ ul.searchOptionLabels li {
 }
 
 .thumbnail {
-	width: 160px;
-	height: 160px;
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
 }

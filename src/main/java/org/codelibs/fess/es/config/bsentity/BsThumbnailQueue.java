@@ -49,6 +49,9 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     /** generator */
     protected String generator;
 
+    /** thumbnail_id */
+    protected String thumbnailId;
+
     /** path */
     protected String path;
 
@@ -88,6 +91,9 @@ public class BsThumbnailQueue extends EsAbstractEntity {
         if (generator != null) {
             addFieldToSource(sourceMap, "generator", generator);
         }
+        if (thumbnailId != null) {
+            addFieldToSource(sourceMap, "thumbnail_id", thumbnailId);
+        }
         if (path != null) {
             addFieldToSource(sourceMap, "path", path);
         }
@@ -111,6 +117,7 @@ public class BsThumbnailQueue extends EsAbstractEntity {
         sb.append(dm).append(createdTime);
         sb.append(dm).append(target);
         sb.append(dm).append(generator);
+        sb.append(dm).append(thumbnailId);
         sb.append(dm).append(path);
         sb.append(dm).append(url);
         if (sb.length() > dm.length()) {
@@ -161,6 +168,16 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     public void setGenerator(String value) {
         registerModifiedProperty("generator");
         this.generator = value;
+    }
+
+    public String getThumbnailId() {
+        checkSpecifiedProperty("thumbnailId");
+        return convertEmptyToNull(thumbnailId);
+    }
+
+    public void setThumbnailId(String value) {
+        registerModifiedProperty("thumbnailId");
+        this.thumbnailId = value;
     }
 
     public String getPath() {

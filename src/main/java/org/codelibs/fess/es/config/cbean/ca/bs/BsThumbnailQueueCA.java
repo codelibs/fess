@@ -725,6 +725,137 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         }
     }
 
+    public void setThumbnailId_Terms() {
+        setThumbnailId_Terms(null);
+    }
+
+    public void setThumbnailId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setThumbnailId_Terms("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_Terms("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_SignificantTerms() {
+        setThumbnailId_SignificantTerms(null);
+    }
+
+    public void setThumbnailId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setThumbnailId_SignificantTerms("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_SignificantTerms("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_IpRange() {
+        setThumbnailId_IpRange(null);
+    }
+
+    public void setThumbnailId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setThumbnailId_IpRange("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_IpRange("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_Count() {
+        setThumbnailId_Count(null);
+    }
+
+    public void setThumbnailId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setThumbnailId_Count("thumbnail_id", opLambda);
+    }
+
+    public void setThumbnailId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Cardinality() {
+        setThumbnailId_Cardinality(null);
+    }
+
+    public void setThumbnailId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setThumbnailId_Cardinality("thumbnail_id", opLambda);
+    }
+
+    public void setThumbnailId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Missing() {
+        setThumbnailId_Missing(null);
+    }
+
+    public void setThumbnailId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setThumbnailId_Missing("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_Missing("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setPath_Terms() {
         setPath_Terms(null);
     }

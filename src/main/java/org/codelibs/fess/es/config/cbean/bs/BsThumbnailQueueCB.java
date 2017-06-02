@@ -192,6 +192,10 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
             doColumn("generator");
         }
 
+        public void columnThumbnailId() {
+            doColumn("thumbnail_id");
+        }
+
         public void columnPath() {
             doColumn("path");
         }

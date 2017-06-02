@@ -853,6 +853,9 @@
           "generator" : {
             "type": "keyword"
           },
+          "thumbnail_id" : {
+            "type": "keyword"
+          },
           "path" : {
             "type": "keyword"
           },

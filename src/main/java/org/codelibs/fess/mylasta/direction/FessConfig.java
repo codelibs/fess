@@ -735,10 +735,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 800 */
     String THUMBNAIL_HTML_PHANTOMJS_WINDOW_HEIGHT = "thumbnail.html.phantomjs.window.height";
 
-    /** The key of the configuration. e.g. 160 */
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_WIDTH = "thumbnail.html.phantomjs.thumbnail.width";
 
-    /** The key of the configuration. e.g. 160 */
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_HEIGHT = "thumbnail.html.phantomjs.thumbnail.height";
 
     /** The key of the configuration. e.g. png */
@@ -759,10 +759,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 800 */
     String THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT = "thumbnail.html.image.window.height";
 
-    /** The key of the configuration. e.g. 160 */
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH = "thumbnail.html.image.thumbnail.width";
 
-    /** The key of the configuration. e.g. 160 */
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_THUMBNAIL_HEIGHT = "thumbnail.html.image.thumbnail.height";
 
     /** The key of the configuration. e.g. png */
@@ -3624,14 +3624,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.width'. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlPhantomjsThumbnailWidth();
 
     /**
      * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.width' as {@link Integer}. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3639,14 +3639,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.height'. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlPhantomjsThumbnailHeight();
 
     /**
      * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.height' as {@link Integer}. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3736,14 +3736,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.width'. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageThumbnailWidth();
 
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.width' as {@link Integer}. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3751,14 +3751,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.height'. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageThumbnailHeight();
 
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.height' as {@link Integer}. <br>
-     * The value is, e.g. 160 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */

@@ -23,13 +23,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.core.misc.Tuple3;
+import org.codelibs.core.misc.Tuple4;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.thumbnail.ThumbnailGenerator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(BaseThumbnailGenerator.class);
 
     protected final Map<String, String> conditionMap = new HashMap<>();
 
@@ -89,10 +92,11 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     }
 
     @Override
-    public Tuple3<String, String, String> createTask(final String path, final Map<String, Object> docMap) {
+    public Tuple4<String, String, String, String> createTask(final String path, final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
         final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
-        return new Tuple3<>(getName(), url, path);
+        return new Tuple4<>(getName(), thumbnailId, url, path);
     }
 
     public void setDirectoryNameLength(final int directoryNameLength) {
@@ -104,6 +108,17 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             return filePathMap.get(value);
         }
         return value;
+    }
+
+    protected void updateThumbnailField(final String thumbnailId, final String url, final String value) {
+        // TODO bulk
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            ComponentUtil.getIndexingHelper().updateDocument(ComponentUtil.getFessEsClient(), thumbnailId,
+                    fessConfig.getIndexFieldThumbnail(), null);
+        } catch (Exception e) {
+            logger.warn("Failed to update thumbnail field at " + url, e);
+        }
     }
 
     public void setGeneratorList(final List<String> generatorList) {

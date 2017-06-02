@@ -33,24 +33,25 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<div class="media">
-						<c:if test="${thumbnailSupport}">
-							<div class="thumbnailBox media-left hidden-xs-down">
-								<a class="link" href="${doc.url_link}"
-									data-uri="${doc.url_link}" data-id="${doc.doc_id}"
-									data-order="${s.index}"> <img
-									src="${fe:url('/images/blank.png')}"
-									data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
-									class="thumbnail">
-								</a>
-							</div>
-						</c:if>
-						<div class="media-body">
+						<div>
 							<h3 class="title ellipsis media-heading">
 								<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 									data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
 							</h3>
 							<div class="body">
-								<div class="description">${doc.content_description}</div>
+								<div>
+									<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
+										<div class="thumbnailBox media-left hidden-xs-down">
+											<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
+												data-order="${s.index}"
+											> <img src="${fe:url('/images/blank.png')}"
+												data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}" class="thumbnail"
+											>
+											</a>
+										</div>
+									</c:if>
+									<div class="media-body description">${doc.content_description}</div>
+								</div>
 								<div class="site ellipsis">
 									<cite>${f:h(doc.site_path)}</cite>
 									<c:if test="${doc.has_cache=='true'}">
