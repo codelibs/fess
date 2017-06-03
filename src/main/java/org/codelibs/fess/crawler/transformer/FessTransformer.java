@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
@@ -182,8 +183,7 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
-        String u = decodeUrlAsName(url, url.startsWith("file:"));
-
+        String u = url;
         int idx = u.lastIndexOf('?');
         if (idx >= 0) {
             u = u.substring(0, idx);
@@ -193,7 +193,7 @@ public interface FessTransformer {
         if (idx >= 0) {
             u = u.substring(0, idx);
         }
-
+        u = decodeUrlAsName(u, u.startsWith("file:"));
         idx = u.lastIndexOf('/');
         if (idx >= 0) {
             if (u.length() > idx + 1) {

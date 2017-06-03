@@ -16,7 +16,8 @@
 package org.codelibs.fess.ds.impl;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -224,7 +225,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected String getGitRef(final String rootURL, final String authToken, final String owner, final String name, final String branch) {
-        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/git/refs/heads/" + encode(branch);
+        final String url = encode(rootURL, "api/v3/repos/" + owner + "/" + name + "/git/refs/heads/" + branch, null);
 
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
             final Map<String, Object> map = curlResponse.getContentAsMap();
@@ -268,8 +269,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final String name, final String refStr, final List<String> roleList, final String path, final CrawlingConfig crawlingConfig,
             final IndexUpdateCallback callback, final Map<String, String> paramMap, final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
-        final String apiUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
-        final String viewUrl = rootURL + owner + "/" + name + "/blob/" + refStr + "/" + path;
+        final String apiUrl = encode(rootURL, "api/v3/repos/" + owner + "/" + name + "/contents/" + path, null);
+        final String viewUrl = encode(rootURL, owner + "/" + name + "/blob/" + refStr + "/" + path, null);
 
         if (logger.isInfoEnabled()) {
             logger.info("Get a content from " + apiUrl);
@@ -405,7 +406,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return;
         }
 
-        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + encode(path) + "?ref=" + refStr;
+        final String url = encode(rootURL, "api/v3/repos/" + owner + "/" + name + "/contents/" + path, "ref=" + refStr);
 
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
             final InputStream iStream = curlResponse.getContentAsStream();
@@ -414,8 +415,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             for (int i = 0; i < fileList.size(); ++i) {
                 @SuppressWarnings("unchecked")
                 final Map<String, String> file = (Map<String, String>) fileList.get(i);
-                final String fname = encode(file.get("name"));
-                final String newPath = path.isEmpty() ? fname : path + "/" + fname;
+                final String newPath = path.isEmpty() ? file.get("name") : path + "/" + file.get("name");
                 switch (file.get("type")) {
                 case "file":
                     consumer.accept(newPath);
@@ -433,13 +433,19 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    private String encode(final String s) {
+    private String encode(final String rootURL, final String path, final String query) {
         try {
-            final String encoded = URLEncoder.encode(s, Constants.UTF_8);
-            return encoded;
-        } catch (UnsupportedEncodingException e) {
-            logger.warn("Failed to encode \"" + s + "\"", e);
-            return s;
+            final URI rootURI = new URI(rootURL);
+            final URI uri =
+                    new URI(rootURI.getScheme(), rootURI.getUserInfo(), rootURI.getHost(), rootURI.getPort(), rootURI.getPath() + path,
+                            query, null);
+            return uri.toASCIIString();
+        } catch (final URISyntaxException e) {
+            logger.warn("Failed to parse " + rootURL + path + "?" + query, e);
+            if (StringUtil.isEmpty(query)) {
+                return rootURL + path;
+            }
+            return rootURL + path + "?" + query;
         }
     }
 }
