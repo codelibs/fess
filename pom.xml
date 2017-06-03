@@ -46,7 +46,7 @@
 		<mailflute.version>0.5.2</mailflute.version>
 
 		<!-- Partner Library -->
-		<slf4j.version>1.7.22</slf4j.version>
+		<slf4j.version>1.7.25</slf4j.version>
 		<log4j.version>2.8.2</log4j.version>
 		<jackson.version>2.8.6</jackson.version>
 		<commons.fileupload.version>1.3.2</commons.fileupload.version>
@@ -66,12 +66,12 @@
 		<suggest.version>5.4.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.4.0</elasticsearch.version>
+		<elasticsearch.version>5.4.1</elasticsearch.version>
 		<elasticsearch.min.version>5.3.0</elasticsearch.min.version>
-		<cluster.runner.version>5.4.0.1</cluster.runner.version>
+		<cluster.runner.version>5.4.1.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.14</tomcat.version>
+		<tomcat.version>8.5.15</tomcat.version>
 		<tomcat.boot.version>0.5.4</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
