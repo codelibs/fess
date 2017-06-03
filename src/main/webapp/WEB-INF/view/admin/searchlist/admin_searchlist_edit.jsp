@@ -109,8 +109,6 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.role" />
 											<la:textarea property="doc.role" styleClass="form-control"
-												required="required" data-validation="custom"
-												data-validation-regexp="^[1|2|R](\w+)$"
 												data-validation-help="1(username) | 2(groupname) | R(rolename)  e.g. Rguest" />
 										</div>
 									</div>
