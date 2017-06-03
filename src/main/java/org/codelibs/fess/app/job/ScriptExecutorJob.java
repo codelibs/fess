@@ -41,6 +41,7 @@ public class ScriptExecutorJob implements LaJob {
             logger.warn(Constants.SCHEDULED_JOB + " is empty.");
             return;
         }
+        runtime.stopIfNeeds();
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobManager jobManager = ComponentUtil.getJobManager();
