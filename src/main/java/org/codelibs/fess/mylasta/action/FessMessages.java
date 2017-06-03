@@ -314,6 +314,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upgrade from {0}: {1} */
     public static final String ERRORS_failed_to_upgrade_from = "{errors.failed_to_upgrade_from}";
 
+    /** The key of the message: Failed to start reindexing from {0} to {1} */
+    public static final String ERRORS_failed_to_reindex = "{errors.failed_to_reindex}";
+
     /** The key of the message: Failed to read request file: {0} */
     public static final String ERRORS_failed_to_read_request_file = "{errors.failed_to_read_request_file}";
 
@@ -416,8 +419,11 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Changed your password. */
     public static final String SUCCESS_changed_password = "{success.changed_password}";
 
-    /** The key of the message: Upgraded data. */
-    public static final String SUCCESS_upgrade_from = "{success.upgrade_from}";
+    /** The key of the message: Started data update process. */
+    public static final String SUCCESS_started_data_update = "{success.started_data_update}";
+
+    /** The key of the message: Started reindexing. */
+    public static final String SUCCESS_reindex_started = "{success.reindex_started}";
 
     /** The key of the message: Bulk process is started. */
     public static final String SUCCESS_bulk_process_started = "{success.bulk_process_started}";
@@ -1846,6 +1852,22 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_reindex' with parameters.
+     * <pre>
+     * message: Failed to start reindexing from {0} to {1}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToReindex(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_reindex, arg0, arg1));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.failed_to_read_request_file' with parameters.
      * <pre>
      * message: Failed to read request file: {0}
@@ -2339,16 +2361,30 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.upgrade_from' with parameters.
+     * Add the created action message for the key 'success.started_data_update' with parameters.
      * <pre>
-     * message: Upgraded data.
+     * message: Started data update process.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addSuccessUpgradeFrom(String property) {
+    public FessMessages addSuccessStartedDataUpdate(String property) {
         assertPropertyNotNull(property);
-        add(property, new UserMessage(SUCCESS_upgrade_from));
+        add(property, new UserMessage(SUCCESS_started_data_update));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.reindex_started' with parameters.
+     * <pre>
+     * message: Started reindexing.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessReindexStarted(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_reindex_started));
         return this;
     }
 

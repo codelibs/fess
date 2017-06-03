@@ -2634,8 +2634,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Data Migration */
     public static final String LABELS_upgrade_data_migration = "{labels.upgrade_data_migration}";
 
+    /** The key of the message: Reindex */
+    public static final String LABELS_upgrade_reindex = "{labels.upgrade_reindex}";
+
     /** The key of the message: Start */
     public static final String LABELS_upgrade_start_button = "{labels.upgrade_start_button}";
+
+    /** The key of the message: Start */
+    public static final String LABELS_reindex_start_button = "{labels.reindex_start_button}";
 
     /** The key of the message: Version */
     public static final String LABELS_TARGET_VERSION = "{labels.targetVersion}";

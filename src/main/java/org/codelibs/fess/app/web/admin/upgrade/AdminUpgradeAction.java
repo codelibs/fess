@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import javax.annotation.Resource;
@@ -128,6 +130,18 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     @Execute
+    public HtmlResponse reindexOnly(final ReindexForm form) {
+        validate(form, messages -> {}, () -> {
+            return asIndexHtml();
+        });
+        verifyToken(() -> asIndexHtml());
+        if (startReindex()) {
+            saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+        }
+        return redirect(getClass());
+    }
+
+    @Execute
     public HtmlResponse upgradeFrom(final UpgradeForm form) {
         validate(form, messages -> {}, () -> {
             return asIndexHtml();
@@ -139,7 +153,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom11_0();
                 upgradeFromAll();
 
-                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
 
                 systemHelper.reloadConfiguration();
             } catch (final Exception e) {
@@ -152,7 +166,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom11_1();
                 upgradeFromAll();
 
-                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
 
                 systemHelper.reloadConfiguration();
             } catch (final Exception e) {
@@ -185,6 +199,28 @@ public class AdminUpgradeAction extends FessAdminAction {
         if (existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
             deleteIndex(indicesClient, crawlerIndex, response -> {});
         }
+
+        startReindex();
+    }
+
+    private boolean startReindex() {
+        final String docIndex = "fess";
+        final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
+        final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+        if (fessEsClient.createIndex(docIndex, "doc", toIndex)) {
+            fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
+                fessEsClient.addMapping(docIndex, "doc", toIndex);
+                fessEsClient.reindex(fromIndex, toIndex, false);
+                if (!fessEsClient.updateAlias(toIndex)) {
+                    logger.warn("Failed to update aliases for " + fromIndex + " and " + toIndex);
+                }
+            }, e -> {
+                logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex, e);
+            }));
+            return true;
+        }
+        saveError(messages -> messages.addErrorsFailedToReindex(GLOBAL, fromIndex, toIndex));
+        return false;
     }
 
     private void addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String field,
