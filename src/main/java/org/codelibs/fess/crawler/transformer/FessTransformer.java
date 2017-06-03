@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
-import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
