@@ -183,9 +183,18 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
-        String u = decodeUrlAsName(url, url.startsWith("file:"));
+        String u = url;
+        int idx = u.lastIndexOf('?');
+        if (idx >= 0) {
+            u = u.substring(0, idx);
+        }
 
-        int idx = u.lastIndexOf('/');
+        idx = u.lastIndexOf('#');
+        if (idx >= 0) {
+            u = u.substring(0, idx);
+        }
+        u = decodeUrlAsName(u, u.startsWith("file:"));
+        idx = u.lastIndexOf('/');
         if (idx >= 0) {
             if (u.length() > idx + 1) {
                 u = u.substring(idx + 1);
@@ -229,9 +238,7 @@ public interface FessTransformer {
 
         final String escapedUrl = escapePlus ? url.replace("+", "%2B") : url;
         try {
-            final URI u = new URI(escapedUrl);
-            final URI uri = new URI(u.getScheme(), u.getUserInfo(), u.getHost(), u.getPort(), u.getPath(), null, null);
-            return URLDecoder.decode(uri.toString(), enc);
+            return URLDecoder.decode(escapedUrl, enc);
         } catch (final Exception e) {
             return url;
         }
