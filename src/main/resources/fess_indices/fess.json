@@ -162,6 +162,18 @@
           "type":       "stemmer",
           "language":   "romanian"
         },
+        "bulgarian_stop": {
+          "type":       "stop",
+          "stopwords":  "_bulgarian_"
+        },
+        "bulgarian_keywords": {
+          "type":       "keyword_marker",
+          "keywords":   ["пример"]
+        },
+        "bulgarian_stemmer": {
+          "type":       "stemmer",
+          "language":   "bulgarian"
+        },
         "catalan_elision": {
         "type":         "elision",
             "articles": [ "d", "l", "m", "n", "s", "t"]
@@ -527,6 +539,15 @@
             "lowercase",
             "romanian_stop",
             "romanian_stemmer"
+          ]
+        },
+        "bulgarian_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "lowercase",
+            "bulgarian_stop",
+            "bulgarian_keywords",
+            "bulgarian_stemmer"
           ]
         },
         "catalan_analyzer": {
