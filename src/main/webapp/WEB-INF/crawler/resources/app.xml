@@ -9,8 +9,6 @@
 	<include path="crawler_es.xml" />
 	<include path="crawler_thumbnail.xml" />
 
-	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
-	</component>
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
 	<component name="webFsIndexHelper" class="org.codelibs.fess.helper.WebFsIndexHelper">

@@ -55,13 +55,13 @@ public class IndexingHelper {
             logger.debug("Sending " + docList.size() + " documents to a server.");
         }
         try {
-            synchronized (fessEsClient) {
-                deleteOldDocuments(fessEsClient, docList);
-                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList);
-            }
             if (fessConfig.isThumbnailCrawlerEnabled()) {
                 final ThumbnailManager thumbnailManager = ComponentUtil.getThumbnailManager();
                 docList.stream().forEach(doc -> thumbnailManager.offer(doc));
+            }
+            synchronized (fessEsClient) {
+                deleteOldDocuments(fessEsClient, docList);
+                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList);
             }
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {
