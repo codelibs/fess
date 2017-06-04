@@ -211,6 +211,11 @@ public class ThumbnailManager {
                     }
                     if (!generator.generate(entity.getThumbnailId(), entity.getUrl(), outputFile)) {
                         new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
+                    } else {
+                        long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
+                        if (interval > 0) {
+                            Thread.sleep(interval);
+                        }
                     }
                 } else if (logger.isDebugEnabled()) {
                     logger.debug("No image file exists: " + noImageFile.getAbsolutePath());

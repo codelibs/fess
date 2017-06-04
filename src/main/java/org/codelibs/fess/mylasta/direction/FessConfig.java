@@ -768,6 +768,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. png */
     String THUMBNAIL_HTML_IMAGE_FORMAT = "thumbnail.html.image.format";
 
+    /** The key of the configuration. e.g. 0 */
+    String THUMBNAIL_GENERATOR_INTERVAL = "thumbnail.generator.interval";
+
     /** The key of the configuration. e.g. all */
     String THUMBNAIL_GENERATOR_TARGETS = "thumbnail.generator.targets";
 
@@ -3772,6 +3775,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getThumbnailHtmlImageFormat();
 
     /**
+     * Get the value for the key 'thumbnail.generator.interval'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailGeneratorInterval();
+
+    /**
+     * Get the value for the key 'thumbnail.generator.interval' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailGeneratorIntervalAsInteger();
+
+    /**
      * Get the value for the key 'thumbnail.generator.targets'. <br>
      * The value is, e.g. all <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6351,6 +6369,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getThumbnailHtmlImageFormat() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_FORMAT);
+        }
+
+        public String getThumbnailGeneratorInterval() {
+            return get(FessConfig.THUMBNAIL_GENERATOR_INTERVAL);
+        }
+
+        public Integer getThumbnailGeneratorIntervalAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_GENERATOR_INTERVAL);
         }
 
         public String getThumbnailGeneratorTargets() {
