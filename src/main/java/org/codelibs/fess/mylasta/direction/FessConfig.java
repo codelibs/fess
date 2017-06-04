@@ -771,7 +771,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. all */
     String THUMBNAIL_GENERATOR_TARGETS = "thumbnail.generator.targets";
 
-    /** The key of the configuration. e.g. false */
+    /** The key of the configuration. e.g. true */
     String THUMBNAIL_CRAWLER_ENABLED = "thumbnail.crawler.enabled";
 
     /** The key of the configuration. e.g. userCode */
@@ -3780,14 +3780,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.crawler.enabled'. <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailCrawlerEnabled();
 
     /**
      * Is the property for the key 'thumbnail.crawler.enabled' true? <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isThumbnailCrawlerEnabled();

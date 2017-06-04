@@ -79,18 +79,29 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         }
 
         Curl.get(url).execute(con -> {
+            boolean created = false;
             try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
-                saveImage(input, outputFile);
+                if (saveImage(input, outputFile)) {
+                    created = true;
+                } else {
+                    logger.warn("Failed to create a thumbnail for " + url);
+                }
             } catch (final Throwable t) {
-                logger.warn("Failed to convert " + url, t);
-                updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
+                logger.warn("Failed to create a thumbnail for " + url, t);
+            } finally {
+                if (!created) {
+                    updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
+                    if (outputFile.exists() && !outputFile.delete()) {
+                        logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+                    }
+                }
             }
         });
 
-        return false;
+        return outputFile.exists();
     }
 
-    protected void saveImage(final ImageInputStream input, final File outputFile) throws IOException {
+    protected boolean saveImage(final ImageInputStream input, final File outputFile) throws IOException {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
         if (readers.hasNext()) {
@@ -114,10 +125,12 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         0, thumbnailWidth, thumbnailHeight, null);
                 ImageIO.write(thumbnail, fessConfig.getThumbnailHtmlImageFormat(), outputFile);
                 image.flush();
+                return true;
             } finally {
                 reader.dispose();
             }
         }
+        return false;
     }
 
 }

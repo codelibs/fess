@@ -706,6 +706,14 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         data = "<img src=\"http://example/foo.jpg\" width=\"100\" height=\"100\">";
         expected = "http://example/foo.jpg";
         assertGetThumbnailUrl(data, expected);
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"100%\" height=\"100%\">";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
+
+        data = "<img src=\"http://example/foo.jpg\" width=\"100px\" height=\"100px\">";
+        expected = "http://example/foo.jpg";
+        assertGetThumbnailUrl(data, expected);
     }
 
     private void assertGetThumbnailUrl(String data, String expected) throws Exception {

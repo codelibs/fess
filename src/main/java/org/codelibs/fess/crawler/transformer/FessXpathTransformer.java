@@ -714,12 +714,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             for (int i = 0; i < imgNodeList.getLength(); i++) {
                 final Node imgNode = imgNodeList.item(i);
                 final NamedNodeMap attributes = imgNode.getAttributes();
-                final Node heightAttr = attributes.getNamedItem("height");
-                final Node widthAttr = attributes.getNamedItem("width");
-                if (heightAttr != null && widthAttr != null) {
+                final Integer height = getAttributeAsInteger(attributes, "height");
+                final Integer width = getAttributeAsInteger(attributes, "width");
+                if (height != null && width != null) {
                     try {
-                        final int height = Integer.parseInt(heightAttr.getTextContent());
-                        final int width = Integer.parseInt(widthAttr.getTextContent());
                         if (fessConfig.validateThumbnailSize(width, height)) {
                             final Node srcNode = attributes.getNamedItem("src");
                             if (srcNode != null) {
@@ -754,6 +752,25 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             logger.warn("Failed to retrieve thumbnail url from " + responseData.getUrl(), e);
         }
         return null;
+    }
+
+    protected Integer getAttributeAsInteger(final NamedNodeMap attributes, final String name) {
+        Node namedItem = attributes.getNamedItem(name);
+        if (namedItem == null) {
+            return null;
+        }
+        final String value = namedItem.getTextContent();
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            if (value.endsWith("%") || value.endsWith("px")) {
+                return null;
+            }
+            return 0;
+        }
     }
 
     protected URL getURL(final String currentUrl, final String url) throws MalformedURLException {
