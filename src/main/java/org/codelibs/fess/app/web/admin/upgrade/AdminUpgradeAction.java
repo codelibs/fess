@@ -210,7 +210,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         if (fessEsClient.createIndex(docIndex, "doc", toIndex)) {
             fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 fessEsClient.addMapping(docIndex, "doc", toIndex);
-                fessEsClient.reindex(fromIndex, toIndex, false);
+                fessEsClient.reindex(fromIndex, toIndex, true);
                 if (!fessEsClient.updateAlias(toIndex)) {
                     logger.warn("Failed to update aliases for " + fromIndex + " and " + toIndex);
                 }
