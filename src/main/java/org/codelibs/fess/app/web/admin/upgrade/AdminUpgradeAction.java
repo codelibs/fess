@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -130,12 +131,12 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse reindexOnly(final ReindexForm form) {
+    public HtmlResponse reindexOnly(final UpgradeForm form) {
         validate(form, messages -> {}, () -> {
             return asIndexHtml();
         });
         verifyToken(() -> asIndexHtml());
-        if (startReindex()) {
+        if (startReindex(Constants.ON.equalsIgnoreCase(form.replaceAliases))) {
             saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         }
         return redirect(getClass());
@@ -199,19 +200,17 @@ public class AdminUpgradeAction extends FessAdminAction {
         if (existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
             deleteIndex(indicesClient, crawlerIndex, response -> {});
         }
-
-        startReindex();
     }
 
-    private boolean startReindex() {
+    private boolean startReindex(boolean replaceAliases) {
         final String docIndex = "fess";
         final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
         if (fessEsClient.createIndex(docIndex, "doc", toIndex)) {
             fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 fessEsClient.addMapping(docIndex, "doc", toIndex);
-                fessEsClient.reindex(fromIndex, toIndex, true);
-                if (!fessEsClient.updateAlias(toIndex)) {
+                fessEsClient.reindex(fromIndex, toIndex, replaceAliases);
+                if (replaceAliases && !fessEsClient.updateAlias(toIndex)) {
                     logger.warn("Failed to update aliases for " + fromIndex + " and " + toIndex);
                 }
             }, e -> {

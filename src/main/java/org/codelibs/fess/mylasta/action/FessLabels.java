@@ -2640,6 +2640,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Start */
     public static final String LABELS_upgrade_start_button = "{labels.upgrade_start_button}";
 
+    /** The key of the message: Update Aliases */
+    public static final String LABELS_replace_aliases = "{labels.replace_aliases}";
+
     /** The key of the message: Start */
     public static final String LABELS_reindex_start_button = "{labels.reindex_start_button}";
 

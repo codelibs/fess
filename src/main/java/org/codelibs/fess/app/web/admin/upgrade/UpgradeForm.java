@@ -15,9 +15,14 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import javax.validation.constraints.Size;
+
 import org.lastaflute.web.validation.Required;
 
 public class UpgradeForm {
     @Required
     public String targetVersion;
+
+    @Size(max = 10)
+    public String replaceAliases;
 }

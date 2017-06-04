@@ -63,8 +63,6 @@
 							</div>
 							<!-- /.box -->
 						</div>
-					</la:form>
-					<la:form action="/admin/upgrade/">
 						<div class="col-md-12">
 							<div class="box box-primary">
 								<div class="box-header with-border">
@@ -82,6 +80,18 @@
 										<la:errors />
 									</div>
 									<%-- Message: END --%>
+									<div class="form-group">
+										<label for="replaceAliases" class="col-sm-3 control-label"><la:message
+												key="labels.replace_aliases" /></label>
+										<div class="col-sm-9">
+											<la:errors property="replaceAliases" />
+											<div class="checkbox">
+												<label> <la:checkbox styleId="replaceAliases" property="replaceAliases" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
