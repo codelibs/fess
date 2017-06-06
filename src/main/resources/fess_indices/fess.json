@@ -38,106 +38,6 @@
           "type": "stop",
           "stopwords": "_english_"
         },
-        "japanese_pos_filter" : {
-          "type" : "fess_japanese_part_of_speech",
-          "stoptags" : [
-            "その他",
-            "その他-間投",
-            "フィラー",
-            "感動詞",
-            "記号",
-            "記号-アルファベット",
-            "記号-一般",
-            "記号-括弧開",
-            "記号-括弧閉",
-            "記号-句点",
-            "記号-空白",
-            "記号-読点",
-            "形容詞",
-            "形容詞-接尾",
-            "形容詞-非自立",
-            "語断片",
-            "助詞",
-            "助詞-格助詞",
-            "助詞-格助詞-一般",
-            "助詞-格助詞-引用",
-            "助詞-格助詞-連語",
-            "助詞-間投助詞",
-            "助詞-係助詞",
-            "助詞-終助詞",
-            "助詞-接続助詞",
-            "助詞-特殊",
-            "助詞-副詞化",
-            "助詞-副助詞",
-            "助詞-副助詞／並立助詞／終助詞",
-            "助詞-並立助詞",
-            "助詞-連体化",
-            "助動詞",
-            "接続詞",
-            "接頭詞",
-            "接頭詞-形容詞接続",
-            "接頭詞-数接続",
-            "接頭詞-動詞接続",
-            "接頭詞-名詞接続",
-            "動詞-接尾",
-            "非言語音",
-            "連体詞"
-          ]
-        },
-        "german_stop": {
-          "type":       "stop",
-          "stopwords":  "_german_"
-        },
-        "german_keywords": {
-          "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}de/protwords.txt"
-        },
-        "german_stemmer": {
-          "type":       "stemmer",
-          "language":   "light_german"
-        },
-        "french_elision": {
-          "type":         "elision",
-          "articles_case": true,
-            "articles": [
-              "l", "m", "t", "qu", "n", "s",
-              "j", "d", "c", "jusqu", "quoiqu",
-              "lorsqu", "puisqu"
-            ]
-        },
-        "french_stop": {
-          "type":       "stop",
-          "stopwords":  "_french_"
-        },
-        "french_keywords": {
-          "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}fr/protwords.txt"
-        },
-        "french_stemmer": {
-          "type":       "stemmer",
-          "language":   "light_french"
-        },
-        "italian_elision": {
-        "type":         "elision",
-            "articles": [
-                "c", "l", "all", "dall", "dell",
-                "nell", "sull", "coll", "pell",
-                "gl", "agl", "dagl", "degl", "negl",
-                "sugl", "un", "m", "t", "s", "v", "d"
-            ]
-        },
-        "italian_stop": {
-          "type":       "stop",
-          "stopwords":  "_italian_"
-        },
-        "italian_keywords": {
-          "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}it/protwords.txt"
-        },
-        "italian_stemmer": {
-          "type":       "stemmer",
-          "language":   "light_italian"
-        },
         "arabic_stop": {
           "type":       "stop",
           "stopwords":  "_arabic_"
@@ -150,17 +50,41 @@
           "type":       "stemmer",
           "language":   "arabic"
         },
-        "romanian_stop": {
+        "armenian_stop": {
           "type":       "stop",
-          "stopwords":  "_romanian_"
+          "stopwords":  "_armenian_"
         },
-        "romanian_keywords": {
+        "armenian_keywords": {
           "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}ro/protwords.txt"
+          "keywords_path": "${fess.dictionary.path}hy/protwords.txt"
         },
-        "romanian_stemmer": {
+        "armenian_stemmer": {
           "type":       "stemmer",
-          "language":   "romanian"
+          "language":   "armenian"
+        },
+        "basque_stop": {
+          "type":       "stop",
+          "stopwords":  "_basque_"
+        },
+        "basque_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}eu/protwords.txt"
+        },
+        "basque_stemmer": {
+          "type":       "stemmer",
+          "language":   "basque"
+        },
+        "brazilian_stop": {
+          "type":       "stop",
+          "stopwords":  "_brazilian_"
+        },
+        "brazilian_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}pt-br/protwords.txt"
+        },
+        "brazilian_stemmer": {
+          "type":       "stemmer",
+          "language":   "brazilian"
         },
         "bulgarian_stop": {
           "type":       "stop",
@@ -214,17 +138,83 @@
           "type":       "stemmer",
           "language":   "danish"
         },
-        "spanish_stop": {
+        "dutch_stop": {
           "type":       "stop",
-          "stopwords":  "_spanish_"
+          "stopwords":  "_dutch_"
         },
-        "spanish_keywords": {
+        "dutch_keywords": {
           "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}es/protwords.txt"
+          "keywords_path": "${fess.dictionary.path}nl/protwords.txt"
         },
-        "spanish_stemmer": {
+        "dutch_stemmer": {
           "type":       "stemmer",
-          "language":   "light_spanish"
+          "language":   "dutch"
+        },
+        "dutch_override": {
+          "type":       "stemmer_override",
+          "rules": [
+            "fiets=>fiets",
+            "bromfiets=>bromfiets",
+            "ei=>eier",
+            "kind=>kinder"
+          ]
+        },
+        "finnish_stop": {
+          "type":       "stop",
+          "stopwords":  "_finnish_"
+        },
+        "finnish_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}fi/protwords.txt"
+        },
+        "finnish_stemmer": {
+          "type":       "stemmer",
+          "language":   "finnish"
+        },
+        "french_elision": {
+          "type":         "elision",
+          "articles_case": true,
+            "articles": [
+              "l", "m", "t", "qu", "n", "s",
+              "j", "d", "c", "jusqu", "quoiqu",
+              "lorsqu", "puisqu"
+            ]
+        },
+        "french_stop": {
+          "type":       "stop",
+          "stopwords":  "_french_"
+        },
+        "french_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}fr/protwords.txt"
+        },
+        "french_stemmer": {
+          "type":       "stemmer",
+          "language":   "light_french"
+        },
+        "galician_stop": {
+          "type":       "stop",
+          "stopwords":  "_galician_"
+        },
+        "galician_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}gl/protwords.txt"
+        },
+        "galician_stemmer": {
+          "type":       "stemmer",
+          "language":   "galician"
+        },
+        "german_stop": {
+          "type":       "stop",
+          "stopwords":  "_german_"
+        },
+        "german_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}de/protwords.txt"
+        },
+        "german_stemmer": {
+          "type":       "stemmer",
+          "language":   "light_german"
         },
         "greek_stop": {
           "type":       "stop",
@@ -241,22 +231,6 @@
         "greek_stemmer": {
           "type":       "stemmer",
           "language":   "greek"
-        },
-        "persian_stop": {
-          "type":       "stop",
-          "stopwords":  "_persian_"
-        },
-        "finnish_stop": {
-          "type":       "stop",
-          "stopwords":  "_finnish_"
-        },
-        "finnish_keywords": {
-          "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}fi/protwords.txt"
-        },
-        "finnish_stemmer": {
-          "type":       "stemmer",
-          "language":   "finnish"
         },
         "hindi_stop": {
           "type":       "stop",
@@ -294,17 +268,92 @@
           "type":       "stemmer",
           "language":   "indonesian"
         },
-        "lithuanian_stop": {
+        "irish_elision": {
+          "type":       "elision",
+          "articles": [ "h", "n", "t" ]
+        },
+        "irish_stop": {
           "type":       "stop",
-          "stopwords":  "_lithuanian_"
+          "stopwords":  "_irish_"
         },
-        "lithuanian_keywords": {
+        "irish_lowercase": {
+          "type":       "lowercase",
+          "language":   "irish"
+        },
+        "irish_keywords": {
           "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}lt/protwords.txt"
+          "keywords_path": "${fess.dictionary.path}en-ie/protwords.txt"
         },
-        "lithuanian_stemmer": {
+        "irish_stemmer": {
           "type":       "stemmer",
-          "language":   "lithuanian"
+          "language":   "irish"
+        },
+        "italian_elision": {
+          "type":         "elision",
+          "articles": [
+                "c", "l", "all", "dall", "dell",
+                "nell", "sull", "coll", "pell",
+                "gl", "agl", "dagl", "degl", "negl",
+                "sugl", "un", "m", "t", "s", "v", "d"
+          ]
+        },
+        "italian_stop": {
+          "type":       "stop",
+          "stopwords":  "_italian_"
+        },
+        "italian_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}it/protwords.txt"
+        },
+        "italian_stemmer": {
+          "type":       "stemmer",
+          "language":   "light_italian"
+        },
+        "japanese_pos_filter" : {
+          "type" : "fess_japanese_part_of_speech",
+          "stoptags" : [
+            "その他",
+            "その他-間投",
+            "フィラー",
+            "感動詞",
+            "記号",
+            "記号-アルファベット",
+            "記号-一般",
+            "記号-括弧開",
+            "記号-括弧閉",
+            "記号-句点",
+            "記号-空白",
+            "記号-読点",
+            "形容詞",
+            "形容詞-接尾",
+            "形容詞-非自立",
+            "語断片",
+            "助詞",
+            "助詞-格助詞",
+            "助詞-格助詞-一般",
+            "助詞-格助詞-引用",
+            "助詞-格助詞-連語",
+            "助詞-間投助詞",
+            "助詞-係助詞",
+            "助詞-終助詞",
+            "助詞-接続助詞",
+            "助詞-特殊",
+            "助詞-副詞化",
+            "助詞-副助詞",
+            "助詞-副助詞／並立助詞／終助詞",
+            "助詞-並立助詞",
+            "助詞-連体化",
+            "助動詞",
+            "接続詞",
+            "接頭詞",
+            "接頭詞-形容詞接続",
+            "接頭詞-数接続",
+            "接頭詞-動詞接続",
+            "接頭詞-名詞接続",
+            "動詞-接尾",
+            "非言語音",
+            "連体詞"
+          ]
         },
         "latvian_stop": {
           "type":       "stop",
@@ -318,26 +367,17 @@
           "type":       "stemmer",
           "language":   "latvian"
         },
-        "dutch_stop": {
+        "lithuanian_stop": {
           "type":       "stop",
-          "stopwords":  "_dutch_"
+          "stopwords":  "_lithuanian_"
         },
-        "dutch_keywords": {
+        "lithuanian_keywords": {
           "type":       "keyword_marker",
-          "keywords_path": "${fess.dictionary.path}nl/protwords.txt"
+          "keywords_path": "${fess.dictionary.path}lt/protwords.txt"
         },
-        "dutch_stemmer": {
+        "lithuanian_stemmer": {
           "type":       "stemmer",
-          "language":   "dutch"
-        },
-        "dutch_override": {
-          "type":       "stemmer_override",
-          "rules": [
-            "fiets=>fiets",
-            "bromfiets=>bromfiets",
-            "ei=>eier",
-            "kind=>kinder"
-          ]
+          "language":   "lithuanian"
         },
         "norwegian_stop": {
           "type":       "stop",
@@ -351,6 +391,10 @@
           "type":       "stemmer",
           "language":   "norwegian"
         },
+        "persian_stop": {
+          "type":       "stop",
+          "stopwords":  "_persian_"
+        },
         "portuguese_stop": {
           "type":       "stop",
           "stopwords":  "_portuguese_"
@@ -363,6 +407,18 @@
           "type":       "stemmer",
           "language":   "light_portuguese"
         },
+        "romanian_stop": {
+          "type":       "stop",
+          "stopwords":  "_romanian_"
+        },
+        "romanian_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}ro/protwords.txt"
+        },
+        "romanian_stemmer": {
+          "type":       "stemmer",
+          "language":   "romanian"
+        },
         "russian_stop": {
           "type":       "stop",
           "stopwords":  "_russian_"
@@ -374,6 +430,30 @@
         "russian_stemmer": {
           "type":       "stemmer",
           "language":   "russian"
+        },
+        "sorani_stop": {
+          "type":       "stop",
+          "stopwords":  "_sorani_"
+        },
+        "sorani_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}ckb-iq/protwords.txt"
+        },
+        "sorani_stemmer": {
+          "type":       "stemmer",
+          "language":   "sorani"
+        },
+        "spanish_stop": {
+          "type":       "stop",
+          "stopwords":  "_spanish_"
+        },
+        "spanish_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}es/protwords.txt"
+        },
+        "spanish_stemmer": {
+          "type":       "stemmer",
+          "language":   "light_spanish"
         },
         "swedish_stop": {
           "type":       "stop",
@@ -456,69 +536,6 @@
         }
       },
       "analyzer": {
-        "japanese_analyzer": {
-          "type": "custom",
-          "char_filter": [
-            "mapping_ja_filter",
-            "fess_japanese_iteration_mark"
-          ],
-          "tokenizer": "japanese_tokenizer",
-          "filter": [
-            "truncate10_filter",
-            "fess_japanese_baseform",
-            "fess_japanese_stemmer",
-            "japanese_pos_filter",
-            "lowercase"
-          ]
-        },
-        "english_analyzer": {
-          "type": "custom",
-          "tokenizer": "standard",
-          "filter": [
-            "truncate20_filter",
-            "lowercase",
-            "possessive_stemmer_en_filter"
-          ]
-        },
-        "korean_analyzer": {
-          "type": "custom",
-          "tokenizer":"korean_tokenizer"
-        },
-        "german_analyzer": {
-          "type": "custom",
-          "tokenizer": "standard",
-          "filter": [
-            "truncate20_filter",
-            "lowercase",
-            "german_stop",
-            "german_normalization",
-            "german_stemmer"
-          ]
-        },
-        "french_analyzer": {
-          "type": "custom",
-          "tokenizer": "standard",
-          "filter": [
-            "truncate20_filter",
-            "french_elision",
-            "lowercase",
-            "french_stop",
-            "french_keywords",
-            "french_stemmer"
-          ]
-        },
-        "italian_analyzer": {
-          "type": "custom",
-          "tokenizer":  "standard",
-          "filter": [
-            "truncate20_filter",
-            "italian_elision",
-            "lowercase",
-            "italian_stop",
-            "italian_keywords",
-            "italian_stemmer"
-          ]
-        },
         "arabic_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
@@ -531,19 +548,40 @@
             "arabic_stemmer"
           ]
         },
-        "romanian_analyzer": {
-          "type": "custom",
-          "tokenizer": "standard",
+        "armenian_analyzer": {
+          "tokenizer":  "standard",
           "filter": [
             "truncate20_filter",
             "lowercase",
-            "romanian_stop",
-            "romanian_stemmer"
+            "armenian_stop",
+            "armenian_keywords",
+            "armenian_stemmer"
+          ]
+        },
+        "basque_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "basque_stop",
+            "basque_keywords",
+            "basque_stemmer"
+          ]
+        },
+        "brazilian_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "brazilian_stop",
+            "brazilian_keywords",
+            "brazilian_stemmer"
           ]
         },
         "bulgarian_analyzer": {
           "tokenizer":  "standard",
           "filter": [
+            "truncate20_filter",
             "lowercase",
             "bulgarian_stop",
             "bulgarian_keywords",
@@ -584,38 +622,25 @@
             "danish_stemmer"
           ]
         },
-        "spanish_analyzer": {
+        "dutch_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
             "truncate20_filter",
             "lowercase",
-            "spanish_stop",
-            "spanish_keywords",
-            "spanish_stemmer"
+            "dutch_stop",
+            "dutch_keywords",
+            "dutch_override",
+            "dutch_stemmer"
           ]
         },
-        "greek_analyzer": {
+        "english_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
-          "filter": [
-            "truncate20_filter",
-            "greek_lowercase",
-            "greek_stop",
-            "greek_keywords",
-            "greek_stemmer"
-          ]
-        },
-        "persian_analyzer": {
-          "type": "custom",
-          "tokenizer": "standard",
-          "char_filter": [ "mapping_fa_filter" ],
           "filter": [
             "truncate20_filter",
             "lowercase",
-            "arabic_normalization",
-            "persian_normalization",
-            "persian_stop"
+            "possessive_stemmer_en_filter"
           ]
         },
         "finnish_analyzer": {
@@ -627,6 +652,50 @@
             "finnish_stop",
             "finnish_keywords",
             "finnish_stemmer"
+          ]
+        },
+        "french_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "truncate20_filter",
+            "french_elision",
+            "lowercase",
+            "french_stop",
+            "french_keywords",
+            "french_stemmer"
+          ]
+        },
+        "galician_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "galician_stop",
+            "galician_keywords",
+            "galician_stemmer"
+          ]
+        },
+        "german_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "german_stop",
+            "german_normalization",
+            "german_stemmer"
+          ]
+        },
+        "greek_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "truncate20_filter",
+            "greek_lowercase",
+            "greek_stop",
+            "greek_keywords",
+            "greek_stemmer"
           ]
         },
         "hindi_analyzer": {
@@ -664,15 +733,50 @@
             "indonesian_stemmer"
           ]
         },
-        "lithuanian_analyzer": {
+        "irish_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "truncate20_filter",
+            "irish_stop",
+            "irish_elision",
+            "irish_lowercase",
+            "irish_keywords",
+            "irish_stemmer"
+          ]
+        },
+        "italian_analyzer": {
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
             "truncate20_filter",
+            "italian_elision",
             "lowercase",
-            "lithuanian_stop",
-            "lithuanian_keywords",
-            "lithuanian_stemmer"
+            "italian_stop",
+            "italian_keywords",
+            "italian_stemmer"
+          ]
+        },
+        "japanese_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "mapping_ja_filter",
+            "fess_japanese_iteration_mark"
+          ],
+          "tokenizer": "japanese_tokenizer",
+          "filter": [
+            "truncate10_filter",
+            "fess_japanese_baseform",
+            "fess_japanese_stemmer",
+            "japanese_pos_filter",
+            "lowercase"
+          ]
+        },
+        "korean_analyzer": {
+          "type": "custom",
+          "tokenizer":"korean_tokenizer",
+          "filter": [
+            "truncate10_filter",
+            "lowercase"
           ]
         },
         "latvian_analyzer": {
@@ -686,16 +790,15 @@
             "latvian_stemmer"
           ]
         },
-        "dutch_analyzer": {
+        "lithuanian_analyzer": {
           "type": "custom",
-          "tokenizer": "standard",
+          "tokenizer":  "standard",
           "filter": [
             "truncate20_filter",
             "lowercase",
-            "dutch_stop",
-            "dutch_keywords",
-            "dutch_override",
-            "dutch_stemmer"
+            "lithuanian_stop",
+            "lithuanian_keywords",
+            "lithuanian_stemmer"
           ]
         },
         "norwegian_analyzer": {
@@ -709,6 +812,18 @@
             "norwegian_stemmer"
           ]
         },
+        "persian_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "char_filter": [ "mapping_fa_filter" ],
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "arabic_normalization",
+            "persian_normalization",
+            "persian_stop"
+          ]
+        },
         "portuguese_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
@@ -720,6 +835,16 @@
             "portuguese_stemmer"
           ]
         },
+        "romanian_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "romanian_stop",
+            "romanian_stemmer"
+          ]
+        },
         "russian_analyzer": {
           "type": "custom",
           "tokenizer":  "standard",
@@ -729,6 +854,28 @@
             "russian_stop",
             "russian_keywords",
             "russian_stemmer"
+          ]
+        },
+        "sorani_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "truncate20_filter",
+            "sorani_normalization",
+            "lowercase",
+            "sorani_stop",
+            "sorani_keywords",
+            "sorani_stemmer"
+          ]
+        },
+        "spanish_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "spanish_stop",
+            "spanish_keywords",
+            "spanish_stemmer"
           ]
         },
         "swedish_analyzer": {
@@ -763,13 +910,6 @@
             "turkish_stemmer"
           ]
         },
-        "empty_analyzer": {
-          "type": "custom",
-          "tokenizer": "standard",
-          "char_filter": [
-            "removeall_filter"
-          ]
-        },
         "standard_analyzer": {
           "type": "custom",
           "char_filter": [
@@ -782,6 +922,13 @@
             "stopword_en_filter",
             "lowercase",
             "stemmer_en_filter"
+          ]
+        },
+        "empty_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "char_filter": [
+            "removeall_filter"
           ]
         },
         "minhash_analyzer": {

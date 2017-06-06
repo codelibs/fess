@@ -14,35 +14,15 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"fa/mapping.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"ja/mapping.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"ja/kuromoji.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"ko/seunjeon.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"de/protwords.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
 			<arg>"ar/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"ro/protwords.txt"</arg>
+			<arg>"ca/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"ca/protwords.txt"</arg>
+			<arg>"ckb-iq/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
@@ -54,11 +34,27 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"es/protwords.txt"</arg>
+			<arg>"de/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"el/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en-ie/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"es/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"eu/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fa/mapping.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
@@ -74,6 +70,10 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"gl/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"hi/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
@@ -82,11 +82,27 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"hy/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"id/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"it/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/kuromoji.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ko/seunjeon.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
@@ -106,7 +122,15 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"pt-br/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"pt/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ro/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
@@ -115,6 +139,10 @@
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"sv/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"th/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
