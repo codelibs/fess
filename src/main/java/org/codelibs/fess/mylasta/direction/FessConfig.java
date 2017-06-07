@@ -749,10 +749,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. png */
     String THUMBNAIL_HTML_PHANTOMJS_FORMAT = "thumbnail.html.phantomjs.format";
 
-    /** The key of the configuration. e.g. 50 */
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_MIN_WIDTH = "thumbnail.html.image.min.width";
 
-    /** The key of the configuration. e.g. 50 */
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_MIN_HEIGHT = "thumbnail.html.image.min.height";
 
     /** The key of the configuration. e.g. 3.0 */
@@ -3674,14 +3674,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.image.min.width'. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageMinWidth();
 
     /**
      * Get the value for the key 'thumbnail.html.image.min.width' as {@link Integer}. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3689,14 +3689,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'thumbnail.html.image.min.height'. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageMinHeight();
 
     /**
      * Get the value for the key 'thumbnail.html.image.min.height' as {@link Integer}. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */

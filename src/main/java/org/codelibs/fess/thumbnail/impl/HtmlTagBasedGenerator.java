@@ -78,29 +78,31 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             return false;
         }
 
-        Curl.get(url).execute(con -> {
-            boolean created = false;
-            try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
-                if (saveImage(input, outputFile)) {
-                    created = true;
-                } else {
-                    logger.warn("Failed to create a thumbnail for " + url);
-                }
-            } catch (final Throwable t) {
-                if (logger.isDebugEnabled()) {
-                    logger.warn("Failed to create a thumbnail for " + url, t);
-                } else {
-                    logger.warn("Failed to create a thumbnail for " + url + " " + t.getClass() + ": " + t.getMessage());
-                }
-            } finally {
-                if (!created) {
-                    updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
-                    if (outputFile.exists() && !outputFile.delete()) {
-                        logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+        Curl.get(url).execute(
+                con -> {
+                    boolean created = false;
+                    try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
+                        if (saveImage(input, outputFile)) {
+                            created = true;
+                        } else {
+                            logger.warn("Failed to create thumbnail: " + url);
+                        }
+                    } catch (final Throwable t) {
+                        if (logger.isDebugEnabled()) {
+                            logger.warn("Failed to create thumbnail: " + url, t);
+                        } else {
+                            logger.warn("Failed to create thumbnail: " + url + " (" + t.getClass().getCanonicalName() + ": "
+                                    + t.getMessage() + ")");
+                        }
+                    } finally {
+                        if (!created) {
+                            updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
+                            if (outputFile.exists() && !outputFile.delete()) {
+                                logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
 
         return outputFile.exists();
     }
