@@ -85,14 +85,14 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         if (saveImage(input, outputFile)) {
                             created = true;
                         } else {
-                            logger.warn("Failed to create thumbnail: " + url);
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url);
                         }
                     } catch (final Throwable t) {
                         if (logger.isDebugEnabled()) {
-                            logger.warn("Failed to create thumbnail: " + url, t);
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url, t);
                         } else {
-                            logger.warn("Failed to create thumbnail: " + url + " (" + t.getClass().getCanonicalName() + ": "
-                                    + t.getMessage() + ")");
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url + " ("
+                                    + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
                         }
                     } finally {
                         if (!created) {
