@@ -63,7 +63,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -118,7 +117,7 @@ public class QueryHelper {
 
     protected long timeAllowed = -1;
 
-    protected SortBuilder[] defaultSortBuilders;
+    protected SortBuilder<?>[] defaultSortBuilders;
 
     protected String highlightPrefix = "hl_";
 
@@ -767,7 +766,7 @@ public class QueryHelper {
     }
 
     public void addDefaultSort(final String fieldName, final String order) {
-        final List<SortBuilder> list = new ArrayList<>();
+        final List<SortBuilder<?>> list = new ArrayList<>();
         if (defaultSortBuilders != null) {
             stream(defaultSortBuilders).of(stream -> stream.forEach(builder -> list.add(builder)));
         }
@@ -775,13 +774,12 @@ public class QueryHelper {
         defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);
     }
 
-    protected FieldSortBuilder createFieldSortBuilder(final String field, final SortOrder order) {
-        final String fieldName = SCORE_FIELD.equals(field) ? ES_SCORE_FIELD : field;
-        FieldSortBuilder builder = SortBuilders.fieldSort(fieldName);
-        if (ES_SCORE_FIELD.equals(fieldName)) {
-            builder.unmappedType("float");
+    protected SortBuilder<?> createFieldSortBuilder(final String field, final SortOrder order) {
+        if (SCORE_FIELD.equals(field) || ES_SCORE_FIELD.equals(field)) {
+            return SortBuilders.scoreSort().order(order);
+        } else {
+            return SortBuilders.fieldSort(field).order(order);
         }
-        return builder.order(order);
     }
 
     public void setHighlightPrefix(final String highlightPrefix) {
