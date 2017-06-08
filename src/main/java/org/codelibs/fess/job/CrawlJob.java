@@ -138,6 +138,11 @@ public class CrawlJob {
         return this;
     }
 
+    public String execute(final JobExecutor jobExecutor) {
+        jobExecutor(jobExecutor);
+        return execute();
+    }
+
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
