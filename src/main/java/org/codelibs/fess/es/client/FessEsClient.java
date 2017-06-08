@@ -311,7 +311,7 @@ public class FessEsClient implements Client {
                 } else {
                     indexName = configIndex;
                 }
-                boolean exists = existsIndex(indexName);
+                final boolean exists = existsIndex(indexName);
                 if (!exists) {
                     final String createdIndexName;
                     if (isFessIndex) {
@@ -370,7 +370,7 @@ public class FessEsClient implements Client {
             } else {
                 logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex, e);
         }
         return false;
@@ -442,8 +442,8 @@ public class FessEsClient implements Client {
 
     public boolean updateAlias(final String newIndex) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
-        String searchAlias = fessConfig.getIndexDocumentSearchIndex();
+        final String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
+        final String searchAlias = fessConfig.getIndexDocumentSearchIndex();
         final GetIndexResponse response1 =
                 client.admin().indices().prepareGetIndex().addIndices(updateAlias).execute().actionGet(fessConfig.getIndexIndicesTimeout());
         final String[] updateIndices = response1.indices();
@@ -451,15 +451,15 @@ public class FessEsClient implements Client {
                 client.admin().indices().prepareGetIndex().addIndices(searchAlias).execute().actionGet(fessConfig.getIndexIndicesTimeout());
         final String[] searchIndices = response2.indices();
 
-        IndicesAliasesRequestBuilder builder =
+        final IndicesAliasesRequestBuilder builder =
                 client.admin().indices().prepareAliases().addAlias(newIndex, updateAlias).addAlias(newIndex, searchAlias);
-        for (String index : updateIndices) {
+        for (final String index : updateIndices) {
             builder.removeAlias(index, updateAlias);
         }
-        for (String index : searchIndices) {
+        for (final String index : searchIndices) {
             builder.removeAlias(index, searchAlias);
         }
-        IndicesAliasesResponse response = builder.execute().actionGet(fessConfig.getIndexIndicesTimeout());
+        final IndicesAliasesResponse response = builder.execute().actionGet(fessConfig.getIndexIndicesTimeout());
         return response.isAcknowledged();
     }
 
@@ -1413,12 +1413,12 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public ActionFuture<FieldCapabilitiesResponse> fieldCaps(FieldCapabilitiesRequest request) {
+    public ActionFuture<FieldCapabilitiesResponse> fieldCaps(final FieldCapabilitiesRequest request) {
         return client.fieldCaps(request);
     }
 
     @Override
-    public void fieldCaps(FieldCapabilitiesRequest request, ActionListener<FieldCapabilitiesResponse> listener) {
+    public void fieldCaps(final FieldCapabilitiesRequest request, final ActionListener<FieldCapabilitiesResponse> listener) {
         client.fieldCaps(request, listener);
     }
 

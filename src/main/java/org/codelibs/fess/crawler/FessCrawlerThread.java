@@ -253,9 +253,9 @@ public class FessCrawlerThread extends CrawlerThread {
     protected void processResponse(final UrlQueue<?> urlQueue, final ResponseData responseData) {
         super.processResponse(urlQueue, responseData);
 
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isCrawlerFailureUrlStatusCodes(responseData.getHttpStatusCode())) {
-            String sessionId = crawlerContext.getSessionId();
+            final String sessionId = crawlerContext.getSessionId();
             final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().get(sessionId);
             final String url = urlQueue.getUrl();
 

@@ -116,7 +116,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         try {
             ComponentUtil.getIndexingHelper().updateDocument(ComponentUtil.getFessEsClient(), thumbnailId,
                     fessConfig.getIndexFieldThumbnail(), null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to update thumbnail field at " + url, e);
         }
     }

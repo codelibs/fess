@@ -180,7 +180,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             @SuppressWarnings({ "rawtypes", "unchecked" })
             final Map<String, String> map = (Map) curlResponse.getContentAsMap();
             assert (map.containsKey("version"));
-            assert (map.containsKey("source_label") && map.containsKey("wiki_label") & map.containsKey("issue_label"));
+            assert (map.containsKey("source_label") && map.containsKey("wiki_label") && map.containsKey("issue_label"));
             return map;
 
         } catch (final Exception e) {
@@ -205,12 +205,13 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 assert (map.containsKey("repositories"));
 
                 totalCount = (int) map.get("total_count");
-                int responseCount = (int) map.get("response_count");
-                if (responseCount == 0)
+                final int responseCount = (int) map.get("response_count");
+                if (responseCount == 0) {
                     break;
+                }
 
                 @SuppressWarnings("unchecked")
-                List<Map<String, Object>> repos = (ArrayList<Map<String, Object>>) map.get("repositories");
+                final List<Map<String, Object>> repos = (ArrayList<Map<String, Object>>) map.get("repositories");
                 repoList.addAll(repos);
             } catch (final Exception e) {
                 logger.warn("Failed to access to " + urlWithOffset, e);
@@ -332,14 +333,15 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
     private List<String> getIssueComments(final String issueUrl, final String authToken) {
         final String commentsUrl = issueUrl + "/comments";
-        final List<String> commentList = new ArrayList<String>();
+        final List<String> commentList = new ArrayList<>();
 
         try (CurlResponse curlResponse = Curl.get(commentsUrl).header("Authorization", "token " + authToken).execute()) {
             final String commentsJson = curlResponse.getContentAsString();
-            List<Map<String, Object>> comments = new ObjectMapper().readValue(commentsJson, new TypeReference<List<Map<String, Object>>>() {
-            });
+            final List<Map<String, Object>> comments =
+                    new ObjectMapper().readValue(commentsJson, new TypeReference<List<Map<String, Object>>>() {
+                    });
 
-            for (Map<String, Object> comment : comments) {
+            for (final Map<String, Object> comment : comments) {
                 if (comment.containsKey("body")) {
                     commentList.add((String) comment.get("body"));
                 }

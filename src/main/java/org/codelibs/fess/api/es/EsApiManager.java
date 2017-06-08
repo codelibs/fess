@@ -107,7 +107,7 @@ public class EsApiManager extends BaseApiManager {
             }
         }
 
-        if (path.startsWith("/_plugin/") || path.equals("/_plugin")) {
+        if (path.equals("/_plugin") || path.startsWith("/_plugin/")) {
             processPluginRequest(request, response, path.replaceFirst("^/_plugin", StringUtil.EMPTY));
             return;
         }
@@ -154,7 +154,7 @@ public class EsApiManager extends BaseApiManager {
         });
     }
 
-    private void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
+    protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         Path filePath = ResourceUtil.getSitePath(path.replaceAll("\\.\\.+", StringUtil.EMPTY).replaceAll("/+", "/").split("/"));
         if (Files.isDirectory(filePath)) {
             filePath = filePath.resolve("index.html");

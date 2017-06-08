@@ -1568,7 +1568,7 @@ public interface FessProp {
                 if (v1.length == 2) {
                     final String[] v2 = v1[0].split(":");
                     if (v2.length == 2) {
-                        return new Tuple3<String, String, String>(v2[0].trim(), v2[0].trim(), "/" + v1[1].trim());
+                        return new Tuple3<>(v2[0].trim(), v2[0].trim(), "/" + v1[1].trim());
                     }
                 }
                 return null;
@@ -1577,7 +1577,7 @@ public interface FessProp {
         }
         final Tuple3<String, String, String>[] vHosts = hosts;
         return LaRequestUtil.getOptionalRequest().map(req -> {
-            for (Tuple3<String, String, String> host : vHosts) {
+            for (final Tuple3<String, String, String> host : vHosts) {
                 final String headerValue = req.getHeader(host.getValue1());
                 if (host.getValue2().equalsIgnoreCase(headerValue)) {
                     return new HtmlNext(host.getValue3() + page.getRoutingPath());
@@ -1597,7 +1597,7 @@ public interface FessProp {
                             stream -> stream.filter(StringUtil::isNotBlank).mapToInt(Integer::parseInt).toArray());
             propMap.put(CRAWLER_FAILURE_URL_STATUS_CODES, codes);
         }
-        for (int v : codes) {
+        for (final int v : codes) {
             if (v == code) {
                 return true;
             }

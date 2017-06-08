@@ -299,28 +299,29 @@ public class JsonApiManager extends BaseJsonApiManager {
         }
     }
 
-    protected String detailedMessage(Throwable t) {
+    protected String detailedMessage(final Throwable t) {
         if (t == null) {
             return "Unknown";
         }
-        if (t.getCause() != null) {
+        Throwable target = t;
+        if (target.getCause() != null) {
             final StringBuilder sb = new StringBuilder();
-            while (t != null) {
-                sb.append(t.getClass().getSimpleName());
-                if (t.getMessage() != null) {
+            while (target != null) {
+                sb.append(target.getClass().getSimpleName());
+                if (target.getMessage() != null) {
                     sb.append("[");
-                    sb.append(t.getMessage());
+                    sb.append(target.getMessage());
                     sb.append("]");
                 }
                 sb.append("; ");
-                t = t.getCause();
-                if (t != null) {
+                target = target.getCause();
+                if (target != null) {
                     sb.append("nested: ");
                 }
             }
             return sb.toString();
         } else {
-            return t.getClass().getSimpleName() + "[" + t.getMessage() + "]";
+            return target.getClass().getSimpleName() + "[" + target.getMessage() + "]";
         }
     }
 

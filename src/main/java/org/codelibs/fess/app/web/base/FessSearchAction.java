@@ -222,7 +222,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         return newHtmlResponseAsRediect(StringUtil.isBlank(contextPath) ? "/" : contextPath);
     }
 
-    protected HtmlNext virtualHost(HtmlNext path) {
+    protected HtmlNext virtualHost(final HtmlNext path) {
         return fessConfig.getVirtualHostPath(path);
     }
 }

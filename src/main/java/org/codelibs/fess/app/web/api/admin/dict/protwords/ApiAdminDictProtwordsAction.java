@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.api.admin.dict.protwords;
 import static org.codelibs.fess.app.web.admin.dict.protwords.AdminDictProtwordsAction.createProtwordsItem;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
@@ -121,8 +122,7 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
         });
         try (InputStream inputStream = form.protwordsFile.getInputStream()) {
             file.update(inputStream);
-        } catch (final Throwable e) {
-            e.printStackTrace();
+        } catch (final IOException e) {
             throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());

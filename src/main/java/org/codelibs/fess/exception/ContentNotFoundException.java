@@ -19,7 +19,7 @@ public class ContentNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public ContentNotFoundException(String url) {
+    public ContentNotFoundException(final String url) {
         super("Not Found: " + url, false, false);
     }
 

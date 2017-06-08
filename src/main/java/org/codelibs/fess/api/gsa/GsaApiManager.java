@@ -59,9 +59,9 @@ import org.slf4j.LoggerFactory;
 public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final Logger logger = LoggerFactory.getLogger(GsaApiManager.class);
 
-    public String gsaPathPrefix = "/gsa";
+    protected String gsaPathPrefix = "/gsa";
 
-    public String gsaMetaPrefix = "MT_";
+    protected String gsaMetaPrefix = "MT_";
 
     private static final String GSA_META_SUFFIX = "_s";
 
@@ -284,9 +284,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         buf.append("<GSP VER=\"");
         buf.append(Constants.GSA_API_VERSION);
         buf.append("\">");
-        //        buf.append("<status>");
-        //        buf.append(status);
-        //        buf.append("</status>");
         if (status == 0) {
             buf.append(body);
         } else {
@@ -394,24 +391,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public String[] getExtraQueries() {
-            /*
-            List<String> additional = new ArrayList<String>();
-            // collections
-            final String site = (String) request.getParameter("site");
-            if (StringUtil.isNotBlank(site)) {
-                additional.add(" (label:" + site.replace(".", " AND label:").replace("|", " OR label:") + ")");
-            }
-            // dynmic fields
-            final String requiredFields = (String) request.getParameter("requiredfields");
-            if (StringUtil.isNotBlank(requiredFields)) {
-                additional.add(" (" + gsaMetaPrefix
-                        + requiredFields.replace(":", "_s:").replace(".", " AND " + gsaMetaPrefix).replace("|", " OR " + gsaMetaPrefix)
-                        + ")");
-            }
-            if (!additional.isEmpty()) {
-                extraParams.put("additional", (String[]) additional.toArray(new String[additional.size()]));
-            }
-            */
             return getParamValueArray(request, "ex_q");
         }
 
@@ -445,28 +424,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public String getSort() {
-            /*
-            // sorting
-            final String sort = request.getParameter("sort");
-            if (StringUtil.isNotBlank(sort)) {
-                final String[] sortParams = sort.split(":");
-                String sortDirection = "desc";
-                if ("date".equals(sortParams[0])) {
-                    if ("A".equals(sortParams[1])) {
-                        sortDirection = "asc";
-                    } else if ("D".equals(sortParams[1])) {
-                        sortDirection = "desc";
-                    }
-                    // TODO: Now ignore sort mode
-                    //                    if ("S".equals(sortParams[2])) {
-                    //                    } else if ("R".equals(sortParams[2])) {
-                    //                    } else if ("L".equals(sortParams[2])) {
-                    //                    }
-                    // sortParams[3]=<mode> is fixed as "d1"
-                    extraParams.put("sort", new String[] { "lastModified." + sortDirection });
-                }
-            }
-            */
             return request.getParameter("sort");
         }
 
@@ -531,5 +488,13 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return request.getParameter("sdh");
         }
 
+    }
+
+    public void setGsaPathPrefix(final String gsaPathPrefix) {
+        this.gsaPathPrefix = gsaPathPrefix;
+    }
+
+    public void setGsaMetaPrefix(final String gsaMetaPrefix) {
+        this.gsaMetaPrefix = gsaMetaPrefix;
     }
 }

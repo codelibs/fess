@@ -190,10 +190,10 @@ public class ApiResult {
                 // facet field
                 if (facetResponse.getFieldList() != null) {
                     facetField = facetResponse.getFieldList().stream().map(field -> {
-                        Map<String, Object> fieldMap = new HashMap<>(2, 1f);
+                        final Map<String, Object> fieldMap = new HashMap<>(2, 1f);
                         fieldMap.put("name", field.getName());
                         fieldMap.put("result", field.getValueCountMap().entrySet().stream().map(e -> {
-                            Map<String, Object> valueCount = new HashMap<>(2, 1f);
+                            final Map<String, Object> valueCount = new HashMap<>(2, 1f);
                             valueCount.put("value", e.getKey());
                             valueCount.put("count", e.getValue());
                             return valueCount;
@@ -204,7 +204,7 @@ public class ApiResult {
                 // facet q
                 if (facetResponse.getQueryCountMap() != null) {
                     facetQuery = facetResponse.getQueryCountMap().entrySet().stream().map(e -> {
-                        Map<String, Object> valueCount = new HashMap<>(2, 1f);
+                        final Map<String, Object> valueCount = new HashMap<>(2, 1f);
                         valueCount.put("value", e.getKey());
                         valueCount.put("count", e.getValue());
                         return valueCount;

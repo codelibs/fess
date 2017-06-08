@@ -63,7 +63,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
     // GET /api/admin/backup/file/{id}
     @Execute
     public StreamResponse get$file(final String id) {
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
             if (id.equals("system.properties")) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {

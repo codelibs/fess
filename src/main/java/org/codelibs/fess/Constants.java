@@ -184,7 +184,8 @@ public class Constants extends CoreLibConstants {
             + ",YandexBot"//
             + ",Chilkat"//
             + ",CloudFront"//
-            + ",Mediapartners";
+            + ",Mediapartners"//
+            + ",MSIE 6";
 
     public static final String DEFAULT_FROM_EMAIL = "Administrator <root@localhost>";
 

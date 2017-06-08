@@ -124,9 +124,8 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 final BufferedImage image = reader.read(0, param);
                 final int thumbnailWidth = fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger();
                 final int thumbnailHeight =
-                        (int) (((float) (height > width ? width : height))
-                                * fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger().floatValue() / (float) width);
-                BufferedImage thumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
+                        (int) ((height > width ? width : height) * fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger().floatValue() / width);
+                final BufferedImage thumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
                 thumbnail.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_AREA_AVERAGING), 0,
                         0, thumbnailWidth, thumbnailHeight, null);
                 ImageIO.write(thumbnail, fessConfig.getThumbnailHtmlImageFormat(), outputFile);

@@ -328,7 +328,7 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     static public List<Map<String, String>> getBackupItems() {
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.map(name -> {
             final Map<String, String> map = new HashMap<>();
             map.put("id", name);

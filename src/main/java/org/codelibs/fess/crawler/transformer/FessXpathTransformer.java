@@ -727,7 +727,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                                 }
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.debug("Failed to parse " + imgNode + " at " + responseData.getUrl(), e);
                     }
                 } else if (firstSrcNode == null) {
@@ -744,7 +744,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     if (thumbnailUrl != null) {
                         return thumbnailUrl.toExternalForm();
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.debug("Failed to parse " + firstSrcNode + " at " + responseData.getUrl(), e);
                 }
             }
@@ -755,7 +755,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected Integer getAttributeAsInteger(final NamedNodeMap attributes, final String name) {
-        Node namedItem = attributes.getNamedItem(name);
+        final Node namedItem = attributes.getNamedItem(name);
         if (namedItem == null) {
             return null;
         }

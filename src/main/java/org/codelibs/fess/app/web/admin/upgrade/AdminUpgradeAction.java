@@ -202,7 +202,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         }
     }
 
-    private boolean startReindex(boolean replaceAliases) {
+    private boolean startReindex(final boolean replaceAliases) {
         final String docIndex = "fess";
         final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
