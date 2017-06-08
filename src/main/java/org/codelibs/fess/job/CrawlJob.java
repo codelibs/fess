@@ -138,34 +138,6 @@ public class CrawlJob {
         return this;
     }
 
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor) {
-        jobExecutor(jobExecutor);
-        return execute();
-    }
-
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor, final String[] webConfigIds, final String[] fileConfigIds,
-            final String[] dataConfigIds, final String operation) {
-        jobExecutor(jobExecutor);
-        webConfigIds(webConfigIds);
-        fileConfigIds(fileConfigIds);
-        dataConfigIds(dataConfigIds);
-        return execute();
-
-    }
-
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor, final String sessionId, final String[] webConfigIds, final String[] fileConfigIds,
-            final String[] dataConfigIds, final String operation) {
-        jobExecutor(jobExecutor);
-        webConfigIds(webConfigIds);
-        fileConfigIds(fileConfigIds);
-        dataConfigIds(dataConfigIds);
-        sessionId(sessionId);
-        return execute();
-    }
-
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
