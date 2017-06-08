@@ -37,6 +37,10 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         bar.setRegularName("www.bar.com");
         bar.setDuplicateHostName("mail.bar.com");
         duplicateHostHelper.duplicateHostList.add(bar);
+        DuplicateHost hoge = new DuplicateHost();
+        hoge.setRegularName("www.foo.com");
+        hoge.setDuplicateHostName("www.foo.com:99");
+        duplicateHostHelper.duplicateHostList.add(hoge);
     }
 
     public void test_convert() {
@@ -57,6 +61,10 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
 
         url = "http://mail.bar.com/";
         result = "http://www.bar.com/";
+        assertEquals(result, duplicateHostHelper.convert(url));
+
+        url = "http://www.foo.com:99/";
+        result = "http://www.foo.com/";
         assertEquals(result, duplicateHostHelper.convert(url));
 
     }

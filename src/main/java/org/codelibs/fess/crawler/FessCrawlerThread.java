@@ -43,6 +43,7 @@ import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.exception.ContentNotFoundException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -261,6 +262,15 @@ public class FessCrawlerThread extends CrawlerThread {
             final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
             failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url, new ContentNotFoundException(
                     url));
+        }
+    }
+
+    @Override
+    protected void storeChildUrl(final String childUrl, final String parentUrl, final String metaData, final int depth) {
+        if (StringUtil.isNotBlank(childUrl)) {
+            final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
+            final String url = duplicateHostHelper.convert(childUrl);
+            super.storeChildUrl(url, parentUrl, metaData, depth);
         }
     }
 }
