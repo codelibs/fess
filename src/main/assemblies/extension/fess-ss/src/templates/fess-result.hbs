@@ -1,0 +1,49 @@
+<div id="result">
+  <div style="border-bottom:solid thin #eeeeee;padding-bottom:5px;margin-bottom:10px;">
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td width="50%">
+            {{record_count}} {result.number} ({{exec_time}}{result.second})
+          </td>
+          <td width="20%" align="right">
+            {result.order}:
+            <select class="form-control sort">
+              <option value="score.desc">{result.order.score}</option>
+              <option value="last_modified.desc">{result.order.last_modified}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <ol id="searchResultList">
+      {{#each result}}
+      <li id="result{{@index}}">
+        <div class="media">
+          <div class="media-body">
+            <h3 class="title ellipsis media-heading">
+              <a class="link" href="{{url}}" data-uri="{{url}}" data-order="0">
+                {{title}}
+              </a>
+            </h3>
+          </div>
+          <div class="body">
+            <div class="description">
+              {{{content_description}}}
+            </div>
+            <div class="site ellipsis">
+              <cite>{{site}}</cite>
+            </div>
+          </div>
+        </div>
+      </li>
+      {{/each}}
+    </ol>
+  </div>
+</div>
+<div class="center">
+  <nav id="subfooter" class='paginationNav'>
+  </nav>
+</div>
