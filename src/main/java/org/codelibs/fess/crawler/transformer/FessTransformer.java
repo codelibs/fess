@@ -139,9 +139,12 @@ public interface FessTransformer {
             final String template) {
         Object target = value;
         if (template != null) {
-            final Map<String, Object> paramMap = new HashMap<>(dataMap.size() + 1);
+            final Map<String, Object> contextMap = new HashMap<>();
+            contextMap.put("doc", dataMap);
+            final Map<String, Object> paramMap = new HashMap<>(dataMap.size() + 2);
             paramMap.putAll(dataMap);
             paramMap.put("value", target);
+            paramMap.put("context", contextMap);
             target = evaluateValue(template, paramMap);
         }
         if (key != null && target != null) {
