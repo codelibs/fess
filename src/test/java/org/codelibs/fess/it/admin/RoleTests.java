@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
@@ -30,7 +27,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("it")
 public class RoleTests extends CrudTestBase {
-    private static final int NUM = 20;
 
     private static final String NAME_PREFIX = "roleTest_";
     private static final String API_PATH = "/api/admin/role";
@@ -64,6 +60,33 @@ public class RoleTests extends CrudTestBase {
         return ITEM_ENDPOINT_SUFFIX;
     }
 
+    @Override
+    protected Map<String, Object> createTestParam(int id) {
+        final Map<String, Object> requestBody = new HashMap<>();
+        final String keyProp = NAME_PREFIX + id;
+        requestBody.put(KEY_PROPERTY, keyProp);
+        return requestBody;
+    }
+
+    private static final String NEW_SUFFIX = "_new";
+
+    @Override
+    protected Map<String, Object> getUpdateMap() {
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put(KEY_PROPERTY, NAME_PREFIX + NEW_SUFFIX);
+        return requestBody;
+    }
+
+    @Override
+    protected void checkUpdate() {
+        Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        List<String> valueList = getPropList(searchBody, KEY_PROPERTY);
+        for (String value : valueList) {
+            assertTrue(value.endsWith(NEW_SUFFIX));
+        }
+    }
+
     @Test
     void crudTest() {
         testCreate();
@@ -71,103 +94,4 @@ public class RoleTests extends CrudTestBase {
         testUpdate();
         testDelete();
     }
-
-    @Override
-    protected void testCreate() {
-        // Test: create setting api.
-        for (int i = 0; i < NUM; i++) {
-            final Map<String, Object> requestBody = new HashMap<>();
-            final String keyProp = NAME_PREFIX + i;
-            requestBody.put(KEY_PROPERTY, keyProp);
-
-            checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
-                    .body("response.status", equalTo(0));
-        }
-
-        // Test: number of settings.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(NUM));
-    }
-
-    @Override
-    protected void testRead() {
-        // Test: get settings api.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> propList = getPropList(searchBody, KEY_PROPERTY);
-
-        assertEquals(NUM, propList.size());
-        for (int i = 0; i < NUM; i++) {
-            final String keyProp = NAME_PREFIX + i;
-            assertTrue(propList.contains(keyProp), keyProp);
-        }
-
-        List<String> idList = getPropList(searchBody, "id");
-        idList.forEach(id -> {
-            // Test: get setting api
-            checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + "." + KEY_PROPERTY, startsWith(NAME_PREFIX));
-        });
-
-        // Test: paging
-        searchBody.put("size", 1);
-        for (int i = 0; i < NUM; i++) {
-            searchBody.put("page", i + 1);
-            checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body("response." + LIST_ENDPOINT_SUFFIX + ".size()", equalTo(1));
-        }
-
-    }
-
-    @Override
-    protected void testUpdate() {
-        // Test: update settings api
-        Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<Map<String, Object>> settings = getItemList(searchBody);
-
-        final String newPrefix = "new_";
-        for (Map<String, Object> setting : settings) {
-            final Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("id", setting.get("id"));
-            requestBody.put(KEY_PROPERTY, newPrefix + setting.get(KEY_PROPERTY));
-            requestBody.put("version_no", 1);
-
-            checkPostMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.status", equalTo(0));
-        }
-
-        searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> valueList = getPropList(searchBody, KEY_PROPERTY);
-        for (String value : valueList) {
-            assertTrue(value.startsWith(newPrefix));
-        }
-    }
-
-    @Override
-    protected void testDelete() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> idList = getPropList(searchBody, "id");
-
-        idList.forEach(id -> {
-            //Test: delete setting api
-            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id).then().body("response.status", equalTo(0));
-        });
-
-        // Test: NUMber of settings.
-        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(0));
-    }
-
-    @Override
-    protected void clearTestData() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 10);
-        List<String> idList = getPropList(searchBody, "id");
-        idList.forEach(id -> {
-            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id);
-        });
-    }
-
 }

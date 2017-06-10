@@ -15,13 +15,7 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
@@ -30,8 +24,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("it")
 public class WebConfigTests extends CrudTestBase {
-
-    private static final int NUM = 20;
 
     private static final String NAME_PREFIX = "webConfigTest_";
     private static final String API_PATH = "/api/admin/webconfig";
@@ -65,6 +57,29 @@ public class WebConfigTests extends CrudTestBase {
         return ITEM_ENDPOINT_SUFFIX;
     }
 
+    @Override
+    protected Map<String, Object> createTestParam(int id) {
+        final Map<String, Object> requestBody = new HashMap<>();
+        final String keyProp = NAME_PREFIX + id;
+        final String urls = "http://" + NAME_PREFIX + id;
+        requestBody.put(KEY_PROPERTY, keyProp);
+        requestBody.put("urls", urls);
+        requestBody.put("user_agent", "Mozilla/5.0");
+        requestBody.put("num_of_thread", 5);
+        requestBody.put("interval_time", 1000);
+        requestBody.put("boost", id);
+        requestBody.put("available", true);
+        requestBody.put("sort_order", id);
+        return requestBody;
+    }
+
+    @Override
+    protected Map<String, Object> getUpdateMap() {
+        final Map<String, Object> updateMap = new HashMap<>();
+        updateMap.put("urls", "http://new." + NAME_PREFIX);
+        return updateMap;
+    }
+
     @Test
     void crudTest() {
         testCreate();
@@ -72,119 +87,4 @@ public class WebConfigTests extends CrudTestBase {
         testUpdate();
         testDelete();
     }
-
-    @Override
-    protected void testCreate() {
-        // Test: create setting api.
-        for (int i = 0; i < NUM; i++) {
-            final Map<String, Object> requestBody = new HashMap<>();
-            final String keyProp = NAME_PREFIX + i;
-            final String urls = "http://" + NAME_PREFIX + i;
-            requestBody.put(KEY_PROPERTY, keyProp);
-            requestBody.put("urls", urls);
-            requestBody.put("user_agent", "Mozilla/5.0");
-            requestBody.put("num_of_thread", 5);
-            requestBody.put("interval_time", 1000);
-            requestBody.put("boost", i);
-            requestBody.put("available", true);
-            requestBody.put("sort_order", i);
-
-            checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
-                    .body("response.status", equalTo(0));
-        }
-
-        // Test: number of settings.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(NUM));
-    }
-
-    @Override
-    protected void testRead() {
-        // Test: get settings api.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> propList = getPropList(searchBody, KEY_PROPERTY);
-
-        assertEquals(NUM, propList.size());
-        for (int i = 0; i < NUM; i++) {
-            final String prop = NAME_PREFIX + i;
-            assertTrue(propList.contains(prop), prop);
-        }
-
-        List<String> idList = getPropList(searchBody, "id");
-        idList.forEach(id -> {
-            // Test: get setting api
-            checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + "." + KEY_PROPERTY, startsWith(NAME_PREFIX));
-        });
-
-        // Test: paging
-        searchBody.put("size", 1);
-        for (int i = 0; i < NUM; i++) {
-            searchBody.put("page", i + 1);
-            checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body("response." + LIST_ENDPOINT_SUFFIX + ".size()", equalTo(1));
-        }
-
-    }
-
-    @Override
-    protected void testUpdate() {
-        // Test: update settings api
-        Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<Map<String, Object>> settings = getItemList(searchBody);
-
-        final String newUrls = "http://new." + NAME_PREFIX;
-        for (Map<String, Object> setting : settings) {
-            final Map<String, Object> requestBody = new HashMap<>();
-
-            requestBody.put("id", setting.get("id"));
-            requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
-            requestBody.put("urls", newUrls);
-            requestBody.put("user_agent", setting.get("user_agent"));
-            requestBody.put("num_of_thread", setting.get("num_of_thread"));
-            requestBody.put("interval_time", setting.get("interval_time"));
-            requestBody.put("boost", setting.get("boost"));
-            requestBody.put("available", true);
-            requestBody.put("sort_order", setting.get("sort_order"));
-            requestBody.put("version_no", 1);
-
-            checkPostMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.status", equalTo(0));
-        }
-
-        searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> valList = getPropList(searchBody, "urls");
-        for (String val : valList) {
-            assertEquals(val, newUrls);
-        }
-    }
-
-    @Override
-    protected void testDelete() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> idList = getPropList(searchBody, "id");
-
-        idList.forEach(id -> {
-            //Test: delete setting api
-            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id).then().body("response.status", equalTo(0));
-        });
-
-        // Test: NUMber of settings.
-        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(0));
-    }
-
-    @Override
-    protected void clearTestData() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 10);
-        List<String> idList = getPropList(searchBody, "id");
-        idList.forEach(id -> {
-            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id);
-        });
-    }
-
 }
