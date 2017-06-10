@@ -92,10 +92,21 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         con -> {
                             boolean created = false;
                             try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
-                                if (saveImage(input, outputFile)) {
+                                switch (saveImage(input, outputFile)) {
+                                case OK:
                                     created = true;
-                                } else {
+                                    break;
+                                case FAILED:
                                     logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url);
+                                    break;
+                                case INVALID_SIZE:
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug("Invalid thumbnail size: " + thumbnailId + " -> " + url);
+                                    }
+                                    break;
+                                default:
+                                    logger.error("Unknown thumbnail result: " + thumbnailId + " -> " + url);
+                                    break;
                                 }
                             } catch (final Throwable t) {
                                 if (logger.isDebugEnabled()) {
@@ -117,7 +128,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         return outputFile.exists();
     }
 
-    protected boolean saveImage(final ImageInputStream input, final File outputFile) throws IOException {
+    protected Result saveImage(final ImageInputStream input, final File outputFile) throws IOException {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
         if (readers.hasNext()) {
@@ -128,7 +139,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 final int width = reader.getWidth(0);
                 final int height = reader.getHeight(0);
                 if (!fessConfig.validateThumbnailSize(width, height)) {
-                    return false;
+                    return Result.INVALID_SIZE;
                 }
                 final int samplingWidth = width / fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger();
                 final int samplingHeight = height / fessConfig.getThumbnailHtmlImageThumbnailHeightAsInteger();
@@ -143,12 +154,15 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         0, thumbnailWidth, thumbnailHeight, null);
                 ImageIO.write(thumbnail, fessConfig.getThumbnailHtmlImageFormat(), outputFile);
                 image.flush();
-                return true;
+                return Result.OK;
             } finally {
                 reader.dispose();
             }
         }
-        return false;
+        return Result.FAILED;
     }
 
+    protected enum Result {
+        OK, FAILED, INVALID_SIZE;
+    }
 }
