@@ -51,9 +51,16 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
         final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldThumbnail(), String.class);
         if (StringUtil.isBlank(url)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Thumbnail task is not found: " + path + ", " + thumbnailId + ", " + url);
+            }
             return null;
         }
-        return new Tuple4<>(getName(), thumbnailId, url, path);
+        final Tuple4<String, String, String, String> task = new Tuple4<>(getName(), thumbnailId, url, path);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Create thumbnail task: " + task);
+        }
+        return task;
     }
 
     @Override

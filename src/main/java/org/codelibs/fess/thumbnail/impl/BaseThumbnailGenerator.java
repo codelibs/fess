@@ -96,7 +96,11 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
         final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
-        return new Tuple4<>(getName(), thumbnailId, url, path);
+        final Tuple4<String, String, String, String> task = new Tuple4<>(getName(), thumbnailId, url, path);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Create thumbnail task: " + task);
+        }
+        return task;
     }
 
     public void setDirectoryNameLength(final int directoryNameLength) {

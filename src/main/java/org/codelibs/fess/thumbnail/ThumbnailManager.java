@@ -82,7 +82,7 @@ public class ThumbnailManager {
 
     protected int thumbnailTaskBulkSize = 100;
 
-    protected long thumbnailTaskQueueTimeout = 60 * 1000L;
+    protected long thumbnailTaskQueueTimeout = 30 * 1000L;
 
     protected long noImageExpired = 24 * 60 * 60 * 1000L; // 24 hours
 
@@ -131,11 +131,17 @@ public class ThumbnailManager {
                             }
                         } catch (final InterruptedException e) {
                             logger.debug("Interupted task.", e);
+                            if (!taskList.isEmpty()) {
+                                storeQueue(taskList);
+                            }
                         } catch (final Exception e) {
                             if (generating) {
-                                logger.warn("Failed to generage a thumbnail.", e);
+                                logger.warn("Failed to generate thumbnail.", e);
                             }
                         }
+                    }
+                    if (!taskList.isEmpty()) {
+                        storeQueue(taskList);
                     }
                 }, "ThumbnailGenerator");
         thumbnailQueueThread.start();
@@ -182,6 +188,9 @@ public class ThumbnailManager {
             }
         });
         taskList.clear();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Storing " + list.size() + " thumbnail tasks.");
+        }
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
         thumbnailQueueBhv.batchInsert(list);
     }
@@ -199,6 +208,9 @@ public class ThumbnailManager {
             cb.query().addOrderBy_CreatedTime_Asc();
             cb.fetchFirst(fessConfig.getPageThumbnailQueueMaxFetchSizeAsInteger());
         }).forEach(entity -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Generating thumbnail: " + entity);
+            }
             idList.add(entity.getId());
             final String generatorName = entity.getGenerator();
             try {
@@ -239,10 +251,18 @@ public class ThumbnailManager {
                 final String path = getImageFilename(docMap);
                 final Tuple4<String, String, String, String> task = generator.createTask(path, docMap);
                 if (task != null) {
-                    thumbnailTaskQueue.offer(task);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Add thumbnail task: " + task);
+                    }
+                    if (!thumbnailTaskQueue.offer(task)) {
+                        logger.warn("Failed to add thumbnail task: " + task);
+                    }
                 }
-                break;
+                return;
             }
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Thumbnail generator is not found: " + (docMap != null ? docMap.get("url") : docMap));
         }
     }
 
