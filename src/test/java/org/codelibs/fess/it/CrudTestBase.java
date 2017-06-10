@@ -216,7 +216,7 @@ public abstract class CrudTestBase extends ITBase {
         return "response." + getListEndpointSuffix() + ".findAll {it." + getKeyProperty() + ".startsWith(\"" + getNamePrefix() + "\")}";
     }
 
-    private RequestSpecification checkMethodBase(final Map<String, Object> body) {
+    protected RequestSpecification checkMethodBase(final Map<String, Object> body) {
         return given().header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2).when();
     }
 
