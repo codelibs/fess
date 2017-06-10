@@ -72,15 +72,17 @@ public class SuggestHelper {
 
     protected Suggester suggester;
 
-    private FessConfig fessConfig;
+    protected FessConfig fessConfig;
 
-    private final Set<String> contentFieldNameSet = new HashSet<>();
+    protected final Set<String> contentFieldNameSet = new HashSet<>();
 
-    private final Set<String> tagFieldNameSet = new HashSet<>();
+    protected final Set<String> tagFieldNameSet = new HashSet<>();
 
-    private final Set<String> roleFieldNameSet = new HashSet<>();
+    protected final Set<String> roleFieldNameSet = new HashSet<>();
 
-    private List<String> contentFieldList;
+    protected List<String> contentFieldList;
+
+    protected PopularWordHelper popularWordHelper = null;
 
     @PostConstruct
     public void init() {
@@ -103,6 +105,10 @@ public class SuggestHelper {
         final Set<String> undefinedAnalyzer = suggester.settings().analyzer().checkAnalyzer();
         if (undefinedAnalyzer.size() > 0) {
             logger.warn("Undefined lang analyzer. " + undefinedAnalyzer.toString());
+        }
+
+        if (ComponentUtil.hasPopularWordHelper()) {
+            popularWordHelper = ComponentUtil.getPopularWordHelper();
         }
     }
 
@@ -154,7 +160,7 @@ public class SuggestHelper {
                         }
                     }
                 });
-        suggester.refresh();
+        refresh();
     }
 
     public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
@@ -180,7 +186,7 @@ public class SuggestHelper {
                             reader.addSort(SortBuilders.scoreSort());
                             return reader;
                         }, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue()).then(response -> {
-                    suggester.refresh();
+                    refresh();
                     success.accept(true);
                 }).error(t -> error.accept(t));
     }
@@ -227,7 +233,7 @@ public class SuggestHelper {
             logger.warn("Failed to delete all words.", response.getErrors().get(0));
             return false;
         }
-        suggester.refresh();
+        refresh();
         return true;
     }
 
@@ -237,7 +243,7 @@ public class SuggestHelper {
             logger.warn("Failed to delete document words.", response.getErrors().get(0));
             return false;
         }
-        suggester.refresh();
+        refresh();
         return true;
     }
 
@@ -247,13 +253,8 @@ public class SuggestHelper {
             logger.warn("Failed to delete query words.", response.getErrors().get(0));
             return false;
         }
-        suggester.refresh();
+        refresh();
         return true;
-    }
-
-    public void refreshWords() {
-        deleteAllBadWords();
-        storeAllElevateWords();
     }
 
     public void storeAllElevateWords() {
@@ -268,7 +269,7 @@ public class SuggestHelper {
             addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getLabelTypeValues(),
                     elevateWord.getPermissions(), elevateWord.getBoost(), false);
         }
-        suggester.refresh();
+        refresh();
     }
 
     public void deleteAllElevateWord() {
@@ -280,20 +281,21 @@ public class SuggestHelper {
         for (final ElevateWord elevateWord : list) {
             suggester.indexer().deleteElevateWord(elevateWord.getSuggestWord());
         }
-        suggester.refresh();
+        refresh();
     }
 
     public void deleteElevateWord(final String word) {
         suggester.indexer().deleteElevateWord(word);
-        suggester.refresh();
+        refresh();
     }
 
     public void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions, final Float boost) {
         addElevateWord(word, reading, tags, permissions, boost, true);
+        refresh();
     }
 
-    public void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions, final float boost,
-            final boolean commit) {
+    protected void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions,
+            final float boost, final boolean commit) {
         final List<String> labelList = new ArrayList<>();
         for (final String label : tags) {
             labelList.add(label);
@@ -308,7 +310,7 @@ public class SuggestHelper {
                         .replaceAll(TEXT_SEP + "+", TEXT_SEP).split(TEXT_SEP)), contentFieldList, labelList, roleList));
     }
 
-    public void deleteAllBadWords() {
+    protected void deleteAllBadWords() {
         suggester.settings().badword().deleteAll();
     }
 
@@ -322,13 +324,23 @@ public class SuggestHelper {
             final String word = badWord.getSuggestWord();
             suggester.indexer().addBadWord(word);
         }
+        refresh();
     }
 
     public void addBadWord(final String badWord) {
         suggester.indexer().addBadWord(badWord);
+        refresh();
     }
 
     public void deleteBadWord(final String badWord) {
         suggester.indexer().deleteBadWord(badWord);
+        refresh();
+    }
+
+    public synchronized void refresh() {
+        suggester.refresh();
+        if (popularWordHelper != null) {
+            popularWordHelper.clearCache();
+        }
     }
 }

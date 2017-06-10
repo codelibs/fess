@@ -421,6 +421,10 @@ public final class ComponentUtil {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
 
+    public static boolean hasPopularWordHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(POPULAR_WORD_HELPER);
+    }
+
     public static boolean available() {
         try {
             return SingletonLaContainer.getComponent(SYSTEM_HELPER) != null;
