@@ -164,7 +164,7 @@ public abstract class CrudTestBase extends ITBase {
         for (Map.Entry<String, Object> entry : updateMap.entrySet()) {
             List<String> updatedList = getPropList(searchBody, entry.getKey());
             for (String val : updatedList) {
-                assertEquals(val, entry.getValue().toString());
+                assertEquals(entry.getValue().toString(), val);
             }
         }
     }
