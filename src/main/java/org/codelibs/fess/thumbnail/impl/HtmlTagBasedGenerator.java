@@ -85,31 +85,34 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             return false;
         }
 
-        Curl.get(url).execute(
-                con -> {
-                    boolean created = false;
-                    try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
-                        if (saveImage(input, outputFile)) {
-                            created = true;
-                        } else {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url);
-                        }
-                    } catch (final Throwable t) {
-                        if (logger.isDebugEnabled()) {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url, t);
-                        } else {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url + " ("
-                                    + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
-                        }
-                    } finally {
-                        if (!created) {
-                            updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
-                            if (outputFile.exists() && !outputFile.delete()) {
-                                logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        Curl.get(url)
+                .proxy(fessConfig.getHttpProxy())
+                .execute(
+                        con -> {
+                            boolean created = false;
+                            try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
+                                if (saveImage(input, outputFile)) {
+                                    created = true;
+                                } else {
+                                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url);
+                                }
+                            } catch (final Throwable t) {
+                                if (logger.isDebugEnabled()) {
+                                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url, t);
+                                } else {
+                                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url + " ("
+                                            + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
+                                }
+                            } finally {
+                                if (!created) {
+                                    updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
+                                    if (outputFile.exists() && !outputFile.delete()) {
+                                        logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+                                    }
+                                }
                             }
-                        }
-                    }
-                });
+                        });
 
         return outputFile.exists();
     }

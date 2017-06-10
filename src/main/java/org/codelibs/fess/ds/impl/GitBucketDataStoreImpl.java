@@ -37,6 +37,7 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfigWrapper;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -175,8 +176,10 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected Map<String, String> getFessPluginInfo(final String rootURL, final String authToken) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = rootURL + "api/v3/fess/info";
-        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+        try (CurlResponse curlResponse =
+                Curl.get(url).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
             @SuppressWarnings({ "rawtypes", "unchecked" })
             final Map<String, String> map = (Map) curlResponse.getContentAsMap();
             assert (map.containsKey("version"));
@@ -190,6 +193,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected List<Map<String, Object>> getRepositoryList(final String rootURL, final String authToken) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = rootURL + "api/v3/fess/repos";
         int totalCount = -1; // initialize with dummy value
         final List<Map<String, Object>> repoList = new ArrayList<>();
@@ -197,7 +201,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         do {
             final String urlWithOffset = url + "?offset=" + repoList.size();
 
-            try (CurlResponse curlResponse = Curl.get(urlWithOffset).header("Authorization", "token " + authToken).execute()) {
+            try (CurlResponse curlResponse =
+                    Curl.get(urlWithOffset).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
                 final Map<String, Object> map = curlResponse.getContentAsMap();
 
                 assert (map.containsKey("total_count"));
@@ -224,9 +229,11 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected String getGitRef(final String rootURL, final String authToken, final String owner, final String name, final String branch) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = encode(rootURL, "api/v3/repos/" + owner + "/" + name + "/git/refs/heads/" + branch, null);
 
-        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+        try (CurlResponse curlResponse =
+                Curl.get(url).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
             final Map<String, Object> map = curlResponse.getContentAsMap();
             assert (map.containsKey("object"));
             @SuppressWarnings("unchecked")
@@ -294,6 +301,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final String name, final Integer issueId, final List<String> roleList, final CrawlingConfig crawlingConfig,
             final IndexUpdateCallback callback, final Map<String, String> paramMap, final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final String issueUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/issues/" + issueId.toString();
         final String viewUrl = rootURL + owner + "/" + name + "/issues/" + issueId.toString();
@@ -308,7 +316,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         // Get issue description
         // FIXME: Use `ComponentUtil.getDocumentHelper().processRequest` instead of `Curl.get`
-        try (CurlResponse curlResponse = Curl.get(issueUrl).header("Authorization", "token " + authToken).execute()) {
+        try (CurlResponse curlResponse =
+                Curl.get(issueUrl).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
             final Map<String, Object> map = curlResponse.getContentAsMap();
             dataMap.put("title", map.getOrDefault("title", ""));
             contentStr = (String) map.getOrDefault("body", "");
@@ -332,10 +341,12 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     private List<String> getIssueComments(final String issueUrl, final String authToken) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String commentsUrl = issueUrl + "/comments";
         final List<String> commentList = new ArrayList<>();
 
-        try (CurlResponse curlResponse = Curl.get(commentsUrl).header("Authorization", "token " + authToken).execute()) {
+        try (CurlResponse curlResponse =
+                Curl.get(commentsUrl).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
             final String commentsJson = curlResponse.getContentAsString();
             final List<Map<String, Object>> comments =
                     new ObjectMapper().readValue(commentsJson, new TypeReference<List<Map<String, Object>>>() {
@@ -358,12 +369,14 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final String name, final List<String> roleList, final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback,
             final Map<String, String> paramMap, final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap,
             final long readInterval) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String wikiUrl = rootURL + "api/v3/fess/" + owner + "/" + name + "/wiki";
 
         List<String> pageList = Collections.emptyList();
 
         // Get list of pages
-        try (CurlResponse curlResponse = Curl.get(wikiUrl).header("Authorization", "token " + authToken).execute()) {
+        try (CurlResponse curlResponse =
+                Curl.get(wikiUrl).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
             final Map<String, Object> map = curlResponse.getContentAsMap();
             pageList = (List<String>) map.get("pages");
         } catch (final Exception e) {
@@ -406,9 +419,11 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return;
         }
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = encode(rootURL, "api/v3/repos/" + owner + "/" + name + "/contents/" + path, "ref=" + refStr);
 
-        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+        try (CurlResponse curlResponse =
+                Curl.get(url).proxy(fessConfig.getHttpProxy()).header("Authorization", "token " + authToken).execute()) {
             final InputStream iStream = curlResponse.getContentAsStream();
             final List<Object> fileList = parseList(iStream);
 

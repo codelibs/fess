@@ -18,6 +18,12 @@ package org.codelibs.fess.mylasta.direction;
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.Proxy.Type;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -61,6 +67,8 @@ import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
+
+    public static final String HTML_PROXY = "httpProxy";
 
     public static final String CRAWLER_FAILURE_URL_STATUS_CODES = "crawlerFailureUrlStatusCodes";
 
@@ -1626,5 +1634,35 @@ public interface FessProp {
         }
 
         return true;
+    }
+
+    String getHttpProxyHost();
+
+    Integer getHttpProxyHostAsInteger();
+
+    String getHttpProxyUsername();
+
+    String getHttpProxyPassword();
+
+    public default Proxy getHttpProxy() {
+        Proxy proxy = (Proxy) propMap.get(HTML_PROXY);
+        if (proxy == null) {
+            if (StringUtil.isNotBlank(getHttpProxyHost()) && getHttpProxyHostAsInteger() != null) {
+                final SocketAddress addr = new InetSocketAddress(getHttpProxyHost(), getHttpProxyHostAsInteger());
+                proxy = new Proxy(Type.HTTP, addr);
+                if (StringUtil.isNotBlank(getHttpProxyUsername())) {
+                    Authenticator.setDefault(new Authenticator() {
+                        @Override
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(getHttpProxyUsername(), getHttpProxyPassword().toCharArray());
+                        }
+                    });
+                }
+            } else {
+                proxy = Proxy.NO_PROXY;
+            }
+            propMap.put(HTML_PROXY, proxy);
+        }
+        return proxy;
     }
 }

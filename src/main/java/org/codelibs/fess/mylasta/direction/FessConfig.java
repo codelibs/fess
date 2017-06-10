@@ -139,6 +139,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
 
+    /** The key of the configuration. e.g.  */
+    String HTTP_PROXY_HOST = "http.proxy.host";
+
+    /** The key of the configuration. e.g. 8080 */
+    String HTTP_PROXY_PORT = "http.proxy.port";
+
+    /** The key of the configuration. e.g.  */
+    String HTTP_PROXY_USERNAME = "http.proxy.username";
+
+    /** The key of the configuration. e.g.  */
+    String HTTP_PROXY_PASSWORD = "http.proxy.password";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -1500,6 +1512,66 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getVirtualHostHeadersAsInteger();
+
+    /**
+     * Get the value for the key 'http.proxy.host'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpProxyHost();
+
+    /**
+     * Get the value for the key 'http.proxy.host' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpProxyHostAsInteger();
+
+    /**
+     * Get the value for the key 'http.proxy.port'. <br>
+     * The value is, e.g. 8080 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpProxyPort();
+
+    /**
+     * Get the value for the key 'http.proxy.port' as {@link Integer}. <br>
+     * The value is, e.g. 8080 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpProxyPortAsInteger();
+
+    /**
+     * Get the value for the key 'http.proxy.username'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpProxyUsername();
+
+    /**
+     * Get the value for the key 'http.proxy.username' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpProxyUsernameAsInteger();
+
+    /**
+     * Get the value for the key 'http.proxy.password'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpProxyPassword();
+
+    /**
+     * Get the value for the key 'http.proxy.password' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpProxyPasswordAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -5179,6 +5251,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getVirtualHostHeadersAsInteger() {
             return getAsInteger(FessConfig.VIRTUAL_HOST_HEADERS);
+        }
+
+        public String getHttpProxyHost() {
+            return get(FessConfig.HTTP_PROXY_HOST);
+        }
+
+        public Integer getHttpProxyHostAsInteger() {
+            return getAsInteger(FessConfig.HTTP_PROXY_HOST);
+        }
+
+        public String getHttpProxyPort() {
+            return get(FessConfig.HTTP_PROXY_PORT);
+        }
+
+        public Integer getHttpProxyPortAsInteger() {
+            return getAsInteger(FessConfig.HTTP_PROXY_PORT);
+        }
+
+        public String getHttpProxyUsername() {
+            return get(FessConfig.HTTP_PROXY_USERNAME);
+        }
+
+        public Integer getHttpProxyUsernameAsInteger() {
+            return getAsInteger(FessConfig.HTTP_PROXY_USERNAME);
+        }
+
+        public String getHttpProxyPassword() {
+            return get(FessConfig.HTTP_PROXY_PASSWORD);
+        }
+
+        public Integer getHttpProxyPasswordAsInteger() {
+            return getAsInteger(FessConfig.HTTP_PROXY_PASSWORD);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {
