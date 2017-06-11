@@ -36,8 +36,8 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
     @Resource
     private RoleService roleService;
 
-    // GET /api/admin/role
-    // POST /api/admin/role
+    // GET /api/admin/role/settings
+    // POST /api/admin/role/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});

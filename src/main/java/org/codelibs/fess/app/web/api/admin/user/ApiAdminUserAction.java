@@ -36,8 +36,8 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     @Resource
     private UserService userService;
 
-    // GET /api/admin/user
-    // POST /api/admin/user
+    // GET /api/admin/user/settings
+    // POST /api/admin/user/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});

@@ -16,9 +16,15 @@
 package org.codelibs.fess.it;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +39,8 @@ import io.restassured.specification.RequestSpecification;
 
 public abstract class CrudTestBase extends ITBase {
 
+    protected static final int NUM = 20;
+
     // ================
     // Abstract Methods
     // ================
@@ -46,15 +54,9 @@ public abstract class CrudTestBase extends ITBase {
 
     abstract protected String getItemEndpointSuffix();
 
-    abstract protected void testCreate();
+    abstract protected Map<String, Object> createTestParam(int id);
 
-    abstract protected void testRead();
-
-    abstract protected void testUpdate();
-
-    abstract protected void testDelete();
-
-    abstract protected void clearTestData();
+    abstract protected Map<String, Object> getUpdateMap();
 
     // ================
 
@@ -70,12 +72,115 @@ public abstract class CrudTestBase extends ITBase {
 
     @AfterEach
     void tearDown() {
-        clearTestData();
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 10);
+        List<String> idList = getPropList(searchBody, "id");
+        idList.forEach(id -> {
+            checkDeleteMethod(getItemEndpointSuffix() + "/" + id);
+        });
     }
 
     @AfterAll
     static void tearDownAll() {
         deleteTestToken();
+    }
+
+    // ================
+    // Bodies
+    // ================
+    protected void testCreate() {
+        // Test: create setting api.
+        for (int i = 0; i < NUM; i++) {
+            final Map<String, Object> requestBody = createTestParam(i);
+            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true))
+                    .body("response.status", equalTo(0));
+        }
+
+        // Test: number of settings.
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(NUM));
+    }
+
+    protected void testRead() {
+        // Test: get settings api.
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        List<String> nameList = getPropList(searchBody, getKeyProperty());
+
+        assertEquals(NUM, nameList.size());
+        for (int i = 0; i < NUM; i++) {
+            final String name = getNamePrefix() + i;
+            assertTrue(nameList.contains(name), name);
+        }
+
+        List<String> idList = getPropList(searchBody, "id");
+        idList.forEach(id -> {
+            // Test: get setting api
+            checkGetMethod(searchBody, getItemEndpointSuffix() + "/" + id).then()
+                    .body("response." + getItemEndpointSuffix() + ".id", equalTo(id))
+                    .body("response." + getItemEndpointSuffix() + "." + getKeyProperty(), startsWith(getNamePrefix()));
+        });
+
+        // Test: paging
+        searchBody.put("size", 1);
+        for (int i = 0; i < NUM; i++) {
+            searchBody.put("page", i + 1);
+            checkGetMethod(searchBody, getListEndpointSuffix()).then().body("response." + getListEndpointSuffix() + ".size()", equalTo(1));
+        }
+
+    }
+
+    protected void testUpdate() {
+        // Test: update settings api
+        final Set<String> keySet = createTestParam(0).keySet();
+        final Map<String, Object> updateMap = getUpdateMap();
+        Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        List<Map<String, Object>> settings = getItemList(searchBody);
+
+        for (Map<String, Object> setting : settings) {
+            final Map<String, Object> requestBody = new HashMap<>(updateMap);
+            requestBody.put("version_no", 1);
+            if (setting.containsKey("id")) {
+                requestBody.put("id", setting.get("id"));
+            }
+            for (String key : keySet) {
+                if (!requestBody.containsKey(key)) {
+                    requestBody.put(key, setting.get(key));
+                }
+            }
+
+            checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+        }
+
+        checkUpdate();
+    }
+
+    protected void checkUpdate() {
+        final Map<String, Object> updateMap = getUpdateMap();
+        Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        for (Map.Entry<String, Object> entry : updateMap.entrySet()) {
+            List<String> updatedList = getPropList(searchBody, entry.getKey());
+            for (String val : updatedList) {
+                assertEquals(entry.getValue().toString(), val);
+            }
+        }
+    }
+
+    protected void testDelete() {
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        List<String> idList = getPropList(searchBody, "id");
+
+        idList.forEach(id -> {
+            //Test: delete setting api
+            checkDeleteMethod(getItemEndpointSuffix() + "/" + id).then().body("response.status", equalTo(0));
+        });
+
+        // Test: NUMber of settings.
+        checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(0));
     }
 
     // ================
@@ -111,7 +216,7 @@ public abstract class CrudTestBase extends ITBase {
         return "response." + getListEndpointSuffix() + ".findAll {it." + getKeyProperty() + ".startsWith(\"" + getNamePrefix() + "\")}";
     }
 
-    private RequestSpecification checkMethodBase(final Map<String, Object> body) {
+    protected RequestSpecification checkMethodBase(final Map<String, Object> body) {
         return given().header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2).when();
     }
 

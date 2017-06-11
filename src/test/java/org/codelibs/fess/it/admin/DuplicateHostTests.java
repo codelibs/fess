@@ -15,13 +15,7 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
@@ -30,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("it")
 public class DuplicateHostTests extends CrudTestBase {
-    private static final int NUM = 20;
 
     private static final String NAME_PREFIX = "duplicateHostTest_";
     private static final String API_PATH = "/api/admin/duplicatehost";
@@ -64,114 +57,29 @@ public class DuplicateHostTests extends CrudTestBase {
         return ITEM_ENDPOINT_SUFFIX;
     }
 
+    @Override
+    protected Map<String, Object> createTestParam(int id) {
+        final Map<String, Object> requestBody = new HashMap<>();
+        final String keyProp = NAME_PREFIX + id;
+        requestBody.put(KEY_PROPERTY, keyProp);
+        requestBody.put("duplicate_host_name", "duplicate_" + new Integer(id).toString());
+        requestBody.put("sort_order", id);
+        return requestBody;
+    }
+
+    @Override
+    protected Map<String, Object> getUpdateMap() {
+        final Map<String, Object> updateMap = new HashMap<>();
+        updateMap.put("duplicate_host_name", "new_duplicate_host");
+        return updateMap;
+    }
+
     @Test
     void crudTest() {
         testCreate();
         testRead();
         testUpdate();
         testDelete();
-    }
-
-    @Override
-    protected void testCreate() {
-        // Test: create setting api.
-        for (int i = 0; i < NUM; i++) {
-            final Map<String, Object> requestBody = new HashMap<>();
-            final String keyProp = NAME_PREFIX + i;
-            requestBody.put(KEY_PROPERTY, keyProp);
-            requestBody.put("duplicate_host_name", "duplicate_" + i);
-            requestBody.put("sort_order", i);
-
-            checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.created", equalTo(true))
-                    .body("response.status", equalTo(0));
-        }
-
-        // Test: number of settings.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(NUM));
-    }
-
-    @Override
-    protected void testRead() {
-        // Test: get settings api.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> propList = getPropList(searchBody, KEY_PROPERTY);
-
-        assertEquals(NUM, propList.size());
-        for (int i = 0; i < NUM; i++) {
-            final String keyProp = NAME_PREFIX + i;
-            assertTrue(propList.contains(keyProp), keyProp);
-        }
-
-        List<String> idList = getPropList(searchBody, "id");
-        idList.forEach(id -> {
-            // Test: get setting api
-            checkGetMethod(searchBody, ITEM_ENDPOINT_SUFFIX + "/" + id).then()
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + ".id", equalTo(id))
-                    .body("response." + ITEM_ENDPOINT_SUFFIX + "." + KEY_PROPERTY, startsWith(NAME_PREFIX));
-        });
-
-        // Test: paging
-        searchBody.put("size", 1);
-        for (int i = 0; i < NUM; i++) {
-            searchBody.put("page", i + 1);
-            checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body("response." + LIST_ENDPOINT_SUFFIX + ".size()", equalTo(1));
-        }
-
-    }
-
-    @Override
-    protected void testUpdate() {
-        // Test: update settings api
-        Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<Map<String, Object>> settings = getItemList(searchBody);
-
-        final String newDHostName = "newDuplicateHost";
-        for (Map<String, Object> setting : settings) {
-            final Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("id", setting.get("id"));
-            requestBody.put(KEY_PROPERTY, setting.get(KEY_PROPERTY));
-            requestBody.put("duplicate_host_name", newDHostName);
-            requestBody.put("sort_order", setting.get("sort_order"));
-            requestBody.put("version_no", 1);
-
-            checkPostMethod(requestBody, ITEM_ENDPOINT_SUFFIX).then().body("response.status", equalTo(0));
-        }
-
-        searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> valueList = getPropList(searchBody, "duplicate_host_name");
-        for (String value : valueList) {
-            assertEquals(value, newDHostName);
-        }
-    }
-
-    @Override
-    protected void testDelete() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        List<String> idList = getPropList(searchBody, "id");
-
-        idList.forEach(id -> {
-            //Test: delete setting api
-            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id).then().body("response.status", equalTo(0));
-        });
-
-        // Test: NUMber of settings.
-        checkGetMethod(searchBody, LIST_ENDPOINT_SUFFIX).then().body(getJsonPath() + ".size()", equalTo(0));
-    }
-
-    @Override
-    protected void clearTestData() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 10);
-        List<String> idList = getPropList(searchBody, "id");
-        idList.forEach(id -> {
-            checkDeleteMethod(ITEM_ENDPOINT_SUFFIX + "/" + id);
-        });
     }
 
 }

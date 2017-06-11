@@ -15,24 +15,25 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.restassured.path.json.JsonPath;
 
 @Tag("it")
-public class GroupTests extends CrudTestBase {
+public class ReqHeaderTests extends CrudTestBase {
 
-    private static final String NAME_PREFIX = "groupTest_";
-    private static final String API_PATH = "/api/admin/group";
+    private static final String NAME_PREFIX = "reqHeaderTest_";
+    private static final String API_PATH = "/api/admin/reqheader";
     private static final String LIST_ENDPOINT_SUFFIX = "settings";
     private static final String ITEM_ENDPOINT_SUFFIX = "setting";
 
@@ -63,39 +64,52 @@ public class GroupTests extends CrudTestBase {
         return ITEM_ENDPOINT_SUFFIX;
     }
 
+    @BeforeEach
+    void createWebConfig() {
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("name", "test_webconfig");
+        requestBody.put("urls", "http://www.example.com");
+        requestBody.put("user_agent", "Mozilla/5.0");
+        requestBody.put("num_of_thread", 5);
+        requestBody.put("interval_time", 1000);
+        requestBody.put("boost", 100.0);
+        requestBody.put("available", true);
+        requestBody.put("sort_order", 1);
+        checkMethodBase(requestBody).put("/api/admin/webconfig/setting").then().body("response.created", equalTo(true))
+                .body("response.status", equalTo(0));
+    }
+
+    String getWebConfigId() {
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("name", "test_webconfig");
+        String res = checkMethodBase(searchBody).get("/api/admin/webconfig/settings").asString();
+        List<String> webConfigList = JsonPath.from(res).getList("response.settings.findAll {it.name.startsWith(\"test_webconfig\")}.id");
+        return webConfigList.get(0);
+    }
+
+    @AfterEach
+    void deleteWebConfig() {
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", NUM * 2);
+        final String webConfigId = getWebConfigId();
+        checkMethodBase(searchBody).delete("/api/admin/webconfig/setting/" + webConfigId).then().body("response.status", equalTo(0));
+    }
+
     @Override
     protected Map<String, Object> createTestParam(int id) {
         final Map<String, Object> requestBody = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
         requestBody.put(KEY_PROPERTY, keyProp);
-        final Map<String, String> attributes = new HashMap<>();
-        attributes.put("gidNumber", new Integer(id).toString());
-        requestBody.put("attributes", attributes);
-
+        requestBody.put("value", "val" + id);
+        requestBody.put("web_config_id", getWebConfigId());
         return requestBody;
     }
 
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        final Map<String, String> newAttributes = new HashMap<>();
-        newAttributes.put("gidNumber", "100");
-        updateMap.put("attributes", newAttributes);
-
+        updateMap.put("value", "new_value");
         return updateMap;
-    }
-
-    @Override
-    protected void checkUpdate() {
-        Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
-        String response = checkGetMethod(searchBody, getListEndpointSuffix()).asString();
-        List<Map<String, String>> attrList = JsonPath.from(response).getList(getJsonPath() + ".attributes");
-        assertEquals(NUM, attrList.size());
-        for (Map<String, String> attr : attrList) {
-            assertTrue(attr.containsKey("gidNumber"));
-            assertEquals(attr.get("gidNumber"), "100");
-        }
     }
 
     @Test
