@@ -694,18 +694,24 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             // meta thumbnail
             final Node thumbnailNode = getXPathAPI().selectSingleNode(document, META_NAME_THUMBNAIL_CONTENT);
             if (thumbnailNode != null) {
-                final URL thumbnailUrl = getURL(responseData.getUrl(), thumbnailNode.getTextContent());
-                if (thumbnailUrl != null) {
-                    return thumbnailUrl.toExternalForm();
+                final String content = thumbnailNode.getTextContent();
+                if (StringUtil.isNotBlank(content)) {
+                    final URL thumbnailUrl = getURL(responseData.getUrl(), content);
+                    if (thumbnailUrl != null) {
+                        return thumbnailUrl.toExternalForm();
+                    }
                 }
             }
 
             // meta og:image
             final Node ogImageNode = getXPathAPI().selectSingleNode(document, META_PROPERTY_OGIMAGE_CONTENT);
             if (ogImageNode != null) {
-                final URL thumbnailUrl = getURL(responseData.getUrl(), ogImageNode.getTextContent());
-                if (thumbnailUrl != null) {
-                    return thumbnailUrl.toExternalForm();
+                final String content = ogImageNode.getTextContent();
+                if (StringUtil.isNotBlank(content)) {
+                    final URL thumbnailUrl = getURL(responseData.getUrl(), content);
+                    if (thumbnailUrl != null) {
+                        return thumbnailUrl.toExternalForm();
+                    }
                 }
             }
 
