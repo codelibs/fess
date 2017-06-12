@@ -296,6 +296,13 @@ public class SuggestHelper {
 
     protected void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions,
             final float boost, final boolean commit) {
+        final String[] readings;
+        if (StringUtil.isBlank(reading)) {
+            readings = word.replace("　", TEXT_SEP).replaceAll(TEXT_SEP + "+", TEXT_SEP).split(TEXT_SEP);
+        } else {
+            readings = reading.replace("　", TEXT_SEP).replaceAll(TEXT_SEP + "+", TEXT_SEP).split(TEXT_SEP);
+        }
+
         final List<String> labelList = new ArrayList<>();
         for (final String label : tags) {
             labelList.add(label);
@@ -306,8 +313,8 @@ public class SuggestHelper {
         }
 
         suggester.indexer().addElevateWord(
-                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(reading.replace("　", TEXT_SEP)
-                        .replaceAll(TEXT_SEP + "+", TEXT_SEP).split(TEXT_SEP)), contentFieldList, labelList, roleList));
+                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings), contentFieldList, labelList,
+                        roleList));
     }
 
     protected void deleteAllBadWords() {
