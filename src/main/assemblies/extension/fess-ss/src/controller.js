@@ -28,9 +28,6 @@ export default class {
   _bindPagination(response) {
     var $cls = this;
     FessJQuery('.fessWrapper .pagination li').click(function(){
-      var off = FessJQuery('.fessWrapper').offset();
-      FessJQuery(window).scrollTop(off.top);
-
       var $this = FessJQuery(this);
       if ($this.hasClass('disabled')) {
         return false;
@@ -46,6 +43,11 @@ export default class {
   _search(params) {
     var $fessResult = FessJQuery('.fessWrapper #fessResult');
     $fessResult.css('display', 'none');
+
+    if (params.start !== undefined) {
+      var off = FessJQuery('.fessWrapper').offset();
+      FessJQuery(window).scrollTop(off.top);
+    }
 
     if (params.q === undefined) {
       var keyword = FessJQuery('.fessWrapper #contentQuery').val();
