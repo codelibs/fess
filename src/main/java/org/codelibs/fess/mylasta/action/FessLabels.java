@@ -2670,6 +2670,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Score:  */
     public static final String LABELS_doc_score = "{labels.doc_score}";
 
+    /** The key of the message: Running as Development mode. For production use, please install a standalone elasticsearch server. */
+    public static final String LABELS_development_mode_warning = "{labels.development_mode_warning}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

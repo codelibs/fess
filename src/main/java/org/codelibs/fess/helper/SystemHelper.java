@@ -179,6 +179,10 @@ public class SystemHelper {
 
     public String getHelpLink(final String name) {
         final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
+        return getHelpUrl(url);
+    }
+
+    protected String getHelpUrl(final String url) {
         final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         if (locale != null) {
             final String lang = locale.getLanguage();
@@ -278,7 +282,9 @@ public class SystemHelper {
     }
 
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        // nothing
+        runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
+        final String url = ComponentUtil.getFessConfig().getOnlineHelpInstallation();
+        runtime.registerData("installationLink", getHelpUrl(url));
     }
 
     public String getSearchRoleByUser(final String name) {

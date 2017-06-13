@@ -827,6 +827,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/admin/ */
     String ONLINE_HELP_BASE_LINK = "online.help.base.link";
 
+    /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/install/install.html */
+    String ONLINE_HELP_INSTALLATION = "online.help.installation";
+
     /** The key of the configuration. e.g. failureurl */
     String ONLINE_HELP_NAME_FAILUREURL = "online.help.name.failureurl";
 
@@ -4007,6 +4010,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpBaseLink();
 
     /**
+     * Get the value for the key 'online.help.installation'. <br>
+     * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/install/install.html <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpInstallation();
+
+    /**
      * Get the value for the key 'online.help.name.failureurl'. <br>
      * The value is, e.g. failureurl <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6563,6 +6573,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpBaseLink() {
             return get(FessConfig.ONLINE_HELP_BASE_LINK);
+        }
+
+        public String getOnlineHelpInstallation() {
+            return get(FessConfig.ONLINE_HELP_INSTALLATION);
         }
 
         public String getOnlineHelpNameFailureurl() {

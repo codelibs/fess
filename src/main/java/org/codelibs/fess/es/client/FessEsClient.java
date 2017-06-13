@@ -211,6 +211,10 @@ public class FessEsClient implements Client {
         this.runner = runner;
     }
 
+    public boolean isEmbedded() {
+        return this.runner != null;
+    }
+
     public void addTransportAddress(final String host, final int port) {
         try {
             transportAddressList.add(new InetSocketTransportAddress(InetAddress.getByName(host), port));

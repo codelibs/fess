@@ -84,4 +84,8 @@ $(function() {
 		showInputs : false
 	});
 
+	// tooltips
+	$(function() {
+		$('[data-toggle="tooltip"]').tooltip()
+	})
 });

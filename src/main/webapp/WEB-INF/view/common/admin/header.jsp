@@ -17,6 +17,11 @@
 		<!-- Navbar Right Menu -->
 		<div class="navbar-custom-menu">
 			<ul class="nav navbar-nav">
+				<c:if test="${developmentMode}">
+				<li data-toggle="tooltip" data-placement="left" title="<la:message
+					key="labels.development_mode_warning" />">
+					<a href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle"></i></a></li>
+				</c:if>
 				<li><a href="${contextPath}/"><i class="fa fa-list-alt"></i></a></li>
 				<li><a
 					href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
