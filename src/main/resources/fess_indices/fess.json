@@ -487,6 +487,10 @@
           "type":       "stemmer",
           "language":   "turkish"
         },
+        "vietnamese_stop": {
+          "type":       "stop",
+          "stopwords": ["bị", "bởi", "cả", "các", "cái", "cần", "càng", "chỉ", "chiếc", "cho", "chứ", "chưa", "chuyện", "có", "có thể", "cứ", "của", "cùng", "cũng", "đã", "đang", "đây", "để", "đến nỗi", "đều", "điều", "do", "đó", "được", "dưới", "gì", "khi", "không", "là", "lại", "lên", "lúc", "mà", "mỗi", "một cách", "này", "nên", "nếu", "ngay", "nhiều", "như", "nhưng", "những", "nơi", "nữa", "phải", "qua", "ra", "rằng", "rằng", "rất", "rất", "rồi", "sau", "sẽ", "so", "sự", "tại", "theo", "thì", "trên", "trước", "từ", "từng", "và", "vẫn", "vào", "vậy", "vì", "việc", "với", "vừa"]
+        },
         "truncate10_filter" : {
           "type" : "truncate",
           "length" : 10
@@ -519,6 +523,11 @@
             "index_eojeol": false,
             "pos_tagging": false,
             "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+        },
+        "vietnamese_tokenizer": {
+            "type": "fess_vietnamese_tokenizer",
+            "sentence_detector": false,
+            "ambiguities_resolved": false
         },
         "unigram_synonym_tokenizer": {
           "type": "ngram_synonym",
@@ -908,6 +917,15 @@
             "turkish_stop",
             "turkish_keywords",
             "turkish_stemmer"
+          ]
+        },
+        "vietnamese_analyzer": {
+          "type": "custom",
+          "tokenizer": "vietnamese_tokenizer",
+          "filter": [
+            "truncate20_filter",
+            "lowercase",
+            "vietnamese_stop"
           ]
         },
         "standard_analyzer": {
