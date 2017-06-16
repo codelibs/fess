@@ -2136,7 +2136,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Word Type */
     public static final String LABELS_suggest_word_type = "{labels.suggest_word_type}";
 
-    /** The key of the message: Word Number */
+    /** The key of the message: Word Count */
     public static final String LABELS_suggest_word_number = "{labels.suggest_word_number}";
 
     /** The key of the message: All */
