@@ -462,7 +462,7 @@
           "match": "*_vi",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "vietnamese_analyzer"
           }
         }
       },
