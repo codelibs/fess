@@ -36,6 +36,8 @@ import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.badword.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
+import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
@@ -52,8 +54,8 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     @Resource
     protected SuggestHelper suggestHelper;
 
-    // GET /api/admin/badword
-    // POST /api/admin/badword
+    // GET /api/admin/badword/settings
+    // POST /api/admin/badword/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -62,6 +64,19 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
                 .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+    }
+
+    // GET /api/admin/badword/{id}
+    @Execute
+    public JsonResponse<ApiResult> get$setting(final String id) {
+
+        final BadWord entity = badWordService.getBadWord(id).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        });
+
+        final EditBody body = createEditBody(entity);
+        return asJson(new ApiResult.ApiConfigResponse().setting(body).status(ApiResult.Status.OK).result());
     }
 
     // PUT /api/admin/badword/setting
@@ -89,19 +104,20 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final BadWord entity = getBadWord(body).orElseGet(() -> {
-            throwValidationErrorApi(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
-            });
+        final BadWord badWord = getBadWord(body).map(entity -> {
+            try {
+                badWordService.store(entity);
+                suggestHelper.storeAllBadWords();
+            } catch (final Exception e) {
+                throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
+            }
+            return entity;
+        }).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id));
             return null;
         });
-        try {
-            badWordService.store(entity);
-            suggestHelper.storeAllBadWords();
-        } catch (final Exception e) {
-            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
-        }
-        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
+
+        return asJson(new ApiUpdateResponse().id(badWord.getId()).created(false).status(Status.OK).result());
     }
 
     // DELETE /api/admin/badword/setting/{id}
@@ -163,13 +179,9 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
 
     protected EditBody createEditBody(final BadWord entity) {
         final EditBody body = new EditBody();
-        body.id = entity.getId();
-        body.versionNo = entity.getVersionNo();
-        body.createdBy = entity.getCreatedBy();
-        body.createdTime = entity.getCreatedTime();
-        body.suggestWord = entity.getSuggestWord();
-        body.updatedBy = entity.getUpdatedBy();
-        body.updatedTime = entity.getUpdatedTime();
+        copyBeanToBean(entity, body, copyOp -> {
+            copyOp.excludeNull();
+        });
         return body;
     }
 

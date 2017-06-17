@@ -118,6 +118,7 @@ public class ApiResult {
 
         public ApiConfigsResponse<T> settings(final List<T> settings) {
             this.settings = settings;
+            this.total = settings.size();
             return this;
         }
 
