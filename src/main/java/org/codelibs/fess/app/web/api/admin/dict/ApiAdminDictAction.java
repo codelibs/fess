@@ -33,10 +33,8 @@ public class ApiAdminDictAction extends FessApiAdminAction {
     protected DictionaryManager dictionaryManager;
 
     // GET /api/admin/dict
-    // POST /api/admin/dict
     @Execute
-    public JsonResponse<ApiResult> settings(final ListBody body) {
-        validateApi(body, messages -> {});
+    public JsonResponse<ApiResult> get$index() {
         final DictionaryFile<? extends DictionaryItem>[] dictFiles = dictionaryManager.getDictionaryFiles();
         return asJson(new ApiResult.ApiConfigsResponse<ListBody>()
                 .settings(Stream.of(dictFiles).map(dictionaryFile -> createListBody(dictionaryFile)).collect(Collectors.toList()))
