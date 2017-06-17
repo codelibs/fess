@@ -110,29 +110,34 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             try {
                 final String owner = (String) repository.get("owner");
                 final String name = (String) repository.get("name");
-                final String refStr = getGitRef(rootURL, authToken, owner, name, "master");
+                // Since old gitbucket-fess-plugin does not return "branch", it refers instead of "master".
+                final String branch = (String) repository.getOrDefault("branch", "master");
                 final int issueCount = (int) repository.get("issue_count");
                 final int pullCount = (int) repository.get("pull_count");
                 final List<String> roleList = createRoleList(owner, repository);
 
-                logger.info("Crawl " + owner + "/" + name);
-                // crawl and store file contents recursively
-                crawlFileContents(
-                        rootURL,
-                        authToken,
-                        owner,
-                        name,
-                        refStr,
-                        StringUtil.EMPTY,
-                        0,
-                        readInterval,
-                        path -> {
-                            storeFileContent(rootURL, authToken, sourceLabel, owner, name, refStr, roleList, path, crawlingConfig,
-                                    callback, paramMap, scriptMap, defaultDataMap);
-                            if (readInterval > 0) {
-                                sleep(readInterval);
-                            }
-                        });
+                // branch is empty when git repository is empty.
+                if (StringUtil.isNotEmpty(branch)) {
+                    final String refStr = getGitRef(rootURL, authToken, owner, name, branch);
+                    logger.info("Crawl " + owner + "/" + name);
+                    // crawl and store file contents recursively
+                    crawlFileContents(
+                            rootURL,
+                            authToken,
+                            owner,
+                            name,
+                            refStr,
+                            StringUtil.EMPTY,
+                            0,
+                            readInterval,
+                            path -> {
+                                storeFileContent(rootURL, authToken, sourceLabel, owner, name, refStr, roleList, path, crawlingConfig,
+                                        callback, paramMap, scriptMap, defaultDataMap);
+                                if (readInterval > 0) {
+                                    sleep(readInterval);
+                                }
+                            });
+                }
 
                 logger.info("Crawl issues in " + owner + "/" + name);
                 // store issues
