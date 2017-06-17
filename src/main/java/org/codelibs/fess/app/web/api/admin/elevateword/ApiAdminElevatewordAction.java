@@ -38,6 +38,8 @@ import org.codelibs.fess.app.service.ElevateWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.elevateword.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
+import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
@@ -112,20 +114,21 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final ElevateWord entity = getElevateWord(body).orElseGet(() -> {
-            throwValidationErrorApi(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
-            });
+        final ElevateWord elevateWord = getElevateWord(body).map(entity -> {
+            try {
+                elevateWordService.store(entity);
+                suggestHelper.deleteAllElevateWord();
+                suggestHelper.storeAllElevateWords();
+            } catch (final Exception e) {
+                throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
+            }
+            return entity;
+        }).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id));
             return null;
         });
-        try {
-            elevateWordService.store(entity);
-            suggestHelper.deleteAllElevateWord();
-            suggestHelper.storeAllElevateWords();
-        } catch (final Exception e) {
-            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
-        }
-        return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
+
+        return asJson(new ApiUpdateResponse().id(elevateWord.getId()).created(false).status(Status.OK).result());
     }
 
     // DELETE /api/admin/elevateword/setting/{id}
@@ -187,21 +190,14 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
 
     protected EditBody createEditBody(final ElevateWord entity) {
         final EditBody body = new EditBody();
-        body.id = entity.getId();
-        body.versionNo = entity.getVersionNo();
-        body.createdBy = entity.getCreatedBy();
-        body.createdTime = entity.getCreatedTime();
-        body.suggestWord = entity.getSuggestWord();
-        body.updatedBy = entity.getUpdatedBy();
-        body.updatedTime = entity.getUpdatedTime();
-        body.labelTypeIds = entity.getLabelTypeIds();
+        copyBeanToBean(entity, body, copyOp -> {
+            copyOp.excludeNull();
+        });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions =
                 stream(entity.getPermissions()).get(
                         stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
                                 .collect(Collectors.joining("\n")));
-        body.targetLabel = entity.getTargetLabel();
-        body.reading = entity.getReading();
         return body;
     }
 
