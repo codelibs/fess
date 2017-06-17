@@ -148,6 +148,14 @@
 			<arg>"fess"</arg>
 			<arg>"tr/protwords.txt"</arg>
 		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"zh-cn/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"zh-tw/stopwords.txt"</arg>
+		</postConstruct>
 		<!-- fess index -->
 		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>

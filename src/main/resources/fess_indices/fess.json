@@ -15,6 +15,10 @@
           "type": "mapping",
           "mappings_path": "${fess.dictionary.path}ja/mapping.txt"
         },
+        "traditional_chinese_convert": {
+          "type": "fess_traditional_chinese_convert",
+          "convert_type": "t2s"
+        },
         "zero_width_spaces": {
             "type":       "mapping",
             "mappings": [ "\\u200C=> "]
@@ -431,6 +435,10 @@
           "type":       "stemmer",
           "language":   "russian"
         },
+        "simplified_chinese_stop": {
+          "type":       "stop",
+          "stopwords_path": "${fess.dictionary.path}zh-cn/stopwords.txt"
+        },
         "sorani_stop": {
           "type":       "stop",
           "stopwords":  "_sorani_"
@@ -470,6 +478,10 @@
         "thai_stop": {
           "type":       "stop",
           "stopwords":  "_thai_"
+        },
+        "traditional_chinese_stop": {
+          "type":       "stop",
+          "stopwords_path": "${fess.dictionary.path}zh-tw/stopwords.txt"
         },
         "turkish_stop": {
           "type":       "stop",
@@ -523,6 +535,9 @@
             "index_eojeol": false,
             "pos_tagging": false,
             "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+        },
+        "simplified_chinese_tokenizer": {
+            "type": "fess_simplified_chinese_tokenizer"
         },
         "vietnamese_tokenizer": {
             "type": "fess_vietnamese_tokenizer",
@@ -865,6 +880,14 @@
             "russian_stemmer"
           ]
         },
+        "simplified_chinese_analyzer": {
+          "tokenizer":  "simplified_chinese_tokenizer",
+          "filter": [
+            "truncate10_filter",
+            "lowercase",
+            "simplified_chinese_stop"
+          ]
+        },
         "sorani_analyzer": {
           "tokenizer":  "standard",
           "filter": [
@@ -905,6 +928,15 @@
             "truncate20_filter",
             "lowercase",
             "thai_stop"
+          ]
+        },
+        "traditional_chinese_analyzer": {
+          "char_filter": [ "traditional_chinese_convert" ],
+          "tokenizer":  "simplified_chinese_tokenizer",
+          "filter": [
+            "truncate10_filter",
+            "lowercase",
+            "traditional_chinese_stop"
           ]
         },
         "turkish_analyzer": {
