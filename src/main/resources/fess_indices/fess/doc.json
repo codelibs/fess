@@ -471,7 +471,7 @@
           "match": "*_zh-cn",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "simplified_chinese_analyzer"
           }
         }
       },
@@ -480,7 +480,7 @@
           "match": "*_zh-tw",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "traditional_chinese_analyzer"
           }
         }
       }
