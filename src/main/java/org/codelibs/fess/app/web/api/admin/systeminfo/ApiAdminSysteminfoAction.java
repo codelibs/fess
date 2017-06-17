@@ -37,9 +37,9 @@ public class ApiAdminSysteminfoAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
-    // GET /api/admin/systeminfo/info
+    // GET /api/admin/systeminfo
     @Execute
-    public JsonResponse<ApiResult> info() {
+    public JsonResponse<ApiResult> get$index() {
         final List<Map<String, String>> bugReportItems = getBugReportItems();
         final List<Map<String, String>> envItems = getEnvItems();
         final List<Map<String, String>> fessPropItems = getFessPropItems();
