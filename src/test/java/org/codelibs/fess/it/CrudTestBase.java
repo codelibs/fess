@@ -61,17 +61,17 @@ public abstract class CrudTestBase extends ITBase {
     // ================
 
     @BeforeAll
-    static void initAll() {
+    protected static void initAll() {
         RestAssured.baseURI = getFessUrl();
         settingTestToken();
     }
 
     @BeforeEach
-    void init() {
+    protected void init() {
     }
 
     @AfterEach
-    void tearDown() {
+    protected void tearDown() {
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", NUM * 10);
         List<String> idList = getPropList(searchBody, "id");
@@ -81,7 +81,7 @@ public abstract class CrudTestBase extends ITBase {
     }
 
     @AfterAll
-    static void tearDownAll() {
+    protected static void tearDownAll() {
         deleteTestToken();
     }
 
