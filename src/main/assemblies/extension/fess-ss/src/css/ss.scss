@@ -1,5 +1,10 @@
 
 .fessWrapper {
+  margin: 0px;
+  padding: 0px 10px;
+  .fessResult {
+    padding: 10px 0px;
+  }
   .form-control.sort {
     display: inline;
     width: 50%;

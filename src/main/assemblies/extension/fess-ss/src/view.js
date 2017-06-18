@@ -9,29 +9,53 @@ export default class {
   }
 
   init() {
-    var $fessWrapper = FessJQuery('<div/>');
-    $fessWrapper.addClass('fessWrapper');
-    $fessWrapper.css('padding', '10px');
-    FessJQuery('fess\\:search').replaceWith($fessWrapper);
+    {
+      var $fessWrapper = FessJQuery('<div/>');
+      $fessWrapper.addClass('fessWrapper');
+      FessJQuery('fess\\:search').replaceWith($fessWrapper);
 
-    var $fessForm = FessJQuery('<div/>');
-    $fessForm.attr('id', 'fessForm');
-    $fessWrapper.append($fessForm);
+      var $fessForm = FessJQuery('<div/>');
+      $fessForm.addClass('fessForm');
+      $fessWrapper.append($fessForm);
 
-    var $fessResult = FessJQuery('<div/>');
-    $fessResult.attr('id', 'fessResult');
-    $fessResult.css('display', 'none');
-    $fessWrapper.append($fessResult);
+      var $fessResult = FessJQuery('<div/>');
+      $fessResult.addClass('fessResult');
+      $fessResult.css('display', 'none');
+      $fessWrapper.append($fessResult);
+    }
+
+    {
+      var $fessFormWrapper = FessJQuery('<div/>');
+      $fessFormWrapper.addClass('fessWrapper');
+
+      var $fessFormOnly = FessJQuery('<div/>');
+      $fessFormOnly.addClass('fessForm');
+      $fessFormWrapper.append($fessFormOnly);
+
+      FessJQuery('fess\\:search-form-only').replaceWith($fessFormWrapper);
+    }
+
+    {
+      var $fessResultWrapper = FessJQuery('<div/>');
+      $fessResultWrapper.addClass('fessWrapper');
+
+      var $fessResultOnly = FessJQuery('<div/>');
+      $fessResultOnly.addClass('fessResult');
+      $fessResultOnly.css('display', 'none');
+      $fessResultWrapper.append($fessResultOnly);
+
+      FessJQuery('fess\\:search-result-only').replaceWith($fessResultWrapper);
+    }
   }
 
   renderForm() {
-    var $fessForm = FessJQuery('.fessWrapper #fessForm');
+    var $fessForm = FessJQuery('.fessWrapper .fessForm');
     var html = formTemplate(this.css);
     $fessForm.html(this.FessMessages.render(html, {}));
   }
 
   renderResult(response, params) {
-    var $fessResult = FessJQuery('.fessWrapper #fessResult');
+    var $fessResult = FessJQuery('.fessWrapper .fessResult');
     var html = resultTemplate(response);
     $fessResult.html(this.FessMessages.render(html, response));
     var $pagination = this._createPagination(response.record_count, response.page_size, response.page_number, params);
@@ -40,7 +64,7 @@ export default class {
   }
 
   renderNoResult(response, params) {
-    var $fessResult = FessJQuery('.fessWrapper #fessResult');
+    var $fessResult = FessJQuery('.fessWrapper .fessResult');
     var html = noResultTemplate(response);
     $fessResult.html(this.FessMessages.render(html, response));
   }
