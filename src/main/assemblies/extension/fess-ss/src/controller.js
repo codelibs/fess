@@ -17,6 +17,8 @@ export default class {
     var $cls = this;
     FessJQuery('.fessWrapper form').submit(function(){
       try {
+        var keyword = FessJQuery('#contentQuery', this).val();
+        FessJQuery('.fessWrapper #contentQuery').val(keyword);
         $cls._search({});
       } catch (e) {
         console.log(e);
@@ -32,6 +34,10 @@ export default class {
       if ($this.hasClass('disabled')) {
         return false;
       }
+
+      var off = $this.parents('.fessResult').offset();
+      FessJQuery(window).scrollTop(off.top);
+
       var page = $this.attr('page');
       var params = {};
       params.start = response.page_size * (page - 1);
@@ -41,13 +47,8 @@ export default class {
   }
 
   _search(params) {
-    var $fessResult = FessJQuery('.fessWrapper #fessResult');
+    var $fessResult = FessJQuery('.fessWrapper .fessResult');
     $fessResult.css('display', 'none');
-
-    if (params.start !== undefined) {
-      var off = FessJQuery('.fessWrapper').offset();
-      FessJQuery(window).scrollTop(off.top);
-    }
 
     if (params.q === undefined) {
       var keyword = FessJQuery('.fessWrapper #contentQuery').val();
