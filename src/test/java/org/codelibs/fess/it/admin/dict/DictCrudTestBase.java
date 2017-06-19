@@ -61,4 +61,9 @@ public abstract class DictCrudTestBase extends CrudTestBase {
 
         assertTrue(false);
     }
+
+    @Override
+    protected String getJsonPath() {
+        return "response." + LIST_ENDPOINT_SUFFIX + ".findAll {it." + getKeyProperty() + ".startsWith(\"" + getNamePrefix() + "\")}";
+    }
 }
