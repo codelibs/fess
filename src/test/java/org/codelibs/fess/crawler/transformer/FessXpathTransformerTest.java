@@ -727,4 +727,19 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         assertEquals(expected, transformer.getThumbnailUrl(responseData, document));
     }
+
+    public void test_isValidUrl() {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        assertTrue(transformer.isValidUrl("http://www.example.com"));
+        assertTrue(transformer.isValidUrl("http://www.example.com/aaa"));
+        assertTrue(transformer.isValidUrl("https://www.example.com"));
+        assertTrue(transformer.isValidUrl("://www.example.com"));
+        assertTrue(transformer.isValidUrl("//www.example.com"));
+
+        assertFalse(transformer.isValidUrl(null));
+        assertFalse(transformer.isValidUrl(" "));
+        assertFalse(transformer.isValidUrl("http://"));
+        assertFalse(transformer.isValidUrl("http://http://www.example.com"));
+    }
 }

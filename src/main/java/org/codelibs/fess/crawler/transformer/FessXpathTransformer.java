@@ -65,6 +65,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.cyberneko.html.parsers.DOMParser;
+import org.hibernate.validator.internal.constraintvalidators.hv.URLValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -219,11 +220,38 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     }
 
+    protected boolean isValidUrl(final String urlStr) {
+        if (StringUtil.isBlank(urlStr)) {
+            return false;
+        }
+        final String value;
+        if (urlStr.startsWith("://")) {
+            value = "http" + urlStr;
+        } else if (urlStr.startsWith("//")) {
+            value = "http:" + urlStr;
+        } else {
+            value = urlStr;
+        }
+        try {
+            final URL url = new java.net.URL(value);
+            final String host = url.getHost();
+            if (StringUtil.isBlank(host)) {
+                return false;
+            }
+            if ("http".equalsIgnoreCase(host) || "https".equalsIgnoreCase(host)) {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        return true;
+    }
+
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
         // canonical
         if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCanonicalXpath())) {
             final String canonicalUrl = getCanonicalUrl(responseData, document);
-            if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl())) {
+            if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)) {
                 final Set<RequestData> childUrlSet = new HashSet<>();
                 childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
                 throw new ChildUrlsException(childUrlSet, this.getClass().getName()
