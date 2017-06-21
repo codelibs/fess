@@ -46,6 +46,7 @@ map:{
         }
     }
 
+    ; isUseDefaultConfigAtGeneration = true
     # you can override (several) default settings like this:
     #; overrideMap = map:{
     #    ; fess.freeGen.mail.targetDir = ./playsql/data/mail

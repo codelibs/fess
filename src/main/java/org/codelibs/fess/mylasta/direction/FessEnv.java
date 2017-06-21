@@ -231,5 +231,20 @@ public interface FessEnv {
         public String getMailReturnPath() {
             return get(FessEnv.MAIL_RETURN_PATH);
         }
+
+        @Override
+        protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
+            java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
+            defaultMap.put(FessEnv.lasta_di_SMART_DEPLOY_MODE, "hot");
+            defaultMap.put(FessEnv.DEVELOPMENT_HERE, "true");
+            defaultMap.put(FessEnv.ENVIRONMENT_TITLE, "Local Development");
+            defaultMap.put(FessEnv.FRAMEWORK_DEBUG, "false");
+            defaultMap.put(FessEnv.TIME_ADJUST_TIME_MILLIS, "0");
+            defaultMap.put(FessEnv.MAIL_SEND_MOCK, "true");
+            defaultMap.put(FessEnv.MAIL_SMTP_SERVER_MAIN_HOST_AND_PORT, "localhost:25");
+            defaultMap.put(FessEnv.MAIL_SUBJECT_TEST_PREFIX, "[Test]");
+            defaultMap.put(FessEnv.MAIL_RETURN_PATH, "root@localhost");
+            return defaultMap;
+        }
     }
 }
