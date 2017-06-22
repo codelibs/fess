@@ -124,7 +124,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. license.properties */
     String SUPPORTED_UPLOADED_FILES = "supported.uploaded.files";
 
-    /** The key of the configuration. e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh */
+    /** The key of the configuration. e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en,en_IE,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt,pt_BR,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh */
     String SUPPORTED_LANGUAGES = "supported.languages";
 
     /** The key of the configuration. e.g. 60 */
@@ -538,12 +538,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     bg=bg
     bn=bn
     ca=ca
+    ckb-iq=ckb-iq
+    ckb_IQ=ckb-iq
     cs=cs
     da=da
     de=de
     el=el
     en=en
     en-ie=en-ie
+    en_IE=en-ie
     es=es
     et=et
     eu=eu
@@ -571,6 +574,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     pl=pl
     pt=pt
     pt-br=pt-br
+    pt_BR=pt-br
     ro=ro
     ru=ru
     si=si
@@ -584,9 +588,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     uk=uk
     ur=ur
     vi=vi
-    zh=zh-cn
     zh-cn=zh-cn
+    zh_CN=zh-cn
     zh-tw=zh-tw
+    zh_TW=zh-tw
+    zh=zh
     */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
@@ -1469,7 +1475,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'supported.languages'. <br>
-     * The value is, e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh <br>
+     * The value is, e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en,en_IE,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt,pt_BR,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedLanguages();
@@ -2884,12 +2890,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     bg=bg
     bn=bn
     ca=ca
+    ckb-iq=ckb-iq
+    ckb_IQ=ckb-iq
     cs=cs
     da=da
     de=de
     el=el
     en=en
     en-ie=en-ie
+    en_IE=en-ie
     es=es
     et=et
     eu=eu
@@ -2917,6 +2926,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     pl=pl
     pt=pt
     pt-br=pt-br
+    pt_BR=pt-br
     ro=ro
     ru=ru
     si=si
@@ -2930,9 +2940,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     uk=uk
     ur=ur
     vi=vi
-    zh=zh-cn
     zh-cn=zh-cn
+    zh_CN=zh-cn
     zh-tw=zh-tw
+    zh_TW=zh-tw
+    zh=zh
     <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */

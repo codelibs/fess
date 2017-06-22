@@ -68,6 +68,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String QUERY_DEFAULT_LANGUAGES = "queryDefaultLanguages";
+
     public static final String HTML_PROXY = "httpProxy";
 
     public static final String CRAWLER_FAILURE_URL_STATUS_CODES = "crawlerFailureUrlStatusCodes";
@@ -848,25 +850,7 @@ public interface FessProp {
 
     String getQueryLanguageMapping();
 
-    public default String[] getQueryLanguages(final Enumeration<Locale> locales, final String[] requestLangs) {
-        if (StringUtil.isNotBlank(getQueryDefaultLanguages())) {
-            String[] langs = (String[]) propMap.get("queryDefaultLanguages");
-            if (langs == null) {
-                langs = split(getQueryDefaultLanguages(), ",").get(stream -> stream.map(s -> s.trim()).toArray(n -> new String[n]));
-                propMap.put("queryDefaultLanguages", langs);
-
-            }
-            return langs;
-        }
-
-        if (requestLangs != null && requestLangs.length != 0) {
-            return requestLangs;
-        }
-
-        if (locales == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-
+    public default String[] normalizeQueryLanguages(final String[] langs) {
         @SuppressWarnings("unchecked")
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
@@ -879,24 +863,54 @@ public interface FessProp {
             }).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond())));
             propMap.put(QUERY_LANGUAGE_MAPPING, params);
         }
-
         final Map<String, String> mapping = params;
-        return Collections.list(locales).stream().map(locale -> {
+        return stream(langs).get(stream -> stream.map(s -> {
+            if (StringUtil.isBlank(s)) {
+                return null;
+            }
+            final String lang1 = mapping.get(s);
+            if (lang1 != null) {
+                return lang1;
+            }
+            final String lang2 = mapping.get(s.split("[\\-_]")[0]);
+            if (lang2 != null) {
+                return lang2;
+            }
+            return null;
+        }).filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
+    }
+
+    public default String[] getQueryLanguages(final Enumeration<Locale> locales, final String[] requestLangs) {
+        // requestLangs > default > browser
+        if (StringUtil.isNotBlank(getQueryDefaultLanguages())) {
+            String[] langs = (String[]) propMap.get(QUERY_DEFAULT_LANGUAGES);
+            if (langs == null) {
+                langs = split(getQueryDefaultLanguages(), ",").get(stream -> stream.map(s -> s.trim()).toArray(n -> new String[n]));
+                propMap.put(QUERY_DEFAULT_LANGUAGES, langs);
+
+            }
+            return normalizeQueryLanguages(langs);
+        }
+
+        if (requestLangs != null && requestLangs.length != 0) {
+            return normalizeQueryLanguages(requestLangs);
+        }
+
+        if (locales == null) {
+            return StringUtil.EMPTY_STRINGS;
+        }
+
+        return normalizeQueryLanguages(Collections.list(locales).stream().map(locale -> {
             final String language = locale.getLanguage();
             final String country = locale.getCountry();
             if (StringUtil.isNotBlank(language)) {
                 if (StringUtil.isNotBlank(country)) {
-                    final String lang = language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
-                    if (mapping.containsKey(lang)) {
-                        return mapping.get(lang);
-                    }
+                    return language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
                 }
-                if (mapping.containsKey(language)) {
-                    return mapping.get(language);
-                }
+                return language.toLowerCase(Locale.ROOT);
             }
             return null;
-        }).filter(l -> l != null).distinct().toArray(n -> new String[n]);
+        }).toArray(n -> new String[n]));
     }
 
     String getSupportedUploadedFiles();
