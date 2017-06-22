@@ -16,10 +16,14 @@
 package org.codelibs.fess.es.log.exbhv;
 
 import org.codelibs.fess.es.log.bsbhv.BsSearchFieldLogBhv;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
  */
 public class SearchFieldLogBhv extends BsSearchFieldLogBhv {
-
+    @Override
+    protected String asEsIndex() {
+        return ComponentUtil.getFessConfig().getIndexLogIndex();
+    }
 }

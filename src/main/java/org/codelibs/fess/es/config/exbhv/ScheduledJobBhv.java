@@ -16,10 +16,14 @@
 package org.codelibs.fess.es.config.exbhv;
 
 import org.codelibs.fess.es.config.bsbhv.BsScheduledJobBhv;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
  */
 public class ScheduledJobBhv extends BsScheduledJobBhv {
-
+    @Override
+    protected String asEsIndex() {
+        return ComponentUtil.getFessConfig().getIndexConfigIndex();
+    }
 }

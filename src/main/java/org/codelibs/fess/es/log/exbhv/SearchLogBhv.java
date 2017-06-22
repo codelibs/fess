@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import org.codelibs.fess.es.log.bsbhv.BsSearchLogBhv;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,11 @@ import org.slf4j.LoggerFactory;
  */
 public class SearchLogBhv extends BsSearchLogBhv {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogBhv.class);
+
+    @Override
+    protected String asEsIndex() {
+        return ComponentUtil.getFessConfig().getIndexLogIndex();
+    }
 
     @Override
     protected LocalDateTime toLocalDateTime(final Object value) {

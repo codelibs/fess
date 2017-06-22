@@ -420,6 +420,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .crawler */
     String INDEX_DOCUMENT_CRAWLER_INDEX = "index.document.crawler.index";
 
+    /** The key of the configuration. e.g. .fess_config */
+    String INDEX_CONFIG_INDEX = "index.config.index";
+
+    /** The key of the configuration. e.g. .fess_user */
+    String INDEX_USER_INDEX = "index.user.index";
+
+    /** The key of the configuration. e.g. fess_log */
+    String INDEX_LOG_INDEX = "index.log.index";
+
     /** The key of the configuration. e.g. lang,role,label,anchor */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
@@ -2447,6 +2456,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerIndex();
+
+    /**
+     * Get the value for the key 'index.config.index'. <br>
+     * The value is, e.g. .fess_config <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexConfigIndex();
+
+    /**
+     * Get the value for the key 'index.user.index'. <br>
+     * The value is, e.g. .fess_user <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexUserIndex();
+
+    /**
+     * Get the value for the key 'index.log.index'. <br>
+     * The value is, e.g. fess_log <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexLogIndex();
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
@@ -5773,6 +5803,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexDocumentCrawlerIndex() {
             return get(FessConfig.INDEX_DOCUMENT_CRAWLER_INDEX);
+        }
+
+        public String getIndexConfigIndex() {
+            return get(FessConfig.INDEX_CONFIG_INDEX);
+        }
+
+        public String getIndexUserIndex() {
+            return get(FessConfig.INDEX_USER_INDEX);
+        }
+
+        public String getIndexLogIndex() {
+            return get(FessConfig.INDEX_LOG_INDEX);
         }
 
         public String getIndexAdminArrayFields() {

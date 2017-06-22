@@ -16,10 +16,14 @@
 package org.codelibs.fess.es.config.exbhv;
 
 import org.codelibs.fess.es.config.bsbhv.BsBadWordBhv;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
  */
 public class BadWordBhv extends BsBadWordBhv {
-
+    @Override
+    protected String asEsIndex() {
+        return ComponentUtil.getFessConfig().getIndexConfigIndex();
+    }
 }

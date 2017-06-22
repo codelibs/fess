@@ -16,10 +16,14 @@
 package org.codelibs.fess.es.config.exbhv;
 
 import org.codelibs.fess.es.config.bsbhv.BsRoleTypeBhv;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
  */
 public class RoleTypeBhv extends BsRoleTypeBhv {
-
+    @Override
+    protected String asEsIndex() {
+        return ComponentUtil.getFessConfig().getIndexConfigIndex();
+    }
 }
