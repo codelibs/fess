@@ -569,19 +569,17 @@ public class QueryHelper {
                 builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
         getQueryLanguages().ifPresent(
-                langs -> {
-                    stream(langs).of(
-                            stream -> stream.forEach(lang -> {
-                                final QueryBuilder titleLangQuery =
-                                        builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
-                                                .getQueryBoostTitleLangAsDecimal().floatValue());
-                                boolQuery.should(titleLangQuery);
-                                final QueryBuilder contentLangQuery =
-                                        builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
-                                                .getQueryBoostContentLangAsDecimal().floatValue());
-                                boolQuery.should(contentLangQuery);
-                            }));
-                });
+                langs -> stream(langs).of(
+                        stream -> stream.forEach(lang -> {
+                            final QueryBuilder titleLangQuery =
+                                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
+                                            .getQueryBoostTitleLangAsDecimal().floatValue());
+                            boolQuery.should(titleLangQuery);
+                            final QueryBuilder contentLangQuery =
+                                    builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
+                                            .getQueryBoostContentLangAsDecimal().floatValue());
+                            boolQuery.should(contentLangQuery);
+                        })));
         return boolQuery;
     }
 
