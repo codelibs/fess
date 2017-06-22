@@ -82,7 +82,7 @@ public class ThumbnailManager {
 
     protected int thumbnailTaskBulkSize = 100;
 
-    protected long thumbnailTaskQueueTimeout = 30 * 1000L;
+    protected long thumbnailTaskQueueTimeout = 10 * 1000L;
 
     protected long noImageExpired = 24 * 60 * 60 * 1000L; // 24 hours
 
@@ -130,9 +130,8 @@ public class ThumbnailManager {
                                 }
                             }
                         } catch (final InterruptedException e) {
-                            logger.debug("Interupted task.", e);
-                            if (!taskList.isEmpty()) {
-                                storeQueue(taskList);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Interupted task.", e);
                             }
                         } catch (final Exception e) {
                             if (generating) {
