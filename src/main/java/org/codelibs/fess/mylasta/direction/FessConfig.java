@@ -282,7 +282,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10000 */
     String INDEXER_WEBFS_UPDATE_INTERVAL = "indexer.webfs.update.interval";
 
-    /** The key of the configuration. e.g. 100 */
+    /** The key of the configuration. e.g. 20 */
     String INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE = "indexer.webfs.max.document.cache.size";
 
     /** The key of the configuration. e.g. 10485760 */
@@ -2103,14 +2103,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size'. <br>
-     * The value is, e.g. 100 <br>
+     * The value is, e.g. 20 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentCacheSize();
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
+     * The value is, e.g. 20 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
