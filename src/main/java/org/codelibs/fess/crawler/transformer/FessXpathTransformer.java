@@ -168,7 +168,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     break;
                 }
             } catch (final TransformerException e) {
-                logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue());
+                logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue(), e);
             }
         }
 
@@ -214,7 +214,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             }
         } catch (final TransformerException e) {
-            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT);
+            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT, e);
         }
 
     }
@@ -596,7 +596,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 buf.append("\n");
             }
         } catch (final Exception e) {
-            logger.warn("Could not parse a value of " + xpath);
+            logger.warn("Could not parse a value of " + xpath, e);
         }
         return buf.toString().trim();
     }
@@ -665,11 +665,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
         return new HashMap<String, Object>();
-    }
-
-    @Override
-    protected boolean isValidPath(final String path) {
-        return super.isValidPath(path);
     }
 
     @Override

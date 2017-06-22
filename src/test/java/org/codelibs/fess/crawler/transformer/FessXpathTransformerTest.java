@@ -373,68 +373,6 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
     }
 
-    public void test_isValidPath_valid() {
-        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
-        fessXpathTransformer.init();
-        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
-
-        String value;
-
-        value = "foo.html";
-        assertTrue(fessXpathTransformer.isValidPath(value));
-
-        value = "./foo.html";
-        assertTrue(fessXpathTransformer.isValidPath(value));
-
-        value = "/foo.html";
-        assertTrue(fessXpathTransformer.isValidPath(value));
-
-        value = "http://www.seasar.org/foo.html";
-        assertTrue(fessXpathTransformer.isValidPath(value));
-
-        value = "a javascript:...";
-        assertTrue(fessXpathTransformer.isValidPath(value));
-
-    }
-
-    public void test_isValidPath_invalid() {
-        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
-        fessXpathTransformer.init();
-        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
-
-        String value;
-
-        value = "javascript:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = "mailto:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = "irc:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = " javascript:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = " mailto:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = " irc:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = "JAVASCRIPT:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = "MAILTO:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = "IRC:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-
-        value = "skype:...";
-        assertFalse(fessXpathTransformer.isValidPath(value));
-    }
-
     public void test_convertChildUrlList() {
         final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
         fessXpathTransformer.init();

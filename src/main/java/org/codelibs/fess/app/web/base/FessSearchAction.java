@@ -37,9 +37,7 @@ import org.codelibs.fess.helper.OpenSearchHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
-import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -63,9 +61,6 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected LabelTypeHelper labelTypeHelper;
 
     @Resource
-    protected ViewHelper viewHelper;
-
-    @Resource
     protected QueryHelper queryHelper;
 
     @Resource
@@ -73,9 +68,6 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     @Resource
     protected UserInfoHelper userInfoHelper;
-
-    @Resource
-    protected SystemHelper systemHelper;
 
     @Resource
     protected OpenSearchHelper openSearchHelper;
