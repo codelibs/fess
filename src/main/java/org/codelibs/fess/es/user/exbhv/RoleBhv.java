@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.user.bsbhv.BsRoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
 
@@ -28,6 +29,11 @@ import org.dbflute.util.DfTypeUtil;
  * @author FreeGen
  */
 public class RoleBhv extends BsRoleBhv {
+    @Override
+    protected String asEsIndex() {
+        return ComponentUtil.getFessConfig().getIndexUserIndex();
+    }
+
     @Override
     protected <RESULT extends Role> RESULT createEntity(final Map<String, Object> source, final Class<? extends RESULT> entityType) {
         try {
