@@ -95,7 +95,7 @@ Run package goal and then the release file is created in target/releases.
 
 ### Integration Tests
 
-Lunch Fess Server and run the following command:
+Launch Fess Server and run the following command:
 
     mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201"
 
