@@ -588,6 +588,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     public void test_getThumbnailUrl_no() throws Exception {
 
         final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
 
