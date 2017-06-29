@@ -743,6 +743,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE = "page.thumbnail.queue.max.fetch.size";
 
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE = "page.thumbnail.purge.max.fetch.size";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
@@ -3632,6 +3635,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageThumbnailQueueMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.thumbnail.purge.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageThumbnailPurgeMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.thumbnail.purge.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageThumbnailPurgeMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
      * comment: search page
@@ -6403,6 +6421,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPageThumbnailQueueMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE);
+        }
+
+        public String getPageThumbnailPurgeMaxFetchSize() {
+            return get(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageThumbnailPurgeMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE);
         }
 
         public String getPagingSearchPageStart() {
