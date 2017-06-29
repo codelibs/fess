@@ -38,6 +38,7 @@ import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple4;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.es.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.exception.FessSystemException;
@@ -47,6 +48,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +61,8 @@ public class ThumbnailManager {
     private static final String FESS_VAR_PATH = "fess.var.path";
 
     private static final String NOIMAGE_FILE_SUFFIX = ".txt";
+
+    protected static final String THUMBNAILS_DIR_NAME = "thumbnails";
 
     private static final Logger logger = LoggerFactory.getLogger(ThumbnailManager.class);
 
@@ -94,7 +98,7 @@ public class ThumbnailManager {
         } else {
             final String varPath = System.getProperty(FESS_VAR_PATH);
             if (varPath != null) {
-                baseDir = new File(varPath, "thumbnails");
+                baseDir = new File(varPath, THUMBNAILS_DIR_NAME);
             } else {
                 baseDir = ResourceUtil.getThumbnailPath().toFile();
             }
@@ -331,7 +335,7 @@ public class ThumbnailManager {
             return 0;
         }
         try {
-            final FilePurgeVisitor visitor = new FilePurgeVisitor(expiry);
+            final FilePurgeVisitor visitor = new FilePurgeVisitor(baseDir.toPath(), imageExtention, expiry);
             Files.walkFileTree(baseDir.toPath(), visitor);
             return visitor.getCount();
         } catch (final Exception e) {
@@ -339,17 +343,95 @@ public class ThumbnailManager {
         }
     }
 
-    private static class FilePurgeVisitor implements FileVisitor<Path> {
+    protected static class FilePurgeVisitor implements FileVisitor<Path> {
 
-        private final long expiry;
+        protected final long expiry;
 
-        private long count;
+        protected long count;
 
-        FilePurgeVisitor(final long expiry) {
+        protected final int maxPurgeSize;
+
+        protected final List<Path> deletedFileList = new ArrayList<>();
+
+        protected final Path basePath;
+
+        protected final String imageExtention;
+
+        protected final FessEsClient fessEsClient;
+
+        protected final FessConfig fessConfig;
+
+        FilePurgeVisitor(final Path basePath, final String imageExtention, final long expiry) {
+            this.basePath = basePath;
+            this.imageExtention = imageExtention;
             this.expiry = expiry;
+            this.fessConfig = ComponentUtil.getFessConfig();
+            this.maxPurgeSize = fessConfig.getPageThumbnailPurgeMaxFetchSizeAsInteger();
+            this.fessEsClient = ComponentUtil.getFessEsClient();
+        }
+
+        protected void deleteFiles() {
+            final Map<String, Path> deleteFileMap = new HashMap<>();
+            for (final Path path : deletedFileList) {
+                final String docId = getDocId(path);
+                if (StringUtil.isBlank(docId) || deleteFileMap.containsKey(docId)) {
+                    deleteFile(path);
+                } else {
+                    deleteFileMap.put(docId, path);
+                }
+            }
+            deletedFileList.clear();
+
+            if (!deleteFileMap.isEmpty()) {
+                final String docIdField = fessConfig.getIndexFieldDocId();
+                fessEsClient.getDocumentList(
+                        fessConfig.getIndexDocumentSearchIndex(),
+                        fessConfig.getIndexDocumentType(),
+                        searchRequestBuilder -> {
+                            searchRequestBuilder.setQuery(QueryBuilders.termsQuery(docIdField,
+                                    deleteFileMap.keySet().toArray(new String[deleteFileMap.size()])));
+                            searchRequestBuilder.setFetchSource(new String[] { docIdField }, StringUtil.EMPTY_STRINGS);
+                            return true;
+                        }).forEach(m -> {
+                    final Object docId = m.get(docIdField);
+                    if (docId != null) {
+                        deleteFileMap.remove(docId);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Keep thumbnail: " + docId);
+                        }
+                    }
+                });
+                ;
+                deleteFileMap.values().forEach(v -> deleteFile(v));
+                count += deleteFileMap.size();
+            }
+        }
+
+        protected void deleteFile(final Path path) {
+            try {
+                Files.delete(path);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Delete " + path);
+                }
+            } catch (IOException e) {
+                logger.warn("Failed to delete " + path, e);
+            }
+        }
+
+        protected String getDocId(final Path file) {
+            final String s = file.toUri().toString();
+            final String b = basePath.toUri().toString();
+            final String id = s.replace(b, StringUtil.EMPTY).replace("." + imageExtention, StringUtil.EMPTY).replace("/", StringUtil.EMPTY);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Base: " + b + " File: " + s + " DocId: " + id);
+            }
+            return id;
         }
 
         public long getCount() {
+            if (!deletedFileList.isEmpty()) {
+                deleteFiles();
+            }
             return count;
         }
 
@@ -361,8 +443,10 @@ public class ThumbnailManager {
         @Override
         public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
             if (System.currentTimeMillis() - Files.getLastModifiedTime(file).toMillis() > expiry) {
-                Files.delete(file);
-                count++;
+                deletedFileList.add(file);
+                if (deletedFileList.size() > maxPurgeSize) {
+                    deleteFiles();
+                }
             }
             return FileVisitResult.CONTINUE;
         }
@@ -380,7 +464,7 @@ public class ThumbnailManager {
             if (e != null) {
                 logger.warn("I/O exception on " + dir, e);
             }
-            if (dir.toFile().list().length == 0) {
+            if (dir.toFile().list().length == 0 && !dir.toFile().getName().equals(THUMBNAILS_DIR_NAME)) {
                 Files.delete(dir);
             }
             return FileVisitResult.CONTINUE;
