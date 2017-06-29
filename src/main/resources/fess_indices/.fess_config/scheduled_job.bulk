@@ -11,6 +11,6 @@
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"thumbnail_generate"}}
 {"name":"Thumbnail Generator","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"generateThumbnailJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":6,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"thumbnail_purger"}}
-{"name":"Thumbnail Purger","target":"all","cronExpression":"0 0 * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"purgeThumbnailJob\").expiry(30 * 24 * 60 * 60 * 1000).execute();","jobLogging":true,"crawler":false,"available":true,"sortOrder":7,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"name":"Thumbnail Purger","target":"all","cronExpression":"0 0 * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"purgeThumbnailJob\").expiry(30 * 24 * 60 * 60 * 1000L).execute();","jobLogging":true,"crawler":false,"available":true,"sortOrder":7,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"ping_es"}}
 {"name":"Ping Elasticsearch","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"pingEsJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":8,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
