@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class PurgeThumbnailJob {
     private static final Logger logger = LoggerFactory.getLogger(PurgeThumbnailJob.class);
 
-    private long expiry;
+    private long expiry = 30 * 24 * 60 * 60 * 1000L;
 
     public String execute() {
         try {
@@ -39,7 +39,9 @@ public class PurgeThumbnailJob {
     }
 
     public PurgeThumbnailJob expiry(final long expiry) {
-        this.expiry = expiry;
+        if (expiry > 0) {
+            this.expiry = expiry;
+        }
         return this;
     }
 }
