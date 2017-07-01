@@ -31,6 +31,7 @@ import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.dict.mapping.CharMappingFile;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
@@ -40,12 +41,15 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
     @Resource
     private CharMappingService charMappingService;
 
-    // GET /api/admin/dict/mapping/settings/{dictId}
+    // GET /api/admin/dict/mapping/settings/{dictId}/{id}
     @Execute
-    public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
+    public JsonResponse<ApiResult> get$settings(final String dictId, final OptionalThing<Integer> page, final SearchBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         final CharMappingPager pager = copyBeanToNewBean(body, CharMappingPager.class);
+        page.ifPresent(p -> {
+            pager.setCurrentPageNumber(p);
+        });
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
                 .settings(
                         charMappingService.getCharMappingList(body.dictId, pager).stream()
