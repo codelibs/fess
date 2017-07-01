@@ -47,6 +47,10 @@ You can register crawling targets on Web/File System/Data Store of admin pages, 
 We provide Docker image on Docker Hub. 
 For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess/).
 
+## Migration from Other Systems
+
+Please see [MIGRATION.md](https://github.com/codelibs/fess/blob/master/MIGRATION.md).
+
 ## Localization
 
 ### Japanese
