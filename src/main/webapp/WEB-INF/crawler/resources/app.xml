@@ -61,6 +61,26 @@
 			<arg>"excel"</arg>
 		</postConstruct>
 		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.sheet.2"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.sheet.3"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.sheet.4"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.workspace.3"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.workspace.4"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
 			<arg>"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</arg>
 			<arg>"excel"</arg>
 		</postConstruct>
