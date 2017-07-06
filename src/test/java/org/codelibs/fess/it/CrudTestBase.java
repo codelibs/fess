@@ -40,6 +40,7 @@ import io.restassured.specification.RequestSpecification;
 public abstract class CrudTestBase extends ITBase {
 
     protected static final int NUM = 20;
+    protected static final int SEARCH_ALL_NUM = 1000;
 
     // ================
     // Abstract Methods
@@ -73,7 +74,7 @@ public abstract class CrudTestBase extends ITBase {
     @AfterEach
     protected void tearDown() {
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 10);
+        searchBody.put("size", SEARCH_ALL_NUM);
         List<String> idList = getPropList(searchBody, "id");
         idList.forEach(id -> {
             checkDeleteMethod(getItemEndpointSuffix() + "/" + id);
@@ -98,14 +99,14 @@ public abstract class CrudTestBase extends ITBase {
 
         // Test: number of settings.
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
+        searchBody.put("size", SEARCH_ALL_NUM);
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(NUM));
     }
 
     protected void testRead() {
         // Test: get settings api.
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
+        searchBody.put("size", SEARCH_ALL_NUM);
         List<String> nameList = getPropList(searchBody, getKeyProperty());
 
         assertEquals(NUM, nameList.size());
@@ -136,7 +137,7 @@ public abstract class CrudTestBase extends ITBase {
         final Set<String> keySet = createTestParam(0).keySet();
         final Map<String, Object> updateMap = getUpdateMap();
         Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
+        searchBody.put("size", SEARCH_ALL_NUM);
         List<Map<String, Object>> settings = getItemList(searchBody);
 
         for (Map<String, Object> setting : settings) {
@@ -160,7 +161,7 @@ public abstract class CrudTestBase extends ITBase {
     protected void checkUpdate() {
         final Map<String, Object> updateMap = getUpdateMap();
         Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
+        searchBody.put("size", SEARCH_ALL_NUM);
         for (Map.Entry<String, Object> entry : updateMap.entrySet()) {
             List<String> updatedList = getPropList(searchBody, entry.getKey());
             for (String val : updatedList) {
@@ -171,7 +172,7 @@ public abstract class CrudTestBase extends ITBase {
 
     protected void testDelete() {
         final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", NUM * 2);
+        searchBody.put("size", SEARCH_ALL_NUM);
         List<String> idList = getPropList(searchBody, "id");
 
         idList.forEach(id -> {
