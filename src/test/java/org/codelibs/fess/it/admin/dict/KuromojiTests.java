@@ -15,16 +15,11 @@
  */
 package org.codelibs.fess.it.admin.dict;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import io.restassured.path.json.JsonPath;
 
 @Tag("it")
 public class KuromojiTests extends DictCrudTestBase {
@@ -86,17 +81,6 @@ public class KuromojiTests extends DictCrudTestBase {
         updateMap.put("reading", "new_reading");
         updateMap.put("pos", "new_pos");
         return updateMap;
-    }
-
-    @Override
-    protected void testRead() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        String response = checkGetMethod(searchBody, getListEndpointSuffix()).asString();
-        final int total = JsonPath.from(response).getInt("response.total");
-        final List<Map<String, String>> dicts = JsonPath.from(response).getList("response.settings");
-        final int status = JsonPath.from(response).getInt("response.status");
-        assertEquals(total, dicts.size());
-        assertEquals(0, status);
     }
 
     @Test

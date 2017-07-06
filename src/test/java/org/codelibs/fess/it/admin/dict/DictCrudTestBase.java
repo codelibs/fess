@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.it.admin.dict;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
@@ -65,5 +66,16 @@ public abstract class DictCrudTestBase extends CrudTestBase {
     @Override
     protected String getJsonPath() {
         return "response." + LIST_ENDPOINT_SUFFIX + ".findAll {it." + getKeyProperty() + ".startsWith(\"" + getNamePrefix() + "\")}";
+    }
+
+    @Override
+    protected void testRead() {
+        final Map<String, Object> searchBody = new HashMap<>();
+        String response = checkGetMethod(searchBody, getListEndpointSuffix()).asString();
+        final int total = JsonPath.from(response).getInt("response.total");
+        final List<Map<String, String>> items = JsonPath.from(response).getList("response.settings");
+        final int status = JsonPath.from(response).getInt("response.status");
+        assertEquals(total, items.size());
+        assertEquals(0, status);
     }
 }
