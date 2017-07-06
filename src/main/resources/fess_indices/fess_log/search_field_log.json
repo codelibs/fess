@@ -15,6 +15,10 @@
       },
       "value": {
         "type": "keyword"
+      },
+      "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
       }
     }
   }

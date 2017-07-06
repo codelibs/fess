@@ -79,6 +79,7 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
             result.setMaxSize(DfTypeUtil.toInteger(source.get("maxSize")));
             result.setQuery(DfTypeUtil.toString(source.get("query")));
             result.setTerm(DfTypeUtil.toString(source.get("term")));
+            result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return updateEntity(source, result);

@@ -1,0 +1,33 @@
+{
+  "related_content": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "term": {
+        "type": "keyword"
+      },
+      "content": {
+        "type": "keyword"
+      },
+      "virtualHost": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+  }
+}

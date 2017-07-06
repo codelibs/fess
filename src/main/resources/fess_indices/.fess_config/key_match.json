@@ -19,6 +19,9 @@
       "boost": {
         "type": "float"
       },
+      "virtualHost": {
+        "type": "keyword"
+      },
       "createdBy": {
         "type": "keyword"
       },

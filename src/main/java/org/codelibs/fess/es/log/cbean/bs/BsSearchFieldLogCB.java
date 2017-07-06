@@ -187,5 +187,9 @@ public class BsSearchFieldLogCB extends EsAbstractConditionBean {
         public void columnValue() {
             doColumn("value");
         }
+
+        public void columnRequestedAt() {
+            doColumn("requestedAt");
+        }
     }
 }

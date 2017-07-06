@@ -94,8 +94,8 @@ public class SearchLogHelper {
         searchLog.setResponseTime(queryResponseList.getExecTime());
         searchLog.setQueryTime(queryResponseList.getQueryTime());
         searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
-        searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
         searchLog.setRequestedAt(requestedTime);
+        searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
         ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).ifPresent(user -> {

@@ -571,6 +571,9 @@
           "term" : {
             "type": "keyword"
           },
+          "virtualHost" : {
+            "type": "keyword"
+          },
           "updatedBy" : {
             "type": "keyword"
           },
@@ -863,6 +866,62 @@
             "type": "keyword"
           }
         }
+      },
+      "related_content" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "properties" : {
+          "createdBy" : {
+            "type": "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "updatedBy" : {
+            "type": "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "term" : {
+            "type": "keyword"
+          },
+          "content" : {
+            "type": "keyword"
+          },
+          "virtualHost" : {
+            "type": "keyword"
+          }
+        }
+      },
+      "related_query" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "properties" : {
+          "createdBy" : {
+            "type": "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "updatedBy" : {
+            "type": "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "term" : {
+            "type": "keyword"
+          },
+          "queries" : {
+            "type": "keyword"
+          },
+          "virtualHost" : {
+            "type": "keyword"
+          }
+        }
       }
     },
     "settings" : {
@@ -907,6 +966,13 @@
           "elevate_word" : {
             "properties" : {
               "permissions" : {
+                "array" : "true"
+              }
+            }
+          },
+          "related_query" : {
+            "properties" : {
+              "queries" : {
                 "array" : "true"
               }
             }

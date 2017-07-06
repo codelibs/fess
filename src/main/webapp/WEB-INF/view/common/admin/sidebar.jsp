@@ -127,6 +127,20 @@
 						</la:link></li>
 
 					<li
+						<c:if test="${param.menuType=='relatedContentRule'}">class="active"</c:if>><la:link
+							href="/admin/relatedcontent/">
+							<i class='fa fa-circle-o'></i>
+							<span><la:message key="labels.menu_related_content" /></span>
+						</la:link></li>
+
+					<li
+						<c:if test="${param.menuType=='relatedQueryRule'}">class="active"</c:if>><la:link
+							href="/admin/relatedquery/">
+							<i class='fa fa-circle-o'></i>
+							<span><la:message key="labels.menu_related_query" /></span>
+						</la:link></li>
+
+					<li
 						<c:if test="${param.menuType=='pathMapping'}">class="active"</c:if>><la:link
 							href="/admin/pathmap/">
 							<i class='fa fa-circle-o'></i>

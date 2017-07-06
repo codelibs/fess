@@ -852,4 +852,182 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setRequestedAt_Equal(LocalDateTime requestedAt) {
+        setRequestedAt_Term(requestedAt, null);
+    }
+
+    public void setRequestedAt_Equal(LocalDateTime requestedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRequestedAt_Term(requestedAt, opLambda);
+    }
+
+    public void setRequestedAt_Term(LocalDateTime requestedAt) {
+        setRequestedAt_Term(requestedAt, null);
+    }
+
+    public void setRequestedAt_Term(LocalDateTime requestedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("requestedAt", requestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_NotEqual(LocalDateTime requestedAt) {
+        setRequestedAt_NotTerm(requestedAt, null);
+    }
+
+    public void setRequestedAt_NotTerm(LocalDateTime requestedAt) {
+        setRequestedAt_NotTerm(requestedAt, null);
+    }
+
+    public void setRequestedAt_NotEqual(LocalDateTime requestedAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setRequestedAt_NotTerm(requestedAt, opLambda);
+    }
+
+    public void setRequestedAt_NotTerm(LocalDateTime requestedAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setRequestedAt_Term(requestedAt), opLambda);
+    }
+
+    public void setRequestedAt_Terms(Collection<LocalDateTime> requestedAtList) {
+        setRequestedAt_Terms(requestedAtList, null);
+    }
+
+    public void setRequestedAt_Terms(Collection<LocalDateTime> requestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("requestedAt", requestedAtList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_InScope(Collection<LocalDateTime> requestedAtList) {
+        setRequestedAt_Terms(requestedAtList, null);
+    }
+
+    public void setRequestedAt_InScope(Collection<LocalDateTime> requestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setRequestedAt_Terms(requestedAtList, opLambda);
+    }
+
+    public void setRequestedAt_Match(LocalDateTime requestedAt) {
+        setRequestedAt_Match(requestedAt, null);
+    }
+
+    public void setRequestedAt_Match(LocalDateTime requestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("requestedAt", requestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_MatchPhrase(LocalDateTime requestedAt) {
+        setRequestedAt_MatchPhrase(requestedAt, null);
+    }
+
+    public void setRequestedAt_MatchPhrase(LocalDateTime requestedAt, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("requestedAt", requestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_MatchPhrasePrefix(LocalDateTime requestedAt) {
+        setRequestedAt_MatchPhrasePrefix(requestedAt, null);
+    }
+
+    public void setRequestedAt_MatchPhrasePrefix(LocalDateTime requestedAt, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("requestedAt", requestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_Fuzzy(LocalDateTime requestedAt) {
+        setRequestedAt_Fuzzy(requestedAt, null);
+    }
+
+    public void setRequestedAt_Fuzzy(LocalDateTime requestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("requestedAt", requestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_GreaterThan(LocalDateTime requestedAt) {
+        setRequestedAt_GreaterThan(requestedAt, null);
+    }
+
+    public void setRequestedAt_GreaterThan(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = toRangeLocalDateTimeString(requestedAt, "date_optional_time");
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_LessThan(LocalDateTime requestedAt) {
+        setRequestedAt_LessThan(requestedAt, null);
+    }
+
+    public void setRequestedAt_LessThan(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = toRangeLocalDateTimeString(requestedAt, "date_optional_time");
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_GreaterEqual(LocalDateTime requestedAt) {
+        setRequestedAt_GreaterEqual(requestedAt, null);
+    }
+
+    public void setRequestedAt_GreaterEqual(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = toRangeLocalDateTimeString(requestedAt, "date_optional_time");
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_LessEqual(LocalDateTime requestedAt) {
+        setRequestedAt_LessEqual(requestedAt, null);
+    }
+
+    public void setRequestedAt_LessEqual(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = toRangeLocalDateTimeString(requestedAt, "date_optional_time");
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_Exists() {
+        setRequestedAt_Exists(null);
+    }
+
+    public void setRequestedAt_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("requestedAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_CommonTerms(LocalDateTime requestedAt) {
+        setRequestedAt_CommonTerms(requestedAt, null);
+    }
+
+    public void setRequestedAt_CommonTerms(LocalDateTime requestedAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("requestedAt", requestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchFieldLogCQ addOrderBy_RequestedAt_Asc() {
+        regOBA("requestedAt");
+        return this;
+    }
+
+    public BsSearchFieldLogCQ addOrderBy_RequestedAt_Desc() {
+        regOBD("requestedAt");
+        return this;
+    }
+
 }

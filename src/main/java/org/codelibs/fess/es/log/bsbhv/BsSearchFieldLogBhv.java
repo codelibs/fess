@@ -76,6 +76,7 @@ public abstract class BsSearchFieldLogBhv extends EsAbstractBehavior<SearchField
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setSearchLogId(DfTypeUtil.toString(source.get("searchLogId")));
             result.setValue(DfTypeUtil.toString(source.get("value")));
+            result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

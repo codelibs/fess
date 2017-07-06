@@ -405,6 +405,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String PERMISSIONS = "permissions";
 
+    public static final String QUERIES = "queries";
+
     public static final String CIPHER_PREFIX = "{cipher}";
 
     public static final String SYSTEM_USER = "system";

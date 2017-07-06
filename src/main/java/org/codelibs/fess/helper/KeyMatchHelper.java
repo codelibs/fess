@@ -25,10 +25,10 @@ import javax.annotation.PostConstruct;
 
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.es.config.exbhv.KeyMatchBhv;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class KeyMatchHelper {
     private static final Logger logger = LoggerFactory.getLogger(KeyMatchHelper.class);
 
-    protected volatile Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = Collections.emptyMap();
+    protected volatile Map<String, Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>>> keyMatchQueryMap = Collections.emptyMap();
 
     protected long reloadInterval = 1000L;
 
@@ -58,53 +58,58 @@ public class KeyMatchHelper {
         new Thread(() -> reload(reloadInterval)).start();
     }
 
+    public List<KeyMatch> getAvailableKeyMatchList() {
+        return ComponentUtil.getComponent(KeyMatchBhv.class).selectList(cb -> {
+            cb.query().matchAll();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageKeymatchMaxFetchSizeAsInteger());
+        });
+    }
+
     protected void reload(final long interval) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final KeyMatchService keyMatchService = ComponentUtil.getComponent(KeyMatchService.class);
-        final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = new HashMap<>();
-        keyMatchService
-                .getAvailableKeyMatchList()
-                .stream()
-                .forEach(
-                        keyMatch -> {
-                            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-                            getDocumentList(keyMatch).stream().map(doc -> {
-                                return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
-                            }).forEach(docId -> {
-                                boolQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-                            });
+        final Map<String, Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>>> keyMatchQueryMap = new HashMap<>();
+        getAvailableKeyMatchList().stream().forEach(
+                keyMatch -> {
+                    final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                    getDocumentList(keyMatch).stream().map(doc -> {
+                        return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                    }).forEach(docId -> {
+                        boolQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+                    });
 
-                            if (boolQuery.hasClauses()) {
-                                keyMatchQueryMap.put(toLowerCase(keyMatch.getTerm()),
-                                        new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
-                            }
+                    if (boolQuery.hasClauses()) {
+                        final String virtualHost = keyMatch.getVirtualHost();
+                        Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> queryMap = keyMatchQueryMap.get(virtualHost);
+                        if (queryMap == null) {
+                            queryMap = new HashMap<>();
+                            keyMatchQueryMap.put(virtualHost, queryMap);
+                        }
+                        queryMap.put(toLowerCase(keyMatch.getTerm()),
+                                new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
+                    }
 
-                            if (reloadInterval > 0) {
-                                try {
-                                    Thread.sleep(reloadInterval);
-                                } catch (final InterruptedException e) {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("Interrupted.", e);
-                                    }
-                                }
+                    if (interval > 0) {
+                        try {
+                            Thread.sleep(interval);
+                        } catch (final InterruptedException e) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Interrupted.", e);
                             }
-                        });
+                        }
+                    }
+                });
         this.keyMatchQueryMap = keyMatchQueryMap;
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final List<Map<String, Object>> documentList =
-                fessEsClient.getDocumentList(
-                        fessConfig.getIndexDocumentSearchIndex(),
-                        fessConfig.getIndexDocumentType(),
-                        searchRequestBuilder -> {
-                            return SearchConditionBuilder.builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY))
-                                    .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize())
-                                    .query(keyMatch.getQuery()).responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
-                        });
-        return documentList;
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+                searchRequestBuilder -> {
+                    return SearchConditionBuilder.builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY))
+                            .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
+                            .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
+                });
     }
 
     public long getReloadInterval() {
@@ -115,9 +120,18 @@ public class KeyMatchHelper {
         this.reloadInterval = reloadInterval;
     }
 
+    protected Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> getQueryMap() {
+        final String key = ComponentUtil.getFessConfig().getVirtualHostValue();
+        final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> map = keyMatchQueryMap.get(key);
+        if (map != null) {
+            return map;
+        }
+        return Collections.emptyMap();
+    }
+
     public void buildQuery(final List<String> keywordList, final List<FilterFunctionBuilder> list) {
         keywordList.stream().forEach(keyword -> {
-            final Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(keyword));
+            final Pair<QueryBuilder, ScoreFunctionBuilder<?>> pair = getQueryMap().get(toLowerCase(keyword));
             if (pair != null) {
                 list.add(new FilterFunctionBuilder(pair.getFirst(), pair.getSecond()));
             }
@@ -126,7 +140,7 @@ public class KeyMatchHelper {
 
     public List<Map<String, Object>> getBoostedDocumentList(final String term, final int size) {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
-        final Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(term));
+        final Pair<QueryBuilder, ScoreFunctionBuilder<?>> pair = getQueryMap().get(toLowerCase(term));
         if (pair == null) {
             return Collections.emptyList();
         }

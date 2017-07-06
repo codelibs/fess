@@ -740,6 +740,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String PAGE_DICTIONARY_MAX_FETCH_SIZE = "page.dictionary.max.fetch.size";
 
+    /** The key of the configuration. e.g. 5000 */
+    String PAGE_RELATEDCONTENT_MAX_FETCH_SIZE = "page.relatedcontent.max.fetch.size";
+
+    /** The key of the configuration. e.g. 5000 */
+    String PAGE_RELATEDQUERY_MAX_FETCH_SIZE = "page.relatedquery.max.fetch.size";
+
     /** The key of the configuration. e.g. 100 */
     String PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE = "page.thumbnail.queue.max.fetch.size";
 
@@ -895,6 +901,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. keymatch */
     String ONLINE_HELP_NAME_KEYMATCH = "online.help.name.keymatch";
+
+    /** The key of the configuration. e.g. relatedquery */
+    String ONLINE_HELP_NAME_RELATEDQUERY = "online.help.name.relatedquery";
+
+    /** The key of the configuration. e.g. relatedcontent */
+    String ONLINE_HELP_NAME_RELATEDCONTENT = "online.help.name.relatedcontent";
 
     /** The key of the configuration. e.g. wizard */
     String ONLINE_HELP_NAME_WIZARD = "online.help.name.wizard";
@@ -3620,6 +3632,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageDictionaryMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.relatedcontent.max.fetch.size'. <br>
+     * The value is, e.g. 5000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageRelatedcontentMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.relatedcontent.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 5000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageRelatedcontentMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.relatedquery.max.fetch.size'. <br>
+     * The value is, e.g. 5000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageRelatedqueryMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.relatedquery.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 5000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageRelatedqueryMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'page.thumbnail.queue.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4187,6 +4229,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameKeymatch();
+
+    /**
+     * Get the value for the key 'online.help.name.relatedquery'. <br>
+     * The value is, e.g. relatedquery <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameRelatedquery();
+
+    /**
+     * Get the value for the key 'online.help.name.relatedcontent'. <br>
+     * The value is, e.g. relatedcontent <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameRelatedcontent();
 
     /**
      * Get the value for the key 'online.help.name.wizard'. <br>
@@ -6415,6 +6471,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_DICTIONARY_MAX_FETCH_SIZE);
         }
 
+        public String getPageRelatedcontentMaxFetchSize() {
+            return get(FessConfig.PAGE_RELATEDCONTENT_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageRelatedcontentMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_RELATEDCONTENT_MAX_FETCH_SIZE);
+        }
+
+        public String getPageRelatedqueryMaxFetchSize() {
+            return get(FessConfig.PAGE_RELATEDQUERY_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageRelatedqueryMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_RELATEDQUERY_MAX_FETCH_SIZE);
+        }
+
         public String getPageThumbnailQueueMaxFetchSize() {
             return get(FessConfig.PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE);
         }
@@ -6721,6 +6793,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameKeymatch() {
             return get(FessConfig.ONLINE_HELP_NAME_KEYMATCH);
+        }
+
+        public String getOnlineHelpNameRelatedquery() {
+            return get(FessConfig.ONLINE_HELP_NAME_RELATEDQUERY);
+        }
+
+        public String getOnlineHelpNameRelatedcontent() {
+            return get(FessConfig.ONLINE_HELP_NAME_RELATEDCONTENT);
         }
 
         public String getOnlineHelpNameWizard() {
@@ -7500,7 +7580,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_ELEVATE_WORD_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_BAD_WORD_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_DICTIONARY_MAX_FETCH_SIZE, "1000");
+            defaultMap.put(FessConfig.PAGE_RELATEDCONTENT_MAX_FETCH_SIZE, "5000");
+            defaultMap.put(FessConfig.PAGE_RELATEDQUERY_MAX_FETCH_SIZE, "5000");
             defaultMap.put(FessConfig.PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE, "100");
+            defaultMap.put(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE, "100");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "20");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");
@@ -7551,6 +7634,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ROLE, "role");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_JOBLOG, "joblog");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_KEYMATCH, "keymatch");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_RELATEDQUERY, "relatedquery");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_RELATEDCONTENT, "relatedcontent");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_WIZARD, "wizard");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_BADWORD, "badword");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_PATHMAP, "pathmap");

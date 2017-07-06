@@ -225,6 +225,12 @@
 			<arg>".fess_config/path_mapping"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/related_content"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/related_query"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/request_header"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

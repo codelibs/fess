@@ -86,11 +86,4 @@ public class KeyMatchService {
 
     }
 
-    public List<KeyMatch> getAvailableKeyMatchList() {
-        return keyMatchBhv.selectList(cb -> {
-            cb.query().matchAll();
-            cb.fetchFirst(fessConfig.getPageKeymatchMaxFetchSizeAsInteger());
-        });
-    }
-
 }

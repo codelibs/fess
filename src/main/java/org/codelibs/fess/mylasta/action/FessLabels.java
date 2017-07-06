@@ -575,6 +575,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Access Token */
     public static final String LABELS_menu_access_token = "{labels.menu_access_token}";
 
+    /** The key of the message: Related Content */
+    public static final String LABELS_menu_related_content = "{labels.menu_related_content}";
+
+    /** The key of the message: Related Query */
+    public static final String LABELS_menu_related_query = "{labels.menu_related_query}";
+
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
@@ -610,6 +616,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Popular Words:  */
     public static final String LABELS_search_popular_word_word = "{labels.search_popular_word_word}";
+
+    /** The key of the message: Related Words:  */
+    public static final String LABELS_search_related_queries = "{labels.search_related_queries}";
 
     /** The key of the message: -- Sort -- */
     public static final String LABELS_search_result_select_sort = "{labels.search_result_select_sort}";
@@ -1448,6 +1457,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Key Match */
     public static final String LABELS_key_match_title_details = "{labels.key_match_title_details}";
 
+    /** The key of the message: Virtual Host */
+    public static final String LABELS_key_match_virtual_host = "{labels.key_match_virtual_host}";
+
     /** The key of the message: Page Design */
     public static final String LABELS_design_configuration = "{labels.design_configuration}";
 
@@ -2279,6 +2291,42 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Group */
     public static final String LABELS_group_title_details = "{labels.group_title_details}";
+
+    /** The key of the message: Related Content */
+    public static final String LABELS_related_content_configuration = "{labels.related_content_configuration}";
+
+    /** The key of the message: Content */
+    public static final String LABELS_related_content_content = "{labels.related_content_content}";
+
+    /** The key of the message: Term */
+    public static final String LABELS_related_content_list_term = "{labels.related_content_list_term}";
+
+    /** The key of the message: Term */
+    public static final String LABELS_related_content_term = "{labels.related_content_term}";
+
+    /** The key of the message: Related Content */
+    public static final String LABELS_related_content_title_details = "{labels.related_content_title_details}";
+
+    /** The key of the message: Virtual Host */
+    public static final String LABELS_related_content_virtual_host = "{labels.related_content_virtual_host}";
+
+    /** The key of the message: Related Query */
+    public static final String LABELS_related_query_configuration = "{labels.related_query_configuration}";
+
+    /** The key of the message: Term */
+    public static final String LABELS_related_query_list_term = "{labels.related_query_list_term}";
+
+    /** The key of the message: Queries */
+    public static final String LABELS_related_query_queries = "{labels.related_query_queries}";
+
+    /** The key of the message: Term */
+    public static final String LABELS_related_query_term = "{labels.related_query_term}";
+
+    /** The key of the message: Related Query */
+    public static final String LABELS_related_query_title_details = "{labels.related_query_title_details}";
+
+    /** The key of the message: Virtual Host */
+    public static final String LABELS_related_query_virtual_host = "{labels.related_query_virtual_host}";
 
     /** The key of the message: Create */
     public static final String LABELS_crud_button_create = "{labels.crud_button_create}";

@@ -78,6 +78,14 @@
 											<la:text styleId="boost" property="boost" styleClass="form-control" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="virtualHost" class="col-sm-3 control-label"><la:message
+												key="labels.key_match_virtual_host" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHost" />
+											<la:text styleId="virtualHost" property="virtualHost" styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

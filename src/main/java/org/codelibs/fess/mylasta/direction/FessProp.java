@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,8 @@ import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
+
+    public static final String VIRTUAL_HOST_VALUE = "VirtualHostValue";
 
     public static final String QUERY_DEFAULT_LANGUAGES = "queryDefaultLanguages";
 
@@ -1581,8 +1584,20 @@ public interface FessProp {
 
     String getVirtualHostHeaders();
 
-    @SuppressWarnings("unchecked")
     public default HtmlNext getVirtualHostPath(final HtmlNext page) {
+        return processVirtualHost(s -> new HtmlNext(s + page.getRoutingPath()), page);
+    }
+
+    public default String getVirtualHostValue() {
+        return LaRequestUtil.getOptionalRequest().map(req -> (String) req.getAttribute(VIRTUAL_HOST_VALUE)).orElseGet(() -> {
+            final String value = processVirtualHost(s -> s, StringUtil.EMPTY);
+            LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(VIRTUAL_HOST_VALUE, value));
+            return value;
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public default <T> T processVirtualHost(final Function<String, T> func, final T defaultValue) {
         Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
         if (hosts == null) {
             hosts = split(getVirtualHostHeaders(), "\n").get(stream -> stream.map(s -> {
@@ -1602,11 +1617,11 @@ public interface FessProp {
             for (final Tuple3<String, String, String> host : vHosts) {
                 final String headerValue = req.getHeader(host.getValue1());
                 if (host.getValue2().equalsIgnoreCase(headerValue)) {
-                    return new HtmlNext(host.getValue3() + page.getRoutingPath());
+                    return func.apply(host.getValue3());
                 }
             }
-            return page;
-        }).orElse(page);
+            return defaultValue;
+        }).orElse(defaultValue);
     }
 
     String getCrawlerFailureUrlStatusCodes();

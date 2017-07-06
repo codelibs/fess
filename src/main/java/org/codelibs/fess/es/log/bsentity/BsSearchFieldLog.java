@@ -46,6 +46,9 @@ public class BsSearchFieldLog extends EsAbstractEntity {
     /** value */
     protected String value;
 
+    /** requestedAt */
+    protected LocalDateTime requestedAt;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -76,6 +79,9 @@ public class BsSearchFieldLog extends EsAbstractEntity {
         if (value != null) {
             addFieldToSource(sourceMap, "value", value);
         }
+        if (requestedAt != null) {
+            addFieldToSource(sourceMap, "requestedAt", requestedAt);
+        }
         return sourceMap;
     }
 
@@ -92,6 +98,7 @@ public class BsSearchFieldLog extends EsAbstractEntity {
         sb.append(dm).append(name);
         sb.append(dm).append(searchLogId);
         sb.append(dm).append(value);
+        sb.append(dm).append(requestedAt);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -130,5 +137,15 @@ public class BsSearchFieldLog extends EsAbstractEntity {
     public void setValue(String value) {
         registerModifiedProperty("value");
         this.value = value;
+    }
+
+    public LocalDateTime getRequestedAt() {
+        checkSpecifiedProperty("requestedAt");
+        return requestedAt;
+    }
+
+    public void setRequestedAt(LocalDateTime value) {
+        registerModifiedProperty("requestedAt");
+        this.requestedAt = value;
     }
 }

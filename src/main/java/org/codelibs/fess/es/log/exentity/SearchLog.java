@@ -70,6 +70,7 @@ public class SearchLog extends BsSearchLog {
             final SearchFieldLog fieldLog = new SearchFieldLog();
             fieldLog.setName(name);
             fieldLog.setValue(value);
+            fieldLog.setRequestedAt(getRequestedAt());
             if (searchFieldLogList == null) {
                 searchFieldLogList = new ArrayList<>();
             }

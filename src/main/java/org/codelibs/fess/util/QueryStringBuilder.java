@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 
 public class QueryStringBuilder {
@@ -29,11 +30,30 @@ public class QueryStringBuilder {
 
     private Map<String, String[]> fieldMap;
 
+    protected String quote(final String value) {
+        if (value.split("\\s").length > 1) {
+            return new StringBuilder().append('"').append(value.replace('"', ' ')).append('"').toString();
+        }
+        return value;
+    }
+
     public String build() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final StringBuilder queryBuf = new StringBuilder(255);
         if (StringUtil.isNotBlank(query)) {
-            queryBuf.append('(').append(query).append(')');
+            final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
+            final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
+            if (relatedQueries.length == 0) {
+                queryBuf.append('(').append(query).append(')');
+            } else {
+                queryBuf.append('(');
+                queryBuf.append(quote(query));
+                for (final String s : relatedQueries) {
+                    queryBuf.append(" OR ");
+                    queryBuf.append(quote(s));
+                }
+                queryBuf.append(')');
+            }
         }
         stream(extraQueries).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= fessConfig.getQueryMaxLengthAsInteger().intValue())

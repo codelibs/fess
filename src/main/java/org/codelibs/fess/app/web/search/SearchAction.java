@@ -35,6 +35,8 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.RelatedContentHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.Execute;
@@ -56,6 +58,12 @@ public class SearchAction extends FessSearchAction {
     //
     @Resource
     protected SearchService searchService;
+
+    @Resource
+    protected RelatedContentHelper relatedContentHelper;
+
+    @Resource
+    protected RelatedQueryHelper relatedQueryHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -140,6 +148,14 @@ public class SearchAction extends FessSearchAction {
                     RenderDataUtil.register(data, "displayQuery",
                             getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
                     createPagingQuery(form);
+                    final String relatedContent = relatedContentHelper.getRelatedContent(form.getQuery());
+                    if (StringUtil.isNotBlank(relatedContent)) {
+                        RenderDataUtil.register(data, "relatedContent", relatedContent);
+                    }
+                    final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
+                    if (relatedQueries.length > 0) {
+                        RenderDataUtil.register(data, "relatedQueries", relatedQueries);
+                    }
                 });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {

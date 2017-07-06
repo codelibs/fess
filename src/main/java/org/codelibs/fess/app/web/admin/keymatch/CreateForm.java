@@ -52,6 +52,9 @@ public class CreateForm {
     @ValidateTypeFailure
     public Float boost;
 
+    @Size(max = 1000)
+    public String virtualHost;
+
     @Size(max = 255)
     public String createdBy;
 

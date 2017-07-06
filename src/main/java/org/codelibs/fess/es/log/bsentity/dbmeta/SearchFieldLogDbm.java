@@ -84,6 +84,8 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
                 (et, vl) -> ((SearchFieldLog) et).setSearchLogId(DfTypeUtil.toString(vl)), "searchLogId");
         setupEpg(_epgMap, et -> ((SearchFieldLog) et).getValue(), (et, vl) -> ((SearchFieldLog) et).setValue(DfTypeUtil.toString(vl)),
                 "value");
+        setupEpg(_epgMap, et -> ((SearchFieldLog) et).getRequestedAt(),
+                (et, vl) -> ((SearchFieldLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
     }
 
     @Override
@@ -126,6 +128,8 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
             false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
             "keyword", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null,
+            false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnName() {
         return _columnName;
@@ -139,11 +143,16 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
         return _columnValue;
     }
 
+    public ColumnInfo columnRequestedAt() {
+        return _columnRequestedAt;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnName());
         ls.add(columnSearchLogId());
         ls.add(columnValue());
+        ls.add(columnRequestedAt());
         return ls;
     }
 

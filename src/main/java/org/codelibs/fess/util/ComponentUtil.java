@@ -48,6 +48,8 @@ import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.RelatedContentHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -391,6 +393,14 @@ public final class ComponentUtil {
 
     public static CrawlerClientFactory getCrawlerClientFactory() {
         return getComponent(CrawlerClientFactory.class);
+    }
+
+    public static RelatedQueryHelper getRelatedQueryHelper() {
+        return getComponent(RelatedQueryHelper.class);
+    }
+
+    public static RelatedContentHelper getRelatedContentHelper() {
+        return getComponent(RelatedContentHelper.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

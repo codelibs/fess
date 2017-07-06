@@ -264,6 +264,25 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/pathmap/admin_pathmap_edit.jsp */
     HtmlNext path_AdminPathmap_AdminPathmapEditJsp = new HtmlNext("/admin/pathmap/admin_pathmap_edit.jsp");
 
+    /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent.jsp */
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent.jsp");
+
+    /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_details.jsp */
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentDetailsJsp =
+            new HtmlNext("/admin/relatedcontent/admin_relatedcontent_details.jsp");
+
+    /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_edit.jsp */
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentEditJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent_edit.jsp");
+
+    /** The path of the HTML: /admin/relatedquery/admin_relatedquery.jsp */
+    HtmlNext path_AdminRelatedquery_AdminRelatedqueryJsp = new HtmlNext("/admin/relatedquery/admin_relatedquery.jsp");
+
+    /** The path of the HTML: /admin/relatedquery/admin_relatedquery_details.jsp */
+    HtmlNext path_AdminRelatedquery_AdminRelatedqueryDetailsJsp = new HtmlNext("/admin/relatedquery/admin_relatedquery_details.jsp");
+
+    /** The path of the HTML: /admin/relatedquery/admin_relatedquery_edit.jsp */
+    HtmlNext path_AdminRelatedquery_AdminRelatedqueryEditJsp = new HtmlNext("/admin/relatedquery/admin_relatedquery_edit.jsp");
+
     /** The path of the HTML: /admin/reqheader/admin_reqheader.jsp */
     HtmlNext path_AdminReqheader_AdminReqheaderJsp = new HtmlNext("/admin/reqheader/admin_reqheader.jsp");
 

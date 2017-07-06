@@ -22,7 +22,9 @@ import org.codelibs.fess.es.log.cbean.cq.SearchFieldLogCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsSearchFieldLogCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
@@ -479,6 +481,113 @@ public abstract class BsSearchFieldLogCA extends EsAbstractConditionAggregation 
     public void setValue_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsSearchFieldLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "value");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchFieldLogCA ca = new SearchFieldLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setRequestedAt_DateRange() {
+        setRequestedAt_DateRange(null);
+    }
+
+    public void setRequestedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda) {
+        setRequestedAt_DateRange("requestedAt", opLambda, null);
+    }
+
+    public void setRequestedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchFieldLogCA> aggsLambda) {
+        setRequestedAt_DateRange("requestedAt", opLambda, aggsLambda);
+    }
+
+    public void setRequestedAt_DateRange(String name, ConditionOptionCall<DateRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchFieldLogCA> aggsLambda) {
+        DateRangeAggregationBuilder builder = regDateRangeA(name, "requestedAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchFieldLogCA ca = new SearchFieldLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setRequestedAt_DateHistogram() {
+        setRequestedAt_DateHistogram(null);
+    }
+
+    public void setRequestedAt_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda) {
+        setRequestedAt_DateHistogram("requestedAt", opLambda, null);
+    }
+
+    public void setRequestedAt_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda,
+            OperatorCall<BsSearchFieldLogCA> aggsLambda) {
+        setRequestedAt_DateHistogram("requestedAt", opLambda, aggsLambda);
+    }
+
+    public void setRequestedAt_DateHistogram(String name, ConditionOptionCall<DateHistogramAggregationBuilder> opLambda,
+            OperatorCall<BsSearchFieldLogCA> aggsLambda) {
+        DateHistogramAggregationBuilder builder = regDateHistogramA(name, "requestedAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchFieldLogCA ca = new SearchFieldLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setRequestedAt_Count() {
+        setRequestedAt_Count(null);
+    }
+
+    public void setRequestedAt_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setRequestedAt_Count("requestedAt", opLambda);
+    }
+
+    public void setRequestedAt_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "requestedAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_Cardinality() {
+        setRequestedAt_Cardinality(null);
+    }
+
+    public void setRequestedAt_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setRequestedAt_Cardinality("requestedAt", opLambda);
+    }
+
+    public void setRequestedAt_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "requestedAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRequestedAt_Missing() {
+        setRequestedAt_Missing(null);
+    }
+
+    public void setRequestedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setRequestedAt_Missing("requestedAt", opLambda, null);
+    }
+
+    public void setRequestedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsSearchFieldLogCA> aggsLambda) {
+        setRequestedAt_Missing("requestedAt", opLambda, aggsLambda);
+    }
+
+    public void setRequestedAt_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsSearchFieldLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "requestedAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

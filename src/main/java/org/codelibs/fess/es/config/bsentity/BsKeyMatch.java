@@ -55,6 +55,9 @@ public class BsKeyMatch extends EsAbstractEntity {
     /** term */
     protected String term;
 
+    /** virtualHost */
+    protected String virtualHost;
+
     /** updatedBy */
     protected String updatedBy;
 
@@ -100,6 +103,9 @@ public class BsKeyMatch extends EsAbstractEntity {
         if (term != null) {
             addFieldToSource(sourceMap, "term", term);
         }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
+        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
@@ -125,6 +131,7 @@ public class BsKeyMatch extends EsAbstractEntity {
         sb.append(dm).append(maxSize);
         sb.append(dm).append(query);
         sb.append(dm).append(term);
+        sb.append(dm).append(virtualHost);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         if (sb.length() > dm.length()) {
@@ -195,6 +202,16 @@ public class BsKeyMatch extends EsAbstractEntity {
     public void setTerm(String value) {
         registerModifiedProperty("term");
         this.term = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 
     public String getUpdatedBy() {

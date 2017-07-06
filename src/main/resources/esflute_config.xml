@@ -30,6 +30,8 @@
 	<component name="labelTypeBhv" class="org.codelibs.fess.es.config.exbhv.LabelTypeBhv"/>
 	<component name="labelToRoleBhv" class="org.codelibs.fess.es.config.exbhv.LabelToRoleBhv"/>
 	<component name="pathMappingBhv" class="org.codelibs.fess.es.config.exbhv.PathMappingBhv"/>
+	<component name="relatedContentBhv" class="org.codelibs.fess.es.config.exbhv.RelatedContentBhv"/>
+	<component name="relatedQueryBhv" class="org.codelibs.fess.es.config.exbhv.RelatedQueryBhv"/>
 	<component name="requestHeaderBhv" class="org.codelibs.fess.es.config.exbhv.RequestHeaderBhv"/>
 	<component name="roleTypeBhv" class="org.codelibs.fess.es.config.exbhv.RoleTypeBhv"/>
 	<component name="scheduledJobBhv" class="org.codelibs.fess.es.config.exbhv.ScheduledJobBhv"/>
