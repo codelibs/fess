@@ -315,14 +315,26 @@ public class FessEsClient implements Client {
                 } else {
                     indexName = configIndex;
                 }
-                final boolean exists = existsIndex(indexName);
-                if (!exists) {
-                    final String createdIndexName;
-                    if (isFessIndex) {
-                        createdIndexName = generateNewIndexName(configIndex);
-                    } else {
-                        createdIndexName = configIndex;
+                final String createdIndexName;
+                if (isFessIndex) {
+                    createdIndexName = generateNewIndexName(configIndex);
+                } else {
+                    switch (configIndex) {
+                    case ".fess_config":
+                        createdIndexName = fessConfig.getIndexConfigIndex();
+                        break;
+                    case ".fess_user":
+                        createdIndexName = fessConfig.getIndexUserIndex();
+                        break;
+                    case "fess_log":
+                        createdIndexName = fessConfig.getIndexLogIndex();
+                        break;
+                    default:
+                        throw new FessSystemException("Unknown config index: " + configIndex);
                     }
+                }
+                final boolean exists = existsIndex(createdIndexName);
+                if (!exists) {
                     createIndex(configIndex, configType, createdIndexName);
                     createAlias(configIndex, createdIndexName);
                 }
@@ -341,7 +353,7 @@ public class FessEsClient implements Client {
                         updatedIndexName = configIndex;
                     }
                 } else {
-                    updatedIndexName = configIndex;
+                    updatedIndexName = createdIndexName;
                 }
                 addMapping(configIndex, configType, updatedIndexName);
             } else {
@@ -434,7 +446,7 @@ public class FessEsClient implements Client {
 
                 final String dataPath = indexConfigPath + "/" + index + "/" + docType + ".bulk";
                 if (ResourceUtil.isExist(dataPath)) {
-                    insertBulkData(fessConfig, index, docType, dataPath);
+                    insertBulkData(fessConfig, indexName, docType, dataPath);
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to create " + indexName + "/" + docType + " mapping.", e);
