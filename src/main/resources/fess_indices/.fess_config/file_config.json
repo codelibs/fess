@@ -52,6 +52,9 @@
       "permissions": {
         "type": "keyword"
       },
+      "virtualHosts": {
+        "type": "keyword"
+      },
       "sortOrder": {
         "type": "integer"
       },

@@ -94,6 +94,7 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setVirtualHosts(toStringArray(source.get("virtualHosts")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

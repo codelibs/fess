@@ -227,5 +227,9 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }
+
+        public void columnVirtualHosts() {
+            doColumn("virtualHosts");
+        }
     }
 }

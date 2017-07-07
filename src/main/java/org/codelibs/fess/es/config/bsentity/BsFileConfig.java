@@ -100,6 +100,9 @@ public class BsFileConfig extends EsAbstractEntity {
     /** updatedTime */
     protected Long updatedTime;
 
+    /** virtualHosts */
+    protected String[] virtualHosts;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -184,6 +187,9 @@ public class BsFileConfig extends EsAbstractEntity {
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
+        if (virtualHosts != null) {
+            addFieldToSource(sourceMap, "virtualHosts", virtualHosts);
+        }
         return sourceMap;
     }
 
@@ -218,6 +224,7 @@ public class BsFileConfig extends EsAbstractEntity {
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
+        sb.append(dm).append(virtualHosts);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -436,5 +443,15 @@ public class BsFileConfig extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
+    }
+
+    public String[] getVirtualHosts() {
+        checkSpecifiedProperty("virtualHosts");
+        return virtualHosts;
+    }
+
+    public void setVirtualHosts(String[] value) {
+        registerModifiedProperty("virtualHosts");
+        this.virtualHosts = value;
     }
 }

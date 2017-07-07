@@ -4619,4 +4619,226 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setVirtualHosts_Equal(String virtualHosts) {
+        setVirtualHosts_Term(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Equal(String virtualHosts, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setVirtualHosts_Term(virtualHosts, opLambda);
+    }
+
+    public void setVirtualHosts_Term(String virtualHosts) {
+        setVirtualHosts_Term(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Term(String virtualHosts, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_NotEqual(String virtualHosts) {
+        setVirtualHosts_NotTerm(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_NotTerm(String virtualHosts) {
+        setVirtualHosts_NotTerm(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_NotEqual(String virtualHosts, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setVirtualHosts_NotTerm(virtualHosts, opLambda);
+    }
+
+    public void setVirtualHosts_NotTerm(String virtualHosts, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setVirtualHosts_Term(virtualHosts), opLambda);
+    }
+
+    public void setVirtualHosts_Terms(Collection<String> virtualHostsList) {
+        setVirtualHosts_Terms(virtualHostsList, null);
+    }
+
+    public void setVirtualHosts_Terms(Collection<String> virtualHostsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("virtualHosts", virtualHostsList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_InScope(Collection<String> virtualHostsList) {
+        setVirtualHosts_Terms(virtualHostsList, null);
+    }
+
+    public void setVirtualHosts_InScope(Collection<String> virtualHostsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setVirtualHosts_Terms(virtualHostsList, opLambda);
+    }
+
+    public void setVirtualHosts_Match(String virtualHosts) {
+        setVirtualHosts_Match(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Match(String virtualHosts, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_MatchPhrase(String virtualHosts) {
+        setVirtualHosts_MatchPhrase(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_MatchPhrase(String virtualHosts, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_MatchPhrasePrefix(String virtualHosts) {
+        setVirtualHosts_MatchPhrasePrefix(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_MatchPhrasePrefix(String virtualHosts, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Fuzzy(String virtualHosts) {
+        setVirtualHosts_Fuzzy(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Fuzzy(String virtualHosts, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Prefix(String virtualHosts) {
+        setVirtualHosts_Prefix(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Prefix(String virtualHosts, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Wildcard(String virtualHosts) {
+        setVirtualHosts_Wildcard(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Wildcard(String virtualHosts, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Regexp(String virtualHosts) {
+        setVirtualHosts_Regexp(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Regexp(String virtualHosts, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_SpanTerm(String virtualHosts) {
+        setVirtualHosts_SpanTerm("virtualHosts", null);
+    }
+
+    public void setVirtualHosts_SpanTerm(String virtualHosts, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_GreaterThan(String virtualHosts) {
+        setVirtualHosts_GreaterThan(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_GreaterThan(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_LessThan(String virtualHosts) {
+        setVirtualHosts_LessThan(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_LessThan(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_GreaterEqual(String virtualHosts) {
+        setVirtualHosts_GreaterEqual(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_GreaterEqual(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_LessEqual(String virtualHosts) {
+        setVirtualHosts_LessEqual(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_LessEqual(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Exists() {
+        setVirtualHosts_Exists(null);
+    }
+
+    public void setVirtualHosts_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_CommonTerms(String virtualHosts) {
+        setVirtualHosts_CommonTerms(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_CommonTerms(String virtualHosts, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsWebConfigCQ addOrderBy_VirtualHosts_Asc() {
+        regOBA("virtualHosts");
+        return this;
+    }
+
+    public BsWebConfigCQ addOrderBy_VirtualHosts_Desc() {
+        regOBD("virtualHosts");
+        return this;
+    }
+
 }

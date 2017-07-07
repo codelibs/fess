@@ -119,6 +119,8 @@ public class WebConfigDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((WebConfig) et).getUrls(), (et, vl) -> ((WebConfig) et).setUrls(DfTypeUtil.toString(vl)), "urls");
         setupEpg(_epgMap, et -> ((WebConfig) et).getUserAgent(), (et, vl) -> ((WebConfig) et).setUserAgent(DfTypeUtil.toString(vl)),
                 "userAgent");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getVirtualHosts(), (et, vl) -> ((WebConfig) et).setVirtualHosts((String[]) vl),
+                "virtualHosts");
     }
 
     @Override
@@ -199,6 +201,8 @@ public class WebConfigDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false,
             false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHosts = cci("virtualHosts", "virtualHosts", null, null, String[].class, "virtualHosts", null,
+            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnAvailable() {
         return _columnAvailable;
@@ -288,6 +292,10 @@ public class WebConfigDbm extends AbstractDBMeta {
         return _columnUserAgent;
     }
 
+    public ColumnInfo columnVirtualHosts() {
+        return _columnVirtualHosts;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnAvailable());
@@ -312,6 +320,7 @@ public class WebConfigDbm extends AbstractDBMeta {
         ls.add(columnUpdatedTime());
         ls.add(columnUrls());
         ls.add(columnUserAgent());
+        ls.add(columnVirtualHosts());
         return ls;
     }
 

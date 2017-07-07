@@ -143,12 +143,15 @@ public class AdminFileconfigAction extends FessAdminAction {
                         entity -> {
                             copyBeanToBean(entity, form, copyOp -> {
                                 copyOp.excludeNull();
-                                copyOp.exclude(Constants.PERMISSIONS);
+                                copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
                             });
                             form.permissions =
                                     stream(entity.getPermissions()).get(
                                             stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
                                                     .collect(Collectors.joining("\n")));
+                            form.virtualHosts =
+                                    stream(entity.getVirtualHosts()).get(
+                                            stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.joining("\n")));
                         })
                 .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml()));
         saveToken();
@@ -178,7 +181,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                                     entity -> {
                                         copyBeanToBean(entity, form, copyOp -> {
                                             copyOp.excludeNull();
-                                            copyOp.exclude(Constants.PERMISSIONS);
+                                            copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
                                         });
                                         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                                         form.permissions =
@@ -186,6 +189,9 @@ public class AdminFileconfigAction extends FessAdminAction {
                                                         stream -> stream.map(s -> permissionHelper.decode(s))
                                                                 .filter(StringUtil::isNotBlank).distinct()
                                                                 .collect(Collectors.joining("\n")));
+                                        form.virtualHosts =
+                                                stream(entity.getVirtualHosts()).get(
+                                                        stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.joining("\n")));
                                         form.crudMode = crudMode;
                                     })
                             .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
@@ -290,12 +296,17 @@ public class AdminFileconfigAction extends FessAdminAction {
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
-                            Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
+                    copyBeanToBean(
+                            form,
+                            entity,
+                            op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                                    Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(split(form.permissions, "\n").get(
                             stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
                                     .toArray(n -> new String[n])));
+                    entity.setVirtualHosts(split(form.virtualHosts, "\n").get(
+                            stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));
                     return entity;
                 });
     }

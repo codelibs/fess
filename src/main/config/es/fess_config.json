@@ -268,6 +268,9 @@
           },
           "userAgent" : {
             "type": "keyword"
+          },
+          "virtualHosts" : {
+            "type": "keyword"
           }
         }
       },
@@ -454,6 +457,9 @@
           },
           "updatedTime" : {
             "type" : "long"
+          },
+          "virtualHosts" : {
+            "type": "keyword"
           }
         }
       },
@@ -725,6 +731,9 @@
           },
           "updatedTime" : {
             "type" : "long"
+          },
+          "virtualHosts" : {
+            "type": "keyword"
           }
         }
       },
@@ -939,12 +948,18 @@
             "properties" : {
               "permissions" : {
                 "array" : "true"
+              },
+              "virtualHosts" : {
+                "array" : "true"
               }
             }
           },
           "file_config" : {
             "properties" : {
               "permissions" : {
+                "array" : "true"
+              },
+              "virtualHosts" : {
                 "array" : "true"
               }
             }
@@ -959,6 +974,9 @@
           "web_config" : {
             "properties" : {
               "permissions" : {
+                "array" : "true"
+              },
+              "virtualHosts" : {
                 "array" : "true"
               }
             }

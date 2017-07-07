@@ -393,6 +393,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. thumbnail */
     String INDEX_FIELD_THUMBNAIL = "index.field.thumbnail";
 
+    /** The key of the configuration. e.g. virtual_host */
+    String INDEX_FIELD_virtual_host = "index.field.virtual_host";
+
     /** The key of the configuration. e.g. content_title */
     String RESPONSE_FIELD_content_title = "response.field.content_title";
 
@@ -2413,6 +2416,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldThumbnail();
+
+    /**
+     * Get the value for the key 'index.field.virtual_host'. <br>
+     * The value is, e.g. virtual_host <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldVirtualHost();
 
     /**
      * Get the value for the key 'response.field.content_title'. <br>
@@ -5855,6 +5865,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_THUMBNAIL);
         }
 
+        public String getIndexFieldVirtualHost() {
+            return get(FessConfig.INDEX_FIELD_virtual_host);
+        }
+
         public String getResponseFieldContentTitle() {
             return get(FessConfig.RESPONSE_FIELD_content_title);
         }
@@ -7481,6 +7495,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_FILETYPE, "filetype");
             defaultMap.put(FessConfig.INDEX_FIELD_FILENAME, "filename");
             defaultMap.put(FessConfig.INDEX_FIELD_THUMBNAIL, "thumbnail");
+            defaultMap.put(FessConfig.INDEX_FIELD_virtual_host, "virtual_host");
             defaultMap.put(FessConfig.RESPONSE_FIELD_content_title, "content_title");
             defaultMap.put(FessConfig.RESPONSE_FIELD_content_description, "content_description");
             defaultMap.put(FessConfig.RESPONSE_FIELD_url_link, "url_link");

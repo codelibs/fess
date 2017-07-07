@@ -1052,6 +1052,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Permissions */
     public static final String LABELS_PERMISSIONS = "{labels.permissions}";
 
+    /** The key of the message: Virtual Hosts */
+    public static final String LABELS_virtual_hosts = "{labels.virtual_hosts}";
+
     /** The key of the message: Label */
     public static final String LABELS_label_type = "{labels.label_type}";
 

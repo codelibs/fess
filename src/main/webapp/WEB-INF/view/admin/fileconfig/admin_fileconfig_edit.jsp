@@ -166,6 +166,15 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="virtualHosts" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_hosts" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHosts" />
+											<la:textarea styleId="virtualHosts" property="virtualHosts" styleClass="form-control"
+												rows="5" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">

@@ -64,6 +64,9 @@ public class CreateForm {
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
+    @CustomSize(maxKey = "form.admin.max.input.size")
+    public String virtualHosts;
+
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)

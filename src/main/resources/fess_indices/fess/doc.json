@@ -574,6 +574,9 @@
       "label": {
         "type": "keyword"
       },
+      "virtual_host": {
+        "type": "keyword"
+      },
       "segment": {
         "type": "keyword"
       },

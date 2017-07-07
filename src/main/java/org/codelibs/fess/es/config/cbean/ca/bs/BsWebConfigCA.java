@@ -3845,4 +3845,135 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setVirtualHosts_Terms() {
+        setVirtualHosts_Terms(null);
+    }
+
+    public void setVirtualHosts_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setVirtualHosts_Terms("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+        setVirtualHosts_Terms("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            WebConfigCA ca = new WebConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_SignificantTerms() {
+        setVirtualHosts_SignificantTerms(null);
+    }
+
+    public void setVirtualHosts_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setVirtualHosts_SignificantTerms("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
+        setVirtualHosts_SignificantTerms("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            WebConfigCA ca = new WebConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_IpRange() {
+        setVirtualHosts_IpRange(null);
+    }
+
+    public void setVirtualHosts_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setVirtualHosts_IpRange("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+        setVirtualHosts_IpRange("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            WebConfigCA ca = new WebConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_Count() {
+        setVirtualHosts_Count(null);
+    }
+
+    public void setVirtualHosts_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setVirtualHosts_Count("virtualHosts", opLambda);
+    }
+
+    public void setVirtualHosts_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Cardinality() {
+        setVirtualHosts_Cardinality(null);
+    }
+
+    public void setVirtualHosts_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setVirtualHosts_Cardinality("virtualHosts", opLambda);
+    }
+
+    public void setVirtualHosts_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Missing() {
+        setVirtualHosts_Missing(null);
+    }
+
+    public void setVirtualHosts_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setVirtualHosts_Missing("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+        setVirtualHosts_Missing("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            WebConfigCA ca = new WebConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
 }

@@ -382,6 +382,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final List<String> roleTypeList = new ArrayList<>();
         stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
+        // virtualHosts
+        putResultDataBody(dataMap, fessConfig.getIndexFieldVirtualHost(),
+                stream(crawlingConfig.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n])));
         // id
         putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
         // parentId

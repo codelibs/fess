@@ -27,6 +27,8 @@ public interface CrawlingConfig {
 
     String[] getPermissions();
 
+    String[] getVirtualHosts();
+
     String[] getLabelTypeValues();
 
     String getDocumentBoost();

@@ -103,6 +103,8 @@ public class DataConfigDbm extends AbstractDBMeta {
                 "updatedBy");
         setupEpg(_epgMap, et -> ((DataConfig) et).getUpdatedTime(), (et, vl) -> ((DataConfig) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getVirtualHosts(), (et, vl) -> ((DataConfig) et).setVirtualHosts((String[]) vl),
+                "virtualHosts");
     }
 
     @Override
@@ -165,6 +167,8 @@ public class DataConfigDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHosts = cci("virtualHosts", "virtualHosts", null, null, String[].class, "virtualHosts", null,
+            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnAvailable() {
         return _columnAvailable;
@@ -218,6 +222,10 @@ public class DataConfigDbm extends AbstractDBMeta {
         return _columnUpdatedTime;
     }
 
+    public ColumnInfo columnVirtualHosts() {
+        return _columnVirtualHosts;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnAvailable());
@@ -233,6 +241,7 @@ public class DataConfigDbm extends AbstractDBMeta {
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
+        ls.add(columnVirtualHosts());
         return ls;
     }
 

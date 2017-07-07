@@ -103,6 +103,9 @@ public class BsWebConfig extends EsAbstractEntity {
     /** userAgent */
     protected String userAgent;
 
+    /** virtualHosts */
+    protected String[] virtualHosts;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -190,6 +193,9 @@ public class BsWebConfig extends EsAbstractEntity {
         if (userAgent != null) {
             addFieldToSource(sourceMap, "userAgent", userAgent);
         }
+        if (virtualHosts != null) {
+            addFieldToSource(sourceMap, "virtualHosts", virtualHosts);
+        }
         return sourceMap;
     }
 
@@ -225,6 +231,7 @@ public class BsWebConfig extends EsAbstractEntity {
         sb.append(dm).append(updatedTime);
         sb.append(dm).append(urls);
         sb.append(dm).append(userAgent);
+        sb.append(dm).append(virtualHosts);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -453,5 +460,15 @@ public class BsWebConfig extends EsAbstractEntity {
     public void setUserAgent(String value) {
         registerModifiedProperty("userAgent");
         this.userAgent = value;
+    }
+
+    public String[] getVirtualHosts() {
+        checkSpecifiedProperty("virtualHosts");
+        return virtualHosts;
+    }
+
+    public void setVirtualHosts(String[] value) {
+        registerModifiedProperty("virtualHosts");
+        this.virtualHosts = value;
     }
 }

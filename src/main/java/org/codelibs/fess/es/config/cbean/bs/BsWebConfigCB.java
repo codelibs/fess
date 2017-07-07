@@ -263,5 +263,9 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
         public void columnUserAgent() {
             doColumn("userAgent");
         }
+
+        public void columnVirtualHosts() {
+            doColumn("virtualHosts");
+        }
     }
 }

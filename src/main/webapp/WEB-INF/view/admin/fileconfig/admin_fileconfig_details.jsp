@@ -118,6 +118,11 @@
 														property="permissions" /></td>
 											</tr>
 											<tr>
+												<th><la:message key="labels.virtual_hosts" /></th>
+												<td>${f:br(f:h(virtualHosts))}<la:hidden
+														property="virtualHosts" /></td>
+											</tr>
+											<tr>
 												<th><la:message key="labels.label_type" /></th>
 												<td><c:forEach var="l" varStatus="s"
 														items="${labelTypeItems}">

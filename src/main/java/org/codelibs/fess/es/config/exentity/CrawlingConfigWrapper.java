@@ -43,6 +43,11 @@ public class CrawlingConfigWrapper implements CrawlingConfig {
     }
 
     @Override
+    public String[] getVirtualHosts() {
+        return crawlingConfig.getVirtualHosts();
+    }
+
+    @Override
     public String[] getLabelTypeValues() {
         return crawlingConfig.getLabelTypeValues();
     }

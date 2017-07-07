@@ -95,6 +95,7 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             result.setUrls(DfTypeUtil.toString(source.get("urls")));
             result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
+            result.setVirtualHosts(toStringArray(source.get("virtualHosts")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
