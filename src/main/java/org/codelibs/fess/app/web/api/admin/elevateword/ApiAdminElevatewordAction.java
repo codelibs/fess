@@ -102,7 +102,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         try {
             elevateWordService.store(entity);
             suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
-                    entity.getPermissions(), entity.getBoost());
+                    entity.getPermissions(), entity.getBoost(), false);
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
@@ -117,8 +117,8 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         final ElevateWord elevateWord = getElevateWord(body).map(entity -> {
             try {
                 elevateWordService.store(entity);
-                suggestHelper.deleteAllElevateWord();
-                suggestHelper.storeAllElevateWords();
+                suggestHelper.deleteAllElevateWord(false);
+                suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
@@ -138,7 +138,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
             elevateWordService.getElevateWord(id).ifPresent(entity -> {
                 try {
                     elevateWordService.delete(entity);
-                    suggestHelper.deleteElevateWord(entity.getSuggestWord());
+                    suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
                     saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                 } catch (final Exception e) {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
@@ -159,7 +159,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         new Thread(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(body.elevateWordFile.getInputStream(), getCsvEncoding()))) {
                 elevateWordService.importCsv(reader);
-                suggestHelper.storeAllElevateWords();
+                suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }

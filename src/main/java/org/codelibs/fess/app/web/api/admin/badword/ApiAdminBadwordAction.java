@@ -92,7 +92,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         });
         try {
             badWordService.store(entity);
-            suggestHelper.addBadWord(entity.getSuggestWord());
+            suggestHelper.addBadWord(entity.getSuggestWord(), false);
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
@@ -107,7 +107,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         final BadWord badWord = getBadWord(body).map(entity -> {
             try {
                 badWordService.store(entity);
-                suggestHelper.storeAllBadWords();
+                suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
@@ -148,7 +148,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         new Thread(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(body.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
-                suggestHelper.storeAllBadWords();
+                suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }

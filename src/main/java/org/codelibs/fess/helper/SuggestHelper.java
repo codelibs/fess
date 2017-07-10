@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
+import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -116,8 +118,18 @@ public class SuggestHelper {
         return suggester;
     }
 
+    public void storeSearchLog() {
+        final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
+
+        searchLogBhv.selectBulk((cb) -> {
+            final String from = LocalDateTime.now().minusDays(fessConfig.getPurgeSuggestSearchLogDay()).format(DateTimeFormatter.ISO_DATE);
+            cb.query().addQuery(QueryBuilders.rangeQuery("requestedAt").gte(from));
+            cb.query().addOrderBy_RequestedAt_Asc();
+        }, (searchLogsList) -> indexFromSearchLog(searchLogsList));
+    }
+
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
-        final Set<String> sessionIdSet = new HashSet<>();
+        final Set<String> ipSet = new HashSet<>();
         searchLogList.stream().forEach(
                 searchLog -> {
                     if (searchLog.getHitCount() == null
@@ -125,8 +137,8 @@ public class SuggestHelper {
                         return;
                     }
 
-                    final String sessionId = searchLog.getUserSessionId();
-                    if (sessionId == null || sessionIdSet.contains(sessionId)) {
+                    final String clientIp = searchLog.getClientIp();
+                    if (clientIp == null || ipSet.contains(clientIp)) {
                         return;
                     }
 
@@ -156,7 +168,7 @@ public class SuggestHelper {
                         if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
                                     tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
-                            sessionIdSet.add(sessionId);
+                            ipSet.add(clientIp);
                         }
                     }
                 });
@@ -257,8 +269,8 @@ public class SuggestHelper {
         return true;
     }
 
-    public void storeAllElevateWords() {
-        deleteAllBadWords();
+    public void storeAllElevateWords(final boolean apply) {
+        deleteAllElevateWord(apply);
 
         final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
             cb.query().matchAll();
@@ -267,35 +279,30 @@ public class SuggestHelper {
 
         for (final ElevateWord elevateWord : list) {
             addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getLabelTypeValues(),
-                    elevateWord.getPermissions(), elevateWord.getBoost(), false);
+                    elevateWord.getPermissions(), elevateWord.getBoost(), apply);
         }
         refresh();
     }
 
-    public void deleteAllElevateWord() {
+    public void deleteAllElevateWord(final boolean apply) {
         final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
             cb.query().matchAll();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageElevateWordMaxFetchSizeAsInteger());
         });
 
         for (final ElevateWord elevateWord : list) {
-            suggester.indexer().deleteElevateWord(elevateWord.getSuggestWord());
+            suggester.indexer().deleteElevateWord(elevateWord.getSuggestWord(), apply);
         }
         refresh();
     }
 
-    public void deleteElevateWord(final String word) {
-        suggester.indexer().deleteElevateWord(word);
+    public void deleteElevateWord(final String word, final boolean apply) {
+        suggester.indexer().deleteElevateWord(word, apply);
         refresh();
     }
 
-    public void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions, final Float boost) {
-        addElevateWord(word, reading, tags, permissions, boost, true);
-        refresh();
-    }
-
-    protected void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions,
-            final float boost, final boolean commit) {
+    public void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions, final Float boost,
+            final boolean apply) {
         final String[] readings;
         if (StringUtil.isBlank(reading)) {
             readings = word.replace("　", TEXT_SEP).replaceAll(TEXT_SEP + "+", TEXT_SEP).split(TEXT_SEP);
@@ -314,14 +321,16 @@ public class SuggestHelper {
 
         suggester.indexer().addElevateWord(
                 new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings), contentFieldList, labelList,
-                        roleList));
+                        roleList), apply);
+
+        refresh();
     }
 
     protected void deleteAllBadWords() {
         suggester.settings().badword().deleteAll();
     }
 
-    public void storeAllBadWords() {
+    public void storeAllBadWords(final boolean apply) {
         deleteAllBadWords();
         final List<BadWord> list = badWordBhv.selectList(cb -> {
             cb.query().matchAll();
@@ -329,13 +338,13 @@ public class SuggestHelper {
         });
         for (final BadWord badWord : list) {
             final String word = badWord.getSuggestWord();
-            suggester.indexer().addBadWord(word);
+            suggester.indexer().addBadWord(word, apply);
         }
         refresh();
     }
 
-    public void addBadWord(final String badWord) {
-        suggester.indexer().addBadWord(badWord);
+    public void addBadWord(final String badWord, final boolean apply) {
+        suggester.indexer().addBadWord(badWord, apply);
         refresh();
     }
 

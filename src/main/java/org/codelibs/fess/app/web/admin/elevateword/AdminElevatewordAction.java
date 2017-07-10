@@ -256,7 +256,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                     try {
                         elevateWordService.store(entity);
                         suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
-                                entity.getPermissions(), entity.getBoost());
+                                entity.getPermissions(), entity.getBoost(), false);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -277,8 +277,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                 entity -> {
                     try {
                         elevateWordService.store(entity);
-                        suggestHelper.deleteAllElevateWord();
-                        suggestHelper.storeAllElevateWords();
+                        suggestHelper.deleteAllElevateWord(false);
+                        suggestHelper.storeAllElevateWords(false);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -302,7 +302,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         entity -> {
                             try {
                                 elevateWordService.delete(entity);
-                                suggestHelper.deleteElevateWord(entity.getSuggestWord());
+                                suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                             } catch (final Exception e) {
                                 throwValidationError(
@@ -322,8 +322,8 @@ public class AdminElevatewordAction extends FessAdminAction {
         new Thread(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.elevateWordFile.getInputStream(), getCsvEncoding()))) {
                 elevateWordService.importCsv(reader);
-                suggestHelper.deleteAllElevateWord();
-                suggestHelper.storeAllElevateWords();
+                suggestHelper.deleteAllElevateWord(false);
+                suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
