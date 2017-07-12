@@ -117,6 +117,8 @@ public interface FessProp {
 
     public static final String DEFAULT_LABEL_VALUES = "defaultLabelValues";
 
+    public static final String VIRTUAL_HOST_VALUES = "virtualHostValues";
+
     public static final String QUERY_LANGUAGE_MAPPING = "queryLanguageMapping";
 
     public static final String CRAWLER_METADATA_NAME_MAPPING = "crawlerMetadataNameMapping";
@@ -282,6 +284,15 @@ public interface FessProp {
 
     public default String getDefaultLabelValue() {
         return getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+    }
+
+    public default void setVirtualHostValue(final String value) {
+        setSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, value);
+        propMap.remove(VIRTUAL_HOST_HEADERS);
+    }
+
+    public default String getVirtualHostValue() {
+        return getSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, getVirtualHostHeaders());
     }
 
     public default void setLoginRequired(final boolean value) {
@@ -1588,7 +1599,7 @@ public interface FessProp {
         return processVirtualHost(s -> new HtmlNext(s + page.getRoutingPath()), page);
     }
 
-    public default String getVirtualHostValue() {
+    public default String getVirtualHostKey() {
         return LaRequestUtil.getOptionalRequest().map(req -> (String) req.getAttribute(VIRTUAL_HOST_VALUE)).orElseGet(() -> {
             final String value = processVirtualHost(s -> s, StringUtil.EMPTY);
             LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(VIRTUAL_HOST_VALUE, value));
@@ -1596,11 +1607,19 @@ public interface FessProp {
         });
     }
 
+    public default String getVirtualHostHeaderValue() {
+        final String value = getVirtualHostValue();
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        }
+        return getVirtualHostHeaders();
+    }
+
     @SuppressWarnings("unchecked")
     public default <T> T processVirtualHost(final Function<String, T> func, final T defaultValue) {
         Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
         if (hosts == null) {
-            hosts = split(getVirtualHostHeaders(), "\n").get(stream -> stream.map(s -> {
+            hosts = split(getVirtualHostHeaderValue(), "\n").get(stream -> stream.map(s -> {
                 final String[] v1 = s.split("=");
                 if (v1.length == 2) {
                     final String[] v2 = v1[0].split(":");

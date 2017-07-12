@@ -1139,6 +1139,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Default Sort Value */
     public static final String LABELS_default_sort_value = "{labels.default_sort_value}";
 
+    /** The key of the message: Virtual Hosts */
+    public static final String LABELS_virtual_host_value = "{labels.virtual_host_value}";
+
     /** The key of the message: Append Params to URL */
     public static final String LABELS_append_query_param_enabled = "{labels.append_query_param_enabled}";
 

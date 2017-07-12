@@ -121,7 +121,7 @@ public class KeyMatchHelper {
     }
 
     protected Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> getQueryMap() {
-        final String key = ComponentUtil.getFessConfig().getVirtualHostValue();
+        final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
         final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> map = keyMatchQueryMap.get(key);
         if (map != null) {
             return map;

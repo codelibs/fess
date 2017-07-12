@@ -111,6 +111,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_SORT_VALUE_PROPERTY = "sort.value";
 
+    public static final String VIRTUAL_HOST_VALUE_PROPERTY = "virtual.host.value";
+
     public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
 
     public static final String RESULT_COLLAPSED_PROPERTY = "result.collapsed";

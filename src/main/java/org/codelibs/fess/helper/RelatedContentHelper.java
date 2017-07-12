@@ -72,7 +72,7 @@ public class RelatedContentHelper {
 
     public String getRelatedContent(final String query) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String key = fessConfig.getVirtualHostValue();
+        final String key = fessConfig.getVirtualHostKey();
         Map<String, String> map = relatedContentMap.get(key);
         if (map != null) {
             final String content = map.get(toLowerCase(query));

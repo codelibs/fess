@@ -112,6 +112,15 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="virtualHostValue" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_host_value" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHostValue" />
+											<la:textarea styleId="virtualHostValue" property="virtualHostValue"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="popularWord" class="col-sm-3 control-label"><la:message
 												key="labels.popular_word_word_enabled" /></label>
 										<div class="col-sm-9">

@@ -61,6 +61,9 @@ public class EditForm {
     @Size(max = 1000)
     public String defaultSortValue;
 
+    @Size(max = 10000)
+    public String virtualHostValue;
+
     @Size(max = 10)
     public String appendQueryParameter;
 

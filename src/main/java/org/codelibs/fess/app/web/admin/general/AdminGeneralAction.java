@@ -138,6 +138,7 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setWebApiJson(Constants.ON.equalsIgnoreCase(form.webApiJson));
         fessConfig.setDefaultLabelValue(form.defaultLabelValue);
         fessConfig.setDefaultSortValue(form.defaultSortValue);
+        fessConfig.setVirtualHostValue(form.virtualHostValue);
         fessConfig.setAppendQueryParameter(Constants.ON.equalsIgnoreCase(form.appendQueryParameter));
         fessConfig.setIgnoreFailureType(form.ignoreFailureType);
         fessConfig.setFailureCountThreshold(form.failureCountThreshold);
@@ -181,6 +182,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.webApiJson = fessConfig.isWebApiJson() ? Constants.TRUE : Constants.FALSE;
         form.defaultLabelValue = fessConfig.getDefaultLabelValue();
         form.defaultSortValue = fessConfig.getDefaultSortValue();
+        form.virtualHostValue = fessConfig.getVirtualHostValue();
         form.appendQueryParameter = fessConfig.isAppendQueryParameter() ? Constants.TRUE : Constants.FALSE;
         form.ignoreFailureType = fessConfig.getIgnoreFailureType();
         form.failureCountThreshold = fessConfig.getFailureCountThreshold();
