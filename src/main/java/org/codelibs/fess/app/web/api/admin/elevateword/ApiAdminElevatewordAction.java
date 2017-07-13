@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -187,14 +188,10 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
 
     protected EditBody createEditBody(final ElevateWord entity) {
         final EditBody body = new EditBody();
-        body.id = entity.getId();
-        body.versionNo = entity.getVersionNo();
-        body.createdBy = entity.getCreatedBy();
-        body.createdTime = entity.getCreatedTime();
-        body.suggestWord = entity.getSuggestWord();
-        body.updatedBy = entity.getUpdatedBy();
-        body.updatedTime = entity.getUpdatedTime();
-        body.labelTypeIds = entity.getLabelTypeIds();
+        copyBeanToBean(entity, body, copyOp -> {
+            copyOp.excludeNull();
+            copyOp.exclude(Constants.PERMISSIONS);
+        });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions =
                 stream(entity.getPermissions()).get(
