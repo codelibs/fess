@@ -136,16 +136,12 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
             copyOp.excludeNull();
-            copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
+            copyOp.exclude(Constants.PERMISSIONS);
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions =
                 stream(entity.getPermissions()).get(
                         stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
-                                .collect(Collectors.joining("\n")));
-        body.virtualHosts =
-                stream(entity.getVirtualHosts()).get(
-                        stream -> stream.filter(StringUtil::isNotBlank).distinct()
                                 .collect(Collectors.joining("\n")));
         return body;
     }
