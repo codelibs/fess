@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.log.bsentity.BsSearchLog;
-import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -39,7 +40,7 @@ public class SearchLog extends BsSearchLog {
 
     private static final long serialVersionUID = 1L;
 
-    private List<SearchFieldLog> searchFieldLogList;
+    private List<Pair<String, String>> searchFieldLogList = new ArrayList<>();
 
     private OptionalEntity<UserInfo> userInfo;
 
@@ -61,20 +62,9 @@ public class SearchLog extends BsSearchLog {
         asDocMeta().version(version);
     }
 
-    public void setClickLogList(final List<ClickLog> clickLogList) {
-
-    }
-
     public void addSearchFieldLogValue(final String name, final String value) {
         if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
-            final SearchFieldLog fieldLog = new SearchFieldLog();
-            fieldLog.setName(name);
-            fieldLog.setValue(value);
-            fieldLog.setRequestedAt(getRequestedAt());
-            if (searchFieldLogList == null) {
-                searchFieldLogList = new ArrayList<>();
-            }
-            searchFieldLogList.add(fieldLog);
+            searchFieldLogList.add(new Pair<String, String>(name, value));
         }
     }
 
@@ -96,14 +86,7 @@ public class SearchLog extends BsSearchLog {
         this.userInfo = userInfo;
     }
 
-    public List<SearchFieldLog> getSearchFieldLogList() {
-        if (searchFieldLogList == null) {
-            final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
-            searchFieldLogList = searchFieldLogBhv.selectList(cb -> {
-                cb.query().setSearchLogId_Equal(getId());
-                cb.fetchFirst(ComponentUtil.getFessConfig().getPageSearchFieldLogMaxFetchSizeAsInteger());
-            });
-        }
+    public List<Pair<String, String>> getSearchFieldLogList() {
         return searchFieldLogList;
     }
 
@@ -117,6 +100,8 @@ public class SearchLog extends BsSearchLog {
         if (fields != null) {
             sourceMap.putAll(fields);
         }
+        final Map<String, String> searchFieldMap = searchFieldLogList.stream().collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+        sourceMap.put("searchField", searchFieldMap);
         return sourceMap;
     }
 

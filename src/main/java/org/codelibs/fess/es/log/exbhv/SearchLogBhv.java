@@ -20,9 +20,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.log.bsbhv.BsSearchLogBhv;
+import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +54,22 @@ public class SearchLogBhv extends BsSearchLogBhv {
             }
         }
         return DfTypeUtil.toLocalDateTime(value);
+    }
+
+    @Override
+    protected <RESULT extends SearchLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+        try {
+            final RESULT result = entityType.newInstance();
+            final Object searchFieldObj = source.get("searchField");
+            if (searchFieldObj instanceof Map) {
+                ((Map<String, String>) searchFieldObj).entrySet().stream()
+                        .forEach(e -> result.getSearchFieldLogList().add(new Pair(e.getKey(), e.getValue())));
+            }
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            final String msg = "Cannot create a new instance: " + entityType.getName();
+            throw new IllegalBehaviorStateException(msg, e);
+        }
     }
 
 }

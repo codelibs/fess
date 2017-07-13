@@ -2772,4 +2772,135 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setVirtualHost_Terms() {
+        setVirtualHost_Terms(null);
+    }
+
+    public void setVirtualHost_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setVirtualHost_Terms("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+        setVirtualHost_Terms("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_SignificantTerms() {
+        setVirtualHost_SignificantTerms(null);
+    }
+
+    public void setVirtualHost_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setVirtualHost_SignificantTerms("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        setVirtualHost_SignificantTerms("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_IpRange() {
+        setVirtualHost_IpRange(null);
+    }
+
+    public void setVirtualHost_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setVirtualHost_IpRange("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+        setVirtualHost_IpRange("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_Count() {
+        setVirtualHost_Count(null);
+    }
+
+    public void setVirtualHost_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setVirtualHost_Count("virtualHost", opLambda);
+    }
+
+    public void setVirtualHost_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHost_Cardinality() {
+        setVirtualHost_Cardinality(null);
+    }
+
+    public void setVirtualHost_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setVirtualHost_Cardinality("virtualHost", opLambda);
+    }
+
+    public void setVirtualHost_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHost_Missing() {
+        setVirtualHost_Missing(null);
+    }
+
+    public void setVirtualHost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setVirtualHost_Missing("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+        setVirtualHost_Missing("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
 }

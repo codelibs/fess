@@ -88,6 +88,9 @@ public class BsSearchLog extends EsAbstractEntity {
     /** languages */
     protected String languages;
 
+    /** virtualHost */
+    protected String virtualHost;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -160,6 +163,9 @@ public class BsSearchLog extends EsAbstractEntity {
         if (languages != null) {
             addFieldToSource(sourceMap, "languages", languages);
         }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
+        }
         return sourceMap;
     }
 
@@ -190,6 +196,7 @@ public class BsSearchLog extends EsAbstractEntity {
         sb.append(dm).append(userInfoId);
         sb.append(dm).append(userSessionId);
         sb.append(dm).append(languages);
+        sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -368,5 +375,15 @@ public class BsSearchLog extends EsAbstractEntity {
     public void setLanguages(String value) {
         registerModifiedProperty("languages");
         this.languages = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 }

@@ -272,9 +272,6 @@
 			<arg>"fess_log/favorite_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>"fess_log/search_field_log"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
 			<arg>"fess_log/search_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

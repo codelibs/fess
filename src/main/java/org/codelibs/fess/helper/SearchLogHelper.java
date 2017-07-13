@@ -37,11 +37,9 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.es.log.exentity.ClickLog;
-import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -120,15 +118,22 @@ public class SearchLogHelper {
         if (languages != null) {
             searchLog.setLanguages(StringUtils.join((String[]) languages, ","));
         } else {
-            searchLog.setLanguages("");
+            searchLog.setLanguages(StringUtil.EMPTY);
+        }
+        final String virtualHostKey = ComponentUtil.getFessConfig().getVirtualHostKey();
+        if (virtualHostKey != null) {
+            searchLog.setVirtualHost(virtualHostKey);
+        } else {
+            searchLog.setVirtualHost(StringUtil.EMPTY);
         }
 
         @SuppressWarnings("unchecked")
         final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
         if (fieldLogMap != null) {
+            final int queryMaxLength = ComponentUtil.getFessConfig().getQueryMaxLengthAsInteger();
             for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
                 for (final String value : logEntry.getValue()) {
-                    searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, 1000));
+                    searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
                 }
             }
         }
@@ -258,17 +263,8 @@ public class SearchLogHelper {
 
     private void storeSearchLogList(final List<SearchLog> searchLogList) {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
-        final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
         searchLogBhv.batchUpdate(searchLogList, op -> {
             op.setRefreshPolicy(Constants.TRUE);
-        });
-        searchLogList.stream().forEach(searchLog -> {
-            final List<SearchFieldLog> fieldLogList = new ArrayList<>();
-            searchLog.getSearchFieldLogList().stream().forEach(fieldLog -> {
-                fieldLog.setSearchLogId(searchLog.getId());
-                fieldLogList.add(fieldLog);
-            });
-            searchFieldLogBhv.batchInsert(fieldLogList);
         });
     }
 

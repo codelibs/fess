@@ -43,7 +43,6 @@ import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -141,8 +140,6 @@ public class AdminBackupAction extends FessAdminAction {
                 final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     return writeCsvResponse(id, getSearchLogCsvWriteCall());
-                } else if ("search_field_log".equals(name)) {
-                    return writeCsvResponse(id, getSearchFieldLogCsvWriteCall());
                 } else if ("user_info".equals(name)) {
                     return writeCsvResponse(id, getUserInfoCsvWriteCall());
                 } else if ("click_log".equals(name)) {
@@ -286,26 +283,6 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getOrder(), list);
                 addToList(entity.getQueryRequestedAt(), list);
                 addToList(entity.getRequestedAt(), list);
-                try {
-                    writer.writeValues(list);
-                } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
-                }
-            });
-        };
-    }
-
-    public static Consumer<CsvWriter> getSearchFieldLogCsvWriteCall() {
-        return writer -> {
-            final SearchFieldLogBhv bhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
-            bhv.selectCursor(cb -> {
-                cb.query().matchAll();
-                cb.query().addOrderBy_SearchLogId_Asc();
-            }, entity -> {
-                final List<String> list = new ArrayList<>();
-                addToList(entity.getSearchLogId(), list);
-                addToList(entity.getName(), list);
-                addToList(entity.getValue(), list);
                 try {
                     writer.writeValues(list);
                 } catch (final IOException e) {

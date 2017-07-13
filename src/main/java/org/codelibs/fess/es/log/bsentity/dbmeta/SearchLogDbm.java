@@ -108,6 +108,8 @@ public class SearchLogDbm extends AbstractDBMeta {
                 (et, vl) -> ((SearchLog) et).setUserSessionId(DfTypeUtil.toString(vl)), "userSessionId");
         setupEpg(_epgMap, et -> ((SearchLog) et).getLanguages(), (et, vl) -> ((SearchLog) et).setLanguages(DfTypeUtil.toString(vl)),
                 "languages");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getVirtualHost(), (et, vl) -> ((SearchLog) et).setVirtualHost(DfTypeUtil.toString(vl)),
+                "virtualHost");
     }
 
     @Override
@@ -178,6 +180,8 @@ public class SearchLogDbm extends AbstractDBMeta {
             null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLanguages = cci("languages", "languages", null, null, String.class, "languages", null, false, false,
             false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
+            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnAccessType() {
         return _columnAccessType;
@@ -247,6 +251,10 @@ public class SearchLogDbm extends AbstractDBMeta {
         return _columnLanguages;
     }
 
+    public ColumnInfo columnVirtualHost() {
+        return _columnVirtualHost;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnAccessType());
@@ -266,6 +274,7 @@ public class SearchLogDbm extends AbstractDBMeta {
         ls.add(columnUserInfoId());
         ls.add(columnUserSessionId());
         ls.add(columnLanguages());
+        ls.add(columnVirtualHost());
         return ls;
     }
 

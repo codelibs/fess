@@ -20,7 +20,6 @@ import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.CSV_EXTEN
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getBackupItems;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getClickLogCsvWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFavoriteLogCsvWriteCall;
-import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchFieldLogCsvWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchLogCsvWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getUserInfoCsvWriteCall;
 
@@ -78,8 +77,6 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                 final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     return writeCsvResponse(id, getSearchLogCsvWriteCall());
-                } else if ("search_field_log".equals(name)) {
-                    return writeCsvResponse(id, getSearchFieldLogCsvWriteCall());
                 } else if ("user_info".equals(name)) {
                     return writeCsvResponse(id, getUserInfoCsvWriteCall());
                 } else if ("click_log".equals(name)) {

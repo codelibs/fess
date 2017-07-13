@@ -6,6 +6,16 @@
     "_all": {
       "enabled": false
     },
+    "dynamic_templates": [
+      {
+        "search_fields": {
+          "path_match": "searchField.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+    ],
     "properties": {
       "user": {
         "type": "keyword"
@@ -57,6 +67,9 @@
         "type": "keyword"
       },
       "languages" : {
+        "type" : "keyword"
+      },
+      "virtualHost" : {
         "type" : "keyword"
       }
     }

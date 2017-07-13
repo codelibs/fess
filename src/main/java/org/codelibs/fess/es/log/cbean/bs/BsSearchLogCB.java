@@ -243,5 +243,9 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
         public void columnLanguages() {
             doColumn("languages");
         }
+
+        public void columnVirtualHost() {
+            doColumn("virtualHost");
+        }
     }
 }

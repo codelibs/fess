@@ -11,7 +11,6 @@
 	<!-- The components of Behavior. -->
 	<component name="clickLogBhv" class="org.codelibs.fess.es.log.exbhv.ClickLogBhv"/>
 	<component name="favoriteLogBhv" class="org.codelibs.fess.es.log.exbhv.FavoriteLogBhv"/>
-	<component name="searchFieldLogBhv" class="org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv"/>
 	<component name="searchLogBhv" class="org.codelibs.fess.es.log.exbhv.SearchLogBhv"/>
 	<component name="userInfoBhv" class="org.codelibs.fess.es.log.exbhv.UserInfoBhv"/>
 </components>

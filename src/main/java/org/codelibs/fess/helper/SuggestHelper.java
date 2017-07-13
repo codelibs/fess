@@ -32,13 +32,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
-import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
@@ -147,18 +147,18 @@ public class SuggestHelper {
                     final List<String> tags = new ArrayList<>();
                     final List<String> roles = new ArrayList<>();
 
-                    for (final SearchFieldLog searchFieldLog : searchLog.getSearchFieldLogList()) {
-                        final String name = searchFieldLog.getName();
+                    for (final Pair<String, String> searchFieldLog : searchLog.getSearchFieldLogList()) {
+                        final String name = searchFieldLog.getFirst();
                         if (contentFieldNameSet.contains(name)) {
                             if (sb.length() > 0) {
                                 sb.append(TEXT_SEP);
                             }
-                            sb.append(searchFieldLog.getValue());
+                            sb.append(searchFieldLog.getSecond());
                             fields.add(name);
                         } else if (tagFieldNameSet.contains(name)) {
-                            tags.add(searchFieldLog.getValue());
+                            tags.add(searchFieldLog.getSecond());
                         } else if (roleFieldNameSet.contains(name)) {
-                            roles.add(searchFieldLog.getValue());
+                            roles.add(searchFieldLog.getSecond());
                         }
                     }
 
