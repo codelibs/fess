@@ -109,57 +109,9 @@
 									<div class="form-group">
 										<la:errors property="fileName" />
 										<la:select styleId="fileName" property="fileName" styleClass="form-control">
-											<la:option value="index">
-												<la:message key="labels.design_file_index" />
-											</la:option>
-											<la:option value="header">
-												<la:message key="labels.design_file_header" />
-											</la:option>
-											<la:option value="footer">
-												<la:message key="labels.design_file_footer" />
-											</la:option>
-											<la:option value="search">
-												<la:message key="labels.design_file_search" />
-											</la:option>
-											<la:option value="searchResults">
-												<la:message key="labels.design_file_searchResults" />
-											</la:option>
-											<la:option value="searchNoResult">
-												<la:message key="labels.design_file_searchNoResult" />
-											</la:option>
-											<la:option value="searchOptions">
-												<la:message key="labels.design_file_searchOptions" />
-											</la:option>
-											<la:option value="help">
-												<la:message key="labels.design_file_help" />
-											</la:option>
-											<la:option value="cache">
-												<la:message key="labels.design_file_cache" />
-											</la:option>
-											<%-- Error --%>
-											<la:option value="error">
-												<la:message key="labels.design_file_error" />
-											</la:option>
-											<la:option value="errorNotFound">
-												<la:message key="labels.design_file_errorNotFound" />
-											</la:option>
-											<la:option value="errorSystem">
-												<la:message key="labels.design_file_errorSystem" />
-											</la:option>
-											<la:option value="errorRedirect">
-												<la:message key="labels.design_file_errorRedirect" />
-											</la:option>
-											<la:option value="errorBadRequest">
-												<la:message key="labels.design_file_errorBadRequest" />
-											</la:option>
-											<%-- Login --%>
-											<la:option value="login">
-												<la:message key="labels.design_file_login" />
-											</la:option>
-											<%-- Profile --%>
-											<la:option value="profile">
-												<la:message key="labels.design_file_profile" />
-											</la:option>
+											<c:forEach var="item" items="${jspFileNameItems}">
+												<la:option value="${f:u(item.first)}">${f:h(item.second)}</la:option>
+											</c:forEach>
 										</la:select>
 									</div>
 								</div>

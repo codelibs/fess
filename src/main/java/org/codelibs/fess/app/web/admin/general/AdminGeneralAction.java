@@ -166,6 +166,7 @@ public class AdminGeneralAction extends FessAdminAction {
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
+        ComponentUtil.getSystemHelper().refreshDesignJspFiles();
     }
 
     public static void updateForm(final FessConfig fessConfig, final EditForm form) {

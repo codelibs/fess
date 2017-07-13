@@ -1615,23 +1615,8 @@ public interface FessProp {
         return getVirtualHostHeaders();
     }
 
-    @SuppressWarnings("unchecked")
     public default <T> T processVirtualHost(final Function<String, T> func, final T defaultValue) {
-        Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
-        if (hosts == null) {
-            hosts = split(getVirtualHostHeaderValue(), "\n").get(stream -> stream.map(s -> {
-                final String[] v1 = s.split("=");
-                if (v1.length == 2) {
-                    final String[] v2 = v1[0].split(":");
-                    if (v2.length == 2) {
-                        return new Tuple3<>(v2[0].trim(), v2[0].trim(), "/" + v1[1].trim());
-                    }
-                }
-                return null;
-            }).filter(v -> v != null).toArray(n -> new Tuple3[n]));
-            propMap.put(VIRTUAL_HOST_HEADERS, hosts);
-        }
-        final Tuple3<String, String, String>[] vHosts = hosts;
+        final Tuple3<String, String, String>[] vHosts = getVirtualHosts();
         return LaRequestUtil.getOptionalRequest().map(req -> {
             for (final Tuple3<String, String, String> host : vHosts) {
                 final String headerValue = req.getHeader(host.getValue1());
@@ -1641,6 +1626,44 @@ public interface FessProp {
             }
             return defaultValue;
         }).orElse(defaultValue);
+    }
+
+    public default String[] getVirtualHostKeys() {
+        return stream(getVirtualHosts()).get(stream -> stream.map(h -> h.getValue3()).toArray(n -> new String[n]));
+    }
+
+    @SuppressWarnings("unchecked")
+    public default Tuple3<String, String, String>[] getVirtualHosts() {
+        Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
+        if (hosts == null) {
+            hosts =
+                    split(getVirtualHostHeaderValue(), "\n").get(
+                            stream -> stream
+                                    .map(s -> {
+                                        final String[] v1 = s.split("=");
+                                        if (v1.length == 2) {
+                                            final String[] v2 = v1[0].split(":");
+                                            if (v2.length == 2) {
+                                                return new Tuple3<>(v2[0].trim(), v2[0].trim(), "/"
+                                                        + v1[1].replaceAll("[^a-zA-Z0-9_]", StringUtil.EMPTY).trim());
+                                            }
+                                        }
+                                        return null;
+                                    })
+                                    .filter(v -> {
+                                        if (v == null) {
+                                            return false;
+                                        }
+                                        if ("/admin".equalsIgnoreCase(v.getValue3()) || "/common".equalsIgnoreCase(v.getValue3())
+                                                || "/error".equalsIgnoreCase(v.getValue3()) || "/login".equalsIgnoreCase(v.getValue3())
+                                                || "/profile".equalsIgnoreCase(v.getValue3())) {
+                                            return false;
+                                        }
+                                        return true;
+                                    }).toArray(n -> new Tuple3[n]));
+            propMap.put(VIRTUAL_HOST_HEADERS, hosts);
+        }
+        return hosts;
     }
 
     String getCrawlerFailureUrlStatusCodes();
