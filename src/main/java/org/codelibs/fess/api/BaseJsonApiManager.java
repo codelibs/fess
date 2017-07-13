@@ -114,7 +114,19 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         }
 
         final StringBuilder buf = new StringBuilder(255);
-        if (obj instanceof List<?>) {
+        if (obj instanceof String[]) {
+            buf.append('[');
+            boolean first = true;
+            for (final Object child : (String[]) obj) {
+                if (first) {
+                    first = false;
+                } else {
+                    buf.append(',');
+                }
+                buf.append(escapeJson(child));
+            }
+            buf.append(']');
+        } else if (obj instanceof List<?>) {
             buf.append('[');
             boolean first = true;
             for (final Object child : (List<?>) obj) {

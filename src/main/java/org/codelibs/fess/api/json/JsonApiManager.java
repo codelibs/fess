@@ -43,6 +43,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -126,6 +127,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
 
         int status = 0;
         Exception err = null;
@@ -195,6 +197,11 @@ public class JsonApiManager extends BaseJsonApiManager {
             buf.append(escapeJson(searchQuery));
             buf.append(",\"requested_time\":");
             buf.append(requestedTime);
+            final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(params.getQuery());
+            if (relatedQueries.length > 0) {
+                buf.append(",\"related_query\":");
+                buf.append(escapeJson(relatedQueries));
+            }
             if (!documentItems.isEmpty()) {
                 buf.append(',');
                 buf.append("\"result\":[");
