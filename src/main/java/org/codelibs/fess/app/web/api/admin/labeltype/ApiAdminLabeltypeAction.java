@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.api.admin.labeltype;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.fess.app.web.admin.labeltype.AdminLabeltypeAction.getLabelType;
 
 import java.util.List;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -32,6 +35,8 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.LabelType;
+import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
@@ -131,7 +136,13 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
             copyOp.excludeNull();
+            copyOp.exclude(Constants.PERMISSIONS);
         });
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+        body.permissions =
+                stream(entity.getPermissions()).get(
+                        stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
+                                .collect(Collectors.joining("\n")));
         return body;
     }
 }

@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -192,6 +193,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
             copyOp.excludeNull();
+            copyOp.exclude(Constants.PERMISSIONS);
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions =
