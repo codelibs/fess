@@ -291,11 +291,28 @@ public class QueryHelper {
         buildBaseQuery(queryContext, context);
         buildBoostQuery(queryContext);
         buildRoleQuery(queryContext, searchRequestType);
+        buildVirtualHostQuery(queryContext, searchRequestType);
 
         if (!queryContext.hasSorts() && defaultSortBuilders != null) {
             queryContext.addSorts(defaultSortBuilders);
         }
         return queryContext;
+    }
+
+    protected void buildVirtualHostQuery(final QueryContext queryContext, final SearchRequestType searchRequestType) {
+        switch (searchRequestType) {
+        case ADMIN_SEARCH:
+            // nothing to do
+            break;
+        default:
+            final String key = fessConfig.getVirtualHostKey();
+            if (StringUtil.isNotBlank(key)) {
+                queryContext.addQuery(boolQuery -> {
+                    boolQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldVirtualHost(), key));
+                });
+            }
+            break;
+        }
     }
 
     protected void buildRoleQuery(final QueryContext queryContext, final SearchRequestType searchRequestType) {

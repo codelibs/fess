@@ -15,9 +15,13 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.File;
+
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
+import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -27,6 +31,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public class QueryHelperTest extends UnitFessTestCase {
 
@@ -43,10 +48,16 @@ public class QueryHelperTest extends UnitFessTestCase {
                 queryParser.setDefaultOperator(QueryParser.Operator.AND);
                 return queryParser;
             }
+
         };
+        File file = File.createTempFile("test", ".properties");
+        file.deleteOnExit();
+        FileUtil.writeBytes(file.getAbsolutePath(), "ldap.security.principal=%s@fess.codelibs.local".getBytes("UTF-8"));
+        DynamicProperties systemProps = new DynamicProperties(file);
+        SingletonLaContainerFactory.getContainer().register(systemProps, "systemProperties");
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        registerMockInstance(fessConfig);
-        registerMockInstance(new SystemHelper());
+        registerMock(fessConfig);
+        registerMock(new SystemHelper());
         inject(queryHelper);
         queryHelper.init();
     }
