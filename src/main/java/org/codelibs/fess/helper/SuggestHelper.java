@@ -129,7 +129,7 @@ public class SuggestHelper {
     }
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
-        final Set<String> ipSet = new HashSet<>();
+        final Set<String> sessionIdSet = new HashSet<>();
         searchLogList.stream().forEach(
                 searchLog -> {
                     if (searchLog.getHitCount() == null
@@ -137,8 +137,8 @@ public class SuggestHelper {
                         return;
                     }
 
-                    final String clientIp = searchLog.getClientIp();
-                    if (clientIp == null || ipSet.contains(clientIp)) {
+                    final String sessionId = searchLog.getUserSessionId();
+                    if (sessionId == null || sessionIdSet.contains(sessionId)) {
                         return;
                     }
 
@@ -168,7 +168,7 @@ public class SuggestHelper {
                         if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
                                     tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
-                            ipSet.add(clientIp);
+                            sessionIdSet.add(sessionId);
                         }
                     }
                 });
