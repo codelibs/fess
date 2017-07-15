@@ -18,4 +18,5 @@ package org.codelibs.fess.app.web.api.admin.scheduler;
 import org.codelibs.fess.app.web.admin.scheduler.EditForm;
 
 public class EditBody extends EditForm {
+    public Boolean running;
 }
