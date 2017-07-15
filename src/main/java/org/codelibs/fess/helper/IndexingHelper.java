@@ -57,7 +57,16 @@ public class IndexingHelper {
         try {
             if (fessConfig.isThumbnailCrawlerEnabled()) {
                 final ThumbnailManager thumbnailManager = ComponentUtil.getThumbnailManager();
-                docList.stream().forEach(doc -> thumbnailManager.offer(doc));
+                docList.stream().forEach(
+                        doc -> {
+                            if (!thumbnailManager.offer(doc)) {
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("Removing " + doc.get(fessConfig.getIndexFieldThumbnail()) + " from "
+                                            + doc.get(fessConfig.getIndexFieldUrl()));
+                                }
+                                doc.remove(fessConfig.getIndexFieldThumbnail());
+                            }
+                        });
             }
             synchronized (fessEsClient) {
                 deleteOldDocuments(fessEsClient, docList);

@@ -13,24 +13,17 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.thumbnail.impl;
+package org.codelibs.fess.exception;
 
-import java.io.File;
+public class ThumbnailGenerationException extends FessSystemException {
 
-public class EmptyGenerator extends BaseThumbnailGenerator {
+    private static final long serialVersionUID = 1L;
 
-    @Override
-    public boolean generate(final String thumbnailId, final File outputFile) {
-        return false;
+    public ThumbnailGenerationException(String message, Exception cause) {
+        super(message, cause);
     }
 
-    @Override
-    public void destroy() {
-        // nothing
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return true;
+    public ThumbnailGenerationException(String message) {
+        super(message, false, false);
     }
 }

@@ -43,6 +43,6 @@ public class ThumbnailQueue extends BsThumbnailQueue {
     @Override
     public String toString() {
         return "ThumbnailQueue [createdBy=" + createdBy + ", createdTime=" + createdTime + ", generator=" + generator + ", path=" + path
-                + ", url=" + url + "]";
+                + "]";
     }
 }

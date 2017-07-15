@@ -36,7 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Tuple4;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv;
@@ -70,7 +70,7 @@ public class ThumbnailManager {
 
     private final List<ThumbnailGenerator> generatorList = new ArrayList<>();
 
-    private BlockingQueue<Tuple4<String, String, String, String>> thumbnailTaskQueue;
+    private BlockingQueue<Tuple3<String, String, String>> thumbnailTaskQueue;
 
     private volatile boolean generating;
 
@@ -116,37 +116,35 @@ public class ThumbnailManager {
 
         thumbnailTaskQueue = new LinkedBlockingQueue<>(thumbnailTaskQueueSize);
         generating = true;
-        thumbnailQueueThread =
-                new Thread((Runnable) () -> {
-                    final List<Tuple4<String, String, String, String>> taskList = new ArrayList<>();
-                    while (generating) {
-                        try {
-                            final Tuple4<String, String, String, String> task =
-                                    thumbnailTaskQueue.poll(thumbnailTaskQueueTimeout, TimeUnit.MILLISECONDS);
-                            if (task == null) {
-                                if (!taskList.isEmpty()) {
-                                    storeQueue(taskList);
-                                }
-                            } else if (!taskList.contains(task)) {
-                                taskList.add(task);
-                                if (taskList.size() > thumbnailTaskBulkSize) {
-                                    storeQueue(taskList);
-                                }
-                            }
-                        } catch (final InterruptedException e) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Interupted task.", e);
-                            }
-                        } catch (final Exception e) {
-                            if (generating) {
-                                logger.warn("Failed to generate thumbnail.", e);
-                            }
+        thumbnailQueueThread = new Thread((Runnable) () -> {
+            final List<Tuple3<String, String, String>> taskList = new ArrayList<>();
+            while (generating) {
+                try {
+                    final Tuple3<String, String, String> task = thumbnailTaskQueue.poll(thumbnailTaskQueueTimeout, TimeUnit.MILLISECONDS);
+                    if (task == null) {
+                        if (!taskList.isEmpty()) {
+                            storeQueue(taskList);
+                        }
+                    } else if (!taskList.contains(task)) {
+                        taskList.add(task);
+                        if (taskList.size() > thumbnailTaskBulkSize) {
+                            storeQueue(taskList);
                         }
                     }
-                    if (!taskList.isEmpty()) {
-                        storeQueue(taskList);
+                } catch (final InterruptedException e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Interupted task.", e);
                     }
-                }, "ThumbnailGenerator");
+                } catch (final Exception e) {
+                    if (generating) {
+                        logger.warn("Failed to generate thumbnail.", e);
+                    }
+                }
+            }
+            if (!taskList.isEmpty()) {
+                storeQueue(taskList);
+            }
+        }, "ThumbnailGenerator");
         thumbnailQueueThread.start();
     }
 
@@ -172,7 +170,7 @@ public class ThumbnailManager {
         return "-D" + FESS_THUMBNAIL_PATH + "=" + baseDir.getAbsolutePath();
     }
 
-    protected void storeQueue(final List<Tuple4<String, String, String, String>> taskList) {
+    protected void storeQueue(final List<Tuple3<String, String, String>> taskList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String[] targets = fessConfig.getThumbnailGeneratorTargetsAsArray();
@@ -182,8 +180,7 @@ public class ThumbnailManager {
                 final ThumbnailQueue entity = new ThumbnailQueue();
                 entity.setGenerator(task.getValue1());
                 entity.setThumbnailId(task.getValue2());
-                entity.setUrl(task.getValue3());
-                entity.setPath(task.getValue4());
+                entity.setPath(task.getValue3());
                 entity.setTarget(target);
                 entity.setCreatedBy(Constants.SYSTEM_USER);
                 entity.setCreatedTime(systemHelper.getCurrentTimeAsLong());
@@ -224,7 +221,7 @@ public class ThumbnailManager {
                     if (noImageFile.isFile() && !noImageFile.delete()) {
                         logger.warn("Failed to delete " + noImageFile.getAbsolutePath());
                     }
-                    if (!generator.generate(entity.getThumbnailId(), entity.getUrl(), outputFile)) {
+                    if (!generator.generate(entity.getThumbnailId(), outputFile)) {
                         new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
                     } else {
                         final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
@@ -248,11 +245,11 @@ public class ThumbnailManager {
         return idList.size();
     }
 
-    public void offer(final Map<String, Object> docMap) {
+    public boolean offer(final Map<String, Object> docMap) {
         for (final ThumbnailGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
                 final String path = getImageFilename(docMap);
-                final Tuple4<String, String, String, String> task = generator.createTask(path, docMap);
+                final Tuple3<String, String, String> task = generator.createTask(path, docMap);
                 if (task != null) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Add thumbnail task: " + task);
@@ -260,13 +257,15 @@ public class ThumbnailManager {
                     if (!thumbnailTaskQueue.offer(task)) {
                         logger.warn("Failed to add thumbnail task: " + task);
                     }
+                    return true;
                 }
-                return;
+                return false;
             }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Thumbnail generator is not found: " + (docMap != null ? docMap.get("url") : docMap));
         }
+        return false;
     }
 
     protected String getImageFilename(final Map<String, Object> docMap) {

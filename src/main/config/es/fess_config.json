@@ -858,9 +858,6 @@
           },
           "path" : {
             "type": "keyword"
-          },
-          "url" : {
-            "type": "keyword"
           }
         }
       }

@@ -310,6 +310,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingInfoHelper.generateId(dataMap));
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url); // set again
         }
+        // thumbnail
+        putResultDataBody(dataMap, fessConfig.getIndexFieldThumbnail(), responseData.getUrl());
 
         // from config
         final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);

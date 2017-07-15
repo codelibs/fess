@@ -10,9 +10,6 @@
       "thumbnail_id": {
         "type": "keyword"
       },
-      "url": {
-        "type": "keyword"
-      },
       "path": {
         "type": "keyword"
       },

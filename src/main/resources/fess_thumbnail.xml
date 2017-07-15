@@ -20,42 +20,6 @@
 			<arg>"text/html"</arg>
 		</postConstruct>
 	</component>
-<!--
-	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.WebDriverGenerator">
-		<property name="name">"htmlThumbnailGenerator"</property>
-		<property name="generatorList">
-			["${path}/phantomjs"]
-		</property>
-		<property name="webDriverCapabilities">
-			<component class="org.openqa.selenium.remote.DesiredCapabilities">
-				<postConstruct name="setCapability">
-					<arg>"phantomjs.binary.path"</arg>
-					<arg>"${path}/phantomjs"</arg>
-				</postConstruct>
-			</component>
-		</property>
-		<postConstruct name="addCondition">
-			<arg>"mimetype"</arg>
-			<arg>"text/html"</arg>
-		</postConstruct>
-	</component>
-	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
-		<property name="name">"htmlThumbnailGenerator"</property>
-		<property name="commandList">
-			["${path}/generate-thumbnail",
-			"html",
-			"${url}",
-			"${outputFile}"]
-		</property>
-		<property name="generatorList">
-			["${path}/generate-thumbnail"]
-		</property>
-		<postConstruct name="addCondition">
-			<arg>"mimetype"</arg>
-			<arg>"text/html"</arg>
-		</postConstruct>
-	</component>
--->
 	<component name="msofficeThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"msofficeThumbnailGenerator"</property>
 		<property name="commandList">

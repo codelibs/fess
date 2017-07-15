@@ -50,6 +50,7 @@ import org.openqa.selenium.remote.UnreachableBrowserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(WebDriverGenerator.class);
@@ -117,7 +118,13 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public boolean generate(final String thumbnailId, final String url, final File outputFile) {
+    public boolean generate(final String thumbnailId, final File outputFile) {
+        return process(thumbnailId, (configId, url) -> {
+            return generate(thumbnailId, url, outputFile);
+        });
+    }
+
+    protected boolean generate(final String thumbnailId, final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
             logger.debug("Generate Thumbnail: " + url);
         }
@@ -154,7 +161,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                     }
                     final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
                     convert(thumbnail, outputFile);
-                    updateThumbnailField(thumbnailId, url, url);
+                    updateThumbnailField(thumbnailId, url);
                     return true;
                 } catch (final UnreachableBrowserException | SessionNotFoundException e) {
                     if (logger.isDebugEnabled()) {

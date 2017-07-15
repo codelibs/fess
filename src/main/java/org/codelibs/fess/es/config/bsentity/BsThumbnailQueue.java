@@ -55,9 +55,6 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     /** path */
     protected String path;
 
-    /** url */
-    protected String url;
-
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -97,9 +94,6 @@ public class BsThumbnailQueue extends EsAbstractEntity {
         if (path != null) {
             addFieldToSource(sourceMap, "path", path);
         }
-        if (url != null) {
-            addFieldToSource(sourceMap, "url", url);
-        }
         return sourceMap;
     }
 
@@ -119,7 +113,6 @@ public class BsThumbnailQueue extends EsAbstractEntity {
         sb.append(dm).append(generator);
         sb.append(dm).append(thumbnailId);
         sb.append(dm).append(path);
-        sb.append(dm).append(url);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -188,15 +181,5 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     public void setPath(String value) {
         registerModifiedProperty("path");
         this.path = value;
-    }
-
-    public String getUrl() {
-        checkSpecifiedProperty("url");
-        return convertEmptyToNull(url);
-    }
-
-    public void setUrl(String value) {
-        registerModifiedProperty("url");
-        this.url = value;
     }
 }

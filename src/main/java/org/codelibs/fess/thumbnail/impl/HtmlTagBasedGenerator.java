@@ -29,8 +29,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Tuple4;
-import org.codelibs.elasticsearch.runner.net.Curl;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -46,17 +45,10 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public Tuple4<String, String, String, String> createTask(final String path, final Map<String, Object> docMap) {
+    public Tuple3<String, String, String> createTask(final String path, final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
-        final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldThumbnail(), String.class);
-        if (StringUtil.isBlank(url)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Thumbnail task is not found: " + path + ", " + thumbnailId + ", " + url);
-            }
-            return null;
-        }
-        final Tuple4<String, String, String, String> task = new Tuple4<>(getName(), thumbnailId, url, path);
+        final Tuple3<String, String, String> task = new Tuple3<>(getName(), thumbnailId, path);
         if (logger.isDebugEnabled()) {
             logger.debug("Create thumbnail task: " + task);
         }
@@ -64,9 +56,9 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public boolean generate(final String thumbnailId, final String url, final File outputFile) {
+    public boolean generate(final String thumbnailId, final File outputFile) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Generate Thumbnail: " + url);
+            logger.debug("Generate Thumbnail: " + thumbnailId);
         }
 
         if (outputFile.exists()) {
@@ -85,47 +77,64 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             return false;
         }
 
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        Curl.get(url)
-                .proxy(fessConfig.getHttpProxy())
-                .execute(
-                        con -> {
-                            boolean created = false;
-                            try (ImageInputStream input = ImageIO.createImageInputStream(con.getInputStream())) {
-                                switch (saveImage(input, outputFile)) {
-                                case OK:
-                                    created = true;
-                                    break;
-                                case FAILED:
-                                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url);
-                                    break;
-                                case INVALID_SIZE:
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("Invalid thumbnail size: " + thumbnailId + " -> " + url);
-                                    }
-                                    break;
-                                default:
-                                    logger.error("Unknown thumbnail result: " + thumbnailId + " -> " + url);
-                                    break;
-                                }
-                            } catch (final Throwable t) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url, t);
-                                } else {
-                                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + url + " ("
-                                            + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
-                                }
-                            } finally {
-                                if (!created) {
-                                    updateThumbnailField(thumbnailId, url, StringUtil.EMPTY);
-                                    if (outputFile.exists() && !outputFile.delete()) {
-                                        logger.warn("Failed to delete " + outputFile.getAbsolutePath());
-                                    }
-                                }
+        return process(
+                thumbnailId,
+                responseData -> {
+                    if (!isImageMimeType(responseData.getMimeType())) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Thumbnail is not image: " + thumbnailId + " : " + responseData.getUrl());
+                        }
+                        updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                        return false;
+                    }
+                    boolean created = false;
+                    try (ImageInputStream input = ImageIO.createImageInputStream(responseData.getResponseBody())) {
+                        switch (saveImage(input, outputFile)) {
+                        case OK:
+                            created = true;
+                            break;
+                        case FAILED:
+                            logger.warn("Failed to create thumbnail: " + thumbnailId);
+                            break;
+                        case INVALID_SIZE:
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Invalid thumbnail size: " + thumbnailId);
                             }
-                        });
+                            break;
+                        default:
+                            logger.error("Unknown thumbnail result: " + thumbnailId);
+                            break;
+                        }
+                    } catch (final Throwable t) {
+                        if (logger.isDebugEnabled()) {
+                            logger.warn("Failed to create thumbnail: " + thumbnailId, t);
+                        } else {
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " (" + t.getClass().getCanonicalName() + ": "
+                                    + t.getMessage() + ")");
+                        }
+                    } finally {
+                        if (!created) {
+                            updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                            if (outputFile.exists() && !outputFile.delete()) {
+                                logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+                            }
+                        }
+                    }
+                    return outputFile.exists();
+                });
 
-        return outputFile.exists();
+    }
+
+    protected boolean isImageMimeType(final String mimeType) {
+        switch (mimeType) {
+        case "image/png":
+        case "image/gif":
+        case "image/jpeg":
+        case "image/bmp":
+            return true;
+        default:
+            return false;
+        }
     }
 
     protected Result saveImage(final ImageInputStream input, final File outputFile) throws IOException {
