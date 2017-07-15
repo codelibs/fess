@@ -32,10 +32,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import io.restassured.RestAssured;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 
 public abstract class CrudTestBase extends ITBase {
 
@@ -216,9 +214,4 @@ public abstract class CrudTestBase extends ITBase {
     protected String getJsonPath() {
         return "response." + getListEndpointSuffix() + ".findAll {it." + getKeyProperty() + ".startsWith(\"" + getNamePrefix() + "\")}";
     }
-
-    protected RequestSpecification checkMethodBase(final Map<String, Object> body) {
-        return given().header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2).when();
-    }
-
 }

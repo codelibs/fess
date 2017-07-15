@@ -168,6 +168,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
     protected EditBody createEditBody(final ScheduledJob entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+        body.running = entity.isRunning();
         return body;
     }
 

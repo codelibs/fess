@@ -17,6 +17,11 @@ package org.codelibs.fess.it;
 
 import static io.restassured.RestAssured.given;
 
+import java.util.Map;
+
+import io.restassured.mapper.ObjectMapperType;
+import io.restassured.specification.RequestSpecification;
+
 public class ITBase {
     public static final String DEFAULT_FESS_URL = "http://localhost:8080";
     public static final String DEFAULT_ES_URL = "http://localhost:9200";
@@ -58,4 +63,7 @@ public class ITBase {
         return System.getProperty("test.es.url", DEFAULT_ES_URL);
     }
 
+    protected RequestSpecification checkMethodBase(final Map<String, Object> body) {
+        return given().header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2).when();
+    }
 }
