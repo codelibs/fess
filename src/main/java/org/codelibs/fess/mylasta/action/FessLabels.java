@@ -1481,6 +1481,54 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Use Default */
     public static final String LABELS_design_use_default_button = "{labels.design_use_default_button}";
 
+    /** The key of the message: Top Page */
+    public static final String LABELS_design_file_index = "{labels.design_file_index}";
+
+    /** The key of the message: Footer */
+    public static final String LABELS_design_file_footer = "{labels.design_file_footer}";
+
+    /** The key of the message: Results Page (Frame) */
+    public static final String LABELS_design_file_search = "{labels.design_file_search}";
+
+    /** The key of the message: Results Page (Content) */
+    public static final String LABELS_design_file_searchResults = "{labels.design_file_searchResults}";
+
+    /** The key of the message: Results Page (No Result) */
+    public static final String LABELS_design_file_searchNoResult = "{labels.design_file_searchNoResult}";
+
+    /** The key of the message: Search Options Page */
+    public static final String LABELS_design_file_searchOptions = "{labels.design_file_searchOptions}";
+
+    /** The key of the message: Help Page (Content) */
+    public static final String LABELS_design_file_help = "{labels.design_file_help}";
+
+    /** The key of the message: Header */
+    public static final String LABELS_design_file_header = "{labels.design_file_header}";
+
+    /** The key of the message: Search Error Page */
+    public static final String LABELS_design_file_error = "{labels.design_file_error}";
+
+    /** The key of the message: Cache Page */
+    public static final String LABELS_design_file_cache = "{labels.design_file_cache}";
+
+    /** The key of the message: Error Page (Not Found) */
+    public static final String LABELS_design_file_errorNotFound = "{labels.design_file_errorNotFound}";
+
+    /** The key of the message: Error Page (System Error) */
+    public static final String LABELS_design_file_errorSystem = "{labels.design_file_errorSystem}";
+
+    /** The key of the message: Error Page (Redirect) */
+    public static final String LABELS_design_file_errorRedirect = "{labels.design_file_errorRedirect}";
+
+    /** The key of the message: Error Page (BadRequest) */
+    public static final String LABELS_design_file_errorBadRequest = "{labels.design_file_errorBadRequest}";
+
+    /** The key of the message: Login Page */
+    public static final String LABELS_design_file_login = "{labels.design_file_login}";
+
+    /** The key of the message: Profile Page */
+    public static final String LABELS_design_file_profile = "{labels.design_file_profile}";
+
     /** The key of the message: Edit JSP File */
     public static final String LABELS_design_title_edit_content = "{labels.design_title_edit_content}";
 
