@@ -39,6 +39,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
@@ -46,9 +47,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.DataConfigService;
-import org.codelibs.fess.app.service.FileConfigService;
-import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -56,7 +54,6 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
-import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -491,21 +488,7 @@ public class ViewHelper {
         if (configId.length() < 2) {
             throw new FessSystemException("Invalid configId: " + configId);
         }
-        final ConfigType configType = crawlingConfigHelper.getConfigType(configId);
-        CrawlingConfig config = null;
-        if (logger.isDebugEnabled()) {
-            logger.debug("configType: " + configType + ", configId: " + configId);
-        }
-        if (ConfigType.WEB == configType) {
-            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId)).get();
-        } else if (ConfigType.FILE == configType) {
-            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-            config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId)).get();
-        } else if (ConfigType.DATA == configType) {
-            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
-            config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId)).get();
-        }
+        final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configId);
         }
@@ -520,15 +503,16 @@ public class ViewHelper {
     }
 
     protected StreamResponse writeContent(final String configId, final String url, final CrawlerClient client) {
-        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
+        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
+        if (responseData.getHttpStatusCode() == 404) {
+            response.httpStatus(responseData.getHttpStatusCode());
+            IOUtils.closeQuietly(responseData);
+            return response;
+        }
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
-        if (responseData.getHttpStatusCode() == 404) {
-            response.httpStatus(responseData.getHttpStatusCode());
-            return response;
-        }
         response.stream(out -> {
             try (final InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                 out.write(is);
@@ -537,7 +521,7 @@ public class ViewHelper {
                     throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
             } finally {
-                responseData.close();
+                IOUtils.closeQuietly(responseData);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished to write " + url);

@@ -17,6 +17,10 @@ package org.codelibs.fess.helper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.FileConfigService;
@@ -27,6 +31,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 public class CrawlingConfigHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlingConfigHelper.class);
@@ -34,6 +41,13 @@ public class CrawlingConfigHelper {
     protected final Map<String, CrawlingConfig> crawlingConfigMap = new ConcurrentHashMap<>();
 
     protected int count = 1;
+
+    protected Cache<String, CrawlingConfig> crawlingConfigCache;
+
+    @PostConstruct
+    public void init() {
+        crawlingConfigCache = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(10, TimeUnit.MINUTES).build();
+    }
 
     public ConfigType getConfigType(final String configId) {
         if (configId == null || configId.length() < 2) {
@@ -58,27 +72,38 @@ public class CrawlingConfigHelper {
     }
 
     public CrawlingConfig getCrawlingConfig(final String configId) {
-        final ConfigType configType = getConfigType(configId);
-        if (configType == null) {
+        try {
+            return crawlingConfigCache.get(configId, () -> {
+                final ConfigType configType = getConfigType(configId);
+                if (configType == null) {
+                    return null;
+                }
+                final String id = getId(configId);
+                if (id == null) {
+                    return null;
+                }
+                switch (configType) {
+                case WEB:
+                    final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
+                    return webConfigService.getWebConfig(id).get();
+                case FILE:
+                    final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
+                    return fileConfigService.getFileConfig(id).get();
+                case DATA:
+                    final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
+                    return dataConfigService.getDataConfig(id).get();
+                default:
+                    return null;
+                }
+            });
+        } catch (ExecutionException e) {
+            logger.warn("Failed to access a crawling config cache: " + configId, e);
             return null;
         }
-        final String id = getId(configId);
-        if (id == null) {
-            return null;
-        }
-        switch (configType) {
-        case WEB:
-            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            return webConfigService.getWebConfig(id).get();
-        case FILE:
-            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-            return fileConfigService.getFileConfig(id).get();
-        case DATA:
-            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
-            return dataConfigService.getDataConfig(id).get();
-        default:
-            return null;
-        }
+    }
+
+    public void refresh() {
+        crawlingConfigCache.invalidateAll();
     }
 
     public synchronized String store(final String sessionId, final CrawlingConfig crawlingConfig) {

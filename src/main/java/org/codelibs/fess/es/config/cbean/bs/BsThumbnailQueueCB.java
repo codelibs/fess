@@ -199,9 +199,5 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
         public void columnPath() {
             doColumn("path");
         }
-
-        public void columnUrl() {
-            doColumn("url");
-        }
     }
 }

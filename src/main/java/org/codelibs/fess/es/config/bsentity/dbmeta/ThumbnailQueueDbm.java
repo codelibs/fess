@@ -90,7 +90,6 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getThumbnailId(),
                 (et, vl) -> ((ThumbnailQueue) et).setThumbnailId(DfTypeUtil.toString(vl)), "thumbnailId");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)), "path");
-        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getUrl(), (et, vl) -> ((ThumbnailQueue) et).setUrl(DfTypeUtil.toString(vl)), "url");
     }
 
     @Override
@@ -139,8 +138,6 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
             false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "keyword", 0,
             0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
-            null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -166,10 +163,6 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
         return _columnPath;
     }
 
-    public ColumnInfo columnUrl() {
-        return _columnUrl;
-    }
-
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
@@ -178,7 +171,6 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
         ls.add(columnGenerator());
         ls.add(columnThumbnailId());
         ls.add(columnPath());
-        ls.add(columnUrl());
         return ls;
     }
 
