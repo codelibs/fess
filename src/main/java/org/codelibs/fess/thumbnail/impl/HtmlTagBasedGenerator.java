@@ -110,10 +110,10 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         }
                     } catch (final Throwable t) {
                         if (logger.isDebugEnabled()) {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId, t);
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl(), t);
                         } else {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " (" + t.getClass().getCanonicalName() + ": "
-                                    + t.getMessage() + ")");
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl() + " ("
+                                    + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
                         }
                     } finally {
                         if (!created) {
@@ -131,15 +131,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     protected boolean isImageMimeType(final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
         if (mimeType == null) {
-            final String url = responseData.getUrl().split(Pattern.quote("?"))[0].toLowerCase(Locale.ROOT);
-            if (url.endsWith(".png")//
-                    || url.endsWith(".gif")//
-                    || url.endsWith(".jpg")//
-                    || url.endsWith(".jpeg")//
-                    || url.endsWith(".bmp")) {
-                return true;
-            }
-            return false;
+            return true;
         }
 
         switch (mimeType) {
