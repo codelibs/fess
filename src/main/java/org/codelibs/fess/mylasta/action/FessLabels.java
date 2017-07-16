@@ -1031,7 +1031,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Max Access Count */
     public static final String LABELS_max_access_count = "{labels.max_access_count}";
 
-    /** The key of the message: The number of Tread */
+    /** The key of the message: The number of Thread */
     public static final String LABELS_number_of_thread = "{labels.number_of_thread}";
 
     /** The key of the message: Interval time */
