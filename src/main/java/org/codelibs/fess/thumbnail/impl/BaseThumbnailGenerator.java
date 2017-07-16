@@ -31,6 +31,7 @@ import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ThumbnailGenerationException;
@@ -186,6 +187,12 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             }
             try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
                 return consumer.test(responseData);
+            } catch (final CrawlingAccessException e) {
+                if (logger.isDebugEnabled()) {
+                    throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
+                } else {
+                    throw new ThumbnailGenerationException(e.getMessage());
+                }
             } catch (final Exception e) {
                 throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
             }

@@ -21,7 +21,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -30,6 +32,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
+import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -80,7 +83,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         return process(
                 thumbnailId,
                 responseData -> {
-                    if (!isImageMimeType(responseData.getMimeType())) {
+                    if (!isImageMimeType(responseData)) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Thumbnail is not image: " + thumbnailId + " : " + responseData.getUrl());
                         }
@@ -125,7 +128,20 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
 
     }
 
-    protected boolean isImageMimeType(final String mimeType) {
+    protected boolean isImageMimeType(final ResponseData responseData) {
+        final String mimeType = responseData.getMimeType();
+        if (mimeType == null) {
+            final String url = responseData.getUrl().split(Pattern.quote("?"))[0].toLowerCase(Locale.ROOT);
+            if (url.endsWith(".png")//
+                    || url.endsWith(".gif")//
+                    || url.endsWith(".jpg")//
+                    || url.endsWith(".jpeg")//
+                    || url.endsWith(".bmp")) {
+                return true;
+            }
+            return false;
+        }
+
         switch (mimeType) {
         case "image/png":
         case "image/gif":
