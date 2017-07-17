@@ -97,15 +97,15 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                             created = true;
                             break;
                         case FAILED:
-                            logger.warn("Failed to create thumbnail: " + thumbnailId);
+                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl());
                             break;
                         case INVALID_SIZE:
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Invalid thumbnail size: " + thumbnailId);
+                                logger.debug("Invalid thumbnail size: " + thumbnailId + " -> " + responseData.getUrl());
                             }
                             break;
                         default:
-                            logger.error("Unknown thumbnail result: " + thumbnailId);
+                            logger.error("Unknown thumbnail result: " + thumbnailId + " -> " + responseData.getUrl());
                             break;
                         }
                     } catch (final Throwable t) {
