@@ -25,9 +25,11 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,6 +79,8 @@ import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper {
+
+    private static final String CONTENT_DISPOSITION = "Content-Disposition";
 
     private static final String HL_CACHE = "hl_cache";
 
@@ -134,6 +138,8 @@ public class ViewHelper {
     private String escapedHighlightPost = null;
 
     protected ActionHook actionHook = new ActionHook();
+
+    private Set<String> inlineMimeTypeSet = new HashSet<>();
 
     @PostConstruct
     public void init() {
@@ -557,22 +563,31 @@ public class ViewHelper {
                 logger.debug("userAgentType: " + userAgentType + ", charset: " + charset + ", name: " + name);
             }
 
+            final String contentDispositionType;
+            if (inlineMimeTypeSet.contains(responseData.getMimeType())) {
+                contentDispositionType = "inline";
+            } else {
+                contentDispositionType = "attachment";
+            }
+
             switch (userAgentType) {
             case IE:
-                response.header("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
+                response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + URLEncoder.encode(name, Constants.UTF_8)
+                        + "\"");
                 break;
             case OPERA:
-                response.header("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
+                response.header(CONTENT_DISPOSITION,
+                        contentDispositionType + "; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
                 break;
             case SAFARI:
-                response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
+                response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + name + "\"");
                 break;
             case CHROME:
             case FIREFOX:
             case OTHER:
             default:
-                response.header("Content-Disposition",
-                        "attachment; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
+                response.header(CONTENT_DISPOSITION,
+                        contentDispositionType + "; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
                 break;
             }
         } catch (final Exception e) {
@@ -638,6 +653,10 @@ public class ViewHelper {
 
     public List<FacetQueryView> getFacetQueryViewList() {
         return facetQueryViewList;
+    }
+
+    public void addInlineMimeType(final String mimeType) {
+        inlineMimeTypeSet.add(mimeType);
     }
 
     public ActionHook getActionHook() {
