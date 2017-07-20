@@ -60,7 +60,12 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     protected int maxRedirectCount = 10;
 
     public void addCondition(final String key, final String regex) {
-        conditionMap.put(key, regex);
+        final String value = conditionMap.get(key);
+        if (StringUtil.isBlank(value)) {
+            conditionMap.put(key, regex);
+        } else {
+            conditionMap.put(key, value + "|" + regex);
+        }
     }
 
     @Override
@@ -70,11 +75,11 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         }
         for (final Map.Entry<String, String> entry : conditionMap.entrySet()) {
             final Object value = docMap.get(entry.getKey());
-            if (value instanceof String && !((String) value).matches(entry.getValue())) {
-                return false;
+            if (value instanceof String && ((String) value).matches(entry.getValue())) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     @Override

@@ -33,10 +33,6 @@
 		</property>
 		<postConstruct name="addCondition">
 			<arg>"mimetype"</arg>
-			<arg>"text/html"</arg>
-		</postConstruct>
-		<postConstruct name="addCondition">
-			<arg>"mimetype"</arg>
 			<arg>"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</arg>
 		</postConstruct>
 		<postConstruct name="addCondition">
