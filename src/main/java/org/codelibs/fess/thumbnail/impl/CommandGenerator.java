@@ -40,11 +40,11 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     @Resource
     protected ServletContext application;
 
-    public List<String> commandList;
+    protected List<String> commandList;
 
-    public long commandTimeout = 10 * 1000L;// 10sec
+    protected long commandTimeout = 30 * 1000L;// 30sec
 
-    public File baseDir;
+    protected File baseDir;
 
     private volatile Timer destoryTimer;
 
@@ -190,6 +190,18 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 logger.warn("Failed to stop destroyer.", e);
             }
         }
+    }
+
+    public void setCommandList(List<String> commandList) {
+        this.commandList = commandList;
+    }
+
+    public void setCommandTimeout(long commandTimeout) {
+        this.commandTimeout = commandTimeout;
+    }
+
+    public void setBaseDir(File baseDir) {
+        this.baseDir = baseDir;
     }
 
 }
