@@ -5,6 +5,7 @@ export default class {
     this.FessView = FessView;
     this.FessModel = FessModel;
     this.fessUrl = FessJQuery('script#fess-ss').attr('fess-url');
+    this.fessContextPath = this.fessUrl.slice(0, this.fessUrl.indexOf('/json'));
   }
 
   start() {
@@ -70,7 +71,7 @@ export default class {
     this.FessModel.search(this.fessUrl, params).then(function(data){
       var response = data.response;
       if (response.record_count > 0) {
-        $cls.FessView.renderResult(data.response, params);
+        $cls.FessView.renderResult($cls.fessContextPath, data.response, params);
         $fessResult.css('display', 'block');
         $cls._bindPagination(data.response);
       } else {
