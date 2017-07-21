@@ -32,9 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.servlet.http.HttpSession;
 
-import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
@@ -49,7 +47,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -282,45 +279,15 @@ public class ThumbnailManager {
         return buf.toString();
     }
 
-    public void storeRequest(final String queryId, final List<Map<String, Object>> documentItems) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Map<String, String> dataMap = new HashMap<>(documentItems.size());
-        for (final Map<String, Object> docMap : documentItems) {
-            final String docid = (String) docMap.get(fessConfig.getIndexFieldDocId());
-            final String thumbnailPath = getImageFilename(docMap);
-            if (StringUtil.isNotBlank(docid) && StringUtil.isNotBlank(thumbnailPath)) {
-                dataMap.put(docid, thumbnailPath);
-            }
-        }
-        final Map<String, Map<String, String>> thumbnailPathCache = getThumbnailPathCache(LaRequestUtil.getRequest().getSession());
-        thumbnailPathCache.put(queryId, dataMap);
-    }
-
-    public File getThumbnailFile(final String queryId, final String docId) {
-        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
-        if (session != null) {
-            final Map<String, Map<String, String>> thumbnailPathCache = getThumbnailPathCache(session);
-            final Map<String, String> dataMap = thumbnailPathCache.get(queryId);
-            if (dataMap != null) {
-                final String path = dataMap.get(docId);
-                final File file = new File(baseDir, path);
-                if (file.isFile()) {
-                    return file;
-                }
+    public File getThumbnailFile(final Map<String, Object> docMap) {
+        final String thumbnailPath = getImageFilename(docMap);
+        if (StringUtil.isNotBlank(thumbnailPath)) {
+            final File file = new File(baseDir, thumbnailPath);
+            if (file.isFile()) {
+                return file;
             }
         }
         return null;
-    }
-
-    private Map<String, Map<String, String>> getThumbnailPathCache(final HttpSession session) {
-        @SuppressWarnings("unchecked")
-        Map<String, Map<String, String>> thumbnailPathCache =
-                (Map<String, Map<String, String>>) session.getAttribute(Constants.SCREEN_SHOT_PATH_CACHE);
-        if (thumbnailPathCache == null) {
-            thumbnailPathCache = new LruHashMap<>(thumbnailPathCacheSize);
-            session.setAttribute(Constants.SCREEN_SHOT_PATH_CACHE, thumbnailPathCache);
-        }
-        return thumbnailPathCache;
     }
 
     public void add(final ThumbnailGenerator generator) {

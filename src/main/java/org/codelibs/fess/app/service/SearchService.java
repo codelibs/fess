@@ -87,7 +87,6 @@ public class SearchService {
         final long requestedTime = systemHelper.getCurrentTimeAsLong();
 
         final long startTime = System.currentTimeMillis();
-        final boolean searchLogSupport = fessConfig.isSearchLog();
 
         final String query =
                 QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
@@ -157,10 +156,16 @@ public class SearchService {
         data.setQueryId(queryId);
 
         // search log
-        if (searchLogSupport) {
+        if (fessConfig.isSearchLog()) {
             ComponentUtil.getSearchLogHelper().addSearchLog(params, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart,
                     pageSize, queryResponseList);
         }
+
+        // favorite
+        if (fessConfig.isUserFavorite()) {
+            ComponentUtil.getUserInfoHelper().storeQueryId(queryId, documentItems);
+        }
+
     }
 
     public int deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
