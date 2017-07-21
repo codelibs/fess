@@ -6,6 +6,8 @@ import noResultTemplate from '!handlebars-loader!./templates/fess-no-result.hbs'
 export default class {
   constructor(FessMessages) {
     this.FessMessages = FessMessages;
+    this.IMG_LOADING_DELAY = 200;
+    this.IMG_LOADING_MAX = 0;
   }
 
   init() {
@@ -54,13 +56,15 @@ export default class {
     $fessForm.html(this.FessMessages.render(html, {}));
   }
 
-  renderResult(response, params) {
+  renderResult(contextPath, response, params) {
+    response['context_path'] = contextPath;
     var $fessResult = FessJQuery('.fessWrapper .fessResult');
     var html = resultTemplate(response);
     $fessResult.html(this.FessMessages.render(html, response));
     var $pagination = this._createPagination(response.record_count, response.page_size, response.page_number, params);
     FessJQuery('.fessWrapper .paginationNav').append($pagination);
     FessJQuery('.fessWrapper select.sort').val(params.sort);
+    this._loadThumbnail(contextPath);
   }
 
   renderNoResult(response, params) {
@@ -132,4 +136,30 @@ export default class {
     return $pagination;
   }
 
+  _loadThumbnail(contextPath) {
+    var $cls = this;
+    var loadImage = function(img, url, limit) {
+  		var imgData = new Image();
+  		imgData.onload = function() {
+  			FessJQuery(img).css('background-image', '');
+  			FessJQuery(img).attr('src', url);
+  		};
+  		imgData.onerror = function() {
+  			if (limit > 0) {
+  				setTimeout(function() {
+  					loadImage(img, url, --limit);
+  				}, $cls.IMG_LOADING_DELAY);
+  			} else {
+  				FessJQuery(img).attr('src', contextPath + "/images/noimage.png");
+  			}
+  			imgData = null;
+  		};
+  		imgData.src = url;
+  	};
+
+  	FessJQuery('img.thumbnail').each(function() {
+  		FessJQuery(this).css('background-image', 'url("' + contextPath + '/images/loading.gif")');
+  		loadImage(this, FessJQuery(this).attr('data-src'), $cls.IMG_LOADING_MAX);
+  	});
+  }
 }
