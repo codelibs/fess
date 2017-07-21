@@ -47,7 +47,6 @@ import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
@@ -285,13 +284,6 @@ public class JsonApiManager extends BaseJsonApiManager {
                     }
                     buf.append(']');
                 }
-            }
-
-            if (fessConfig.isThumbnailEnabled()) {
-                final UserInfoHelper userInfoHelper = ComponentUtil.getComponent(UserInfoHelper.class);
-                final ThumbnailManager thumbnailManager = ComponentUtil.getComponent(ThumbnailManager.class);
-                userInfoHelper.storeQueryId(queryId, documentItems);
-                thumbnailManager.storeRequest(queryId, documentItems);
             }
         } catch (final Exception e) {
             status = 1;

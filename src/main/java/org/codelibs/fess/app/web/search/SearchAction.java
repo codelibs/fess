@@ -134,29 +134,21 @@ public class SearchAction extends FessSearchAction {
             request.setAttribute(Constants.REQUEST_QUERIES, form.q);
             final WebRenderData renderData = new WebRenderData();
             searchService.search(form, renderData, getUserBean());
-            return asHtml(virtualHost(path_SearchJsp)).renderWith(data -> {
-                renderData.register(data);
-                // favorite or thumbnail
-                    if (favoriteSupport || thumbnailSupport) {
-                        final String queryId = renderData.getQueryId();
-                        final List<Map<String, Object>> documentItems = renderData.getDocumentItems();
-                        userInfoHelper.storeQueryId(queryId, documentItems);
-                        if (thumbnailSupport) {
-                            thumbnailManager.storeRequest(queryId, documentItems);
+            return asHtml(virtualHost(path_SearchJsp)).renderWith(
+                    data -> {
+                        renderData.register(data);
+                        RenderDataUtil.register(data, "displayQuery",
+                                getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
+                        createPagingQuery(form);
+                        final String relatedContent = relatedContentHelper.getRelatedContent(form.getQuery());
+                        if (StringUtil.isNotBlank(relatedContent)) {
+                            RenderDataUtil.register(data, "relatedContent", relatedContent);
                         }
-                    }
-                    RenderDataUtil.register(data, "displayQuery",
-                            getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
-                    createPagingQuery(form);
-                    final String relatedContent = relatedContentHelper.getRelatedContent(form.getQuery());
-                    if (StringUtil.isNotBlank(relatedContent)) {
-                        RenderDataUtil.register(data, "relatedContent", relatedContent);
-                    }
-                    final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
-                    if (relatedQueries.length > 0) {
-                        RenderDataUtil.register(data, "relatedQueries", relatedQueries);
-                    }
-                });
+                        final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
+                        if (relatedQueries.length > 0) {
+                            RenderDataUtil.register(data, "relatedQueries", relatedQueries);
+                        }
+                    });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
