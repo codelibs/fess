@@ -12,6 +12,12 @@
 		<postConstruct name="add">
 			<arg>pdfThumbnailGenerator</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>psThumbnailGenerator</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>imageThumbnailGenerator</arg>
+		</postConstruct>
 	</component>
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.HtmlTagBasedGenerator">
 		<property name="name">"htmlThumbnailGenerator"</property>
@@ -95,6 +101,87 @@
 		<postConstruct name="addCondition">
 			<arg>"mimetype"</arg>
 			<arg>"application/pdf"
+			</arg>
+		</postConstruct>
+	</component>
+	<component name="psThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+		<property name="name">"psThumbnailGenerator"</property>
+		<property name="commandList">
+			["${path}/generate-thumbnail",
+			"ps",
+			"${url}",
+			"${outputFile}"]
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/postscript"
+			</arg>
+		</postConstruct>
+	</component>
+	<component name="imageThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+		<property name="name">"imageThumbnailGenerator"</property>
+		<property name="commandList">
+			["${path}/generate-thumbnail",
+			"image",
+			"${url}",
+			"${outputFile}"]
+		</property>
+		<property name="generatorList">
+			["${path}/generate-thumbnail"]
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/jpeg"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/tiff"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/bmp"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/x-windows-bmp"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/x-ms-bmp"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/gif"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/png"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/vnd.adobe.photoshop"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/photoshop"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/x-photoshop"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/photoshop"
 			</arg>
 		</postConstruct>
 	</component>
