@@ -1652,7 +1652,7 @@ public interface FessProp {
 
     String getHttpProxyHost();
 
-    Integer getHttpProxyHostAsInteger();
+    Integer getHttpProxyPortAsInteger();
 
     String getHttpProxyUsername();
 
@@ -1661,8 +1661,8 @@ public interface FessProp {
     public default Proxy getHttpProxy() {
         Proxy proxy = (Proxy) propMap.get(HTML_PROXY);
         if (proxy == null) {
-            if (StringUtil.isNotBlank(getHttpProxyHost()) && getHttpProxyHostAsInteger() != null) {
-                final SocketAddress addr = new InetSocketAddress(getHttpProxyHost(), getHttpProxyHostAsInteger());
+            if (StringUtil.isNotBlank(getHttpProxyHost()) && getHttpProxyPortAsInteger() != null) {
+                final SocketAddress addr = new InetSocketAddress(getHttpProxyHost(), getHttpProxyPortAsInteger());
                 proxy = new Proxy(Type.HTTP, addr);
                 if (StringUtil.isNotBlank(getHttpProxyUsername())) {
                     Authenticator.setDefault(new Authenticator() {
