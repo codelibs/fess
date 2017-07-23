@@ -30,6 +30,14 @@ elif [ x"$CMD_TYPE" = "xpdf" ] ; then
   check_command convert
   TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
   convert -thumbnail $IMAGE_SIZE ${TARGET_FILE}[0] $OUTPUT_FILE
+elif [ x"$CMD_TYPE" = "xps" ] ; then
+  check_command convert
+  TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
+  convert -thumbnail $IMAGE_SIZE ${TARGET_FILE}[0] $OUTPUT_FILE
+elif [ x"$CMD_TYPE" = "ximage" ] ; then
+  check_command convert
+  TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
+  convert -thumbnail $IMAGE_SIZE ${TARGET_FILE}[0] $OUTPUT_FILE
 else
   echo "Unsupported type: $CMD_TYPE"
   exit 1
