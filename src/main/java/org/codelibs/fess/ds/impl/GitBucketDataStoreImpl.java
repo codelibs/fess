@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Keiichi Watanabe
  */
 public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
-    private static final Logger logger = LoggerFactory.getLogger(CsvDataStoreImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GitBucketDataStoreImpl.class);
 
     private static final int MAX_DEPTH = 20;
 

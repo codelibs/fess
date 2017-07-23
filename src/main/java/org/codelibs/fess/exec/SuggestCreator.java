@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 public class SuggestCreator {
 
-    private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SuggestCreator.class);
 
     @Resource
     public FessEsClient fessEsClient;
