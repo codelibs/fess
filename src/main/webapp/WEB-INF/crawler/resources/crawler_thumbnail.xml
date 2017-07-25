@@ -92,7 +92,7 @@
 			</arg>
 		</postConstruct>
 	</component>
-	<component name="psThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+	<component name="psThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.EmptyGenerator">
 		<property name="name">"psThumbnailGenerator"</property>
 		<property name="commandList">
 			["${path}/generate-thumbnail",
@@ -106,7 +106,7 @@
 			</arg>
 		</postConstruct>
 	</component>
-	<component name="imageThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+	<component name="imageThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.EmptyGenerator">
 		<property name="name">"imageThumbnailGenerator"</property>
 		<property name="commandList">
 			["${path}/generate-thumbnail",
