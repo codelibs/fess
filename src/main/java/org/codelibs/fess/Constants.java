@@ -193,6 +193,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String CRAWLER_STATUS = "CrawlerStatus";
 
+    public static final String CRAWLER_ERRORS = "CrawlerErrors";
+
     public static final String CRAWLER_START_TIME = "CrawlerStartTime";
 
     public static final String CRAWLER_END_TIME = "CrawlerEndTime";
