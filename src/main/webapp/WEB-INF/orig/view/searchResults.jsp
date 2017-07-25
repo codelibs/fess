@@ -11,6 +11,11 @@
 				<la:message key="labels.search_result_time" arg0="${f:h(execTime)}" />
 			</c:if>
 		</p>
+		<c:if test="${! empty sdh }">
+		<p>
+			<la:message key="labels.similar_doc_result_status" />
+		</p>
+		</c:if>
 	</div>
 </div>
 <c:if test="${partialResults}">
@@ -28,24 +33,25 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<div class="media">
-						<c:if test="${thumbnailSupport}">
-							<div class="thumbnailBox media-left hidden-xs-down">
-								<a class="link" href="${doc.url_link}"
-									data-uri="${doc.url_link}" data-id="${doc.doc_id}"
-									data-order="${s.index}"> <img
-									src="${fe:url('/images/blank.png')}"
-									data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
-									class="thumbnail">
-								</a>
-							</div>
-						</c:if>
-						<div class="media-body">
+						<div>
 							<h3 class="title ellipsis media-heading">
 								<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 									data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
 							</h3>
 							<div class="body">
-								<div class="description">${doc.content_description}</div>
+								<div>
+									<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
+										<div class="thumbnailBox media-left hidden-xs-down">
+											<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
+												data-order="${s.index}"
+											> <img src="${fe:url('/images/blank.png')}"
+												data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}" class="thumbnail"
+											>
+											</a>
+										</div>
+									</c:if>
+									<div class="media-body description">${doc.content_description}</div>
+								</div>
 								<div class="site ellipsis">
 									<cite>${f:h(doc.site_path)}</cite>
 									<c:if test="${doc.has_cache=='true'}">
@@ -53,6 +59,14 @@
 												href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
 												class="cache">
 												<la:message key="labels.search_result_cache" />
+											</la:link>
+										</small>
+									</c:if>
+									<c:if test="${doc.similar_docs_count!=null&&doc.similar_docs_count>1}">
+										<small class="hidden-md-down"> <la:link
+												href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
+												<la:message key="labels.search_result_similar"
+															arg0="${fe:formatNumber(doc.similar_docs_count-1)}" />
 											</la:link>
 										</small>
 									</c:if>
@@ -130,7 +144,7 @@
 							<c:if
 								test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 								<li class="list-group-item"><la:link
-										href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+										href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}&sdh=${f:u(fe:sdh(sh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 											${f:h(fe:label(countEntry.key))} 
 											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>
 									</la:link></li>
@@ -147,7 +161,7 @@
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 							<li class="list-group-item p-l-md"><la:link
-									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
+									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
 									<la:message key="${queryEntry.key}" />
 									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
 								</la:link></li>

@@ -112,6 +112,32 @@
 				</div>
 			</div>
 		</c:if>
+		<c:if test="${!empty relatedQueries}">
+			<div class="row">
+				<div class="col-md-12">
+					<p class="popularWordBody ellipsis">
+						<la:message key="labels.search_related_queries" />
+						<c:forEach var="item" varStatus="s" items="${relatedQueries}">
+							<c:if test="${s.index < 3}">
+								<la:link
+									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+							</c:if>
+							<c:if test="${3 <= s.index}">
+								<la:link styleClass="hidden-xs"
+									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+							</c:if>
+						</c:forEach>
+					</p>
+				</div>
+			</div>
+		</c:if>
+		<c:if test="${!empty relatedContent}">
+			<div class="row">
+				<div class="col-md-12">
+					${relatedContent}
+				</div>
+			</div>
+		</c:if>
 		<c:choose>
 			<c:when test="${f:h(allRecordCount) != 0}">
 				<jsp:include page="searchResults.jsp" />
