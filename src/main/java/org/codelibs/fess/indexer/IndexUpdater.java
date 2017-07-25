@@ -272,7 +272,7 @@ public class IndexUpdater extends Thread {
                     if (fessConfig.getIndexerThreadDumpEnabledAsBoolean()) {
                         printThreadDump();
                     }
-
+                    org.codelibs.fess.exec.Crawler.addError("QueueTimeout");
                 }
 
                 if (!ComponentUtil.available()) {
@@ -297,8 +297,10 @@ public class IndexUpdater extends Thread {
                 logger.error("IndexUpdater is terminated.", t);
             } else if (logger.isDebugEnabled()) {
                 logger.error("IndexUpdater is terminated.", t);
+                org.codelibs.fess.exec.Crawler.addError(t.getClass().getSimpleName());
             } else if (logger.isInfoEnabled()) {
                 logger.info("IndexUpdater is terminated.");
+                org.codelibs.fess.exec.Crawler.addError(t.getClass().getSimpleName());
             }
             forceStop();
         } finally {

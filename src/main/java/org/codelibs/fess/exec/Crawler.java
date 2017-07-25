@@ -26,7 +26,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -67,6 +70,8 @@ public class Crawler {
 
     private static AtomicBoolean running = new AtomicBoolean(false);
 
+    private static Queue<String> errors = new ConcurrentLinkedQueue<>();
+
     @Resource
     protected FessEsClient fessEsClient;
 
@@ -81,6 +86,12 @@ public class Crawler {
 
     @Resource
     protected CrawlingInfoService crawlingInfoService;
+
+    public static void addError(final String msg) {
+        if (StringUtil.isNotBlank(msg)) {
+            errors.offer(msg);
+        }
+    }
 
     public static class Options {
 
@@ -367,7 +378,6 @@ public class Crawler {
 
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
-        boolean completed = false;
         try {
             writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_START_TIME);
 
@@ -423,7 +433,6 @@ public class Crawler {
             if (logger.isInfoEnabled()) {
                 logger.info("Finished Crawler");
             }
-            completed = true;
 
             return Constants.EXIT_OK;
         } catch (final Throwable t) {
@@ -431,7 +440,11 @@ public class Crawler {
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
-            crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_STATUS, completed ? Constants.T.toString() : Constants.F.toString());
+            crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_STATUS, errors.isEmpty() ? Constants.T.toString() : Constants.F.toString());
+            if (!errors.isEmpty()) {
+                crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_ERRORS, errors.stream().map(s -> s.replace(" ", StringUtil.EMPTY))
+                        .collect(Collectors.joining(" ")));
+            }
             writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_END_TIME);
             crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
 
