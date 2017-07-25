@@ -94,12 +94,6 @@
 	</component>
 	<component name="psThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.EmptyGenerator">
 		<property name="name">"psThumbnailGenerator"</property>
-		<property name="commandList">
-			["${path}/generate-thumbnail",
-			"ps",
-			"${url}",
-			"${outputFile}"]
-		</property>
 		<postConstruct name="addCondition">
 			<arg>"mimetype"</arg>
 			<arg>"application/postscript"
@@ -108,12 +102,6 @@
 	</component>
 	<component name="imageThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.EmptyGenerator">
 		<property name="name">"imageThumbnailGenerator"</property>
-		<property name="commandList">
-			["${path}/generate-thumbnail",
-			"image",
-			"${url}",
-			"${outputFile}"]
-		</property>
 		<property name="generatorList">
 			["${path}/generate-thumbnail"]
 		</property>
