@@ -112,6 +112,9 @@
 			"${url}",
 			"${outputFile}"]
 		</property>
+		<property name="generatorList">
+			["${path}/generate-thumbnail"]
+		</property>
 		<postConstruct name="addCondition">
 			<arg>"mimetype"</arg>
 			<arg>"application/postscript"
