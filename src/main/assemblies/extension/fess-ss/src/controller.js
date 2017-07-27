@@ -6,17 +6,44 @@ export default class {
     this.FessModel = FessModel;
     this.fessUrl = FessJQuery('script#fess-ss').attr('fess-url');
     this.fessContextPath = this.fessUrl.slice(0, this.fessUrl.indexOf('/json'));
+    this.searchPagePath = FessJQuery('script#fess-ss').attr('fess-search-page-path');
+    this.urlParams = function() {
+      var params = {};
+      var array = location.search.replace(/\?/g, '').split('&');
+      array.forEach(function(param){
+        var tpl = param.split('=');
+        if (tpl.length == 1) {
+          params[decodeURIComponent(tpl[0])] = '';
+        } else if (tpl.length == 2) {
+          params[decodeURIComponent(tpl[0])] = decodeURIComponent(tpl[1]);
+        }
+      })
+      return params;
+    }();
   }
 
   start() {
     this.FessView.init();
-    this.FessView.renderForm();
+    this.FessView.renderForm(this.searchPagePath, this.urlParams);
     this._bindForm();
+    if (this.urlParams.q !== undefined) {
+      if (FessJQuery('.fessWrapper .fessForm form input').length > 0) {
+        FessJQuery('.fessWrapper .fessForm form input').val(this.urlParams.q);
+      }
+      if (FessJQuery('.fessWrapper .fessFormOnly form input').length > 0) {
+        FessJQuery('.fessWrapper .fessFormOnly form input').val(this.urlParams.q);
+      }
+      try {
+        this._search({q: this.urlParams.q});
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 
   _bindForm() {
     var $cls = this;
-    FessJQuery('.fessWrapper form').submit(function(){
+    FessJQuery('.fessWrapper .fessForm form').submit(function(){
       try {
         var keyword = FessJQuery('#contentQuery', this).val();
         FessJQuery('.fessWrapper #contentQuery').val(keyword);
@@ -52,7 +79,12 @@ export default class {
     $fessResult.css('display', 'none');
 
     if (params.q === undefined) {
-      var keyword = FessJQuery('.fessWrapper #contentQuery').val();
+      var keyword = '';
+      if (FessJQuery('.fessWrapper .fessForm').length > 0) {
+        keyword = FessJQuery('.fessWrapper .fessForm #contentQuery').val();
+      } else if(FessJQuery('.fessWrapper .fessFormOnly').length > 0) {
+        keyword = FessJQuery('.fessWrapper .fessFormOnly #contentQuery').val();
+      }
       if (keyword.length > 0) {
         params.q = keyword;
       } else {
