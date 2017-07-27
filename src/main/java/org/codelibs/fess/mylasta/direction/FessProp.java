@@ -68,6 +68,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS = "ThumbnailHtmlImageExcludeExtensions";
+
     public static final String QUERY_DEFAULT_LANGUAGES = "queryDefaultLanguages";
 
     public static final String HTML_PROXY = "httpProxy";
@@ -1679,4 +1681,25 @@ public interface FessProp {
         }
         return proxy;
     }
+
+    String getThumbnailHtmlImageExcludeExtensions();
+
+    public default boolean isThumbnailHtmlImageUrl(final String url) {
+        if (StringUtil.isBlank(url)) {
+            return false;
+        }
+
+        String[] excludeExtensions = (String[]) propMap.get(THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS);
+        if (excludeExtensions == null) {
+            excludeExtensions =
+                    split(getThumbnailHtmlImageExcludeExtensions(), ",").get(
+                            stream -> stream.map(s -> s.toLowerCase(Locale.ROOT).trim()).filter(StringUtil::isNotBlank)
+                                    .toArray(n -> new String[n]));
+            propMap.put(THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS, excludeExtensions);
+        }
+
+        final String u = url.toLowerCase(Locale.ROOT);
+        return !stream(excludeExtensions).get(stream -> stream.anyMatch(s -> u.endsWith(s)));
+    }
+
 }

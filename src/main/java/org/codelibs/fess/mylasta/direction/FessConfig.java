@@ -803,6 +803,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. png */
     String THUMBNAIL_HTML_IMAGE_FORMAT = "thumbnail.html.image.format";
 
+    /** The key of the configuration. e.g. //IMG */
+    String THUMBNAIL_HTML_IMAGE_XPATH = "thumbnail.html.image.xpath";
+
+    /** The key of the configuration. e.g. svg,html,css,js */
+    String THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS = "thumbnail.html.image.exclude.extensions";
+
     /** The key of the configuration. e.g. 0 */
     String THUMBNAIL_GENERATOR_INTERVAL = "thumbnail.generator.interval";
 
@@ -3920,6 +3926,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getThumbnailHtmlImageFormat();
 
     /**
+     * Get the value for the key 'thumbnail.html.image.xpath'. <br>
+     * The value is, e.g. //IMG <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageXpath();
+
+    /**
+     * Get the value for the key 'thumbnail.html.image.exclude.extensions'. <br>
+     * The value is, e.g. svg,html,css,js <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageExcludeExtensions();
+
+    /**
      * Get the value for the key 'thumbnail.generator.interval'. <br>
      * The value is, e.g. 0 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6573,6 +6593,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getThumbnailHtmlImageFormat() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_FORMAT);
+        }
+
+        public String getThumbnailHtmlImageXpath() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_XPATH);
+        }
+
+        public String getThumbnailHtmlImageExcludeExtensions() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS);
         }
 
         public String getThumbnailGeneratorInterval() {
