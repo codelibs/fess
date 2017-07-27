@@ -115,8 +115,6 @@ public class QueryHelper {
 
     protected boolean lowercaseWildcard = true;
 
-    protected long timeAllowed = -1;
-
     protected SortBuilder<?>[] defaultSortBuilders;
 
     protected String highlightPrefix = "hl_";
@@ -749,20 +747,6 @@ public class QueryHelper {
      */
     public void setAdditionalQuery(final String additionalQuery) {
         this.additionalQuery = additionalQuery;
-    }
-
-    /**
-     * @return the timeAllowed
-     */
-    public long getTimeAllowed() {
-        return timeAllowed;
-    }
-
-    /**
-     * @param timeAllowed the timeAllowed to set
-     */
-    public void setTimeAllowed(final long timeAllowed) {
-        this.timeAllowed = timeAllowed;
     }
 
     public void addDefaultSort(final String fieldName, final String order) {
