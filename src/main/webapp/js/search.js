@@ -216,7 +216,8 @@ $(function() {
 					loadImage(img, url, --limit);
 				}, IMG_LOADING_DELAY);
 			} else {
-				$(img).attr('src', contextPath + "/images/noimage.png");
+				// $(img).attr('src', contextPath + "/images/noimage.png");
+				$(img).parent().css('display', 'none');
 			}
 			imgData = null;
 		});

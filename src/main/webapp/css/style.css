@@ -250,6 +250,10 @@ ul.searchOptionLabels li {
 	border-radius: 0px;
 }
 
+img.thumbnail {
+	width: 100px;
+}
+
 .thumbnail {
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
