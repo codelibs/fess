@@ -740,47 +740,54 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             }
 
-            final NodeList imgNodeList = getXPathAPI().selectNodeList(document, "//IMG");
-            Node firstSrcNode = null;
+            final NodeList imgNodeList = getXPathAPI().selectNodeList(document, fessConfig.getThumbnailHtmlImageXpath());
+            String firstThumbnailUrl = null;
             for (int i = 0; i < imgNodeList.getLength(); i++) {
                 final Node imgNode = imgNodeList.item(i);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("img tag: " + imgNode);
+                }
                 final NamedNodeMap attributes = imgNode.getAttributes();
+                final String thumbnailUrl = getThumbnailSrc(responseData.getUrl(), attributes);
                 final Integer height = getAttributeAsInteger(attributes, "height");
                 final Integer width = getAttributeAsInteger(attributes, "width");
-                if (height != null && width != null) {
+                if (!fessConfig.isThumbnailHtmlImageUrl(thumbnailUrl)) {
+                    continue;
+                } else if (height != null && width != null) {
                     try {
                         if (fessConfig.validateThumbnailSize(width, height)) {
-                            final Node srcNode = attributes.getNamedItem("src");
-                            if (srcNode != null) {
-                                final URL thumbnailUrl = getURL(responseData.getUrl(), srcNode.getTextContent());
-                                if (thumbnailUrl != null) {
-                                    return thumbnailUrl.toExternalForm();
-                                }
-                            }
+                            return thumbnailUrl;
                         }
                     } catch (final Exception e) {
                         logger.debug("Failed to parse " + imgNode + " at " + responseData.getUrl(), e);
                     }
-                } else if (firstSrcNode == null) {
-                    final Node srcNode = attributes.getNamedItem("src");
-                    if (srcNode != null) {
-                        firstSrcNode = srcNode;
-                    }
+                } else if (firstThumbnailUrl == null) {
+                    firstThumbnailUrl = thumbnailUrl;
                 }
             }
 
-            if (firstSrcNode != null) {
-                try {
-                    final URL thumbnailUrl = getURL(responseData.getUrl(), firstSrcNode.getTextContent());
-                    if (thumbnailUrl != null) {
-                        return thumbnailUrl.toExternalForm();
-                    }
-                } catch (final Exception e) {
-                    logger.debug("Failed to parse " + firstSrcNode + " at " + responseData.getUrl(), e);
-                }
+            if (firstThumbnailUrl != null) {
+                return firstThumbnailUrl;
             }
         } catch (final Exception e) {
             logger.warn("Failed to retrieve thumbnail url from " + responseData.getUrl(), e);
+        }
+        return null;
+    }
+
+    protected String getThumbnailSrc(final String url, final NamedNodeMap attributes) {
+        final Node srcNode = attributes.getNamedItem("src");
+        if (srcNode != null) {
+            try {
+                final URL thumbnailUrl = getURL(url, srcNode.getTextContent());
+                if (thumbnailUrl != null) {
+                    return thumbnailUrl.toExternalForm();
+                }
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to parse thumbnail url for " + url + " : " + attributes, e);
+                }
+            }
         }
         return null;
     }
