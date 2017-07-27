@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.admin.upgrade;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 
@@ -36,13 +35,8 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
-import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.UpgradeUtil;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
@@ -62,12 +56,11 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private static final String VERSION_11_1 = "11.1";
 
+    private static final String VERSION_11_2 = "11.2";
+
     // ===================================================================================
     //                                                                           Attribute
     //
-    @Resource
-    protected FessConfig fessConfig;
-
     @Resource
     protected RoleBhv roleBhv;
 
@@ -152,6 +145,8 @@ public class AdminUpgradeAction extends FessAdminAction {
         if (VERSION_11_0.equals(form.targetVersion)) {
             try {
                 upgradeFrom11_0();
+                upgradeFrom11_1();
+                upgradeFrom11_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -163,8 +158,8 @@ public class AdminUpgradeAction extends FessAdminAction {
             }
         } else if (VERSION_11_1.equals(form.targetVersion)) {
             try {
-                upgradeFrom11_0();
                 upgradeFrom11_1();
+                upgradeFrom11_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -173,6 +168,18 @@ public class AdminUpgradeAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_1, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_11_2.equals(form.targetVersion)) {
+            try {
+                upgradeFrom11_2();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_2, e.getLocalizedMessage()));
             }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
@@ -188,8 +195,34 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String configIndex = ".fess_config";
 
         // update mapping
-        addFieldMapping(indicesClient, configIndex, "thumbnail_queue", "thumbnail_id",
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "thumbnail_queue", "thumbnail_id",
                 "{\"properties\":{\"thumbnail_id\":{\"type\":\"keyword\"}}}");
+    }
+
+    private void upgradeFrom11_2() {
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String configIndex = ".fess_config";
+        final String searchLogIndex = "fess_log";
+
+        // update mapping
+        UpgradeUtil.addMapping(indicesClient, configIndex, "related_content", "fess_indices/.fess_config");
+        UpgradeUtil.addMapping(indicesClient, configIndex, "related_query", "fess_indices/.fess_config");
+
+        // update mapping
+        if (UpgradeUtil.addFieldMapping(indicesClient, searchLogIndex, "search_log", "virtualHost",
+                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}")) {
+            UpgradeUtil.putMapping(indicesClient, searchLogIndex, "{\"dynamic_templates\": ["
+                    + "{\"search_fields\": {\"path_match\": \"searchField.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
+                    + "]}");
+        }
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "web_config", "virtualHost",
+                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "data_config", "virtualHost",
+                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "file_config", "virtualHost",
+                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "key_match", "virtualHost",
+                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
     }
 
     private void upgradeFromAll() {
@@ -197,8 +230,8 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
 
         // .crawler
-        if (existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
-            deleteIndex(indicesClient, crawlerIndex, response -> {});
+        if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
+            UpgradeUtil.deleteIndex(indicesClient, crawlerIndex, response -> {});
         }
     }
 
@@ -222,48 +255,4 @@ public class AdminUpgradeAction extends FessAdminAction {
         return false;
     }
 
-    private void addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String field,
-            final String source) {
-        final GetFieldMappingsResponse gfmResponse =
-                indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
-        final FieldMappingMetaData fieldMappings = gfmResponse.fieldMappings(index, type, field);
-        if (fieldMappings == null || fieldMappings.isNull()) {
-            try {
-                final PutMappingResponse pmResponse =
-                        indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
-                if (!pmResponse.isAcknowledged()) {
-                    logger.warn("Failed to add " + field + " to " + index + "/" + type);
-                }
-            } catch (final Exception e) {
-                logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
-            }
-        }
-    }
-
-    private boolean existsIndex(final IndicesAdminClient indicesClient, final String index, final IndicesOptions options) {
-        try {
-            final IndicesExistsResponse response =
-                    indicesClient.prepareExists(index).setIndicesOptions(options).execute().actionGet(fessConfig.getIndexSearchTimeout());
-            return response.isExists();
-        } catch (final Exception e) {
-            // ignore
-        }
-        return false;
-    }
-
-    private void deleteIndex(final IndicesAdminClient indicesClient, final String index, final Consumer<DeleteIndexResponse> comsumer) {
-        indicesClient.prepareDelete(index).execute(new ActionListener<DeleteIndexResponse>() {
-
-            @Override
-            public void onResponse(final DeleteIndexResponse response) {
-                logger.info("Deleted " + index + " index.");
-                comsumer.accept(response);
-            }
-
-            @Override
-            public void onFailure(final Exception e) {
-                logger.warn("Failed to delete " + index + " index.", e);
-            }
-        });
-    }
 }
