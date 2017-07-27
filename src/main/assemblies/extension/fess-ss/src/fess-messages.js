@@ -3,7 +3,7 @@ export default class {
     this.messages = {
       en: {
         'form.search.button': 'Search',
-        'form.input.placeholder': 'Fess custom search',
+        'form.input.placeholder': '',
         'result.number': 'results',
         'result.second': 'second',
         'result.order': 'Order',
@@ -15,7 +15,7 @@ export default class {
       },
       ja: {
         'form.search.button': '検索',
-        'form.input.placeholder': 'Fess カスタム検索',
+        'form.input.placeholder': '',
         'result.number': '件',
         'result.second': '秒',
         'result.order': '表示順',
