@@ -695,11 +695,10 @@ public class FessEsClient implements Client {
         final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type);
         if (condition.build(searchRequestBuilder)) {
 
-            if (ComponentUtil.hasQueryHelper()) {
-                final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-                if (queryHelper.getTimeAllowed() >= 0) {
-                    searchRequestBuilder.setTimeout(TimeValue.timeValueMillis(queryHelper.getTimeAllowed()));
-                }
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final long queryTimeout = fessConfig.getQueryTimeoutAsInteger().longValue();
+            if (queryTimeout >= 0) {
+                searchRequestBuilder.setTimeout(TimeValue.timeValueMillis(queryTimeout));
             }
 
             try {
