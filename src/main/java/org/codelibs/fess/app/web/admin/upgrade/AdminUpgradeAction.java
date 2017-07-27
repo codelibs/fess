@@ -152,6 +152,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         if (VERSION_11_0.equals(form.targetVersion)) {
             try {
                 upgradeFrom11_0();
+                upgradeFrom11_1();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -163,7 +164,6 @@ public class AdminUpgradeAction extends FessAdminAction {
             }
         } else if (VERSION_11_1.equals(form.targetVersion)) {
             try {
-                upgradeFrom11_0();
                 upgradeFrom11_1();
                 upgradeFromAll();
 
