@@ -15,7 +15,7 @@ export default class {
         if (tpl.length == 1) {
           params[decodeURIComponent(tpl[0])] = '';
         } else if (tpl.length == 2) {
-          params[decodeURIComponent(tpl[0])] = decodeURIComponent(tpl[1]);
+          params[decodeURIComponent(tpl[0])] = decodeURIComponent(tpl[1].replace(/\+/g, ' '));
         }
       })
       return params;
