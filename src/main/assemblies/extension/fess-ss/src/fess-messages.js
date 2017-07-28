@@ -28,7 +28,11 @@ export default class {
     }
   }
   getLanguage() {
-    return window.navigator.userLanguage || window.navigator.language || window.navigator.browserLanguage  || 'en';
+    var lang = window.navigator.userLanguage || window.navigator.language || window.navigator.browserLanguage  || 'en';
+    if (lang.indexOf('-') > 0) {
+      lang = lang.substr(0, lang.indexOf('-'));
+    }
+    return lang;
   }
   getMessage(key, vars) {
     var language = this.getLanguage();
