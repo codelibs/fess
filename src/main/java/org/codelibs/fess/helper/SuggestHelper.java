@@ -162,6 +162,11 @@ public class SuggestHelper {
                         }
                     }
 
+                    final String virtualHost = searchLog.getVirtualHost();
+                    if (virtualHost != null) {
+                        tags.add(virtualHost);
+                    }
+
                     if (sb.length() > 0) {
                         final String[] langs = searchLog.getLanguages() == null ? new String[] {} : searchLog.getLanguages().split(",");
                         stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));

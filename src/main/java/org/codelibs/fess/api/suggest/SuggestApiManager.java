@@ -79,6 +79,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
             builder.setSize(parameter.getNum());
             stream(langs).of(stream -> stream.forEach(builder::addLang));
 
+            stream(parameter.getTags()).of(stream -> stream.forEach(builder::addTag));
+            final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
+            if (StringUtil.isNotBlank(key)) {
+                builder.addTag(key);
+            }
+
             builder.addKind(SuggestItem.Kind.USER.toString());
             if (ComponentUtil.getFessConfig().isSuggestSearchLog()) {
                 builder.addKind(SuggestItem.Kind.QUERY.toString());
@@ -149,8 +155,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
         private final HttpServletRequest request;
 
-        protected RequestParameter(final HttpServletRequest request, final String query, final String[] fields, final int num) {
+        private final String[] tags;
+
+        protected RequestParameter(final HttpServletRequest request, final String query, final String[] tags, final String[] fields,
+                final int num) {
             this.query = query;
+            this.tags = tags;
             this.fields = fields;
             this.num = num;
             this.request = request;
@@ -174,7 +184,15 @@ public class SuggestApiManager extends BaseJsonApiManager {
                 num = 10;
             }
 
-            return new RequestParameter(request, query, fields, num);
+            final String tagsStr = request.getParameter("tags");
+            final String[] tags;
+            if (StringUtil.isNotBlank(tagsStr)) {
+                tags = tagsStr.split(",");
+            } else {
+                tags = new String[0];
+            }
+
+            return new RequestParameter(request, query, tags, fields, num);
         }
 
         @Override
@@ -193,6 +211,10 @@ public class SuggestApiManager extends BaseJsonApiManager {
         @Override
         public Map<String, String[]> getFields() {
             throw new UnsupportedOperationException();
+        }
+
+        public String[] getTags() {
+            return tags;
         }
 
         @Override
