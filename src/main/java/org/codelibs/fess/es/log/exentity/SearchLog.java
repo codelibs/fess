@@ -100,7 +100,8 @@ public class SearchLog extends BsSearchLog {
         if (fields != null) {
             sourceMap.putAll(fields);
         }
-        final Map<String, String> searchFieldMap = searchFieldLogList.stream().collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+        final Map<String, List<Object>> searchFieldMap = searchFieldLogList.stream()
+                .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
         sourceMap.put("searchField", searchFieldMap);
         return sourceMap;
     }
