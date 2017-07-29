@@ -40,9 +40,16 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 
+/**
+ * Integration Tests for
+ * - /api/admin/joblog
+ * - /api/admin/crawlinginfo
+ * - /api/admin/failureurl
+ * - /api/admin/searchlist
+ * */
 @Tag("it")
-public class CrawlingInfoTests extends ITBase {
-    private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoTests.class);
+public class CrawlerLogTests extends ITBase {
+    private static final Logger logger = LoggerFactory.getLogger(CrawlerLogTests.class);
 
     private static final String NAME_PREFIX = "crawlingInfoTest_";
 
