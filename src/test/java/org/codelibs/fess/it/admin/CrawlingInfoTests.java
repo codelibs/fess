@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,34 +46,19 @@ public class CrawlingInfoTests extends ITBase {
 
     private static final String NAME_PREFIX = "crawlingInfoTest_";
 
+    private static String webConfigId;
+
     @BeforeAll
     protected static void initAll() {
         RestAssured.baseURI = getFessUrl();
         settingTestToken();
-    }
 
-    @BeforeEach
-    protected void init() {
-    }
-
-    @AfterEach
-    protected void tearDown() {
-        deleteMethod("/api/admin/webconfig/setting/" + getWebConfigId());
-        deleteMethod("/api/admin/scheduler/setting/" + getSchedulerId());
-        // TODO delete searchlist & job log
-    }
-
-    @AfterAll
-    protected static void tearDownAll() {
-        deleteTestToken();
-    }
-
-    @Test
-    void crawlingTest() {
+        // create and execute a web crawler
         try {
             createWebConfig();
             logger.info("WebConfig is created");
             Thread.sleep(10000);
+            webConfigId = getWebConfigId();
 
             createJob();
             logger.info("Job is created");
@@ -81,18 +67,67 @@ public class CrawlingInfoTests extends ITBase {
             startJob();
 
             waitJob();
-
-            testReadCrawlingInfo();
-            testDeleteCrawlingInfo();
         } catch (InterruptedException e) {
             e.printStackTrace();
             assertTrue(false);
         }
     }
 
-    private void createWebConfig() {
+    @BeforeEach
+    protected void init() {
+    }
+
+    @AfterEach
+    protected void tearDown() {
+    }
+
+    @AfterAll
+    protected static void tearDownAll() {
+        final List<Map<String, Object>> jobLogList = readJobLog();
+        for (Map<String, Object> elem : jobLogList) {
+            deleteMethod("/api/admin/joblog/log/" + elem.get("id"));
+        }
+
+        final List<Map<String, Object>> crawlingInfoList = readCrawlingInfo();
+        for (Map<String, Object> elem : crawlingInfoList) {
+            deleteMethod("/api/admin/crawlinginfo/log/" + elem.get("id"));
+        }
+
+        final List<Map<String, Object>> failureUrlList = readFailureUrl();
+        for (Map<String, Object> elem : failureUrlList) {
+            deleteMethod("/api/admin/failurelog/log/" + elem.get("id"));
+        }
+
+        deleteMethod("/api/admin/scheduler/setting/" + getSchedulerId());
+        deleteMethod("/api/admin/webconfig/setting/" + webConfigId);
+
+        deleteTestToken();
+    }
+
+    @Test
+    void jobLogTest() {
+        testReadJobLog();
+        testDeleteJobLog();
+    }
+
+    @Test
+    void crawlingInfoTest() {
+        testReadCrawlingInfo();
+        testDeleteCrawlingInfo();
+    }
+
+    @Test
+    void failureUrlTest() {
+        testReadFailureUrl();
+        testDeleteFailureUrl();
+    }
+
+    /**
+     * Methods for a Web Crawling Job
+     * */
+    private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        final String urls = "http://example.com";
+        final String urls = "http://example.com" + "\n" + "http://failure.url";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("user_agent", "Mozilla/5.0");
@@ -107,7 +142,7 @@ public class CrawlingInfoTests extends ITBase {
                 .body("response.status", equalTo(0));
     }
 
-    private void createJob() {
+    private static void createJob() {
         final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("name", NAME_PREFIX + "Scheduler");
         requestBody.put("target", "all");
@@ -122,7 +157,7 @@ public class CrawlingInfoTests extends ITBase {
                 .body("response.status", equalTo(0));
     }
 
-    private void startJob() {
+    private static void startJob() {
         final Map<String, Object> requestBody = new HashMap<>();
         final String schedulerId = getSchedulerId();
         final Response response = checkMethodBase(requestBody).post("/api/admin/scheduler/" + schedulerId + "/start");
@@ -130,9 +165,10 @@ public class CrawlingInfoTests extends ITBase {
         logger.info("Start scheduler \"" + schedulerId + "\"");
     }
 
-    private void waitJob() throws InterruptedException {
+    private static void waitJob() throws InterruptedException {
         Boolean isRunning = false;
         int count = 0;
+
         while (count < 300 && !isRunning) { // Wait until the crawler starts
             Thread.sleep(500);
             count++;
@@ -164,75 +200,138 @@ public class CrawlingInfoTests extends ITBase {
         logger.info("Crawler terminated");
     }
 
-    private void testReadCrawlingInfo() {
-        final String webConfigId = getWebConfigId();
-        final Map<String, Object> searchBody = new HashMap<>();
-        final String response = checkMethodBase(searchBody).get("/api/admin/crawlinginfo/logs").asString();
-        final List<Map<String, Object>> itemList = JsonPath.from(response).getList("response.logs");
-        //logger.info("crawling info" + response);
+    /**
+     * Test for JobLog
+     * */
+    private void testReadJobLog() {
+        final List<Map<String, Object>> logList = readJobLog();
+        assertEquals(1, logList.size());
+    }
 
-        int count = 0;
-        for (Map<String, Object> elem : itemList) {
-            if (elem.containsKey("session_id") && elem.get("session_id").equals(webConfigId)) {
-                count += 1;
+    private void testDeleteJobLog() {
+        final List<Map<String, Object>> logList = readJobLog();
+        for (Map<String, Object> elem : logList) {
+            deleteMethod("/api/admin/joblog/log/" + elem.get("id")).then().body("response.status", equalTo(0));
+        }
+
+        final List<Map<String, Object>> afterList = readJobLog();
+        assertEquals(0, afterList.size()); // check if logs are successfully deleted
+    }
+
+    private static List<Map<String, Object>> readJobLog() {
+        final List<Map<String, Object>> logList = readLogItems("joblog");
+        final List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> elem : logList) {
+            if (elem.containsKey("job_name") && elem.get("job_name").equals(NAME_PREFIX + "Scheduler")) {
+                resList.add(elem);
             }
         }
-        assertEquals(1, count);
+        return resList;
+    }
+
+    /**
+     * Test for CrawlingInfo
+     * */
+    private void testReadCrawlingInfo() {
+        final List<Map<String, Object>> logList = readCrawlingInfo();
+        assertEquals(1, logList.size());
     }
 
     private void testDeleteCrawlingInfo() {
-        final String webConfigId = getWebConfigId();
-        final Map<String, Object> searchBody = new HashMap<>();
-        final String response = checkMethodBase(searchBody).get("/api/admin/crawlinginfo/logs").asString();
-        final List<Map<String, Object>> itemList = JsonPath.from(response).getList("response.logs");
-        //logger.info("crawling info" + response);
+        final List<Map<String, Object>> logList = readCrawlingInfo();
+        for (Map<String, Object> elem : logList) {
+            deleteMethod("/api/admin/crawlinginfo/log/" + elem.get("id")).then().body("response.status", equalTo(0));
+        }
 
-        for (Map<String, Object> elem : itemList) {
+        final List<Map<String, Object>> afterList = readCrawlingInfo();
+        assertEquals(0, afterList.size()); // check if logs are successfully deleted
+    }
+
+    private static List<Map<String, Object>> readCrawlingInfo() {
+        final List<Map<String, Object>> logList = readLogItems("crawlinginfo");
+        final List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> elem : logList) {
             if (elem.containsKey("session_id") && elem.get("session_id").equals(webConfigId)) {
-                deleteMethod("/api/admin/crawlinginfo/log/" + elem.get("id")).then().body("response.status", equalTo(0));
+                resList.add(elem);
             }
         }
+        return resList;
+    }
+
+    /**
+     * Test for FailureUrl
+     * */
+    private void testReadFailureUrl() {
+        final List<Map<String, Object>> logList = readFailureUrl();
+        assertEquals(1, logList.size());
+    }
+
+    private void testDeleteFailureUrl() {
+        final List<Map<String, Object>> logList = readFailureUrl();
+        for (Map<String, Object> elem : logList) {
+            deleteMethod("/api/admin/failureurl/log/" + elem.get("id")).then().body("response.status", equalTo(0));
+        }
+
+        final List<Map<String, Object>> afterList = readFailureUrl();
+        assertEquals(0, afterList.size()); // check if logs are successfully deleted
+    }
+
+    private static List<Map<String, Object>> readFailureUrl() {
+        final List<Map<String, Object>> logList = readLogItems("failureurl");
+        final List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> elem : logList) {
+            if (elem.containsKey("thread_name") && elem.get("thread_name").toString().startsWith("Crawler-" + webConfigId)) {
+                resList.add(elem);
+            }
+        }
+        return resList;
     }
 
     /**
      * Utilities
      * */
-    private String getJsonResponse(final String path) {
+    private static List<Map<String, Object>> readLogItems(final String apiName) {
+        final Map<String, Object> searchBody = new HashMap<>();
+        final String response = checkMethodBase(searchBody).get("/api/admin/" + apiName + "/logs").asString();
+        final List<Map<String, Object>> itemList = JsonPath.from(response).getList("response.logs");
+        return itemList;
+    }
+
+    private static String getJsonResponse(final String path) {
         final Map<String, Object> searchBody = new HashMap<>();
         final String response = checkMethodBase(searchBody).get(path).asString();
         return response;
     }
 
-    private String getResponsePath() {
+    private static String getResponsePath() {
         return "response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}";
     }
 
-    private String getWebConfigId() {
+    private static String getWebConfigId() {
         final String response = getJsonResponse("/api/admin/webconfig/settings");
         final List<String> idList = JsonPath.from(response).getList(getResponsePath() + ".id");
         return idList.get(0);
     }
 
-    private String getSchedulerId() {
+    private static String getSchedulerId() {
         final String response = getJsonResponse("/api/admin/scheduler/settings");
         final List<String> idList = JsonPath.from(response).getList(getResponsePath() + ".id");
         return idList.get(0);
     }
 
-    private Map<String, Object> getSchedulerItem() {
+    private static Map<String, Object> getSchedulerItem() {
         final String response = getJsonResponse("/api/admin/scheduler/settings");
         final List<Map<String, Object>> itemList = JsonPath.from(response).getList(getResponsePath());
         assertEquals(1, itemList.size());
         return itemList.get(0);
     }
 
-    private String buildJobScript() {
-        String webConfigId = getWebConfigId();
+    private static String buildJobScript() {
         return String.format("return container.getComponent(\"crawlJob\")" + ".logLevel(\"info\")" + ".sessionId(\"%s\")"
                 + ".webConfigIds([\"%s\"] as String[])" + ".jobExecutor(executor).execute();", webConfigId, webConfigId);
     }
 
-    private Response deleteMethod(final String path) {
+    private static Response deleteMethod(final String path) {
         return given().header("Authorization", getTestToken()).delete(path);
     }
 }

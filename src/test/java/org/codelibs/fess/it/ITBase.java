@@ -63,7 +63,7 @@ public class ITBase {
         return System.getProperty("test.es.url", DEFAULT_ES_URL);
     }
 
-    protected RequestSpecification checkMethodBase(final Map<String, Object> body) {
+    protected static RequestSpecification checkMethodBase(final Map<String, Object> body) {
         return given().header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2).when();
     }
 }
