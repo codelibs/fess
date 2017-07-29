@@ -192,15 +192,15 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
     }
 
-    public void setCommandList(List<String> commandList) {
+    public void setCommandList(final List<String> commandList) {
         this.commandList = commandList;
     }
 
-    public void setCommandTimeout(long commandTimeout) {
+    public void setCommandTimeout(final long commandTimeout) {
         this.commandTimeout = commandTimeout;
     }
 
-    public void setBaseDir(File baseDir) {
+    public void setBaseDir(final File baseDir) {
         this.baseDir = baseDir;
     }
 

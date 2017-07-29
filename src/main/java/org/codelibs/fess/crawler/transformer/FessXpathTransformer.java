@@ -240,7 +240,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             if ("http".equalsIgnoreCase(host) || "https".equalsIgnoreCase(host)) {
                 return false;
             }
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             return false;
         }
         return true;
@@ -784,7 +784,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 if (thumbnailUrl != null) {
                     return thumbnailUrl.toExternalForm();
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to parse thumbnail url for " + url + " : " + attributes, e);
                 }

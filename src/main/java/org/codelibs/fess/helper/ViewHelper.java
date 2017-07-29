@@ -139,7 +139,7 @@ public class ViewHelper {
 
     protected ActionHook actionHook = new ActionHook();
 
-    private Set<String> inlineMimeTypeSet = new HashSet<>();
+    private final Set<String> inlineMimeTypeSet = new HashSet<>();
 
     @PostConstruct
     public void init() {

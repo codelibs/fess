@@ -40,7 +40,7 @@ public class SearchLog extends BsSearchLog {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Pair<String, String>> searchFieldLogList = new ArrayList<>();
+    private final List<Pair<String, String>> searchFieldLogList = new ArrayList<>();
 
     private OptionalEntity<UserInfo> userInfo;
 
@@ -64,7 +64,7 @@ public class SearchLog extends BsSearchLog {
 
     public void addSearchFieldLogValue(final String name, final String value) {
         if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
-            searchFieldLogList.add(new Pair<String, String>(name, value));
+            searchFieldLogList.add(new Pair<>(name, value));
         }
     }
 
@@ -100,8 +100,9 @@ public class SearchLog extends BsSearchLog {
         if (fields != null) {
             sourceMap.putAll(fields);
         }
-        final Map<String, List<Object>> searchFieldMap = searchFieldLogList.stream()
-                .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+        final Map<String, List<Object>> searchFieldMap =
+                searchFieldLogList.stream().collect(
+                        Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
         sourceMap.put("searchField", searchFieldMap);
         return sourceMap;
     }

@@ -183,7 +183,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return process(id,
                 (configId, url) -> {
                     final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-                    CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
+                    final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
                     if (config == null) {
                         throw new ThumbnailGenerationException("No CrawlingConfig: " + configId);
                     }
@@ -232,7 +232,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         this.name = name;
     }
 
-    public void setMaxRedirectCount(int maxRedirectCount) {
+    public void setMaxRedirectCount(final int maxRedirectCount) {
         this.maxRedirectCount = maxRedirectCount;
     }
 

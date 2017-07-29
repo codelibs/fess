@@ -308,13 +308,7 @@ public class FessEsClient implements Client {
                 final String configIndex = values[0];
                 final String configType = values[1];
 
-                final String indexName;
                 final boolean isFessIndex = configIndex.equals("fess");
-                if (isFessIndex) {
-                    indexName = fessConfig.getIndexDocumentUpdateIndex();
-                } else {
-                    indexName = configIndex;
-                }
                 final String createdIndexName;
                 if (isFessIndex) {
                     createdIndexName = generateNewIndexName(configIndex);

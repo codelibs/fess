@@ -19,11 +19,11 @@ public class ThumbnailGenerationException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public ThumbnailGenerationException(String message, Exception cause) {
+    public ThumbnailGenerationException(final String message, final Exception cause) {
         super(message, cause);
     }
 
-    public ThumbnailGenerationException(String message) {
+    public ThumbnailGenerationException(final String message) {
         super(message, false, false);
     }
 }

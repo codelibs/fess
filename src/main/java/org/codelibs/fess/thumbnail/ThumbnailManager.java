@@ -379,7 +379,7 @@ public class ThumbnailManager {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Delete " + path);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.warn("Failed to delete " + path, e);
             }
         }

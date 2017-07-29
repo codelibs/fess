@@ -65,7 +65,7 @@ public class RelatedQueryHelper {
         this.relatedQueryMap = relatedQueryMap;
     }
 
-    protected String getHostKey(RelatedQuery entity) {
+    protected String getHostKey(final RelatedQuery entity) {
         final String key = entity.getVirtualHost();
         return StringUtil.isBlank(key) ? StringUtil.EMPTY : key;
     }
@@ -73,7 +73,7 @@ public class RelatedQueryHelper {
     public String[] getRelatedQueries(final String query) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String key = fessConfig.getVirtualHostKey();
-        Map<String, String[]> map = relatedQueryMap.get(key);
+        final Map<String, String[]> map = relatedQueryMap.get(key);
         if (map != null) {
             final String[] queries = map.get(toLowerCase(query));
             if (queries != null) {

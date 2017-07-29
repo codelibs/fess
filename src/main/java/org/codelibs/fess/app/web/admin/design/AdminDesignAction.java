@@ -81,7 +81,7 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     private List<Pair<String, String>> loadJspFileNameItems() {
-        List<Pair<String, String>> jspItems = new ArrayList<>();
+        final List<Pair<String, String>> jspItems = new ArrayList<>();
         for (final Pair<String, String> p : systemHelper.getDesignJspFileNames()) {
             jspItems.add(new Pair<>(":" + p.getFirst(), "/" + p.getSecond()));
         }
@@ -324,7 +324,7 @@ public class AdminDesignAction extends FessAdminAction {
                 throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), () -> asListHtml());
             }
             return jspFile;
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Failed to decode " + fileName, e);
         }
     }

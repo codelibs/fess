@@ -237,7 +237,7 @@ public class SystemHelper {
                                                             new File(servletContext.getRealPath("/WEB-INF/view/" + e.getValue()));
                                                     try {
                                                         Files.copy(baseJspFile.toPath(), jspFile.toPath());
-                                                    } catch (IOException ex) {
+                                                    } catch (final IOException ex) {
                                                         logger.warn("Could not copy from " + baseJspFile.getAbsolutePath() + " to "
                                                                 + jspFile.getAbsolutePath(), ex);
                                                     }

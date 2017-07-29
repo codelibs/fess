@@ -96,7 +96,7 @@ public class CrawlingConfigHelper {
                     return null;
                 }
             });
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             logger.warn("Failed to access a crawling config cache: " + configId, e);
             return null;
         }

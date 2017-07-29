@@ -57,7 +57,7 @@ public class SearchLogBhv extends BsSearchLogBhv {
     }
 
     @Override
-    protected <RESULT extends SearchLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends SearchLog> RESULT createEntity(final Map<String, Object> source, final Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             final Object searchFieldObj = source.get("searchField");

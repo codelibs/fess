@@ -65,7 +65,7 @@ public class RelatedContentHelper {
         this.relatedContentMap = relatedContentMap;
     }
 
-    protected String getHostKey(RelatedContent entity) {
+    protected String getHostKey(final RelatedContent entity) {
         final String key = entity.getVirtualHost();
         return StringUtil.isBlank(key) ? StringUtil.EMPTY : key;
     }
@@ -73,7 +73,7 @@ public class RelatedContentHelper {
     public String getRelatedContent(final String query) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String key = fessConfig.getVirtualHostKey();
-        Map<String, String> map = relatedContentMap.get(key);
+        final Map<String, String> map = relatedContentMap.get(key);
         if (map != null) {
             final String content = map.get(toLowerCase(query));
             if (StringUtil.isNotBlank(content)) {

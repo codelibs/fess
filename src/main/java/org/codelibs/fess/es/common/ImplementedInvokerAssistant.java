@@ -102,7 +102,7 @@ public class ImplementedInvokerAssistant implements InvokerAssistant {
     }
 
     @Override
-    public OutsideSqlOption assistFirstOutsideSqlOption(String tableDbName) {
+    public OutsideSqlOption assistFirstOutsideSqlOption(final String tableDbName) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -171,7 +171,7 @@ public class ImplementedInvokerAssistant implements InvokerAssistant {
     }
 
     @Override
-    public void toBeDisposable(DisposableProcess callerProcess) {
+    public void toBeDisposable(final DisposableProcess callerProcess) {
         // TODO Auto-generated method stub
 
     }
