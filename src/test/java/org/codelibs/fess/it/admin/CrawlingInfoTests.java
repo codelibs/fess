@@ -98,6 +98,10 @@ public class CrawlingInfoTests extends ITBase {
             deleteMethod("/api/admin/failurelog/log/" + elem.get("id"));
         }
 
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("q", "Example Domain");
+        checkMethodBase(requestBody).delete("/api/admin/searchlist/query");
+
         deleteMethod("/api/admin/scheduler/setting/" + getSchedulerId());
         deleteMethod("/api/admin/webconfig/setting/" + webConfigId);
 
@@ -120,6 +124,12 @@ public class CrawlingInfoTests extends ITBase {
     void failureUrlTest() {
         testReadFailureUrl();
         testDeleteFailureUrl();
+    }
+
+    @Test
+    void searchListTest() {
+        testReadSearchList();
+        testDeleteSearchList();
     }
 
     /**
@@ -220,7 +230,7 @@ public class CrawlingInfoTests extends ITBase {
 
     private static List<Map<String, Object>> readJobLog() {
         final List<Map<String, Object>> logList = readLogItems("joblog");
-        final List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> resList = new ArrayList<>();
         for (Map<String, Object> elem : logList) {
             if (elem.containsKey("job_name") && elem.get("job_name").equals(NAME_PREFIX + "Scheduler")) {
                 resList.add(elem);
@@ -249,7 +259,7 @@ public class CrawlingInfoTests extends ITBase {
 
     private static List<Map<String, Object>> readCrawlingInfo() {
         final List<Map<String, Object>> logList = readLogItems("crawlinginfo");
-        final List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> resList = new ArrayList<>();
         for (Map<String, Object> elem : logList) {
             if (elem.containsKey("session_id") && elem.get("session_id").equals(webConfigId)) {
                 resList.add(elem);
@@ -278,13 +288,43 @@ public class CrawlingInfoTests extends ITBase {
 
     private static List<Map<String, Object>> readFailureUrl() {
         final List<Map<String, Object>> logList = readLogItems("failureurl");
-        final List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> resList = new ArrayList<>();
         for (Map<String, Object> elem : logList) {
             if (elem.containsKey("thread_name") && elem.get("thread_name").toString().startsWith("Crawler-" + webConfigId)) {
                 resList.add(elem);
             }
         }
         return resList;
+    }
+
+    /**
+     * Test for SearchList
+     * */
+    private void testReadSearchList() {
+        final List<Map<String, Object>> results = getSearchResults();
+        assertTrue(results.size() >= 1);
+        Map<String, Object> item = results.get(0);
+        assertTrue(item.containsKey("content_title"));
+        assertEquals("Example Domain", item.get("content_title"));
+    }
+
+    private void testDeleteSearchList() {
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("q", "Example Domain");
+
+        checkMethodBase(requestBody).delete("/api/admin/searchlist/query").then().body("response.status", equalTo(0));
+
+        final List<Map<String, Object>> results = getSearchResults();
+        assertTrue(results.size() == 0);
+    }
+
+    private List<Map<String, Object>> getSearchResults() {
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("q", "Example Domain");
+
+        final String response = checkMethodBase(requestBody).get("/api/admin/searchlist/docs").asString();
+        final List<Map<String, Object>> results = JsonPath.from(response).getList("response.result");
+        return results;
     }
 
     /**
