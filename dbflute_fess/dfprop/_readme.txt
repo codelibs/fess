@@ -4,7 +4,7 @@ Required (Basic) Properties:
 o basicInfoMap.dfprop
 o databaseInfoMap.dfprop
 
-Properties for additional informations:
+Properties for additional information:
 o additionalForeignKeyMap.dfprop
 o additionalPrimaryKeyMap.dfprop
 o additionalUniqueKeyMap.dfprop (manual making)
