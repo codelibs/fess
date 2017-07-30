@@ -66,12 +66,12 @@ Please see [MIGRATION.md](https://github.com/codelibs/fess/blob/master/MIGRATION
 
 ### Get Source Code
 
-First of all, clone Fess's repositories:
+First of all, clone Fess's repository:
 
     $ cd ~/workspace
     $ git clone https://github.com/codelibs/fess.git
 
-and then imports it as Maven project on eclipse or ohter IDE.
+and then import it as Maven project on Eclipse or other IDE.
 
 ### Setup for Elasticsearch Plugins
 
