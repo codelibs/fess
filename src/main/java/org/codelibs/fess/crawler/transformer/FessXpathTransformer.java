@@ -246,11 +246,22 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return true;
     }
 
+    protected boolean isValidCanonicalUrl(final String url, final String canonicalUrl) {
+        if (url.startsWith("https:") && canonicalUrl.startsWith("http:")) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Invalid Canonical Url(https->http): " + url + " -> " + canonicalUrl);
+            }
+            return false;
+        }
+        return true;
+    }
+
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
         // canonical
         if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCanonicalXpath())) {
             final String canonicalUrl = getCanonicalUrl(responseData, document);
-            if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)) {
+            if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)
+                    && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
                 final Set<RequestData> childUrlSet = new HashSet<>();
                 childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
                 logger.info("CANONICAL: " + responseData.getUrl() + " -> " + canonicalUrl);
