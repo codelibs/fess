@@ -25,7 +25,6 @@ public class EditForm extends CreateForm {
 
     public String id;
 
-    @Required
     public String docId;
 
     @ValidateTypeFailure

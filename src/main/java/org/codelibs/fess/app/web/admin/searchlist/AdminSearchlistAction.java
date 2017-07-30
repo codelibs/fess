@@ -440,10 +440,13 @@ public class AdminSearchlistAction extends FessAdminAction {
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 final String docId = ((EditForm) form).docId;
-                return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
-                    builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-                    return true;
-                });
+                if (StringUtil.isNotBlank(docId)) {
+                    return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
+                            builder -> {
+                                builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+                                return true;
+                            });
+                }
             }
             break;
         default:
