@@ -309,47 +309,48 @@ public class FessEsClient implements Client {
                 final String configType = values[1];
 
                 final boolean isFessIndex = configIndex.equals("fess");
-                final String createdIndexName;
+                final String indexName;
                 if (isFessIndex) {
-                    createdIndexName = generateNewIndexName(configIndex);
+                    final boolean exists = existsIndex(fessConfig.getIndexDocumentUpdateIndex());
+                    if (!exists) {
+                        indexName = generateNewIndexName(configIndex);
+                        createIndex(configIndex, configType, indexName);
+                        createAlias(configIndex, indexName);
+                    } else {
+                        client.admin().cluster().prepareHealth(fessConfig.getIndexDocumentUpdateIndex()).setWaitForYellowStatus().execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                        final GetIndexResponse response =
+                                client.admin().indices().prepareGetIndex().addIndices(fessConfig.getIndexDocumentUpdateIndex()).execute()
+                                        .actionGet(fessConfig.getIndexIndicesTimeout());
+                        final String[] indices = response.indices();
+                        if (indices.length == 1) {
+                            indexName = indices[0];
+                        } else {
+                            indexName = configIndex;
+                        }
+                    }
                 } else {
                     switch (configIndex) {
                     case ".fess_config":
-                        createdIndexName = fessConfig.getIndexConfigIndex();
+                        indexName = fessConfig.getIndexConfigIndex();
                         break;
                     case ".fess_user":
-                        createdIndexName = fessConfig.getIndexUserIndex();
+                        indexName = fessConfig.getIndexUserIndex();
                         break;
                     case "fess_log":
-                        createdIndexName = fessConfig.getIndexLogIndex();
+                        indexName = fessConfig.getIndexLogIndex();
                         break;
                     default:
                         throw new FessSystemException("Unknown config index: " + configIndex);
                     }
-                }
-                final boolean exists = existsIndex(createdIndexName);
-                if (!exists) {
-                    createIndex(configIndex, configType, createdIndexName);
-                    createAlias(configIndex, createdIndexName);
+                    final boolean exists = existsIndex(indexName);
+                    if (!exists) {
+                        createIndex(configIndex, configType, indexName);
+                        createAlias(configIndex, indexName);
+                    }
                 }
 
-                final String updatedIndexName;
-                if (isFessIndex) {
-                    client.admin().cluster().prepareHealth(fessConfig.getIndexDocumentUpdateIndex()).setWaitForYellowStatus().execute()
-                            .actionGet(fessConfig.getIndexIndicesTimeout());
-                    final GetIndexResponse response =
-                            client.admin().indices().prepareGetIndex().addIndices(fessConfig.getIndexDocumentUpdateIndex()).execute()
-                                    .actionGet(fessConfig.getIndexIndicesTimeout());
-                    final String[] indices = response.indices();
-                    if (indices.length == 1) {
-                        updatedIndexName = indices[0];
-                    } else {
-                        updatedIndexName = configIndex;
-                    }
-                } else {
-                    updatedIndexName = createdIndexName;
-                }
-                addMapping(configIndex, configType, updatedIndexName);
+                addMapping(configIndex, configType, indexName);
             } else {
                 logger.warn("Invalid index config name: " + configName);
             }
