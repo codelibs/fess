@@ -56,6 +56,7 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.taglib.function.LaFunctions;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class SearchService {
 
@@ -85,8 +86,12 @@ public class SearchService {
 
     public void search(final SearchRequestParams params, final SearchRenderData data, final OptionalThing<FessUserBean> userBean) {
         final long requestedTime = systemHelper.getCurrentTimeAsLong();
-
         final long startTime = System.currentTimeMillis();
+
+        LaRequestUtil.getOptionalRequest().ifPresent(request -> {
+            request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
+            request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
+        });
 
         final String query =
                 QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();

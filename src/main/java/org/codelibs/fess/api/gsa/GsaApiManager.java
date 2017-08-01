@@ -102,7 +102,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final SearchRenderData data = new SearchRenderData();
             final GsaRequestParams params = new GsaRequestParams(request, fessConfig);
             query = params.getQuery();
-            request.setAttribute(Constants.REQUEST_QUERIES, query);
             searchService.search(params, data, OptionalThing.empty());
             final String execTime = data.getExecTime();
             final long allRecordCount = data.getAllRecordCount();

@@ -138,7 +138,6 @@ public class JsonApiManager extends BaseJsonApiManager {
             final SearchRenderData data = new SearchRenderData();
             final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
             query = params.getQuery();
-            request.setAttribute(Constants.REQUEST_QUERIES, query);
             searchService.search(params, data, OptionalThing.empty());
             final String execTime = data.getExecTime();
             final String queryTime = Long.toString(data.getQueryTime());
