@@ -1598,7 +1598,10 @@ public interface FessProp {
     String getVirtualHostHeaders();
 
     public default HtmlNext getVirtualHostPath(final HtmlNext page) {
-        return processVirtualHost(s -> new HtmlNext(s + page.getRoutingPath()), page);
+        return processVirtualHost(s -> {
+            final String basePath = StringUtil.isBlank(s) ? StringUtil.EMPTY : "/" + s;
+            return new HtmlNext(basePath + page.getRoutingPath());
+        }, page);
     }
 
     public default String getVirtualHostKey() {
@@ -1634,6 +1637,10 @@ public interface FessProp {
         return stream(getVirtualHosts()).get(stream -> stream.map(h -> h.getValue3()).toArray(n -> new String[n]));
     }
 
+    public default String[] getVirtualHostPaths() {
+        return stream(getVirtualHosts()).get(stream -> stream.map(h -> "/" + h.getValue3()).toArray(n -> new String[n]));
+    }
+
     @SuppressWarnings("unchecked")
     public default Tuple3<String, String, String>[] getVirtualHosts() {
         Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
@@ -1644,10 +1651,10 @@ public interface FessProp {
                                     .map(s -> {
                                         final String[] v1 = s.split("=");
                                         if (v1.length == 2) {
-                                            final String[] v2 = v1[0].split(":");
+                                            final String[] v2 = v1[0].split(":", 2);
                                             if (v2.length == 2) {
-                                                return new Tuple3<>(v2[0].trim(), v2[0].trim(), "/"
-                                                        + v1[1].replaceAll("[^a-zA-Z0-9_]", StringUtil.EMPTY).trim());
+                                                return new Tuple3<>(v2[0].trim(), v2[1].trim(), v1[1].replaceAll("[^a-zA-Z0-9_]",
+                                                        StringUtil.EMPTY).trim());
                                             }
                                         }
                                         return null;
@@ -1656,9 +1663,9 @@ public interface FessProp {
                                         if (v == null) {
                                             return false;
                                         }
-                                        if ("/admin".equalsIgnoreCase(v.getValue3()) || "/common".equalsIgnoreCase(v.getValue3())
-                                                || "/error".equalsIgnoreCase(v.getValue3()) || "/login".equalsIgnoreCase(v.getValue3())
-                                                || "/profile".equalsIgnoreCase(v.getValue3())) {
+                                        if ("admin".equalsIgnoreCase(v.getValue3()) || "common".equalsIgnoreCase(v.getValue3())
+                                                || "error".equalsIgnoreCase(v.getValue3()) || "login".equalsIgnoreCase(v.getValue3())
+                                                || "profile".equalsIgnoreCase(v.getValue3())) {
                                             return false;
                                         }
                                         return true;

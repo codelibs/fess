@@ -35,6 +35,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.config.exentity.LabelType;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class LabelTypeHelper {
             item.setLabel(labelType.getName());
             item.setValue(labelType.getValue());
             item.setPermissions(labelType.getPermissions());
+            item.setVirtualHost(labelType.getVirtualHost());
             itemList.add(item);
         }
         labelTypeItemList = itemList;
@@ -76,10 +78,19 @@ public class LabelTypeHelper {
             init();
         }
 
+        final String virtualHostKey = ComponentUtil.getFessConfig().getVirtualHostKey();
+        final List<LabelTypeItem> labelList;
+        if (StringUtil.isBlank(virtualHostKey)) {
+            labelList = labelTypeItemList;
+        } else {
+            labelList =
+                    labelTypeItemList.stream().filter(item -> virtualHostKey.equals(item.getVirtualHost())).collect(Collectors.toList());
+        }
+
         final List<Map<String, String>> itemList = new ArrayList<>();
         final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
         if (roleSet.isEmpty()) {
-            for (final LabelTypeItem item : labelTypeItemList) {
+            for (final LabelTypeItem item : labelList) {
                 if (item.getPermissions().length == 0) {
                     final Map<String, String> map = new HashMap<>(2);
                     map.put(Constants.ITEM_LABEL, item.getLabel());
@@ -88,7 +99,7 @@ public class LabelTypeHelper {
                 }
             }
         } else {
-            for (final LabelTypeItem item : labelTypeItemList) {
+            for (final LabelTypeItem item : labelList) {
                 final Set<String> permissions = stream(item.getPermissions()).get(stream -> stream.collect(Collectors.toSet()));
                 for (final String roleValue : roleSet) {
                     if (permissions.contains(roleValue)) {
@@ -148,6 +159,8 @@ public class LabelTypeHelper {
 
         private String[] permissions;
 
+        private String virtualHost;
+
         public String getLabel() {
             return label;
         }
@@ -170,6 +183,14 @@ public class LabelTypeHelper {
 
         public void setPermissions(final String[] permissions) {
             this.permissions = permissions;
+        }
+
+        public String getVirtualHost() {
+            return virtualHost;
+        }
+
+        public void setVirtualHost(String virtualHost) {
+            this.virtualHost = virtualHost;
         }
     }
 

@@ -85,7 +85,7 @@ public class AdminDesignAction extends FessAdminAction {
         for (final Pair<String, String> p : systemHelper.getDesignJspFileNames()) {
             jspItems.add(new Pair<>(":" + p.getFirst(), "/" + p.getSecond()));
         }
-        for (String key : fessConfig.getVirtualHostKeys()) {
+        for (String key : fessConfig.getVirtualHostPaths()) {
             if (StringUtil.isBlank(key)) {
                 key = "/";
             }

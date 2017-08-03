@@ -55,6 +55,9 @@ public class BsLabelType extends EsAbstractEntity {
     /** permissions */
     protected String[] permissions;
 
+    /** virtualHost */
+    protected String virtualHost;
+
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -106,6 +109,9 @@ public class BsLabelType extends EsAbstractEntity {
         if (permissions != null) {
             addFieldToSource(sourceMap, "permissions", permissions);
         }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
+        }
         if (sortOrder != null) {
             addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
@@ -137,6 +143,7 @@ public class BsLabelType extends EsAbstractEntity {
         sb.append(dm).append(includedPaths);
         sb.append(dm).append(name);
         sb.append(dm).append(permissions);
+        sb.append(dm).append(virtualHost);
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
@@ -209,6 +216,16 @@ public class BsLabelType extends EsAbstractEntity {
     public void setPermissions(String[] value) {
         registerModifiedProperty("permissions");
         this.permissions = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 
     public Integer getSortOrder() {

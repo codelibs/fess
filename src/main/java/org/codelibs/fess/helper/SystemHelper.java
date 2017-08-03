@@ -221,7 +221,7 @@ public class SystemHelper {
 
     public void refreshDesignJspFiles() {
         final ServletContext servletContext = LaServletContextUtil.getServletContext();
-        stream(ComponentUtil.getFessConfig().getVirtualHostKeys()).of(
+        stream(ComponentUtil.getFessConfig().getVirtualHostPaths()).of(
                 stream -> stream.filter(s -> s != null && !s.equals("/")).forEach(
                         key -> {
                             designJspFileNameMap

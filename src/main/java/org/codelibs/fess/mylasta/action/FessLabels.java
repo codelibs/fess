@@ -1055,6 +1055,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Virtual Hosts */
     public static final String LABELS_virtual_hosts = "{labels.virtual_hosts}";
 
+    /** The key of the message: Virtual Host */
+    public static final String LABELS_virtual_host = "{labels.virtual_host}";
+
     /** The key of the message: Label */
     public static final String LABELS_label_type = "{labels.label_type}";
 
@@ -1462,9 +1465,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Key Match */
     public static final String LABELS_key_match_title_details = "{labels.key_match_title_details}";
-
-    /** The key of the message: Virtual Host */
-    public static final String LABELS_key_match_virtual_host = "{labels.key_match_virtual_host}";
 
     /** The key of the message: Page Design */
     public static final String LABELS_design_configuration = "{labels.design_configuration}";
@@ -2265,9 +2265,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Related Content */
     public static final String LABELS_related_content_title_details = "{labels.related_content_title_details}";
 
-    /** The key of the message: Virtual Host */
-    public static final String LABELS_related_content_virtual_host = "{labels.related_content_virtual_host}";
-
     /** The key of the message: Related Query */
     public static final String LABELS_related_query_configuration = "{labels.related_query_configuration}";
 
@@ -2282,9 +2279,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Related Query */
     public static final String LABELS_related_query_title_details = "{labels.related_query_title_details}";
-
-    /** The key of the message: Virtual Host */
-    public static final String LABELS_related_query_virtual_host = "{labels.related_query_virtual_host}";
 
     /** The key of the message: Create */
     public static final String LABELS_crud_button_create = "{labels.crud_button_create}";

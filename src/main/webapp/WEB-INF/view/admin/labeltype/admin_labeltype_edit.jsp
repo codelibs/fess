@@ -88,6 +88,14 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="virtualHost" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_host" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHost" />
+											<la:text styleId="virtualHost" property="virtualHost" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
 										<div class="form-inline col-sm-9">

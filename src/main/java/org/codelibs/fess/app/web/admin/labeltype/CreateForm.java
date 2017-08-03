@@ -54,6 +54,9 @@ public class CreateForm {
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
+    @Size(max = 1000)
+    public String virtualHost;
+
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure

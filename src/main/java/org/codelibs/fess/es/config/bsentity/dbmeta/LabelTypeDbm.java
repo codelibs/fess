@@ -90,6 +90,8 @@ public class LabelTypeDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((LabelType) et).getName(), (et, vl) -> ((LabelType) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((LabelType) et).getPermissions(), (et, vl) -> ((LabelType) et).setPermissions((String[]) vl),
                 "permissions");
+        setupEpg(_epgMap, et -> ((LabelType) et).getVirtualHost(), (et, vl) -> ((LabelType) et).setVirtualHost(DfTypeUtil.toString(vl)),
+                "virtualHost");
         setupEpg(_epgMap, et -> ((LabelType) et).getSortOrder(), (et, vl) -> ((LabelType) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
         setupEpg(_epgMap, et -> ((LabelType) et).getUpdatedBy(), (et, vl) -> ((LabelType) et).setUpdatedBy(DfTypeUtil.toString(vl)),
@@ -145,6 +147,8 @@ public class LabelTypeDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
             false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
+            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
@@ -178,6 +182,10 @@ public class LabelTypeDbm extends AbstractDBMeta {
         return _columnPermissions;
     }
 
+    public ColumnInfo columnVirtualHost() {
+        return _columnVirtualHost;
+    }
+
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
@@ -202,6 +210,7 @@ public class LabelTypeDbm extends AbstractDBMeta {
         ls.add(columnIncludedPaths());
         ls.add(columnName());
         ls.add(columnPermissions());
+        ls.add(columnVirtualHost());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());

@@ -61,7 +61,7 @@
 											</tr>
 											<tr>
 												<th class="col-xs-2"><la:message
-														key="labels.related_query_virtual_host" /></th>
+														key="labels.virtual_host" /></th>
 												<td>${f:h(virtualHost)}<la:hidden property="virtualHost" /></td>
 											</tr>
 										</tbody>
