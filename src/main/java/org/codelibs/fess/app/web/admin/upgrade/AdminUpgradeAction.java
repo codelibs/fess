@@ -223,15 +223,37 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
         UpgradeUtil.addFieldMapping(indicesClient, configIndex, "key_match", "virtualHost",
                 "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "label_type", "virtualHost",
+                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
     }
 
     private void upgradeFromAll() {
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
         final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
+        final String suggestIndex = fessConfig.getIndexDocumentSuggestIndex();
 
         // .crawler
         if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
             UpgradeUtil.deleteIndex(indicesClient, crawlerIndex, response -> {});
+        }
+
+        // fess.suggest
+        if (UpgradeUtil.existsIndex(indicesClient, suggestIndex, IndicesOptions.fromOptions(false, true, true, true))) {
+            UpgradeUtil.deleteIndex(indicesClient, suggestIndex, response -> {
+                scheduledJobService.getScheduledJob("suggest_indexer").ifPresent(entity -> {
+                    if (!entity.isEnabled() || entity.isRunning()) {
+                        logger.warn("suggest_indexer job is running.");
+                        return;
+                    }
+                    try {
+                        entity.start();
+                    } catch (final Exception e) {
+                        logger.warn("Failed to start suggest_indexer job.", e);
+                    }
+                }).orElse(() -> {
+                    logger.warn("No suggest_indexer job.");
+                });
+            });
         }
     }
 
