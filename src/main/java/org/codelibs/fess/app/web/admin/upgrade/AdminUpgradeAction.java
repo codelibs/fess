@@ -35,6 +35,8 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
+import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.UpgradeUtil;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -230,7 +232,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     private void upgradeFromAll() {
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
         final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
-        final String suggestIndex = fessConfig.getIndexDocumentSuggestIndex();
+        final String suggestIndex = ComponentUtil.getComponent(SuggestHelper.class).suggester().getIndex();
 
         // .crawler
         if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
