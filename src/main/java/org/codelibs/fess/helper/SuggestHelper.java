@@ -316,12 +316,16 @@ public class SuggestHelper {
         }
 
         final List<String> labelList = new ArrayList<>();
-        for (final String label : tags) {
-            labelList.add(label);
+        if (tags != null) {
+            for (final String label : tags) {
+                labelList.add(label);
+            }
         }
         final List<String> roleList = new ArrayList<>();
-        for (final String permission : permissions) {
-            roleList.add(permission);
+        if (permissions != null) {
+            for (final String permission : permissions) {
+                roleList.add(permission);
+            }
         }
 
         suggester.indexer().addElevateWord(
