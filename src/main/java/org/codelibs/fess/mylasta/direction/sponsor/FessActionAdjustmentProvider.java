@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.path.ActionAdjustmentProvider;
 import org.lastaflute.web.path.FormMappingOption;
@@ -34,6 +36,22 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
         return new FormMappingOption().filterSimpleTextParameter((parameter, meta) -> {
             return parameter.trim();
         });
+    }
+
+    @Override
+    public String customizeActionMappingRequestPath(String requestPath) {
+        if (StringUtil.isBlank(requestPath)) {
+            return null;
+        }
+        final String virtualHostKey = ComponentUtil.getFessConfig().getVirtualHostKey();
+        if (StringUtil.isBlank(virtualHostKey)) {
+            return null;
+        }
+        final String prefix = "/" + virtualHostKey;
+        if (requestPath.startsWith(prefix)) {
+            return requestPath.substring(prefix.length());
+        }
+        return null;
     }
 
     @Override
