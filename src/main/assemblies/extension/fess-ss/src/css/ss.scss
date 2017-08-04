@@ -9,4 +9,38 @@
     display: inline;
     width: 50%;
   }
+  /* Large desktop */
+  @media ( min-width : 74.9em) {
+    .order-box {
+      width: 20%
+    }
+  }
+  /* Large devices (desktops, less than 75em) */
+  @media ( max-width : 74.9em) {
+    .order-box {
+      width: 20%
+    }
+  }
+
+  /* Medium devices (tablets, less than 62em) */
+	@media ( max-width : 61.9em) {
+    .order-box {
+      width: 20%
+    }
+  }
+
+  /* Small devices (landscape phones, less than 48em) */
+  @media ( max-width : 47.9em) {
+    .order-box {
+      width: 50%
+    }
+  }
+
+  /* Extra small devices (portrait phones, less than 34em) */
+  @media ( max-width : 360px) {
+    .order-box {
+      width: 50%
+    }
+  }
+
 }
