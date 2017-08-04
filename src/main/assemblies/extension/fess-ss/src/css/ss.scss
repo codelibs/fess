@@ -14,11 +14,17 @@
     .order-box {
       width: 20%
     }
+    .description {
+      font-size: medium;
+    }
   }
   /* Large devices (desktops, less than 75em) */
   @media ( max-width : 74.9em) {
     .order-box {
       width: 20%
+    }
+    .description {
+      font-size: medium;
     }
   }
 
@@ -27,6 +33,9 @@
     .order-box {
       width: 20%
     }
+    .description {
+      font-size: medium;
+    }
   }
 
   /* Small devices (landscape phones, less than 48em) */
@@ -34,12 +43,18 @@
     .order-box {
       width: 50%
     }
+    .description {
+      font-size: small;
+    }
   }
 
   /* Extra small devices (portrait phones, less than 34em) */
   @media ( max-width : 360px) {
     .order-box {
       width: 50%
+    }
+    .description {
+      font-size: small;
     }
   }
 
