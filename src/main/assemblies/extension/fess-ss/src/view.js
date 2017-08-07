@@ -97,11 +97,20 @@ export default class {
     }
 
     var paginationInfo = (function(){
+      var pageWidth = function() {
+        var width;
+        if (window.matchMedia('( max-width : 47.9em)').matches) {
+          width = 2;
+        } else {
+          width = 5;
+        }
+        return width;
+      }();
       var allPageNum = Math.floor((recordCount - 1) / pageSize) + 1;
       var info = {};
       info.current = currentPage;
-      info.min = (currentPage - 5) > 0 ? currentPage - 5 : 1;
-      info.max = (currentPage + 5) < allPageNum ? currentPage + 5 : allPageNum;
+      info.min = (currentPage - pageWidth) > 0 ? currentPage - pageWidth : 1;
+      info.max = (currentPage + pageWidth) < allPageNum ? currentPage + pageWidth : allPageNum;
       return info;
     })();
 
