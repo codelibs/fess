@@ -17,6 +17,13 @@
     .description {
       font-size: medium;
     }
+    .title {
+      line-height: 32px;
+      font-size: 18px;
+    }
+    .site {
+      font-size: medium;
+    }
   }
   /* Large devices (desktops, less than 75em) */
   @media ( max-width : 74.9em) {
@@ -24,6 +31,13 @@
       width: 20%
     }
     .description {
+      font-size: medium;
+    }
+    .title {
+      line-height: 32px;
+      font-size: 18px;
+    }
+    .site {
       font-size: medium;
     }
   }
@@ -36,6 +50,13 @@
     .description {
       font-size: medium;
     }
+    .title {
+      line-height: 32px;
+      font-size: 18px;
+    }
+    .site {
+      font-size: medium;
+    }
   }
 
   /* Small devices (landscape phones, less than 48em) */
@@ -44,6 +65,14 @@
       width: 50%
     }
     .description {
+      font-size: small;
+      display: inline !important;
+    }
+    .title {
+      line-height: 24px;
+      font-size: 15px;
+    }
+    .site {
       font-size: small;
     }
   }
@@ -54,6 +83,14 @@
       width: 50%
     }
     .description {
+      font-size: small;
+      display: inline !important;
+    }
+    .title {
+      line-height: 24px;
+      font-size: 15px;
+    }
+    .site {
       font-size: small;
     }
   }
