@@ -18,6 +18,7 @@ package org.codelibs.fess.api.json;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -378,7 +379,15 @@ public class JsonApiManager extends BaseJsonApiManager {
         }
 
         final String seed = request.getParameter("seed");
+        final List<String> tagList = new ArrayList<>();
         final String[] tags = request.getParameterValues("labels");
+        if (tags != null) {
+            tagList.addAll(Arrays.asList(tags));
+        }
+        final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
+        if (StringUtil.isNotBlank(key)) {
+            tagList.add(key);
+        }
         final String[] fields = request.getParameterValues("fields");
         final String[] excludes = StringUtil.EMPTY_STRINGS;// TODO
 
@@ -388,7 +397,9 @@ public class JsonApiManager extends BaseJsonApiManager {
         Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
-            final List<String> popularWordList = popularWordHelper.getWordList(SearchRequestType.JSON, seed, tags, null, fields, excludes);
+            final List<String> popularWordList =
+                    popularWordHelper.getWordList(SearchRequestType.JSON, seed, tagList.toArray(new String[tagList.size()]), null, fields,
+                            excludes);
 
             buf.append("\"result\":[");
             boolean first1 = true;
