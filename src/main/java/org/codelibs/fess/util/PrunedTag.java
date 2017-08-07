@@ -15,24 +15,30 @@
  */
 package org.codelibs.fess.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.w3c.dom.Node;
 
 public class PrunedTag {
     private final String tag;
-    private final String id;
-    private final String css;
+    private String id;
+    private String css;
+    private String attrName;
+    private String attrValue;
 
-    public PrunedTag(final String tag, final String id, final String css) {
+    public PrunedTag(final String tag) {
         this.tag = tag;
-        this.id = id;
-        this.css = css;
-
     }
 
     public boolean matches(final Node node) {
         if (tag.equalsIgnoreCase(node.getNodeName())) {
+            if (attrName != null) {
+                Node attr = node.getAttributes().getNamedItem(attrName);
+                if (attr == null || !attrValue.equals(attr.getNodeValue())) {
+                    return false;
+                }
+            }
             if (id == null) {
                 if (css == null) {
                     return true;
@@ -57,11 +63,6 @@ public class PrunedTag {
     }
 
     @Override
-    public String toString() {
-        return "PrunedTag [tag=" + tag + ", id=" + id + ", css=" + css + "]";
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -83,27 +84,28 @@ public class PrunedTag {
             return false;
         }
         final PrunedTag other = (PrunedTag) obj;
-        if (css == null) {
-            if (other.css != null) {
-                return false;
-            }
-        } else if (!css.equals(other.css)) {
-            return false;
-        }
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        if (tag == null) {
-            if (other.tag != null) {
-                return false;
-            }
-        } else if (!tag.equals(other.tag)) {
-            return false;
-        }
-        return true;
+        return StringUtils.compare(tag, other.tag) == 0 //
+                && StringUtils.compare(css, other.css) == 0 //
+                && StringUtils.compare(id, other.id) == 0 //
+                && StringUtils.compare(attrName, other.attrName) == 0 //
+                && StringUtils.compare(attrValue, other.attrValue) == 0;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setCss(String css) {
+        this.css = css;
+    }
+
+    public void setAttr(String name, String value) {
+        this.attrName = name;
+        this.attrValue = value;
+    }
+
+    @Override
+    public String toString() {
+        return "PrunedTag [tag=" + tag + ", id=" + id + ", css=" + css + ", attrName=" + attrName + ", attrValue=" + attrValue + "]";
     }
 }

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
@@ -635,23 +637,26 @@ public interface FessProp {
         PrunedTag[] tags = (PrunedTag[]) propMap.get("crawlerDocumentHtmlPrunedTags");
         if (tags == null) {
             tags = split(getCrawlerDocumentHtmlPrunedTags(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
-                final String[] cssValues = v.split("\\.", 2);
-                final String css;
-                if (cssValues.length == 2) {
-                    css = cssValues[1];
-                } else {
-                    css = null;
+                final Pattern pattern = Pattern.compile("(\\w+)(\\[[^\\]]+\\])?(\\.\\w+)?(#\\w+)?");
+                final Matcher matcher = pattern.matcher(v.trim());
+                if (matcher.matches()) {
+                    final PrunedTag tag = new PrunedTag(matcher.group(1));
+                    if (matcher.group(2) != null) {
+                        final String attrPair = matcher.group(2).substring(1, matcher.group(2).length() - 1);
+                        final Matcher equalMatcher = Pattern.compile("(\\w+)=(\\w+)").matcher(attrPair);
+                        if (equalMatcher.matches()) {
+                            tag.setAttr(equalMatcher.group(1), equalMatcher.group(2));
+                        }
+                    }
+                    if (matcher.group(3) != null) {
+                        tag.setCss(matcher.group(3).substring(1));
+                    }
+                    if (matcher.group(4) != null) {
+                        tag.setId(matcher.group(4).substring(1));
+                    }
+                    return tag;
                 }
-
-                final String[] idValues = cssValues[0].split("#", 2);
-                final String id;
-                if (idValues.length == 2) {
-                    id = idValues[1];
-                } else {
-                    id = null;
-                }
-
-                return new PrunedTag(idValues[0], id, css);
+                throw new FessSystemException("Invalid pruned tag: " + v);
             }).toArray(n -> new PrunedTag[n]));
             propMap.put("crawlerDocumentHtmlPrunedTags", tags);
         }
