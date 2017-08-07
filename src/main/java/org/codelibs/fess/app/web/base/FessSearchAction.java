@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.base;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -93,7 +94,13 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("favoriteSupport", favoriteSupport);
         runtime.registerData("thumbnailSupport", thumbnailSupport);
         if (fessConfig.isWebApiPopularWord()) {
-            runtime.registerData("popularWords", popularWordHelper.getWordList(SearchRequestType.SEARCH, null, null, null, null, null));
+            final List<String> tagList = new ArrayList<>();
+            final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
+            if (StringUtil.isNotBlank(key)) {
+                tagList.add(key);
+            }
+            runtime.registerData("popularWords", popularWordHelper.getWordList(SearchRequestType.SEARCH, null,
+                    tagList.toArray(new String[tagList.size()]), null, null, null));
         }
         return super.hookBefore(runtime);
     }
