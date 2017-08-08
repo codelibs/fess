@@ -219,7 +219,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. //LINK[@rel='canonical']/@href */
     String CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH = "crawler.document.html.canonical.xpath";
 
-    /** The key of the configuration. e.g. noscript,script,style,header,footer,nav */
+    /** The key of the configuration. e.g. noscript,script,style,header,footer,nav,a[rel="nofollow"] */
     String CRAWLER_DOCUMENT_HTML_PRUNED_TAGS = "crawler.document.html.pruned.tags";
 
     /** The key of the configuration. e.g. 200 */
@@ -276,7 +276,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5000 */
     String INDEXER_WEBFS_COMMIT_MARGIN_TIME = "indexer.webfs.commit.margin.time";
 
-    /** The key of the configuration. e.g. 360 */
+    /** The key of the configuration. e.g. 3600 */
     String INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT = "indexer.webfs.max.empty.list.count";
 
     /** The key of the configuration. e.g. 10000 */
@@ -1853,7 +1853,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.html.pruned.tags'. <br>
-     * The value is, e.g. noscript,script,style,header,footer,nav <br>
+     * The value is, e.g. noscript,script,style,header,footer,nav,a[rel="nofollow"] <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlPrunedTags();
@@ -2106,14 +2106,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.max.empty.list.count'. <br>
-     * The value is, e.g. 360 <br>
+     * The value is, e.g. 3600 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxEmptyListCount();
 
     /**
      * Get the value for the key 'indexer.webfs.max.empty.list.count' as {@link Integer}. <br>
-     * The value is, e.g. 360 <br>
+     * The value is, e.g. 3600 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7491,7 +7491,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH, "//HTML/@lang");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH, "//META[@name='description']/@content");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH, "//LINK[@rel='canonical']/@href");
-            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=\"nofollow\"]");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "200");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL, "No title.");
@@ -7510,7 +7510,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_CLICK_COUNT_ENABLED, "true");
             defaultMap.put(FessConfig.INDEXER_FAVORITE_COUNT_ENABLED, "true");
             defaultMap.put(FessConfig.INDEXER_WEBFS_COMMIT_MARGIN_TIME, "5000");
-            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT, "360");
+            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT, "3600");
             defaultMap.put(FessConfig.INDEXER_WEBFS_UPDATE_INTERVAL, "10000");
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE, "20");
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
