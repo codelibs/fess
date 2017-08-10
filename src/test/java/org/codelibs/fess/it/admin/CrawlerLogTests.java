@@ -64,12 +64,12 @@ public class CrawlerLogTests extends ITBase {
         try {
             createWebConfig();
             logger.info("WebConfig is created");
-            Thread.sleep(10000);
+            refresh();
             webConfigId = getWebConfigId();
 
             createJob();
             logger.info("Job is created");
-            Thread.sleep(30000);
+            refresh();
 
             startJob();
 
@@ -175,11 +175,21 @@ public class CrawlerLogTests extends ITBase {
     }
 
     private static void startJob() {
-        final Map<String, Object> requestBody = new HashMap<>();
-        final String schedulerId = getSchedulerId();
-        final Response response = checkMethodBase(requestBody).post("/api/admin/scheduler/" + schedulerId + "/start");
-        response.then().body("response.status", equalTo(0));
-        logger.info("Start scheduler \"" + schedulerId + "\"");
+        for (int i = 0; i < 30; i++) {
+            final Map<String, Object> requestBody = new HashMap<>();
+            final String schedulerId = getSchedulerId();
+            final Response response = checkMethodBase(requestBody).post("/api/admin/scheduler/" + schedulerId + "/start");
+            if (response.getBody().jsonPath().getInt("response.status") == 0) {
+                logger.info("Start scheduler \"" + schedulerId + "\"");
+                return;
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        assertTrue(false, "could not start job.");
     }
 
     private static void waitJob() throws InterruptedException {
@@ -320,6 +330,7 @@ public class CrawlerLogTests extends ITBase {
         requestBody.put("q", "Example Domain");
 
         checkMethodBase(requestBody).delete("/api/admin/searchlist/query").then().body("response.status", equalTo(0));
+        refresh();
 
         final List<Map<String, Object>> results = getSearchResults();
         assertTrue(results.size() == 0);

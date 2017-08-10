@@ -55,6 +55,10 @@ public class ITBase {
         given().delete(getEsUrl() + "/.fess_config/access_token/" + DEFAULT_TEST_TOKEN_ID);
     }
 
+    public static void refresh() {
+        given().post(getEsUrl() + "/_refresh");
+    }
+
     public static String getFessUrl() {
         return System.getProperty("test.fess.url", DEFAULT_FESS_URL);
     }
