@@ -18,6 +18,7 @@ package org.codelibs.fess.es.config.exentity;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.bsentity.BsScheduledJob;
+import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.job.key.LaJobUnique;
 
@@ -56,12 +57,16 @@ public class ScheduledJob extends BsScheduledJob {
     public void start() {
         ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).ifPresent(job -> {
             job.launchNow();
+        }).orElse(() -> {
+            throw new JobNotFoundException(this);
         });
     }
 
     public void stop() {
         ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).ifPresent(job -> {
             job.stopNow();
+        }).orElse(() -> {
+            throw new JobNotFoundException(this);
         });
     }
 
