@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
@@ -211,7 +212,7 @@ public class WebFsIndexHelper {
             final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
             for (final String u : excludedUrlList) {
                 if (StringUtil.isNotBlank(u)) {
-                    final String urlValue = u.trim();
+                    final String urlValue = Pattern.quote(u.trim());
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
                         logger.info("Excluded URL from failures: " + urlValue);
@@ -354,7 +355,7 @@ public class WebFsIndexHelper {
             if (excludedUrlList != null) {
                 for (final String u : excludedUrlList) {
                     if (StringUtil.isNotBlank(u)) {
-                        final String urlValue = u.trim();
+                        final String urlValue = Pattern.quote(u.trim());
                         crawler.addExcludeFilter(urlValue);
                         if (logger.isInfoEnabled()) {
                             logger.info("Excluded Path from failures: " + urlValue);
