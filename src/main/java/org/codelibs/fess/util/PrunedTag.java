@@ -34,7 +34,7 @@ public class PrunedTag {
     public boolean matches(final Node node) {
         if (tag.equalsIgnoreCase(node.getNodeName())) {
             if (attrName != null) {
-                Node attr = node.getAttributes().getNamedItem(attrName);
+                final Node attr = node.getAttributes().getNamedItem(attrName);
                 if (attr == null || !attrValue.equals(attr.getNodeValue())) {
                     return false;
                 }
@@ -91,15 +91,15 @@ public class PrunedTag {
                 && StringUtils.compare(attrValue, other.attrValue) == 0;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
-    public void setCss(String css) {
+    public void setCss(final String css) {
         this.css = css;
     }
 
-    public void setAttr(String name, String value) {
+    public void setAttr(final String name, final String value) {
         this.attrName = name;
         this.attrValue = value;
     }

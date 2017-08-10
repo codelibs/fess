@@ -71,7 +71,7 @@
 		<cluster.runner.version>5.5.1.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.15</tomcat.version>
+		<tomcat.version>8.5.20</tomcat.version>
 		<tomcat.boot.version>0.5.5</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
@@ -1175,6 +1175,10 @@
 					<groupId>org.codehaus.groovy</groupId>
 					<artifactId>groovy</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -1197,7 +1201,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>22.0</version>
+			<version>23.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
@@ -1233,7 +1237,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
+			<version>3.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
@@ -1298,6 +1302,10 @@
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-exec</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -1335,51 +1343,6 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>2.4.11</version>
-		</dependency>
-
-		<!-- phantomjsdriver -->
-		<dependency>
-			<groupId>com.github.detro</groupId>
-			<artifactId>phantomjsdriver</artifactId>
-			<version>1.2.0</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>selenium-chrome-driver</artifactId>
-					<groupId>org.seleniumhq.selenium</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>selenium-htmlunit-driver</artifactId>
-					<groupId>org.seleniumhq.selenium</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>selenium-firefox-driver</artifactId>
-					<groupId>org.seleniumhq.selenium</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>selenium-ie-driver</artifactId>
-					<groupId>org.seleniumhq.selenium</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>selenium-safari-driver</artifactId>
-					<groupId>org.seleniumhq.selenium</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>webbit</artifactId>
-					<groupId>org.webbitserver</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.java.dev.jna</groupId>
-					<artifactId>jna</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-exec</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Tomcat -->
@@ -1440,6 +1403,12 @@
 			<artifactId>rest-assured</artifactId>
 			<version>3.0.3</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

@@ -39,7 +39,7 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
     }
 
     @Override
-    public String customizeActionMappingRequestPath(String requestPath) {
+    public String customizeActionMappingRequestPath(final String requestPath) {
         if (StringUtil.isBlank(requestPath)) {
             return null;
         }

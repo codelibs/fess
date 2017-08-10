@@ -188,7 +188,7 @@ public class LabelTypeHelper {
             return virtualHost;
         }
 
-        public void setVirtualHost(String virtualHost) {
+        public void setVirtualHost(final String virtualHost) {
             this.virtualHost = virtualHost;
         }
     }
