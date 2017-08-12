@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.searchlist;
 
 import java.util.Map;
 
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
@@ -27,6 +28,7 @@ public class CreateForm {
     @ValidateTypeFailure
     public Integer crudMode;
 
+    @Required
     public Map<String, Object> doc;
 
     public String q;

@@ -281,7 +281,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         validateUpdateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
-        logger.debug("DEBUUG:::role" + form.doc.get("role"));
+        logger.debug("DEBUG:::role" + form.doc.get("role"));
         verifyToken(() -> asEditHtml());
         getDoc(form).ifPresent(
                 entity -> {
@@ -325,46 +325,53 @@ public class AdminSearchlistAction extends FessAdminAction {
 
         if (!fessConfig.validateIndexRequiredFields(form.doc)) {
             final List<String> invalidRequiredFields = fessConfig.invalidIndexRequiredFields(form.doc);
+            final String invalids = String.join(", doc.", invalidRequiredFields);
+
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidRequiredFields.get(0));
-                // TODO messages.addConstraintsRequiredMessage("doc." + invalidRequiredFields.get(0), invalidRequiredFields.get(0));
-                });
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Required: {doc." + invalids + "}");
+            });
         }
 
         if (!fessConfig.validateIndexArrayFields(form.doc)) {
             final List<String> invalidArrayFields = fessConfig.invalidIndexArrayFields(form.doc);
+            final String invalids = String.join(", doc.", invalidArrayFields);
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidArrayFields.get(0));
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Array: {doc." + invalids + "}");
             });
         }
         if (!fessConfig.validateIndexDateFields(form.doc)) {
             final List<String> invalidDateFields = fessConfig.invalidIndexDateFields(form.doc);
+            final String invalids = String.join(", doc.", invalidDateFields);
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidDateFields.get(0));
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Date: {doc." + invalids + "}");
             });
         }
         if (!fessConfig.validateIndexIntegerFields(form.doc)) {
             final List<String> invalidIntegerFields = fessConfig.invalidIndexIntegerFields(form.doc);
+            final String invalids = String.join(", doc.", invalidIntegerFields);
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidIntegerFields.get(0));
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Integer: {doc." + invalids + "}");
             });
         }
         if (!fessConfig.validateIndexLongFields(form.doc)) {
             final List<String> invalidLongFields = fessConfig.invalidIndexLongFields(form.doc);
+            final String invalids = String.join(", doc.", invalidLongFields);
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidLongFields.get(0));
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Long: {doc." + invalids + "}");
             });
         }
         if (!fessConfig.validateIndexFloatFields(form.doc)) {
             final List<String> invalidFloatFields = fessConfig.invalidIndexFloatFields(form.doc);
+            final String invalids = String.join(", doc.", invalidFloatFields);
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidFloatFields.get(0));
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Float: {doc." + invalids + "}");
             });
         }
         if (!fessConfig.validateIndexDoubleFields(form.doc)) {
             final List<String> invalidDoubleFields = fessConfig.invalidIndexDoubleFields(form.doc);
+            final String invalids = String.join(", doc.", invalidDoubleFields);
             throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateInstance("doc." + invalidDoubleFields.get(0));
+                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Double: {doc." + invalids + "}");
             });
         }
     }

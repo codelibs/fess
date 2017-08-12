@@ -118,6 +118,9 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> put$doc(final CreateBody body) {
         validateApi(body, messages -> {});
+        if (body.doc == null) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
+        }
         validateCreateFields(body, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.CREATE;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
