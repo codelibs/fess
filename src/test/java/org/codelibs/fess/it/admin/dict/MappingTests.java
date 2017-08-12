@@ -74,7 +74,7 @@ public class MappingTests extends DictCrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put(KEY_PROPERTY, "new_inputs");
+        updateMap.put(KEY_PROPERTY, "new_inputs_mapping");
         updateMap.put("output", "new_output");
         return updateMap;
     }

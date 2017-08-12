@@ -73,7 +73,7 @@ public class ProtwordsTests extends DictCrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put(KEY_PROPERTY, "new_input");
+        updateMap.put(KEY_PROPERTY, "new_input_protwords");
         return updateMap;
     }
 

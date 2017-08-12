@@ -151,6 +151,7 @@ public abstract class CrudTestBase extends ITBase {
             }
 
             checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+            refresh();
         }
 
         checkUpdate();
