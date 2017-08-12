@@ -167,7 +167,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 String oldId = null;
                 if (newId.equals(body.id)) {
                     entity.put(fessConfig.getIndexFieldId(), body.id);
-                    entity.put(fessConfig.getIndexFieldVersion(), body.versionNo);
+                    entity.put(fessConfig.getIndexFieldVersion(), body.version);
                 } else {
                     oldId = body.id;
                     entity.put(fessConfig.getIndexFieldId(), newId);
@@ -178,7 +178,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 final String type = fessConfig.getIndexDocumentType();
                 fessEsClient.store(index, type, entity);
                 if (oldId != null) {
-                    fessEsClient.delete(index, type, oldId, body.versionNo);
+                    fessEsClient.delete(index, type, oldId, body.version);
                 }
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {

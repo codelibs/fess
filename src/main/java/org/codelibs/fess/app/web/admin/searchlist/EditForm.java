@@ -31,8 +31,7 @@ public class EditForm extends CreateForm {
     @Size(max = 1000)
     public String docId;
 
-    @Required
     @ValidateTypeFailure
-    public Long versionNo;
+    public Long version;
 
 }
