@@ -30,6 +30,7 @@ import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRespon
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -147,9 +148,16 @@ public final class UpgradeUtil {
     }
 
     public static boolean putMapping(final IndicesAdminClient indicesClient, final String index, final String source) {
+        return putMapping(indicesClient, index, null, source);
+    }
+
+    public static boolean putMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String source) {
         try {
-            final PutMappingResponse pmResponse =
-                    indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON).execute().actionGet();
+            final PutMappingRequestBuilder builder = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON);
+            if (type != null) {
+                builder.setType(type);
+            }
+            final PutMappingResponse pmResponse = builder.execute().actionGet();
             if (!pmResponse.isAcknowledged()) {
                 logger.warn("Failed to update " + index + " settings.");
             } else {

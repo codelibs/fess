@@ -35,8 +35,6 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
-import org.codelibs.fess.helper.SuggestHelper;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.UpgradeUtil;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -213,7 +211,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         // update mapping
         if (UpgradeUtil.addFieldMapping(indicesClient, searchLogIndex, "search_log", "virtualHost",
                 "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}")) {
-            UpgradeUtil.putMapping(indicesClient, searchLogIndex, "{\"dynamic_templates\": ["
+            UpgradeUtil.putMapping(indicesClient, searchLogIndex, "search_log", "{\"dynamic_templates\": ["
                     + "{\"search_fields\": {\"path_match\": \"searchField.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
                     + "]}");
         }
@@ -232,30 +230,10 @@ public class AdminUpgradeAction extends FessAdminAction {
     private void upgradeFromAll() {
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
         final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
-        final String suggestIndex = ComponentUtil.getComponent(SuggestHelper.class).suggester().getIndex();
 
         // .crawler
         if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
             UpgradeUtil.deleteIndex(indicesClient, crawlerIndex, response -> {});
-        }
-
-        // fess.suggest
-        if (UpgradeUtil.existsIndex(indicesClient, suggestIndex, IndicesOptions.fromOptions(false, true, true, true))) {
-            UpgradeUtil.deleteIndex(indicesClient, suggestIndex, response -> {
-                scheduledJobService.getScheduledJob("suggest_indexer").ifPresent(entity -> {
-                    if (!entity.isEnabled() || entity.isRunning()) {
-                        logger.warn("suggest_indexer job is running.");
-                        return;
-                    }
-                    try {
-                        entity.start();
-                    } catch (final Exception e) {
-                        logger.warn("Failed to start suggest_indexer job.", e);
-                    }
-                }).orElse(() -> {
-                    logger.warn("No suggest_indexer job.");
-                });
-            });
         }
     }
 
