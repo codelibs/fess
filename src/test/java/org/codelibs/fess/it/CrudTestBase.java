@@ -30,9 +30,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -100,7 +100,7 @@ public abstract class CrudTestBase extends ITBase {
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = createTestParam(i);
             checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true))
-            .body("response.status", equalTo(0));
+                    .body("response.status", equalTo(0));
 
             //logger.info("create " + i + checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
             refresh();
@@ -126,7 +126,7 @@ public abstract class CrudTestBase extends ITBase {
         idList.forEach(id -> {
             // Test: get setting api
             checkGetMethod(searchBody, getItemEndpointSuffix() + "/" + id).then()
-            //.body("response." + getItemEndpointSuffix() + ".id", equalTo(id))
+                    .body("response." + getItemEndpointSuffix() + "." + getIdKey(), equalTo(id))
                     .body("response." + getItemEndpointSuffix() + "." + getKeyProperty(), startsWith(getNamePrefix()));
         });
 
@@ -180,14 +180,12 @@ public abstract class CrudTestBase extends ITBase {
 
     protected void testDelete() {
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
-        List<String> idList = getIdList(searchBody);
 
-        idList.forEach(id -> {
-            //Test: delete setting api
-            checkDeleteMethod(getItemEndpointSuffix() + "/" + id).then().body("response.status", equalTo(0));
-        });
-
-        refresh();
+        for (int count = 0; count < NUM; count++) {
+            final String id = getIdList(searchBody).get(0);
+            checkDeleteMethod(getItemEndpointSuffix() + "/" + id.toString()).then().body("response.status", equalTo(0));
+            refresh();
+        }
 
         // Test: number of settings.
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(0));

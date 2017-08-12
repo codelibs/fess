@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.it.admin.dict;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,16 +74,14 @@ public class ProtwordsTests extends DictCrudTestBase {
 
     @Override
     protected Map<String, Object> getUpdateMap() {
-        final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put(KEY_PROPERTY, "new_input_protwords");
-        return updateMap;
+        assertTrue(false); // Unreachable
+        return null;
     }
 
     @Test
     void crudTest() {
         testCreate();
         testRead();
-        testUpdate();
         testDelete();
     }
 }

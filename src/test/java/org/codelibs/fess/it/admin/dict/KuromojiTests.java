@@ -76,10 +76,7 @@ public class KuromojiTests extends DictCrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put(KEY_PROPERTY, "new_token");
         updateMap.put("segmentation", "new_segment");
-        updateMap.put("reading", "new_reading");
-        updateMap.put("pos", "new_pos");
         return updateMap;
     }
 
