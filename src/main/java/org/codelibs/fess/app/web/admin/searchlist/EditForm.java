@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.searchlist;
 
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
@@ -24,9 +27,12 @@ public class EditForm extends CreateForm {
 
     public String id;
 
+    @Required
+    @Size(max = 1000)
     public String docId;
 
+    @Required
     @ValidateTypeFailure
-    public Long version;
+    public Long versionNo;
 
 }

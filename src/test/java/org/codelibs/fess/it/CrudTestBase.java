@@ -31,6 +31,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -39,6 +41,8 @@ public abstract class CrudTestBase extends ITBase {
 
     protected static final int NUM = 20;
     protected static final int SEARCH_ALL_NUM = 1000;
+
+    private static final Logger logger = LoggerFactory.getLogger(CrudTestBase.class);
 
     // ================
     // Abstract Methods
@@ -58,6 +62,11 @@ public abstract class CrudTestBase extends ITBase {
     abstract protected Map<String, Object> getUpdateMap();
 
     // ================
+    // Constant
+    // ================
+    protected String getIdKey() {
+        return "id";
+    }
 
     @BeforeAll
     protected static void initAll() {
@@ -71,9 +80,8 @@ public abstract class CrudTestBase extends ITBase {
 
     @AfterEach
     protected void tearDown() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", SEARCH_ALL_NUM);
-        List<String> idList = getPropList(searchBody, "id");
+        final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
+        List<String> idList = getIdList(searchBody);
         idList.forEach(id -> {
             checkDeleteMethod(getItemEndpointSuffix() + "/" + id);
         });
@@ -92,19 +100,20 @@ public abstract class CrudTestBase extends ITBase {
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = createTestParam(i);
             checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true))
-                    .body("response.status", equalTo(0));
+            .body("response.status", equalTo(0));
+
+            //logger.info("create " + i + checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
+            refresh();
         }
 
         // Test: number of settings.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", SEARCH_ALL_NUM);
+        final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(NUM));
     }
 
     protected void testRead() {
         // Test: get settings api.
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", SEARCH_ALL_NUM);
+        final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         List<String> nameList = getPropList(searchBody, getKeyProperty());
 
         assertEquals(NUM, nameList.size());
@@ -113,11 +122,11 @@ public abstract class CrudTestBase extends ITBase {
             assertTrue(nameList.contains(name), name);
         }
 
-        List<String> idList = getPropList(searchBody, "id");
+        List<String> idList = getIdList(searchBody);
         idList.forEach(id -> {
             // Test: get setting api
             checkGetMethod(searchBody, getItemEndpointSuffix() + "/" + id).then()
-                    .body("response." + getItemEndpointSuffix() + ".id", equalTo(id))
+            //.body("response." + getItemEndpointSuffix() + ".id", equalTo(id))
                     .body("response." + getItemEndpointSuffix() + "." + getKeyProperty(), startsWith(getNamePrefix()));
         });
 
@@ -134,15 +143,15 @@ public abstract class CrudTestBase extends ITBase {
         // Test: update settings api
         final Set<String> keySet = createTestParam(0).keySet();
         final Map<String, Object> updateMap = getUpdateMap();
-        Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", SEARCH_ALL_NUM);
+        final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         List<Map<String, Object>> settings = getItemList(searchBody);
 
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>(updateMap);
             requestBody.put("version_no", 1);
-            if (setting.containsKey("id")) {
-                requestBody.put("id", setting.get("id"));
+            final String idKey = getIdKey();
+            if (setting.containsKey(idKey)) {
+                requestBody.put(idKey, setting.get(idKey));
             }
             for (String key : keySet) {
                 if (!requestBody.containsKey(key)) {
@@ -170,16 +179,17 @@ public abstract class CrudTestBase extends ITBase {
     }
 
     protected void testDelete() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", SEARCH_ALL_NUM);
-        List<String> idList = getPropList(searchBody, "id");
+        final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
+        List<String> idList = getIdList(searchBody);
 
         idList.forEach(id -> {
             //Test: delete setting api
             checkDeleteMethod(getItemEndpointSuffix() + "/" + id).then().body("response.status", equalTo(0));
         });
 
-        // Test: NUMber of settings.
+        refresh();
+
+        // Test: number of settings.
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(0));
     }
 
@@ -207,6 +217,10 @@ public abstract class CrudTestBase extends ITBase {
         return JsonPath.from(response).getList(getJsonPath());
     }
 
+    protected List<String> getIdList(final Map<String, Object> body) {
+        return getPropList(body, getIdKey());
+    }
+
     protected List<String> getPropList(final Map<String, Object> body, final String prop) {
         String response = checkGetMethod(body, getListEndpointSuffix()).asString();
         return JsonPath.from(response).getList(getJsonPath() + "." + prop);
@@ -214,5 +228,11 @@ public abstract class CrudTestBase extends ITBase {
 
     protected String getJsonPath() {
         return "response." + getListEndpointSuffix() + ".findAll {it." + getKeyProperty() + ".startsWith(\"" + getNamePrefix() + "\")}";
+    }
+
+    protected Map<String, Object> createSearchBody(final int size) {
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", size);
+        return searchBody;
     }
 }

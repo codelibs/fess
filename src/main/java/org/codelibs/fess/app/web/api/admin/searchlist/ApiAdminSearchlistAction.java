@@ -70,8 +70,8 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
-    // GET /api/admin/searchlist
-    // POST /api/admin/searchlist
+    // GET /api/admin/searchlist/docs
+    // POST /api/admin/searchlist/docs
     @Execute
     public JsonResponse<ApiResult> docs(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -80,6 +80,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             // query matches on all documents.
             body.q = Constants.MATCHES_ALL_QUERY;
         }
+
         final SearchRenderData renderData = new SearchRenderData();
         body.initialize();
         try {
@@ -151,6 +152,11 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$doc(final EditBody body) {
         validateApi(body, messages -> {});
+
+        if (body.doc == null) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
+        }
+
         validateUpdateFields(body, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.EDIT;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
@@ -161,7 +167,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 String oldId = null;
                 if (newId.equals(body.id)) {
                     entity.put(fessConfig.getIndexFieldId(), body.id);
-                    entity.put(fessConfig.getIndexFieldVersion(), body.version);
+                    entity.put(fessConfig.getIndexFieldVersion(), body.versionNo);
                 } else {
                     oldId = body.id;
                     entity.put(fessConfig.getIndexFieldId(), newId);
@@ -172,7 +178,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 final String type = fessConfig.getIndexDocumentType();
                 fessEsClient.store(index, type, entity);
                 if (oldId != null) {
-                    fessEsClient.delete(index, type, oldId, body.version);
+                    fessEsClient.delete(index, type, oldId, body.versionNo);
                 }
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {

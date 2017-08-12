@@ -16,7 +16,21 @@
 package org.codelibs.fess.app.web.api.admin.searchlist;
 
 import org.codelibs.fess.app.web.admin.searchlist.ListForm;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class SearchBody extends ListForm {
+
+    // `size` is an alias of `num`.
+    // `size` is prepared to be compatible with other Admin APIs
+    @ValidateTypeFailure
+    public Integer size;
+
+    @Override
+    public void initialize() {
+        if (size != null) {
+            num = (num == null || num < size) ? size : num;
+        }
+        super.initialize();
+    }
 
 }
