@@ -1,4 +1,4 @@
-Enterprise Search Server: Fess 
+Enterprise Search Server: Fess
 ====
 
 ## Overview
@@ -44,7 +44,7 @@ You can register crawling targets on Web/File System/Data Store of admin pages, 
 
 ## Fess on Docker Hub
 
-We provide Docker image on Docker Hub. 
+We provide Docker image on Docker Hub.
 For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess/).
 
 ## Migration from Other Systems
@@ -101,7 +101,7 @@ Run package goal and then the release file is created in target/releases.
 
 Launch Fess Server and run the following command:
 
-    mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201"
+    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201"
 
 ### Translate In Your Language
 
