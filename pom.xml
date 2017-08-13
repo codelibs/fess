@@ -60,7 +60,7 @@
 		<utflute.version>0.8.0</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.4.0</crawler.version>
+		<crawler.version>1.4.1-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>5.5.0</suggest.version>
@@ -1238,6 +1238,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>

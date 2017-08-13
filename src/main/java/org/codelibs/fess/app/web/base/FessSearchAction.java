@@ -26,7 +26,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;

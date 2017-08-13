@@ -42,8 +42,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Base64Util;
