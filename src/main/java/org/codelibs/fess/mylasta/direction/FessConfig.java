@@ -450,7 +450,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_ADMIN_DOUBLE_FIELDS = "index.admin.double.fields";
 
-    /** The key of the configuration. e.g. doc_id,url,title,role,boost */
+    /** The key of the configuration. e.g. url,title,role,boost */
     String INDEX_ADMIN_REQUIRED_FIELDS = "index.admin.required.fields";
 
     /** The key of the configuration. e.g. 3m */
@@ -2579,7 +2579,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.required.fields'. <br>
-     * The value is, e.g. doc_id,url,title,role,boost <br>
+     * The value is, e.g. url,title,role,boost <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminRequiredFields();
@@ -7568,7 +7568,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_ADMIN_LONG_FIELDS, "content_length,favorite_count,click_count");
             defaultMap.put(FessConfig.INDEX_ADMIN_FLOAT_FIELDS, "boost");
             defaultMap.put(FessConfig.INDEX_ADMIN_DOUBLE_FIELDS, "");
-            defaultMap.put(FessConfig.INDEX_ADMIN_REQUIRED_FIELDS, "doc_id,url,title,role,boost");
+            defaultMap.put(FessConfig.INDEX_ADMIN_REQUIRED_FIELDS, "url,title,role,boost");
             defaultMap.put(FessConfig.INDEX_SEARCH_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_SCROLL_SEARCH_TIMEOUT_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_INDEX_TIMEOUT, "3m");

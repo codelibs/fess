@@ -74,7 +74,6 @@ public class SynonymTests extends DictCrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put(KEY_PROPERTY, "new_inputs");
         updateMap.put("outputs", "new_outputs");
         return updateMap;
     }

@@ -1254,7 +1254,7 @@ public interface FessProp {
         final IntegerTypeValidator integerValidator = new IntegerTypeValidator();
         return split(getIndexAdminIntegerFields(), ",").get(
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !integerValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
+                        .filter(s -> !integerValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
     String getIndexAdminLongFields();
@@ -1279,7 +1279,7 @@ public interface FessProp {
         final LongTypeValidator longValidator = new LongTypeValidator();
         return split(getIndexAdminLongFields(), ",").get(
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !longValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
+                        .filter(s -> !longValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
     String getIndexAdminFloatFields();
@@ -1304,7 +1304,7 @@ public interface FessProp {
         final FloatTypeValidator floatValidator = new FloatTypeValidator();
         return split(getIndexAdminFloatFields(), ",").get(
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !floatValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
+                        .filter(s -> !floatValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
     String getIndexAdminDoubleFields();
@@ -1329,7 +1329,7 @@ public interface FessProp {
         final DoubleTypeValidator doubleValidator = new DoubleTypeValidator();
         return split(getIndexAdminDoubleFields(), ",").get(
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !doubleValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
+                        .filter(s -> !doubleValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
     public default Map<String, Object> convertToEditableDoc(final Map<String, Object> source) {

@@ -41,7 +41,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 
 /**
- * Integration Tests for
+ * Integration Tests which need an execution of crawler
  * - /api/admin/joblog
  * - /api/admin/crawlinginfo
  * - /api/admin/failureurl
@@ -65,7 +65,7 @@ public class CrawlerLogTests extends ITBase {
             createWebConfig();
             logger.info("WebConfig is created");
             refresh();
-            webConfigId = getWebConfigId();
+            webConfigId = getWebConfigIds().get(0);
 
             createJob();
             logger.info("Job is created");
@@ -74,6 +74,7 @@ public class CrawlerLogTests extends ITBase {
             startJob();
 
             waitJob();
+            refresh();
         } catch (InterruptedException e) {
             e.printStackTrace();
             assertTrue(false);
@@ -82,6 +83,7 @@ public class CrawlerLogTests extends ITBase {
 
     @BeforeEach
     protected void init() {
+        refresh();
     }
 
     @AfterEach
@@ -108,9 +110,15 @@ public class CrawlerLogTests extends ITBase {
         final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("q", "Example Domain");
         checkMethodBase(requestBody).delete("/api/admin/searchlist/query");
+        refresh();
 
-        deleteMethod("/api/admin/scheduler/setting/" + getSchedulerId());
-        deleteMethod("/api/admin/webconfig/setting/" + webConfigId);
+        for (String sId : getSchedulerIds()) {
+            deleteMethod("/api/admin/scheduler/setting/" + sId);
+        }
+
+        for (String wId : getWebConfigIds()) {
+            deleteMethod("/api/admin/webconfig/setting/" + wId);
+        }
 
         deleteTestToken();
     }
@@ -177,7 +185,7 @@ public class CrawlerLogTests extends ITBase {
     private static void startJob() {
         for (int i = 0; i < 30; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
-            final String schedulerId = getSchedulerId();
+            final String schedulerId = getSchedulerIds().get(0);
             final Response response = checkMethodBase(requestBody).post("/api/admin/scheduler/" + schedulerId + "/start");
             if (response.getBody().jsonPath().getInt("response.status") == 0) {
                 logger.info("Start scheduler \"" + schedulerId + "\"");
@@ -341,7 +349,7 @@ public class CrawlerLogTests extends ITBase {
         requestBody.put("q", "Example Domain");
 
         final String response = checkMethodBase(requestBody).get("/api/admin/searchlist/docs").asString();
-        final List<Map<String, Object>> results = JsonPath.from(response).getList("response.result");
+        final List<Map<String, Object>> results = JsonPath.from(response).getList("response.docs");
         return results;
     }
 
@@ -365,16 +373,16 @@ public class CrawlerLogTests extends ITBase {
         return "response.settings.findAll {it.name.startsWith(\"" + NAME_PREFIX + "\")}";
     }
 
-    private static String getWebConfigId() {
+    private static List<String> getWebConfigIds() {
         final String response = getJsonResponse("/api/admin/webconfig/settings");
         final List<String> idList = JsonPath.from(response).getList(getResponsePath() + ".id");
-        return idList.get(0);
+        return idList;
     }
 
-    private static String getSchedulerId() {
+    private static List<String> getSchedulerIds() {
         final String response = getJsonResponse("/api/admin/scheduler/settings");
         final List<String> idList = JsonPath.from(response).getList(getResponsePath() + ".id");
-        return idList.get(0);
+        return idList;
     }
 
     private static Map<String, Object> getSchedulerItem() {

@@ -13,26 +13,26 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.it.admin.dict;
+package org.codelibs.fess.it.admin;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("it")
-public class ProtwordsTests extends DictCrudTestBase {
+public class SearchListTests extends CrudTestBase {
 
-    private static final String NAME_PREFIX = "protwordsTest_";
-    private static final String API_PATH = "/api/admin/dict/protwords";
-    private static final String LIST_ENDPOINT_SUFFIX = "settings";
-    private static final String ITEM_ENDPOINT_SUFFIX = "setting";
-    private static final String DICT_TYPE = "protwords";
+    private static final String NAME_PREFIX = "searchListTest_";
+    private static final String API_PATH = "/api/admin/searchlist";
+    private static final String LIST_ENDPOINT_SUFFIX = "docs";
+    private static final String ITEM_ENDPOINT_SUFFIX = "doc";
 
-    private static final String KEY_PROPERTY = "input";
+    private static final String KEY_PROPERTY = "title";
 
     @Override
     protected String getNamePrefix() {
@@ -51,37 +51,57 @@ public class ProtwordsTests extends DictCrudTestBase {
 
     @Override
     protected String getListEndpointSuffix() {
-        return LIST_ENDPOINT_SUFFIX + "/" + dictId;
+        return LIST_ENDPOINT_SUFFIX;
     }
 
     @Override
     protected String getItemEndpointSuffix() {
-        return ITEM_ENDPOINT_SUFFIX + "/" + dictId;
+        return ITEM_ENDPOINT_SUFFIX;
     }
 
     @Override
-    protected String getDictType() {
-        return DICT_TYPE;
+    protected String getIdKey() {
+        return "doc_id";
     }
 
     @Override
     protected Map<String, Object> createTestParam(int id) {
-        final Map<String, Object> requestBody = new HashMap<>();
+
+        final Map<String, Object> doc = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
-        requestBody.put(KEY_PROPERTY, keyProp);
+        doc.put(KEY_PROPERTY, keyProp);
+        doc.put("url", "http://example.com/" + id);
+        doc.put("boost", id);
+        doc.put("role", "Rguest");
+
+        final Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("doc", doc);
         return requestBody;
     }
 
     @Override
+    protected Map<String, Object> createSearchBody(final int size) {
+        final Map<String, Object> searchBody = new HashMap<>();
+        searchBody.put("size", size);
+        searchBody.put("q", NAME_PREFIX);
+        return searchBody;
+    }
+
+    @Override
     protected Map<String, Object> getUpdateMap() {
-        assertTrue(false); // Unreachable
-        return null;
+        // TODO
+        assertTrue(false);
+
+        final Map<String, Object> updateMap = new HashMap<>();
+        updateMap.put("click_count", 100);
+        return updateMap;
     }
 
     @Test
     void crudTest() {
         testCreate();
         testRead();
+        //testUpdate(); // TODO
         testDelete();
     }
 }

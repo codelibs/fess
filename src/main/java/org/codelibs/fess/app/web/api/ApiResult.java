@@ -149,7 +149,7 @@ public class ApiResult {
 
     public static class ApiDocsResponse extends ApiResponse {
         protected String queryId;
-        protected List<Map<String, Object>> result;
+        protected List<Map<String, Object>> docs;
         protected String highlightParams;
         protected String execTime;
         protected int pageSize;
@@ -170,7 +170,7 @@ public class ApiResult {
 
         public ApiDocsResponse renderData(final SearchRenderData data) {
             queryId = data.getQueryId();
-            result = data.getDocumentItems();
+            docs = data.getDocumentItems();
             highlightParams = data.getAppendHighlightParams();
             execTime = data.getExecTime();
             pageSize = data.getPageSize();
