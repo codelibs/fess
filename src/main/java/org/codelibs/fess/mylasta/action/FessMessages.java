@@ -362,6 +362,24 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Could not find the data({0}). */
     public static final String ERRORS_crud_could_not_find_crud_table = "{errors.crud_could_not_find_crud_table}";
 
+    /** The key of the message: {0} is required. */
+    public static final String ERRORS_property_required = "{errors.property_required}";
+
+    /** The key of the message: {0} should be numeric. */
+    public static final String ERRORS_property_type_integer = "{errors.property_type_integer}";
+
+    /** The key of the message: {0} should be numeric. */
+    public static final String ERRORS_property_type_long = "{errors.property_type_long}";
+
+    /** The key of the message: {0} should be numeric. */
+    public static final String ERRORS_property_type_float = "{errors.property_type_float}";
+
+    /** The key of the message: {0} should be numeric. */
+    public static final String ERRORS_property_type_double = "{errors.property_type_double}";
+
+    /** The key of the message: {0} should be date. */
+    public static final String ERRORS_property_type_date = "{errors.property_type_date}";
+
     /** The key of the message: Updated parameters. */
     public static final String SUCCESS_update_crawler_params = "{success.update_crawler_params}";
 
@@ -2085,6 +2103,96 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsCrudCouldNotFindCrudTable(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_crud_could_not_find_crud_table, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_required' with parameters.
+     * <pre>
+     * message: {0} is required.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyRequired(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_required, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_type_integer' with parameters.
+     * <pre>
+     * message: {0} should be numeric.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyTypeInteger(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_type_integer, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_type_long' with parameters.
+     * <pre>
+     * message: {0} should be numeric.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyTypeLong(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_type_long, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_type_float' with parameters.
+     * <pre>
+     * message: {0} should be numeric.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyTypeFloat(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_type_float, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_type_double' with parameters.
+     * <pre>
+     * message: {0} should be numeric.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyTypeDouble(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_type_double, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_type_date' with parameters.
+     * <pre>
+     * message: {0} should be date.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyTypeDate(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_type_date, arg0));
         return this;
     }
 

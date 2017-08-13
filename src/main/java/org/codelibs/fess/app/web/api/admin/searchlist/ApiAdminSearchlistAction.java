@@ -16,8 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.searchlist;
 
 import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.getDoc;
-import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.validateCreateFields;
-import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.validateUpdateFields;
+import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.validateFields;
 
 import java.util.Map;
 
@@ -102,7 +101,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         return null; // ignore
     }
 
-    // GET /api/admin/searchlist/doc/{id}
+    // GET /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> get$doc(final String id) {
         return asJson(new ApiDocResponse()
@@ -122,7 +121,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         if (body.doc == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
         }
-        validateCreateFields(body, v -> throwValidationErrorApi(v));
+        validateFields(body, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.CREATE;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             try {
@@ -152,34 +151,28 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$doc(final EditBody body) {
         validateApi(body, messages -> {});
-
         if (body.doc == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
         }
-
-        validateUpdateFields(body, v -> throwValidationErrorApi(v));
+        validateFields(body, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.EDIT;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
+            final String index = fessConfig.getIndexDocumentUpdateIndex();
+            final String type = fessConfig.getIndexDocumentType();
             try {
                 entity.putAll(fessConfig.convertToStorableDoc(body.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
-                String oldId = null;
-                if (newId.equals(body.id)) {
-                    entity.put(fessConfig.getIndexFieldId(), body.id);
-                    entity.put(fessConfig.getIndexFieldVersion(), body.version);
-                } else {
-                    oldId = body.id;
+                final String oldId = (String) entity.get(fessConfig.getIndexFieldId());
+                if (!newId.equals(oldId)) {
                     entity.put(fessConfig.getIndexFieldId(), newId);
-                    entity.remove(fessConfig.getIndexFieldVersion());
+                    final Number version = (Number) entity.remove(fessConfig.getIndexFieldVersion());
+                    if (version != null && oldId != null) {
+                        fessEsClient.delete(index, type, oldId, version.longValue());
+                    }
                 }
 
-                final String index = fessConfig.getIndexDocumentUpdateIndex();
-                final String type = fessConfig.getIndexDocumentType();
                 fessEsClient.store(index, type, entity);
-                if (oldId != null) {
-                    fessEsClient.delete(index, type, oldId, body.version);
-                }
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to update " + entity, e);
@@ -187,14 +180,14 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             }
             return entity;
         }).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id));
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.doc.toString()));
             return null;
         });
         return asJson(new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(false).status(Status.OK)
                 .result());
     }
 
-    // DELETE /api/admin/searchlist/doc/{id}
+    // DELETE /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> delete$doc(final String id) {
         try {

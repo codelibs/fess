@@ -1049,10 +1049,11 @@ public class FessEsClient implements Client {
         @SuppressWarnings("unchecked")
         final Map<String, Object> source = obj instanceof Map ? (Map<String, Object>) obj : BeanUtil.copyBeanToNewMap(obj);
         final String id = (String) source.remove(fessConfig.getIndexFieldId());
-        final Long version = (Long) source.remove(fessConfig.getIndexFieldVersion());
+        final Number version = (Number) source.remove(fessConfig.getIndexFieldVersion());
         IndexResponse response;
         try {
             if (id == null) {
+                // TODO throw Exception in next release
                 // create
                 response =
                         client.prepareIndex(index, type).setSource(new DocMap(source)).setRefreshPolicy(RefreshPolicy.IMMEDIATE)
@@ -1063,7 +1064,7 @@ public class FessEsClient implements Client {
                         client.prepareIndex(index, type, id).setSource(new DocMap(source)).setRefreshPolicy(RefreshPolicy.IMMEDIATE)
                                 .setOpType(OpType.INDEX);
                 if (version != null && version.longValue() > 0) {
-                    builder.setVersion(version);
+                    builder.setVersion(version.longValue());
                 }
                 response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             }

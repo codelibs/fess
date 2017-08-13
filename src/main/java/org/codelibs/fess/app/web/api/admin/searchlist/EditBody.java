@@ -18,5 +18,4 @@ package org.codelibs.fess.app.web.api.admin.searchlist;
 import org.codelibs.fess.app.web.admin.searchlist.EditForm;
 
 public class EditBody extends EditForm {
-
 }

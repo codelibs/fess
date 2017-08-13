@@ -28,7 +28,6 @@
 					<la:hidden property="crudMode" />
 					<la:hidden property="q" />
 					<c:if test="${crudMode==2}">
-						<la:hidden property="docId" />
 						<la:hidden property="id" />
 						<la:hidden property="version" />
 					</c:if>
@@ -78,16 +77,19 @@
 										</la:info>
 										<la:errors property="_global" />
 									</div>
+									<c:if test="${crudMode==2}">
+									<div class="form-group">
+										<label for="doc_id" class="col-sm-3 control-label">_id</label>
+										<div class="col-sm-9">${f:h(id)}</div>
+									</div>
 									<div class="form-group">
 										<label for="doc_id" class="col-sm-3 control-label">doc_id</label>
 										<div class="col-sm-9">
-											<la:errors property="doc.doc_id" />
-											<la:text property="doc.doc_id" styleClass="form-control"
-												required="required" data-validation="custom"
-												data-validation-regexp="^([a-z0-9]+)$"
-												data-validation-help="[a-z] or [0-9]" />
+											${f:h(doc.doc_id)}
+											<la:hidden property="doc.doc_id"/>
 										</div>
 									</div>
+									</c:if>
 									<div class="form-group">
 										<label for="url" class="col-sm-3 control-label">url</label>
 										<div class="col-sm-9">
@@ -128,13 +130,6 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.label" />
 											<la:textarea property="doc.label" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="version" class="col-sm-3 control-label">version</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.version" />
-											<la:text property="doc.version" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -219,13 +214,6 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.config_id" />
 											<la:text property="doc.config_id" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="_id" class="col-sm-3 control-label">_id</label>
-										<div class="col-sm-9">
-											<la:errors property="doc._id" />
-											<la:text property="doc._id" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">

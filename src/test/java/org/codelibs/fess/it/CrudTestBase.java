@@ -83,7 +83,7 @@ public abstract class CrudTestBase extends ITBase {
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         int count = 0;
         List<String> idList = getIdList(searchBody);
-        while(idList.size() > 0 && count < NUM) {
+        while (idList.size() > 0 && count < NUM) {
             final String id = idList.get(0);
             checkDeleteMethod(getItemEndpointSuffix() + "/" + id.toString());
             refresh();

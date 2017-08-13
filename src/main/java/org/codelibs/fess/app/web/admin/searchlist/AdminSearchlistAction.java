@@ -235,13 +235,12 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
-        final String docId = form.docId;
         getDoc(form).ifPresent(entity -> {
             form.doc = fessConfig.convertToEditableDoc(entity);
             form.id = (String) entity.remove(fessConfig.getIndexFieldId());
             form.version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, docId), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asListHtml());
         });
         saveToken();
         return asEditHtml();
@@ -251,7 +250,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
-        validateCreateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
+        validateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
         verifyToken(() -> asEditHtml());
         getDoc(form).ifPresent(
                 entity -> {
@@ -280,31 +279,26 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
-        validateUpdateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
-        logger.debug("DEBUG:::role" + form.doc.get("role"));
+        validateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
         verifyToken(() -> asEditHtml());
         getDoc(form).ifPresent(
                 entity -> {
+                    final String index = fessConfig.getIndexDocumentUpdateIndex();
+                    final String type = fessConfig.getIndexDocumentType();
                     try {
                         entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
                         final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
-                        String oldId = null;
-                        if (newId.equals(form.id)) {
-                            entity.put(fessConfig.getIndexFieldId(), form.id);
-                            entity.put(fessConfig.getIndexFieldVersion(), form.version);
-                        } else {
-                            oldId = form.id;
+                        final String oldId = (String) entity.get(fessConfig.getIndexFieldId());
+                        if (!newId.equals(oldId)) {
                             entity.put(fessConfig.getIndexFieldId(), newId);
-                            entity.remove(fessConfig.getIndexFieldVersion());
+                            final Long version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
+                            if (version != null && oldId != null) {
+                                fessEsClient.delete(index, type, oldId, version);
+                            }
                         }
 
-                        final String index = fessConfig.getIndexDocumentUpdateIndex();
-                        final String type = fessConfig.getIndexDocumentType();
                         fessEsClient.store(index, type, entity);
-                        if (oldId != null) {
-                            fessEsClient.delete(index, type, oldId, form.version);
-                        }
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         logger.error("Failed to update " + entity, e);
@@ -312,7 +306,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                                 () -> asEditHtml());
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirectWith(getClass(), moreUrl("search").params("q", URLUtil.encode(form.q, Constants.UTF_8)));
     }
@@ -320,107 +314,41 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     //                                                                       Validation
     //                                                                           =========
-    public static void validateCreateFields(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
+    public static void validateFields(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        if (!fessConfig.validateIndexRequiredFields(form.doc)) {
-            final List<String> invalidRequiredFields = fessConfig.invalidIndexRequiredFields(form.doc);
-            final String invalids = String.join(", doc.", invalidRequiredFields);
+        try {
+            if (!fessConfig.validateIndexRequiredFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexRequiredFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
+            }
 
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Required: {doc." + invalids + "}");
-            });
-        }
-
-        if (!fessConfig.validateIndexArrayFields(form.doc)) {
-            final List<String> invalidArrayFields = fessConfig.invalidIndexArrayFields(form.doc);
-            final String invalids = String.join(", doc.", invalidArrayFields);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Array: {doc." + invalids + "}");
-            });
-        }
-        if (!fessConfig.validateIndexDateFields(form.doc)) {
-            final List<String> invalidDateFields = fessConfig.invalidIndexDateFields(form.doc);
-            final String invalids = String.join(", doc.", invalidDateFields);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Date: {doc." + invalids + "}");
-            });
-        }
-        if (!fessConfig.validateIndexIntegerFields(form.doc)) {
-            final List<String> invalidIntegerFields = fessConfig.invalidIndexIntegerFields(form.doc);
-            final String invalids = String.join(", doc.", invalidIntegerFields);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Integer: {doc." + invalids + "}");
-            });
-        }
-        if (!fessConfig.validateIndexLongFields(form.doc)) {
-            final List<String> invalidLongFields = fessConfig.invalidIndexLongFields(form.doc);
-            final String invalids = String.join(", doc.", invalidLongFields);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Long: {doc." + invalids + "}");
-            });
-        }
-        if (!fessConfig.validateIndexFloatFields(form.doc)) {
-            final List<String> invalidFloatFields = fessConfig.invalidIndexFloatFields(form.doc);
-            final String invalids = String.join(", doc.", invalidFloatFields);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Float: {doc." + invalids + "}");
-            });
-        }
-        if (!fessConfig.validateIndexDoubleFields(form.doc)) {
-            final List<String> invalidDoubleFields = fessConfig.invalidIndexDoubleFields(form.doc);
-            final String invalids = String.join(", doc.", invalidDoubleFields);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudFailedToCreateCrudTable("doc.", "Must be Double: {doc." + invalids + "}");
-            });
-        }
-    }
-
-    public static void validateUpdateFields(final EditForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-
-        if (!fessConfig.validateIndexRequiredFields(form.doc)) {
-            final List<String> invalidRequiredFields = fessConfig.invalidIndexRequiredFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidRequiredFields.get(0), form.docId);
-            });
-        }
-
-        if (!fessConfig.validateIndexArrayFields(form.doc)) {
-            final List<String> invalidArrayFields = fessConfig.invalidIndexArrayFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidArrayFields.get(0), form.docId);
-            });
-        }
-        if (!fessConfig.validateIndexDateFields(form.doc)) {
-            final List<String> invalidDateFields = fessConfig.invalidIndexDateFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidDateFields.get(0), form.docId);
-            });
-        }
-        if (!fessConfig.validateIndexIntegerFields(form.doc)) {
-            final List<String> invalidIntegerFields = fessConfig.invalidIndexIntegerFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidIntegerFields.get(0), form.docId);
-            });
-        }
-        if (!fessConfig.validateIndexLongFields(form.doc)) {
-            final List<String> invalidLongFields = fessConfig.invalidIndexLongFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidLongFields.get(0), form.docId);
-            });
-        }
-        if (!fessConfig.validateIndexFloatFields(form.doc)) {
-            final List<String> invalidFloatFields = fessConfig.invalidIndexFloatFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidFloatFields.get(0), form.docId);
-            });
-        }
-        if (!fessConfig.validateIndexDoubleFields(form.doc)) {
-            final List<String> invalidDoubleFields = fessConfig.invalidIndexDoubleFields(form.doc);
-            throwError.accept(messages -> {
-                messages.addErrorsCrudCouldNotFindCrudTable("doc." + invalidDoubleFields.get(0), form.docId);
-            });
+            if (!fessConfig.validateIndexArrayFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexArrayFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
+            }
+            if (!fessConfig.validateIndexDateFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexDateFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyTypeDate(s, s)));
+            }
+            if (!fessConfig.validateIndexIntegerFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexIntegerFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyTypeInteger(s, s)));
+            }
+            if (!fessConfig.validateIndexLongFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexLongFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyTypeLong(s, s)));
+            }
+            if (!fessConfig.validateIndexFloatFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexFloatFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyTypeFloat(s, s)));
+            }
+            if (!fessConfig.validateIndexDoubleFields(form.doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexDoubleFields(form.doc).stream().map(s -> "doc." + s)
+                        .forEach(s -> messages.addErrorsPropertyTypeDouble(s, s)));
+            }
+        } catch (final Exception e) {
+            throwError.accept(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, e.getMessage()));
         }
     }
 
@@ -445,15 +373,17 @@ public class AdminSearchlistAction extends FessAdminAction {
             entity.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(entity));
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
-            if (form instanceof EditForm) {
-                final String docId = ((EditForm) form).docId;
-                if (StringUtil.isNotBlank(docId)) {
-                    return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
-                            builder -> {
-                                builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-                                return true;
-                            });
-                }
+            final String docId;
+            if (form.doc != null) {
+                docId = (String) form.doc.get(fessConfig.getIndexFieldDocId());
+            } else {
+                docId = null;
+            }
+            if (StringUtil.isNotBlank(docId)) {
+                return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
+                    builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+                    return true;
+                });
             }
             break;
         default:
