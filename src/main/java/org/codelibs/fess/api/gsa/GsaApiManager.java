@@ -52,6 +52,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,11 +60,15 @@ import org.slf4j.LoggerFactory;
 public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final Logger logger = LoggerFactory.getLogger(GsaApiManager.class);
 
+    private static final String GSA_META_SUFFIX = "_s";
+
     protected String gsaPathPrefix = "/gsa";
 
     protected String gsaMetaPrefix = "MT_";
 
-    private static final String GSA_META_SUFFIX = "_s";
+    protected String charsetField = "charset";
+
+    protected String contentTypeField = "content_type";
 
     @Override
     public boolean matches(final HttpServletRequest request) {
@@ -95,7 +100,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         String query = null;
-        final StringBuilder buf = new StringBuilder(1000); // TODO replace response stream
+        final StringBuilder buf = new StringBuilder(1000);
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_XML);
         boolean xmlDtd = false;
         try {
@@ -195,14 +200,25 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("<R N=\"");
                     buf.append(recordNumber);
                     buf.append("\">");
-                    final String url = (String) document.remove("url");
+                    final String url = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
+                    document.remove(fessConfig.getIndexFieldUrl());
                     document.put("UE", url);
                     document.put("U", URLDecoder.decode(url, Constants.UTF_8));
-                    document.put("T", document.remove("title"));
-                    final float score = Float.parseFloat((String) document.remove("boost"));
+                    document.put("T", DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class));
+                    document.remove(fessConfig.getIndexFieldTitle());
+                    final float score = DocumentUtil.getValue(document, fessConfig.getIndexFieldBoost(), Float.class, Float.valueOf(0));
+                    document.remove(fessConfig.getIndexFieldBoost());
                     document.put("RK", (int) (score * 10));
-                    document.put("S", ((String) document.remove("content_description")).replaceAll("<(/*)em>", "<$1b>"));
-                    document.put("LANG", document.remove("lang"));
+                    document.put("S",
+                            DocumentUtil
+                                    .getValue(document, fessConfig.getResponseFieldContentDescription(), String.class, StringUtil.EMPTY)
+                                    .replaceAll("<(/*)em>", "<$1b>"));
+                    document.remove(fessConfig.getResponseFieldContentDescription());
+                    final String lang = DocumentUtil.getValue(document, fessConfig.getIndexFieldLang(), String.class);
+                    if (StringUtil.isNotBlank(lang)) {
+                        document.put("LANG", lang);
+                        document.remove(fessConfig.getIndexFieldLang());
+                    }
                     for (final Map.Entry<String, Object> entry : document.entrySet()) {
                         final String name = entry.getKey();
                         if (StringUtil.isNotBlank(name) && entry.getValue() != null
@@ -213,7 +229,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                                     buf.append("<MT N=\"");
                                     buf.append(tagName);
                                     buf.append("\" V=\"");
-                                    buf.append(escapeXml(entry.getValue().toString()));
+                                    buf.append(escapeXml(entry.getValue()));
                                     buf.append("\"/>");
                                 }
                             } else {
@@ -231,23 +247,29 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("<HAS>");
                     buf.append("<L/>");
                     buf.append("<C SZ=\"");
-                    buf.append(Long.parseLong((String) document.remove("content_length")) / 1000);
+                    buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldContentLength(), Long.class, Long.valueOf(0))
+                            .longValue() / 1000);
+                    document.remove(fessConfig.getIndexFieldContentLength());
                     buf.append("k\" CID=\"");
-                    buf.append(document.remove("doc_id"));
+                    buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class));
+                    document.remove(fessConfig.getIndexFieldDocId());
                     buf.append("\" ENC=\"");
-                    String charset = (String) document.remove("charset_s");
-                    if (StringUtil.isNotBlank(charset)) {
-                        buf.append(charset);
-                    } else {
-                        charset = (String) document.remove("contentType_s");
+                    String charset = DocumentUtil.getValue(document, charsetField, String.class);
+                    document.remove(charsetField);
+                    if (StringUtil.isBlank(charset)) {
+                        charset = DocumentUtil.getValue(document, contentTypeField, String.class);
+                        document.remove(contentTypeField);
                         if (StringUtil.isNotBlank(charset)) {
                             final Matcher m = Pattern.compile(".*;\\s*charset=(.+)").matcher(charset);
                             if (m.matches()) {
                                 charset = m.group(1);
-                                buf.append(charset);
                             }
                         }
+                        if (StringUtil.isBlank(charset)) {
+                            charset = Constants.UTF_8;
+                        }
                     }
+                    buf.append(charset);
                     buf.append("\"/>");
                     buf.append("</HAS>");
                     buf.append("</R>");
@@ -495,5 +517,13 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     public void setGsaMetaPrefix(final String gsaMetaPrefix) {
         this.gsaMetaPrefix = gsaMetaPrefix;
+    }
+
+    public void setCharsetField(String charsetField) {
+        this.charsetField = charsetField;
+    }
+
+    public void setContentTypeField(String contentTypeField) {
+        this.contentTypeField = contentTypeField;
     }
 }

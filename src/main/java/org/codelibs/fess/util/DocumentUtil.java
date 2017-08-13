@@ -26,6 +26,14 @@ public final class DocumentUtil {
     private DocumentUtil() {
     }
 
+    public static <T> T getValue(final Map<String, Object> doc, final String key, final Class<T> clazz, final T defaultValue) {
+        T value = getValue(doc, key, clazz);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getValue(final Map<String, Object> doc, final String key, final Class<T> clazz) {
         if (doc == null || key == null) {
