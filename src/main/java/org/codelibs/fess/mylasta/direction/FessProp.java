@@ -71,6 +71,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String QUERY_GSA_RESPONSE_FIELDS = "queryGsaResponseFields";
+
     public static final String THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS = "ThumbnailHtmlImageExcludeExtensions";
 
     public static final String VIRTUAL_HOST_VALUE = "VirtualHostValue";
@@ -1769,6 +1771,21 @@ public interface FessProp {
 
         final String u = url.toLowerCase(Locale.ROOT);
         return !stream(excludeExtensions).get(stream -> stream.anyMatch(s -> u.endsWith(s)));
+    }
+
+    String getQueryGsaResponseFields();
+
+    public default boolean isGsaResponseFields(final String name) {
+        @SuppressWarnings("unchecked")
+        Set<String> gsaResponseFieldSet = (Set<String>) propMap.get(QUERY_GSA_RESPONSE_FIELDS);
+        if (gsaResponseFieldSet == null) {
+            gsaResponseFieldSet =
+                    split(getQueryGsaResponseFields(), ",").get(
+                            stream -> stream.map(s -> s.toLowerCase(Locale.ROOT).trim()).filter(StringUtil::isNotBlank)
+                                    .collect(Collectors.toSet()));
+            propMap.put(QUERY_GSA_RESPONSE_FIELDS, gsaResponseFieldSet);
+        }
+        return gsaResponseFieldSet.contains(name.toLowerCase(Locale.ROOT));
     }
 
 }
