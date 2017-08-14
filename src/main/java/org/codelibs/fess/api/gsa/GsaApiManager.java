@@ -221,10 +221,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     }
                     for (final Map.Entry<String, Object> entry : document.entrySet()) {
                         final String name = entry.getKey();
-                        if (StringUtil.isNotBlank(name) && entry.getValue() != null
-                                && ComponentUtil.getQueryHelper().isApiResponseField(name)) {
+                        if (StringUtil.isNotBlank(name) && entry.getValue() != null && fessConfig.isGsaResponseFields(name)) {
                             if (name.startsWith(gsaMetaPrefix)) {
-                                final String tagName = name.replaceAll("^" + gsaMetaPrefix, "").replaceAll(GSA_META_SUFFIX + "\\z", "");
+                                final String tagName =
+                                        name.replaceFirst("^" + gsaMetaPrefix, StringUtil.EMPTY).replaceAll(GSA_META_SUFFIX + "\\z",
+                                                StringUtil.EMPTY);
                                 if (getFields != null && getFields.contains(tagName)) {
                                     buf.append("<MT N=\"");
                                     buf.append(tagName);

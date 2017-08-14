@@ -525,6 +525,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS = "query.additional.not.analyzed.fields";
 
+    /** The key of the configuration. e.g. UE,U,T,RK,S,LANG */
+    String QUERY_GSA_RESPONSE_FIELDS = "query.gsa.response.fields";
+
     /** The key of the configuration. e.g. 4 */
     String QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS = "query.collapse.max.concurrent.group.results";
 
@@ -2865,6 +2868,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryAdditionalNotAnalyzedFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.gsa.response.fields'. <br>
+     * The value is, e.g. UE,U,T,RK,S,LANG <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaResponseFields();
 
     /**
      * Get the value for the key 'query.collapse.max.concurrent.group.results'. <br>
@@ -6143,6 +6153,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS);
         }
 
+        public String getQueryGsaResponseFields() {
+            return get(FessConfig.QUERY_GSA_RESPONSE_FIELDS);
+        }
+
         public String getQueryCollapseMaxConcurrentGroupResults() {
             return get(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS);
         }
@@ -7593,6 +7607,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_FACET_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_SORT_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS, "");
+            defaultMap.put(FessConfig.QUERY_GSA_RESPONSE_FIELDS, "UE,U,T,RK,S,LANG");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS, "4");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_NAME, "similar_docs");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE, "0");
