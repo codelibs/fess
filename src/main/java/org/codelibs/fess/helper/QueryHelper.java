@@ -62,6 +62,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -124,6 +125,8 @@ public class QueryHelper {
     protected GeoInfo defaultGeoInfo;
 
     protected Map<String, String> fieldBoostMap = new HashMap<>();
+
+    protected List<FilterFunctionBuilder> boostFunctionList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -334,6 +337,7 @@ public class QueryHelper {
             if (keyMatchHelper != null) {
                 keyMatchHelper.buildQuery(queryContext.getDefaultKeyword(), list);
             }
+            list.addAll(boostFunctionList);
         });
     }
 
@@ -815,4 +819,11 @@ public class QueryHelper {
         this.lowercaseWildcard = lowercaseWildcard;
     }
 
+    public void addBoostFunction(final ScoreFunctionBuilder<?> scoreFunction) {
+        boostFunctionList.add(new FilterFunctionBuilder(scoreFunction));
+    }
+
+    public void addBoostFunction(final QueryBuilder filter, final ScoreFunctionBuilder<?> scoreFunction) {
+        boostFunctionList.add(new FilterFunctionBuilder(filter, scoreFunction));
+    }
 }
