@@ -15,23 +15,34 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RelatedContentHelper {
 
-    protected volatile Map<String, Map<String, String>> relatedContentMap = Collections.emptyMap();
+    private static final Logger logger = LoggerFactory.getLogger(RelatedContentHelper.class);
+
+    protected volatile Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = Collections.emptyMap();
+
+    protected String regexPrefix = "regex:";
+
+    protected String queryPlaceHolder = "__QUERY__";
 
     @PostConstruct
     public void init() {
@@ -52,15 +63,24 @@ public class RelatedContentHelper {
     }
 
     protected void reload() {
-        final Map<String, Map<String, String>> relatedContentMap = new HashMap<>();
+        final Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = new HashMap<>();
         getAvailableRelatedContentList().stream().forEach(entity -> {
             final String key = getHostKey(entity);
-            Map<String, String> map = relatedContentMap.get(key);
-            if (map == null) {
-                map = new HashMap<>();
-                relatedContentMap.put(key, map);
+            Pair<Map<String, String>, List<Pair<Pattern, String>>> pair = relatedContentMap.get(key);
+            if (pair == null) {
+                pair = new Pair<>(new HashMap<>(), new ArrayList<>());
+                relatedContentMap.put(key, pair);
             }
-            map.put(toLowerCase(entity.getTerm()), entity.getContent());
+            if (entity.getTerm().startsWith(regexPrefix)) {
+                String regex = entity.getTerm().substring(regexPrefix.length());
+                if (StringUtil.isBlank(regex)) {
+                    logger.warn("Unknown regex pattern: " + entity.getTerm());
+                } else {
+                    pair.getSecond().add(new Pair<>(Pattern.compile(regex), entity.getContent()));
+                }
+            } else {
+                pair.getFirst().put(toLowerCase(entity.getTerm()), entity.getContent());
+            }
         });
         this.relatedContentMap = relatedContentMap;
     }
@@ -73,11 +93,16 @@ public class RelatedContentHelper {
     public String getRelatedContent(final String query) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String key = fessConfig.getVirtualHostKey();
-        final Map<String, String> map = relatedContentMap.get(key);
-        if (map != null) {
-            final String content = map.get(toLowerCase(query));
+        final Pair<Map<String, String>, List<Pair<Pattern, String>>> pair = relatedContentMap.get(key);
+        if (pair != null) {
+            final String content = pair.getFirst().get(toLowerCase(query));
             if (StringUtil.isNotBlank(content)) {
                 return content;
+            }
+            for (final Pair<Pattern, String> regexData : pair.getSecond()) {
+                if (regexData.getFirst().matcher(query).matches()) {
+                    return regexData.getSecond().replace(queryPlaceHolder, query);
+                }
             }
         }
         return StringUtil.EMPTY;
@@ -85,6 +110,14 @@ public class RelatedContentHelper {
 
     private String toLowerCase(final String term) {
         return term != null ? term.toLowerCase(Locale.ROOT) : term;
+    }
+
+    public void setRegexPrefix(String regexPrefix) {
+        this.regexPrefix = regexPrefix;
+    }
+
+    public void setQueryPlaceHolder(String queryPlaceHolder) {
+        this.queryPlaceHolder = queryPlaceHolder;
     }
 
 }
