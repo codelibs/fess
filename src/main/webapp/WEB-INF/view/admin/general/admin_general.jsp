@@ -350,7 +350,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapProviderUrl" />
 											<la:text styleId="ldapProviderUrl" property="ldapProviderUrl"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -360,7 +360,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapBaseDn" />
 											<la:text styleId="ldapBaseDn" property="ldapBaseDn"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -370,7 +370,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapAdminSecurityPrincipal" />
 											<la:text styleId="ldapAdminSecurityPrincipal" property="ldapAdminSecurityPrincipal"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -380,7 +380,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapAdminSecurityCredentials" />
 											<la:password styleId="ldapAdminSecurityCredentials" property="ldapAdminSecurityCredentials"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="new-password" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -390,7 +390,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapSecurityPrincipal" />
 											<la:text styleId="ldapSecurityPrincipal" property="ldapSecurityPrincipal"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -400,7 +400,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapAccountFilter" />
 											<la:text styleId="ldapAccountFilter" property="ldapAccountFilter"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -410,7 +410,7 @@
 										<div class="col-sm-9">
 											<la:errors property="ldapMemberofAttribute" />
 											<la:text styleId="ldapMemberofAttribute" property="ldapMemberofAttribute"
-												styleClass="form-control" />
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<%-- Nortification --%>
