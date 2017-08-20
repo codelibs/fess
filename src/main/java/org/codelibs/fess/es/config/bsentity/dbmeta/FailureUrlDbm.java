@@ -129,19 +129,19 @@ public class FailureUrlDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnConfigId = cci("configId", "configId", null, null, String.class, "configId", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorCount = cci("errorCount", "errorCount", null, null, Integer.class, "errorCount", null, false,
-            false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorLog = cci("errorLog", "errorLog", null, null, String.class, "errorLog", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorName = cci("errorName", "errorName", null, null, String.class, "errorName", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLastAccessTime = cci("lastAccessTime", "lastAccessTime", null, null, Long.class, "lastAccessTime",
-            null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnThreadName = cci("threadName", "threadName", null, null, String.class, "threadName", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
-            null, false, null, null, null, null, null, false);
+            null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnConfigId() {
         return _columnConfigId;

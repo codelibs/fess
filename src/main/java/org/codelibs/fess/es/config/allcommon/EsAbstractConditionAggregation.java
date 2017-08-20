@@ -74,8 +74,8 @@ public abstract class EsAbstractConditionAggregation {
 
     // ===================================================================================
     //                                                                         Aggregation
-    //                                                                               =====
-    public void addAggregation(AbstractAggregationBuilder aggregationAggregationBuilder) {
+    //                                                                         ===========
+    public void addAggregation(AbstractAggregationBuilder<?> aggregationAggregationBuilder) {
         assertObjectNotNull("aggregationAggregationBuilder", aggregationAggregationBuilder);
         regA(aggregationAggregationBuilder);
     }
