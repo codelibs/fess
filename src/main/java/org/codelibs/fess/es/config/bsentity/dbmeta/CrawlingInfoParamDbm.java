@@ -124,13 +124,13 @@ public class CrawlingInfoParamDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnCrawlingInfoId = cci("crawlingInfoId", "crawlingInfoId", null, null, String.class, "crawlingInfoId",
-            null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "keyword", 0, 0,
-            null, false, null, null, null, null, null, false);
+            null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCrawlingInfoId() {
         return _columnCrawlingInfoId;
