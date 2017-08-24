@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.job;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -55,6 +56,10 @@ public class SuggestJob {
 
     protected String logLevel;
 
+    protected String jvmOptions;
+
+    protected String lastaEnv;
+
     public SuggestJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
         return this;
@@ -77,6 +82,16 @@ public class SuggestJob {
 
     public SuggestJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
         this.useLocaleElasticsearch = useLocaleElasticsearch;
+        return this;
+    }
+
+    public SuggestJob jvmOptions(final String option) {
+        this.jvmOptions = option;
+        return this;
+    }
+
+    public SuggestJob lastaEnv(final String env) {
+        this.lastaEnv = env;
         return this;
     }
 
@@ -169,13 +184,15 @@ public class SuggestJob {
             cmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + fessConfig.getElasticsearchClusterName());
         }
 
-        final String lastaEnv = System.getProperty("lasta.env");
-        if (StringUtil.isNotBlank(lastaEnv)) {
-            if (lastaEnv.equals("web")) {
+        final String systemLastaEnv = System.getProperty("lasta.env");
+        if (StringUtil.isNotBlank(systemLastaEnv)) {
+            if (systemLastaEnv.equals("web")) {
                 cmdList.add("-Dlasta.env=suggest");
             } else {
-                cmdList.add("-Dlasta.env=" + lastaEnv);
+                cmdList.add("-Dlasta.env=" + systemLastaEnv);
             }
+        } else if (StringUtil.isNotBlank(lastaEnv)) {
+            cmdList.add("-Dlasta.env=" + lastaEnv);
         }
 
         cmdList.add("-Dfess.suggest.process=true");
@@ -202,6 +219,10 @@ public class SuggestJob {
             } else {
                 ownTmpDir = null;
             }
+        }
+
+        if (StringUtil.isNotBlank(jvmOptions)) {
+            split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
         }
 
         cmdList.add(SuggestCreator.class.getCanonicalName());
