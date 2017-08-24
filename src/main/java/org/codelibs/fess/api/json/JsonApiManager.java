@@ -44,6 +44,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
+import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
@@ -129,6 +130,7 @@ public class JsonApiManager extends BaseJsonApiManager {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
+        final RelatedContentHelper relatedContentHelper = ComponentUtil.getRelatedContentHelper();
 
         int status = 0;
         Exception err = null;
@@ -201,6 +203,11 @@ public class JsonApiManager extends BaseJsonApiManager {
             if (relatedQueries.length > 0) {
                 buf.append(",\"related_query\":");
                 buf.append(escapeJson(relatedQueries));
+            }
+            final String relatedContent = relatedContentHelper.getRelatedContent(params.getQuery());
+            if (StringUtil.isNotBlank(relatedContent)) {
+                buf.append(",\"related_content\":");
+                buf.append(escapeJson(relatedContent));
             }
             if (!documentItems.isEmpty()) {
                 buf.append(',');
