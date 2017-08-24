@@ -92,8 +92,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     }
 
     protected Map<String, Object> generateData(final ResponseData responseData) {
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final Extractor extractor = getExtractor(responseData);
-        final Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>(crawlingConfig.getConfigParameterMap(ConfigName.CONFIG));
         params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
         final String mimeType = responseData.getMimeType();
         params.put(HttpHeaders.CONTENT_TYPE, mimeType);
@@ -162,12 +164,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
         final String contentMeta = contentMetaBuf.toString().trim();
 
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
-        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
