@@ -41,6 +41,7 @@
 	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
 		<property name="defaultFacetInfo">
 			<component class="org.codelibs.fess.entity.FacetInfo">
+				<property name="size">100</property>
 				<property name="minDocCount">1</property>
 				<property name="field">["label"]</property>
 				<property name="query">[
