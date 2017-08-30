@@ -218,6 +218,10 @@ public class AdminBackupAction extends FessAdminAction {
                 addToList(entity.getQueryTime(), list);
                 addToList(entity.getResponseTime(), list);
                 addToList(entity.getRequestedAt(), list);
+                entity.getSearchFieldLogList().stream().forEach(e -> {
+                    addToList(e.getFirst(), list);
+                    addToList(e.getSecond(), list);
+                });
                 try {
                     writer.writeValues(list);
                 } catch (final IOException e) {
