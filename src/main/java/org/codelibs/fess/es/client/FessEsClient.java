@@ -396,7 +396,10 @@ public class FessEsClient implements Client {
         final String indexConfigFile = indexConfigPath + "/" + index + ".json";
         try {
             String source = FileUtil.readUTF8(indexConfigFile);
-            final String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+            String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+            if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
+                dictionaryPath = dictionaryPath + "/";
+            }
             source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
             final CreateIndexResponse indexResponse =
                     client.admin().indices().prepareCreate(indexName).setSource(source, XContentFactory.xContentType(source)).execute()
