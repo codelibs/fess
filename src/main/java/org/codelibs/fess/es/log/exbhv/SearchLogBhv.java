@@ -59,14 +59,14 @@ public class SearchLogBhv extends BsSearchLogBhv {
     @Override
     protected <RESULT extends SearchLog> RESULT createEntity(final Map<String, Object> source, final Class<? extends RESULT> entityType) {
         try {
-            final RESULT result = entityType.newInstance();
+            final RESULT result = super.createEntity(source, entityType);
             final Object searchFieldObj = source.get("searchField");
             if (searchFieldObj instanceof Map) {
                 ((Map<String, String>) searchFieldObj).entrySet().stream()
                         .forEach(e -> result.getSearchFieldLogList().add(new Pair(e.getKey(), e.getValue())));
             }
             return result;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (Exception e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
