@@ -24,9 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +38,14 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
@@ -70,6 +76,8 @@ public class AdminBackupAction extends FessAdminAction {
     private static final Logger logger = LoggerFactory.getLogger(AdminBackupAction.class);
 
     public static final String CSV_EXTENTION = ".csv";
+
+    public static final String NDJSON_EXTENTION = ".ndjson";
 
     private static final DateTimeFormatter ISO_8601_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
@@ -136,6 +144,17 @@ public class AdminBackupAction extends FessAdminAction {
                         }
                     }
                 });
+            } else if (id.endsWith(NDJSON_EXTENTION)) {
+                final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
+                if ("search_log".equals(name)) {
+                    return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
+                } else if ("user_info".equals(name)) {
+                    return writeNdjsonResponse(id, getUserInfoNdjsonWriteCall());
+                } else if ("click_log".equals(name)) {
+                    return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
+                } else if ("favorite_log".equals(name)) {
+                    return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
+                }
             } else if (id.endsWith(CSV_EXTENTION)) {
                 final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
                 if ("search_log".equals(name)) {
@@ -173,6 +192,184 @@ public class AdminBackupAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
+    private StreamResponse writeNdjsonResponse(final String id, final Consumer<Writer> writeCall) {
+        return asStream(id)//
+                .header("Pragma", "no-cache")//
+                .header("Cache-Control", "no-cache")//
+                .header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT")//
+                .header("Content-Type", "application/x-ndjson")//
+                .stream(out -> {
+                    try (final Writer writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
+                        writeCall.accept(writer);
+                        writer.flush();
+                    } catch (final Exception e) {
+                        logger.warn("Failed to write " + id + " to response.", e);
+                    }
+                });
+    }
+
+    private static StringBuilder appendJson(String field, Object value, StringBuilder buf) {
+        buf.append('"').append(StringEscapeUtils.escapeJson(field)).append('"').append(':');
+        if (value == null) {
+            buf.append("null");
+        } else if (value instanceof LocalDateTime) {
+            final String format =
+                    ((LocalDateTime) value).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).format(ISO_8601_FORMATTER);
+            buf.append('"').append(StringEscapeUtils.escapeJson(format)).append('"');
+        } else if (value instanceof String[]) {
+            final String json =
+                    Arrays.stream((String[]) value).map(s -> "\"" + StringEscapeUtils.escapeJson(s) + "\"")
+                            .collect(Collectors.joining(","));
+            buf.append('[').append(json).append(']');
+        } else if (value instanceof List) {
+            final String json =
+                    ((List<?>) value).stream().map(s -> "\"" + StringEscapeUtils.escapeJson(s.toString()) + "\"")
+                            .collect(Collectors.joining(","));
+            buf.append('[').append(json).append(']');
+        } else if (value instanceof Map) {
+            buf.append('{');
+            final String json = ((Map<?, ?>) value).entrySet().stream().map(e -> {
+                StringBuilder tempBuf = new StringBuilder();
+                appendJson(e.getKey().toString(), e.getValue(), tempBuf);
+                return tempBuf.toString();
+            }).collect(Collectors.joining(","));
+            buf.append(json);
+            buf.append('}');
+        } else if (value instanceof Long || value instanceof Integer) {
+            buf.append(((Number) value).longValue());
+        } else if (value instanceof Number) {
+            buf.append(((Number) value).doubleValue());
+        } else {
+            buf.append('"').append(StringEscapeUtils.escapeJson(value.toString())).append('"');
+        }
+        return buf;
+    }
+
+    public static Consumer<Writer> getSearchLogNdjsonWriteCall() {
+        return writer -> {
+            final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
+            bhv.selectCursor(
+                    cb -> {
+                        cb.query().matchAll();
+                        cb.query().addOrderBy_RequestedAt_Asc();
+                    },
+                    entity -> {
+                        StringBuilder buf = new StringBuilder();
+                        buf.append('{');
+                        appendJson("id", entity.getId(), buf).append(',');
+                        appendJson("query-id", entity.getQueryId(), buf).append(',');
+                        appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
+                        appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
+                        appendJson("user", entity.getUser(), buf).append(',');
+                        appendJson("search-word", entity.getSearchWord(), buf).append(',');
+                        appendJson("hit-count", entity.getHitCount(), buf).append(',');
+                        appendJson("query-page-size", entity.getQueryPageSize(), buf).append(',');
+                        appendJson("query-offset", entity.getQueryOffset(), buf).append(',');
+                        appendJson("referer", entity.getReferer(), buf).append(',');
+                        appendJson("languages", entity.getLanguages(), buf).append(',');
+                        appendJson("roles", entity.getRoles(), buf).append(',');
+                        appendJson("user-agent", entity.getUserAgent(), buf).append(',');
+                        appendJson("client-ip", entity.getClientIp(), buf).append(',');
+                        appendJson("access-type", entity.getAccessType(), buf).append(',');
+                        appendJson("query-time", entity.getQueryTime(), buf).append(',');
+                        appendJson("response-time", entity.getResponseTime(), buf).append(',');
+                        appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
+                        final Map<String, List<String>> searchFieldMap =
+                                entity.getSearchFieldLogList()
+                                        .stream()
+                                        .collect(
+                                                Collectors.groupingBy(Pair::getFirst,
+                                                        Collectors.mapping(Pair::getSecond, Collectors.toList())));
+                        appendJson("search-field", searchFieldMap, buf);
+                        buf.append('}');
+                        buf.append('\n');
+                        try {
+                            writer.write(buf.toString());
+                        } catch (final IOException e) {
+                            throw new RuntimeIOException(e);
+                        }
+                    });
+        };
+    }
+
+    public static Consumer<Writer> getUserInfoNdjsonWriteCall() {
+        return writer -> {
+            final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_CreatedAt_Asc();
+            }, entity -> {
+                StringBuilder buf = new StringBuilder();
+                buf.append('{');
+                appendJson("id", entity.getId(), buf).append(',');
+                appendJson("created-at", entity.getCreatedAt(), buf).append(',');
+                appendJson("updated-at", entity.getUpdatedAt(), buf);
+                buf.append('}');
+                buf.append('\n');
+                try {
+                    writer.write(buf.toString());
+                } catch (final IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        };
+    }
+
+    public static Consumer<Writer> getFavoriteLogNdjsonWriteCall() {
+        return writer -> {
+            final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_CreatedAt_Asc();
+            }, entity -> {
+                StringBuilder buf = new StringBuilder();
+                buf.append('{');
+                appendJson("id", entity.getId(), buf).append(',');
+                appendJson("created-at", entity.getCreatedAt(), buf).append(',');
+                appendJson("query-id", entity.getQueryId(), buf).append(',');
+                appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
+                appendJson("doc-id", entity.getDocId(), buf).append(',');
+                appendJson("url", entity.getUrl(), buf);
+                buf.append('}');
+                buf.append('\n');
+                try {
+                    writer.write(buf.toString());
+                } catch (final IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        };
+    }
+
+    public static Consumer<Writer> getClickLogNdjsonWriteCall() {
+        return writer -> {
+            final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_RequestedAt_Asc();
+            }, entity -> {
+                StringBuilder buf = new StringBuilder();
+                buf.append('{');
+                appendJson("id", entity.getId(), buf).append(',');
+                appendJson("query-id", entity.getQueryId(), buf).append(',');
+                appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
+                appendJson("doc-id", entity.getDocId(), buf).append(',');
+                appendJson("url", entity.getUrl(), buf).append(',');
+                appendJson("order", entity.getOrder(), buf).append(',');
+                appendJson("query-requested-at", entity.getQueryRequestedAt(), buf).append(',');
+                appendJson("requested-at", entity.getRequestedAt(), buf);
+                buf.append('}');
+                buf.append('\n');
+                try {
+                    writer.write(buf.toString());
+                } catch (final IOException e) {
+                    throw new RuntimeIOException(e);
+                }
+            });
+        };
+    }
+
+    @Deprecated
     private StreamResponse writeCsvResponse(final String id, final Consumer<CsvWriter> writeCall) {
         return asStream(id)
                 .contentTypeOctetStream()
@@ -193,6 +390,7 @@ public class AdminBackupAction extends FessAdminAction {
                 });
     }
 
+    @Deprecated
     public static Consumer<CsvWriter> getSearchLogCsvWriteCall() {
         return writer -> {
             final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
@@ -231,6 +429,7 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    @Deprecated
     public static Consumer<CsvWriter> getUserInfoCsvWriteCall() {
         return writer -> {
             final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
@@ -250,6 +449,7 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    @Deprecated
     public static Consumer<CsvWriter> getFavoriteLogCsvWriteCall() {
         return writer -> {
             final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
@@ -272,6 +472,7 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    @Deprecated
     public static Consumer<CsvWriter> getClickLogCsvWriteCall() {
         return writer -> {
             final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
