@@ -95,17 +95,13 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final Extractor extractor = getExtractor(responseData);
-        final Map<String, String> params = new HashMap<>(crawlingConfig.getConfigParameterMap(ConfigName.CONFIG));
-        params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
         final String mimeType = responseData.getMimeType();
-        params.put(HttpHeaders.CONTENT_TYPE, mimeType);
-        params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
         final StringBuilder contentMetaBuf = new StringBuilder(1000);
         final Map<String, Object> dataMap = new HashMap<>();
         final Map<String, Object> metaDataMap = new HashMap<>();
         String content;
         try (final InputStream in = responseData.getResponseBody()) {
-            final ExtractData extractData = getExtractData(extractor, in, params);
+            final ExtractData extractData = getExtractData(extractor, in, createExtractParams(responseData, crawlingConfig));
             content = extractData.getContent();
             if (fessConfig.isCrawlerDocumentFileIgnoreEmptyContent() && StringUtil.isBlank(content)) {
                 return null;
@@ -334,7 +330,16 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return dataMap;
     }
 
-    private ExtractData getExtractData(final Extractor extractor, final InputStream in, final Map<String, String> params) {
+    protected Map<String, String> createExtractParams(final ResponseData responseData, final CrawlingConfig crawlingConfig) {
+        final Map<String, String> params = new HashMap<>(crawlingConfig.getConfigParameterMap(ConfigName.CONFIG));
+        params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
+        params.put(HttpHeaders.CONTENT_TYPE, responseData.getMimeType());
+        params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
+        params.put(ExtractData.URL, responseData.getUrl());
+        return params;
+    }
+
+    protected ExtractData getExtractData(final Extractor extractor, final InputStream in, final Map<String, String> params) {
         try {
             return extractor.getText(in, params);
         } catch (final RuntimeException e) {

@@ -289,6 +289,9 @@ public class CrawlJob {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {
             cmdList.add("-Dfess.log.level=" + logLevel);
+            if (logLevel.equalsIgnoreCase("debug")) {
+                cmdList.add("-Dorg.apache.tika.service.error.warn=true");
+            }
         }
         stream(fessConfig.getJvmCrawlerOptionsAsArray()).of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
