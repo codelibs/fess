@@ -626,7 +626,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
-    /** The key of the configuration. e.g. click_log.csv,favorite_log.csv,search_log.csv,user_info.csv */
+    /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
     String INDEX_BACKUP_LOG_TARGETS = "index.backup.log.targets";
 
     /** The key of the configuration. e.g. 4000 */
@@ -3112,7 +3112,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.backup.log.targets'. <br>
-     * The value is, e.g. click_log.csv,favorite_log.csv,search_log.csv,user_info.csv <br>
+     * The value is, e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupLogTargets();
@@ -7623,7 +7623,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS, ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties");
-            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.csv,favorite_log.csv,search_log.csv,user_info.csv");
+            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
