@@ -1299,10 +1299,6 @@
 					<artifactId>httpmime</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-exec</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>jcl-over-slf4j</artifactId>
 				</exclusion>
