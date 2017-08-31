@@ -98,6 +98,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final String mimeType = responseData.getMimeType();
         params.put(HttpHeaders.CONTENT_TYPE, mimeType);
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
+        params.put(ExtractData.URL, responseData.getUrl());
         final StringBuilder contentMetaBuf = new StringBuilder(1000);
         final Map<String, Object> dataMap = new HashMap<>();
         final Map<String, Object> metaDataMap = new HashMap<>();
