@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SuggestJob {
+    private static final String REMOTE_DEBUG_OPTIONS = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=localhost:8000";
+
     private static final Logger logger = LoggerFactory.getLogger(SuggestJob.class);
 
     protected JobExecutor jobExecutor;
@@ -83,6 +85,10 @@ public class SuggestJob {
     public SuggestJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
         this.useLocaleElasticsearch = useLocaleElasticsearch;
         return this;
+    }
+
+    public SuggestJob remoteDebug() {
+        return jvmOptions(REMOTE_DEBUG_OPTIONS);
     }
 
     public SuggestJob jvmOptions(final String option) {
