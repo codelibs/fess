@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.job;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -43,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SuggestJob {
+    private static final String REMOTE_DEBUG_OPTIONS = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=localhost:8000";
+
     private static final Logger logger = LoggerFactory.getLogger(SuggestJob.class);
 
     protected JobExecutor jobExecutor;
@@ -54,6 +57,8 @@ public class SuggestJob {
     protected String logFilePath;
 
     protected String logLevel;
+
+    protected String jvmOptions;
 
     public SuggestJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
@@ -77,6 +82,15 @@ public class SuggestJob {
 
     public SuggestJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
         this.useLocaleElasticsearch = useLocaleElasticsearch;
+        return this;
+    }
+
+    public SuggestJob remoteDebug() {
+        return jvmOptions(REMOTE_DEBUG_OPTIONS);
+    }
+
+    public SuggestJob jvmOptions(final String option) {
+        this.jvmOptions = option;
         return this;
     }
 
@@ -202,6 +216,10 @@ public class SuggestJob {
             } else {
                 ownTmpDir = null;
             }
+        }
+
+        if (StringUtil.isNotBlank(jvmOptions)) {
+            split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
         }
 
         cmdList.add(SuggestCreator.class.getCanonicalName());
