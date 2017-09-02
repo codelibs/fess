@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.misc.Pair;
@@ -62,8 +63,21 @@ public class SearchLogBhv extends BsSearchLogBhv {
             final RESULT result = super.createEntity(source, entityType);
             final Object searchFieldObj = source.get("searchField");
             if (searchFieldObj instanceof Map) {
-                ((Map<String, String>) searchFieldObj).entrySet().stream()
-                        .forEach(e -> result.getSearchFieldLogList().add(new Pair(e.getKey(), e.getValue())));
+                ((Map<String, ?>) searchFieldObj).entrySet().stream().forEach(e -> {
+                    if (e.getValue() instanceof String[]) {
+                        String[] values = (String[]) e.getValue();
+                        for (final String v : values) {
+                            result.getSearchFieldLogList().add(new Pair<>(e.getKey(), v));
+                        }
+                    } else if (e.getValue() instanceof List) {
+                        List<String> values = (List<String>) e.getValue();
+                        for (final String v : values) {
+                            result.getSearchFieldLogList().add(new Pair<>(e.getKey(), v));
+                        }
+                    } else if (e.getValue() != null) {
+                        result.getSearchFieldLogList().add(new Pair<>(e.getKey(), e.getValue().toString()));
+                    }
+                });
             }
             return result;
         } catch (Exception e) {
