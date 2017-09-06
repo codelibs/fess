@@ -219,7 +219,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. //LINK[@rel='canonical']/@href */
     String CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH = "crawler.document.html.canonical.xpath";
 
-    /** The key of the configuration. e.g. noscript,script,style,header,footer,nav,a[rel="nofollow"] */
+    /** The key of the configuration. e.g. noscript,script,style,header,footer,nav,a[rel=nofollow] */
     String CRAWLER_DOCUMENT_HTML_PRUNED_TAGS = "crawler.document.html.pruned.tags";
 
     /** The key of the configuration. e.g. 200 */
@@ -1856,7 +1856,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.html.pruned.tags'. <br>
-     * The value is, e.g. noscript,script,style,header,footer,nav,a[rel="nofollow"] <br>
+     * The value is, e.g. noscript,script,style,header,footer,nav,a[rel=nofollow] <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlPrunedTags();
@@ -7505,7 +7505,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH, "//HTML/@lang");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH, "//META[@name='description']/@content");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH, "//LINK[@rel='canonical']/@href");
-            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=\"nofollow\"]");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=nofollow]");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "200");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL, "No title.");
