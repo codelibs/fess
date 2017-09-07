@@ -15,9 +15,15 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -29,6 +35,109 @@ public class ViewHelperTest extends UnitFessTestCase {
         super.setUp();
         viewHelper = new ViewHelper();
         viewHelper.init();
+    }
+
+    public void test_getUrlLink() throws IOException {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isAppendQueryParameter() {
+                return false;
+            }
+
+            public String getIndexFieldUrl() {
+                return "url";
+            }
+
+            public String getIndexFieldDocId() {
+                return "doc_id";
+            }
+        });
+
+        // http
+        assertUrlLink("http://www.codelibs.org/", //
+                "http://www.codelibs.org/");
+        assertUrlLink("http://www.codelibs.org/あ", //
+                "http://www.codelibs.org/あ");
+        assertUrlLink("http://www.codelibs.org/%E3%81%82", //
+                "http://www.codelibs.org/%E3%81%82");
+        assertUrlLink("http://www.codelibs.org/%z", //
+                "http://www.codelibs.org/%z");
+        assertUrlLink("http://www.codelibs.org/?a=1&b=2", //
+                "http://www.codelibs.org/?a=1&b=2");
+
+        // https
+        assertUrlLink("https://www.codelibs.org/", //
+                "https://www.codelibs.org/");
+        assertUrlLink("https://www.codelibs.org/あ", //
+                "https://www.codelibs.org/あ");
+        assertUrlLink("https://www.codelibs.org/%E3%81%82", //
+                "https://www.codelibs.org/%E3%81%82");
+        assertUrlLink("https://www.codelibs.org/%z", //
+                "https://www.codelibs.org/%z");
+        assertUrlLink("https://www.codelibs.org/?a=1&b=2", //
+                "https://www.codelibs.org/?a=1&b=2");
+
+        // ftp
+        assertUrlLink("ftp://www.codelibs.org/", //
+                "ftp://www.codelibs.org/");
+        assertUrlLink("ftp://www.codelibs.org/あ", //
+                "ftp://www.codelibs.org/あ");
+        assertUrlLink("ftp://www.codelibs.org/%E3%81%82", //
+                "ftp://www.codelibs.org/%E3%81%82");
+        assertUrlLink("ftp://www.codelibs.org/%z", //
+                "ftp://www.codelibs.org/%z");
+
+        viewHelper.userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.IE;
+            }
+        };
+        File tempFile = File.createTempFile("test", ".properties");
+        FileUtil.writeBytes(tempFile.getAbsolutePath(), new byte[0]);
+        tempFile.deleteOnExit();
+        viewHelper.systemProperties = new DynamicProperties(tempFile);
+
+        // file
+        assertUrlLink("file:/home/taro/test.txt", //
+                "file://home/taro/test.txt");
+        assertUrlLink("file:/home/taro/あ.txt", //
+                "file://home/taro/あ.txt");
+        assertUrlLink("file:/home/taro/%E3%81%82.txt", //
+                "file://home/taro/あ.txt");
+
+        // smb->file
+        assertUrlLink("smb:/home/taro/test.txt", //
+                "file://home/taro/test.txt");
+        assertUrlLink("smb:/home/taro/あ.txt", //
+                "file://home/taro/あ.txt");
+        assertUrlLink("smb:/home/taro/%E3%81%82.txt", //
+                "file://home/taro/%E3%81%82.txt");
+
+        PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("ftp:");
+        pathMapping.setReplacement("file:");
+        viewHelper.pathMappingHelper = new PathMappingHelper();
+        viewHelper.pathMappingHelper.cachedPathMappingList = new ArrayList<>();
+        viewHelper.pathMappingHelper.cachedPathMappingList.add(pathMapping);
+        // ftp->file
+        assertUrlLink("ftp:/home/taro/test.txt", //
+                "file://home/taro/test.txt");
+        assertUrlLink("ftp:/home/taro/あ.txt", //
+                "file://home/taro/あ.txt");
+        assertUrlLink("ftp:/home/taro/%E3%81%82.txt", //
+                "file://home/taro/%E3%81%82.txt");
+
+        assertUrlLink(null, "#not-found-docId");
+        assertUrlLink("", "#not-found-docId");
+        assertUrlLink(" ", "#not-found-docId");
+    }
+
+    private void assertUrlLink(String url, String expected) {
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "docId");
+        doc.put("url", url);
+        assertEquals(expected, viewHelper.getUrlLink(doc));
     }
 
     public void test_replaceHighlightQueries() {
