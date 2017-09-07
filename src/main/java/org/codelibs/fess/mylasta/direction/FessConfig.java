@@ -623,6 +623,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1,2 */
     String SMB_AVAILABLE_SID_TYPES = "smb.available.sid.types";
 
+    /** The key of the configuration. e.g. true */
+    String FILE_ROLE_FROM_FILE = "file.role.from.file";
+
+    /** The key of the configuration. e.g. true */
+    String FTP_ROLE_FROM_FILE = "ftp.role.from.file";
+
     /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
@@ -3101,6 +3107,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getSmbAvailableSidTypesAsInteger();
+
+    /**
+     * Get the value for the key 'file.role.from.file'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFileRoleFromFile();
+
+    /**
+     * Is the property for the key 'file.role.from.file' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isFileRoleFromFile();
+
+    /**
+     * Get the value for the key 'ftp.role.from.file'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFtpRoleFromFile();
+
+    /**
+     * Is the property for the key 'ftp.role.from.file' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isFtpRoleFromFile();
 
     /**
      * Get the value for the key 'index.backup.targets'. <br>
@@ -6245,6 +6279,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.SMB_AVAILABLE_SID_TYPES);
         }
 
+        public String getFileRoleFromFile() {
+            return get(FessConfig.FILE_ROLE_FROM_FILE);
+        }
+
+        public boolean isFileRoleFromFile() {
+            return is(FessConfig.FILE_ROLE_FROM_FILE);
+        }
+
+        public String getFtpRoleFromFile() {
+            return get(FessConfig.FTP_ROLE_FROM_FILE);
+        }
+
+        public boolean isFtpRoleFromFile() {
+            return is(FessConfig.FTP_ROLE_FROM_FILE);
+        }
+
         public String getIndexBackupTargets() {
             return get(FessConfig.INDEX_BACKUP_TARGETS);
         }
@@ -7622,6 +7672,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.5");
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2");
+            defaultMap.put(FessConfig.FILE_ROLE_FROM_FILE, "true");
+            defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS, ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
