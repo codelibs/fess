@@ -228,7 +228,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
             } else if (Constants.FTP.equals(fileAuth.getProtocolScheme())) {
                 final FtpAuthentication ftpAuth = new FtpAuthentication();
                 ftpAuth.setServer(fileAuth.getHostname());
-                ftpAuth.setPort(fileAuth.getPort());
+                ftpAuth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort());
                 ftpAuth.setUsername(fileAuth.getUsername());
                 ftpAuth.setPassword(fileAuth.getPassword());
                 ftpAuthList.add(ftpAuth);

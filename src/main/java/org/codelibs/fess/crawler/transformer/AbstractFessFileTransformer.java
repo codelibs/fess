@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
@@ -34,6 +35,8 @@ import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.client.fs.FileSystemClient;
+import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.AccessResultData;
 import org.codelibs.fess.crawler.entity.ExtractData;
@@ -398,7 +401,52 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     protected List<String> getRoleTypes(final ResponseData responseData) {
         final List<String> roleTypeList = new ArrayList<>();
 
-        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb://")) {
+        roleTypeList.addAll(getSmbRoleTypes(responseData));
+        roleTypeList.addAll(getFileRoleTypes(responseData));
+        roleTypeList.addAll(getFtpRoleTypes(responseData));
+
+        return roleTypeList;
+    }
+
+    protected List<String> getFileRoleTypes(final ResponseData responseData) {
+        final List<String> roleTypeList = new ArrayList<>();
+        if (fessConfig.isFileRoleFromFile() && responseData.getUrl().startsWith("file:")) {
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final String owner = (String) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_USER);
+            if (owner != null) {
+                roleTypeList.add(systemHelper.getSearchRoleByUser(owner));
+            }
+            final String[] groups = (String[]) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_GROUPS);
+            roleTypeList.addAll(stream(groups).get(stream -> stream.map(systemHelper::getSearchRoleByGroup).collect(Collectors.toList())));
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("fileUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+            }
+        }
+        return roleTypeList;
+    }
+
+    protected List<String> getFtpRoleTypes(final ResponseData responseData) {
+        final List<String> roleTypeList = new ArrayList<>();
+        if (fessConfig.isFtpRoleFromFile() && responseData.getUrl().startsWith("ftp:")) {
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final String owner = (String) responseData.getMetaDataMap().get(FtpClient.FTP_FILE_USER);
+            if (owner != null) {
+                roleTypeList.add(systemHelper.getSearchRoleByUser(owner));
+            }
+            final String group = (String) responseData.getMetaDataMap().get(FtpClient.FTP_FILE_GROUP);
+            if (group != null) {
+                roleTypeList.add(systemHelper.getSearchRoleByGroup(group));
+            }
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("ftpUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+            }
+        }
+        return roleTypeList;
+    }
+
+    protected List<String> getSmbRoleTypes(final ResponseData responseData) {
+        final List<String> roleTypeList = new ArrayList<>();
+        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb:")) {
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
             if (aces != null) {
@@ -414,7 +462,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 }
             }
         }
-
         return roleTypeList;
     }
 
