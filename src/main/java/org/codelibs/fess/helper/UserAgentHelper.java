@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class UserAgentHelper {
@@ -25,29 +23,30 @@ public class UserAgentHelper {
     private static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
 
     public UserAgentType getUserAgentType() {
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-        UserAgentType uaType = (UserAgentType) request.getAttribute(USER_AGENT_TYPE);
-        if (uaType == null) {
-            final String userAgent = request.getHeader(USER_AGENT);
-            if (userAgent != null) {
-                if (userAgent.indexOf("MSIE") >= 0 || userAgent.indexOf("Trident") >= 0) {
-                    uaType = UserAgentType.IE;
-                } else if (userAgent.indexOf("Firefox") >= 0) {
-                    uaType = UserAgentType.FIREFOX;
-                } else if (userAgent.indexOf("Chrome") >= 0) {
-                    uaType = UserAgentType.CHROME;
-                } else if (userAgent.indexOf("Safari") >= 0) {
-                    uaType = UserAgentType.SAFARI;
-                } else if (userAgent.indexOf("Opera") >= 0) {
-                    uaType = UserAgentType.OPERA;
-                }
-            }
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            UserAgentType uaType = (UserAgentType) request.getAttribute(USER_AGENT_TYPE);
             if (uaType == null) {
-                uaType = UserAgentType.OTHER;
+                final String userAgent = request.getHeader(USER_AGENT);
+                if (userAgent != null) {
+                    if (userAgent.indexOf("MSIE") >= 0 || userAgent.indexOf("Trident") >= 0) {
+                        uaType = UserAgentType.IE;
+                    } else if (userAgent.indexOf("Firefox") >= 0) {
+                        uaType = UserAgentType.FIREFOX;
+                    } else if (userAgent.indexOf("Chrome") >= 0) {
+                        uaType = UserAgentType.CHROME;
+                    } else if (userAgent.indexOf("Safari") >= 0) {
+                        uaType = UserAgentType.SAFARI;
+                    } else if (userAgent.indexOf("Opera") >= 0) {
+                        uaType = UserAgentType.OPERA;
+                    }
+                }
+                if (uaType == null) {
+                    uaType = UserAgentType.OTHER;
+                }
+                request.setAttribute(USER_AGENT_TYPE, uaType);
             }
-            request.setAttribute(USER_AGENT_TYPE, uaType);
-        }
-        return uaType;
+            return uaType;
+        }).orElse(UserAgentType.OTHER);
     }
 
     public enum UserAgentType {
