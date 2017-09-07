@@ -180,26 +180,31 @@ public class ViewHelper {
     }
 
     public String getUrlLink(final Map<String, Object> document) {
-        // file protocol
-        String url = DocumentUtil.getValue(document, "url", String.class);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        String url = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
 
-        if (url == null) {
-            // TODO should redirect to a invalid page?
-            return "#";
+        if (StringUtil.isBlank(url)) {
+            return "#not-found-" + DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class);
         }
 
-        final boolean isFileUrl = url.startsWith("smb:") || url.startsWith("ftp:");
+        final boolean isSmbUrl = url.startsWith("smb:");
+        final boolean isFtpUrl = url.startsWith("ftp:");
+        final boolean isSmbOrFtpUrl = isSmbUrl || isFtpUrl;
 
         // replacing url with mapping data
-        url = pathMappingHelper.replaceUrl(url);
-
-        if (url.startsWith("smb:")) {
-            url = url.replace("smb:", "file:");
-        } else if (url.startsWith("ftp:")) {
-            url = url.replace("ftp:", "file:");
+        if (pathMappingHelper != null) {
+            url = pathMappingHelper.replaceUrl(url);
         }
 
-        if (url.startsWith("http:") && isFileUrl) {
+        final boolean isHttpUrl = url.startsWith("http:") || url.startsWith("https:");
+
+        if (isSmbUrl) {
+            url = url.replace("smb:", "file:");
+        }
+
+        if (isHttpUrl && isSmbOrFtpUrl) {
+            //  smb/ftp->http
+            // encode
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             for (final char c : url.toCharArray()) {
                 if (CharUtil.isUrlChar(c)) {
@@ -208,89 +213,96 @@ public class ViewHelper {
                     try {
                         buf.append(URLEncoder.encode(String.valueOf(c), urlLinkEncoding));
                     } catch (final UnsupportedEncodingException e) {
-                        // NOP
+                        buf.append(c);
                     }
                 }
             }
             url = buf.toString();
         } else if (url.startsWith("file:")) {
-
-            final int pos = url.indexOf(':', 5);
-            final boolean isLocalFile = pos > 0 && pos < 12;
-
-            final UserAgentType ua = userAgentHelper.getUserAgentType();
-            switch (ua) {
-            case IE:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.ie", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.ie", "file://"));
-                }
-                break;
-            case FIREFOX:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.firefox", "file://///"));
-                }
-                break;
-            case CHROME:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.chrome", "file://"));
-                }
-                break;
-            case SAFARI:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.safari", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.safari", "file:////"));
-                }
-                break;
-            case OPERA:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.opera", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.opera", "file://"));
-                }
-                break;
-            default:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.other", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.other", "file://"));
-                }
-                break;
-            }
+            // file, smb/ftp->http
+            url = updateFileProtocol(url);
 
             if (encodeUrlLink) {
                 return appendQueryParameter(document, url);
-            } else {
-                final String urlLink = appendQueryParameter(document, url).replace("+", "%2B");
-                final String[] values = urlLink.split("#");
-                final StringBuilder buf = new StringBuilder(urlLink.length());
+            }
+
+            // decode
+            if (!isSmbOrFtpUrl) {
+                // file
                 try {
-                    buf.append(URLDecoder.decode(values[0], urlLinkEncoding));
-                    for (int i = 1; i < values.length - 1; i++) {
-                        buf.append('#').append(URLDecoder.decode(values[i], urlLinkEncoding));
+                    url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
+                } catch (Exception e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.warn("Failed to decode " + url, e);
                     }
-                } catch (final Exception e) {
-                    throw new FessSystemException("Unsupported encoding: " + urlLinkEncoding, e);
                 }
-                if (values.length > 1) {
-                    buf.append('#').append(values[values.length - 1]);
-                }
-                return buf.toString();
             }
         }
+        // http, ftp
+        // nothing
 
         return appendQueryParameter(document, url);
+    }
+
+    protected String updateFileProtocol(String url) {
+        final int pos = url.indexOf(':', 5);
+        final boolean isLocalFile = pos > 0 && pos < 12;
+
+        final UserAgentType ua = userAgentHelper.getUserAgentType();
+        switch (ua) {
+        case IE:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.ie", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.ie", "file://"));
+            }
+            break;
+        case FIREFOX:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.firefox", "file://///"));
+            }
+            break;
+        case CHROME:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.chrome", "file://"));
+            }
+            break;
+        case SAFARI:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.safari", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.safari", "file:////"));
+            }
+            break;
+        case OPERA:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.opera", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.opera", "file://"));
+            }
+            break;
+        default:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.other", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.other", "file://"));
+            }
+            break;
+        }
+        return url;
     }
 
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isAppendQueryParameter()) {
+            if (url.indexOf('#') >= 0) {
+                return url;
+            }
+
             final String mimetype = DocumentUtil.getValue(document, fessConfig.getIndexFieldMimetype(), String.class);
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
