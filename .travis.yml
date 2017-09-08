@@ -1,0 +1,22 @@
+sudo: required
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+
+install:
+  - mvn package
+  - unzip target/releases/fess-*.zip
+
+before_script:
+  - java -version
+  - ./fess-*/bin/fess &
+
+script:
+  - mvn test -P integrationTests -Dtest.fess.url="http://127.0.0.1:8080" -Dtest.es.url="http://127.0.0.1:9201"
+
