@@ -73,9 +73,15 @@ export default class {
     var $pagination = this._createPagination(response.record_count, response.page_size, response.page_number, params);
     FessJQuery('.fessWrapper .paginationNav').append($pagination);
     if (FessJQuery('.fessWrapper .fessForm').length > 0) {
-      FessJQuery('.fessWrapper select.sort').val(params.sort);
+      if (params.sort !== undefined) {
+        FessJQuery('.fessWrapper select.sort').val(params.sort);
+      }
+      if (params['fields.label'] !== undefined){
+        FessJQuery('.fessWrapper select.field-labels').val(params['fields.label']);
+      }
     } else {
       FessJQuery('.fessWrapper .fessResult table .order').css('display', 'none');
+      FessJQuery('.fessWrapper .fessResult table .labels').css('display', 'none');
     }
     this._loadThumbnail(contextPath);
   }
@@ -84,6 +90,17 @@ export default class {
     var $fessResult = FessJQuery('.fessWrapper .fessResult');
     var html = noResultTemplate(response);
     $fessResult.html(this.FessMessages.render(html, response));
+    if (FessJQuery('.fessWrapper .fessForm').length > 0) {
+      if (params.sort !== undefined) {
+        FessJQuery('.fessWrapper select.sort').val(params.sort);
+      }
+      if (params['fields.label'] !== undefined){
+        FessJQuery('.fessWrapper select.field-labels').val(params['fields.label']);
+      }
+    } else {
+      FessJQuery('.fessWrapper .fessResult table .order').css('display', 'none');
+      FessJQuery('.fessWrapper .fessResult table .labels').css('display', 'none');
+    }
   }
 
   _createPagination(recordCount, pageSize, currentPage, params) {

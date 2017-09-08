@@ -18,4 +18,19 @@ export default class {
       });
     });
   }
+
+  getLabels(url) {
+    return new Promise(function(resolve, reject) {
+      FessJQuery.ajax({
+        url: url,
+        type: "GET",
+        dataType: "jsonp",
+        data: {type: 'label'}
+      }).done(function(data){
+        resolve(data);
+      }).fail(function(data){
+        reject(data);
+      });
+    });
+  }
 }

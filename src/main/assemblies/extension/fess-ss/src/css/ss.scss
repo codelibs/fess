@@ -7,37 +7,40 @@
   }
   .form-control.sort {
     display: inline;
-    width: 50%;
+    width: 90%;
+  }
+  .media-body {
+    width: initial;
   }
   /* Large desktop */
   @media ( min-width : 74.9em) {
     .order-box {
-      width: 20%
+      width: 10%
     }
-    .description {
-      font-size: medium;
+    .labels-box {
+      width: 10%
     }
     .title {
       line-height: 32px;
       font-size: 18px;
     }
-    .site {
+    .site, .description, .result-header, .field-labels, .sort {
       font-size: medium;
     }
   }
   /* Large devices (desktops, less than 75em) */
   @media ( max-width : 74.9em) {
     .order-box {
-      width: 20%
+      width: 10%
     }
-    .description {
-      font-size: medium;
+    .labels-box {
+      width: 10%
     }
     .title {
       line-height: 32px;
       font-size: 18px;
     }
-    .site {
+    .site, .description, .result-header, .field-labels, .sort {
       font-size: medium;
     }
   }
@@ -45,16 +48,16 @@
   /* Medium devices (tablets, less than 62em) */
 	@media ( max-width : 61.9em) {
     .order-box {
-      width: 20%
+      width: 15%
     }
-    .description {
-      font-size: medium;
+    .labels-box {
+      width: 15%
     }
     .title {
       line-height: 32px;
       font-size: 18px;
     }
-    .site {
+    .site, .description, .result-header, .field-labels, .sort {
       font-size: medium;
     }
   }
@@ -62,16 +65,16 @@
   /* Small devices (landscape phones, less than 48em) */
   @media ( max-width : 47.9em) {
     .order-box {
-      width: 50%
+      width: 25%
     }
-    .description {
-      font-size: small;
+    .labels-box {
+      width: 25%
     }
     .title {
       line-height: 24px;
       font-size: 15px;
     }
-    .site {
+    .site, .description, .result-header, .field-labels, .sort {
       font-size: small;
     }
   }
@@ -79,16 +82,16 @@
   /* Extra small devices (portrait phones, less than 34em) */
   @media ( max-width : 360px) {
     .order-box {
-      width: 50%
+      width: 30%
     }
-    .description {
-      font-size: small;
+    .labels-box {
+      width: 30%
     }
     .title {
       line-height: 24px;
       font-size: 15px;
     }
-    .site {
+    .site, .description, .result-header, .field-labels, .sort {
       font-size: small;
     }
   }

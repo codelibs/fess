@@ -7,6 +7,8 @@ export default class {
     this.fessUrl = FessJQuery('script#fess-ss').attr('fess-url');
     this.fessContextPath = this.fessUrl.slice(0, this.fessUrl.indexOf('/json'));
     this.searchPagePath = FessJQuery('script#fess-ss').attr('fess-search-page-path');
+    this.enableLabels = FessJQuery('script#fess-ss').attr('enable-labels') === 'true' ? true : false;
+    this.labelsCache = null
     this.urlParams = function() {
       var params = {};
       var array = location.search.replace(/\?/g, '').split('&');
@@ -93,27 +95,48 @@ export default class {
     }
 
     var sort = FessJQuery(".fessWrapper select.sort").val();
-    if (sort !== undefined) {
+    if (sort !== undefined && sort !== '') {
       params.sort = sort;
-    } else {
-      params.sort = 'score.desc';
+    }
+    var label = FessJQuery(".fessWrapper select.field-labels").val();
+    if (label !== undefined && label !== '') {
+      params['fields.label'] = label;
     }
 
     var $cls = this;
     this.FessModel.search(this.fessUrl, params).then(function(data){
-      var response = data.response;
-      if (response.record_count > 0) {
-        $cls.FessView.renderResult($cls.fessContextPath, data.response, params);
-        $fessResult.css('display', 'block');
-        $cls._bindPagination(data.response);
+      var searchResponse = data.response;
+      if ($cls.enableLabels && $cls.labelsCache === null) {
+        $cls.FessModel.getLabels($cls.fessUrl).then(function(data) {
+          $cls.labelsCache = data.response.result;
+          $cls._renderResult(searchResponse, params);
+        }, function(data) {
+          console.log("labels error: " + JSON.stringify(data));
+          $cls._renderResult(searchResponse, params);
+        });
       } else {
-        $cls.FessView.renderNoResult(data.response, params);
-        $fessResult.css('display', 'block');
+        $cls._renderResult(searchResponse, params);
       }
     }, function(data) {
       console.log("search error: " + JSON.stringify(data));
-      $cls.FessView.renderNoResult(data.response, params);
+      $cls.FessView.renderNoResult(searchResponse, params);
       $fessResult.css('display', 'block');
     });
+  }
+
+  _renderResult(response, params) {
+    if (this.enableLabels && this.labelsCache !== null) {
+      response.labels = this.labelsCache;
+    }
+
+    var $fessResult = FessJQuery('.fessWrapper .fessResult');
+    if (response.record_count > 0) {
+      this.FessView.renderResult(this.fessContextPath, response, params);
+      $fessResult.css('display', 'block');
+      this._bindPagination(response);
+    } else {
+      this.FessView.renderNoResult(response, params);
+      $fessResult.css('display', 'block');
+    }
   }
 }

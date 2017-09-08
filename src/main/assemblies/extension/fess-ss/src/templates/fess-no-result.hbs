@@ -1,10 +1,32 @@
 <div id="result">
   <div style="border-bottom:solid thin #eeeeee;padding-bottom:5px;margin-bottom:10px;">
-    <table width="100%">
+    <table width="100%" class="result-header">
       <tbody>
         <tr>
-          <td width="50%">
+          <td>
             {{record_count}} {result.number} ({{exec_time}}{result.second})
+          </td>
+          {{#if labels}}
+          <td class="labels-box" align="right">
+            <div class="labels">
+              <select class="form-control field-labels">
+                <option value="" disabled selected style="display:none;">{result.label}</option>
+                <option value="">{result.label.all}</option>
+                {{#each labels}}
+                <option value="{{value}}">{{label}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </td>
+          {{/if}}
+          <td class="order-box" align="right">
+            <div class="order">
+              <select class="form-control sort">
+                <option value="" disabled selected style="display:none;">{result.order}</option>
+                <option value="score.desc">{result.order.score}</option>
+                <option value="last_modified.desc">{result.order.last_modified}</option>
+              </select>
+            </div>
           </td>
         </tr>
       </tbody>
