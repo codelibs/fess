@@ -185,9 +185,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
-        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
-        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
         String ignore = configMap.get(IGNORE_META_ROBOTS);
         if (ignore == null) {
             if (fessConfig.isCrawlerIgnoreMetaRobots()) {
@@ -231,6 +229,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT, e);
         }
 
+    }
+
+    protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(config);
+        return configMap;
     }
 
     protected boolean isValidUrl(final String urlStr) {
@@ -464,9 +469,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
-        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
-        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
         String xpath = configMap.get(HTML_CANONICAL_XPATH);
         if (xpath == null) {
             xpath = fessConfig.getCrawlerDocumentHtmlCanonicalXpath();
