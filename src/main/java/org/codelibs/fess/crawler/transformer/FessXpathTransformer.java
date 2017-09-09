@@ -76,6 +76,10 @@ import org.xml.sax.InputSource;
 public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
     private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformer.class);
 
+    private static final String HTML_CANONICAL_XPATH = "html.canonical.xpath";
+
+    private static final String IGNORE_META_ROBOTS = "ignore.meta.robots";
+
     private static final String META_NAME_THUMBNAIL_CONTENT = "//META[@name=\"thumbnail\" or @name=\"THUMBNAIL\"]/@content";
 
     private static final String META_PROPERTY_OGIMAGE_CONTENT = "//META[@property=\"og:image\"]/@content";
@@ -134,9 +138,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
         final Document document = parser.getDocument();
 
-        if (!fessConfig.isCrawlerIgnoreMetaRobots()) {
-            processMetaRobots(responseData, resultData, document);
-        }
+        processMetaRobots(responseData, resultData, document);
 
         final Map<String, Object> dataMap = new LinkedHashMap<>();
         for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
@@ -183,6 +185,18 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        String ignore = configMap.get(IGNORE_META_ROBOTS);
+        if (ignore == null) {
+            if (fessConfig.isCrawlerIgnoreMetaRobots()) {
+                return;
+            }
+        } else if (Boolean.parseBoolean(ignore)) {
+            return;
+        }
+
         try {
             final Node value = getXPathAPI().selectSingleNode(document, META_NAME_ROBOTS_CONTENT);
             if (value != null) {
@@ -258,16 +272,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
         // canonical
-        if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCanonicalXpath())) {
-            final String canonicalUrl = getCanonicalUrl(responseData, document);
-            if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)
-                    && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
-                final Set<RequestData> childUrlSet = new HashSet<>();
-                childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
-                logger.info("CANONICAL: " + responseData.getUrl() + " -> " + canonicalUrl);
-                throw new ChildUrlsException(childUrlSet, this.getClass().getName()
-                        + "#putAdditionalData(Map<String, Object>, ResponseData, Document)");
-            }
+        final String canonicalUrl = getCanonicalUrl(responseData, document);
+        if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)
+                && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
+            final Set<RequestData> childUrlSet = new HashSet<>();
+            childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
+            logger.info("CANONICAL: " + responseData.getUrl() + " -> " + canonicalUrl);
+            throw new ChildUrlsException(childUrlSet, this.getClass().getName()
+                    + "#putAdditionalData(Map<String, Object>, ResponseData, Document)");
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -452,7 +464,17 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
-        final String canonicalUrl = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlCanonicalXpath(), false);
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        String xpath = configMap.get(HTML_CANONICAL_XPATH);
+        if (xpath == null) {
+            xpath = fessConfig.getCrawlerDocumentHtmlCanonicalXpath();
+        }
+        if (StringUtil.isBlank(xpath)) {
+            return null;
+        }
+        final String canonicalUrl = getSingleNodeValue(document, xpath, false);
         if (StringUtil.isBlank(canonicalUrl)) {
             return null;
         }
