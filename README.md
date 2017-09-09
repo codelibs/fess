@@ -1,4 +1,4 @@
-Enterprise Search Server: Fess
+Enterprise Search Server: Fess [![Build Status](https://travis-ci.org/codelibs/fess.svg?branch=master)](https://travis-ci.org/codelibs/fess)
 ====
 
 ## Overview
