@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.es.config.exentity.WebConfig;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DocumentHelper;
@@ -269,7 +271,12 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<html><body>foo</body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            @Override
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -282,7 +289,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<meta name=\"robots\" content=\"none\" />";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -301,7 +312,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW\" />";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -340,7 +355,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<meta name=\"robots\" content=\"nofollow\" />";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -428,7 +447,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     public void test_canonicalXpath() throws Exception {
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
         transformer.init();
 
         final Map<String, Object> dataMap = new HashMap<String, Object>();
