@@ -277,6 +277,14 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
                 return Collections.emptyMap();
             }
         };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreMetaRobots() {
+                return false;
+            };
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -293,6 +301,14 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
                 return Collections.emptyMap();
             }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreMetaRobots() {
+                return false;
+            };
         };
 
         final ResponseData responseData = new ResponseData();
@@ -317,6 +333,14 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
                 return Collections.emptyMap();
             }
         };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreMetaRobots() {
+                return false;
+            };
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -335,7 +359,19 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<meta name=\"robots\" content=\"noindex\" /><a href=\"index.html\">aaa</a>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreMetaRobots() {
+                return false;
+            };
+        };
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
@@ -359,6 +395,14 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
                 return Collections.emptyMap();
             }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreMetaRobots() {
+                return false;
+            };
         };
 
         final ResponseData responseData = new ResponseData();
