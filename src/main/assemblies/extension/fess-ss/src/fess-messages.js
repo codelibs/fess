@@ -13,7 +13,8 @@ export default class {
         'result.order.last_modified': 'Last modified',
         'result.pagination.prev': 'prev',
         'result.pagination.next': 'next',
-        'result.did_not_match': 'Your search - <b>{{q}}</b> - did not match any documents.'
+        'result.did_not_match': 'Your search - <b>{{q}}</b> - did not match any documents.',
+        'result.related_query_label': 'Related Words:'
       },
       ja: {
         'form.search.button': '検索',
@@ -27,7 +28,8 @@ export default class {
         'result.order.last_modified': '更新日時',
         'result.pagination.prev': '前へ',
         'result.pagination.next': '次へ',
-        'result.did_not_match': '<b>{{q}}</b>に一致する情報は見つかりませんでした。'
+        'result.did_not_match': '<b>{{q}}</b>に一致する情報は見つかりませんでした。',
+        'result.related_query_label': '関連ワード:'
       }
     }
   }

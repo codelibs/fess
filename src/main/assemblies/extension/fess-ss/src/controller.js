@@ -8,35 +8,25 @@ export default class {
     this.fessContextPath = this.fessUrl.slice(0, this.fessUrl.indexOf('/json'));
     this.searchPagePath = FessJQuery('script#fess-ss').attr('fess-search-page-path');
     this.enableLabels = FessJQuery('script#fess-ss').attr('enable-labels') === 'true' ? true : false;
+    this.enableRelated = FessJQuery('script#fess-ss').attr('enable-related') === 'true' ? true : false;
     this.labelsCache = null
-    this.urlParams = function() {
-      var params = {};
-      var array = location.search.replace(/\?/g, '').split('&');
-      array.forEach(function(param){
-        var tpl = param.split('=');
-        if (tpl.length == 1) {
-          params[decodeURIComponent(tpl[0])] = '';
-        } else if (tpl.length == 2) {
-          params[decodeURIComponent(tpl[0])] = decodeURIComponent(tpl[1].replace(/\+/g, ' '));
-        }
-      })
-      return params;
-    }();
+    this.urlParams = this._getParameters();
   }
 
   start() {
     this.FessView.init();
     this.FessView.renderForm(this.searchPagePath, this.urlParams);
     this._bindForm();
-    if (this.urlParams.q !== undefined) {
+    if (this.urlParams.q !== undefined && this.urlParams.q.length > 0) {
+      var query = this.urlParams.q[0];
       if (FessJQuery('.fessWrapper .fessForm form input').length > 0) {
-        FessJQuery('.fessWrapper .fessForm form input').val(this.urlParams.q);
+        FessJQuery('.fessWrapper .fessForm form input').val(query);
       }
       if (FessJQuery('.fessWrapper .fessFormOnly form input').length > 0) {
-        FessJQuery('.fessWrapper .fessFormOnly form input').val(this.urlParams.q);
+        FessJQuery('.fessWrapper .fessFormOnly form input').val(query);
       }
       try {
-        this._search({q: this.urlParams.q});
+        this._search({q: query});
       } catch (e) {
         console.log(e);
       }
@@ -76,7 +66,7 @@ export default class {
     });
   }
 
-  _search(params) {
+    _search(params) {
     var $fessResult = FessJQuery('.fessWrapper .fessResult');
     $fessResult.css('display', 'none');
 
@@ -129,6 +119,18 @@ export default class {
       response.labels = this.labelsCache;
     }
 
+    if (!this.enableRelated) {
+      delete response.related_query;
+      delete response.related_content;
+    }
+
+    if (response.related_query !== undefined) {
+      for (var i=0;i<response.related_query.length;i++) {
+        var relatedQuery = response.related_query[i];
+        response.related_query[i] = {"query": relatedQuery, "link": this._getRelatedQueryLink(relatedQuery)};
+      }
+    }
+
     var $fessResult = FessJQuery('.fessWrapper .fessResult');
     if (response.record_count > 0) {
       this.FessView.renderResult(this.fessContextPath, response, params);
@@ -138,5 +140,58 @@ export default class {
       this.FessView.renderNoResult(response, params);
       $fessResult.css('display', 'block');
     }
+  }
+
+  _getParameters() {
+    var path = location.href.replace(/\?.*$/, '');
+    var hash = '';
+    var url = location.href;
+    if (url.indexOf('#') != -1) {
+      var array = url.split('#');
+      url = array[0];
+      hash = array[1];
+    }
+
+    var params = function(url) {
+      var params = {};
+      if (url.indexOf('?') != -1) {
+        var array = url.split('?');
+        var paramArray = array[1].split('&');
+        paramArray.forEach(function(val, index, ar) {
+          var tpl = val.split('=');
+          var key = decodeURIComponent(tpl[0]);
+          var value = '';
+          if (tpl.length > 1) {
+            value = decodeURIComponent(tpl[1]);
+          }
+
+          if (params[key] === undefined) {
+            params[key] = [value];
+          } else {
+            params[key].push(value);
+          }
+        });
+      }
+      return params;
+    }(url);
+
+    params['fess_url_hash'] = hash;
+    return params;
+  }
+
+  _getRelatedQueryLink(query) {
+    var url = location.href.replace(/\?.*$/, '') + '?q=' + encodeURIComponent(query);
+    var hash = this.urlParams['fess_url_hash'];
+    Object.keys(this.urlParams).forEach(function(key) {
+      if (key !== 'q' && key !== 'fess_url_hash') {
+        this[key].forEach(function(val) {
+          url = url + '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+        });
+      }
+    }, this.urlParams);
+    if (hash !== undefined && hash !== '') {
+      url = url + '#' + hash;
+    }
+    return url;
   }
 }

@@ -28,6 +28,23 @@
               </select>
             </div>
           </td>
+          {{#if related_query}}
+          <tr>
+            <td>
+              {result.related_query_label}
+              {{#each related_query}}
+              &nbsp;<a href="{{link}}">{{query}}</a>
+              {{/each}}
+            </td>
+          </tr>
+          {{/if}}
+          {{#if related_content}}
+          <tr>
+            <td>
+              {{{related_content}}}
+            </td>
+          </tr>
+          {{/if}}
         </tr>
       </tbody>
     </table>
