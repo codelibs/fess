@@ -47,7 +47,7 @@
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.25</slf4j.version>
-		<log4j.version>2.8.2</log4j.version>
+		<log4j.version>2.9.0</log4j.version>
 		<jackson.version>2.8.6</jackson.version>
 		<commons.fileupload.version>1.3.2</commons.fileupload.version>
 		<asm.version>5.1</asm.version>
