@@ -42,7 +42,7 @@ public class CreateForm {
 
     @Required
     @Size(max = 20)
-    @Pattern(regexp = "^[a-zA-Z0-9_-| ]+$")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$")
     public String value;
 
     @CustomSize(maxKey = "form.admin.max.input.size")
