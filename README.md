@@ -59,7 +59,7 @@ Please see [MIGRATION.md](https://github.com/codelibs/fess/blob/master/MIGRATION
 
 ### Korean
 
- - [PDF Document](https://github.com/nocode2k/fess/releases/download/fess-ko-10.1.0/FESS-ko_10.1.0_.pdf)
+ - [PDF Document](https://github.com/nocode2k/fess/releases/download/11.0.1-ko/Fess-ko_11.0.1_manual.pdf)
  - [Forum](https://github.com/nocode2k/fess-kr-forum)
 
 ## Development Information
