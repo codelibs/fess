@@ -128,6 +128,19 @@ public class JobHelper {
         }
     }
 
+    public void remove(final ScheduledJob scheduledJob) {
+        try {
+            final JobManager jobManager = ComponentUtil.getJobManager();
+            if (jobManager.isSchedulingDone()) {
+                jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
+                    job.disappear();
+                }).orElse(() -> logger.debug("Job {} is not scheduled.", scheduledJob.getId()));
+            }
+        } catch (final Exception e) {
+            throw new ScheduledJobException("Failed to delete Job: " + scheduledJob, e);
+        }
+    }
+
     public boolean isAvailable(final String id) {
         return ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(id).filter(e -> Boolean.TRUE.equals(e.getAvailable()))
                 .isPresent();
