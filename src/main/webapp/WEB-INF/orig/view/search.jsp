@@ -131,13 +131,13 @@
 				</div>
 			</div>
 		</c:if>
-		<c:if test="${!empty relatedContent}">
+		<c:forEach var="item" varStatus="s" items="${relatedContents}">
 			<div class="row">
 				<div class="col-md-12">
-					${relatedContent}
+					${item}
 				</div>
 			</div>
-		</c:if>
+		</c:forEach>
 		<c:choose>
 			<c:when test="${f:h(allRecordCount) != 0}">
 				<jsp:include page="searchResults.jsp" />
