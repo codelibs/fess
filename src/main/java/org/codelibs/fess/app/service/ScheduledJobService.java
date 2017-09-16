@@ -75,6 +75,7 @@ public class ScheduledJobService {
         scheduledJobBhv.delete(scheduledJob, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
+        ComponentUtil.getJobHelper().remove(scheduledJob);
     }
 
     protected void setupListCondition(final ScheduledJobCB cb, final SchedulerPager scheduledJobPager) {
