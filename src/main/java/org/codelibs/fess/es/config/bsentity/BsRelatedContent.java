@@ -55,6 +55,9 @@ public class BsRelatedContent extends EsAbstractEntity {
     /** content */
     protected String content;
 
+    /** sortOrder */
+    protected Integer sortOrder;
+
     /** virtualHost */
     protected String virtualHost;
 
@@ -97,6 +100,9 @@ public class BsRelatedContent extends EsAbstractEntity {
         if (content != null) {
             addFieldToSource(sourceMap, "content", content);
         }
+        if (sortOrder != null) {
+            addFieldToSource(sourceMap, "sortOrder", sortOrder);
+        }
         if (virtualHost != null) {
             addFieldToSource(sourceMap, "virtualHost", virtualHost);
         }
@@ -119,6 +125,7 @@ public class BsRelatedContent extends EsAbstractEntity {
         sb.append(dm).append(updatedTime);
         sb.append(dm).append(term);
         sb.append(dm).append(content);
+        sb.append(dm).append(sortOrder);
         sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -188,6 +195,16 @@ public class BsRelatedContent extends EsAbstractEntity {
     public void setContent(String value) {
         registerModifiedProperty("content");
         this.content = value;
+    }
+
+    public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer value) {
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getVirtualHost() {

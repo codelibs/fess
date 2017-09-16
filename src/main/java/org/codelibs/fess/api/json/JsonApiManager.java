@@ -204,11 +204,9 @@ public class JsonApiManager extends BaseJsonApiManager {
                 buf.append(",\"related_query\":");
                 buf.append(escapeJson(relatedQueries));
             }
-            final String relatedContent = relatedContentHelper.getRelatedContent(params.getQuery());
-            if (StringUtil.isNotBlank(relatedContent)) {
-                buf.append(",\"related_content\":");
-                buf.append(escapeJson(relatedContent));
-            }
+            final String[] relatedContents = relatedContentHelper.getRelatedContents(params.getQuery());
+            buf.append(",\"related_contents\":");
+            buf.append(escapeJson(relatedContents));
             if (!documentItems.isEmpty()) {
                 buf.append(',');
                 buf.append("\"result\":[");

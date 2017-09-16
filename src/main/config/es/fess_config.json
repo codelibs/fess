@@ -899,6 +899,9 @@
           "content" : {
             "type": "keyword"
           },
+          "sortOrder" : {
+            "type": "integer"
+          },
           "virtualHost" : {
             "type": "keyword"
           }

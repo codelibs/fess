@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.relatedcontent;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.app.web.CrudMode;
@@ -38,6 +40,11 @@ public class CreateForm {
     @Size(max = 1000)
     public String virtualHost;
 
+    @Min(value = 0)
+    @Max(value = 2147483647)
+    @ValidateTypeFailure
+    public Integer sortOrder;
+
     @Size(max = 1000)
     public String createdBy;
 
@@ -48,5 +55,6 @@ public class CreateForm {
         crudMode = CrudMode.CREATE;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        sortOrder = 1;
     }
 }

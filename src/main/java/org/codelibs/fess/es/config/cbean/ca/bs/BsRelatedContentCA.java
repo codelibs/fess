@@ -1082,6 +1082,232 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         }
     }
 
+    public void setSortOrder_Avg() {
+        setSortOrder_Avg(null);
+    }
+
+    public void setSortOrder_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setSortOrder_Avg("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Max() {
+        setSortOrder_Max(null);
+    }
+
+    public void setSortOrder_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setSortOrder_Max("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Min() {
+        setSortOrder_Min(null);
+    }
+
+    public void setSortOrder_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setSortOrder_Min("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Sum() {
+        setSortOrder_Sum(null);
+    }
+
+    public void setSortOrder_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setSortOrder_Sum("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_ExtendedStats() {
+        setSortOrder_ExtendedStats(null);
+    }
+
+    public void setSortOrder_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setSortOrder_ExtendedStats("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Stats() {
+        setSortOrder_Stats(null);
+    }
+
+    public void setSortOrder_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setSortOrder_Stats("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Percentiles() {
+        setSortOrder_Percentiles(null);
+    }
+
+    public void setSortOrder_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setSortOrder_Percentiles("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_PercentileRanks() {
+        setSortOrder_PercentileRanks(null);
+    }
+
+    public void setSortOrder_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setSortOrder_PercentileRanks("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Histogram() {
+        setSortOrder_Histogram(null);
+    }
+
+    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setSortOrder_Histogram("sortOrder", opLambda, null);
+    }
+
+    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
+        setSortOrder_Histogram("sortOrder", opLambda, aggsLambda);
+    }
+
+    public void setSortOrder_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            RelatedContentCA ca = new RelatedContentCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setSortOrder_Range() {
+        setSortOrder_Range(null);
+    }
+
+    public void setSortOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setSortOrder_Range("sortOrder", opLambda, null);
+    }
+
+    public void setSortOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsRelatedContentCA> aggsLambda) {
+        setSortOrder_Range("sortOrder", opLambda, aggsLambda);
+    }
+
+    public void setSortOrder_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            RelatedContentCA ca = new RelatedContentCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setSortOrder_Count() {
+        setSortOrder_Count(null);
+    }
+
+    public void setSortOrder_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setSortOrder_Count("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Cardinality() {
+        setSortOrder_Cardinality(null);
+    }
+
+    public void setSortOrder_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setSortOrder_Cardinality("sortOrder", opLambda);
+    }
+
+    public void setSortOrder_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_Missing() {
+        setSortOrder_Missing(null);
+    }
+
+    public void setSortOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setSortOrder_Missing("sortOrder", opLambda, null);
+    }
+
+    public void setSortOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRelatedContentCA> aggsLambda) {
+        setSortOrder_Missing("sortOrder", opLambda, aggsLambda);
+    }
+
+    public void setSortOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            RelatedContentCA ca = new RelatedContentCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setVirtualHost_Terms() {
         setVirtualHost_Terms(null);
     }

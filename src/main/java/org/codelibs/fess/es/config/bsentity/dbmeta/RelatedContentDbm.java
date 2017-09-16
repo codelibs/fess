@@ -90,6 +90,8 @@ public class RelatedContentDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((RelatedContent) et).getTerm(), (et, vl) -> ((RelatedContent) et).setTerm(DfTypeUtil.toString(vl)), "term");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getContent(), (et, vl) -> ((RelatedContent) et).setContent(DfTypeUtil.toString(vl)),
                 "content");
+        setupEpg(_epgMap, et -> ((RelatedContent) et).getSortOrder(),
+                (et, vl) -> ((RelatedContent) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getVirtualHost(),
                 (et, vl) -> ((RelatedContent) et).setVirtualHost(DfTypeUtil.toString(vl)), "virtualHost");
     }
@@ -140,6 +142,8 @@ public class RelatedContentDbm extends AbstractDBMeta {
             0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnContent = cci("content", "content", null, null, String.class, "content", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
+            false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
@@ -167,6 +171,10 @@ public class RelatedContentDbm extends AbstractDBMeta {
         return _columnContent;
     }
 
+    public ColumnInfo columnSortOrder() {
+        return _columnSortOrder;
+    }
+
     public ColumnInfo columnVirtualHost() {
         return _columnVirtualHost;
     }
@@ -179,6 +187,7 @@ public class RelatedContentDbm extends AbstractDBMeta {
         ls.add(columnUpdatedTime());
         ls.add(columnTerm());
         ls.add(columnContent());
+        ls.add(columnSortOrder());
         ls.add(columnVirtualHost());
         return ls;
     }
