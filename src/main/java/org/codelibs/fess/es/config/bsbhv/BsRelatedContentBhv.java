@@ -79,6 +79,7 @@ public abstract class BsRelatedContentBhv extends EsAbstractBehavior<RelatedCont
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             result.setTerm(DfTypeUtil.toString(source.get("term")));
             result.setContent(DfTypeUtil.toString(source.get("content")));
+            result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {

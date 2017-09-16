@@ -138,10 +138,8 @@ public class SearchAction extends FessSearchAction {
                         RenderDataUtil.register(data, "displayQuery",
                                 getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
                         createPagingQuery(form);
-                        final String relatedContent = relatedContentHelper.getRelatedContent(form.getQuery());
-                        if (StringUtil.isNotBlank(relatedContent)) {
-                            RenderDataUtil.register(data, "relatedContent", relatedContent);
-                        }
+                        final String[] relatedContents = relatedContentHelper.getRelatedContents(form.getQuery());
+                        RenderDataUtil.register(data, "relatedContents", relatedContents);
                         final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
                         if (relatedQueries.length > 0) {
                             RenderDataUtil.register(data, "relatedQueries", relatedQueries);

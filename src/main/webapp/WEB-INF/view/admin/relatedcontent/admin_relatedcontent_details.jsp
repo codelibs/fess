@@ -61,6 +61,11 @@
 											</tr>
 											<tr>
 												<th class="col-xs-2"><la:message
+														key="labels.sortOrder" /></th>
+												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message
 														key="labels.virtual_host" /></th>
 												<td>${f:h(virtualHost)}<la:hidden property="virtualHost" /></td>
 											</tr>

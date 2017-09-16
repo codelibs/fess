@@ -200,6 +200,10 @@ public class BsRelatedContentCB extends EsAbstractConditionBean {
             doColumn("content");
         }
 
+        public void columnSortOrder() {
+            doColumn("sortOrder");
+        }
+
         public void columnVirtualHost() {
             doColumn("virtualHost");
         }

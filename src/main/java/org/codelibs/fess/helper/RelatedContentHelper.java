@@ -57,6 +57,7 @@ public class RelatedContentHelper {
 
         return ComponentUtil.getComponent(RelatedContentBhv.class).selectList(cb -> {
             cb.query().matchAll();
+            cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Term_Asc();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageRelatedqueryMaxFetchSizeAsInteger());
         });
@@ -90,22 +91,24 @@ public class RelatedContentHelper {
         return StringUtil.isBlank(key) ? StringUtil.EMPTY : key;
     }
 
-    public String getRelatedContent(final String query) {
+    public String[] getRelatedContents(final String query) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String key = fessConfig.getVirtualHostKey();
         final Pair<Map<String, String>, List<Pair<Pattern, String>>> pair = relatedContentMap.get(key);
         if (pair != null) {
+            final List<String> contentList = new ArrayList<>();
             final String content = pair.getFirst().get(toLowerCase(query));
             if (StringUtil.isNotBlank(content)) {
-                return content;
+                contentList.add(content);
             }
             for (final Pair<Pattern, String> regexData : pair.getSecond()) {
                 if (regexData.getFirst().matcher(query).matches()) {
-                    return regexData.getSecond().replace(queryPlaceHolder, query);
+                    contentList.add(regexData.getSecond().replace(queryPlaceHolder, query));
                 }
             }
+            return contentList.toArray(new String[contentList.size()]);
         }
-        return StringUtil.EMPTY;
+        return StringUtil.EMPTY_STRINGS;
     }
 
     private String toLowerCase(final String term) {
