@@ -58,6 +58,8 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private static final String VERSION_11_2 = "11.2";
 
+    private static final String VERSION_11_3 = "11.3";
+
     // ===================================================================================
     //                                                                           Attribute
     //
@@ -147,6 +149,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom11_0();
                 upgradeFrom11_1();
                 upgradeFrom11_2();
+                upgradeFrom11_3();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -160,6 +163,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             try {
                 upgradeFrom11_1();
                 upgradeFrom11_2();
+                upgradeFrom11_3();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -172,6 +176,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         } else if (VERSION_11_2.equals(form.targetVersion)) {
             try {
                 upgradeFrom11_2();
+                upgradeFrom11_3();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -180,6 +185,18 @@ public class AdminUpgradeAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_2, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_11_3.equals(form.targetVersion)) {
+            try {
+                upgradeFrom11_3();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_3, e.getLocalizedMessage()));
             }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
@@ -225,6 +242,14 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
         UpgradeUtil.addFieldMapping(indicesClient, configIndex, "label_type", "virtualHost",
                 "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
+    }
+
+    private void upgradeFrom11_3() {
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String configIndex = ".fess_config";
+
+        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "related_content", "sortOrder",
+                "{\"properties\":{\"sortOrder\":{\"type\":\"integer\"}}}");
     }
 
     private void upgradeFromAll() {
