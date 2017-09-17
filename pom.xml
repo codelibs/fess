@@ -263,7 +263,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<configFile>${basedir}/src/config/eclipse/formatter/java.xml</configFile>
+					<configFile>${basedir}/src/main/config/eclipse/formatter/java.xml</configFile>
 				</configuration>
 			</plugin>
 			<plugin>
