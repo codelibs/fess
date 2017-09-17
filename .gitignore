@@ -23,5 +23,6 @@
 .DS_Store
 /plugins/
 /tomcat.8080/
+dbflute_fess/output/doc/lastadoc-fess.html
 dbflute_fess/schema/project-lastadoc-fess.json
 src/main/resources/fess_indices/.fess_config/access_token.bulk
