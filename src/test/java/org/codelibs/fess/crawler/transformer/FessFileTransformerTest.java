@@ -76,6 +76,14 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         url = "http://example.com/" + encodeUrl("#") + "/@@folder/test.txt";
         exp = "test.txt";
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "http://example.com/test%20+%2B.txt";
+        exp = "test  +.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "file://example.com/test%20+%2B.txt";
+        exp = "test ++.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
     }
 
     public void test_decodeUrl_null() throws Exception {
