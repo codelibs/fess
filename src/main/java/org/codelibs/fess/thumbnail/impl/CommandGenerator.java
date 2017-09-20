@@ -114,11 +114,12 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 return true;
             } catch (final Exception e) {
                 logger.warn("Failed to process ", e);
+                updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                return false;
+            } finally {
                 if (tempFile != null && !tempFile.delete()) {
                     logger.debug("Failed to delete " + tempFile.getAbsolutePath());
                 }
-                updateThumbnailField(thumbnailId, StringUtil.EMPTY);
-                return false;
             }
         });
 
