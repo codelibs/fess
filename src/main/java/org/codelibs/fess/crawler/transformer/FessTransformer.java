@@ -204,12 +204,6 @@ public interface FessTransformer {
                 u = StringUtil.EMPTY;
             }
         }
-
-        try {
-            u = URLDecoder.decode(u, encoding);
-        } catch (final Exception e) {
-            // ignore
-        }
         return u;
     }
 
