@@ -54,9 +54,9 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<junit.jupiter.version>5.0.0-RC2</junit.jupiter.version>
-		<junit.vintage.version>${junit.version}.0-RC2</junit.vintage.version>
-		<junit.platform.version>1.0.0-RC2</junit.platform.version>
+		<junit.jupiter.version>5.0.0</junit.jupiter.version>
+		<junit.vintage.version>${junit.version}.0</junit.vintage.version>
+		<junit.platform.version>1.0.0</junit.platform.version>
 		<utflute.version>0.8.1</utflute.version>
 
 		<!-- Crawler -->
@@ -104,6 +104,16 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>build-jdk9</id>
+			<activation>
+				<jdk>9</jdk>
+			</activation>
+			<properties>
+				<test.include.path>**/*Test.java</test.include.path>
+				<test.command.args>--add-modules java.xml.bind</test.command.args>
+			</properties>
+		</profile>
+		<profile>
 			<id>integrationTests</id>
 			<properties>
 				<test.include.path>**/*Tests.java</test.include.path>
@@ -127,7 +137,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>3.7.0</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
@@ -149,7 +159,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 				<configuration>
 					<webResources>
 						<resource>
@@ -159,9 +169,8 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>unpack-provided</id>
@@ -186,6 +195,9 @@
 					<includes>
 						<include>${test.include.path}</include>
 					</includes>
+					<configuration>
+						<argLine>${test.command.args}</argLine>
+					</configuration>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -207,7 +219,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.0.0-M1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
@@ -322,10 +334,9 @@
 					<goal>run</goal>
 				</goals>
 			</plugin>
-
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>copy-resources-deb</id>
@@ -421,12 +432,10 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<!-- zip, tarball -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.1.0</version>
 				<configuration>
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
@@ -446,7 +455,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<!-- deb -->
 			<plugin>
 				<groupId>org.vafer</groupId>
@@ -691,7 +699,6 @@
 					</dataSet>
 				</configuration>
 			</plugin>
-
 			<!-- rpm -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
