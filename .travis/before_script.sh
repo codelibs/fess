@@ -7,7 +7,7 @@ tail $TMP_FILE
 ./fess-*/bin/fess 2>&1 > $TMP_FILE &
 sleep 3
 tail $TMP_FILE
-tail ./fess-*/logs/*.log &
+tail -f ./fess-*/logs/*.log &
 
 counter=0
 ret=1
