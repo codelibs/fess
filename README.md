@@ -19,13 +19,13 @@ Please check filed [questions](https://github.com/codelibs/fess/issues?q=label%3
 
 ### Download
 
-Fess 11.3 is available.
+Fess 11.4 is available.
 The release page is [HERE](https://github.com/codelibs/fess/releases "download").
 
 ### Install/Run Fess
 
-    $ unzip fess-11.3.x.zip
-    $ cd fess-11.3.x
+    $ unzip fess-11.4.x.zip
+    $ cd fess-11.4.x
     $ ./bin/fess
 
 For the details, see [Installation Guide](http://fess.codelibs.org/11.3/install/index.html).
