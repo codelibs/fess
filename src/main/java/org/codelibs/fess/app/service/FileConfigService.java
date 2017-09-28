@@ -94,16 +94,17 @@ public class FileConfigService {
 
     public List<FileConfig> getAllFileConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
             final List<String> idList) {
-        final List<FileConfig> list = fileConfigBhv.selectList(cb -> {
+        return fileConfigBhv.selectList(cb -> {
             if (available) {
                 cb.query().setAvailable_Equal(Constants.T);
             }
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
             cb.fetchFirst(fessConfig.getPageFileConfigMaxFetchSizeAsInteger());
         });
-        return list;
     }
 
     public OptionalEntity<FileConfig> getFileConfig(final String id) {
