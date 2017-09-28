@@ -28,9 +28,4 @@ public class EmptyGenerator extends BaseThumbnailGenerator {
     public void destroy() {
         // nothing
     }
-
-    @Override
-    public boolean isAvailable() {
-        return true;
-    }
 }
