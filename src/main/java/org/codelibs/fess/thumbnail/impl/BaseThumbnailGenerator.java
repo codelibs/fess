@@ -59,6 +59,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     protected int maxRedirectCount = 10;
 
+    protected Boolean available = null;
+
     public void addCondition(final String key, final String regex) {
         final String value = conditionMap.get(key);
         if (StringUtil.isBlank(value)) {
@@ -84,6 +86,9 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     @Override
     public boolean isAvailable() {
+        if (available != null) {
+            return available;
+        }
         if (generatorList != null && !generatorList.isEmpty()) {
             String path = System.getenv("PATH");
             if (path == null) {
@@ -97,7 +102,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             if (path != null) {
                 stream(path.split(File.pathSeparator)).of(stream -> stream.map(s -> s.trim()).forEach(s -> pathList.add(s)));
             }
-            return generatorList.stream().map(s -> {
+            available = generatorList.stream().map(s -> {
                 if (s.startsWith("${path}")) {
                     for (final String p : pathList) {
                         final File f = new File(s.replace("${path}", p));
@@ -110,8 +115,10 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                 }
                 return s;
             }).allMatch(s -> new File(s).isFile());
+        } else {
+            available = true;
         }
-        return true;
+        return available;
     }
 
     @Override

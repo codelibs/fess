@@ -211,20 +211,24 @@ public class ThumbnailManager {
             idList.add(entity.getId());
             final String generatorName = entity.getGenerator();
             try {
-                final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
                 final File outputFile = new File(baseDir, entity.getPath());
                 final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
                 if (!noImageFile.isFile() || System.currentTimeMillis() - noImageFile.lastModified() > noImageExpired) {
                     if (noImageFile.isFile() && !noImageFile.delete()) {
                         logger.warn("Failed to delete " + noImageFile.getAbsolutePath());
                     }
-                    if (!generator.generate(entity.getThumbnailId(), outputFile)) {
-                        new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
-                    } else {
-                        final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
-                        if (interval > 0) {
-                            Thread.sleep(interval);
+                    final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
+                    if (generator.isAvailable()) {
+                        if (!generator.generate(entity.getThumbnailId(), outputFile)) {
+                            new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
+                        } else {
+                            final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
+                            if (interval > 0) {
+                                Thread.sleep(interval);
+                            }
                         }
+                    } else {
+                        logger.warn(generatorName + " is not available.");
                     }
                 } else if (logger.isDebugEnabled()) {
                     logger.debug("No image file exists: " + noImageFile.getAbsolutePath());
@@ -291,6 +295,7 @@ public class ThumbnailManager {
     }
 
     public void add(final ThumbnailGenerator generator) {
+        logger.info(generator.getName() + " is available.");
         if (generator.isAvailable()) {
             generatorList.add(generator);
         }
