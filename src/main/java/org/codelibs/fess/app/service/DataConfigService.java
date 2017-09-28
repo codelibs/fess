@@ -88,16 +88,17 @@ public class DataConfigService {
 
     public List<DataConfig> getAllDataConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
             final List<String> idList) {
-        final List<DataConfig> list = dataConfigBhv.selectList(cb -> {
+        return dataConfigBhv.selectList(cb -> {
             if (available) {
                 cb.query().setAvailable_Equal(Constants.T);
             }
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
             cb.fetchFirst(fessConfig.getPageDataConfigMaxFetchSizeAsInteger());
         });
-        return list;
     }
 
     public OptionalEntity<DataConfig> getDataConfig(final String id) {
