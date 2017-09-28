@@ -71,8 +71,8 @@
 		<cluster.runner.version>5.6.1.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.20</tomcat.version>
-		<tomcat.boot.version>0.5.8</tomcat.boot.version>
+		<tomcat.version>8.5.21</tomcat.version>
+		<tomcat.boot.version>0.5.9-RC1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
@@ -328,6 +328,7 @@
 						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
 							<property name="with.fess" value="true" />
 						</ant>
+						<ant antfile="deps.xml" target="install.jars" />
 					</tasks>
 				</configuration>
 				<goals>
@@ -1079,7 +1080,14 @@
 			<version>${dbflute.version}</version>
 		</dependency>
 
-		<!-- transaction -->
+		<!-- J2EE -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+			<!-- contains taglibs.standard -->
+			<!-- <scope>provided</scope> -->
+		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>javax.transaction-api</artifactId>
@@ -1121,15 +1129,6 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-jul</artifactId>
 			<version>${log4j.version}</version>
-		</dependency>
-
-		<!-- servlet -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.2</version>
-			<!-- contains taglibs.standard -->
-			<!-- <scope>provided</scope> -->
 		</dependency>
 
 		<!-- elasticsearch -->
