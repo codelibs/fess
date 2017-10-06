@@ -38,12 +38,16 @@ if [ "x$FESS_USE_IPV4" != "x" ]; then
   JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
 fi
 
-JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC"
+JAVA_OPTS="$JAVA_OPTS -Djna.nosys=true"
+JAVA_OPTS="$JAVA_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
+
 JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"
 
 JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
 JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
 
+JAVA_OPTS="$JAVA_OPTS -Dio.netty.noUnsafe=true"
+JAVA_OPTS="$JAVA_OPTS -Dio.netty.noKeySetOptimization=true"
 JAVA_OPTS="$JAVA_OPTS -Dio.netty.recycler.maxCapacityPerThread=0"
 
 JAVA_OPTS="$JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
