@@ -355,6 +355,13 @@ public class SystemHelper {
         ComponentUtil.getRelatedQueryHelper().update();
     }
 
+    public void updateConfiguration() {
+        ComponentUtil.getLabelTypeHelper().update();
+        ComponentUtil.getPathMappingHelper().update();
+        ComponentUtil.getRelatedContentHelper().update();
+        ComponentUtil.getRelatedQueryHelper().update();
+    }
+
     public String generateAccessToken() {
         return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger().intValue(), 0, 0, true, true,
                 null, random);
