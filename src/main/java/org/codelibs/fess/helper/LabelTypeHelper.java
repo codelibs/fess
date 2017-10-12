@@ -51,6 +51,10 @@ public class LabelTypeHelper {
 
     @PostConstruct
     public void init() {
+        update();
+    }
+
+    public void update() {
         final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
     }

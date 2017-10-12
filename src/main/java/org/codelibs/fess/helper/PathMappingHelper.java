@@ -43,6 +43,10 @@ public class PathMappingHelper {
 
     @PostConstruct
     public void init() {
+        update();
+    }
+
+    public void update() {
         final List<String> ptList = new ArrayList<>();
         ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
         ptList.add(Constants.PROCESS_TYPE_BOTH);
