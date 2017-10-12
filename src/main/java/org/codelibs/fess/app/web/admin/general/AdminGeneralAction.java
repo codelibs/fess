@@ -200,7 +200,8 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ldapProviderUrl = fessConfig.getLdapProviderUrl();
         form.ldapSecurityPrincipal = fessConfig.getLdapSecurityPrincipal();
         form.ldapAdminSecurityPrincipal = fessConfig.getLdapAdminSecurityPrincipal();
-        form.ldapAdminSecurityCredentials = DUMMY_PASSWORD;//fessConfig.getLdapAdminSecurityCredentials();
+        form.ldapAdminSecurityCredentials =
+                StringUtil.isNotBlank(fessConfig.getLdapAdminSecurityCredentials()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
         form.ldapBaseDn = fessConfig.getLdapBaseDn();
         form.ldapAccountFilter = fessConfig.getLdapAccountFilter();
         form.ldapMemberofAttribute = fessConfig.getLdapMemberofAttribute();
