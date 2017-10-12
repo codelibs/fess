@@ -355,11 +355,13 @@ public class SystemHelper {
         ComponentUtil.getRelatedQueryHelper().update();
     }
 
-    public void updateConfiguration() {
-        ComponentUtil.getLabelTypeHelper().update();
-        ComponentUtil.getPathMappingHelper().update();
-        ComponentUtil.getRelatedContentHelper().update();
-        ComponentUtil.getRelatedQueryHelper().update();
+    public String updateConfiguration() {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("Label: ").append(ComponentUtil.getLabelTypeHelper().update()).append("\n");
+        buf.append("PathMapping: ").append(ComponentUtil.getPathMappingHelper().update()).append("\n");
+        buf.append("RelatedContent: ").append(ComponentUtil.getRelatedContentHelper().update()).append("\n");
+        buf.append("RelatedQuery: ").append(ComponentUtil.getRelatedQueryHelper().update()).append("\n");
+        return buf.toString();
     }
 
     public String generateAccessToken() {

@@ -54,9 +54,10 @@ public class LabelTypeHelper {
         update();
     }
 
-    public void update() {
+    public int update() {
         final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
+        return labelTypeList.size();
     }
 
     public void refresh(final List<LabelType> labelTypeList) {

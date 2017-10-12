@@ -46,7 +46,7 @@ public class PathMappingHelper {
         update();
     }
 
-    public void update() {
+    public int update() {
         final List<String> ptList = new ArrayList<>();
         ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
         ptList.add(Constants.PROCESS_TYPE_BOTH);
@@ -58,9 +58,11 @@ public class PathMappingHelper {
                 cb.query().setProcessType_InScope(ptList);
                 cb.fetchFirst(ComponentUtil.getFessConfig().getPagePathMappingMaxFetchSizeAsInteger());
             });
+            return cachedPathMappingList.size();
         } catch (final Exception e) {
             logger.warn("Failed to load path mappings.", e);
         }
+        return 0;
     }
 
     public void setPathMappingList(final String sessionId, final List<PathMapping> pathMappingList) {

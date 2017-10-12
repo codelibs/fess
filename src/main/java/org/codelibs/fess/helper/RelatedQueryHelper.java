@@ -38,8 +38,8 @@ public class RelatedQueryHelper {
         reload();
     }
 
-    public void update() {
-        reload();
+    public int update() {
+        return reload();
     }
 
     public List<RelatedQuery> getAvailableRelatedQueryList() {
@@ -51,7 +51,7 @@ public class RelatedQueryHelper {
         });
     }
 
-    protected void reload() {
+    protected int reload() {
         final Map<String, Map<String, String[]>> relatedQueryMap = new HashMap<>();
         getAvailableRelatedQueryList().stream().forEach(entity -> {
             final String key = getHostKey(entity);
@@ -63,6 +63,7 @@ public class RelatedQueryHelper {
             map.put(toLowerCase(entity.getTerm()), entity.getQueries());
         });
         this.relatedQueryMap = relatedQueryMap;
+        return relatedQueryMap.size();
     }
 
     protected String getHostKey(final RelatedQuery entity) {

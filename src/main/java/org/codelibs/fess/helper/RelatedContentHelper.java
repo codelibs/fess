@@ -49,8 +49,8 @@ public class RelatedContentHelper {
         reload();
     }
 
-    public void update() {
-        reload();
+    public int update() {
+        return reload();
     }
 
     public List<RelatedContent> getAvailableRelatedContentList() {
@@ -63,7 +63,7 @@ public class RelatedContentHelper {
         });
     }
 
-    protected void reload() {
+    protected int reload() {
         final Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = new HashMap<>();
         getAvailableRelatedContentList().stream().forEach(entity -> {
             final String key = getHostKey(entity);
@@ -84,6 +84,7 @@ public class RelatedContentHelper {
             }
         });
         this.relatedContentMap = relatedContentMap;
+        return relatedContentMap.size();
     }
 
     protected String getHostKey(final RelatedContent entity) {
