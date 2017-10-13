@@ -1073,6 +1073,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. {user}guest,{role}guest */
     String SUGGEST_SEARCH_LOG_PERMISSIONS = "suggest.search.log.permissions";
 
+    /** The key of the configuration. e.g. 60 */
+    String SUGGEST_SYSTEM_MONITOR_INTERVAL = "suggest.system.monitor.interval";
+
     /** The key of the configuration. e.g. false */
     String LDAP_ADMIN_ENABLED = "ldap.admin.enabled";
 
@@ -4776,6 +4779,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSuggestSearchLogPermissions();
 
     /**
+     * Get the value for the key 'suggest.system.monitor.interval'. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestSystemMonitorInterval();
+
+    /**
+     * Get the value for the key 'suggest.system.monitor.interval' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestSystemMonitorIntervalAsInteger();
+
+    /**
      * Get the value for the key 'ldap.admin.enabled'. <br>
      * The value is, e.g. false <br>
      * comment: ------
@@ -7209,6 +7227,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.SUGGEST_SEARCH_LOG_PERMISSIONS);
         }
 
+        public String getSuggestSystemMonitorInterval() {
+            return get(FessConfig.SUGGEST_SYSTEM_MONITOR_INTERVAL);
+        }
+
+        public Integer getSuggestSystemMonitorIntervalAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_SYSTEM_MONITOR_INTERVAL);
+        }
+
         public String getLdapAdminEnabled() {
             return get(FessConfig.LDAP_ADMIN_ENABLED);
         }
@@ -7878,6 +7904,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_CACHE_SIZE, "1000");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_CACHE_EXPIRE, "60");
             defaultMap.put(FessConfig.SUGGEST_SEARCH_LOG_PERMISSIONS, "{user}guest,{role}guest");
+            defaultMap.put(FessConfig.SUGGEST_SYSTEM_MONITOR_INTERVAL, "60");
             defaultMap.put(FessConfig.LDAP_ADMIN_ENABLED, "false");
             defaultMap.put(FessConfig.LDAP_ADMIN_USER_FILTER, "uid=%s");
             defaultMap.put(FessConfig.LDAP_ADMIN_USER_BASE_DN, "ou=People,dc=fess,dc=codelibs,dc=org");

@@ -135,7 +135,7 @@ public class SuggestCreator {
 
             systemMonitorTask =
                     TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
-                            ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
+                            ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(), true);
 
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
