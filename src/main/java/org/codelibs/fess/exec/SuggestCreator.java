@@ -26,12 +26,18 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.monitor.jvm.JvmInfo;
+import org.elasticsearch.monitor.os.OsProbe;
+import org.elasticsearch.monitor.process.ProcessProbe;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -68,6 +74,13 @@ public class SuggestCreator {
         }
     }
 
+    static void initializeProbes() {
+        // Force probes to be loaded
+        ProcessProbe.getInstance();
+        OsProbe.getInstance();
+        JvmInfo.jvmInfo();
+    }
+
     public static void main(final String[] args) {
         final Options options = new Options();
 
@@ -101,6 +114,7 @@ public class SuggestCreator {
             System.setProperty(EsClient.CLUSTER_NAME, clusterName);
         }
 
+        TimeoutTask systemMonitorTask = null;
         int exitCode;
         try {
             SingletonLaContainerFactory.setConfigPath("app.xml");
@@ -118,6 +132,11 @@ public class SuggestCreator {
                 }
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
+
+            systemMonitorTask =
+                    TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
+                            ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
+
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
@@ -130,6 +149,9 @@ public class SuggestCreator {
             logger.error("Suggest creator does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
+            if (systemMonitorTask != null) {
+                systemMonitorTask.cancel();
+            }
             destroyContainer();
         }
 
