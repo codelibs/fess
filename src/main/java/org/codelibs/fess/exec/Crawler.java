@@ -36,6 +36,8 @@ import javax.annotation.Resource;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.PathMappingService;
@@ -49,7 +51,11 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
+import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.monitor.jvm.JvmInfo;
+import org.elasticsearch.monitor.os.OsProbe;
+import org.elasticsearch.monitor.process.ProcessProbe;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -161,6 +167,13 @@ public class Crawler {
 
     }
 
+    static void initializeProbes() {
+        // Force probes to be loaded
+        ProcessProbe.getInstance();
+        OsProbe.getInstance();
+        JvmInfo.jvmInfo();
+    }
+
     public static void main(final String[] args) {
         final Options options = new Options();
 
@@ -185,6 +198,8 @@ public class Crawler {
             }
         }
 
+        initializeProbes();
+
         final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
         if (StringUtil.isNotBlank(transportAddresses)) {
             System.setProperty(EsClient.TRANSPORT_ADDRESSES, transportAddresses);
@@ -194,6 +209,7 @@ public class Crawler {
             System.setProperty(EsClient.CLUSTER_NAME, clusterName);
         }
 
+        TimeoutTask systemMonitorTask = null;
         int exitCode;
         try {
             running.set(true);
@@ -211,6 +227,10 @@ public class Crawler {
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
+            systemMonitorTask =
+                    TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
+                            ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
+
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
@@ -223,6 +243,9 @@ public class Crawler {
             logger.error("Crawler does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
+            if (systemMonitorTask != null) {
+                systemMonitorTask.cancel();
+            }
             destroyContainer();
         }
 
