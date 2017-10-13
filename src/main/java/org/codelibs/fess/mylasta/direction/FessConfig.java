@@ -50,6 +50,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -Djdk.io.permissionsUseCanonicalPath=true
     -server
     -Xmx512m
     -XX:MaxMetaspaceSize=128m
@@ -57,7 +60,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:-UseGCOverheadLimit
     -XX:+UseConcMarkSweepGC
     -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
+    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
@@ -66,10 +69,19 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.responseTimeout=30000
     -Dgroovy.use.classvalue=true
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
     */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -Djdk.io.permissionsUseCanonicalPath=true
     -server
     -Xmx256m
     -XX:MaxMetaspaceSize=128m
@@ -77,11 +89,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:-UseGCOverheadLimit
     -XX:+UseConcMarkSweepGC
     -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
+    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -Dgroovy.use.classvalue=true
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
     */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
@@ -198,6 +216,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 404 */
     String CRAWLER_FAILURE_URL_STATUS_CODES = "crawler.failure.url.status.codes";
+
+    /** The key of the configuration. e.g. 60 */
+    String CRAWLER_SYSTEM_MONITOR_INTERVAL = "crawler.system.monitor.interval";
 
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
@@ -1360,6 +1381,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -Djdk.io.permissionsUseCanonicalPath=true
     -server
     -Xmx512m
     -XX:MaxMetaspaceSize=128m
@@ -1367,7 +1391,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:-UseGCOverheadLimit
     -XX:+UseConcMarkSweepGC
     -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
+    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
@@ -1376,6 +1400,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.responseTimeout=30000
     -Dgroovy.use.classvalue=true
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
     <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1385,6 +1415,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'jvm.suggest.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -Djdk.io.permissionsUseCanonicalPath=true
     -server
     -Xmx256m
     -XX:MaxMetaspaceSize=128m
@@ -1392,11 +1425,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:-UseGCOverheadLimit
     -XX:+UseConcMarkSweepGC
     -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
+    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -Dgroovy.use.classvalue=true
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
     <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -1814,6 +1853,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerFailureUrlStatusCodesAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.system.monitor.interval'. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerSystemMonitorInterval();
+
+    /**
+     * Get the value for the key 'crawler.system.monitor.interval' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerSystemMonitorIntervalAsInteger();
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
@@ -5607,6 +5661,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES);
         }
 
+        public String getCrawlerSystemMonitorInterval() {
+            return get(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL);
+        }
+
+        public Integer getCrawlerSystemMonitorIntervalAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL);
+        }
+
         public String getCrawlerMetadataContentExcludes() {
             return get(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES);
         }
@@ -7501,10 +7563,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
-                            "-Djava.awt.headless=true\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseParNewGC\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
-                            "-Djava.awt.headless=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseParNewGC\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");
@@ -7549,6 +7611,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_IGNORE_META_ROBOTS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
             defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404");
+            defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");
             defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES, "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*");
             defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING, "title=title:string\nTitle=title:string\n");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH, "//BODY");

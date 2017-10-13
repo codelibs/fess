@@ -827,6 +827,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: WAV Audio */
     public static final String LABELS_facet_filetype_wav = "{labels.facet_filetype_wav}";
 
+    /** The key of the message: WebP Audio */
+    public static final String LABELS_facet_filetype_webp = "{labels.facet_filetype_webp}";
+
     /** The key of the message: AIF Audio */
     public static final String LABELS_facet_filetype_aif = "{labels.facet_filetype_aif}";
 
