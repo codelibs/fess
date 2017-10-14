@@ -416,4 +416,6 @@ public class Constants extends CoreLibConstants {
     public static final String SYSTEM_USER = "system";
 
     public static final String EMPTY_USER_ID = "<empty>";
+
+    public static final String CRAWLER_PROCESS_COMMAND_THREAD_DUMP = "thread_dump";
 }

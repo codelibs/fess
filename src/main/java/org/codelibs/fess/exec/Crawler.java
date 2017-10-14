@@ -17,8 +17,10 @@ package org.codelibs.fess.exec;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ThreadDumpUtil;
 import org.elasticsearch.monitor.jvm.JvmInfo;
 import org.elasticsearch.monitor.os.OsProbe;
 import org.elasticsearch.monitor.process.ProcessProbe;
@@ -210,6 +213,7 @@ public class Crawler {
         }
 
         TimeoutTask systemMonitorTask = null;
+        Thread commandThread = null;
         int exitCode;
         try {
             running.set(true);
@@ -227,6 +231,36 @@ public class Crawler {
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
+            commandThread = new Thread(() -> {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+                    String command;
+                    while (true) {
+                        try {
+                            while (!reader.ready()) {
+                                Thread.sleep(1000L);
+                            }
+                            command = reader.readLine().trim();
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Process command: " + command);
+                            }
+                            if (Constants.CRAWLER_PROCESS_COMMAND_THREAD_DUMP.equals(command)) {
+                                ThreadDumpUtil.printThreadDump();
+                            } else {
+                                logger.warn("Unknown process command: " + command);
+                            }
+                            if (Thread.interrupted()) {
+                                return;
+                            }
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                    }
+                } catch (IOException e) {
+                    logger.debug("I/O exception.", e);
+                }
+            }, "ProcessCommand");
+            commandThread.start();
+
             systemMonitorTask =
                     TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
                             ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
@@ -243,6 +277,9 @@ public class Crawler {
             logger.error("Crawler does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
+            if (commandThread != null && commandThread.isAlive()) {
+                commandThread.interrupt();
+            }
             if (systemMonitorTask != null) {
                 systemMonitorTask.cancel();
             }

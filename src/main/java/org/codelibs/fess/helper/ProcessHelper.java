@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,9 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.JobNotFoundException;
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.slf4j.Logger;
@@ -63,7 +66,7 @@ public class ProcessHelper {
             destroyProcess(sessionId, runningProcessMap.putIfAbsent(sessionId, jobProcess));
             return jobProcess;
         } catch (final IOException e) {
-            throw new FessSystemException("Crawler Process terminated.", e);
+            throw new JobProcessingException("Crawler Process terminated.", e);
         }
     }
 
@@ -74,6 +77,11 @@ public class ProcessHelper {
 
     public boolean isProcessRunning() {
         return !runningProcessMap.isEmpty();
+    }
+
+    public boolean isProcessRunning(String sessionId) {
+        JobProcess jobProcess = runningProcessMap.get(sessionId);
+        return jobProcess != null && jobProcess.getProcess().isAlive();
     }
 
     protected int destroyProcess(final String sessionId, final JobProcess jobProcess) {
@@ -138,4 +146,18 @@ public class ProcessHelper {
         this.processDestroyTimeout = processDestroyTimeout;
     }
 
+    public void sendCommand(String sessionId, String command) {
+        JobProcess jobProcess = runningProcessMap.get(sessionId);
+        if (jobProcess != null) {
+            try {
+                final OutputStream out = jobProcess.getProcess().getOutputStream();
+                IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
+                out.flush();
+            } catch (IOException e) {
+                throw new JobProcessingException(e);
+            }
+        } else {
+            throw new JobNotFoundException("Job for " + sessionId + " is not found.");
+        }
+    }
 }
