@@ -1283,6 +1283,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Cancel */
     public static final String LABELS_crawling_info_delete_all_cancel = "{labels.crawling_info_delete_all_cancel}";
 
+    /** The key of the message: Thread Dump */
+    public static final String LABELS_crawling_info_thread_dump = "{labels.crawling_info_thread_dump}";
+
     /** The key of the message: Crawler start time */
     public static final String LABELS_crawling_info_CrawlerStartTime = "{labels.crawling_info_CrawlerStartTime}";
 

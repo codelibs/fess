@@ -49,6 +49,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
+import org.codelibs.fess.util.ThreadDumpUtil;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -270,7 +271,7 @@ public class IndexUpdater extends Thread {
                     finishCrawling = true;
                     forceStop();
                     if (fessConfig.getIndexerThreadDumpEnabledAsBoolean()) {
-                        printThreadDump();
+                        ThreadDumpUtil.printThreadDump();
                     }
                     org.codelibs.fess.exec.Crawler.addError("QueueTimeout");
                 }
@@ -311,16 +312,6 @@ public class IndexUpdater extends Thread {
             logger.info("[EXEC TIME] index update time: " + executeTime + "ms");
         }
 
-    }
-
-    private void printThreadDump() {
-        for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
-            logger.info("Thread: " + entry.getKey());
-            final StackTraceElement[] trace = entry.getValue();
-            for (final StackTraceElement element : trace) {
-                logger.info("\tat " + element);
-            }
-        }
     }
 
     private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList, final List<EsAccessResult> arList) {

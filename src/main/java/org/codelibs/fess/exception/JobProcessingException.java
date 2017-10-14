@@ -15,12 +15,18 @@
  */
 package org.codelibs.fess.exception;
 
+import java.io.IOException;
+
 public class JobProcessingException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
     public JobProcessingException(final Throwable e) {
         super(e);
+    }
+
+    public JobProcessingException(String message, IOException e) {
+        super(message, e);
     }
 
 }

@@ -329,6 +329,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Unauthorized request. */
     public static final String ERRORS_unauthorized_request = "{errors.unauthorized_request}";
 
+    /** The key of the message: Failed to print thread dump. */
+    public static final String ERRORS_failed_to_print_thread_dump = "{errors.failed_to_print_thread_dump}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -445,6 +448,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Bulk process is started. */
     public static final String SUCCESS_bulk_process_started = "{success.bulk_process_started}";
+
+    /** The key of the message: Printed thread dump to log file. */
+    public static final String SUCCESS_print_thread_dump = "{success.print_thread_dump}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -1914,6 +1920,20 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_print_thread_dump' with parameters.
+     * <pre>
+     * message: Failed to print thread dump.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToPrintThreadDump(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_print_thread_dump));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.invalid_query_unknown' with parameters.
      * <pre>
      * message: The given query has unknown condition.
@@ -2477,6 +2497,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessBulkProcessStarted(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_bulk_process_started));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.print_thread_dump' with parameters.
+     * <pre>
+     * message: Printed thread dump to log file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessPrintThreadDump(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_print_thread_dump));
         return this;
     }
 

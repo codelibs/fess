@@ -28,12 +28,16 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  * @author Shunji Makino
  */
 public class AdminCrawlinginfoAction extends FessAdminAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminCrawlinginfoAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -116,20 +120,42 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                crawlingInfoService.getCrawlingInfo(id).ifPresent(entity -> {
+        return crawlingInfoService.getCrawlingInfo(id).map(entity -> {
+            return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
+                op.setup(form -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
+            }).renderWith(data -> {
+                RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
+                RenderDataUtil.register(data, "running", processHelper.isProcessRunning(entity.getSessionId()));
             });
-        }).renderWith(data -> {
-            RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+            return null;
         });
+    }
+
+    @Execute
+    public HtmlResponse threaddump(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
+        final String id = form.id;
+        crawlingInfoService.getCrawlingInfo(id).ifPresent(entity -> {
+            try {
+                processHelper.sendCommand(entity.getSessionId(), Constants.CRAWLER_PROCESS_COMMAND_THREAD_DUMP);
+                saveInfo(messages -> messages.addSuccessPrintThreadDump(GLOBAL));
+            } catch (Exception e) {
+                logger.warn("Failed to print a thread dump.", e);
+                throwValidationError(messages -> messages.addErrorsFailedToPrintThreadDump(GLOBAL), () -> asListHtml());
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+        });
+        return redirect(getClass());
     }
 
     // -----------------------------------------------------
