@@ -16,7 +16,9 @@
 package org.codelibs.fess.timer;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.timer.TimeoutTarget;
@@ -26,6 +28,12 @@ import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.monitor.jvm.JvmStats;
+import org.elasticsearch.monitor.jvm.JvmStats.BufferPool;
+import org.elasticsearch.monitor.jvm.JvmStats.Classes;
+import org.elasticsearch.monitor.jvm.JvmStats.GarbageCollectors;
+import org.elasticsearch.monitor.jvm.JvmStats.Mem;
+import org.elasticsearch.monitor.jvm.JvmStats.Threads;
 import org.elasticsearch.monitor.os.OsProbe;
 import org.elasticsearch.monitor.os.OsStats;
 import org.elasticsearch.monitor.process.ProcessProbe;
@@ -41,6 +49,8 @@ public class SystemMonitorTarget implements TimeoutTarget {
             final Object value = supplier.get();
             if (value == null) {
                 buf.append("null");
+            } else if (value instanceof Integer) {
+                buf.append(((Integer) value).intValue());
             } else if (value instanceof Long) {
                 buf.append(((Long) value).longValue());
             } else if (value instanceof Short) {
@@ -58,12 +68,92 @@ public class SystemMonitorTarget implements TimeoutTarget {
 
     @Override
     public void expired() {
-        StringBuilder buf = new StringBuilder();
+        StringBuilder buf = new StringBuilder(1000);
 
         buf.append("[SYSTEM MONITOR] ");
         buf.append('{');
-        append(buf, "timestamp", () -> System.currentTimeMillis()).append(',');
 
+        appendOsStats(buf);
+        appendProcessStats(buf);
+        appendJvmStats(buf);
+        appendElasticsearchStats(buf);
+
+        append(buf, "timestamp", () -> System.currentTimeMillis());
+        buf.append('}');
+
+        logger.info(buf.toString());
+    }
+
+    private void appendJvmStats(StringBuilder buf) {
+        buf.append("\"jvm\":{");
+        final JvmStats jvmStats = JvmStats.jvmStats();
+        Mem mem = jvmStats.getMem();
+        buf.append("\"memory\":{");
+        buf.append("\"heap\":{");
+        append(buf, "used", () -> mem.getHeapUsed().bytesAsInt()).append(',');
+        append(buf, "committed", () -> mem.getHeapCommitted().bytesAsInt()).append(',');
+        append(buf, "max", () -> mem.getHeapMax().bytesAsInt()).append(',');
+        append(buf, "percent", () -> mem.getHeapUsedPercent());
+        buf.append("},");
+        buf.append("\"non_heap\":{");
+        append(buf, "used", () -> mem.getNonHeapUsed().bytesAsInt()).append(',');
+        append(buf, "committed", () -> mem.getNonHeapCommitted().bytesAsInt());
+        buf.append('}');
+        buf.append("},");
+        List<BufferPool> bufferPools = jvmStats.getBufferPools();
+        buf.append("\"pools\":{");
+        buf.append(bufferPools.stream().map(p -> {
+            StringBuilder b = new StringBuilder();
+            b.append('"').append(StringEscapeUtils.escapeJson(p.getName())).append("\":{");
+            append(b, "count", () -> p.getCount()).append(',');
+            append(b, "used", () -> p.getUsed().bytesAsInt()).append(',');
+            append(b, "capacity", () -> p.getTotalCapacity().bytesAsInt()).append('}');
+            return b.toString();
+        }).collect(Collectors.joining(",")));
+        buf.append("},");
+        GarbageCollectors gc = jvmStats.getGc();
+        buf.append("\"gc\":{");
+        buf.append(Arrays.stream(gc.getCollectors()).map(c -> {
+            StringBuilder b = new StringBuilder();
+            b.append('"').append(StringEscapeUtils.escapeJson(c.getName())).append("\":{");
+            append(b, "count", () -> c.getCollectionCount()).append(',');
+            append(b, "time", () -> c.getCollectionTime().getMillis()).append('}');
+            return b.toString();
+        }).collect(Collectors.joining(",")));
+        buf.append("},");
+        Threads threads = jvmStats.getThreads();
+        buf.append("\"threads\":{");
+        append(buf, "count", () -> threads.getCount()).append(',');
+        append(buf, "peak", () -> threads.getPeakCount());
+        buf.append("},");
+        Classes classes = jvmStats.getClasses();
+        buf.append("\"classes\":{");
+        append(buf, "loaded", () -> classes.getLoadedClassCount()).append(',');
+        append(buf, "total_loaded", () -> classes.getTotalLoadedClassCount()).append(',');
+        append(buf, "unloaded", () -> classes.getUnloadedClassCount());
+        buf.append("},");
+        append(buf, "uptime", () -> jvmStats.getUptime().getMillis());
+        buf.append("},");
+    }
+
+    private void appendProcessStats(StringBuilder buf) {
+        buf.append("\"process\":{");
+        final ProcessProbe processProbe = ProcessProbe.getInstance();
+        buf.append("\"file_descriptor\":{");
+        append(buf, "open", () -> processProbe.getOpenFileDescriptorCount()).append(',');
+        append(buf, "max", () -> processProbe.getMaxFileDescriptorCount());
+        buf.append("},");
+        buf.append("\"cpu\":{");
+        append(buf, "percent", () -> processProbe.getProcessCpuPercent()).append(',');
+        append(buf, "total", () -> processProbe.getProcessCpuTotalTime());
+        buf.append("},");
+        buf.append("\"virtual_memory\":{");
+        append(buf, "total", () -> processProbe.getTotalVirtualMemorySize());
+        buf.append('}');
+        buf.append("},");
+    }
+
+    private void appendOsStats(StringBuilder buf) {
         buf.append("\"os\":{");
         final OsProbe osProbe = OsProbe.getInstance();
         buf.append("\"memory\":{");
@@ -82,39 +172,9 @@ public class SystemMonitorTarget implements TimeoutTarget {
         buf.append("},");
         append(buf, "load_averages", () -> osStats.getCpu().getLoadAverage());
         buf.append("},");
-
-        buf.append("\"process\":{");
-        final ProcessProbe processProbe = ProcessProbe.getInstance();
-        buf.append("\"file_descriptor\":{");
-        append(buf, "open", () -> processProbe.getOpenFileDescriptorCount()).append(',');
-        append(buf, "max", () -> processProbe.getMaxFileDescriptorCount());
-        buf.append("},");
-        buf.append("\"cpu\":{");
-        append(buf, "percent", () -> processProbe.getProcessCpuPercent()).append(',');
-        append(buf, "total", () -> processProbe.getProcessCpuTotalTime());
-        buf.append("},");
-        buf.append("\"virtual_memory\":{");
-        append(buf, "total", () -> processProbe.getTotalVirtualMemorySize());
-        buf.append('}');
-        buf.append("},");
-
-        buf.append("\"jvm\":{");
-        final Runtime runtime = Runtime.getRuntime();
-        buf.append("\"memory\":{");
-        append(buf, "free", () -> runtime.freeMemory()).append(',');
-        append(buf, "max", () -> runtime.maxMemory()).append(',');
-        append(buf, "total", () -> runtime.totalMemory());
-        buf.append('}');
-        buf.append("},");
-
-        appendElasticsearchStats(buf);
-
-        buf.append('}');
-
-        logger.info(buf.toString());
     }
 
-    protected void appendElasticsearchStats(StringBuilder buf) {
+    private void appendElasticsearchStats(StringBuilder buf) {
         String stats = null;
         try {
             FessEsClient esClient = ComponentUtil.getFessEsClient();
@@ -130,6 +190,6 @@ public class SystemMonitorTarget implements TimeoutTarget {
         } catch (Exception e) {
             logger.debug("Failed to access Elasticsearch stats.", e);
         }
-        buf.append("\"elasticsearch\":").append(stats);
+        buf.append("\"elasticsearch\":").append(stats).append(',');
     }
 }
