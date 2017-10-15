@@ -20,6 +20,12 @@ import java.util.function.Supplier;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.timer.TimeoutTarget;
+import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.monitor.os.OsProbe;
 import org.elasticsearch.monitor.os.OsStats;
 import org.elasticsearch.monitor.process.ProcessProbe;
@@ -56,6 +62,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
 
         buf.append("[SYSTEM MONITOR] ");
         buf.append('{');
+        append(buf, "timestamp", () -> System.currentTimeMillis()).append(',');
 
         buf.append("\"os\":{");
         final OsProbe osProbe = OsProbe.getInstance();
@@ -84,7 +91,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
         buf.append("},");
         buf.append("\"cpu\":{");
         append(buf, "percent", () -> processProbe.getProcessCpuPercent()).append(',');
-        append(buf, "time", () -> processProbe.getProcessCpuTotalTime());
+        append(buf, "total", () -> processProbe.getProcessCpuTotalTime());
         buf.append("},");
         buf.append("\"virtual_memory\":{");
         append(buf, "total", () -> processProbe.getTotalVirtualMemorySize());
@@ -98,9 +105,31 @@ public class SystemMonitorTarget implements TimeoutTarget {
         append(buf, "max", () -> runtime.maxMemory()).append(',');
         append(buf, "total", () -> runtime.totalMemory());
         buf.append('}');
-        buf.append('}');
+        buf.append("},");
+
+        appendElasticsearchStats(buf);
+
         buf.append('}');
 
         logger.info(buf.toString());
+    }
+
+    protected void appendElasticsearchStats(StringBuilder buf) {
+        String stats = null;
+        try {
+            FessEsClient esClient = ComponentUtil.getFessEsClient();
+            NodesStatsResponse response =
+                    esClient.admin().cluster().prepareNodesStats().ingest(false).setBreaker(false).setDiscovery(false).setFs(true)
+                            .setHttp(false).setIndices(true).setJvm(true).setOs(true).setProcess(true).setScript(false).setThreadPool(true)
+                            .setTransport(true).execute().actionGet(10000L);
+            XContentBuilder builder = XContentFactory.jsonBuilder();
+            builder.startObject();
+            response.toXContent(builder, ToXContent.EMPTY_PARAMS);
+            builder.endObject();
+            stats = builder.string();
+        } catch (Exception e) {
+            logger.debug("Failed to access Elasticsearch stats.", e);
+        }
+        buf.append("\"elasticsearch\":").append(stats);
     }
 }
