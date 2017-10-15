@@ -20,3 +20,5 @@ while [ $ret != 0 -a $counter != 60 ] ; do
   counter=`expr $counter + 1`
 done
 
+cd /tmp
+git clone https://github.com/codelibs/fess-testdata.git
