@@ -890,10 +890,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 30 */
     String SCHEDULER_MONITOR_INTERVAL = "scheduler.monitor.interval";
 
-    /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/admin/ */
+    /** The key of the configuration. e.g. https://fess.codelibs.org/{lang}/{version}/admin/ */
     String ONLINE_HELP_BASE_LINK = "online.help.base.link";
 
-    /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/install/install.html */
+    /** The key of the configuration. e.g. https://fess.codelibs.org/{lang}/{version}/install/install.html */
     String ONLINE_HELP_INSTALLATION = "online.help.installation";
 
     /** The key of the configuration. e.g. failureurl */
@@ -4254,7 +4254,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'online.help.base.link'. <br>
-     * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/admin/ <br>
+     * The value is, e.g. https://fess.codelibs.org/{lang}/{version}/admin/ <br>
      * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -4262,7 +4262,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'online.help.installation'. <br>
-     * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/install/install.html <br>
+     * The value is, e.g. https://fess.codelibs.org/{lang}/{version}/install/install.html <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpInstallation();
@@ -7843,8 +7843,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SCHEDULER_JOB_CLASS, "org.codelibs.fess.app.job.ScriptExecutorJob");
             defaultMap.put(FessConfig.SCHEDULER_CONCURRENT_EXEC_MODE, "QUIT");
             defaultMap.put(FessConfig.SCHEDULER_MONITOR_INTERVAL, "30");
-            defaultMap.put(FessConfig.ONLINE_HELP_BASE_LINK, "http://fess.codelibs.org/{lang}/{version}/admin/");
-            defaultMap.put(FessConfig.ONLINE_HELP_INSTALLATION, "http://fess.codelibs.org/{lang}/{version}/install/install.html");
+            defaultMap.put(FessConfig.ONLINE_HELP_BASE_LINK, "https://fess.codelibs.org/{lang}/{version}/admin/");
+            defaultMap.put(FessConfig.ONLINE_HELP_INSTALLATION, "https://fess.codelibs.org/{lang}/{version}/install/install.html");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_FAILUREURL, "failureurl");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ELEVATEWORD, "elevateword");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_REQHEADER, "reqheader");
