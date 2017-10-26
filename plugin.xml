@@ -15,66 +15,66 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20170929.212801-1" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-ja" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20171009.082300-1" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-synonym" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20171009.124614-1" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20171021.010126-1" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20171021.021412-1" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20171021.060118-1" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="5.5.0" />
-			<param name="plugin.zip.version" value="5.5.0" />
+			<param name="plugin.version" value="6.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.0.0-20171021.021949-1" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}/kopf.zip">
@@ -130,7 +130,7 @@ mv plugins/analysis-seunjeon/elasticsearch/* plugins/analysis-seunjeon/
 
 # Japanese
 # https://github.com/codelibs/elasticsearch-analysis-kuromoji-neologd
-PLUGIN_VERSION=5.5.0
+PLUGIN_VERSION=6.0.0-SNAPSHOT
 rm -rf plugins/analysis-kuromoji-neologd
 wget -O target/analysis-kuromoji-neologd.zip http://central.maven.org/maven2/org/codelibs/elasticsearch-analysis-kuromoji-neologd/${PLUGIN_VERSION}/elasticsearch-analysis-kuromoji-neologd-${PLUGIN_VERSION}.zip
 unzip -d plugins/analysis-kuromoji-neologd target/analysis-kuromoji-neologd.zip
@@ -138,7 +138,7 @@ mv plugins/analysis-kuromoji-neologd/elasticsearch/* plugins/analysis-kuromoji-n
 
 # Vietnamese
 # https://github.com/duydo/elasticsearch-analysis-vietnamese
-PLUGIN_VERSION=5.5.0
+PLUGIN_VERSION=6.0.0-SNAPSHOT
 rm -rf plugins/analysis-vietnamese
 wget -O target/analysis-vietnamese.zip https://github.com/duydo/elasticsearch-analysis-vietnamese/releases/download/v${PLUGIN_VERSION}/elasticsearch-analysis-vietnamese-${PLUGIN_VERSION}.zip
 unzip -d plugins/analysis-vietnamese target/analysis-vietnamese.zip
@@ -149,7 +149,7 @@ rm plugins/analysis-vietnamese/opennlp-maxent-*.jar
 rm plugins/analysis-vietnamese/jwnl-*.jar
 
 # Simplified Chinese
-PLUGIN_VERSION=5.5.0
+PLUGIN_VERSION=6.0.0-SNAPSHOT
 rm -rf plugins/analysis-smartcn
 wget -O target/analysis-smartcn.zip https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-${PLUGIN_VERSION}.zip
 unzip -d plugins/analysis-smartcn target/analysis-smartcn.zip
@@ -157,7 +157,7 @@ mv plugins/analysis-smartcn/elasticsearch/* plugins/analysis-smartcn/
 
 # Traditional Chinese
 # https://github.com/medcl/elasticsearch-analysis-stconvert
-PLUGIN_VERSION=5.5.0
+PLUGIN_VERSION=6.0.0-SNAPSHOT
 rm -rf plugins/analysis-stconvert
 wget -O target/analysis-stconvert.zip https://github.com/medcl/elasticsearch-analysis-stconvert/releases/download/v${PLUGIN_VERSION}/elasticsearch-analysis-stconvert-${PLUGIN_VERSION}.zip
 unzip -d plugins/analysis-stconvert target/analysis-stconvert.zip

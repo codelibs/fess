@@ -176,12 +176,12 @@ public class BsGroupCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
-        public void columnName() {
-            doColumn("name");
-        }
-
         public void columnGidNumber() {
             doColumn("gidNumber");
+        }
+
+        public void columnName() {
+            doColumn("name");
         }
     }
 }

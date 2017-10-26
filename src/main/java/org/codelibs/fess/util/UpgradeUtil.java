@@ -33,7 +33,6 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -181,11 +180,13 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static boolean existsIndex(final IndicesAdminClient indicesClient, final String index, final IndicesOptions options) {
+    public static boolean existsIndex(final IndicesAdminClient indicesClient, final String index, final boolean expandWildcardsOpen,
+            final boolean expandWildcardsClosed) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
             final IndicesExistsResponse response =
-                    indicesClient.prepareExists(index).setIndicesOptions(options).execute().actionGet(fessConfig.getIndexSearchTimeout());
+                    indicesClient.prepareExists(index).setExpandWildcardsClosed(expandWildcardsClosed)
+                            .setExpandWildcardsOpen(expandWildcardsOpen).execute().actionGet(fessConfig.getIndexSearchTimeout());
             return response.isExists();
         } catch (final Exception e) {
             // ignore

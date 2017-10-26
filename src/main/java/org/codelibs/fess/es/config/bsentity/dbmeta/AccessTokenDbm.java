@@ -79,18 +79,18 @@ public class AccessTokenDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((AccessToken) et).getName(), (et, vl) -> ((AccessToken) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((AccessToken) et).getToken(), (et, vl) -> ((AccessToken) et).setToken(DfTypeUtil.toString(vl)), "token");
-        setupEpg(_epgMap, et -> ((AccessToken) et).getPermissions(), (et, vl) -> ((AccessToken) et).setPermissions((String[]) vl),
-                "permissions");
-        setupEpg(_epgMap, et -> ((AccessToken) et).getParameterName(),
-                (et, vl) -> ((AccessToken) et).setParameterName(DfTypeUtil.toString(vl)), "parameterName");
-        setupEpg(_epgMap, et -> ((AccessToken) et).getExpiredTime(), (et, vl) -> ((AccessToken) et).setExpiredTime(DfTypeUtil.toLong(vl)),
-                "expiredTime");
         setupEpg(_epgMap, et -> ((AccessToken) et).getCreatedBy(), (et, vl) -> ((AccessToken) et).setCreatedBy(DfTypeUtil.toString(vl)),
                 "createdBy");
         setupEpg(_epgMap, et -> ((AccessToken) et).getCreatedTime(), (et, vl) -> ((AccessToken) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getExpiredTime(), (et, vl) -> ((AccessToken) et).setExpiredTime(DfTypeUtil.toLong(vl)),
+                "expiredTime");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getName(), (et, vl) -> ((AccessToken) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getParameterName(),
+                (et, vl) -> ((AccessToken) et).setParameterName(DfTypeUtil.toString(vl)), "parameterName");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getPermissions(), (et, vl) -> ((AccessToken) et).setPermissions((String[]) vl),
+                "permissions");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getToken(), (et, vl) -> ((AccessToken) et).setToken(DfTypeUtil.toString(vl)), "token");
         setupEpg(_epgMap, et -> ((AccessToken) et).getUpdatedBy(), (et, vl) -> ((AccessToken) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((AccessToken) et).getUpdatedTime(), (et, vl) -> ((AccessToken) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
@@ -131,44 +131,24 @@ public class AccessTokenDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
-            0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnToken = cci("token", "token", null, null, String.class, "token", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
-            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnParameterName = cci("parameter_name", "parameter_name", null, null, String.class, "parameterName",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnExpiredTime = cci("expiredTime", "expiredTime", null, null, Long.class, "expiredTime", null, false,
-            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnExpiredTime = cci("expiredTime", "expiredTime", null, null, Long.class, "expiredTime", null, false,
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
+            0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnParameterName = cci("parameter_name", "parameter_name", null, null, String.class, "parameterName",
+            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnToken = cci("token", "token", null, null, String.class, "token", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
-
-    public ColumnInfo columnToken() {
-        return _columnToken;
-    }
-
-    public ColumnInfo columnPermissions() {
-        return _columnPermissions;
-    }
-
-    public ColumnInfo columnParameterName() {
-        return _columnParameterName;
-    }
-
-    public ColumnInfo columnExpiredTime() {
-        return _columnExpiredTime;
-    }
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -176,6 +156,26 @@ public class AccessTokenDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnExpiredTime() {
+        return _columnExpiredTime;
+    }
+
+    public ColumnInfo columnName() {
+        return _columnName;
+    }
+
+    public ColumnInfo columnParameterName() {
+        return _columnParameterName;
+    }
+
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
+    }
+
+    public ColumnInfo columnToken() {
+        return _columnToken;
     }
 
     public ColumnInfo columnUpdatedBy() {
@@ -188,13 +188,13 @@ public class AccessTokenDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnName());
-        ls.add(columnToken());
-        ls.add(columnPermissions());
-        ls.add(columnParameterName());
-        ls.add(columnExpiredTime());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnExpiredTime());
+        ls.add(columnName());
+        ls.add(columnParameterName());
+        ls.add(columnPermissions());
+        ls.add(columnToken());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
         return ls;

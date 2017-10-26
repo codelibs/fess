@@ -51,7 +51,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
 
     @Override
     protected String asEsIndex() {
-        return "fess_log";
+        return "fess_log.favorite_log";
     }
 
     @Override
@@ -74,9 +74,9 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
         try {
             final RESULT result = entityType.newInstance();
             result.setCreatedAt(toLocalDateTime(source.get("createdAt")));
-            result.setUrl(DfTypeUtil.toString(source.get("url")));
             result.setDocId(DfTypeUtil.toString(source.get("docId")));
             result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
+            result.setUrl(DfTypeUtil.toString(source.get("url")));
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {

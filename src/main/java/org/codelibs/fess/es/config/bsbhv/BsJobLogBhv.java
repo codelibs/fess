@@ -51,7 +51,7 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.job_log";
     }
 
     @Override
@@ -76,12 +76,12 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
             result.setEndTime(DfTypeUtil.toLong(source.get("endTime")));
             result.setJobName(DfTypeUtil.toString(source.get("jobName")));
             result.setJobStatus(DfTypeUtil.toString(source.get("jobStatus")));
+            result.setLastUpdated(DfTypeUtil.toLong(source.get("lastUpdated")));
             result.setScriptData(DfTypeUtil.toString(source.get("scriptData")));
             result.setScriptResult(DfTypeUtil.toString(source.get("scriptResult")));
             result.setScriptType(DfTypeUtil.toString(source.get("scriptType")));
             result.setStartTime(DfTypeUtil.toLong(source.get("startTime")));
             result.setTarget(DfTypeUtil.toString(source.get("target")));
-            result.setLastUpdated(DfTypeUtil.toLong(source.get("lastUpdated")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

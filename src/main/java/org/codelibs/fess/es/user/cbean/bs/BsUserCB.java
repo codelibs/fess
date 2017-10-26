@@ -176,84 +176,36 @@ public class BsUserCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
-        public void columnName() {
-            doColumn("name");
+        public void columnBusinessCategory() {
+            doColumn("businessCategory");
         }
 
-        public void columnPassword() {
-            doColumn("password");
+        public void columnCarLicense() {
+            doColumn("carLicense");
         }
 
-        public void columnSurname() {
-            doColumn("surname");
+        public void columnCity() {
+            doColumn("city");
         }
 
-        public void columnGivenName() {
-            doColumn("givenName");
-        }
-
-        public void columnEmployeeNumber() {
-            doColumn("employeeNumber");
-        }
-
-        public void columnMail() {
-            doColumn("mail");
-        }
-
-        public void columnTelephoneNumber() {
-            doColumn("telephoneNumber");
-        }
-
-        public void columnHomePhone() {
-            doColumn("homePhone");
-        }
-
-        public void columnHomePostalAddress() {
-            doColumn("homePostalAddress");
-        }
-
-        public void columnLabeledURI() {
-            doColumn("labeledURI");
-        }
-
-        public void columnRoomNumber() {
-            doColumn("roomNumber");
+        public void columnDepartmentNumber() {
+            doColumn("departmentNumber");
         }
 
         public void columnDescription() {
             doColumn("description");
         }
 
-        public void columnTitle() {
-            doColumn("title");
-        }
-
-        public void columnPager() {
-            doColumn("pager");
-        }
-
-        public void columnStreet() {
-            doColumn("street");
-        }
-
-        public void columnPostalCode() {
-            doColumn("postalCode");
-        }
-
-        public void columnPhysicalDeliveryOfficeName() {
-            doColumn("physicalDeliveryOfficeName");
-        }
-
         public void columnDestinationIndicator() {
             doColumn("destinationIndicator");
         }
 
-        public void columnInternationaliSDNNumber() {
-            doColumn("internationaliSDNNumber");
+        public void columnDisplayName() {
+            doColumn("displayName");
         }
 
-        public void columnState() {
-            doColumn("state");
+        public void columnEmployeeNumber() {
+            doColumn("employeeNumber");
         }
 
         public void columnEmployeeType() {
@@ -264,76 +216,124 @@ public class BsUserCB extends EsAbstractConditionBean {
             doColumn("facsimileTelephoneNumber");
         }
 
-        public void columnPostOfficeBox() {
-            doColumn("postOfficeBox");
-        }
-
-        public void columnInitials() {
-            doColumn("initials");
-        }
-
-        public void columnCarLicense() {
-            doColumn("carLicense");
-        }
-
-        public void columnMobile() {
-            doColumn("mobile");
-        }
-
-        public void columnPostalAddress() {
-            doColumn("postalAddress");
-        }
-
-        public void columnCity() {
-            doColumn("city");
-        }
-
-        public void columnTeletexTerminalIdentifier() {
-            doColumn("teletexTerminalIdentifier");
-        }
-
-        public void columnX121Address() {
-            doColumn("x121Address");
-        }
-
-        public void columnBusinessCategory() {
-            doColumn("businessCategory");
-        }
-
-        public void columnRegisteredAddress() {
-            doColumn("registeredAddress");
-        }
-
-        public void columnDisplayName() {
-            doColumn("displayName");
-        }
-
-        public void columnPreferredLanguage() {
-            doColumn("preferredLanguage");
-        }
-
-        public void columnDepartmentNumber() {
-            doColumn("departmentNumber");
-        }
-
-        public void columnUidNumber() {
-            doColumn("uidNumber");
-        }
-
         public void columnGidNumber() {
             doColumn("gidNumber");
         }
 
-        public void columnHomeDirectory() {
-            doColumn("homeDirectory");
+        public void columnGivenName() {
+            doColumn("givenName");
         }
 
         public void columnGroups() {
             doColumn("groups");
         }
 
+        public void columnHomeDirectory() {
+            doColumn("homeDirectory");
+        }
+
+        public void columnHomePhone() {
+            doColumn("homePhone");
+        }
+
+        public void columnHomePostalAddress() {
+            doColumn("homePostalAddress");
+        }
+
+        public void columnInitials() {
+            doColumn("initials");
+        }
+
+        public void columnInternationaliSDNNumber() {
+            doColumn("internationaliSDNNumber");
+        }
+
+        public void columnLabeledURI() {
+            doColumn("labeledURI");
+        }
+
+        public void columnMail() {
+            doColumn("mail");
+        }
+
+        public void columnMobile() {
+            doColumn("mobile");
+        }
+
+        public void columnName() {
+            doColumn("name");
+        }
+
+        public void columnPager() {
+            doColumn("pager");
+        }
+
+        public void columnPassword() {
+            doColumn("password");
+        }
+
+        public void columnPhysicalDeliveryOfficeName() {
+            doColumn("physicalDeliveryOfficeName");
+        }
+
+        public void columnPostOfficeBox() {
+            doColumn("postOfficeBox");
+        }
+
+        public void columnPostalAddress() {
+            doColumn("postalAddress");
+        }
+
+        public void columnPostalCode() {
+            doColumn("postalCode");
+        }
+
+        public void columnPreferredLanguage() {
+            doColumn("preferredLanguage");
+        }
+
+        public void columnRegisteredAddress() {
+            doColumn("registeredAddress");
+        }
+
         public void columnRoles() {
             doColumn("roles");
+        }
+
+        public void columnRoomNumber() {
+            doColumn("roomNumber");
+        }
+
+        public void columnState() {
+            doColumn("state");
+        }
+
+        public void columnStreet() {
+            doColumn("street");
+        }
+
+        public void columnSurname() {
+            doColumn("surname");
+        }
+
+        public void columnTelephoneNumber() {
+            doColumn("telephoneNumber");
+        }
+
+        public void columnTeletexTerminalIdentifier() {
+            doColumn("teletexTerminalIdentifier");
+        }
+
+        public void columnTitle() {
+            doColumn("title");
+        }
+
+        public void columnUidNumber() {
+            doColumn("uidNumber");
+        }
+
+        public void columnX121Address() {
+            doColumn("x121Address");
         }
     }
 }

@@ -51,7 +51,7 @@ public abstract class BsLabelToRoleBhv extends EsAbstractBehavior<LabelToRole, L
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.label_to_role";
     }
 
     @Override

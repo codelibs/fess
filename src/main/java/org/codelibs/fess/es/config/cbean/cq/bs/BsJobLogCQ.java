@@ -807,6 +807,184 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setLastUpdated_Equal(Long lastUpdated) {
+        setLastUpdated_Term(lastUpdated, null);
+    }
+
+    public void setLastUpdated_Equal(Long lastUpdated, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setLastUpdated_Term(lastUpdated, opLambda);
+    }
+
+    public void setLastUpdated_Term(Long lastUpdated) {
+        setLastUpdated_Term(lastUpdated, null);
+    }
+
+    public void setLastUpdated_Term(Long lastUpdated, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("lastUpdated", lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_NotEqual(Long lastUpdated) {
+        setLastUpdated_NotTerm(lastUpdated, null);
+    }
+
+    public void setLastUpdated_NotTerm(Long lastUpdated) {
+        setLastUpdated_NotTerm(lastUpdated, null);
+    }
+
+    public void setLastUpdated_NotEqual(Long lastUpdated, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLastUpdated_NotTerm(lastUpdated, opLambda);
+    }
+
+    public void setLastUpdated_NotTerm(Long lastUpdated, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLastUpdated_Term(lastUpdated), opLambda);
+    }
+
+    public void setLastUpdated_Terms(Collection<Long> lastUpdatedList) {
+        setLastUpdated_Terms(lastUpdatedList, null);
+    }
+
+    public void setLastUpdated_Terms(Collection<Long> lastUpdatedList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("lastUpdated", lastUpdatedList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_InScope(Collection<Long> lastUpdatedList) {
+        setLastUpdated_Terms(lastUpdatedList, null);
+    }
+
+    public void setLastUpdated_InScope(Collection<Long> lastUpdatedList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setLastUpdated_Terms(lastUpdatedList, opLambda);
+    }
+
+    public void setLastUpdated_Match(Long lastUpdated) {
+        setLastUpdated_Match(lastUpdated, null);
+    }
+
+    public void setLastUpdated_Match(Long lastUpdated, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("lastUpdated", lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_MatchPhrase(Long lastUpdated) {
+        setLastUpdated_MatchPhrase(lastUpdated, null);
+    }
+
+    public void setLastUpdated_MatchPhrase(Long lastUpdated, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("lastUpdated", lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_MatchPhrasePrefix(Long lastUpdated) {
+        setLastUpdated_MatchPhrasePrefix(lastUpdated, null);
+    }
+
+    public void setLastUpdated_MatchPhrasePrefix(Long lastUpdated, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("lastUpdated", lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Fuzzy(Long lastUpdated) {
+        setLastUpdated_Fuzzy(lastUpdated, null);
+    }
+
+    public void setLastUpdated_Fuzzy(Long lastUpdated, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("lastUpdated", lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_GreaterThan(Long lastUpdated) {
+        setLastUpdated_GreaterThan(lastUpdated, null);
+    }
+
+    public void setLastUpdated_GreaterThan(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = lastUpdated;
+        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_LessThan(Long lastUpdated) {
+        setLastUpdated_LessThan(lastUpdated, null);
+    }
+
+    public void setLastUpdated_LessThan(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = lastUpdated;
+        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_GreaterEqual(Long lastUpdated) {
+        setLastUpdated_GreaterEqual(lastUpdated, null);
+    }
+
+    public void setLastUpdated_GreaterEqual(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = lastUpdated;
+        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_LessEqual(Long lastUpdated) {
+        setLastUpdated_LessEqual(lastUpdated, null);
+    }
+
+    public void setLastUpdated_LessEqual(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = lastUpdated;
+        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Exists() {
+        setLastUpdated_Exists(null);
+    }
+
+    public void setLastUpdated_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_CommonTerms(Long lastUpdated) {
+        setLastUpdated_CommonTerms(lastUpdated, null);
+    }
+
+    public void setLastUpdated_CommonTerms(Long lastUpdated, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("lastUpdated", lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsJobLogCQ addOrderBy_LastUpdated_Asc() {
+        regOBA("lastUpdated");
+        return this;
+    }
+
+    public BsJobLogCQ addOrderBy_LastUpdated_Desc() {
+        regOBD("lastUpdated");
+        return this;
+    }
+
     public void setScriptData_Equal(String scriptData) {
         setScriptData_Term(scriptData, null);
     }
@@ -1870,184 +2048,6 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public BsJobLogCQ addOrderBy_Target_Desc() {
         regOBD("target");
-        return this;
-    }
-
-    public void setLastUpdated_Equal(Long lastUpdated) {
-        setLastUpdated_Term(lastUpdated, null);
-    }
-
-    public void setLastUpdated_Equal(Long lastUpdated, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setLastUpdated_Term(lastUpdated, opLambda);
-    }
-
-    public void setLastUpdated_Term(Long lastUpdated) {
-        setLastUpdated_Term(lastUpdated, null);
-    }
-
-    public void setLastUpdated_Term(Long lastUpdated, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("lastUpdated", lastUpdated);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_NotEqual(Long lastUpdated) {
-        setLastUpdated_NotTerm(lastUpdated, null);
-    }
-
-    public void setLastUpdated_NotTerm(Long lastUpdated) {
-        setLastUpdated_NotTerm(lastUpdated, null);
-    }
-
-    public void setLastUpdated_NotEqual(Long lastUpdated, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setLastUpdated_NotTerm(lastUpdated, opLambda);
-    }
-
-    public void setLastUpdated_NotTerm(Long lastUpdated, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setLastUpdated_Term(lastUpdated), opLambda);
-    }
-
-    public void setLastUpdated_Terms(Collection<Long> lastUpdatedList) {
-        setLastUpdated_Terms(lastUpdatedList, null);
-    }
-
-    public void setLastUpdated_Terms(Collection<Long> lastUpdatedList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("lastUpdated", lastUpdatedList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_InScope(Collection<Long> lastUpdatedList) {
-        setLastUpdated_Terms(lastUpdatedList, null);
-    }
-
-    public void setLastUpdated_InScope(Collection<Long> lastUpdatedList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setLastUpdated_Terms(lastUpdatedList, opLambda);
-    }
-
-    public void setLastUpdated_Match(Long lastUpdated) {
-        setLastUpdated_Match(lastUpdated, null);
-    }
-
-    public void setLastUpdated_Match(Long lastUpdated, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("lastUpdated", lastUpdated);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_MatchPhrase(Long lastUpdated) {
-        setLastUpdated_MatchPhrase(lastUpdated, null);
-    }
-
-    public void setLastUpdated_MatchPhrase(Long lastUpdated, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("lastUpdated", lastUpdated);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_MatchPhrasePrefix(Long lastUpdated) {
-        setLastUpdated_MatchPhrasePrefix(lastUpdated, null);
-    }
-
-    public void setLastUpdated_MatchPhrasePrefix(Long lastUpdated, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("lastUpdated", lastUpdated);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Fuzzy(Long lastUpdated) {
-        setLastUpdated_Fuzzy(lastUpdated, null);
-    }
-
-    public void setLastUpdated_Fuzzy(Long lastUpdated, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("lastUpdated", lastUpdated);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_GreaterThan(Long lastUpdated) {
-        setLastUpdated_GreaterThan(lastUpdated, null);
-    }
-
-    public void setLastUpdated_GreaterThan(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = lastUpdated;
-        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_LessThan(Long lastUpdated) {
-        setLastUpdated_LessThan(lastUpdated, null);
-    }
-
-    public void setLastUpdated_LessThan(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = lastUpdated;
-        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_GreaterEqual(Long lastUpdated) {
-        setLastUpdated_GreaterEqual(lastUpdated, null);
-    }
-
-    public void setLastUpdated_GreaterEqual(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = lastUpdated;
-        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_LessEqual(Long lastUpdated) {
-        setLastUpdated_LessEqual(lastUpdated, null);
-    }
-
-    public void setLastUpdated_LessEqual(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = lastUpdated;
-        RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Exists() {
-        setLastUpdated_Exists(null);
-    }
-
-    public void setLastUpdated_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_CommonTerms(Long lastUpdated) {
-        setLastUpdated_CommonTerms(lastUpdated, null);
-    }
-
-    public void setLastUpdated_CommonTerms(Long lastUpdated, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("lastUpdated", lastUpdated);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsJobLogCQ addOrderBy_LastUpdated_Asc() {
-        regOBA("lastUpdated");
-        return this;
-    }
-
-    public BsJobLogCQ addOrderBy_LastUpdated_Desc() {
-        regOBD("lastUpdated");
         return this;
     }
 

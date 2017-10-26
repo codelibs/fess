@@ -30,9 +30,9 @@ import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
@@ -91,7 +91,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final SearchHits searchHits = searchResponse.getHits();
             allRecordCount = searchHits.getTotalHits();
-            queryTime = searchResponse.getTookInMillis();
+            queryTime = searchResponse.getTook().millis();
 
             if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
                 partialResults = true;
@@ -111,8 +111,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
                                 final long totalHits = innerSearchHits.getTotalHits();
                                 if (totalHits > 1) {
                                     docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
-                                    final SearchHitField bitsField =
-                                            searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
+                                    final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
                                     if (bitsField != null && !bitsField.getValues().isEmpty()) {
                                         docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
                                     }
@@ -142,12 +141,12 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     private Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
         final Map<String, Object> docMap = new HashMap<>();
-        if (searchHit.getSource() == null) {
+        if (searchHit.getSourceAsMap() == null) {
             searchHit.getFields().forEach((key, value) -> {
                 docMap.put(key, value.getValue());
             });
         } else {
-            docMap.putAll(searchHit.getSource());
+            docMap.putAll(searchHit.getSourceAsMap());
         }
 
         final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();

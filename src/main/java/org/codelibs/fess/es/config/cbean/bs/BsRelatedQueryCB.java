@@ -184,20 +184,20 @@ public class BsRelatedQueryCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
-        public void columnUpdatedBy() {
-            doColumn("updatedBy");
-        }
-
-        public void columnUpdatedTime() {
-            doColumn("updatedTime");
+        public void columnQueries() {
+            doColumn("queries");
         }
 
         public void columnTerm() {
             doColumn("term");
         }
 
-        public void columnQueries() {
-            doColumn("queries");
+        public void columnUpdatedBy() {
+            doColumn("updatedBy");
+        }
+
+        public void columnUpdatedTime() {
+            doColumn("updatedTime");
         }
 
         public void columnVirtualHost() {

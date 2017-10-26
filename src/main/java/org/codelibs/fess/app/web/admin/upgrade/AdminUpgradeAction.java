@@ -37,7 +37,6 @@ import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.util.UpgradeUtil;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -257,7 +256,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
 
         // .crawler
-        if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
+        if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, true, true)) {
             UpgradeUtil.deleteIndex(indicesClient, crawlerIndex, response -> {});
         }
     }

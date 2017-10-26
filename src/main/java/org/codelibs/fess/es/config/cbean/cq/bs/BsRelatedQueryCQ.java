@@ -586,6 +586,450 @@ public abstract class BsRelatedQueryCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setQueries_Equal(String queries) {
+        setQueries_Term(queries, null);
+    }
+
+    public void setQueries_Equal(String queries, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueries_Term(queries, opLambda);
+    }
+
+    public void setQueries_Term(String queries) {
+        setQueries_Term(queries, null);
+    }
+
+    public void setQueries_Term(String queries, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_NotEqual(String queries) {
+        setQueries_NotTerm(queries, null);
+    }
+
+    public void setQueries_NotTerm(String queries) {
+        setQueries_NotTerm(queries, null);
+    }
+
+    public void setQueries_NotEqual(String queries, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setQueries_NotTerm(queries, opLambda);
+    }
+
+    public void setQueries_NotTerm(String queries, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setQueries_Term(queries), opLambda);
+    }
+
+    public void setQueries_Terms(Collection<String> queriesList) {
+        setQueries_Terms(queriesList, null);
+    }
+
+    public void setQueries_Terms(Collection<String> queriesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("queries", queriesList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_InScope(Collection<String> queriesList) {
+        setQueries_Terms(queriesList, null);
+    }
+
+    public void setQueries_InScope(Collection<String> queriesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setQueries_Terms(queriesList, opLambda);
+    }
+
+    public void setQueries_Match(String queries) {
+        setQueries_Match(queries, null);
+    }
+
+    public void setQueries_Match(String queries, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_MatchPhrase(String queries) {
+        setQueries_MatchPhrase(queries, null);
+    }
+
+    public void setQueries_MatchPhrase(String queries, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_MatchPhrasePrefix(String queries) {
+        setQueries_MatchPhrasePrefix(queries, null);
+    }
+
+    public void setQueries_MatchPhrasePrefix(String queries, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_Fuzzy(String queries) {
+        setQueries_Fuzzy(queries, null);
+    }
+
+    public void setQueries_Fuzzy(String queries, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_Prefix(String queries) {
+        setQueries_Prefix(queries, null);
+    }
+
+    public void setQueries_Prefix(String queries, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_Wildcard(String queries) {
+        setQueries_Wildcard(queries, null);
+    }
+
+    public void setQueries_Wildcard(String queries, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_Regexp(String queries) {
+        setQueries_Regexp(queries, null);
+    }
+
+    public void setQueries_Regexp(String queries, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_SpanTerm(String queries) {
+        setQueries_SpanTerm("queries", null);
+    }
+
+    public void setQueries_SpanTerm(String queries, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_GreaterThan(String queries) {
+        setQueries_GreaterThan(queries, null);
+    }
+
+    public void setQueries_GreaterThan(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = queries;
+        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_LessThan(String queries) {
+        setQueries_LessThan(queries, null);
+    }
+
+    public void setQueries_LessThan(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = queries;
+        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_GreaterEqual(String queries) {
+        setQueries_GreaterEqual(queries, null);
+    }
+
+    public void setQueries_GreaterEqual(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = queries;
+        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_LessEqual(String queries) {
+        setQueries_LessEqual(queries, null);
+    }
+
+    public void setQueries_LessEqual(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = queries;
+        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_Exists() {
+        setQueries_Exists(null);
+    }
+
+    public void setQueries_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("queries");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueries_CommonTerms(String queries) {
+        setQueries_CommonTerms(queries, null);
+    }
+
+    public void setQueries_CommonTerms(String queries, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("queries", queries);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsRelatedQueryCQ addOrderBy_Queries_Asc() {
+        regOBA("queries");
+        return this;
+    }
+
+    public BsRelatedQueryCQ addOrderBy_Queries_Desc() {
+        regOBD("queries");
+        return this;
+    }
+
+    public void setTerm_Equal(String term) {
+        setTerm_Term(term, null);
+    }
+
+    public void setTerm_Equal(String term, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTerm_Term(term, opLambda);
+    }
+
+    public void setTerm_Term(String term) {
+        setTerm_Term(term, null);
+    }
+
+    public void setTerm_Term(String term, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_NotEqual(String term) {
+        setTerm_NotTerm(term, null);
+    }
+
+    public void setTerm_NotTerm(String term) {
+        setTerm_NotTerm(term, null);
+    }
+
+    public void setTerm_NotEqual(String term, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTerm_NotTerm(term, opLambda);
+    }
+
+    public void setTerm_NotTerm(String term, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTerm_Term(term), opLambda);
+    }
+
+    public void setTerm_Terms(Collection<String> termList) {
+        setTerm_Terms(termList, null);
+    }
+
+    public void setTerm_Terms(Collection<String> termList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("term", termList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_InScope(Collection<String> termList) {
+        setTerm_Terms(termList, null);
+    }
+
+    public void setTerm_InScope(Collection<String> termList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setTerm_Terms(termList, opLambda);
+    }
+
+    public void setTerm_Match(String term) {
+        setTerm_Match(term, null);
+    }
+
+    public void setTerm_Match(String term, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_MatchPhrase(String term) {
+        setTerm_MatchPhrase(term, null);
+    }
+
+    public void setTerm_MatchPhrase(String term, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_MatchPhrasePrefix(String term) {
+        setTerm_MatchPhrasePrefix(term, null);
+    }
+
+    public void setTerm_MatchPhrasePrefix(String term, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_Fuzzy(String term) {
+        setTerm_Fuzzy(term, null);
+    }
+
+    public void setTerm_Fuzzy(String term, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_Prefix(String term) {
+        setTerm_Prefix(term, null);
+    }
+
+    public void setTerm_Prefix(String term, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_Wildcard(String term) {
+        setTerm_Wildcard(term, null);
+    }
+
+    public void setTerm_Wildcard(String term, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_Regexp(String term) {
+        setTerm_Regexp(term, null);
+    }
+
+    public void setTerm_Regexp(String term, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_SpanTerm(String term) {
+        setTerm_SpanTerm("term", null);
+    }
+
+    public void setTerm_SpanTerm(String term, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_GreaterThan(String term) {
+        setTerm_GreaterThan(term, null);
+    }
+
+    public void setTerm_GreaterThan(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = term;
+        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_LessThan(String term) {
+        setTerm_LessThan(term, null);
+    }
+
+    public void setTerm_LessThan(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = term;
+        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_GreaterEqual(String term) {
+        setTerm_GreaterEqual(term, null);
+    }
+
+    public void setTerm_GreaterEqual(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = term;
+        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_LessEqual(String term) {
+        setTerm_LessEqual(term, null);
+    }
+
+    public void setTerm_LessEqual(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = term;
+        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_Exists() {
+        setTerm_Exists(null);
+    }
+
+    public void setTerm_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("term");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTerm_CommonTerms(String term) {
+        setTerm_CommonTerms(term, null);
+    }
+
+    public void setTerm_CommonTerms(String term, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsRelatedQueryCQ addOrderBy_Term_Asc() {
+        regOBA("term");
+        return this;
+    }
+
+    public BsRelatedQueryCQ addOrderBy_Term_Desc() {
+        regOBD("term");
+        return this;
+    }
+
     public void setUpdatedBy_Equal(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -983,450 +1427,6 @@ public abstract class BsRelatedQueryCQ extends EsAbstractConditionQuery {
 
     public BsRelatedQueryCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
-        return this;
-    }
-
-    public void setTerm_Equal(String term) {
-        setTerm_Term(term, null);
-    }
-
-    public void setTerm_Equal(String term, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setTerm_Term(term, opLambda);
-    }
-
-    public void setTerm_Term(String term) {
-        setTerm_Term(term, null);
-    }
-
-    public void setTerm_Term(String term, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_NotEqual(String term) {
-        setTerm_NotTerm(term, null);
-    }
-
-    public void setTerm_NotTerm(String term) {
-        setTerm_NotTerm(term, null);
-    }
-
-    public void setTerm_NotEqual(String term, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setTerm_NotTerm(term, opLambda);
-    }
-
-    public void setTerm_NotTerm(String term, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setTerm_Term(term), opLambda);
-    }
-
-    public void setTerm_Terms(Collection<String> termList) {
-        setTerm_Terms(termList, null);
-    }
-
-    public void setTerm_Terms(Collection<String> termList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("term", termList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_InScope(Collection<String> termList) {
-        setTerm_Terms(termList, null);
-    }
-
-    public void setTerm_InScope(Collection<String> termList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setTerm_Terms(termList, opLambda);
-    }
-
-    public void setTerm_Match(String term) {
-        setTerm_Match(term, null);
-    }
-
-    public void setTerm_Match(String term, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_MatchPhrase(String term) {
-        setTerm_MatchPhrase(term, null);
-    }
-
-    public void setTerm_MatchPhrase(String term, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_MatchPhrasePrefix(String term) {
-        setTerm_MatchPhrasePrefix(term, null);
-    }
-
-    public void setTerm_MatchPhrasePrefix(String term, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_Fuzzy(String term) {
-        setTerm_Fuzzy(term, null);
-    }
-
-    public void setTerm_Fuzzy(String term, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_Prefix(String term) {
-        setTerm_Prefix(term, null);
-    }
-
-    public void setTerm_Prefix(String term, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_Wildcard(String term) {
-        setTerm_Wildcard(term, null);
-    }
-
-    public void setTerm_Wildcard(String term, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
-        WildcardQueryBuilder builder = regWildcardQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_Regexp(String term) {
-        setTerm_Regexp(term, null);
-    }
-
-    public void setTerm_Regexp(String term, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
-        RegexpQueryBuilder builder = regRegexpQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_SpanTerm(String term) {
-        setTerm_SpanTerm("term", null);
-    }
-
-    public void setTerm_SpanTerm(String term, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
-        SpanTermQueryBuilder builder = regSpanTermQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_GreaterThan(String term) {
-        setTerm_GreaterThan(term, null);
-    }
-
-    public void setTerm_GreaterThan(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = term;
-        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_LessThan(String term) {
-        setTerm_LessThan(term, null);
-    }
-
-    public void setTerm_LessThan(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = term;
-        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_GreaterEqual(String term) {
-        setTerm_GreaterEqual(term, null);
-    }
-
-    public void setTerm_GreaterEqual(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = term;
-        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_LessEqual(String term) {
-        setTerm_LessEqual(term, null);
-    }
-
-    public void setTerm_LessEqual(String term, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = term;
-        RangeQueryBuilder builder = regRangeQ("term", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_Exists() {
-        setTerm_Exists(null);
-    }
-
-    public void setTerm_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("term");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTerm_CommonTerms(String term) {
-        setTerm_CommonTerms(term, null);
-    }
-
-    public void setTerm_CommonTerms(String term, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("term", term);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsRelatedQueryCQ addOrderBy_Term_Asc() {
-        regOBA("term");
-        return this;
-    }
-
-    public BsRelatedQueryCQ addOrderBy_Term_Desc() {
-        regOBD("term");
-        return this;
-    }
-
-    public void setQueries_Equal(String queries) {
-        setQueries_Term(queries, null);
-    }
-
-    public void setQueries_Equal(String queries, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setQueries_Term(queries, opLambda);
-    }
-
-    public void setQueries_Term(String queries) {
-        setQueries_Term(queries, null);
-    }
-
-    public void setQueries_Term(String queries, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_NotEqual(String queries) {
-        setQueries_NotTerm(queries, null);
-    }
-
-    public void setQueries_NotTerm(String queries) {
-        setQueries_NotTerm(queries, null);
-    }
-
-    public void setQueries_NotEqual(String queries, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setQueries_NotTerm(queries, opLambda);
-    }
-
-    public void setQueries_NotTerm(String queries, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setQueries_Term(queries), opLambda);
-    }
-
-    public void setQueries_Terms(Collection<String> queriesList) {
-        setQueries_Terms(queriesList, null);
-    }
-
-    public void setQueries_Terms(Collection<String> queriesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("queries", queriesList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_InScope(Collection<String> queriesList) {
-        setQueries_Terms(queriesList, null);
-    }
-
-    public void setQueries_InScope(Collection<String> queriesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setQueries_Terms(queriesList, opLambda);
-    }
-
-    public void setQueries_Match(String queries) {
-        setQueries_Match(queries, null);
-    }
-
-    public void setQueries_Match(String queries, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_MatchPhrase(String queries) {
-        setQueries_MatchPhrase(queries, null);
-    }
-
-    public void setQueries_MatchPhrase(String queries, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_MatchPhrasePrefix(String queries) {
-        setQueries_MatchPhrasePrefix(queries, null);
-    }
-
-    public void setQueries_MatchPhrasePrefix(String queries, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_Fuzzy(String queries) {
-        setQueries_Fuzzy(queries, null);
-    }
-
-    public void setQueries_Fuzzy(String queries, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_Prefix(String queries) {
-        setQueries_Prefix(queries, null);
-    }
-
-    public void setQueries_Prefix(String queries, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_Wildcard(String queries) {
-        setQueries_Wildcard(queries, null);
-    }
-
-    public void setQueries_Wildcard(String queries, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
-        WildcardQueryBuilder builder = regWildcardQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_Regexp(String queries) {
-        setQueries_Regexp(queries, null);
-    }
-
-    public void setQueries_Regexp(String queries, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
-        RegexpQueryBuilder builder = regRegexpQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_SpanTerm(String queries) {
-        setQueries_SpanTerm("queries", null);
-    }
-
-    public void setQueries_SpanTerm(String queries, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
-        SpanTermQueryBuilder builder = regSpanTermQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_GreaterThan(String queries) {
-        setQueries_GreaterThan(queries, null);
-    }
-
-    public void setQueries_GreaterThan(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = queries;
-        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_LessThan(String queries) {
-        setQueries_LessThan(queries, null);
-    }
-
-    public void setQueries_LessThan(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = queries;
-        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_GreaterEqual(String queries) {
-        setQueries_GreaterEqual(queries, null);
-    }
-
-    public void setQueries_GreaterEqual(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = queries;
-        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_LessEqual(String queries) {
-        setQueries_LessEqual(queries, null);
-    }
-
-    public void setQueries_LessEqual(String queries, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = queries;
-        RangeQueryBuilder builder = regRangeQ("queries", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_Exists() {
-        setQueries_Exists(null);
-    }
-
-    public void setQueries_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("queries");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setQueries_CommonTerms(String queries) {
-        setQueries_CommonTerms(queries, null);
-    }
-
-    public void setQueries_CommonTerms(String queries, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("queries", queries);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsRelatedQueryCQ addOrderBy_Queries_Asc() {
-        regOBA("queries");
-        return this;
-    }
-
-    public BsRelatedQueryCQ addOrderBy_Queries_Desc() {
-        regOBD("queries");
         return this;
     }
 

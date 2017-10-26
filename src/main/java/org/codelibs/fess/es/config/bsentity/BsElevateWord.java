@@ -46,6 +46,9 @@ public class BsElevateWord extends EsAbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
+    /** permissions */
+    protected String[] permissions;
+
     /** reading */
     protected String reading;
 
@@ -57,9 +60,6 @@ public class BsElevateWord extends EsAbstractEntity {
 
     /** targetRole */
     protected String targetRole;
-
-    /** permissions */
-    protected String[] permissions;
 
     /** updatedBy */
     protected String updatedBy;
@@ -97,6 +97,9 @@ public class BsElevateWord extends EsAbstractEntity {
         if (createdTime != null) {
             addFieldToSource(sourceMap, "createdTime", createdTime);
         }
+        if (permissions != null) {
+            addFieldToSource(sourceMap, "permissions", permissions);
+        }
         if (reading != null) {
             addFieldToSource(sourceMap, "reading", reading);
         }
@@ -108,9 +111,6 @@ public class BsElevateWord extends EsAbstractEntity {
         }
         if (targetRole != null) {
             addFieldToSource(sourceMap, "targetRole", targetRole);
-        }
-        if (permissions != null) {
-            addFieldToSource(sourceMap, "permissions", permissions);
         }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
@@ -134,11 +134,11 @@ public class BsElevateWord extends EsAbstractEntity {
         sb.append(dm).append(boost);
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
+        sb.append(dm).append(permissions);
         sb.append(dm).append(reading);
         sb.append(dm).append(suggestWord);
         sb.append(dm).append(targetLabel);
         sb.append(dm).append(targetRole);
-        sb.append(dm).append(permissions);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         if (sb.length() > dm.length()) {
@@ -181,6 +181,16 @@ public class BsElevateWord extends EsAbstractEntity {
         this.createdTime = value;
     }
 
+    public String[] getPermissions() {
+        checkSpecifiedProperty("permissions");
+        return permissions;
+    }
+
+    public void setPermissions(String[] value) {
+        registerModifiedProperty("permissions");
+        this.permissions = value;
+    }
+
     public String getReading() {
         checkSpecifiedProperty("reading");
         return convertEmptyToNull(reading);
@@ -219,16 +229,6 @@ public class BsElevateWord extends EsAbstractEntity {
     public void setTargetRole(String value) {
         registerModifiedProperty("targetRole");
         this.targetRole = value;
-    }
-
-    public String[] getPermissions() {
-        checkSpecifiedProperty("permissions");
-        return permissions;
-    }
-
-    public void setPermissions(String[] value) {
-        registerModifiedProperty("permissions");
-        this.permissions = value;
     }
 
     public String getUpdatedBy() {

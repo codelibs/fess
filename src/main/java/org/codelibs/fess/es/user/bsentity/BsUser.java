@@ -37,65 +37,29 @@ public class BsUser extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** name */
-    protected String name;
+    /** businessCategory */
+    protected String businessCategory;
 
-    /** password */
-    protected String password;
+    /** carLicense */
+    protected String carLicense;
 
-    /** surname */
-    protected String surname;
+    /** city */
+    protected String city;
 
-    /** givenName */
-    protected String givenName;
-
-    /** employeeNumber */
-    protected String employeeNumber;
-
-    /** mail */
-    protected String mail;
-
-    /** telephoneNumber */
-    protected String telephoneNumber;
-
-    /** homePhone */
-    protected String homePhone;
-
-    /** homePostalAddress */
-    protected String homePostalAddress;
-
-    /** labeledURI */
-    protected String labeledURI;
-
-    /** roomNumber */
-    protected String roomNumber;
+    /** departmentNumber */
+    protected String departmentNumber;
 
     /** description */
     protected String description;
 
-    /** title */
-    protected String title;
-
-    /** pager */
-    protected String pager;
-
-    /** street */
-    protected String street;
-
-    /** postalCode */
-    protected String postalCode;
-
-    /** physicalDeliveryOfficeName */
-    protected String physicalDeliveryOfficeName;
-
     /** destinationIndicator */
     protected String destinationIndicator;
 
-    /** internationaliSDNNumber */
-    protected String internationaliSDNNumber;
+    /** displayName */
+    protected String displayName;
 
-    /** state */
-    protected String state;
+    /** employeeNumber */
+    protected String employeeNumber;
 
     /** employeeType */
     protected String employeeType;
@@ -103,59 +67,95 @@ public class BsUser extends EsAbstractEntity {
     /** facsimileTelephoneNumber */
     protected String facsimileTelephoneNumber;
 
-    /** postOfficeBox */
-    protected String postOfficeBox;
-
-    /** initials */
-    protected String initials;
-
-    /** carLicense */
-    protected String carLicense;
-
-    /** mobile */
-    protected String mobile;
-
-    /** postalAddress */
-    protected String postalAddress;
-
-    /** city */
-    protected String city;
-
-    /** teletexTerminalIdentifier */
-    protected String teletexTerminalIdentifier;
-
-    /** x121Address */
-    protected String x121Address;
-
-    /** businessCategory */
-    protected String businessCategory;
-
-    /** registeredAddress */
-    protected String registeredAddress;
-
-    /** displayName */
-    protected String displayName;
-
-    /** preferredLanguage */
-    protected String preferredLanguage;
-
-    /** departmentNumber */
-    protected String departmentNumber;
-
-    /** uidNumber */
-    protected Long uidNumber;
-
     /** gidNumber */
     protected Long gidNumber;
 
-    /** homeDirectory */
-    protected String homeDirectory;
+    /** givenName */
+    protected String givenName;
 
     /** groups */
     protected String[] groups;
 
+    /** homeDirectory */
+    protected String homeDirectory;
+
+    /** homePhone */
+    protected String homePhone;
+
+    /** homePostalAddress */
+    protected String homePostalAddress;
+
+    /** initials */
+    protected String initials;
+
+    /** internationaliSDNNumber */
+    protected String internationaliSDNNumber;
+
+    /** labeledURI */
+    protected String labeledURI;
+
+    /** mail */
+    protected String mail;
+
+    /** mobile */
+    protected String mobile;
+
+    /** name */
+    protected String name;
+
+    /** pager */
+    protected String pager;
+
+    /** password */
+    protected String password;
+
+    /** physicalDeliveryOfficeName */
+    protected String physicalDeliveryOfficeName;
+
+    /** postOfficeBox */
+    protected String postOfficeBox;
+
+    /** postalAddress */
+    protected String postalAddress;
+
+    /** postalCode */
+    protected String postalCode;
+
+    /** preferredLanguage */
+    protected String preferredLanguage;
+
+    /** registeredAddress */
+    protected String registeredAddress;
+
     /** roles */
     protected String[] roles;
+
+    /** roomNumber */
+    protected String roomNumber;
+
+    /** state */
+    protected String state;
+
+    /** street */
+    protected String street;
+
+    /** surname */
+    protected String surname;
+
+    /** telephoneNumber */
+    protected String telephoneNumber;
+
+    /** teletexTerminalIdentifier */
+    protected String teletexTerminalIdentifier;
+
+    /** title */
+    protected String title;
+
+    /** uidNumber */
+    protected Long uidNumber;
+
+    /** x121Address */
+    protected String x121Address;
 
     // [Referrers] *comment only
 
@@ -178,65 +178,29 @@ public class BsUser extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (name != null) {
-            addFieldToSource(sourceMap, "name", name);
+        if (businessCategory != null) {
+            addFieldToSource(sourceMap, "businessCategory", businessCategory);
         }
-        if (password != null) {
-            addFieldToSource(sourceMap, "password", password);
+        if (carLicense != null) {
+            addFieldToSource(sourceMap, "carLicense", carLicense);
         }
-        if (surname != null) {
-            addFieldToSource(sourceMap, "surname", surname);
+        if (city != null) {
+            addFieldToSource(sourceMap, "city", city);
         }
-        if (givenName != null) {
-            addFieldToSource(sourceMap, "givenName", givenName);
-        }
-        if (employeeNumber != null) {
-            addFieldToSource(sourceMap, "employeeNumber", employeeNumber);
-        }
-        if (mail != null) {
-            addFieldToSource(sourceMap, "mail", mail);
-        }
-        if (telephoneNumber != null) {
-            addFieldToSource(sourceMap, "telephoneNumber", telephoneNumber);
-        }
-        if (homePhone != null) {
-            addFieldToSource(sourceMap, "homePhone", homePhone);
-        }
-        if (homePostalAddress != null) {
-            addFieldToSource(sourceMap, "homePostalAddress", homePostalAddress);
-        }
-        if (labeledURI != null) {
-            addFieldToSource(sourceMap, "labeledURI", labeledURI);
-        }
-        if (roomNumber != null) {
-            addFieldToSource(sourceMap, "roomNumber", roomNumber);
+        if (departmentNumber != null) {
+            addFieldToSource(sourceMap, "departmentNumber", departmentNumber);
         }
         if (description != null) {
             addFieldToSource(sourceMap, "description", description);
         }
-        if (title != null) {
-            addFieldToSource(sourceMap, "title", title);
-        }
-        if (pager != null) {
-            addFieldToSource(sourceMap, "pager", pager);
-        }
-        if (street != null) {
-            addFieldToSource(sourceMap, "street", street);
-        }
-        if (postalCode != null) {
-            addFieldToSource(sourceMap, "postalCode", postalCode);
-        }
-        if (physicalDeliveryOfficeName != null) {
-            addFieldToSource(sourceMap, "physicalDeliveryOfficeName", physicalDeliveryOfficeName);
-        }
         if (destinationIndicator != null) {
             addFieldToSource(sourceMap, "destinationIndicator", destinationIndicator);
         }
-        if (internationaliSDNNumber != null) {
-            addFieldToSource(sourceMap, "internationaliSDNNumber", internationaliSDNNumber);
+        if (displayName != null) {
+            addFieldToSource(sourceMap, "displayName", displayName);
         }
-        if (state != null) {
-            addFieldToSource(sourceMap, "state", state);
+        if (employeeNumber != null) {
+            addFieldToSource(sourceMap, "employeeNumber", employeeNumber);
         }
         if (employeeType != null) {
             addFieldToSource(sourceMap, "employeeType", employeeType);
@@ -244,59 +208,95 @@ public class BsUser extends EsAbstractEntity {
         if (facsimileTelephoneNumber != null) {
             addFieldToSource(sourceMap, "facsimileTelephoneNumber", facsimileTelephoneNumber);
         }
-        if (postOfficeBox != null) {
-            addFieldToSource(sourceMap, "postOfficeBox", postOfficeBox);
-        }
-        if (initials != null) {
-            addFieldToSource(sourceMap, "initials", initials);
-        }
-        if (carLicense != null) {
-            addFieldToSource(sourceMap, "carLicense", carLicense);
-        }
-        if (mobile != null) {
-            addFieldToSource(sourceMap, "mobile", mobile);
-        }
-        if (postalAddress != null) {
-            addFieldToSource(sourceMap, "postalAddress", postalAddress);
-        }
-        if (city != null) {
-            addFieldToSource(sourceMap, "city", city);
-        }
-        if (teletexTerminalIdentifier != null) {
-            addFieldToSource(sourceMap, "teletexTerminalIdentifier", teletexTerminalIdentifier);
-        }
-        if (x121Address != null) {
-            addFieldToSource(sourceMap, "x121Address", x121Address);
-        }
-        if (businessCategory != null) {
-            addFieldToSource(sourceMap, "businessCategory", businessCategory);
-        }
-        if (registeredAddress != null) {
-            addFieldToSource(sourceMap, "registeredAddress", registeredAddress);
-        }
-        if (displayName != null) {
-            addFieldToSource(sourceMap, "displayName", displayName);
-        }
-        if (preferredLanguage != null) {
-            addFieldToSource(sourceMap, "preferredLanguage", preferredLanguage);
-        }
-        if (departmentNumber != null) {
-            addFieldToSource(sourceMap, "departmentNumber", departmentNumber);
-        }
-        if (uidNumber != null) {
-            addFieldToSource(sourceMap, "uidNumber", uidNumber);
-        }
         if (gidNumber != null) {
             addFieldToSource(sourceMap, "gidNumber", gidNumber);
         }
-        if (homeDirectory != null) {
-            addFieldToSource(sourceMap, "homeDirectory", homeDirectory);
+        if (givenName != null) {
+            addFieldToSource(sourceMap, "givenName", givenName);
         }
         if (groups != null) {
             addFieldToSource(sourceMap, "groups", groups);
         }
+        if (homeDirectory != null) {
+            addFieldToSource(sourceMap, "homeDirectory", homeDirectory);
+        }
+        if (homePhone != null) {
+            addFieldToSource(sourceMap, "homePhone", homePhone);
+        }
+        if (homePostalAddress != null) {
+            addFieldToSource(sourceMap, "homePostalAddress", homePostalAddress);
+        }
+        if (initials != null) {
+            addFieldToSource(sourceMap, "initials", initials);
+        }
+        if (internationaliSDNNumber != null) {
+            addFieldToSource(sourceMap, "internationaliSDNNumber", internationaliSDNNumber);
+        }
+        if (labeledURI != null) {
+            addFieldToSource(sourceMap, "labeledURI", labeledURI);
+        }
+        if (mail != null) {
+            addFieldToSource(sourceMap, "mail", mail);
+        }
+        if (mobile != null) {
+            addFieldToSource(sourceMap, "mobile", mobile);
+        }
+        if (name != null) {
+            addFieldToSource(sourceMap, "name", name);
+        }
+        if (pager != null) {
+            addFieldToSource(sourceMap, "pager", pager);
+        }
+        if (password != null) {
+            addFieldToSource(sourceMap, "password", password);
+        }
+        if (physicalDeliveryOfficeName != null) {
+            addFieldToSource(sourceMap, "physicalDeliveryOfficeName", physicalDeliveryOfficeName);
+        }
+        if (postOfficeBox != null) {
+            addFieldToSource(sourceMap, "postOfficeBox", postOfficeBox);
+        }
+        if (postalAddress != null) {
+            addFieldToSource(sourceMap, "postalAddress", postalAddress);
+        }
+        if (postalCode != null) {
+            addFieldToSource(sourceMap, "postalCode", postalCode);
+        }
+        if (preferredLanguage != null) {
+            addFieldToSource(sourceMap, "preferredLanguage", preferredLanguage);
+        }
+        if (registeredAddress != null) {
+            addFieldToSource(sourceMap, "registeredAddress", registeredAddress);
+        }
         if (roles != null) {
             addFieldToSource(sourceMap, "roles", roles);
+        }
+        if (roomNumber != null) {
+            addFieldToSource(sourceMap, "roomNumber", roomNumber);
+        }
+        if (state != null) {
+            addFieldToSource(sourceMap, "state", state);
+        }
+        if (street != null) {
+            addFieldToSource(sourceMap, "street", street);
+        }
+        if (surname != null) {
+            addFieldToSource(sourceMap, "surname", surname);
+        }
+        if (telephoneNumber != null) {
+            addFieldToSource(sourceMap, "telephoneNumber", telephoneNumber);
+        }
+        if (teletexTerminalIdentifier != null) {
+            addFieldToSource(sourceMap, "teletexTerminalIdentifier", teletexTerminalIdentifier);
+        }
+        if (title != null) {
+            addFieldToSource(sourceMap, "title", title);
+        }
+        if (uidNumber != null) {
+            addFieldToSource(sourceMap, "uidNumber", uidNumber);
+        }
+        if (x121Address != null) {
+            addFieldToSource(sourceMap, "x121Address", x121Address);
         }
         return sourceMap;
     }
@@ -311,46 +311,46 @@ public class BsUser extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
-        sb.append(dm).append(name);
-        sb.append(dm).append(password);
-        sb.append(dm).append(surname);
-        sb.append(dm).append(givenName);
-        sb.append(dm).append(employeeNumber);
-        sb.append(dm).append(mail);
-        sb.append(dm).append(telephoneNumber);
-        sb.append(dm).append(homePhone);
-        sb.append(dm).append(homePostalAddress);
-        sb.append(dm).append(labeledURI);
-        sb.append(dm).append(roomNumber);
+        sb.append(dm).append(businessCategory);
+        sb.append(dm).append(carLicense);
+        sb.append(dm).append(city);
+        sb.append(dm).append(departmentNumber);
         sb.append(dm).append(description);
-        sb.append(dm).append(title);
-        sb.append(dm).append(pager);
-        sb.append(dm).append(street);
-        sb.append(dm).append(postalCode);
-        sb.append(dm).append(physicalDeliveryOfficeName);
         sb.append(dm).append(destinationIndicator);
-        sb.append(dm).append(internationaliSDNNumber);
-        sb.append(dm).append(state);
+        sb.append(dm).append(displayName);
+        sb.append(dm).append(employeeNumber);
         sb.append(dm).append(employeeType);
         sb.append(dm).append(facsimileTelephoneNumber);
-        sb.append(dm).append(postOfficeBox);
-        sb.append(dm).append(initials);
-        sb.append(dm).append(carLicense);
-        sb.append(dm).append(mobile);
-        sb.append(dm).append(postalAddress);
-        sb.append(dm).append(city);
-        sb.append(dm).append(teletexTerminalIdentifier);
-        sb.append(dm).append(x121Address);
-        sb.append(dm).append(businessCategory);
-        sb.append(dm).append(registeredAddress);
-        sb.append(dm).append(displayName);
-        sb.append(dm).append(preferredLanguage);
-        sb.append(dm).append(departmentNumber);
-        sb.append(dm).append(uidNumber);
         sb.append(dm).append(gidNumber);
-        sb.append(dm).append(homeDirectory);
+        sb.append(dm).append(givenName);
         sb.append(dm).append(groups);
+        sb.append(dm).append(homeDirectory);
+        sb.append(dm).append(homePhone);
+        sb.append(dm).append(homePostalAddress);
+        sb.append(dm).append(initials);
+        sb.append(dm).append(internationaliSDNNumber);
+        sb.append(dm).append(labeledURI);
+        sb.append(dm).append(mail);
+        sb.append(dm).append(mobile);
+        sb.append(dm).append(name);
+        sb.append(dm).append(pager);
+        sb.append(dm).append(password);
+        sb.append(dm).append(physicalDeliveryOfficeName);
+        sb.append(dm).append(postOfficeBox);
+        sb.append(dm).append(postalAddress);
+        sb.append(dm).append(postalCode);
+        sb.append(dm).append(preferredLanguage);
+        sb.append(dm).append(registeredAddress);
         sb.append(dm).append(roles);
+        sb.append(dm).append(roomNumber);
+        sb.append(dm).append(state);
+        sb.append(dm).append(street);
+        sb.append(dm).append(surname);
+        sb.append(dm).append(telephoneNumber);
+        sb.append(dm).append(teletexTerminalIdentifier);
+        sb.append(dm).append(title);
+        sb.append(dm).append(uidNumber);
+        sb.append(dm).append(x121Address);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -361,114 +361,44 @@ public class BsUser extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getName() {
-        checkSpecifiedProperty("name");
-        return convertEmptyToNull(name);
+    public String getBusinessCategory() {
+        checkSpecifiedProperty("businessCategory");
+        return convertEmptyToNull(businessCategory);
     }
 
-    public void setName(String value) {
-        registerModifiedProperty("name");
-        this.name = value;
+    public void setBusinessCategory(String value) {
+        registerModifiedProperty("businessCategory");
+        this.businessCategory = value;
     }
 
-    public String getPassword() {
-        checkSpecifiedProperty("password");
-        return convertEmptyToNull(password);
+    public String getCarLicense() {
+        checkSpecifiedProperty("carLicense");
+        return convertEmptyToNull(carLicense);
     }
 
-    public void setPassword(String value) {
-        registerModifiedProperty("password");
-        this.password = value;
+    public void setCarLicense(String value) {
+        registerModifiedProperty("carLicense");
+        this.carLicense = value;
     }
 
-    public String getSurname() {
-        checkSpecifiedProperty("surname");
-        return convertEmptyToNull(surname);
+    public String getCity() {
+        checkSpecifiedProperty("city");
+        return convertEmptyToNull(city);
     }
 
-    public void setSurname(String value) {
-        registerModifiedProperty("surname");
-        this.surname = value;
+    public void setCity(String value) {
+        registerModifiedProperty("city");
+        this.city = value;
     }
 
-    public String getGivenName() {
-        checkSpecifiedProperty("givenName");
-        return convertEmptyToNull(givenName);
+    public String getDepartmentNumber() {
+        checkSpecifiedProperty("departmentNumber");
+        return convertEmptyToNull(departmentNumber);
     }
 
-    public void setGivenName(String value) {
-        registerModifiedProperty("givenName");
-        this.givenName = value;
-    }
-
-    public String getEmployeeNumber() {
-        checkSpecifiedProperty("employeeNumber");
-        return convertEmptyToNull(employeeNumber);
-    }
-
-    public void setEmployeeNumber(String value) {
-        registerModifiedProperty("employeeNumber");
-        this.employeeNumber = value;
-    }
-
-    public String getMail() {
-        checkSpecifiedProperty("mail");
-        return convertEmptyToNull(mail);
-    }
-
-    public void setMail(String value) {
-        registerModifiedProperty("mail");
-        this.mail = value;
-    }
-
-    public String getTelephoneNumber() {
-        checkSpecifiedProperty("telephoneNumber");
-        return convertEmptyToNull(telephoneNumber);
-    }
-
-    public void setTelephoneNumber(String value) {
-        registerModifiedProperty("telephoneNumber");
-        this.telephoneNumber = value;
-    }
-
-    public String getHomePhone() {
-        checkSpecifiedProperty("homePhone");
-        return convertEmptyToNull(homePhone);
-    }
-
-    public void setHomePhone(String value) {
-        registerModifiedProperty("homePhone");
-        this.homePhone = value;
-    }
-
-    public String getHomePostalAddress() {
-        checkSpecifiedProperty("homePostalAddress");
-        return convertEmptyToNull(homePostalAddress);
-    }
-
-    public void setHomePostalAddress(String value) {
-        registerModifiedProperty("homePostalAddress");
-        this.homePostalAddress = value;
-    }
-
-    public String getLabeledURI() {
-        checkSpecifiedProperty("labeledURI");
-        return convertEmptyToNull(labeledURI);
-    }
-
-    public void setLabeledURI(String value) {
-        registerModifiedProperty("labeledURI");
-        this.labeledURI = value;
-    }
-
-    public String getRoomNumber() {
-        checkSpecifiedProperty("roomNumber");
-        return convertEmptyToNull(roomNumber);
-    }
-
-    public void setRoomNumber(String value) {
-        registerModifiedProperty("roomNumber");
-        this.roomNumber = value;
+    public void setDepartmentNumber(String value) {
+        registerModifiedProperty("departmentNumber");
+        this.departmentNumber = value;
     }
 
     public String getDescription() {
@@ -481,56 +411,6 @@ public class BsUser extends EsAbstractEntity {
         this.description = value;
     }
 
-    public String getTitle() {
-        checkSpecifiedProperty("title");
-        return convertEmptyToNull(title);
-    }
-
-    public void setTitle(String value) {
-        registerModifiedProperty("title");
-        this.title = value;
-    }
-
-    public String getPager() {
-        checkSpecifiedProperty("pager");
-        return convertEmptyToNull(pager);
-    }
-
-    public void setPager(String value) {
-        registerModifiedProperty("pager");
-        this.pager = value;
-    }
-
-    public String getStreet() {
-        checkSpecifiedProperty("street");
-        return convertEmptyToNull(street);
-    }
-
-    public void setStreet(String value) {
-        registerModifiedProperty("street");
-        this.street = value;
-    }
-
-    public String getPostalCode() {
-        checkSpecifiedProperty("postalCode");
-        return convertEmptyToNull(postalCode);
-    }
-
-    public void setPostalCode(String value) {
-        registerModifiedProperty("postalCode");
-        this.postalCode = value;
-    }
-
-    public String getPhysicalDeliveryOfficeName() {
-        checkSpecifiedProperty("physicalDeliveryOfficeName");
-        return convertEmptyToNull(physicalDeliveryOfficeName);
-    }
-
-    public void setPhysicalDeliveryOfficeName(String value) {
-        registerModifiedProperty("physicalDeliveryOfficeName");
-        this.physicalDeliveryOfficeName = value;
-    }
-
     public String getDestinationIndicator() {
         checkSpecifiedProperty("destinationIndicator");
         return convertEmptyToNull(destinationIndicator);
@@ -541,24 +421,24 @@ public class BsUser extends EsAbstractEntity {
         this.destinationIndicator = value;
     }
 
-    public String getInternationaliSDNNumber() {
-        checkSpecifiedProperty("internationaliSDNNumber");
-        return convertEmptyToNull(internationaliSDNNumber);
+    public String getDisplayName() {
+        checkSpecifiedProperty("displayName");
+        return convertEmptyToNull(displayName);
     }
 
-    public void setInternationaliSDNNumber(String value) {
-        registerModifiedProperty("internationaliSDNNumber");
-        this.internationaliSDNNumber = value;
+    public void setDisplayName(String value) {
+        registerModifiedProperty("displayName");
+        this.displayName = value;
     }
 
-    public String getState() {
-        checkSpecifiedProperty("state");
-        return convertEmptyToNull(state);
+    public String getEmployeeNumber() {
+        checkSpecifiedProperty("employeeNumber");
+        return convertEmptyToNull(employeeNumber);
     }
 
-    public void setState(String value) {
-        registerModifiedProperty("state");
-        this.state = value;
+    public void setEmployeeNumber(String value) {
+        registerModifiedProperty("employeeNumber");
+        this.employeeNumber = value;
     }
 
     public String getEmployeeType() {
@@ -581,146 +461,6 @@ public class BsUser extends EsAbstractEntity {
         this.facsimileTelephoneNumber = value;
     }
 
-    public String getPostOfficeBox() {
-        checkSpecifiedProperty("postOfficeBox");
-        return convertEmptyToNull(postOfficeBox);
-    }
-
-    public void setPostOfficeBox(String value) {
-        registerModifiedProperty("postOfficeBox");
-        this.postOfficeBox = value;
-    }
-
-    public String getInitials() {
-        checkSpecifiedProperty("initials");
-        return convertEmptyToNull(initials);
-    }
-
-    public void setInitials(String value) {
-        registerModifiedProperty("initials");
-        this.initials = value;
-    }
-
-    public String getCarLicense() {
-        checkSpecifiedProperty("carLicense");
-        return convertEmptyToNull(carLicense);
-    }
-
-    public void setCarLicense(String value) {
-        registerModifiedProperty("carLicense");
-        this.carLicense = value;
-    }
-
-    public String getMobile() {
-        checkSpecifiedProperty("mobile");
-        return convertEmptyToNull(mobile);
-    }
-
-    public void setMobile(String value) {
-        registerModifiedProperty("mobile");
-        this.mobile = value;
-    }
-
-    public String getPostalAddress() {
-        checkSpecifiedProperty("postalAddress");
-        return convertEmptyToNull(postalAddress);
-    }
-
-    public void setPostalAddress(String value) {
-        registerModifiedProperty("postalAddress");
-        this.postalAddress = value;
-    }
-
-    public String getCity() {
-        checkSpecifiedProperty("city");
-        return convertEmptyToNull(city);
-    }
-
-    public void setCity(String value) {
-        registerModifiedProperty("city");
-        this.city = value;
-    }
-
-    public String getTeletexTerminalIdentifier() {
-        checkSpecifiedProperty("teletexTerminalIdentifier");
-        return convertEmptyToNull(teletexTerminalIdentifier);
-    }
-
-    public void setTeletexTerminalIdentifier(String value) {
-        registerModifiedProperty("teletexTerminalIdentifier");
-        this.teletexTerminalIdentifier = value;
-    }
-
-    public String getX121Address() {
-        checkSpecifiedProperty("x121Address");
-        return convertEmptyToNull(x121Address);
-    }
-
-    public void setX121Address(String value) {
-        registerModifiedProperty("x121Address");
-        this.x121Address = value;
-    }
-
-    public String getBusinessCategory() {
-        checkSpecifiedProperty("businessCategory");
-        return convertEmptyToNull(businessCategory);
-    }
-
-    public void setBusinessCategory(String value) {
-        registerModifiedProperty("businessCategory");
-        this.businessCategory = value;
-    }
-
-    public String getRegisteredAddress() {
-        checkSpecifiedProperty("registeredAddress");
-        return convertEmptyToNull(registeredAddress);
-    }
-
-    public void setRegisteredAddress(String value) {
-        registerModifiedProperty("registeredAddress");
-        this.registeredAddress = value;
-    }
-
-    public String getDisplayName() {
-        checkSpecifiedProperty("displayName");
-        return convertEmptyToNull(displayName);
-    }
-
-    public void setDisplayName(String value) {
-        registerModifiedProperty("displayName");
-        this.displayName = value;
-    }
-
-    public String getPreferredLanguage() {
-        checkSpecifiedProperty("preferredLanguage");
-        return convertEmptyToNull(preferredLanguage);
-    }
-
-    public void setPreferredLanguage(String value) {
-        registerModifiedProperty("preferredLanguage");
-        this.preferredLanguage = value;
-    }
-
-    public String getDepartmentNumber() {
-        checkSpecifiedProperty("departmentNumber");
-        return convertEmptyToNull(departmentNumber);
-    }
-
-    public void setDepartmentNumber(String value) {
-        registerModifiedProperty("departmentNumber");
-        this.departmentNumber = value;
-    }
-
-    public Long getUidNumber() {
-        checkSpecifiedProperty("uidNumber");
-        return uidNumber;
-    }
-
-    public void setUidNumber(Long value) {
-        registerModifiedProperty("uidNumber");
-        this.uidNumber = value;
-    }
-
     public Long getGidNumber() {
         checkSpecifiedProperty("gidNumber");
         return gidNumber;
@@ -731,14 +471,14 @@ public class BsUser extends EsAbstractEntity {
         this.gidNumber = value;
     }
 
-    public String getHomeDirectory() {
-        checkSpecifiedProperty("homeDirectory");
-        return convertEmptyToNull(homeDirectory);
+    public String getGivenName() {
+        checkSpecifiedProperty("givenName");
+        return convertEmptyToNull(givenName);
     }
 
-    public void setHomeDirectory(String value) {
-        registerModifiedProperty("homeDirectory");
-        this.homeDirectory = value;
+    public void setGivenName(String value) {
+        registerModifiedProperty("givenName");
+        this.givenName = value;
     }
 
     public String[] getGroups() {
@@ -751,6 +491,176 @@ public class BsUser extends EsAbstractEntity {
         this.groups = value;
     }
 
+    public String getHomeDirectory() {
+        checkSpecifiedProperty("homeDirectory");
+        return convertEmptyToNull(homeDirectory);
+    }
+
+    public void setHomeDirectory(String value) {
+        registerModifiedProperty("homeDirectory");
+        this.homeDirectory = value;
+    }
+
+    public String getHomePhone() {
+        checkSpecifiedProperty("homePhone");
+        return convertEmptyToNull(homePhone);
+    }
+
+    public void setHomePhone(String value) {
+        registerModifiedProperty("homePhone");
+        this.homePhone = value;
+    }
+
+    public String getHomePostalAddress() {
+        checkSpecifiedProperty("homePostalAddress");
+        return convertEmptyToNull(homePostalAddress);
+    }
+
+    public void setHomePostalAddress(String value) {
+        registerModifiedProperty("homePostalAddress");
+        this.homePostalAddress = value;
+    }
+
+    public String getInitials() {
+        checkSpecifiedProperty("initials");
+        return convertEmptyToNull(initials);
+    }
+
+    public void setInitials(String value) {
+        registerModifiedProperty("initials");
+        this.initials = value;
+    }
+
+    public String getInternationaliSDNNumber() {
+        checkSpecifiedProperty("internationaliSDNNumber");
+        return convertEmptyToNull(internationaliSDNNumber);
+    }
+
+    public void setInternationaliSDNNumber(String value) {
+        registerModifiedProperty("internationaliSDNNumber");
+        this.internationaliSDNNumber = value;
+    }
+
+    public String getLabeledURI() {
+        checkSpecifiedProperty("labeledURI");
+        return convertEmptyToNull(labeledURI);
+    }
+
+    public void setLabeledURI(String value) {
+        registerModifiedProperty("labeledURI");
+        this.labeledURI = value;
+    }
+
+    public String getMail() {
+        checkSpecifiedProperty("mail");
+        return convertEmptyToNull(mail);
+    }
+
+    public void setMail(String value) {
+        registerModifiedProperty("mail");
+        this.mail = value;
+    }
+
+    public String getMobile() {
+        checkSpecifiedProperty("mobile");
+        return convertEmptyToNull(mobile);
+    }
+
+    public void setMobile(String value) {
+        registerModifiedProperty("mobile");
+        this.mobile = value;
+    }
+
+    public String getName() {
+        checkSpecifiedProperty("name");
+        return convertEmptyToNull(name);
+    }
+
+    public void setName(String value) {
+        registerModifiedProperty("name");
+        this.name = value;
+    }
+
+    public String getPager() {
+        checkSpecifiedProperty("pager");
+        return convertEmptyToNull(pager);
+    }
+
+    public void setPager(String value) {
+        registerModifiedProperty("pager");
+        this.pager = value;
+    }
+
+    public String getPassword() {
+        checkSpecifiedProperty("password");
+        return convertEmptyToNull(password);
+    }
+
+    public void setPassword(String value) {
+        registerModifiedProperty("password");
+        this.password = value;
+    }
+
+    public String getPhysicalDeliveryOfficeName() {
+        checkSpecifiedProperty("physicalDeliveryOfficeName");
+        return convertEmptyToNull(physicalDeliveryOfficeName);
+    }
+
+    public void setPhysicalDeliveryOfficeName(String value) {
+        registerModifiedProperty("physicalDeliveryOfficeName");
+        this.physicalDeliveryOfficeName = value;
+    }
+
+    public String getPostOfficeBox() {
+        checkSpecifiedProperty("postOfficeBox");
+        return convertEmptyToNull(postOfficeBox);
+    }
+
+    public void setPostOfficeBox(String value) {
+        registerModifiedProperty("postOfficeBox");
+        this.postOfficeBox = value;
+    }
+
+    public String getPostalAddress() {
+        checkSpecifiedProperty("postalAddress");
+        return convertEmptyToNull(postalAddress);
+    }
+
+    public void setPostalAddress(String value) {
+        registerModifiedProperty("postalAddress");
+        this.postalAddress = value;
+    }
+
+    public String getPostalCode() {
+        checkSpecifiedProperty("postalCode");
+        return convertEmptyToNull(postalCode);
+    }
+
+    public void setPostalCode(String value) {
+        registerModifiedProperty("postalCode");
+        this.postalCode = value;
+    }
+
+    public String getPreferredLanguage() {
+        checkSpecifiedProperty("preferredLanguage");
+        return convertEmptyToNull(preferredLanguage);
+    }
+
+    public void setPreferredLanguage(String value) {
+        registerModifiedProperty("preferredLanguage");
+        this.preferredLanguage = value;
+    }
+
+    public String getRegisteredAddress() {
+        checkSpecifiedProperty("registeredAddress");
+        return convertEmptyToNull(registeredAddress);
+    }
+
+    public void setRegisteredAddress(String value) {
+        registerModifiedProperty("registeredAddress");
+        this.registeredAddress = value;
+    }
+
     public String[] getRoles() {
         checkSpecifiedProperty("roles");
         return roles;
@@ -759,5 +669,95 @@ public class BsUser extends EsAbstractEntity {
     public void setRoles(String[] value) {
         registerModifiedProperty("roles");
         this.roles = value;
+    }
+
+    public String getRoomNumber() {
+        checkSpecifiedProperty("roomNumber");
+        return convertEmptyToNull(roomNumber);
+    }
+
+    public void setRoomNumber(String value) {
+        registerModifiedProperty("roomNumber");
+        this.roomNumber = value;
+    }
+
+    public String getState() {
+        checkSpecifiedProperty("state");
+        return convertEmptyToNull(state);
+    }
+
+    public void setState(String value) {
+        registerModifiedProperty("state");
+        this.state = value;
+    }
+
+    public String getStreet() {
+        checkSpecifiedProperty("street");
+        return convertEmptyToNull(street);
+    }
+
+    public void setStreet(String value) {
+        registerModifiedProperty("street");
+        this.street = value;
+    }
+
+    public String getSurname() {
+        checkSpecifiedProperty("surname");
+        return convertEmptyToNull(surname);
+    }
+
+    public void setSurname(String value) {
+        registerModifiedProperty("surname");
+        this.surname = value;
+    }
+
+    public String getTelephoneNumber() {
+        checkSpecifiedProperty("telephoneNumber");
+        return convertEmptyToNull(telephoneNumber);
+    }
+
+    public void setTelephoneNumber(String value) {
+        registerModifiedProperty("telephoneNumber");
+        this.telephoneNumber = value;
+    }
+
+    public String getTeletexTerminalIdentifier() {
+        checkSpecifiedProperty("teletexTerminalIdentifier");
+        return convertEmptyToNull(teletexTerminalIdentifier);
+    }
+
+    public void setTeletexTerminalIdentifier(String value) {
+        registerModifiedProperty("teletexTerminalIdentifier");
+        this.teletexTerminalIdentifier = value;
+    }
+
+    public String getTitle() {
+        checkSpecifiedProperty("title");
+        return convertEmptyToNull(title);
+    }
+
+    public void setTitle(String value) {
+        registerModifiedProperty("title");
+        this.title = value;
+    }
+
+    public Long getUidNumber() {
+        checkSpecifiedProperty("uidNumber");
+        return uidNumber;
+    }
+
+    public void setUidNumber(Long value) {
+        registerModifiedProperty("uidNumber");
+        this.uidNumber = value;
+    }
+
+    public String getX121Address() {
+        checkSpecifiedProperty("x121Address");
+        return convertEmptyToNull(x121Address);
+    }
+
+    public void setX121Address(String value) {
+        registerModifiedProperty("x121Address");
+        this.x121Address = value;
     }
 }

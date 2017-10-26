@@ -51,7 +51,7 @@ public abstract class BsRelatedQueryBhv extends EsAbstractBehavior<RelatedQuery,
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.related_query";
     }
 
     @Override
@@ -75,10 +75,10 @@ public abstract class BsRelatedQueryBhv extends EsAbstractBehavior<RelatedQuery,
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setQueries(toStringArray(source.get("queries")));
+            result.setTerm(DfTypeUtil.toString(source.get("term")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
-            result.setTerm(DfTypeUtil.toString(source.get("term")));
-            result.setQueries(toStringArray(source.get("queries")));
             result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {

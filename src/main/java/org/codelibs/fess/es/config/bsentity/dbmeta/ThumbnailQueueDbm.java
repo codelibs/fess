@@ -83,13 +83,13 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getCreatedTime(),
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getTarget(), (et, vl) -> ((ThumbnailQueue) et).setTarget(DfTypeUtil.toString(vl)),
-                "target");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getGenerator(),
                 (et, vl) -> ((ThumbnailQueue) et).setGenerator(DfTypeUtil.toString(vl)), "generator");
+        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)), "path");
+        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getTarget(), (et, vl) -> ((ThumbnailQueue) et).setTarget(DfTypeUtil.toString(vl)),
+                "target");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getThumbnailId(),
                 (et, vl) -> ((ThumbnailQueue) et).setThumbnailId(DfTypeUtil.toString(vl)), "thumbnailId");
-        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)), "path");
     }
 
     @Override
@@ -130,14 +130,14 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGenerator = cci("generator", "generator", null, null, String.class, "generator", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnThumbnailId = cci("thumbnail_id", "thumbnail_id", null, null, String.class, "thumbnailId", null,
-            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "keyword", 0,
             0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnThumbnailId = cci("thumbnail_id", "thumbnail_id", null, null, String.class, "thumbnailId", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -147,30 +147,30 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
         return _columnCreatedTime;
     }
 
-    public ColumnInfo columnTarget() {
-        return _columnTarget;
-    }
-
     public ColumnInfo columnGenerator() {
         return _columnGenerator;
-    }
-
-    public ColumnInfo columnThumbnailId() {
-        return _columnThumbnailId;
     }
 
     public ColumnInfo columnPath() {
         return _columnPath;
     }
 
+    public ColumnInfo columnTarget() {
+        return _columnTarget;
+    }
+
+    public ColumnInfo columnThumbnailId() {
+        return _columnThumbnailId;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnTarget());
         ls.add(columnGenerator());
-        ls.add(columnThumbnailId());
         ls.add(columnPath());
+        ls.add(columnTarget());
+        ls.add(columnThumbnailId());
         return ls;
     }
 

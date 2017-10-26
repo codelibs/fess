@@ -188,6 +188,10 @@ public class BsJobLogCB extends EsAbstractConditionBean {
             doColumn("jobStatus");
         }
 
+        public void columnLastUpdated() {
+            doColumn("lastUpdated");
+        }
+
         public void columnScriptData() {
             doColumn("scriptData");
         }
@@ -206,10 +210,6 @@ public class BsJobLogCB extends EsAbstractConditionBean {
 
         public void columnTarget() {
             doColumn("target");
-        }
-
-        public void columnLastUpdated() {
-            doColumn("lastUpdated");
         }
     }
 }

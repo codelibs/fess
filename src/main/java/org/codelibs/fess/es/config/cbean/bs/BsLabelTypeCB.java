@@ -200,10 +200,6 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
             doColumn("permissions");
         }
 
-        public void columnVirtualHost() {
-            doColumn("virtualHost");
-        }
-
         public void columnSortOrder() {
             doColumn("sortOrder");
         }
@@ -218,6 +214,10 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
 
         public void columnValue() {
             doColumn("value");
+        }
+
+        public void columnVirtualHost() {
+            doColumn("virtualHost");
         }
     }
 }

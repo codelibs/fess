@@ -180,18 +180,6 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("accessType");
         }
 
-        public void columnUser() {
-            doColumn("user");
-        }
-
-        public void columnRoles() {
-            doColumn("roles");
-        }
-
-        public void columnQueryId() {
-            doColumn("queryId");
-        }
-
         public void columnClientIp() {
             doColumn("clientIp");
         }
@@ -200,12 +188,24 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("hitCount");
         }
 
+        public void columnLanguages() {
+            doColumn("languages");
+        }
+
+        public void columnQueryId() {
+            doColumn("queryId");
+        }
+
         public void columnQueryOffset() {
             doColumn("queryOffset");
         }
 
         public void columnQueryPageSize() {
             doColumn("queryPageSize");
+        }
+
+        public void columnQueryTime() {
+            doColumn("queryTime");
         }
 
         public void columnReferer() {
@@ -220,12 +220,16 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("responseTime");
         }
 
-        public void columnQueryTime() {
-            doColumn("queryTime");
+        public void columnRoles() {
+            doColumn("roles");
         }
 
         public void columnSearchWord() {
             doColumn("searchWord");
+        }
+
+        public void columnUser() {
+            doColumn("user");
         }
 
         public void columnUserAgent() {
@@ -238,10 +242,6 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
 
         public void columnUserSessionId() {
             doColumn("userSessionId");
-        }
-
-        public void columnLanguages() {
-            doColumn("languages");
         }
 
         public void columnVirtualHost() {

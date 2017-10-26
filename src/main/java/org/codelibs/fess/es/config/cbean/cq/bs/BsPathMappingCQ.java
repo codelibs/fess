@@ -1430,228 +1430,6 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setUserAgent_Equal(String userAgent) {
-        setUserAgent_Term(userAgent, null);
-    }
-
-    public void setUserAgent_Equal(String userAgent, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setUserAgent_Term(userAgent, opLambda);
-    }
-
-    public void setUserAgent_Term(String userAgent) {
-        setUserAgent_Term(userAgent, null);
-    }
-
-    public void setUserAgent_Term(String userAgent, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_NotEqual(String userAgent) {
-        setUserAgent_NotTerm(userAgent, null);
-    }
-
-    public void setUserAgent_NotTerm(String userAgent) {
-        setUserAgent_NotTerm(userAgent, null);
-    }
-
-    public void setUserAgent_NotEqual(String userAgent, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setUserAgent_NotTerm(userAgent, opLambda);
-    }
-
-    public void setUserAgent_NotTerm(String userAgent, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setUserAgent_Term(userAgent), opLambda);
-    }
-
-    public void setUserAgent_Terms(Collection<String> userAgentList) {
-        setUserAgent_Terms(userAgentList, null);
-    }
-
-    public void setUserAgent_Terms(Collection<String> userAgentList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("userAgent", userAgentList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_InScope(Collection<String> userAgentList) {
-        setUserAgent_Terms(userAgentList, null);
-    }
-
-    public void setUserAgent_InScope(Collection<String> userAgentList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUserAgent_Terms(userAgentList, opLambda);
-    }
-
-    public void setUserAgent_Match(String userAgent) {
-        setUserAgent_Match(userAgent, null);
-    }
-
-    public void setUserAgent_Match(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_MatchPhrase(String userAgent) {
-        setUserAgent_MatchPhrase(userAgent, null);
-    }
-
-    public void setUserAgent_MatchPhrase(String userAgent, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_MatchPhrasePrefix(String userAgent) {
-        setUserAgent_MatchPhrasePrefix(userAgent, null);
-    }
-
-    public void setUserAgent_MatchPhrasePrefix(String userAgent, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Fuzzy(String userAgent) {
-        setUserAgent_Fuzzy(userAgent, null);
-    }
-
-    public void setUserAgent_Fuzzy(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Prefix(String userAgent) {
-        setUserAgent_Prefix(userAgent, null);
-    }
-
-    public void setUserAgent_Prefix(String userAgent, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Wildcard(String userAgent) {
-        setUserAgent_Wildcard(userAgent, null);
-    }
-
-    public void setUserAgent_Wildcard(String userAgent, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
-        WildcardQueryBuilder builder = regWildcardQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Regexp(String userAgent) {
-        setUserAgent_Regexp(userAgent, null);
-    }
-
-    public void setUserAgent_Regexp(String userAgent, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
-        RegexpQueryBuilder builder = regRegexpQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_SpanTerm(String userAgent) {
-        setUserAgent_SpanTerm("userAgent", null);
-    }
-
-    public void setUserAgent_SpanTerm(String userAgent, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
-        SpanTermQueryBuilder builder = regSpanTermQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_GreaterThan(String userAgent) {
-        setUserAgent_GreaterThan(userAgent, null);
-    }
-
-    public void setUserAgent_GreaterThan(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = userAgent;
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_LessThan(String userAgent) {
-        setUserAgent_LessThan(userAgent, null);
-    }
-
-    public void setUserAgent_LessThan(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = userAgent;
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_GreaterEqual(String userAgent) {
-        setUserAgent_GreaterEqual(userAgent, null);
-    }
-
-    public void setUserAgent_GreaterEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = userAgent;
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_LessEqual(String userAgent) {
-        setUserAgent_LessEqual(userAgent, null);
-    }
-
-    public void setUserAgent_LessEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = userAgent;
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Exists() {
-        setUserAgent_Exists(null);
-    }
-
-    public void setUserAgent_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("userAgent");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_CommonTerms(String userAgent) {
-        setUserAgent_CommonTerms(userAgent, null);
-    }
-
-    public void setUserAgent_CommonTerms(String userAgent, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("userAgent", userAgent);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsPathMappingCQ addOrderBy_UserAgent_Asc() {
-        regOBA("userAgent");
-        return this;
-    }
-
-    public BsPathMappingCQ addOrderBy_UserAgent_Desc() {
-        regOBD("userAgent");
-        return this;
-    }
-
     public void setUpdatedBy_Equal(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -2049,6 +1827,228 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
 
     public BsPathMappingCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
+        return this;
+    }
+
+    public void setUserAgent_Equal(String userAgent) {
+        setUserAgent_Term(userAgent, null);
+    }
+
+    public void setUserAgent_Equal(String userAgent, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserAgent_Term(userAgent, opLambda);
+    }
+
+    public void setUserAgent_Term(String userAgent) {
+        setUserAgent_Term(userAgent, null);
+    }
+
+    public void setUserAgent_Term(String userAgent, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_NotEqual(String userAgent) {
+        setUserAgent_NotTerm(userAgent, null);
+    }
+
+    public void setUserAgent_NotTerm(String userAgent) {
+        setUserAgent_NotTerm(userAgent, null);
+    }
+
+    public void setUserAgent_NotEqual(String userAgent, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUserAgent_NotTerm(userAgent, opLambda);
+    }
+
+    public void setUserAgent_NotTerm(String userAgent, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUserAgent_Term(userAgent), opLambda);
+    }
+
+    public void setUserAgent_Terms(Collection<String> userAgentList) {
+        setUserAgent_Terms(userAgentList, null);
+    }
+
+    public void setUserAgent_Terms(Collection<String> userAgentList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("userAgent", userAgentList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_InScope(Collection<String> userAgentList) {
+        setUserAgent_Terms(userAgentList, null);
+    }
+
+    public void setUserAgent_InScope(Collection<String> userAgentList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUserAgent_Terms(userAgentList, opLambda);
+    }
+
+    public void setUserAgent_Match(String userAgent) {
+        setUserAgent_Match(userAgent, null);
+    }
+
+    public void setUserAgent_Match(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_MatchPhrase(String userAgent) {
+        setUserAgent_MatchPhrase(userAgent, null);
+    }
+
+    public void setUserAgent_MatchPhrase(String userAgent, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_MatchPhrasePrefix(String userAgent) {
+        setUserAgent_MatchPhrasePrefix(userAgent, null);
+    }
+
+    public void setUserAgent_MatchPhrasePrefix(String userAgent, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Fuzzy(String userAgent) {
+        setUserAgent_Fuzzy(userAgent, null);
+    }
+
+    public void setUserAgent_Fuzzy(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Prefix(String userAgent) {
+        setUserAgent_Prefix(userAgent, null);
+    }
+
+    public void setUserAgent_Prefix(String userAgent, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Wildcard(String userAgent) {
+        setUserAgent_Wildcard(userAgent, null);
+    }
+
+    public void setUserAgent_Wildcard(String userAgent, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Regexp(String userAgent) {
+        setUserAgent_Regexp(userAgent, null);
+    }
+
+    public void setUserAgent_Regexp(String userAgent, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent) {
+        setUserAgent_SpanTerm("userAgent", null);
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_GreaterThan(String userAgent) {
+        setUserAgent_GreaterThan(userAgent, null);
+    }
+
+    public void setUserAgent_GreaterThan(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_LessThan(String userAgent) {
+        setUserAgent_LessThan(userAgent, null);
+    }
+
+    public void setUserAgent_LessThan(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_GreaterEqual(String userAgent) {
+        setUserAgent_GreaterEqual(userAgent, null);
+    }
+
+    public void setUserAgent_GreaterEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_LessEqual(String userAgent) {
+        setUserAgent_LessEqual(userAgent, null);
+    }
+
+    public void setUserAgent_LessEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Exists() {
+        setUserAgent_Exists(null);
+    }
+
+    public void setUserAgent_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_CommonTerms(String userAgent) {
+        setUserAgent_CommonTerms(userAgent, null);
+    }
+
+    public void setUserAgent_CommonTerms(String userAgent, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsPathMappingCQ addOrderBy_UserAgent_Asc() {
+        regOBA("userAgent");
+        return this;
+    }
+
+    public BsPathMappingCQ addOrderBy_UserAgent_Desc() {
+        regOBD("userAgent");
         return this;
     }
 

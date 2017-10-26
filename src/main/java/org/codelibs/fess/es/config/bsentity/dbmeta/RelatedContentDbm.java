@@ -79,19 +79,19 @@ public class RelatedContentDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
+        setupEpg(_epgMap, et -> ((RelatedContent) et).getContent(), (et, vl) -> ((RelatedContent) et).setContent(DfTypeUtil.toString(vl)),
+                "content");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getCreatedBy(),
                 (et, vl) -> ((RelatedContent) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getCreatedTime(),
                 (et, vl) -> ((RelatedContent) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((RelatedContent) et).getSortOrder(),
+                (et, vl) -> ((RelatedContent) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
+        setupEpg(_epgMap, et -> ((RelatedContent) et).getTerm(), (et, vl) -> ((RelatedContent) et).setTerm(DfTypeUtil.toString(vl)), "term");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getUpdatedBy(),
                 (et, vl) -> ((RelatedContent) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getUpdatedTime(),
                 (et, vl) -> ((RelatedContent) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
-        setupEpg(_epgMap, et -> ((RelatedContent) et).getTerm(), (et, vl) -> ((RelatedContent) et).setTerm(DfTypeUtil.toString(vl)), "term");
-        setupEpg(_epgMap, et -> ((RelatedContent) et).getContent(), (et, vl) -> ((RelatedContent) et).setContent(DfTypeUtil.toString(vl)),
-                "content");
-        setupEpg(_epgMap, et -> ((RelatedContent) et).getSortOrder(),
-                (et, vl) -> ((RelatedContent) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getVirtualHost(),
                 (et, vl) -> ((RelatedContent) et).setVirtualHost(DfTypeUtil.toString(vl)), "virtualHost");
     }
@@ -130,22 +130,26 @@ public class RelatedContentDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
+    protected final ColumnInfo _columnContent = cci("content", "content", null, null, String.class, "content", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
+            false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTerm = cci("term", "term", null, null, String.class, "term", null, false, false, false, "keyword", 0,
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTerm = cci("term", "term", null, null, String.class, "term", null, false, false, false, "keyword", 0,
-            0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnContent = cci("content", "content", null, null, String.class, "content", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
-            false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnContent() {
+        return _columnContent;
+    }
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -153,6 +157,14 @@ public class RelatedContentDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnSortOrder() {
+        return _columnSortOrder;
+    }
+
+    public ColumnInfo columnTerm() {
+        return _columnTerm;
     }
 
     public ColumnInfo columnUpdatedBy() {
@@ -163,31 +175,19 @@ public class RelatedContentDbm extends AbstractDBMeta {
         return _columnUpdatedTime;
     }
 
-    public ColumnInfo columnTerm() {
-        return _columnTerm;
-    }
-
-    public ColumnInfo columnContent() {
-        return _columnContent;
-    }
-
-    public ColumnInfo columnSortOrder() {
-        return _columnSortOrder;
-    }
-
     public ColumnInfo columnVirtualHost() {
         return _columnVirtualHost;
     }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
+        ls.add(columnContent());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnSortOrder());
+        ls.add(columnTerm());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
-        ls.add(columnTerm());
-        ls.add(columnContent());
-        ls.add(columnSortOrder());
         ls.add(columnVirtualHost());
         return ls;
     }

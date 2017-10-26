@@ -55,9 +55,6 @@ public class BsLabelType extends EsAbstractEntity {
     /** permissions */
     protected String[] permissions;
 
-    /** virtualHost */
-    protected String virtualHost;
-
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -69,6 +66,9 @@ public class BsLabelType extends EsAbstractEntity {
 
     /** value */
     protected String value;
+
+    /** virtualHost */
+    protected String virtualHost;
 
     // [Referrers] *comment only
 
@@ -109,9 +109,6 @@ public class BsLabelType extends EsAbstractEntity {
         if (permissions != null) {
             addFieldToSource(sourceMap, "permissions", permissions);
         }
-        if (virtualHost != null) {
-            addFieldToSource(sourceMap, "virtualHost", virtualHost);
-        }
         if (sortOrder != null) {
             addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
@@ -123,6 +120,9 @@ public class BsLabelType extends EsAbstractEntity {
         }
         if (value != null) {
             addFieldToSource(sourceMap, "value", value);
+        }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
         }
         return sourceMap;
     }
@@ -143,11 +143,11 @@ public class BsLabelType extends EsAbstractEntity {
         sb.append(dm).append(includedPaths);
         sb.append(dm).append(name);
         sb.append(dm).append(permissions);
-        sb.append(dm).append(virtualHost);
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         sb.append(dm).append(value);
+        sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -218,16 +218,6 @@ public class BsLabelType extends EsAbstractEntity {
         this.permissions = value;
     }
 
-    public String getVirtualHost() {
-        checkSpecifiedProperty("virtualHost");
-        return convertEmptyToNull(virtualHost);
-    }
-
-    public void setVirtualHost(String value) {
-        registerModifiedProperty("virtualHost");
-        this.virtualHost = value;
-    }
-
     public Integer getSortOrder() {
         checkSpecifiedProperty("sortOrder");
         return sortOrder;
@@ -266,5 +256,15 @@ public class BsLabelType extends EsAbstractEntity {
     public void setValue(String value) {
         registerModifiedProperty("value");
         this.value = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 }

@@ -39,7 +39,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -91,19 +91,19 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                                         Collectors.toMap(e -> e.getKey().replaceFirst("^settings\\.", StringUtil.EMPTY), e -> e.getValue())))
                         .build();
         logger.info("Connecting to " + hostsStr + " with [" + settings.toDelimitedString(',') + "]");
-        final InetSocketTransportAddress[] addresses = split(hostsStr, ",").get(stream -> stream.map(h -> {
+        final TransportAddress[] addresses = split(hostsStr, ",").get(stream -> stream.map(h -> {
             final String[] values = h.trim().split(":");
             try {
                 if (values.length == 1) {
-                    return new InetSocketTransportAddress(InetAddress.getByName(values[0]), 9300);
+                    return new TransportAddress(InetAddress.getByName(values[0]), 9300);
                 } else if (values.length == 2) {
-                    return new InetSocketTransportAddress(InetAddress.getByName(values[0]), Integer.parseInt(values[1]));
+                    return new TransportAddress(InetAddress.getByName(values[0]), Integer.parseInt(values[1]));
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to parse address: " + h, e);
             }
             return null;
-        }).filter(v -> v != null).toArray(n -> new InetSocketTransportAddress[n]));
+        }).filter(v -> v != null).toArray(n -> new TransportAddress[n]));
         try (PreBuiltTransportClient client = new PreBuiltTransportClient(settings)) {
             client.addTransportAddresses(addresses);
             processData(dataConfig, callback, paramMap, scriptMap, defaultDataMap, readInterval, client);
@@ -163,7 +163,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                     resultMap.put("id", hit.getId());
                     resultMap.put("version", Long.valueOf(hit.getVersion()));
                     resultMap.put("hit", hit);
-                    resultMap.put("source", hit.getSource());
+                    resultMap.put("source", hit.getSourceAsMap());
                     resultMap.put("crawlingConfig", dataConfig);
 
                     if (logger.isDebugEnabled()) {

@@ -83,12 +83,12 @@ public class RelatedQueryDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getCreatedTime(),
                 (et, vl) -> ((RelatedQuery) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((RelatedQuery) et).getQueries(), (et, vl) -> ((RelatedQuery) et).setQueries((String[]) vl), "queries");
+        setupEpg(_epgMap, et -> ((RelatedQuery) et).getTerm(), (et, vl) -> ((RelatedQuery) et).setTerm(DfTypeUtil.toString(vl)), "term");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getUpdatedBy(), (et, vl) -> ((RelatedQuery) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getUpdatedTime(),
                 (et, vl) -> ((RelatedQuery) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
-        setupEpg(_epgMap, et -> ((RelatedQuery) et).getTerm(), (et, vl) -> ((RelatedQuery) et).setTerm(DfTypeUtil.toString(vl)), "term");
-        setupEpg(_epgMap, et -> ((RelatedQuery) et).getQueries(), (et, vl) -> ((RelatedQuery) et).setQueries((String[]) vl), "queries");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getVirtualHost(),
                 (et, vl) -> ((RelatedQuery) et).setVirtualHost(DfTypeUtil.toString(vl)), "virtualHost");
     }
@@ -131,14 +131,14 @@ public class RelatedQueryDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueries = cci("queries", "queries", null, null, String[].class, "queries", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTerm = cci("term", "term", null, null, String.class, "term", null, false, false, false, "keyword", 0,
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTerm = cci("term", "term", null, null, String.class, "term", null, false, false, false, "keyword", 0,
-            0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueries = cci("queries", "queries", null, null, String[].class, "queries", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
@@ -150,20 +150,20 @@ public class RelatedQueryDbm extends AbstractDBMeta {
         return _columnCreatedTime;
     }
 
-    public ColumnInfo columnUpdatedBy() {
-        return _columnUpdatedBy;
-    }
-
-    public ColumnInfo columnUpdatedTime() {
-        return _columnUpdatedTime;
+    public ColumnInfo columnQueries() {
+        return _columnQueries;
     }
 
     public ColumnInfo columnTerm() {
         return _columnTerm;
     }
 
-    public ColumnInfo columnQueries() {
-        return _columnQueries;
+    public ColumnInfo columnUpdatedBy() {
+        return _columnUpdatedBy;
+    }
+
+    public ColumnInfo columnUpdatedTime() {
+        return _columnUpdatedTime;
     }
 
     public ColumnInfo columnVirtualHost() {
@@ -174,10 +174,10 @@ public class RelatedQueryDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnQueries());
+        ls.add(columnTerm());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
-        ls.add(columnTerm());
-        ls.add(columnQueries());
         ls.add(columnVirtualHost());
         return ls;
     }

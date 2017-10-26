@@ -51,7 +51,7 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
 
     @Override
     protected String asEsIndex() {
-        return "fess_log";
+        return "fess_log.click_log";
     }
 
     @Override
@@ -73,13 +73,13 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
     protected <RESULT extends ClickLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
+            result.setDocId(DfTypeUtil.toString(source.get("docId")));
+            result.setOrder(DfTypeUtil.toInteger(source.get("order")));
+            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
             result.setQueryRequestedAt(toLocalDateTime(source.get("queryRequestedAt")));
             result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
-            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
-            result.setDocId(DfTypeUtil.toString(source.get("docId")));
-            result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
-            result.setOrder(DfTypeUtil.toInteger(source.get("order")));
+            result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -43,7 +43,6 @@ public class QueryHelperTest extends UnitFessTestCase {
         queryHelper = new QueryHelper() {
             protected QueryParser getQueryParser() {
                 ExtendableQueryParser queryParser = new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
-                queryParser.setLowercaseExpandedTerms(false);
                 queryParser.setAllowLeadingWildcard(true);
                 queryParser.setDefaultOperator(QueryParser.Operator.AND);
                 return queryParser;

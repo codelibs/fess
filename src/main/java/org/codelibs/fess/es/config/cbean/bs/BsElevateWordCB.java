@@ -188,6 +188,10 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
+        public void columnPermissions() {
+            doColumn("permissions");
+        }
+
         public void columnReading() {
             doColumn("reading");
         }
@@ -202,10 +206,6 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
 
         public void columnTargetRole() {
             doColumn("targetRole");
-        }
-
-        public void columnPermissions() {
-            doColumn("permissions");
         }
 
         public void columnUpdatedBy() {

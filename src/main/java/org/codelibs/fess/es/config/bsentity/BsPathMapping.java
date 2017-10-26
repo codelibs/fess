@@ -55,14 +55,14 @@ public class BsPathMapping extends EsAbstractEntity {
     /** sortOrder */
     protected Integer sortOrder;
 
-    /** userAgent */
-    protected String userAgent;
-
     /** updatedBy */
     protected String updatedBy;
 
     /** updatedTime */
     protected Long updatedTime;
+
+    /** userAgent */
+    protected String userAgent;
 
     // [Referrers] *comment only
 
@@ -103,14 +103,14 @@ public class BsPathMapping extends EsAbstractEntity {
         if (sortOrder != null) {
             addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
-        if (userAgent != null) {
-            addFieldToSource(sourceMap, "userAgent", userAgent);
-        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
+        }
+        if (userAgent != null) {
+            addFieldToSource(sourceMap, "userAgent", userAgent);
         }
         return sourceMap;
     }
@@ -131,9 +131,9 @@ public class BsPathMapping extends EsAbstractEntity {
         sb.append(dm).append(regex);
         sb.append(dm).append(replacement);
         sb.append(dm).append(sortOrder);
-        sb.append(dm).append(userAgent);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
+        sb.append(dm).append(userAgent);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -204,16 +204,6 @@ public class BsPathMapping extends EsAbstractEntity {
         this.sortOrder = value;
     }
 
-    public String getUserAgent() {
-        checkSpecifiedProperty("userAgent");
-        return convertEmptyToNull(userAgent);
-    }
-
-    public void setUserAgent(String value) {
-        registerModifiedProperty("userAgent");
-        this.userAgent = value;
-    }
-
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
         return convertEmptyToNull(updatedBy);
@@ -232,5 +222,15 @@ public class BsPathMapping extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
+    }
+
+    public String getUserAgent() {
+        checkSpecifiedProperty("userAgent");
+        return convertEmptyToNull(userAgent);
+    }
+
+    public void setUserAgent(String value) {
+        registerModifiedProperty("userAgent");
+        this.userAgent = value;
     }
 }

@@ -50,7 +50,7 @@ public abstract class BsUserInfoBhv extends EsAbstractBehavior<UserInfo, UserInf
 
     @Override
     protected String asEsIndex() {
-        return "fess_log";
+        return "fess_log.user_info";
     }
 
     @Override

@@ -37,26 +37,26 @@ public class BsRelatedContent extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** content */
+    protected String content;
+
     /** createdBy */
     protected String createdBy;
 
     /** createdTime */
     protected Long createdTime;
 
+    /** sortOrder */
+    protected Integer sortOrder;
+
+    /** term */
+    protected String term;
+
     /** updatedBy */
     protected String updatedBy;
 
     /** updatedTime */
     protected Long updatedTime;
-
-    /** term */
-    protected String term;
-
-    /** content */
-    protected String content;
-
-    /** sortOrder */
-    protected Integer sortOrder;
 
     /** virtualHost */
     protected String virtualHost;
@@ -82,26 +82,26 @@ public class BsRelatedContent extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
+        if (content != null) {
+            addFieldToSource(sourceMap, "content", content);
+        }
         if (createdBy != null) {
             addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
             addFieldToSource(sourceMap, "createdTime", createdTime);
         }
+        if (sortOrder != null) {
+            addFieldToSource(sourceMap, "sortOrder", sortOrder);
+        }
+        if (term != null) {
+            addFieldToSource(sourceMap, "term", term);
+        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
-        }
-        if (term != null) {
-            addFieldToSource(sourceMap, "term", term);
-        }
-        if (content != null) {
-            addFieldToSource(sourceMap, "content", content);
-        }
-        if (sortOrder != null) {
-            addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
         if (virtualHost != null) {
             addFieldToSource(sourceMap, "virtualHost", virtualHost);
@@ -119,13 +119,13 @@ public class BsRelatedContent extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(content);
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
+        sb.append(dm).append(sortOrder);
+        sb.append(dm).append(term);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
-        sb.append(dm).append(term);
-        sb.append(dm).append(content);
-        sb.append(dm).append(sortOrder);
         sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -137,6 +137,16 @@ public class BsRelatedContent extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public String getContent() {
+        checkSpecifiedProperty("content");
+        return convertEmptyToNull(content);
+    }
+
+    public void setContent(String value) {
+        registerModifiedProperty("content");
+        this.content = value;
+    }
+
     public String getCreatedBy() {
         checkSpecifiedProperty("createdBy");
         return convertEmptyToNull(createdBy);
@@ -157,6 +167,26 @@ public class BsRelatedContent extends EsAbstractEntity {
         this.createdTime = value;
     }
 
+    public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer value) {
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
+    }
+
+    public String getTerm() {
+        checkSpecifiedProperty("term");
+        return convertEmptyToNull(term);
+    }
+
+    public void setTerm(String value) {
+        registerModifiedProperty("term");
+        this.term = value;
+    }
+
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
         return convertEmptyToNull(updatedBy);
@@ -175,36 +205,6 @@ public class BsRelatedContent extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
-    }
-
-    public String getTerm() {
-        checkSpecifiedProperty("term");
-        return convertEmptyToNull(term);
-    }
-
-    public void setTerm(String value) {
-        registerModifiedProperty("term");
-        this.term = value;
-    }
-
-    public String getContent() {
-        checkSpecifiedProperty("content");
-        return convertEmptyToNull(content);
-    }
-
-    public void setContent(String value) {
-        registerModifiedProperty("content");
-        this.content = value;
-    }
-
-    public Integer getSortOrder() {
-        checkSpecifiedProperty("sortOrder");
-        return sortOrder;
-    }
-
-    public void setSortOrder(Integer value) {
-        registerModifiedProperty("sortOrder");
-        this.sortOrder = value;
     }
 
     public String getVirtualHost() {

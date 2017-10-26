@@ -200,16 +200,16 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
             doColumn("term");
         }
 
-        public void columnVirtualHost() {
-            doColumn("virtualHost");
-        }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
 
         public void columnUpdatedTime() {
             doColumn("updatedTime");
+        }
+
+        public void columnVirtualHost() {
+            doColumn("virtualHost");
         }
     }
 }

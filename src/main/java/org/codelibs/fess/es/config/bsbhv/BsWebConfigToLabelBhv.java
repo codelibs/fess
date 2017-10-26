@@ -51,7 +51,7 @@ public abstract class BsWebConfigToLabelBhv extends EsAbstractBehavior<WebConfig
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.web_config_to_label";
     }
 
     @Override

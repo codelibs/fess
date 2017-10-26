@@ -184,20 +184,20 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
-        public void columnTarget() {
-            doColumn("target");
-        }
-
         public void columnGenerator() {
             doColumn("generator");
         }
 
-        public void columnThumbnailId() {
-            doColumn("thumbnail_id");
-        }
-
         public void columnPath() {
             doColumn("path");
+        }
+
+        public void columnTarget() {
+            doColumn("target");
+        }
+
+        public void columnThumbnailId() {
+            doColumn("thumbnail_id");
         }
     }
 }

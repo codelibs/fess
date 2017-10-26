@@ -97,9 +97,6 @@ import org.elasticsearch.action.explain.ExplainResponse;
 import org.elasticsearch.action.fieldcaps.FieldCapabilitiesRequest;
 import org.elasticsearch.action.fieldcaps.FieldCapabilitiesRequestBuilder;
 import org.elasticsearch.action.fieldcaps.FieldCapabilitiesResponse;
-import org.elasticsearch.action.fieldstats.FieldStatsRequest;
-import org.elasticsearch.action.fieldstats.FieldStatsRequestBuilder;
-import org.elasticsearch.action.fieldstats.FieldStatsResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -136,9 +133,9 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -146,11 +143,10 @@ import org.elasticsearch.index.query.InnerHitBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -217,7 +213,7 @@ public class FessEsClient implements Client {
 
     public void addTransportAddress(final String host, final int port) {
         try {
-            transportAddressList.add(new InetSocketTransportAddress(InetAddress.getByName(host), port));
+            transportAddressList.add(new TransportAddress(InetAddress.getByName(host), port));
         } catch (final UnknownHostException e) {
             throw new FessSystemException("Failed to resolve the hostname: " + host, e);
         }
@@ -285,11 +281,11 @@ public class FessEsClient implements Client {
         if (StringUtil.isBlank(transportAddressesValue)) {
             final StringBuilder buf = new StringBuilder();
             for (final TransportAddress transportAddress : transportAddressList) {
-                if (transportAddress instanceof InetSocketTransportAddress) {
+                if (transportAddress instanceof TransportAddress) {
                     if (buf.length() > 0) {
                         buf.append(',');
                     }
-                    final InetSocketTransportAddress inetTransportAddress = (InetSocketTransportAddress) transportAddress;
+                    final TransportAddress inetTransportAddress = (TransportAddress) transportAddress;
                     buf.append(inetTransportAddress.address().getHostName());
                     buf.append(':');
                     buf.append(inetTransportAddress.address().getPort());
@@ -722,14 +718,14 @@ public class FessEsClient implements Client {
                 condition,
                 (response, hit) -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final Map<String, Object> source = hit.getSource();
+                    final Map<String, Object> source = hit.getSourceAsMap();
                     if (source != null) {
                         final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
                         return docMap;
                     }
-                    final Map<String, SearchHitField> fields = hit.getFields();
+                    final Map<String, DocumentField> fields = hit.getFields();
                     if (fields != null) {
                         final Map<String, Object> docMap =
                                 fields.entrySet().stream()
@@ -766,13 +762,13 @@ public class FessEsClient implements Client {
                 condition,
                 (response, hit) -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final Map<String, Object> source = hit.getSource();
+                    final Map<String, Object> source = hit.getSourceAsMap();
                     if (source != null) {
                         final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
-                    final Map<String, SearchHitField> fields = hit.getFields();
+                    final Map<String, DocumentField> fields = hit.getFields();
                     if (fields != null) {
                         final Map<String, Object> docMap =
                                 fields.entrySet().stream()
@@ -997,10 +993,10 @@ public class FessEsClient implements Client {
                                 final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                                 final TermsAggregationBuilder termsBuilder =
                                         AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
-                                if ("term".equals(facetInfo.sort)) {
-                                    termsBuilder.order(Order.term(true));
+                                if ("term".equals(facetInfo.sort) || "key".equals(facetInfo.sort)) {
+                                    termsBuilder.order(BucketOrder.key(true));
                                 } else if ("count".equals(facetInfo.sort)) {
-                                    termsBuilder.order(Order.count(true));
+                                    termsBuilder.order(BucketOrder.count(true));
                                 }
                                 if (facetInfo.size != null) {
                                     termsBuilder.size(facetInfo.size);
@@ -1309,21 +1305,6 @@ public class FessEsClient implements Client {
     @Override
     public void clearScroll(final ClearScrollRequest request, final ActionListener<ClearScrollResponse> listener) {
         client.clearScroll(request, listener);
-    }
-
-    @Override
-    public FieldStatsRequestBuilder prepareFieldStats() {
-        return client.prepareFieldStats();
-    }
-
-    @Override
-    public ActionFuture<FieldStatsResponse> fieldStats(final FieldStatsRequest request) {
-        return client.fieldStats(request);
-    }
-
-    @Override
-    public void fieldStats(final FieldStatsRequest request, final ActionListener<FieldStatsResponse> listener) {
-        client.fieldStats(request, listener);
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_user";
+        return ".fess_user.user";
     }
 
     @Override
@@ -73,46 +73,46 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
     protected <RESULT extends User> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setName(DfTypeUtil.toString(source.get("name")));
-            result.setPassword(DfTypeUtil.toString(source.get("password")));
-            result.setSurname(DfTypeUtil.toString(source.get("surname")));
-            result.setGivenName(DfTypeUtil.toString(source.get("givenName")));
-            result.setEmployeeNumber(DfTypeUtil.toString(source.get("employeeNumber")));
-            result.setMail(DfTypeUtil.toString(source.get("mail")));
-            result.setTelephoneNumber(DfTypeUtil.toString(source.get("telephoneNumber")));
-            result.setHomePhone(DfTypeUtil.toString(source.get("homePhone")));
-            result.setHomePostalAddress(DfTypeUtil.toString(source.get("homePostalAddress")));
-            result.setLabeledURI(DfTypeUtil.toString(source.get("labeledURI")));
-            result.setRoomNumber(DfTypeUtil.toString(source.get("roomNumber")));
+            result.setBusinessCategory(DfTypeUtil.toString(source.get("businessCategory")));
+            result.setCarLicense(DfTypeUtil.toString(source.get("carLicense")));
+            result.setCity(DfTypeUtil.toString(source.get("city")));
+            result.setDepartmentNumber(DfTypeUtil.toString(source.get("departmentNumber")));
             result.setDescription(DfTypeUtil.toString(source.get("description")));
-            result.setTitle(DfTypeUtil.toString(source.get("title")));
-            result.setPager(DfTypeUtil.toString(source.get("pager")));
-            result.setStreet(DfTypeUtil.toString(source.get("street")));
-            result.setPostalCode(DfTypeUtil.toString(source.get("postalCode")));
-            result.setPhysicalDeliveryOfficeName(DfTypeUtil.toString(source.get("physicalDeliveryOfficeName")));
             result.setDestinationIndicator(DfTypeUtil.toString(source.get("destinationIndicator")));
-            result.setInternationaliSDNNumber(DfTypeUtil.toString(source.get("internationaliSDNNumber")));
-            result.setState(DfTypeUtil.toString(source.get("state")));
+            result.setDisplayName(DfTypeUtil.toString(source.get("displayName")));
+            result.setEmployeeNumber(DfTypeUtil.toString(source.get("employeeNumber")));
             result.setEmployeeType(DfTypeUtil.toString(source.get("employeeType")));
             result.setFacsimileTelephoneNumber(DfTypeUtil.toString(source.get("facsimileTelephoneNumber")));
-            result.setPostOfficeBox(DfTypeUtil.toString(source.get("postOfficeBox")));
-            result.setInitials(DfTypeUtil.toString(source.get("initials")));
-            result.setCarLicense(DfTypeUtil.toString(source.get("carLicense")));
-            result.setMobile(DfTypeUtil.toString(source.get("mobile")));
-            result.setPostalAddress(DfTypeUtil.toString(source.get("postalAddress")));
-            result.setCity(DfTypeUtil.toString(source.get("city")));
-            result.setTeletexTerminalIdentifier(DfTypeUtil.toString(source.get("teletexTerminalIdentifier")));
-            result.setX121Address(DfTypeUtil.toString(source.get("x121Address")));
-            result.setBusinessCategory(DfTypeUtil.toString(source.get("businessCategory")));
-            result.setRegisteredAddress(DfTypeUtil.toString(source.get("registeredAddress")));
-            result.setDisplayName(DfTypeUtil.toString(source.get("displayName")));
-            result.setPreferredLanguage(DfTypeUtil.toString(source.get("preferredLanguage")));
-            result.setDepartmentNumber(DfTypeUtil.toString(source.get("departmentNumber")));
-            result.setUidNumber(DfTypeUtil.toLong(source.get("uidNumber")));
             result.setGidNumber(DfTypeUtil.toLong(source.get("gidNumber")));
-            result.setHomeDirectory(DfTypeUtil.toString(source.get("homeDirectory")));
+            result.setGivenName(DfTypeUtil.toString(source.get("givenName")));
             result.setGroups(toStringArray(source.get("groups")));
+            result.setHomeDirectory(DfTypeUtil.toString(source.get("homeDirectory")));
+            result.setHomePhone(DfTypeUtil.toString(source.get("homePhone")));
+            result.setHomePostalAddress(DfTypeUtil.toString(source.get("homePostalAddress")));
+            result.setInitials(DfTypeUtil.toString(source.get("initials")));
+            result.setInternationaliSDNNumber(DfTypeUtil.toString(source.get("internationaliSDNNumber")));
+            result.setLabeledURI(DfTypeUtil.toString(source.get("labeledURI")));
+            result.setMail(DfTypeUtil.toString(source.get("mail")));
+            result.setMobile(DfTypeUtil.toString(source.get("mobile")));
+            result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setPager(DfTypeUtil.toString(source.get("pager")));
+            result.setPassword(DfTypeUtil.toString(source.get("password")));
+            result.setPhysicalDeliveryOfficeName(DfTypeUtil.toString(source.get("physicalDeliveryOfficeName")));
+            result.setPostOfficeBox(DfTypeUtil.toString(source.get("postOfficeBox")));
+            result.setPostalAddress(DfTypeUtil.toString(source.get("postalAddress")));
+            result.setPostalCode(DfTypeUtil.toString(source.get("postalCode")));
+            result.setPreferredLanguage(DfTypeUtil.toString(source.get("preferredLanguage")));
+            result.setRegisteredAddress(DfTypeUtil.toString(source.get("registeredAddress")));
             result.setRoles(toStringArray(source.get("roles")));
+            result.setRoomNumber(DfTypeUtil.toString(source.get("roomNumber")));
+            result.setState(DfTypeUtil.toString(source.get("state")));
+            result.setStreet(DfTypeUtil.toString(source.get("street")));
+            result.setSurname(DfTypeUtil.toString(source.get("surname")));
+            result.setTelephoneNumber(DfTypeUtil.toString(source.get("telephoneNumber")));
+            result.setTeletexTerminalIdentifier(DfTypeUtil.toString(source.get("teletexTerminalIdentifier")));
+            result.setTitle(DfTypeUtil.toString(source.get("title")));
+            result.setUidNumber(DfTypeUtil.toLong(source.get("uidNumber")));
+            result.setX121Address(DfTypeUtil.toString(source.get("x121Address")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

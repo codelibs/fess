@@ -176,6 +176,10 @@ public class BsRelatedContentCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
+        public void columnContent() {
+            doColumn("content");
+        }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
@@ -184,24 +188,20 @@ public class BsRelatedContentCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
-        public void columnUpdatedBy() {
-            doColumn("updatedBy");
-        }
-
-        public void columnUpdatedTime() {
-            doColumn("updatedTime");
+        public void columnSortOrder() {
+            doColumn("sortOrder");
         }
 
         public void columnTerm() {
             doColumn("term");
         }
 
-        public void columnContent() {
-            doColumn("content");
+        public void columnUpdatedBy() {
+            doColumn("updatedBy");
         }
 
-        public void columnSortOrder() {
-            doColumn("sortOrder");
+        public void columnUpdatedTime() {
+            doColumn("updatedTime");
         }
 
         public void columnVirtualHost() {

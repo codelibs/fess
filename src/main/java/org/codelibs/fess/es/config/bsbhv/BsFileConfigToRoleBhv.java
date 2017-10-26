@@ -51,7 +51,7 @@ public abstract class BsFileConfigToRoleBhv extends EsAbstractBehavior<FileConfi
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.file_config_to_role";
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class BsDataConfigToRoleBhv extends EsAbstractBehavior<DataConfi
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.data_config_to_role";
     }
 
     @Override

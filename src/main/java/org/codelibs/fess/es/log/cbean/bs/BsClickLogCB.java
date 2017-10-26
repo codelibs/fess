@@ -176,6 +176,18 @@ public class BsClickLogCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
+        public void columnDocId() {
+            doColumn("docId");
+        }
+
+        public void columnOrder() {
+            doColumn("order");
+        }
+
+        public void columnQueryId() {
+            doColumn("queryId");
+        }
+
         public void columnQueryRequestedAt() {
             doColumn("queryRequestedAt");
         }
@@ -184,24 +196,12 @@ public class BsClickLogCB extends EsAbstractConditionBean {
             doColumn("requestedAt");
         }
 
-        public void columnQueryId() {
-            doColumn("queryId");
-        }
-
-        public void columnDocId() {
-            doColumn("docId");
-        }
-
-        public void columnUserSessionId() {
-            doColumn("userSessionId");
-        }
-
         public void columnUrl() {
             doColumn("url");
         }
 
-        public void columnOrder() {
-            doColumn("order");
+        public void columnUserSessionId() {
+            doColumn("userSessionId");
         }
     }
 }

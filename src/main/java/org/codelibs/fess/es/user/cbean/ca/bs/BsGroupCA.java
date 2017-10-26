@@ -24,8 +24,8 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -103,6 +103,230 @@ public abstract class BsGroupCA extends EsAbstractConditionAggregation {
         TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Avg() {
+        setGidNumber_Avg(null);
+    }
+
+    public void setGidNumber_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setGidNumber_Avg("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Max() {
+        setGidNumber_Max(null);
+    }
+
+    public void setGidNumber_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setGidNumber_Max("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Min() {
+        setGidNumber_Min(null);
+    }
+
+    public void setGidNumber_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setGidNumber_Min("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Sum() {
+        setGidNumber_Sum(null);
+    }
+
+    public void setGidNumber_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setGidNumber_Sum("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_ExtendedStats() {
+        setGidNumber_ExtendedStats(null);
+    }
+
+    public void setGidNumber_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setGidNumber_ExtendedStats("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Stats() {
+        setGidNumber_Stats(null);
+    }
+
+    public void setGidNumber_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setGidNumber_Stats("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Percentiles() {
+        setGidNumber_Percentiles(null);
+    }
+
+    public void setGidNumber_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setGidNumber_Percentiles("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_PercentileRanks(double[] values) {
+        setGidNumber_PercentileRanks(values, null);
+    }
+
+    public void setGidNumber_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setGidNumber_PercentileRanks("gidNumber", values, opLambda);
+    }
+
+    public void setGidNumber_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "gidNumber", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Histogram() {
+        setGidNumber_Histogram(null);
+    }
+
+    public void setGidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setGidNumber_Histogram("gidNumber", opLambda, null);
+    }
+
+    public void setGidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
+        setGidNumber_Histogram("gidNumber", opLambda, aggsLambda);
+    }
+
+    public void setGidNumber_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsGroupCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            GroupCA ca = new GroupCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setGidNumber_Range() {
+        setGidNumber_Range(null);
+    }
+
+    public void setGidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setGidNumber_Range("gidNumber", opLambda, null);
+    }
+
+    public void setGidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
+        setGidNumber_Range("gidNumber", opLambda, aggsLambda);
+    }
+
+    public void setGidNumber_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            GroupCA ca = new GroupCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setGidNumber_Count() {
+        setGidNumber_Count(null);
+    }
+
+    public void setGidNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setGidNumber_Count("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Cardinality() {
+        setGidNumber_Cardinality(null);
+    }
+
+    public void setGidNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setGidNumber_Cardinality("gidNumber", opLambda);
+    }
+
+    public void setGidNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Missing() {
+        setGidNumber_Missing(null);
+    }
+
+    public void setGidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setGidNumber_Missing("gidNumber", opLambda, null);
+    }
+
+    public void setGidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
+        setGidNumber_Missing("gidNumber", opLambda, aggsLambda);
+    }
+
+    public void setGidNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsGroupCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            GroupCA ca = new GroupCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
         }
     }
 
@@ -224,230 +448,6 @@ public abstract class BsGroupCA extends EsAbstractConditionAggregation {
 
     public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "name");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            GroupCA ca = new GroupCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setGidNumber_Avg() {
-        setGidNumber_Avg(null);
-    }
-
-    public void setGidNumber_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        setGidNumber_Avg("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        AvgAggregationBuilder builder = regAvgA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Max() {
-        setGidNumber_Max(null);
-    }
-
-    public void setGidNumber_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        setGidNumber_Max("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        MaxAggregationBuilder builder = regMaxA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Min() {
-        setGidNumber_Min(null);
-    }
-
-    public void setGidNumber_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        setGidNumber_Min("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        MinAggregationBuilder builder = regMinA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Sum() {
-        setGidNumber_Sum(null);
-    }
-
-    public void setGidNumber_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        setGidNumber_Sum("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        SumAggregationBuilder builder = regSumA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_ExtendedStats() {
-        setGidNumber_ExtendedStats(null);
-    }
-
-    public void setGidNumber_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        setGidNumber_ExtendedStats("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Stats() {
-        setGidNumber_Stats(null);
-    }
-
-    public void setGidNumber_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        setGidNumber_Stats("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        StatsAggregationBuilder builder = regStatsA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Percentiles() {
-        setGidNumber_Percentiles(null);
-    }
-
-    public void setGidNumber_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        setGidNumber_Percentiles("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        PercentilesAggregationBuilder builder = regPercentilesA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_PercentileRanks() {
-        setGidNumber_PercentileRanks(null);
-    }
-
-    public void setGidNumber_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setGidNumber_PercentileRanks("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Histogram() {
-        setGidNumber_Histogram(null);
-    }
-
-    public void setGidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
-        setGidNumber_Histogram("gidNumber", opLambda, null);
-    }
-
-    public void setGidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
-        setGidNumber_Histogram("gidNumber", opLambda, aggsLambda);
-    }
-
-    public void setGidNumber_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
-            OperatorCall<BsGroupCA> aggsLambda) {
-        HistogramAggregationBuilder builder = regHistogramA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            GroupCA ca = new GroupCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setGidNumber_Range() {
-        setGidNumber_Range(null);
-    }
-
-    public void setGidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
-        setGidNumber_Range("gidNumber", opLambda, null);
-    }
-
-    public void setGidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
-        setGidNumber_Range("gidNumber", opLambda, aggsLambda);
-    }
-
-    public void setGidNumber_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
-        RangeAggregationBuilder builder = regRangeA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            GroupCA ca = new GroupCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setGidNumber_Count() {
-        setGidNumber_Count(null);
-    }
-
-    public void setGidNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setGidNumber_Count("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Cardinality() {
-        setGidNumber_Cardinality(null);
-    }
-
-    public void setGidNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setGidNumber_Cardinality("gidNumber", opLambda);
-    }
-
-    public void setGidNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Missing() {
-        setGidNumber_Missing(null);
-    }
-
-    public void setGidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setGidNumber_Missing("gidNumber", opLambda, null);
-    }
-
-    public void setGidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsGroupCA> aggsLambda) {
-        setGidNumber_Missing("gidNumber", opLambda, aggsLambda);
-    }
-
-    public void setGidNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsGroupCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

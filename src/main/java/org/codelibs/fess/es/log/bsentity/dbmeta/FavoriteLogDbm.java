@@ -81,10 +81,10 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     {
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getCreatedAt(),
                 (et, vl) -> ((FavoriteLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
-        setupEpg(_epgMap, et -> ((FavoriteLog) et).getUrl(), (et, vl) -> ((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getDocId(), (et, vl) -> ((FavoriteLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getQueryId(), (et, vl) -> ((FavoriteLog) et).setQueryId(DfTypeUtil.toString(vl)),
                 "queryId");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getUrl(), (et, vl) -> ((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUserInfoId(), (et, vl) -> ((FavoriteLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
                 "userInfoId");
     }
@@ -125,21 +125,17 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
             false, false, "LocalDateTime", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
-            null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
+            null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedAt() {
         return _columnCreatedAt;
-    }
-
-    public ColumnInfo columnUrl() {
-        return _columnUrl;
     }
 
     public ColumnInfo columnDocId() {
@@ -150,6 +146,10 @@ public class FavoriteLogDbm extends AbstractDBMeta {
         return _columnQueryId;
     }
 
+    public ColumnInfo columnUrl() {
+        return _columnUrl;
+    }
+
     public ColumnInfo columnUserInfoId() {
         return _columnUserInfoId;
     }
@@ -157,9 +157,9 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedAt());
-        ls.add(columnUrl());
         ls.add(columnDocId());
         ls.add(columnQueryId());
+        ls.add(columnUrl());
         ls.add(columnUserInfoId());
         return ls;
     }

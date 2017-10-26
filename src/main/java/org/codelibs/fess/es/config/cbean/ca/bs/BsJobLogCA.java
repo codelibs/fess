@@ -24,8 +24,8 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -211,16 +211,16 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setEndTime_PercentileRanks() {
-        setEndTime_PercentileRanks(null);
+    public void setEndTime_PercentileRanks(double[] values) {
+        setEndTime_PercentileRanks(values, null);
     }
 
-    public void setEndTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setEndTime_PercentileRanks("endTime", opLambda);
+    public void setEndTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setEndTime_PercentileRanks("endTime", values, opLambda);
     }
 
-    public void setEndTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "endTime");
+    public void setEndTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "endTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -577,6 +577,230 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
     public void setJobStatus_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsJobLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "jobStatus");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            JobLogCA ca = new JobLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setLastUpdated_Avg() {
+        setLastUpdated_Avg(null);
+    }
+
+    public void setLastUpdated_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setLastUpdated_Avg("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Max() {
+        setLastUpdated_Max(null);
+    }
+
+    public void setLastUpdated_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setLastUpdated_Max("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Min() {
+        setLastUpdated_Min(null);
+    }
+
+    public void setLastUpdated_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setLastUpdated_Min("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Sum() {
+        setLastUpdated_Sum(null);
+    }
+
+    public void setLastUpdated_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setLastUpdated_Sum("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_ExtendedStats() {
+        setLastUpdated_ExtendedStats(null);
+    }
+
+    public void setLastUpdated_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setLastUpdated_ExtendedStats("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Stats() {
+        setLastUpdated_Stats(null);
+    }
+
+    public void setLastUpdated_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setLastUpdated_Stats("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Percentiles() {
+        setLastUpdated_Percentiles(null);
+    }
+
+    public void setLastUpdated_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setLastUpdated_Percentiles("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_PercentileRanks(double[] values) {
+        setLastUpdated_PercentileRanks(values, null);
+    }
+
+    public void setLastUpdated_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setLastUpdated_PercentileRanks("lastUpdated", values, opLambda);
+    }
+
+    public void setLastUpdated_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "lastUpdated", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Histogram() {
+        setLastUpdated_Histogram(null);
+    }
+
+    public void setLastUpdated_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setLastUpdated_Histogram("lastUpdated", opLambda, null);
+    }
+
+    public void setLastUpdated_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+        setLastUpdated_Histogram("lastUpdated", opLambda, aggsLambda);
+    }
+
+    public void setLastUpdated_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            JobLogCA ca = new JobLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setLastUpdated_Range() {
+        setLastUpdated_Range(null);
+    }
+
+    public void setLastUpdated_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setLastUpdated_Range("lastUpdated", opLambda, null);
+    }
+
+    public void setLastUpdated_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+        setLastUpdated_Range("lastUpdated", opLambda, aggsLambda);
+    }
+
+    public void setLastUpdated_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            JobLogCA ca = new JobLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setLastUpdated_Count() {
+        setLastUpdated_Count(null);
+    }
+
+    public void setLastUpdated_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setLastUpdated_Count("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Cardinality() {
+        setLastUpdated_Cardinality(null);
+    }
+
+    public void setLastUpdated_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setLastUpdated_Cardinality("lastUpdated", opLambda);
+    }
+
+    public void setLastUpdated_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Missing() {
+        setLastUpdated_Missing(null);
+    }
+
+    public void setLastUpdated_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setLastUpdated_Missing("lastUpdated", opLambda, null);
+    }
+
+    public void setLastUpdated_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+        setLastUpdated_Missing("lastUpdated", opLambda, aggsLambda);
+    }
+
+    public void setLastUpdated_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "lastUpdated");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1083,16 +1307,16 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setStartTime_PercentileRanks() {
-        setStartTime_PercentileRanks(null);
+    public void setStartTime_PercentileRanks(double[] values) {
+        setStartTime_PercentileRanks(values, null);
     }
 
-    public void setStartTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setStartTime_PercentileRanks("startTime", opLambda);
+    public void setStartTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setStartTime_PercentileRanks("startTime", values, opLambda);
     }
 
-    public void setStartTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "startTime");
+    public void setStartTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "startTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1320,230 +1544,6 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
 
     public void setTarget_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "target");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            JobLogCA ca = new JobLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setLastUpdated_Avg() {
-        setLastUpdated_Avg(null);
-    }
-
-    public void setLastUpdated_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        setLastUpdated_Avg("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        AvgAggregationBuilder builder = regAvgA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Max() {
-        setLastUpdated_Max(null);
-    }
-
-    public void setLastUpdated_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        setLastUpdated_Max("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        MaxAggregationBuilder builder = regMaxA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Min() {
-        setLastUpdated_Min(null);
-    }
-
-    public void setLastUpdated_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        setLastUpdated_Min("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        MinAggregationBuilder builder = regMinA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Sum() {
-        setLastUpdated_Sum(null);
-    }
-
-    public void setLastUpdated_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        setLastUpdated_Sum("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        SumAggregationBuilder builder = regSumA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_ExtendedStats() {
-        setLastUpdated_ExtendedStats(null);
-    }
-
-    public void setLastUpdated_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        setLastUpdated_ExtendedStats("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Stats() {
-        setLastUpdated_Stats(null);
-    }
-
-    public void setLastUpdated_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        setLastUpdated_Stats("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        StatsAggregationBuilder builder = regStatsA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Percentiles() {
-        setLastUpdated_Percentiles(null);
-    }
-
-    public void setLastUpdated_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        setLastUpdated_Percentiles("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        PercentilesAggregationBuilder builder = regPercentilesA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_PercentileRanks() {
-        setLastUpdated_PercentileRanks(null);
-    }
-
-    public void setLastUpdated_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setLastUpdated_PercentileRanks("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Histogram() {
-        setLastUpdated_Histogram(null);
-    }
-
-    public void setLastUpdated_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
-        setLastUpdated_Histogram("lastUpdated", opLambda, null);
-    }
-
-    public void setLastUpdated_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
-        setLastUpdated_Histogram("lastUpdated", opLambda, aggsLambda);
-    }
-
-    public void setLastUpdated_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
-            OperatorCall<BsJobLogCA> aggsLambda) {
-        HistogramAggregationBuilder builder = regHistogramA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            JobLogCA ca = new JobLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setLastUpdated_Range() {
-        setLastUpdated_Range(null);
-    }
-
-    public void setLastUpdated_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
-        setLastUpdated_Range("lastUpdated", opLambda, null);
-    }
-
-    public void setLastUpdated_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
-        setLastUpdated_Range("lastUpdated", opLambda, aggsLambda);
-    }
-
-    public void setLastUpdated_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
-        RangeAggregationBuilder builder = regRangeA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            JobLogCA ca = new JobLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setLastUpdated_Count() {
-        setLastUpdated_Count(null);
-    }
-
-    public void setLastUpdated_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setLastUpdated_Count("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Cardinality() {
-        setLastUpdated_Cardinality(null);
-    }
-
-    public void setLastUpdated_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setLastUpdated_Cardinality("lastUpdated", opLambda);
-    }
-
-    public void setLastUpdated_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "lastUpdated");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setLastUpdated_Missing() {
-        setLastUpdated_Missing(null);
-    }
-
-    public void setLastUpdated_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setLastUpdated_Missing("lastUpdated", opLambda, null);
-    }
-
-    public void setLastUpdated_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
-        setLastUpdated_Missing("lastUpdated", opLambda, aggsLambda);
-    }
-
-    public void setLastUpdated_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsJobLogCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "lastUpdated");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

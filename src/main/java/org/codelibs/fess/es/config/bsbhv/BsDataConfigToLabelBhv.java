@@ -51,7 +51,7 @@ public abstract class BsDataConfigToLabelBhv extends EsAbstractBehavior<DataConf
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.data_config_to_label";
     }
 
     @Override

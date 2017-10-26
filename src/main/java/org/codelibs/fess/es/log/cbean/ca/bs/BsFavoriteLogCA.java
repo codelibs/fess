@@ -24,8 +24,8 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -194,136 +194,6 @@ public abstract class BsFavoriteLogCA extends EsAbstractConditionAggregation {
     public void setCreatedAt_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsFavoriteLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "createdAt");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FavoriteLogCA ca = new FavoriteLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_Terms() {
-        setUrl_Terms(null);
-    }
-
-    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setUrl_Terms("url", opLambda, null);
-    }
-
-    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        setUrl_Terms("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FavoriteLogCA ca = new FavoriteLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_SignificantTerms() {
-        setUrl_SignificantTerms(null);
-    }
-
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setUrl_SignificantTerms("url", opLambda, null);
-    }
-
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        setUrl_SignificantTerms("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FavoriteLogCA ca = new FavoriteLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_IpRange() {
-        setUrl_IpRange(null);
-    }
-
-    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setUrl_IpRange("url", opLambda, null);
-    }
-
-    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        setUrl_IpRange("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
-            OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FavoriteLogCA ca = new FavoriteLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_Count() {
-        setUrl_Count(null);
-    }
-
-    public void setUrl_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setUrl_Count("url", opLambda);
-    }
-
-    public void setUrl_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Cardinality() {
-        setUrl_Cardinality(null);
-    }
-
-    public void setUrl_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setUrl_Cardinality("url", opLambda);
-    }
-
-    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Missing() {
-        setUrl_Missing(null);
-    }
-
-    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setUrl_Missing("url", opLambda, null);
-    }
-
-    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        setUrl_Missing("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsFavoriteLogCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -585,6 +455,136 @@ public abstract class BsFavoriteLogCA extends EsAbstractConditionAggregation {
     public void setQueryId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsFavoriteLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FavoriteLogCA ca = new FavoriteLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrl_Terms() {
+        setUrl_Terms(null);
+    }
+
+    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setUrl_Terms("url", opLambda, null);
+    }
+
+    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        setUrl_Terms("url", opLambda, aggsLambda);
+    }
+
+    public void setUrl_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "url");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FavoriteLogCA ca = new FavoriteLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrl_SignificantTerms() {
+        setUrl_SignificantTerms(null);
+    }
+
+    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setUrl_SignificantTerms("url", opLambda, null);
+    }
+
+    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        setUrl_SignificantTerms("url", opLambda, aggsLambda);
+    }
+
+    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "url");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FavoriteLogCA ca = new FavoriteLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrl_IpRange() {
+        setUrl_IpRange(null);
+    }
+
+    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setUrl_IpRange("url", opLambda, null);
+    }
+
+    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        setUrl_IpRange("url", opLambda, aggsLambda);
+    }
+
+    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FavoriteLogCA ca = new FavoriteLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrl_Count() {
+        setUrl_Count(null);
+    }
+
+    public void setUrl_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setUrl_Count("url", opLambda);
+    }
+
+    public void setUrl_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "url");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Cardinality() {
+        setUrl_Cardinality(null);
+    }
+
+    public void setUrl_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setUrl_Cardinality("url", opLambda);
+    }
+
+    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "url");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Missing() {
+        setUrl_Missing(null);
+    }
+
+    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setUrl_Missing("url", opLambda, null);
+    }
+
+    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        setUrl_Missing("url", opLambda, aggsLambda);
+    }
+
+    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFavoriteLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

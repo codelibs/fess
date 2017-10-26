@@ -364,228 +364,6 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setUrl_Equal(String url) {
-        setUrl_Term(url, null);
-    }
-
-    public void setUrl_Equal(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setUrl_Term(url, opLambda);
-    }
-
-    public void setUrl_Term(String url) {
-        setUrl_Term(url, null);
-    }
-
-    public void setUrl_Term(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_NotEqual(String url) {
-        setUrl_NotTerm(url, null);
-    }
-
-    public void setUrl_NotTerm(String url) {
-        setUrl_NotTerm(url, null);
-    }
-
-    public void setUrl_NotEqual(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setUrl_NotTerm(url, opLambda);
-    }
-
-    public void setUrl_NotTerm(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setUrl_Term(url), opLambda);
-    }
-
-    public void setUrl_Terms(Collection<String> urlList) {
-        setUrl_Terms(urlList, null);
-    }
-
-    public void setUrl_Terms(Collection<String> urlList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("url", urlList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_InScope(Collection<String> urlList) {
-        setUrl_Terms(urlList, null);
-    }
-
-    public void setUrl_InScope(Collection<String> urlList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUrl_Terms(urlList, opLambda);
-    }
-
-    public void setUrl_Match(String url) {
-        setUrl_Match(url, null);
-    }
-
-    public void setUrl_Match(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_MatchPhrase(String url) {
-        setUrl_MatchPhrase(url, null);
-    }
-
-    public void setUrl_MatchPhrase(String url, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_MatchPhrasePrefix(String url) {
-        setUrl_MatchPhrasePrefix(url, null);
-    }
-
-    public void setUrl_MatchPhrasePrefix(String url, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Fuzzy(String url) {
-        setUrl_Fuzzy(url, null);
-    }
-
-    public void setUrl_Fuzzy(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Prefix(String url) {
-        setUrl_Prefix(url, null);
-    }
-
-    public void setUrl_Prefix(String url, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Wildcard(String url) {
-        setUrl_Wildcard(url, null);
-    }
-
-    public void setUrl_Wildcard(String url, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
-        WildcardQueryBuilder builder = regWildcardQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Regexp(String url) {
-        setUrl_Regexp(url, null);
-    }
-
-    public void setUrl_Regexp(String url, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
-        RegexpQueryBuilder builder = regRegexpQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_SpanTerm(String url) {
-        setUrl_SpanTerm("url", null);
-    }
-
-    public void setUrl_SpanTerm(String url, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
-        SpanTermQueryBuilder builder = regSpanTermQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_GreaterThan(String url) {
-        setUrl_GreaterThan(url, null);
-    }
-
-    public void setUrl_GreaterThan(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = url;
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_LessThan(String url) {
-        setUrl_LessThan(url, null);
-    }
-
-    public void setUrl_LessThan(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = url;
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_GreaterEqual(String url) {
-        setUrl_GreaterEqual(url, null);
-    }
-
-    public void setUrl_GreaterEqual(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = url;
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_LessEqual(String url) {
-        setUrl_LessEqual(url, null);
-    }
-
-    public void setUrl_LessEqual(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = url;
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Exists() {
-        setUrl_Exists(null);
-    }
-
-    public void setUrl_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_CommonTerms(String url) {
-        setUrl_CommonTerms(url, null);
-    }
-
-    public void setUrl_CommonTerms(String url, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("url", url);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsFavoriteLogCQ addOrderBy_Url_Asc() {
-        regOBA("url");
-        return this;
-    }
-
-    public BsFavoriteLogCQ addOrderBy_Url_Desc() {
-        regOBD("url");
-        return this;
-    }
-
     public void setDocId_Equal(String docId) {
         setDocId_Term(docId, null);
     }
@@ -1027,6 +805,228 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
 
     public BsFavoriteLogCQ addOrderBy_QueryId_Desc() {
         regOBD("queryId");
+        return this;
+    }
+
+    public void setUrl_Equal(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Equal(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrl_Term(url, opLambda);
+    }
+
+    public void setUrl_Term(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Term(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_NotEqual(String url) {
+        setUrl_NotTerm(url, null);
+    }
+
+    public void setUrl_NotTerm(String url) {
+        setUrl_NotTerm(url, null);
+    }
+
+    public void setUrl_NotEqual(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUrl_NotTerm(url, opLambda);
+    }
+
+    public void setUrl_NotTerm(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUrl_Term(url), opLambda);
+    }
+
+    public void setUrl_Terms(Collection<String> urlList) {
+        setUrl_Terms(urlList, null);
+    }
+
+    public void setUrl_Terms(Collection<String> urlList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("url", urlList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_InScope(Collection<String> urlList) {
+        setUrl_Terms(urlList, null);
+    }
+
+    public void setUrl_InScope(Collection<String> urlList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUrl_Terms(urlList, opLambda);
+    }
+
+    public void setUrl_Match(String url) {
+        setUrl_Match(url, null);
+    }
+
+    public void setUrl_Match(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_MatchPhrase(String url) {
+        setUrl_MatchPhrase(url, null);
+    }
+
+    public void setUrl_MatchPhrase(String url, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_MatchPhrasePrefix(String url) {
+        setUrl_MatchPhrasePrefix(url, null);
+    }
+
+    public void setUrl_MatchPhrasePrefix(String url, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Fuzzy(String url) {
+        setUrl_Fuzzy(url, null);
+    }
+
+    public void setUrl_Fuzzy(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Prefix(String url) {
+        setUrl_Prefix(url, null);
+    }
+
+    public void setUrl_Prefix(String url, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Wildcard(String url) {
+        setUrl_Wildcard(url, null);
+    }
+
+    public void setUrl_Wildcard(String url, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Regexp(String url) {
+        setUrl_Regexp(url, null);
+    }
+
+    public void setUrl_Regexp(String url, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_SpanTerm(String url) {
+        setUrl_SpanTerm("url", null);
+    }
+
+    public void setUrl_SpanTerm(String url, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_GreaterThan(String url) {
+        setUrl_GreaterThan(url, null);
+    }
+
+    public void setUrl_GreaterThan(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_LessThan(String url) {
+        setUrl_LessThan(url, null);
+    }
+
+    public void setUrl_LessThan(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_GreaterEqual(String url) {
+        setUrl_GreaterEqual(url, null);
+    }
+
+    public void setUrl_GreaterEqual(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_LessEqual(String url) {
+        setUrl_LessEqual(url, null);
+    }
+
+    public void setUrl_LessEqual(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_Exists() {
+        setUrl_Exists(null);
+    }
+
+    public void setUrl_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("url");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_CommonTerms(String url) {
+        setUrl_CommonTerms(url, null);
+    }
+
+    public void setUrl_CommonTerms(String url, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsFavoriteLogCQ addOrderBy_Url_Asc() {
+        regOBA("url");
+        return this;
+    }
+
+    public BsFavoriteLogCQ addOrderBy_Url_Desc() {
+        regOBD("url");
         return this;
     }
 

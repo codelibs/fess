@@ -51,7 +51,7 @@ public abstract class BsWebConfigToRoleBhv extends EsAbstractBehavior<WebConfigT
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.web_config_to_role";
     }
 
     @Override

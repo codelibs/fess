@@ -176,32 +176,32 @@ public class BsAccessTokenCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
-        public void columnName() {
-            doColumn("name");
-        }
-
-        public void columnToken() {
-            doColumn("token");
-        }
-
-        public void columnPermissions() {
-            doColumn("permissions");
-        }
-
-        public void columnParameterName() {
-            doColumn("parameter_name");
-        }
-
-        public void columnExpiredTime() {
-            doColumn("expiredTime");
-        }
-
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
 
         public void columnCreatedTime() {
             doColumn("createdTime");
+        }
+
+        public void columnExpiredTime() {
+            doColumn("expiredTime");
+        }
+
+        public void columnName() {
+            doColumn("name");
+        }
+
+        public void columnParameterName() {
+            doColumn("parameter_name");
+        }
+
+        public void columnPermissions() {
+            doColumn("permissions");
+        }
+
+        public void columnToken() {
+            doColumn("token");
         }
 
         public void columnUpdatedBy() {

@@ -87,12 +87,12 @@ public class KeyMatchDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((KeyMatch) et).getMaxSize(), (et, vl) -> ((KeyMatch) et).setMaxSize(DfTypeUtil.toInteger(vl)), "maxSize");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getQuery(), (et, vl) -> ((KeyMatch) et).setQuery(DfTypeUtil.toString(vl)), "query");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getTerm(), (et, vl) -> ((KeyMatch) et).setTerm(DfTypeUtil.toString(vl)), "term");
-        setupEpg(_epgMap, et -> ((KeyMatch) et).getVirtualHost(), (et, vl) -> ((KeyMatch) et).setVirtualHost(DfTypeUtil.toString(vl)),
-                "virtualHost");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getUpdatedBy(), (et, vl) -> ((KeyMatch) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getUpdatedTime(), (et, vl) -> ((KeyMatch) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getVirtualHost(), (et, vl) -> ((KeyMatch) et).setVirtualHost(DfTypeUtil.toString(vl)),
+                "virtualHost");
     }
 
     @Override
@@ -141,12 +141,12 @@ public class KeyMatchDbm extends AbstractDBMeta {
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTerm = cci("term", "term", null, null, String.class, "term", null, false, false, false, "keyword", 0,
             0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
-            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnBoost() {
         return _columnBoost;
@@ -172,16 +172,16 @@ public class KeyMatchDbm extends AbstractDBMeta {
         return _columnTerm;
     }
 
-    public ColumnInfo columnVirtualHost() {
-        return _columnVirtualHost;
-    }
-
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
+    }
+
+    public ColumnInfo columnVirtualHost() {
+        return _columnVirtualHost;
     }
 
     protected List<ColumnInfo> ccil() {
@@ -192,9 +192,9 @@ public class KeyMatchDbm extends AbstractDBMeta {
         ls.add(columnMaxSize());
         ls.add(columnQuery());
         ls.add(columnTerm());
-        ls.add(columnVirtualHost());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
+        ls.add(columnVirtualHost());
         return ls;
     }
 

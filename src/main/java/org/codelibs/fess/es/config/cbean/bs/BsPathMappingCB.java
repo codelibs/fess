@@ -200,16 +200,16 @@ public class BsPathMappingCB extends EsAbstractConditionBean {
             doColumn("sortOrder");
         }
 
-        public void columnUserAgent() {
-            doColumn("userAgent");
-        }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
 
         public void columnUpdatedTime() {
             doColumn("updatedTime");
+        }
+
+        public void columnUserAgent() {
+            doColumn("userAgent");
         }
     }
 }

@@ -24,8 +24,8 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -342,16 +342,16 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setErrorCount_PercentileRanks() {
-        setErrorCount_PercentileRanks(null);
+    public void setErrorCount_PercentileRanks(double[] values) {
+        setErrorCount_PercentileRanks(values, null);
     }
 
-    public void setErrorCount_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setErrorCount_PercentileRanks("errorCount", opLambda);
+    public void setErrorCount_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setErrorCount_PercentileRanks("errorCount", values, opLambda);
     }
 
-    public void setErrorCount_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "errorCount");
+    public void setErrorCount_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "errorCount", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -829,16 +829,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setLastAccessTime_PercentileRanks() {
-        setLastAccessTime_PercentileRanks(null);
+    public void setLastAccessTime_PercentileRanks(double[] values) {
+        setLastAccessTime_PercentileRanks(values, null);
     }
 
-    public void setLastAccessTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setLastAccessTime_PercentileRanks("lastAccessTime", opLambda);
+    public void setLastAccessTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setLastAccessTime_PercentileRanks("lastAccessTime", values, opLambda);
     }
 
-    public void setLastAccessTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "lastAccessTime");
+    public void setLastAccessTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "lastAccessTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

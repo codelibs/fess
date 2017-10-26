@@ -38,9 +38,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,7 +171,7 @@ public class CrawlingInfoHelper {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
                     final TermsAggregationBuilder termsBuilder =
                             AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
-                                    .size(maxSessionIdsInList).order(Order.term(false));
+                                    .size(maxSessionIdsInList).order(BucketOrder.key(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
                     queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY);
                     return true;

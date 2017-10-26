@@ -185,6 +185,184 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setGidNumber_Equal(Long gidNumber) {
+        setGidNumber_Term(gidNumber, null);
+    }
+
+    public void setGidNumber_Equal(Long gidNumber, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setGidNumber_Term(gidNumber, opLambda);
+    }
+
+    public void setGidNumber_Term(Long gidNumber) {
+        setGidNumber_Term(gidNumber, null);
+    }
+
+    public void setGidNumber_Term(Long gidNumber, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("gidNumber", gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_NotEqual(Long gidNumber) {
+        setGidNumber_NotTerm(gidNumber, null);
+    }
+
+    public void setGidNumber_NotTerm(Long gidNumber) {
+        setGidNumber_NotTerm(gidNumber, null);
+    }
+
+    public void setGidNumber_NotEqual(Long gidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setGidNumber_NotTerm(gidNumber, opLambda);
+    }
+
+    public void setGidNumber_NotTerm(Long gidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setGidNumber_Term(gidNumber), opLambda);
+    }
+
+    public void setGidNumber_Terms(Collection<Long> gidNumberList) {
+        setGidNumber_Terms(gidNumberList, null);
+    }
+
+    public void setGidNumber_Terms(Collection<Long> gidNumberList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("gidNumber", gidNumberList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_InScope(Collection<Long> gidNumberList) {
+        setGidNumber_Terms(gidNumberList, null);
+    }
+
+    public void setGidNumber_InScope(Collection<Long> gidNumberList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setGidNumber_Terms(gidNumberList, opLambda);
+    }
+
+    public void setGidNumber_Match(Long gidNumber) {
+        setGidNumber_Match(gidNumber, null);
+    }
+
+    public void setGidNumber_Match(Long gidNumber, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("gidNumber", gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_MatchPhrase(Long gidNumber) {
+        setGidNumber_MatchPhrase(gidNumber, null);
+    }
+
+    public void setGidNumber_MatchPhrase(Long gidNumber, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("gidNumber", gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_MatchPhrasePrefix(Long gidNumber) {
+        setGidNumber_MatchPhrasePrefix(gidNumber, null);
+    }
+
+    public void setGidNumber_MatchPhrasePrefix(Long gidNumber, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("gidNumber", gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Fuzzy(Long gidNumber) {
+        setGidNumber_Fuzzy(gidNumber, null);
+    }
+
+    public void setGidNumber_Fuzzy(Long gidNumber, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("gidNumber", gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_GreaterThan(Long gidNumber) {
+        setGidNumber_GreaterThan(gidNumber, null);
+    }
+
+    public void setGidNumber_GreaterThan(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = gidNumber;
+        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_LessThan(Long gidNumber) {
+        setGidNumber_LessThan(gidNumber, null);
+    }
+
+    public void setGidNumber_LessThan(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = gidNumber;
+        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_GreaterEqual(Long gidNumber) {
+        setGidNumber_GreaterEqual(gidNumber, null);
+    }
+
+    public void setGidNumber_GreaterEqual(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = gidNumber;
+        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_LessEqual(Long gidNumber) {
+        setGidNumber_LessEqual(gidNumber, null);
+    }
+
+    public void setGidNumber_LessEqual(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = gidNumber;
+        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Exists() {
+        setGidNumber_Exists(null);
+    }
+
+    public void setGidNumber_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_CommonTerms(Long gidNumber) {
+        setGidNumber_CommonTerms(gidNumber, null);
+    }
+
+    public void setGidNumber_CommonTerms(Long gidNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("gidNumber", gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsGroupCQ addOrderBy_GidNumber_Asc() {
+        regOBA("gidNumber");
+        return this;
+    }
+
+    public BsGroupCQ addOrderBy_GidNumber_Desc() {
+        regOBD("gidNumber");
+        return this;
+    }
+
     public void setName_Equal(String name) {
         setName_Term(name, null);
     }
@@ -404,184 +582,6 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
 
     public BsGroupCQ addOrderBy_Name_Desc() {
         regOBD("name");
-        return this;
-    }
-
-    public void setGidNumber_Equal(Long gidNumber) {
-        setGidNumber_Term(gidNumber, null);
-    }
-
-    public void setGidNumber_Equal(Long gidNumber, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setGidNumber_Term(gidNumber, opLambda);
-    }
-
-    public void setGidNumber_Term(Long gidNumber) {
-        setGidNumber_Term(gidNumber, null);
-    }
-
-    public void setGidNumber_Term(Long gidNumber, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("gidNumber", gidNumber);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_NotEqual(Long gidNumber) {
-        setGidNumber_NotTerm(gidNumber, null);
-    }
-
-    public void setGidNumber_NotTerm(Long gidNumber) {
-        setGidNumber_NotTerm(gidNumber, null);
-    }
-
-    public void setGidNumber_NotEqual(Long gidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setGidNumber_NotTerm(gidNumber, opLambda);
-    }
-
-    public void setGidNumber_NotTerm(Long gidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setGidNumber_Term(gidNumber), opLambda);
-    }
-
-    public void setGidNumber_Terms(Collection<Long> gidNumberList) {
-        setGidNumber_Terms(gidNumberList, null);
-    }
-
-    public void setGidNumber_Terms(Collection<Long> gidNumberList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("gidNumber", gidNumberList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_InScope(Collection<Long> gidNumberList) {
-        setGidNumber_Terms(gidNumberList, null);
-    }
-
-    public void setGidNumber_InScope(Collection<Long> gidNumberList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setGidNumber_Terms(gidNumberList, opLambda);
-    }
-
-    public void setGidNumber_Match(Long gidNumber) {
-        setGidNumber_Match(gidNumber, null);
-    }
-
-    public void setGidNumber_Match(Long gidNumber, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("gidNumber", gidNumber);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_MatchPhrase(Long gidNumber) {
-        setGidNumber_MatchPhrase(gidNumber, null);
-    }
-
-    public void setGidNumber_MatchPhrase(Long gidNumber, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("gidNumber", gidNumber);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_MatchPhrasePrefix(Long gidNumber) {
-        setGidNumber_MatchPhrasePrefix(gidNumber, null);
-    }
-
-    public void setGidNumber_MatchPhrasePrefix(Long gidNumber, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("gidNumber", gidNumber);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Fuzzy(Long gidNumber) {
-        setGidNumber_Fuzzy(gidNumber, null);
-    }
-
-    public void setGidNumber_Fuzzy(Long gidNumber, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("gidNumber", gidNumber);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_GreaterThan(Long gidNumber) {
-        setGidNumber_GreaterThan(gidNumber, null);
-    }
-
-    public void setGidNumber_GreaterThan(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = gidNumber;
-        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_LessThan(Long gidNumber) {
-        setGidNumber_LessThan(gidNumber, null);
-    }
-
-    public void setGidNumber_LessThan(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = gidNumber;
-        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_GreaterEqual(Long gidNumber) {
-        setGidNumber_GreaterEqual(gidNumber, null);
-    }
-
-    public void setGidNumber_GreaterEqual(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = gidNumber;
-        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_LessEqual(Long gidNumber) {
-        setGidNumber_LessEqual(gidNumber, null);
-    }
-
-    public void setGidNumber_LessEqual(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = gidNumber;
-        RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_Exists() {
-        setGidNumber_Exists(null);
-    }
-
-    public void setGidNumber_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("gidNumber");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setGidNumber_CommonTerms(Long gidNumber) {
-        setGidNumber_CommonTerms(gidNumber, null);
-    }
-
-    public void setGidNumber_CommonTerms(Long gidNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("gidNumber", gidNumber);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsGroupCQ addOrderBy_GidNumber_Asc() {
-        regOBA("gidNumber");
-        return this;
-    }
-
-    public BsGroupCQ addOrderBy_GidNumber_Desc() {
-        regOBD("gidNumber");
         return this;
     }
 

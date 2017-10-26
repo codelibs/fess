@@ -51,7 +51,7 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.label_type";
     }
 
     @Override
@@ -79,11 +79,11 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
             result.setIncludedPaths(DfTypeUtil.toString(source.get("includedPaths")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setPermissions(toStringArray(source.get("permissions")));
-            result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             result.setValue(DfTypeUtil.toString(source.get("value")));
+            result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

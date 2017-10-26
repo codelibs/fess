@@ -24,8 +24,8 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -211,16 +211,16 @@ public abstract class BsElevateWordCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setBoost_PercentileRanks() {
-        setBoost_PercentileRanks(null);
+    public void setBoost_PercentileRanks(double[] values) {
+        setBoost_PercentileRanks(values, null);
     }
 
-    public void setBoost_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setBoost_PercentileRanks("boost", opLambda);
+    public void setBoost_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setBoost_PercentileRanks("boost", values, opLambda);
     }
 
-    public void setBoost_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost");
+    public void setBoost_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -566,16 +566,16 @@ public abstract class BsElevateWordCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setCreatedTime_PercentileRanks() {
-        setCreatedTime_PercentileRanks(null);
+    public void setCreatedTime_PercentileRanks(double[] values) {
+        setCreatedTime_PercentileRanks(values, null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCreatedTime_PercentileRanks("createdTime", opLambda);
+    public void setCreatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -676,6 +676,137 @@ public abstract class BsElevateWordCA extends EsAbstractConditionAggregation {
     public void setCreatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsElevateWordCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "createdTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ElevateWordCA ca = new ElevateWordCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setPermissions_Terms() {
+        setPermissions_Terms(null);
+    }
+
+    public void setPermissions_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setPermissions_Terms("permissions", opLambda, null);
+    }
+
+    public void setPermissions_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsElevateWordCA> aggsLambda) {
+        setPermissions_Terms("permissions", opLambda, aggsLambda);
+    }
+
+    public void setPermissions_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ElevateWordCA ca = new ElevateWordCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setPermissions_SignificantTerms() {
+        setPermissions_SignificantTerms(null);
+    }
+
+    public void setPermissions_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setPermissions_SignificantTerms("permissions", opLambda, null);
+    }
+
+    public void setPermissions_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordCA> aggsLambda) {
+        setPermissions_SignificantTerms("permissions", opLambda, aggsLambda);
+    }
+
+    public void setPermissions_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ElevateWordCA ca = new ElevateWordCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setPermissions_IpRange() {
+        setPermissions_IpRange(null);
+    }
+
+    public void setPermissions_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setPermissions_IpRange("permissions", opLambda, null);
+    }
+
+    public void setPermissions_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsElevateWordCA> aggsLambda) {
+        setPermissions_IpRange("permissions", opLambda, aggsLambda);
+    }
+
+    public void setPermissions_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ElevateWordCA ca = new ElevateWordCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setPermissions_Count() {
+        setPermissions_Count(null);
+    }
+
+    public void setPermissions_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setPermissions_Count("permissions", opLambda);
+    }
+
+    public void setPermissions_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Cardinality() {
+        setPermissions_Cardinality(null);
+    }
+
+    public void setPermissions_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setPermissions_Cardinality("permissions", opLambda);
+    }
+
+    public void setPermissions_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Missing() {
+        setPermissions_Missing(null);
+    }
+
+    public void setPermissions_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setPermissions_Missing("permissions", opLambda, null);
+    }
+
+    public void setPermissions_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsElevateWordCA> aggsLambda) {
+        setPermissions_Missing("permissions", opLambda, aggsLambda);
+    }
+
+    public void setPermissions_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "permissions");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1210,137 +1341,6 @@ public abstract class BsElevateWordCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setPermissions_Terms() {
-        setPermissions_Terms(null);
-    }
-
-    public void setPermissions_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setPermissions_Terms("permissions", opLambda, null);
-    }
-
-    public void setPermissions_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsElevateWordCA> aggsLambda) {
-        setPermissions_Terms("permissions", opLambda, aggsLambda);
-    }
-
-    public void setPermissions_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
-            OperatorCall<BsElevateWordCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "permissions");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ElevateWordCA ca = new ElevateWordCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setPermissions_SignificantTerms() {
-        setPermissions_SignificantTerms(null);
-    }
-
-    public void setPermissions_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setPermissions_SignificantTerms("permissions", opLambda, null);
-    }
-
-    public void setPermissions_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsElevateWordCA> aggsLambda) {
-        setPermissions_SignificantTerms("permissions", opLambda, aggsLambda);
-    }
-
-    public void setPermissions_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsElevateWordCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "permissions");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ElevateWordCA ca = new ElevateWordCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setPermissions_IpRange() {
-        setPermissions_IpRange(null);
-    }
-
-    public void setPermissions_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setPermissions_IpRange("permissions", opLambda, null);
-    }
-
-    public void setPermissions_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsElevateWordCA> aggsLambda) {
-        setPermissions_IpRange("permissions", opLambda, aggsLambda);
-    }
-
-    public void setPermissions_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
-            OperatorCall<BsElevateWordCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "permissions");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ElevateWordCA ca = new ElevateWordCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setPermissions_Count() {
-        setPermissions_Count(null);
-    }
-
-    public void setPermissions_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setPermissions_Count("permissions", opLambda);
-    }
-
-    public void setPermissions_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "permissions");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setPermissions_Cardinality() {
-        setPermissions_Cardinality(null);
-    }
-
-    public void setPermissions_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setPermissions_Cardinality("permissions", opLambda);
-    }
-
-    public void setPermissions_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "permissions");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setPermissions_Missing() {
-        setPermissions_Missing(null);
-    }
-
-    public void setPermissions_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setPermissions_Missing("permissions", opLambda, null);
-    }
-
-    public void setPermissions_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsElevateWordCA> aggsLambda) {
-        setPermissions_Missing("permissions", opLambda, aggsLambda);
-    }
-
-    public void setPermissions_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsElevateWordCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "permissions");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ElevateWordCA ca = new ElevateWordCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
     public void setUpdatedBy_Terms() {
         setUpdatedBy_Terms(null);
     }
@@ -1577,16 +1577,16 @@ public abstract class BsElevateWordCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setUpdatedTime_PercentileRanks() {
-        setUpdatedTime_PercentileRanks(null);
+    public void setUpdatedTime_PercentileRanks(double[] values) {
+        setUpdatedTime_PercentileRanks(values, null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setUpdatedTime_PercentileRanks("updatedTime", opLambda);
+    public void setUpdatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

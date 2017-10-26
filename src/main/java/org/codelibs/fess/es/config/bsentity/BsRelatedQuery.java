@@ -43,17 +43,17 @@ public class BsRelatedQuery extends EsAbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
+    /** queries */
+    protected String[] queries;
+
+    /** term */
+    protected String term;
+
     /** updatedBy */
     protected String updatedBy;
 
     /** updatedTime */
     protected Long updatedTime;
-
-    /** term */
-    protected String term;
-
-    /** queries */
-    protected String[] queries;
 
     /** virtualHost */
     protected String virtualHost;
@@ -85,17 +85,17 @@ public class BsRelatedQuery extends EsAbstractEntity {
         if (createdTime != null) {
             addFieldToSource(sourceMap, "createdTime", createdTime);
         }
+        if (queries != null) {
+            addFieldToSource(sourceMap, "queries", queries);
+        }
+        if (term != null) {
+            addFieldToSource(sourceMap, "term", term);
+        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
-        }
-        if (term != null) {
-            addFieldToSource(sourceMap, "term", term);
-        }
-        if (queries != null) {
-            addFieldToSource(sourceMap, "queries", queries);
         }
         if (virtualHost != null) {
             addFieldToSource(sourceMap, "virtualHost", virtualHost);
@@ -115,10 +115,10 @@ public class BsRelatedQuery extends EsAbstractEntity {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
+        sb.append(dm).append(queries);
+        sb.append(dm).append(term);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
-        sb.append(dm).append(term);
-        sb.append(dm).append(queries);
         sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -150,6 +150,26 @@ public class BsRelatedQuery extends EsAbstractEntity {
         this.createdTime = value;
     }
 
+    public String[] getQueries() {
+        checkSpecifiedProperty("queries");
+        return queries;
+    }
+
+    public void setQueries(String[] value) {
+        registerModifiedProperty("queries");
+        this.queries = value;
+    }
+
+    public String getTerm() {
+        checkSpecifiedProperty("term");
+        return convertEmptyToNull(term);
+    }
+
+    public void setTerm(String value) {
+        registerModifiedProperty("term");
+        this.term = value;
+    }
+
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
         return convertEmptyToNull(updatedBy);
@@ -168,26 +188,6 @@ public class BsRelatedQuery extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
-    }
-
-    public String getTerm() {
-        checkSpecifiedProperty("term");
-        return convertEmptyToNull(term);
-    }
-
-    public void setTerm(String value) {
-        registerModifiedProperty("term");
-        this.term = value;
-    }
-
-    public String[] getQueries() {
-        checkSpecifiedProperty("queries");
-        return queries;
-    }
-
-    public void setQueries(String[] value) {
-        registerModifiedProperty("queries");
-        this.queries = value;
     }
 
     public String getVirtualHost() {

@@ -51,7 +51,7 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.path_mapping";
     }
 
     @Override
@@ -79,9 +79,9 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
             result.setRegex(DfTypeUtil.toString(source.get("regex")));
             result.setReplacement(DfTypeUtil.toString(source.get("replacement")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
-            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

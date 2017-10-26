@@ -55,14 +55,14 @@ public class BsKeyMatch extends EsAbstractEntity {
     /** term */
     protected String term;
 
-    /** virtualHost */
-    protected String virtualHost;
-
     /** updatedBy */
     protected String updatedBy;
 
     /** updatedTime */
     protected Long updatedTime;
+
+    /** virtualHost */
+    protected String virtualHost;
 
     // [Referrers] *comment only
 
@@ -103,14 +103,14 @@ public class BsKeyMatch extends EsAbstractEntity {
         if (term != null) {
             addFieldToSource(sourceMap, "term", term);
         }
-        if (virtualHost != null) {
-            addFieldToSource(sourceMap, "virtualHost", virtualHost);
-        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
+        }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
         }
         return sourceMap;
     }
@@ -131,9 +131,9 @@ public class BsKeyMatch extends EsAbstractEntity {
         sb.append(dm).append(maxSize);
         sb.append(dm).append(query);
         sb.append(dm).append(term);
-        sb.append(dm).append(virtualHost);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
+        sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -204,16 +204,6 @@ public class BsKeyMatch extends EsAbstractEntity {
         this.term = value;
     }
 
-    public String getVirtualHost() {
-        checkSpecifiedProperty("virtualHost");
-        return convertEmptyToNull(virtualHost);
-    }
-
-    public void setVirtualHost(String value) {
-        registerModifiedProperty("virtualHost");
-        this.virtualHost = value;
-    }
-
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
         return convertEmptyToNull(updatedBy);
@@ -232,5 +222,15 @@ public class BsKeyMatch extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 }
