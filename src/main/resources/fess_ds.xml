@@ -27,6 +27,10 @@
 			<arg>"GitBucketDataStore"</arg>
 			<arg>gitBucketDataStore</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"JsonDataStore"</arg>
+			<arg>jsonDataStore</arg>
+		</postConstruct>
 	</component>
 
 	<component name="databaseDataStore" class="org.codelibs.fess.ds.impl.DatabaseDataStoreImpl">
@@ -43,6 +47,8 @@
 	<component name="esListDataStore" class="org.codelibs.fess.ds.impl.EsListDataStoreImpl">
 	</component>
 	<component name="gitBucketDataStore" class="org.codelibs.fess.ds.impl.GitBucketDataStoreImpl">
+	</component>
+	<component name="jsonDataStore" class="org.codelibs.fess.ds.impl.JsonDataStoreImpl">
 	</component>
 
 	<component name="indexUpdateCallback" class="org.codelibs.fess.ds.impl.IndexUpdateCallbackImpl" instance="prototype">
