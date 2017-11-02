@@ -46,7 +46,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
@@ -555,8 +554,6 @@ public class ViewHelper {
     }
 
     protected void writeFileName(final StreamResponse response, final ResponseData responseData) {
-        final UserAgentHelper userAgentHelper = ComponentUtil.getUserAgentHelper();
-        final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
         String charset = responseData.getCharSet();
         if (charset == null) {
             charset = Constants.UTF_8;
@@ -571,10 +568,6 @@ public class ViewHelper {
                 name = URLDecoder.decode(url, charset);
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("userAgentType: " + userAgentType + ", charset: " + charset + ", name: " + name);
-            }
-
             final String contentDispositionType;
             if (inlineMimeTypeSet.contains(responseData.getMimeType())) {
                 contentDispositionType = "inline";
@@ -582,26 +575,8 @@ public class ViewHelper {
                 contentDispositionType = "attachment";
             }
 
-            switch (userAgentType) {
-            case IE:
-                response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + URLEncoder.encode(name, Constants.UTF_8)
-                        + "\"");
-                break;
-            case OPERA:
-                response.header(CONTENT_DISPOSITION,
-                        contentDispositionType + "; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
-                break;
-            case SAFARI:
-                response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + name + "\"");
-                break;
-            case CHROME:
-            case FIREFOX:
-            case OTHER:
-            default:
-                response.header(CONTENT_DISPOSITION,
-                        contentDispositionType + "; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
-                break;
-            }
+            response.header(CONTENT_DISPOSITION,
+                    contentDispositionType + "; filename=\"" + name + "\"; filename*=utf-8''" + URLEncoder.encode(name, Constants.UTF_8));
         } catch (final Exception e) {
             logger.warn("Failed to write a filename: " + responseData, e);
         }
