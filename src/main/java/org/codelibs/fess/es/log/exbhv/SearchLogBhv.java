@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.log.bsbhv.BsSearchLogBhv;
@@ -38,9 +39,15 @@ import org.slf4j.LoggerFactory;
 public class SearchLogBhv extends BsSearchLogBhv {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogBhv.class);
 
+    private String indexName = null;
+
     @Override
     protected String asEsIndex() {
-        return ComponentUtil.getFessConfig().getIndexLogIndex();
+        if (indexName == null) {
+            final String name = ComponentUtil.getFessConfig().getIndexLogIndex();
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote("fess_log"), name);
+        }
+        return indexName;
     }
 
     @Override

@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.user.exbhv;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.codelibs.core.misc.Pair;
@@ -29,9 +30,15 @@ import org.dbflute.util.DfTypeUtil;
  * @author FreeGen
  */
 public class RoleBhv extends BsRoleBhv {
+    private String indexName = null;
+
     @Override
     protected String asEsIndex() {
-        return ComponentUtil.getFessConfig().getIndexUserIndex();
+        if (indexName == null) {
+            final String name = ComponentUtil.getFessConfig().getIndexUserIndex();
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote(".fess_user"), name);
+        }
+        return indexName;
     }
 
     @Override

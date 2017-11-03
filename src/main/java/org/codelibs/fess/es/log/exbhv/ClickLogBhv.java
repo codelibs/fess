@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.regex.Pattern;
 
 import org.codelibs.fess.es.log.bsbhv.BsClickLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
@@ -33,9 +34,15 @@ import org.slf4j.LoggerFactory;
 public class ClickLogBhv extends BsClickLogBhv {
     private static final Logger logger = LoggerFactory.getLogger(ClickLogBhv.class);
 
+    private String indexName = null;
+
     @Override
     protected String asEsIndex() {
-        return ComponentUtil.getFessConfig().getIndexLogIndex();
+        if (indexName == null) {
+            final String name = ComponentUtil.getFessConfig().getIndexLogIndex();
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote("fess_log"), name);
+        }
+        return indexName;
     }
 
     @Override

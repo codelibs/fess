@@ -326,17 +326,16 @@ public class FessEsClient implements Client {
                         }
                     }
                 } else {
-                    switch (configIndex) {
-                    case ".fess_config":
-                        indexName = fessConfig.getIndexConfigIndex();
-                        break;
-                    case ".fess_user":
-                        indexName = fessConfig.getIndexUserIndex();
-                        break;
-                    case "fess_log":
-                        indexName = fessConfig.getIndexLogIndex();
-                        break;
-                    default:
+                    if (configIndex.startsWith(".fess_config")) {
+                        final String name = fessConfig.getIndexConfigIndex();
+                        indexName = configIndex.replaceFirst(Pattern.quote(".fess_config"), name);
+                    } else if (configIndex.startsWith(".fess_user")) {
+                        final String name = fessConfig.getIndexUserIndex();
+                        indexName = configIndex.replaceFirst(Pattern.quote(".fess_config"), name);
+                    } else if (configIndex.startsWith("fess_log")) {
+                        final String name = fessConfig.getIndexLogIndex();
+                        indexName = configIndex.replaceFirst(Pattern.quote(".fess_config"), name);
+                    } else {
                         throw new FessSystemException("Unknown config index: " + configIndex);
                     }
                     final boolean exists = existsIndex(indexName);
