@@ -34,7 +34,6 @@
 		<arg>
 			<component class="org.apache.lucene.analysis.core.WhitespaceAnalyzer"></component>
 		</arg>
-		<property name="lowercaseExpandedTerms">false</property>
 		<property name="allowLeadingWildcard">true</property>
 		<property name="defaultOperator">org.apache.lucene.queryparser.classic.QueryParser$Operator.AND</property>
 	</component>
