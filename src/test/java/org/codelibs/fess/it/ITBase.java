@@ -38,12 +38,12 @@ public class ITBase {
             return testToken;
         }
 
-        given().body(
-                "{\"index\":{\"_index\":\".fess_config.access_token\",\"_type\":\"access_token\",\"_id\":\""
+        given().contentType("application/json")
+                .body("{\"index\":{\"_index\":\".fess_config.access_token\",\"_type\":\"access_token\",\"_id\":\""
                         + DEFAULT_TEST_TOKEN_ID
                         + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
                         + DEFAULT_TEST_TOKEN + "\"}\n").when().post(getEsUrl() + "/_bulk");
-        given().when().post(getEsUrl() + "/_refresh");
+        given().contentType("application/json").when().post(getEsUrl() + "/_refresh");
         return DEFAULT_TEST_TOKEN;
     }
 
@@ -52,11 +52,11 @@ public class ITBase {
         if (testToken != null) {
             return;
         }
-        given().delete(getEsUrl() + "/.fess_config.access_token/access_token/" + DEFAULT_TEST_TOKEN_ID);
+        given().contentType("application/json").delete(getEsUrl() + "/.fess_config.access_token/access_token/" + DEFAULT_TEST_TOKEN_ID);
     }
 
     public static void refresh() {
-        given().post(getEsUrl() + "/_refresh");
+        given().contentType("application/json").post(getEsUrl() + "/_refresh");
     }
 
     public static String getFessUrl() {
@@ -68,6 +68,7 @@ public class ITBase {
     }
 
     protected static RequestSpecification checkMethodBase(final Map<String, Object> body) {
-        return given().header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2).when();
+        return given().contentType("application/json").header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2)
+                .when();
     }
 }

@@ -175,13 +175,13 @@ public class CrawlTestBase extends ITBase {
     }
 
     protected static Response deleteMethod(final String path) {
-        return given().header("Authorization", getTestToken()).delete(path);
+        return given().contentType("application/json").header("Authorization", getTestToken()).delete(path);
     }
 
     protected static void deleteDocuments(final String queryString) {
         List<String> docIds = new ArrayList<>();
         Response response =
-                given().param("scroll", "1m").param("q", queryString)
+                given().contentType("application/json").param("scroll", "1m").param("q", queryString)
                         .get(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/_search");
         JsonPath jsonPath = JsonPath.from(response.asString());
         String scrollId = jsonPath.getString("_scroll_id");
@@ -194,12 +194,12 @@ public class CrawlTestBase extends ITBase {
             Map<String, Object> scrollBody = new HashMap<>();
             scrollBody.put("scroll", "1m");
             scrollBody.put("scroll_id", scrollId);
-            response = given().body(scrollBody).get(getEsUrl() + "/_search/scroll");
+            response = given().contentType("application/json").body(scrollBody).get(getEsUrl() + "/_search/scroll");
             jsonPath = JsonPath.from(response.asString());
         }
 
         for (String docId : docIds) {
-            given().delete(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/" + docId);
+            given().contentType("application/json").delete(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/" + docId);
         }
     }
 

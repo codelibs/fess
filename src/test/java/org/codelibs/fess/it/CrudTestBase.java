@@ -212,7 +212,7 @@ public abstract class CrudTestBase extends ITBase {
     }
 
     protected Response checkDeleteMethod(final String path) {
-        return given().header("Authorization", getTestToken()).delete(getApiPath() + "/" + path);
+        return given().contentType("application/json").header("Authorization", getTestToken()).delete(getApiPath() + "/" + path);
     }
 
     protected List<Map<String, Object>> getItemList(final Map<String, Object> body) {
