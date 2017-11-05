@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "request_header" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "createdBy" : {
             "type" : "keyword"

@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "click_log" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "docId" : {
             "type" : "keyword"

@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "scheduled_job" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "available" : {
             "type" : "boolean"

@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "path_mapping" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "createdBy" : {
             "type" : "keyword"

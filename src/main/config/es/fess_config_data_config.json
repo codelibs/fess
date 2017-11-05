@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "data_config" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "available" : {
             "type" : "boolean"

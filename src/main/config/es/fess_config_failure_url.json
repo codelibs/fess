@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "failure_url" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "configId" : {
             "type" : "keyword"

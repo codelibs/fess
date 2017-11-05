@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "crawling_info_param" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "crawlingInfoId" : {
             "type" : "keyword"

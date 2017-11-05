@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "job_log" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "endTime" : {
             "type" : "long"

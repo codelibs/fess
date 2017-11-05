@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "web_config_to_role" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "roleTypeId" : {
             "type" : "keyword"

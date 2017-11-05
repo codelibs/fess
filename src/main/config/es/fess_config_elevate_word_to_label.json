@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "elevate_word_to_label" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "elevateWordId" : {
             "type" : "keyword"

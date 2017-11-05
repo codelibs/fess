@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "duplicate_host" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "createdBy" : {
             "type" : "keyword"

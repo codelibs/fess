@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "boost_document_rule" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "boostExpr" : {
             "type" : "keyword"

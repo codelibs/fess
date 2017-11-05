@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "group" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "gidNumber" : {
             "type" : "long"

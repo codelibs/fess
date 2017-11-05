@@ -3,9 +3,6 @@
     "_source": {
       "enabled": true
     },
-    "_all": {
-      "enabled": false
-    },
     "properties": {
       "docId": {
         "type": "keyword"

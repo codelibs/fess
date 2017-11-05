@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "access_token" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "createdBy" : {
             "type" : "keyword"

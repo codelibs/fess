@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "user_info" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "createdAt" : {
             "type" : "date",

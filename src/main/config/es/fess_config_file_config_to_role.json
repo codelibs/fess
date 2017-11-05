@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "file_config_to_role" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "fileConfigId" : {
             "type" : "keyword"

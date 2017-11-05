@@ -3,9 +3,6 @@
     "aliases" : { },
     "mappings" : {
       "key_match" : {
-        "_all" : {
-          "enabled" : false
-        },
         "properties" : {
           "boost" : {
             "type" : "float"
