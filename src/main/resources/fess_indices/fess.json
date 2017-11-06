@@ -163,6 +163,10 @@
             "kind=>kinder"
           ]
         },
+        "english_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}en/protwords.txt"
+        },
         "finnish_stop": {
           "type":       "stop",
           "stopwords":  "_finnish_"
@@ -664,6 +668,7 @@
           "filter": [
             "truncate20_filter",
             "lowercase",
+            "english_keywords",
             "possessive_stemmer_en_filter"
           ]
         },

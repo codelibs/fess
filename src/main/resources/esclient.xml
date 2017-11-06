@@ -42,6 +42,10 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"en/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"en-ie/protwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
