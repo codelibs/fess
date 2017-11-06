@@ -37,6 +37,7 @@ import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.login.exception.LoginRequiredException;
 import org.lastaflute.web.login.option.LoginSpecifiedOption;
+import org.lastaflute.web.servlet.session.SessionManager;
 
 /**
  * @author jflute
@@ -52,6 +53,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     private TimeManager timeManager;
     @Resource
     private AsyncManager asyncManager;
+    @Resource
+    private SessionManager sessionManager;
     @Resource
     private FessConfig fessConfig;
     @Resource
@@ -166,5 +169,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             cb.query().setName_Equal(username);
             cb.query().setPassword_Equal(cipheredPassword);
         }).map(user -> (FessUser) user);
+    }
+
+    // ===================================================================================
+    //                                                                              Logout
+    //                                                                              ======
+    @Override
+    public void logout() {
+        sessionManager.invalidate();
     }
 }
