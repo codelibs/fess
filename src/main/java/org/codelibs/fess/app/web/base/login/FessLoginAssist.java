@@ -170,12 +170,4 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             cb.query().setPassword_Equal(cipheredPassword);
         }).map(user -> (FessUser) user);
     }
-
-    // ===================================================================================
-    //                                                                              Logout
-    //                                                                              ======
-    @Override
-    public void logout() {
-        sessionManager.invalidate();
-    }
 }
