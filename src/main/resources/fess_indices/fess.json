@@ -976,6 +976,7 @@
             "cjk_bigram",
             "stopword_en_filter",
             "lowercase",
+            "english_keywords",
             "stemmer_en_filter"
           ]
         },
