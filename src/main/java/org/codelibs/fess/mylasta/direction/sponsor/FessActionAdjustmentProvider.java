@@ -34,7 +34,7 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
     @Override
     public FormMappingOption adjustFormMapping() {
         return new FormMappingOption().filterSimpleTextParameter((parameter, meta) -> {
-            return parameter.trim();
+            return parameter.trim().replace("\r\n", "\n").replace('\r', '\n');
         });
     }
 
