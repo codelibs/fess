@@ -25,9 +25,11 @@ import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +40,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
@@ -246,41 +249,50 @@ public interface FessProp {
 
     public default String[] getDefaultLabelValues(final OptionalThing<FessUserBean> userBean) {
         @SuppressWarnings("unchecked")
-        Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_LABEL_VALUES);
+        Map<String, List<String>> map = (Map<String, List<String>>) propMap.get(DEFAULT_LABEL_VALUES);
         if (map == null) {
             final String value = getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
             if (StringUtil.isBlank(value)) {
                 map = Collections.emptyMap();
             } else {
                 final Set<String> keySet = new HashSet<>();
-                map = split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                    final String[] pair = s.split("=");
-                    if (pair.length == 1) {
-                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
-                    } else if (pair.length == 2) {
-                        return new Pair<>(pair[0].trim(), pair[1].trim());
-                    }
-                    return null;
-                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond())));
+                map =
+                        split(value, "\n").get(
+                                stream -> stream
+                                        .filter(StringUtil::isNotBlank)
+                                        .map(s -> {
+                                            final String[] pair = s.split("=");
+                                            if (pair.length == 1) {
+                                                return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                                            } else if (pair.length == 2) {
+                                                return new Pair<>(pair[0].trim(), pair[1].trim());
+                                            }
+                                            return null;
+                                        })
+                                        .filter(o -> o != null && keySet.add(o.getFirst()))
+                                        .collect(HashMap<String, List<String>>::new,
+                                                (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))),
+                                                (m, u) -> m.putAll(u)));
             }
             propMap.put(DEFAULT_LABEL_VALUES, map);
         }
         return map
                 .entrySet()
                 .stream()
-                .map(e -> {
-                    final String key = e.getKey();
-                    if (StringUtil.isEmpty(key)) {
-                        return e.getValue();
-                    }
-                    if (userBean.map(
-                            user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s)))
-                                    || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))))
-                            .orElse(false)) {
-                        return e.getValue();
-                    }
-                    return null;
-                }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
+                .flatMap(
+                        e -> {
+                            final String key = e.getKey();
+                            if (StringUtil.isEmpty(key)) {
+                                return e.getValue().stream();
+                            }
+                            if (userBean.map(
+                                    user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s)))
+                                            || stream(user.getGroups()).get(
+                                                    stream -> stream.anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s)))).orElse(false)) {
+                                return e.getValue().stream();
+                            }
+                            return Stream.empty();
+                        }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     public default void setDefaultLabelValue(final String value) {
