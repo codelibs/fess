@@ -41,7 +41,7 @@ public class CreateForm {
     public String name;
 
     @Required
-    @Size(max = 20)
+    @Size(max = 100)
     @Pattern(regexp = "^[a-zA-Z0-9_]+$")
     public String value;
 
