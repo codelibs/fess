@@ -93,10 +93,10 @@ public class DataIndexHelper {
         final IndexUpdateCallback indexUpdateCallback = ComponentUtil.getComponent(IndexUpdateCallback.class);
 
         final List<String> sessionIdList = new ArrayList<>();
-        final Map<String, String> initParamMap = new HashMap<>();
         dataCrawlingThreadList.clear();
         final List<String> dataCrawlingThreadStatusList = new ArrayList<>();
         for (final DataConfig dataConfig : configList) {
+            final Map<String, String> initParamMap = new HashMap<>();
             final String sid = crawlingConfigHelper.store(sessionId, dataConfig);
             sessionIdList.add(sid);
 
