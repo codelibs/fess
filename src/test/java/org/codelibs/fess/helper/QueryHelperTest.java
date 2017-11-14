@@ -28,6 +28,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
+import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -79,6 +81,39 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertQuery(
                 functionScoreQuery(orQuery(simpleQuery("QUERY1", titleBoost, contentBoost), simpleQuery("QUERY2", titleBoost, contentBoost))),
                 buildQuery("QUERY1 OR QUERY2"));
+
+        assertQueryBuilder("test", "", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("test", "test", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("test", "a", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("test", "あ", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("test", "ア", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("test", "亜", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("test", "아", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("title", "test", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("title", "a", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("title", "あ", PrefixQueryBuilder.class);
+        assertQueryBuilder("title", "ああ", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("title", "ア", PrefixQueryBuilder.class);
+        assertQueryBuilder("title", "アア", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("title", "亜", PrefixQueryBuilder.class);
+        assertQueryBuilder("title", "亜亜", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("title", "아", PrefixQueryBuilder.class);
+        assertQueryBuilder("title", "아아", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("content", "test", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("content", "a", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("content", "あ", PrefixQueryBuilder.class);
+        assertQueryBuilder("content", "ああ", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("content", "ア", PrefixQueryBuilder.class);
+        assertQueryBuilder("content", "アア", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("content", "亜", PrefixQueryBuilder.class);
+        assertQueryBuilder("content", "亜亜", MatchPhraseQueryBuilder.class);
+        assertQueryBuilder("content", "아", PrefixQueryBuilder.class);
+        assertQueryBuilder("content", "아아", MatchPhraseQueryBuilder.class);
+    }
+
+    private void assertQueryBuilder(String field, String value, Class<?> clazz) {
+        QueryBuilder queryBuilder = queryHelper.buildMatchPhraseQuery(field, value);
+        assertEquals(clazz, queryBuilder.getClass());
     }
 
     private QueryBuilder andQuery(QueryBuilder... queries) {
