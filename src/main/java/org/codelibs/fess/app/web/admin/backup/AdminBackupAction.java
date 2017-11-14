@@ -17,11 +17,13 @@ package org.codelibs.fess.app.web.admin.backup;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -64,6 +66,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthmarketscience.jackcess.RuntimeIOException;
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvWriter;
@@ -169,19 +173,53 @@ public class AdminBackupAction extends FessAdminAction {
             } else {
                 final String index;
                 final String filename;
-                if (id.endsWith(".bulk")) {
+                final boolean isNextVersion;
+                if (id.endsWith(".12.bulk")) {
+                    index = id.substring(0, id.length() - 8);
+                    filename = id;
+                    isNextVersion = true;
+                } else if (id.endsWith(".bulk")) {
                     index = id.substring(0, id.length() - 5);
                     filename = id;
+                    isNextVersion = false;
                 } else {
                     index = id;
                     filename = id + ".bulk";
+                    isNextVersion = false;
                 }
                 return asStream(filename).contentTypeOctetStream().stream(
                         out -> {
                             try (CurlResponse response =
                                     Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/" + index + "/_data")
                                             .header("Content-Type", "application/json").param("format", "json").execute()) {
-                                out.write(response.getContentAsStream());
+                                if (isNextVersion) {
+                                    ObjectMapper mapper = new ObjectMapper();
+                                    try (BufferedReader reader =
+                                            new BufferedReader(
+                                                    new InputStreamReader(response.getContentAsStream(), Constants.CHARSET_UTF_8));
+                                            BufferedWriter writer =
+                                                    new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
+                                        String line;
+                                        int count = 0;
+                                        while ((line = reader.readLine()) != null) {
+                                            if (count % 2 == 0) {
+                                                Map<String, Object> headerMap =
+                                                        mapper.readValue(line, new TypeReference<Map<String, Object>>() {
+                                                        });
+                                                @SuppressWarnings("unchecked")
+                                                Map<String, Object> indexMap = (Map<String, Object>) headerMap.get("index");
+                                                indexMap.put("_index", indexMap.get("_index") + "." + indexMap.get("_type"));
+                                                writer.write(mapper.writeValueAsString(headerMap));
+                                            } else {
+                                                writer.write(line);
+                                            }
+                                            writer.newLine();
+                                            count++;
+                                        }
+                                    }
+                                } else {
+                                    out.write(response.getContentAsStream());
+                                }
                             }
                         });
             }
