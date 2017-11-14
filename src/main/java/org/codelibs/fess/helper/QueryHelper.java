@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -505,6 +506,23 @@ public class QueryHelper {
         }
     }
 
+    protected QueryBuilder buildMatchPhraseQuery(final String f, final String text) {
+        if (text == null || text.length() != 1
+                || (!fessConfig.getIndexFieldTitle().equals(f) && !fessConfig.getIndexFieldContent().equals(f))) {
+            return QueryBuilders.matchPhraseQuery(f, text);
+        }
+
+        UnicodeBlock block = UnicodeBlock.of(text.codePointAt(0));
+        if (block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS //
+                || block == UnicodeBlock.HIRAGANA //
+                || block == UnicodeBlock.KATAKANA //
+                || block == UnicodeBlock.HANGUL_SYLLABLES //
+        ) {
+            return QueryBuilders.prefixQuery(f, text);
+        }
+        return QueryBuilders.matchPhraseQuery(f, text);
+    }
+
     protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery, final float boost) {
         final String field = termQuery.getTerm().field();
         final String text = termQuery.getTerm().text();
@@ -513,7 +531,7 @@ public class QueryHelper {
         } else if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         } else if ("sort".equals(field)) {
             final String[] values = text.split("\\.");
             if (values.length > 2) {
@@ -546,13 +564,13 @@ public class QueryHelper {
             if (notAnalyzedFieldSet.contains(field)) {
                 return QueryBuilders.termQuery(field, text).boost(boost);
             } else {
-                return QueryBuilders.matchPhraseQuery(field, text).boost(boost);
+                return buildMatchPhraseQuery(field, text).boost(boost);
             }
         } else {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, origQuery).boost(b * boost));
         }
     }
 
@@ -567,7 +585,7 @@ public class QueryHelper {
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
         stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
-        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
+        return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
     }
 
     private boolean isSearchField(final String field) {
