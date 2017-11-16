@@ -10,6 +10,10 @@
 		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"synonym.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
