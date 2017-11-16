@@ -15,6 +15,10 @@
           "type": "mapping",
           "mappings_path": "${fess.dictionary.path}ja/mapping.txt"
         },
+        "mapping_filter": {
+          "type": "mapping",
+          "mappings_path": "${fess.dictionary.path}mapping.txt"
+        },
         "traditional_chinese_convert": {
           "type": "fess_traditional_chinese_convert",
           "convert_type": "t2s"
@@ -968,7 +972,7 @@
         "standard_analyzer": {
           "type": "custom",
           "char_filter": [
-            "mapping_ja_filter"
+            "mapping_filter"
           ],
           "tokenizer": "unigram_synonym_tokenizer",
           "filter": [
