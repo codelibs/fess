@@ -60,7 +60,7 @@
 		<utflute.version>0.8.1</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.5.2</crawler.version>
+		<crawler.version>1.5.3</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>5.6.0</suggest.version>
@@ -71,7 +71,7 @@
 		<cluster.runner.version>5.6.4.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.21</tomcat.version>
+		<tomcat.version>8.5.23</tomcat.version>
 		<tomcat.boot.version>0.5.9</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
