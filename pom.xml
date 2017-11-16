@@ -66,9 +66,9 @@
 		<suggest.version>6.0.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>6.0.0-rc2</elasticsearch.version>
+		<elasticsearch.version>6.0.0</elasticsearch.version>
 		<elasticsearch.min.version>6.0.0</elasticsearch.min.version>
-		<cluster.runner.version>6.0.0.0-SNAPSHOT</cluster.runner.version>
+		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>9.0.1</tomcat.version>
