@@ -105,8 +105,11 @@ public class PathMappingHelper {
         String result = text;
         for (final PathMapping pathMapping : cachedPathMappingList) {
             if (matchUserAgent(pathMapping)) {
-                result =
-                        result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
+                String replacement = pathMapping.getReplacement();
+                if (replacement == null) {
+                    replacement = StringUtil.EMPTY;
+                }
+                result = result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + replacement + "$2");
             }
         }
         return result;
@@ -129,7 +132,11 @@ public class PathMappingHelper {
             if (matchUserAgent(pathMapping)) {
                 final Matcher matcher = pathMapping.getMatcher(newUrl);
                 if (matcher.find()) {
-                    newUrl = matcher.replaceAll(pathMapping.getReplacement());
+                    String replacement = pathMapping.getReplacement();
+                    if (replacement == null) {
+                        replacement = StringUtil.EMPTY;
+                    }
+                    newUrl = matcher.replaceAll(replacement);
                 }
             }
         }

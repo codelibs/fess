@@ -38,7 +38,6 @@ public class CreateForm {
     @Size(max = 1000)
     public String regex;
 
-    @Required
     @Size(max = 1000)
     public String replacement;
 
