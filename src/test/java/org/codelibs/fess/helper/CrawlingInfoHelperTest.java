@@ -91,5 +91,16 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
             assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 520), null).length());
             assertEquals(509, crawlingInfoHelper.generateId(value.toString(), null).length());
         }
+
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < 550; i++) {
+            buf.append('a');
+        }
+        assertEquals("aaaaaaaaaaaaaaa9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318",
+                crawlingInfoHelper.generateId(buf.substring(0, 500), null).substring(430));
+        assertEquals("aaaaaaaaaaaaaaa635361c48bb9eab14198e76ea8ab7f1a41685d6ad62aa9146d301d4f17eb0ae0",
+                crawlingInfoHelper.generateId(buf.substring(0, 510), null).substring(430));
+        assertEquals("aaaaaaaaaaaaaaa8af881bc88895bd9d8cea975a7d06dc0275d9db9d57f138216936b65e8b06489",
+                crawlingInfoHelper.generateId(buf.substring(0, 520), null).substring(430));
     }
 }
