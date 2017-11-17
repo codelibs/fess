@@ -18,6 +18,7 @@ package org.codelibs.fess.helper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -231,7 +232,13 @@ public class CrawlingInfoHelper {
                 encodedBuf.append(c);
             } else {
                 try {
-                    encodedBuf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                    final String target = String.valueOf(c);
+                    final String converted = URLEncoder.encode(target, Constants.UTF_8);
+                    if (target.equals(converted)) {
+                        encodedBuf.append(Base64.getUrlEncoder().encodeToString(target.getBytes(Constants.CHARSET_UTF_8)));
+                    } else {
+                        encodedBuf.append(converted);
+                    }
                 } catch (final UnsupportedEncodingException e) {
                     // NOP
                 }
@@ -239,10 +246,14 @@ public class CrawlingInfoHelper {
         }
 
         final String id = encodedBuf.toString();
-        if (id.length() <= urlIdPrefixLength) {
+        if (id.getBytes(Constants.CHARSET_UTF_8).length <= urlIdPrefixLength) {
             return id;
         }
-        return id.substring(0, urlIdPrefixLength) + MessageDigestUtil.digest("SHA-256", id.substring(urlIdPrefixLength));
+        final String longId = id.substring(0, urlIdPrefixLength) + MessageDigestUtil.digest("SHA-256", id.substring(urlIdPrefixLength));
+        if (longId.getBytes(Constants.CHARSET_UTF_8).length <= urlIdPrefixLength + 64) {
+            return longId;
+        }
+        return longId.substring(0, urlIdPrefixLength + 64);
     }
 
     public void setMaxSessionIdsInList(final int maxSessionIdsInList) {
