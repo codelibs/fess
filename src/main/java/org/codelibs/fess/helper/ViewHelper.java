@@ -102,8 +102,10 @@ public class ViewHelper {
     @Resource
     protected UserAgentHelper userAgentHelper;
 
+    @Deprecated
     public int titleLength = 50;
 
+    @Deprecated
     public int sitePathLength = 50;
 
     public boolean encodeUrlLink = false;
@@ -147,7 +149,6 @@ public class ViewHelper {
     }
 
     public String getContentTitle(final Map<String, Object> document) {
-        final int size = titleLength;
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
         if (StringUtil.isBlank(title)) {
@@ -156,7 +157,12 @@ public class ViewHelper {
                 title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
             }
         }
-        return StringUtils.abbreviate(title, size);
+        final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
+        if (size > -1) {
+            return StringUtils.abbreviate(title, size);
+        } else {
+            return title;
+        }
     }
 
     public String getContentDescription(final Map<String, Object> document) {
@@ -487,7 +493,12 @@ public class ViewHelper {
             } else {
                 returnUrl = url.replaceFirst("^[a-zA-Z0-9]*:/+", "");
             }
-            return StringUtils.abbreviate(returnUrl, sitePathLength);
+            final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
+            if (size > -1) {
+                return StringUtils.abbreviate(returnUrl, size);
+            } else {
+                return returnUrl;
+            }
         }
         return null;
     }
