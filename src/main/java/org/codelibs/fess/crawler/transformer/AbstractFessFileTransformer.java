@@ -472,15 +472,15 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
         if (url.startsWith("file:////")) {
             final String value = decodeUrlAsName(url.substring(9), true);
-            return StringUtils.abbreviate("\\\\" + value.replace('/', '\\'), getMaxSiteLength());
+            return abbreviateSite("\\\\" + value.replace('/', '\\'));
         } else if (url.startsWith("file:")) {
             final String value = decodeUrlAsName(url.substring(5), true);
             if (value.length() > 2 && value.charAt(2) == ':') {
                 // Windows
-                return StringUtils.abbreviate(value.substring(1).replace('/', '\\'), getMaxSiteLength());
+                return abbreviateSite(value.substring(1).replace('/', '\\'));
             } else {
                 // Unix
-                return StringUtils.abbreviate(value, getMaxSiteLength());
+                return abbreviateSite(value);
             }
         }
 

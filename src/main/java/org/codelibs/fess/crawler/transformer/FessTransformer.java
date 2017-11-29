@@ -104,7 +104,7 @@ public interface FessTransformer {
             } catch (final Exception e) {}
         }
 
-        return StringUtils.abbreviate(url, getMaxSiteLength());
+        return abbreviateSite(url);
     }
 
     public default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
@@ -178,6 +178,15 @@ public interface FessTransformer {
 
     public default int getMaxSiteLength() {
         return getFessConfig().getCrawlerDocumentMaxSiteLengthAsInteger();
+    }
+
+    public default String abbreviateSite(final String value) {
+        final int maxSiteLength = getMaxSiteLength();
+        if (maxSiteLength > -1) {
+            return StringUtils.abbreviate(value, maxSiteLength);
+        } else {
+            return value;
+        }
     }
 
     public default String getFileName(final String url, final String encoding) {

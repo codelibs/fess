@@ -429,6 +429,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. site_path */
     String RESPONSE_FIELD_site_path = "response.field.site_path";
 
+    /** The key of the configuration. e.g. 50 */
+    String RESPONSE_MAX_TITLE_LENGTH = "response.max.title.length";
+
+    /** The key of the configuration. e.g. 50 */
+    String RESPONSE_MAX_SITE_PATH_LENGTH = "response.max.site.path.length";
+
     /** The key of the configuration. e.g. fess.search */
     String INDEX_DOCUMENT_SEARCH_INDEX = "index.document.search.index";
 
@@ -2526,6 +2532,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseFieldSitePath();
+
+    /**
+     * Get the value for the key 'response.max.title.length'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseMaxTitleLength();
+
+    /**
+     * Get the value for the key 'response.max.title.length' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getResponseMaxTitleLengthAsInteger();
+
+    /**
+     * Get the value for the key 'response.max.site.path.length'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseMaxSitePathLength();
+
+    /**
+     * Get the value for the key 'response.max.site.path.length' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getResponseMaxSitePathLengthAsInteger();
 
     /**
      * Get the value for the key 'index.document.search.index'. <br>
@@ -6047,6 +6083,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.RESPONSE_FIELD_site_path);
         }
 
+        public String getResponseMaxTitleLength() {
+            return get(FessConfig.RESPONSE_MAX_TITLE_LENGTH);
+        }
+
+        public Integer getResponseMaxTitleLengthAsInteger() {
+            return getAsInteger(FessConfig.RESPONSE_MAX_TITLE_LENGTH);
+        }
+
+        public String getResponseMaxSitePathLength() {
+            return get(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH);
+        }
+
+        public Integer getResponseMaxSitePathLengthAsInteger() {
+            return getAsInteger(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH);
+        }
+
         public String getIndexDocumentSearchIndex() {
             return get(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX);
         }
@@ -7707,6 +7759,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_FIELD_content_description, "content_description");
             defaultMap.put(FessConfig.RESPONSE_FIELD_url_link, "url_link");
             defaultMap.put(FessConfig.RESPONSE_FIELD_site_path, "site_path");
+            defaultMap.put(FessConfig.RESPONSE_MAX_TITLE_LENGTH, "50");
+            defaultMap.put(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH, "50");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_TYPE, "doc");
