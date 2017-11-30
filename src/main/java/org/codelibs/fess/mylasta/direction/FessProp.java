@@ -1618,7 +1618,7 @@ public interface FessProp {
 
     public default HtmlNext getVirtualHostPath(final HtmlNext page) {
         return processVirtualHost(s -> {
-            final String basePath = StringUtil.isBlank(s) ? StringUtil.EMPTY : "/" + s;
+            final String basePath = ComponentUtil.getSystemHelper().getVirtualHostBasePath(s, page);
             return new HtmlNext(basePath + page.getRoutingPath());
         }, page);
     }

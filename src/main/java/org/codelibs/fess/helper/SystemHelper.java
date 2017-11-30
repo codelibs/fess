@@ -58,6 +58,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
+import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -380,6 +381,10 @@ public class SystemHelper {
     public ActionValidator<FessMessages> createValidator(final RequestManager requestManager,
             final UserMessagesCreator<FessMessages> messagesCreator, final Class<?>[] runtimeGroups) {
         return new FessActionValidator<>(requestManager, messagesCreator, runtimeGroups);
+    }
+
+    public String getVirtualHostBasePath(final String s, final HtmlNext page) {
+        return StringUtil.isBlank(s) ? StringUtil.EMPTY : "/" + s;
     }
 
 }
