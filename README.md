@@ -3,9 +3,16 @@ Enterprise Search Server: Fess [![Build Status](https://travis-ci.org/codelibs/f
 
 ## Overview
 
-Fess is very powerful and easily deployable Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.
+Fess is very powerful and easily deployable Enterprise Search Server.
+You can install and run Fess quickly on any platforms, which have Java runtime environment.
+Fess is provided under Apache license.
 
-Fess is Elasticsearch based search server, but knowledge/experience about Elasticsearch is NOT needed because of All-in-One Enterprise Search Server. Fess provides Administration GUI to configure the system on your browser. Fess also contains a crawler, which can crawl documents on Web/FileSystem/DB and supports many file formats, such as MS Office, pdf and zip.
+Fess is Elasticsearch based search server, but knowledge/experience about Elasticsearch is NOT needed because of All-in-One Enterprise Search Server.
+Fess provides Administration GUI to configure the system on your browser.
+Fess also contains a crawler, which can crawl documents on Web/FileSystem/DB and supports many file formats, such as MS Office, pdf and zip.
+
+For Site Search feature, see [FSS JS Genertor](https://fss-generator.codelibs.org/docs/manual).
+Fess Site Search is Google Site Search alternative.
 
 ## Web Sites
 
