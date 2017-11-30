@@ -26,8 +26,10 @@
 				<li><a
 					href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
 						class="fa fa-play-circle"></i></a></li>
+				<c:if test="${not empty helpLink}">
 				<li><a href="${helpLink}" target="_olh"><i
 						class="fa fa-question-circle"></i></a></li>
+				</c:if>
 				<li><a href="${contextPath}/logout"><i
 						class="fa fa-sign-out"></i></a></li>
 			</ul>
