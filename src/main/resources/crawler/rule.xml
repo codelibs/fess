@@ -34,7 +34,7 @@
 			<arg>"http[s]?:.*sitemap[^/]*.xml$|http[s]?:.*sitemap[^/]*.gz$|http[s]?:.*sitemap[^/]*.txt$"</arg>
 		</postConstruct>
 	</component>
-	
+
 	<component name="webHtmlRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"webHtmlRule"</property>
 		<property name="responseProcessor">
