@@ -68,12 +68,3 @@
 		<pre>Fess~0.5</pre>
 	</dd>
 </dl>
-<h2>Others</h2>
-<dl>
-	<dt>Add To Browser Search Engines</dt>
-	<dd>
-		Click <a href="#" onclick='window.external.AddSearchProvider("/osdd/");return false;'>here</a>
-		 to add a search engine list for your browser.
-	</dd>
-</dl>
-
