@@ -65,12 +65,3 @@
 		デフォルトは 0.5 になります。
 	</dd>
 </dl>
-<h2>その他</h2>
-<dl>
-	<dt>ブラウザの検索エンジンに追加</dt>
-	<dd>
-		ご利用のブラウザの検索エンジン一覧に追加するためには
-		<a href="#" onclick='window.external.AddSearchProvider("/osdd/");return false;'>ここ</a>をクリックしてください。
-	</dd>
-</dl>
-

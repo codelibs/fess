@@ -65,12 +65,3 @@
 		기본값은 0.5입니다.
 	</dd>
 </dl>
-<h2>기타</h2>
-<dl>
-	<dt>브라우저 검색 엔진에 추가</dt>
-	<dd>
-		브라우저에 검색 엔진 목록을 추가하기 위해서는
-		<a href="#" onclick='window.external.AddSearchProvider("/osdd/");return false;'>여기 </a>를 클릭하세요.
-	</dd>
-</dl>
-
