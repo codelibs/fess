@@ -30,7 +30,7 @@
 		<property name="name">"fessFileTransformer"</property>
 	</component>
 
-	<component name="fessTikaTransformer" class="org.codelibs.fess.crawler.transformer.FessTikaTransformer" instance="singleton">
-		<property name="name">"fessTikaTransformer"</property>
+	<component name="fessStandardTransformer" class="org.codelibs.fess.crawler.transformer.FessStandardTransformer" instance="singleton">
+		<property name="name">"fessStandardTransformer"</property>
 	</component>
 </components>

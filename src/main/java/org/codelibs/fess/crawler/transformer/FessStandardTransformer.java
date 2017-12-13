@@ -26,8 +26,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FessTikaTransformer extends AbstractFessFileTransformer {
-    private static final Logger logger = LoggerFactory.getLogger(FessTikaTransformer.class);
+public class FessStandardTransformer extends AbstractFessFileTransformer {
+    private static final Logger logger = LoggerFactory.getLogger(FessStandardTransformer.class);
 
     @PostConstruct
     public void init() {
