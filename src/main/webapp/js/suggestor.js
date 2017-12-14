@@ -52,7 +52,7 @@ $.fn.suggestor = function(setting) {
 
 			//設定
 			settingAjaxInfo = setting.ajaxinfo;
-			settingMinTerm = setting.minturm;
+			settingMinTerm = setting.minterm;
 			$settingSearchForm = setting.searchForm;
 			listSelectedCssInfo = setting.listSelectedCssInfo;
 			listDeselectedCssInfo = setting.listDeselectedCssInfo;
