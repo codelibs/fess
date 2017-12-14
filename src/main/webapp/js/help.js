@@ -47,7 +47,7 @@ $(function(){
         listDeselectedCssInfo: {
             'background-color': '#ffffff'
         },
-        minturm: 1,
+        minterm: 1,
         adjustWidthVal: 11,
         searchForm: $('#searchForm')
     });
