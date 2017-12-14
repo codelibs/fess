@@ -50,7 +50,7 @@ $.fn.suggestor = function(setting) {
 			inputText = $textArea.val();
 
 
-			//設定
+			//settings
 			settingAjaxInfo = setting.ajaxinfo;
 			settingMinTerm = setting.minterm;
 			$settingSearchForm = setting.searchForm;
@@ -68,7 +68,6 @@ $.fn.suggestor = function(setting) {
 			});
 
 
-			//ポジション設定
 			this.resize();
 			var suggestor = this;
 			$(window).resize(function() {
@@ -81,7 +80,6 @@ $.fn.suggestor = function(setting) {
 		suggest: function() {
 			suggestingSts = true;
 
-			//ポジション設定
 			this.resize();
 
 			var suggestor = this;
@@ -210,7 +208,6 @@ $.fn.suggestor = function(setting) {
 			} else {
 				$boxElement.css("display","none");
 			}
-			//ポジション設定
 			this.resize();
 
 			suggestingSts = false;
@@ -339,14 +336,14 @@ $.fn.suggestor = function(setting) {
 		}
 	});
 
-	//テキストエリア監視
+	//monitoring input field
 	setInterval( function() {
 		if(interval < 5) {
 			interval = interval + 1;
 		} else {
 			if($textArea.val() !== inputText) {
 				if(!isFocusList && started && !suggestingSts) {
-					//リスト選択中でなければ更新
+					//update if not selecting item in list
 					suggestor.suggest();
 					interval = 0;
 				}
