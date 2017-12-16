@@ -33,7 +33,7 @@
 	</div>
 	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
-		src="${fe:url('/js/jquery-2.2.4.min.js')}"></script>
+		src="${fe:url('/js/jquery-3.2.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/search.js')}"></script>

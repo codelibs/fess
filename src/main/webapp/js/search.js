@@ -80,7 +80,7 @@ $(function() {
 	$result.on('click', 'a.favorite', function(e) {
 		var $favorite = $(this);
 		var values = $favorite.attr('href').split('#');
-		if (values.length === 2 && $queryId.size() > 0) {
+		if (values.length === 2 && $queryId.length > 0) {
 			var actionUrl = contextPath + '/json';
 			var docId = values[1];
 			$.ajax({
@@ -116,7 +116,7 @@ $(function() {
 		return false;
 	});
 
-	if ($favorites.size() > 0) {
+	if ($favorites.length > 0) {
 		$.ajax({
 			dataType : 'json',
 			cache : false,
@@ -165,7 +165,7 @@ $(function() {
 		var value = $moreLink.attr('href');
 		if (value !== '') {
 			var $info = $(value + ' .info');
-			if ($info.size() > 0) {
+			if ($info.length > 0) {
 				$moreLink.fadeOut(500, function() {
 					$info.slideDown("slow");
 				});

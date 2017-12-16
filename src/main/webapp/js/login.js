@@ -6,7 +6,7 @@ $(function() {
 	$("section.content input").keypress(function(e) {
 		if (e.which === 13) {
 			var $submitButton = $('input#submit, button#submit');
-			if ($submitButton.size() > 0) {
+			if ($submitButton.length > 0) {
 				$submitButton[0].submit();
 			}
 			// ignore enter key down

@@ -137,7 +137,7 @@ $.fn.suggestor = function(setting) {
 					var chkCorrectWord = true;
 
 					var $tmpli = $($olEle.children("li"));
-					for(var k=0;k<$tmpli.size();k++) {
+					for(var k=0;k<$tmpli.length;k++) {
 						if(str === $($tmpli.get(k)).html()) {
 							chkCorrectWord = false;
 						}
