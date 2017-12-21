@@ -40,10 +40,10 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.5</dbflute.version>
-		<lastaflute.version>1.0.3-RC3</lastaflute.version>
+		<lastaflute.version>1.0.3</lastaflute.version>
 		<lasta.taglib.version>0.7.2</lasta.taglib.version>
 		<lasta.job.version>0.5.2</lasta.job.version>
-		<mailflute.version>0.5.7</mailflute.version>
+		<mailflute.version>0.5.8</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.25</slf4j.version>
