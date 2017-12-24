@@ -43,7 +43,7 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
         if (StringUtil.isBlank(requestPath)) {
             return null;
         }
-        final String virtualHostKey = ComponentUtil.getFessConfig().getVirtualHostKey();
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         if (StringUtil.isBlank(virtualHostKey)) {
             return null;
         }

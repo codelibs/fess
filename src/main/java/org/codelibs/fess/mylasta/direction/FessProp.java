@@ -36,7 +36,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -64,7 +63,6 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.JobConcurrentExec;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.RequiredValidator;
 import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
@@ -1616,48 +1614,12 @@ public interface FessProp {
 
     String getVirtualHostHeaders();
 
-    public default HtmlNext getVirtualHostPath(final HtmlNext page) {
-        return processVirtualHost(s -> {
-            final String basePath = ComponentUtil.getSystemHelper().getVirtualHostBasePath(s, page);
-            return new HtmlNext(basePath + page.getRoutingPath());
-        }, page);
-    }
-
-    public default String getVirtualHostKey() {
-        return LaRequestUtil.getOptionalRequest().map(req -> (String) req.getAttribute(VIRTUAL_HOST_VALUE)).orElseGet(() -> {
-            final String value = processVirtualHost(s -> s, StringUtil.EMPTY);
-            LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(VIRTUAL_HOST_VALUE, value));
-            return value;
-        });
-    }
-
     public default String getVirtualHostHeaderValue() {
         final String value = getVirtualHostValue();
         if (StringUtil.isNotBlank(value)) {
             return value;
         }
         return getVirtualHostHeaders();
-    }
-
-    public default <T> T processVirtualHost(final Function<String, T> func, final T defaultValue) {
-        final Tuple3<String, String, String>[] vHosts = getVirtualHosts();
-        return LaRequestUtil.getOptionalRequest().map(req -> {
-            for (final Tuple3<String, String, String> host : vHosts) {
-                final String headerValue = req.getHeader(host.getValue1());
-                if (host.getValue2().equalsIgnoreCase(headerValue)) {
-                    return func.apply(host.getValue3());
-                }
-            }
-            return defaultValue;
-        }).orElse(defaultValue);
-    }
-
-    public default String[] getVirtualHostKeys() {
-        return stream(getVirtualHosts()).get(stream -> stream.map(h -> h.getValue3()).toArray(n -> new String[n]));
-    }
-
-    public default String[] getVirtualHostPaths() {
-        return stream(getVirtualHosts()).get(stream -> stream.map(h -> "/" + h.getValue3()).toArray(n -> new String[n]));
     }
 
     @SuppressWarnings("unchecked")

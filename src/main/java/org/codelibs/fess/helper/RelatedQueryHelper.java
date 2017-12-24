@@ -26,7 +26,6 @@ import javax.annotation.PostConstruct;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.exbhv.RelatedQueryBhv;
 import org.codelibs.fess.es.config.exentity.RelatedQuery;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class RelatedQueryHelper {
@@ -72,8 +71,7 @@ public class RelatedQueryHelper {
     }
 
     public String[] getRelatedQueries(final String query) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String key = fessConfig.getVirtualHostKey();
+        final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final Map<String, String[]> map = relatedQueryMap.get(key);
         if (map != null) {
             final String[] queries = map.get(toLowerCase(query));

@@ -60,6 +60,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         registerMock(fessConfig);
         registerMock(new SystemHelper());
+        registerMock(new VirtualHostHelper());
         inject(queryHelper);
         queryHelper.init();
     }

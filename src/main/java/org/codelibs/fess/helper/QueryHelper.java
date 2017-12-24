@@ -93,6 +93,9 @@ public class QueryHelper {
     @Resource
     protected KeyMatchHelper keyMatchHelper;
 
+    @Resource
+    protected VirtualHostHelper virtualHostHelper;
+
     protected Set<String> apiResponseFieldSet;
 
     protected Set<String> highlightFieldSet = new HashSet<>();
@@ -307,7 +310,7 @@ public class QueryHelper {
             // nothing to do
             break;
         default:
-            final String key = fessConfig.getVirtualHostKey();
+            final String key = virtualHostHelper.getVirtualHostKey();
             if (StringUtil.isNotBlank(key)) {
                 queryContext.addQuery(boolQuery -> {
                     boolQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldVirtualHost(), key));

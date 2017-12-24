@@ -31,6 +31,7 @@ import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -85,7 +86,7 @@ public class AdminDesignAction extends FessAdminAction {
         for (final Pair<String, String> p : systemHelper.getDesignJspFileNames()) {
             jspItems.add(new Pair<>(":" + p.getFirst(), "/" + p.getSecond()));
         }
-        for (String key : fessConfig.getVirtualHostPaths()) {
+        for (String key : ComponentUtil.getVirtualHostHelper().getVirtualHostPaths()) {
             if (StringUtil.isBlank(key)) {
                 key = "/";
             }

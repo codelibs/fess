@@ -95,7 +95,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("thumbnailSupport", thumbnailSupport);
         if (fessConfig.isWebApiPopularWord()) {
             final List<String> tagList = new ArrayList<>();
-            final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
+            final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
             if (StringUtil.isNotBlank(key)) {
                 tagList.add(key);
             }
@@ -222,6 +222,6 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected HtmlNext virtualHost(final HtmlNext path) {
-        return fessConfig.getVirtualHostPath(path);
+        return ComponentUtil.getVirtualHostHelper().getVirtualHostPath(path);
     }
 }

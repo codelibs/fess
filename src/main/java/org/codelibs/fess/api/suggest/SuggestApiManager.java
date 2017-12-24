@@ -80,7 +80,7 @@ public class SuggestApiManager extends BaseJsonApiManager {
             stream(langs).of(stream -> stream.forEach(builder::addLang));
 
             stream(parameter.getTags()).of(stream -> stream.forEach(builder::addTag));
-            final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
+            final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
             if (StringUtil.isNotBlank(key)) {
                 builder.addTag(key);
             }
