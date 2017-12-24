@@ -29,7 +29,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,8 +92,7 @@ public class RelatedContentHelper {
     }
 
     public String[] getRelatedContents(final String query) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String key = fessConfig.getVirtualHostKey();
+        final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final Pair<Map<String, String>, List<Pair<Pattern, String>>> pair = relatedContentMap.get(key);
         if (pair != null) {
             final List<String> contentList = new ArrayList<>();

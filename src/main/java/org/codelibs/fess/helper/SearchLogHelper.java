@@ -120,7 +120,7 @@ public class SearchLogHelper {
         } else {
             searchLog.setLanguages(StringUtil.EMPTY);
         }
-        final String virtualHostKey = ComponentUtil.getFessConfig().getVirtualHostKey();
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         if (virtualHostKey != null) {
             searchLog.setVirtualHost(virtualHostKey);
         } else {

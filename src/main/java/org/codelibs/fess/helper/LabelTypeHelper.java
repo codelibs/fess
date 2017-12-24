@@ -82,7 +82,7 @@ public class LabelTypeHelper {
             init();
         }
 
-        final String virtualHostKey = ComponentUtil.getFessConfig().getVirtualHostKey();
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final List<LabelTypeItem> labelList;
         if (StringUtil.isBlank(virtualHostKey)) {
             labelList = labelTypeItemList;

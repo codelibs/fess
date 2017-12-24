@@ -389,7 +389,7 @@ public class JsonApiManager extends BaseJsonApiManager {
         if (tags != null) {
             tagList.addAll(Arrays.asList(tags));
         }
-        final String key = ComponentUtil.getFessConfig().getVirtualHostKey();
+        final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         if (StringUtil.isNotBlank(key)) {
             tagList.add(key);
         }

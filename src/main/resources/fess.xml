@@ -28,6 +28,8 @@
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>
+	<component name="virtualHostHelper" class="org.codelibs.fess.helper.VirtualHostHelper">
+	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
 		<postConstruct name="addDesignJspFileName">
 			<arg>"index"</arg>

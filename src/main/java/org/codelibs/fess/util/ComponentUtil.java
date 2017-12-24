@@ -58,6 +58,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
+import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
@@ -161,6 +162,12 @@ public final class ComponentUtil {
     private static final String KEY_MATCH_HELPER = "keyMatchHelper";
 
     private static final String INDEXING_HELPER = "indexingHelper";
+
+    private static final String VIRTUAL_HOST_HELPER = "virtualHostHelper";
+
+    private static final String RELATED_CONTENT_HELPER = "relatedContentHelper";
+
+    private static final String RELATED_QUERY_HELPER = "relatedQueryHelper";
 
     private static IndexingHelper indexingHelper;
 
@@ -396,11 +403,15 @@ public final class ComponentUtil {
     }
 
     public static RelatedQueryHelper getRelatedQueryHelper() {
-        return getComponent(RelatedQueryHelper.class);
+        return getComponent(RELATED_QUERY_HELPER);
     }
 
     public static RelatedContentHelper getRelatedContentHelper() {
-        return getComponent(RelatedContentHelper.class);
+        return getComponent(RELATED_CONTENT_HELPER);
+    }
+
+    public static VirtualHostHelper getVirtualHostHelper() {
+        return getComponent(VIRTUAL_HOST_HELPER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {
