@@ -388,51 +388,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /index.jsp */
     HtmlNext path_IndexJsp = new HtmlNext("/index.jsp");
 
-    /** The path of the HTML: /local/error/badRequest.jsp */
-    HtmlNext path_LocalError_BadRequestJsp = new HtmlNext("/local/error/badRequest.jsp");
-
-    /** The path of the HTML: /local/error/error.jsp */
-    HtmlNext path_LocalError_ErrorJsp = new HtmlNext("/local/error/error.jsp");
-
-    /** The path of the HTML: /local/error/notFound.jsp */
-    HtmlNext path_LocalError_NotFoundJsp = new HtmlNext("/local/error/notFound.jsp");
-
-    /** The path of the HTML: /local/error/redirect.jsp */
-    HtmlNext path_LocalError_RedirectJsp = new HtmlNext("/local/error/redirect.jsp");
-
-    /** The path of the HTML: /local/error/system.jsp */
-    HtmlNext path_LocalError_SystemJsp = new HtmlNext("/local/error/system.jsp");
-
-    /** The path of the HTML: /local/footer.jsp */
-    HtmlNext path_Local_FooterJsp = new HtmlNext("/local/footer.jsp");
-
-    /** The path of the HTML: /local/header.jsp */
-    HtmlNext path_Local_HeaderJsp = new HtmlNext("/local/header.jsp");
-
-    /** The path of the HTML: /local/help.jsp */
-    HtmlNext path_Local_HelpJsp = new HtmlNext("/local/help.jsp");
-
-    /** The path of the HTML: /local/index.jsp */
-    HtmlNext path_Local_IndexJsp = new HtmlNext("/local/index.jsp");
-
-    /** The path of the HTML: /local/login/index.jsp */
-    HtmlNext path_LocalLogin_IndexJsp = new HtmlNext("/local/login/index.jsp");
-
-    /** The path of the HTML: /local/profile/index.jsp */
-    HtmlNext path_LocalProfile_IndexJsp = new HtmlNext("/local/profile/index.jsp");
-
-    /** The path of the HTML: /local/search.jsp */
-    HtmlNext path_Local_SearchJsp = new HtmlNext("/local/search.jsp");
-
-    /** The path of the HTML: /local/searchNoResult.jsp */
-    HtmlNext path_Local_SearchNoResultJsp = new HtmlNext("/local/searchNoResult.jsp");
-
-    /** The path of the HTML: /local/searchOptions.jsp */
-    HtmlNext path_Local_SearchOptionsJsp = new HtmlNext("/local/searchOptions.jsp");
-
-    /** The path of the HTML: /local/searchResults.jsp */
-    HtmlNext path_Local_SearchResultsJsp = new HtmlNext("/local/searchResults.jsp");
-
     /** The path of the HTML: /login/index.jsp */
     HtmlNext path_Login_IndexJsp = new HtmlNext("/login/index.jsp");
 
