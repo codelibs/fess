@@ -61,6 +61,19 @@ public class DocumentHelper {
 
     private static final String SIMILAR_DOC_HASH_PREFIX = "$";
 
+    public String getTitle(final ResponseData responseData, final String title, final Map<String, Object> dataMap) {
+        if (title == null) {
+            return StringUtil.EMPTY; // empty
+        }
+
+        final int[] spaceChars = getSpaceChars();
+        try (final Reader reader = new StringReader(title)) {
+            return TextUtil.normalizeText(reader).initialCapacity(title.length()).spaceChars(spaceChars).execute();
+        } catch (final IOException e) {
+            return StringUtil.EMPTY; // empty
+        }
+    }
+
     public String getContent(final ResponseData responseData, final String content, final Map<String, Object> dataMap) {
         if (content == null) {
             return StringUtil.EMPTY; // empty

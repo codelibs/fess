@@ -175,6 +175,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         putAdditionalData(dataMap, responseData, document);
+        normalizeData(responseData, dataMap);
 
         try {
             resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
@@ -182,6 +183,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
         }
         resultData.setEncoding(charsetName);
+    }
+
+    protected void normalizeData(final ResponseData responseData, Map<String, Object> dataMap) {
+        Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
+        if (titleObj != null) {
+            dataMap.put(fessConfig.getIndexFieldTitle(),
+                    ComponentUtil.getDocumentHelper().getTitle(responseData, titleObj.toString(), dataMap));
+        }
     }
 
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
