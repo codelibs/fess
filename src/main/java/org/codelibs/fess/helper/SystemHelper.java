@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -58,6 +59,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -380,6 +382,14 @@ public class SystemHelper {
     public ActionValidator<FessMessages> createValidator(final RequestManager requestManager,
             final UserMessagesCreator<FessMessages> messagesCreator, final Class<?>[] runtimeGroups) {
         return new FessActionValidator<>(requestManager, messagesCreator, runtimeGroups);
+    }
+
+    public HtmlResponse getRedirectResponseToLogin(final HttpServletRequest request, final HtmlResponse response) {
+        return response;
+    }
+
+    public HtmlResponse getRedirectResponseToRoot(final HttpServletRequest request, final HtmlResponse response) {
+        return response;
     }
 
 }

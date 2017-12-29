@@ -213,12 +213,13 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected HtmlResponse redirectToLogin() {
-        return redirect(SsoAction.class);
+        return systemHelper.getRedirectResponseToLogin(request, redirect(SsoAction.class));
     }
 
     protected HtmlResponse redirectToRoot() {
         final String contextPath = request.getServletContext().getContextPath();
-        return newHtmlResponseAsRedirect(StringUtil.isBlank(contextPath) ? "/" : contextPath);
+        return systemHelper.getRedirectResponseToRoot(request,
+                newHtmlResponseAsRedirect(StringUtil.isBlank(contextPath) ? "/" : contextPath));
     }
 
     protected HtmlNext virtualHost(final HtmlNext path) {
