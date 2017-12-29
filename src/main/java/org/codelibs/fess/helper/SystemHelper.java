@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -384,11 +383,11 @@ public class SystemHelper {
         return new FessActionValidator<>(requestManager, messagesCreator, runtimeGroups);
     }
 
-    public HtmlResponse getRedirectResponseToLogin(final HttpServletRequest request, final HtmlResponse response) {
+    public HtmlResponse getRedirectResponseToLogin(final HtmlResponse response) {
         return response;
     }
 
-    public HtmlResponse getRedirectResponseToRoot(final HttpServletRequest request, final HtmlResponse response) {
+    public HtmlResponse getRedirectResponseToRoot(final HtmlResponse response) {
         return response;
     }
 
