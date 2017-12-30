@@ -438,6 +438,10 @@ public final class ComponentUtil {
         }
     }
 
+    public static boolean hasViewHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(VIEW_HELPER);
+    }
+
     public static boolean hasQueryHelper() {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
