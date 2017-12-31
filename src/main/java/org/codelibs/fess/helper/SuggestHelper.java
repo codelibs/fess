@@ -194,8 +194,8 @@ public class SuggestHelper {
                             reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
 
                             final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
-                            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction().seed(
-                                    System.currentTimeMillis())));
+                            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
+                                    .seed(System.currentTimeMillis()).setField(fessConfig.getIndexFieldId())));
                             reader.setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery(),
                                     flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()])).boostMode(
                                     CombineFunction.MULTIPLY));
