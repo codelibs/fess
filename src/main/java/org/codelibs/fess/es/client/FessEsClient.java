@@ -257,7 +257,7 @@ public class FessEsClient implements Client {
                         settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
                     }
                     if (settings != null) {
-                        settingsBuilder.put(settings);
+                        settingsBuilder.putProperties(settings, s -> s);
                     }
                 });
                 runner.build(config);

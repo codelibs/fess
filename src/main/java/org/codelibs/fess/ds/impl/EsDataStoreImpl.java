@@ -83,13 +83,13 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
 
         final Settings settings =
                 Settings.builder()
-                        .put(paramMap
-                                .entrySet()
-                                .stream()
-                                .filter(e -> e.getKey().startsWith(SETTINGS_PREFIX))
-                                .collect(
-                                        Collectors.toMap(e -> e.getKey().replaceFirst("^settings\\.", StringUtil.EMPTY), e -> e.getValue())))
-                        .build();
+                        .putProperties(
+                                paramMap.entrySet()
+                                        .stream()
+                                        .filter(e -> e.getKey().startsWith(SETTINGS_PREFIX))
+                                        .collect(
+                                                Collectors.toMap(e -> e.getKey().replaceFirst("^settings\\.", StringUtil.EMPTY),
+                                                        e -> e.getValue())), s -> s).build();
         logger.info("Connecting to " + hostsStr + " with [" + settings.toDelimitedString(',') + "]");
         final TransportAddress[] addresses = split(hostsStr, ",").get(stream -> stream.map(h -> {
             final String[] values = h.trim().split(":");
