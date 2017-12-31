@@ -174,7 +174,7 @@ public class CrawlingInfoHelper {
                             AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
                                     .size(maxSessionIdsInList).order(BucketOrder.key(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
-                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY);
+                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL);
                     return true;
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
                     final List<Map<String, String>> sessionIdList = new ArrayList<>();

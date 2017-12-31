@@ -1068,7 +1068,7 @@ public interface FessProp {
     public default void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean) {
         userBean.map(user -> {
             if (user.hasRoles(getAuthenticationAdminRolesAsArray())) {
-                return Constants.SEARCH_PREFERENCE_PRIMARY;
+                return Constants.SEARCH_PREFERENCE_LOCAL;
             }
             return user.getUserId();
         }).ifPresent(p -> searchRequestBuilder.setPreference(p)).orElse(() -> LaRequestUtil.getOptionalRequest().map(r -> {

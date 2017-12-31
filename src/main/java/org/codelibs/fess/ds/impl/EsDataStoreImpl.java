@@ -134,7 +134,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
         }
         builder.setQuery(QueryBuilders.wrapperQuery(paramMap.containsKey(QUERY) ? paramMap.get(QUERY).trim() : "{\"match_all\":{}}"));
         builder.setScroll(scroll);
-        builder.setPreference(paramMap.containsKey(PREFERENCE) ? paramMap.get(PREFERENCE).trim() : Constants.SEARCH_PREFERENCE_PRIMARY);
+        builder.setPreference(paramMap.containsKey(PREFERENCE) ? paramMap.get(PREFERENCE).trim() : Constants.SEARCH_PREFERENCE_LOCAL);
         try {
             SearchResponse response = builder.execute().actionGet(timeout);
 
