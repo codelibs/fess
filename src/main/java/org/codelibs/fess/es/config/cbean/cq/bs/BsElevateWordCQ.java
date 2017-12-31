@@ -177,12 +177,12 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
     }
 
     public BsElevateWordCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsElevateWordCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

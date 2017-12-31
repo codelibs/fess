@@ -176,12 +176,12 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
     }
 
     public BsWebConfigCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsWebConfigCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

@@ -178,12 +178,12 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public BsWebAuthenticationCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsWebAuthenticationCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

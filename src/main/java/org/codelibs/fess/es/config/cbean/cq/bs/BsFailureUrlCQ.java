@@ -177,12 +177,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public BsFailureUrlCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsFailureUrlCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

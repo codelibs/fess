@@ -177,12 +177,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
     }
 
     public BsThumbnailQueueCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsThumbnailQueueCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

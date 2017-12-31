@@ -177,12 +177,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
     }
 
     public BsRelatedContentCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsRelatedContentCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

@@ -176,12 +176,12 @@ public abstract class BsLabelTypeCQ extends EsAbstractConditionQuery {
     }
 
     public BsLabelTypeCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsLabelTypeCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

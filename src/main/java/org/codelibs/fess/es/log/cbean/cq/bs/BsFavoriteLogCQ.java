@@ -177,12 +177,12 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
     }
 
     public BsFavoriteLogCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsFavoriteLogCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

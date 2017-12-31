@@ -177,12 +177,12 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
     }
 
     public BsScheduledJobCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsScheduledJobCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

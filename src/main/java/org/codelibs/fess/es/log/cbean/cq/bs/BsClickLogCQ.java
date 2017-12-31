@@ -176,12 +176,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
     }
 
     public BsClickLogCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsClickLogCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 

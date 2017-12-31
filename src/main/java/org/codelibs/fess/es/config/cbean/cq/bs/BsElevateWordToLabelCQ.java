@@ -178,12 +178,12 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
     }
 
     public BsElevateWordToLabelCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsElevateWordToLabelCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 
