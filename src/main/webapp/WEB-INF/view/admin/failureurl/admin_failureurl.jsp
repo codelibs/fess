@@ -79,7 +79,7 @@
 												<i class="fa fa-search"></i>
 												<la:message key="labels.crud_button_search" />
 											</button>
-											<button type="submit" class="btn btn-secondary" name="reset"
+											<button type="submit" class="btn btn-default" name="reset"
 												value="<la:message key="labels.crud_button_reset" />">
 												<la:message key="labels.crud_button_reset" />
 											</button>

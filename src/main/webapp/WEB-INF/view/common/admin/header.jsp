@@ -10,7 +10,7 @@
 	<!-- Header Navbar -->
 	<nav class="navbar navbar-static-top" role="navigation">
 		<!-- Sidebar toggle button-->
-		<a href="#" class="sidebar-toggle" data-toggle="offcanvas"
+		<a href="#" class="sidebar-toggle" data-toggle="push-menu"
 			role="button"> <span class="sr-only"><la:message
 					key="labels.admin_toggle_navi" /></span>
 		</a>

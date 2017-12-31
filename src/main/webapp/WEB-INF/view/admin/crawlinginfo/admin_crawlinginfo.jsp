@@ -60,7 +60,7 @@
 													<i class="fa fa-search"></i>
 													<la:message key="labels.crawling_info_search" />
 												</button>
-												<button type="submit" class="btn btn-secondary" name="reset"
+												<button type="submit" class="btn btn-default" name="reset"
 													value="<la:message key="labels.crawling_info_reset" />">
 													<la:message key="labels.crawling_info_reset" />
 												</button>

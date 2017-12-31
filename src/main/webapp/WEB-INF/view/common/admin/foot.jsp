@@ -4,5 +4,5 @@
 <script src="${fe:url('/js/admin/moment-with-locales.min.js')}" type="text/javascript"></script>
 <script src="${fe:url('/js/admin/plugins/daterangepicker/daterangepicker.js')}" type="text/javascript"></script>
 <script src="${fe:url('/js/admin/plugins/timepicker/bootstrap-timepicker.min.js')}" type="text/javascript"></script>
-<script src="${fe:url('/js/admin/app.min.js')}" type="text/javascript"></script>
+<script src="${fe:url('/js/admin/adminlte.min.js')}" type="text/javascript"></script>
 <script src="${fe:url('/js/admin/admin.js')}" type="text/javascript"></script>
