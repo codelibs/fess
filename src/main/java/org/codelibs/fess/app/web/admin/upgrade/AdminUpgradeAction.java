@@ -35,9 +35,7 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
-import org.codelibs.fess.util.UpgradeUtil;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -51,13 +49,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     //
     private static final Logger logger = LoggerFactory.getLogger(AdminUpgradeAction.class);
 
-    private static final String VERSION_11_0 = "11.0";
-
-    private static final String VERSION_11_1 = "11.1";
-
-    private static final String VERSION_11_2 = "11.2";
-
-    private static final String VERSION_11_3 = "11.3";
+    // private static final String VERSION_12_0 = "12.0";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -143,12 +135,10 @@ public class AdminUpgradeAction extends FessAdminAction {
         });
         verifyToken(() -> asIndexHtml());
 
-        if (VERSION_11_0.equals(form.targetVersion)) {
+        /*
+        if (VERSION_12_0.equals(form.targetVersion)) {
             try {
-                upgradeFrom11_0();
-                upgradeFrom11_1();
-                upgradeFrom11_2();
-                upgradeFrom11_3();
+                upgradeFrom12_0();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -156,109 +146,20 @@ public class AdminUpgradeAction extends FessAdminAction {
                 systemHelper.reloadConfiguration();
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_0, e.getLocalizedMessage()));
-            }
-        } else if (VERSION_11_1.equals(form.targetVersion)) {
-            try {
-                upgradeFrom11_1();
-                upgradeFrom11_2();
-                upgradeFrom11_3();
-                upgradeFromAll();
-
-                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
-
-                systemHelper.reloadConfiguration();
-            } catch (final Exception e) {
-                logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_1, e.getLocalizedMessage()));
-            }
-        } else if (VERSION_11_2.equals(form.targetVersion)) {
-            try {
-                upgradeFrom11_2();
-                upgradeFrom11_3();
-                upgradeFromAll();
-
-                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
-
-                systemHelper.reloadConfiguration();
-            } catch (final Exception e) {
-                logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_2, e.getLocalizedMessage()));
-            }
-        } else if (VERSION_11_3.equals(form.targetVersion)) {
-            try {
-                upgradeFrom11_3();
-                upgradeFromAll();
-
-                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
-
-                systemHelper.reloadConfiguration();
-            } catch (final Exception e) {
-                logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_11_3, e.getLocalizedMessage()));
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_12_0, e.getLocalizedMessage()));
             }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
         }
+        */
+        saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
         return redirect(getClass());
     }
 
-    private void upgradeFrom11_0() {
-    }
-
-    private void upgradeFrom11_1() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
-        final String configIndex = ".fess_config";
-
-        // update mapping
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "thumbnail_queue", "thumbnail_id",
-                "{\"properties\":{\"thumbnail_id\":{\"type\":\"keyword\"}}}");
-    }
-
-    private void upgradeFrom11_2() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
-        final String configIndex = ".fess_config";
-        final String searchLogIndex = "fess_log";
-
-        // update mapping
-        UpgradeUtil.addMapping(indicesClient, configIndex, "related_content", "fess_indices/.fess_config");
-        UpgradeUtil.addMapping(indicesClient, configIndex, "related_query", "fess_indices/.fess_config");
-
-        // update mapping
-        if (UpgradeUtil.addFieldMapping(indicesClient, searchLogIndex, "search_log", "virtualHost",
-                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}")) {
-            UpgradeUtil.putMapping(indicesClient, searchLogIndex, "search_log", "{\"dynamic_templates\": ["
-                    + "{\"search_fields\": {\"path_match\": \"searchField.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
-                    + "]}");
-        }
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "web_config", "virtualHost",
-                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "data_config", "virtualHost",
-                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "file_config", "virtualHost",
-                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "key_match", "virtualHost",
-                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "label_type", "virtualHost",
-                "{\"properties\":{\"virtualHost\":{\"type\":\"keyword\"}}}");
-    }
-
-    private void upgradeFrom11_3() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
-        final String configIndex = ".fess_config";
-
-        UpgradeUtil.addFieldMapping(indicesClient, configIndex, "related_content", "sortOrder",
-                "{\"properties\":{\"sortOrder\":{\"type\":\"integer\"}}}");
+    private void upgradeFrom12_0() {
     }
 
     private void upgradeFromAll() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
-        final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
-
-        // .crawler
-        if (UpgradeUtil.existsIndex(indicesClient, crawlerIndex, true, true)) {
-            UpgradeUtil.deleteIndex(indicesClient, crawlerIndex, response -> {});
-        }
     }
 
     private boolean startReindex(final boolean replaceAliases) {

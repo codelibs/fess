@@ -22,6 +22,14 @@
 			<section class="content">
 				<div class="row">
 					<la:form action="/admin/upgrade/">
+						<%-- Message: BEGIN --%>
+						<div class="col-md-12">
+							<la:info id="msg" message="true">
+								<div class="alert alert-info">${msg}</div>
+							</la:info>
+							<la:errors />
+						</div>
+						<%-- Message: END --%>
 						<div class="col-md-12">
 							<div class="box box-primary">
 								<div class="box-header with-border">
@@ -31,23 +39,12 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message: BEGIN --%>
-									<div>
-										<la:info id="msg" message="true">
-											<div class="alert alert-info">${msg}</div>
-										</la:info>
-										<la:errors />
-									</div>
-									<%-- Message: END --%>
 									<div class="form-group">
 										<label for="targetVersion" class="col-sm-3 control-label"><la:message key="labels.target_version" /></label>
 										<div class="col-sm-9">
 											<la:errors property="targetVersion" />
 											<la:select styleId="targetVersion" property="targetVersion" styleClass="form-control">
-												<la:option value="11.0">11.0</la:option>
-												<la:option value="11.1">11.1</la:option>
-												<la:option value="11.2">11.2</la:option>
-												<la:option value="11.3">11.3</la:option>
+												<la:option value="-">-</la:option>
 											</la:select>
 										</div>
 									</div>
@@ -74,14 +71,6 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message: BEGIN --%>
-									<div>
-										<la:info id="msg" message="true">
-											<div class="alert alert-info">${msg}</div>
-										</la:info>
-										<la:errors />
-									</div>
-									<%-- Message: END --%>
 									<div class="form-group">
 										<label for="replaceAliases" class="col-sm-3 control-label"><la:message
 												key="labels.replace_aliases" /></label>
