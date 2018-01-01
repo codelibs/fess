@@ -333,7 +333,7 @@
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-	<script src="${fe:url('/js/admin/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
-	<script src="${fe:url('/js/admin/load-validator.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/plugins/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/searchlist.js')}" type="text/javascript"></script>
 </body>
 </html>
