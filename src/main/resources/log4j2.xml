@@ -29,7 +29,7 @@
 			</Routes>
 		</Routing>
 		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
-			filePattern="${log.file.basedir}/backup/${domain.name}${backup.date.suffix}-%i.log.gz">
+			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>${log.pattern}</Pattern>
 			</PatternLayout>
@@ -41,7 +41,7 @@
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
 		<RollingFile name="AuditFile" fileName="${log.file.basedir}/audit.log"
-			filePattern="${log.file.basedir}/backup/audit${backup.date.suffix}-%i.log.gz">
+			filePattern="${log.file.basedir}/audit${backup.date.suffix}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>${audit.log.pattern}</Pattern>
 			</PatternLayout>
