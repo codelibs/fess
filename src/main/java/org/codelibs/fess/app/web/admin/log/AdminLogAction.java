@@ -62,7 +62,7 @@ public class AdminLogAction extends FessAdminAction {
     public ActionResponse download(final String id) {
         final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
-        if (StringUtil.isNotBlank(logFilePath)) {
+        if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
             return asStream(filename).contentTypeOctetStream().stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
@@ -83,7 +83,7 @@ public class AdminLogAction extends FessAdminAction {
         if (StringUtil.isNotBlank(logFilePath)) {
             final Path logDirPath = Paths.get(logFilePath);
             try (Stream<Path> stream = Files.list(logDirPath)) {
-                stream.filter(entry -> entry.getFileName().toString().endsWith(".log")).forEach(filePath -> {
+                stream.filter(entry -> isLogFilename(entry.getFileName().toString())).forEach(filePath -> {
                     final Map<String, Object> map = new HashMap<>();
                     final String name = filePath.getFileName().toString();
                     map.put("id", Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
@@ -100,6 +100,10 @@ public class AdminLogAction extends FessAdminAction {
             }
         }
         return logFileItems;
+    }
+
+    public static boolean isLogFilename(final String name) {
+        return name.endsWith(".log") || name.endsWith(".log.gz");
     }
 
     private HtmlResponse asIndexHtml() {
