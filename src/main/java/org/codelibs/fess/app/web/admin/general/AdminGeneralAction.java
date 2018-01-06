@@ -125,32 +125,32 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     public static void updateConfig(final FessConfig fessConfig, final EditForm form) {
-        fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
-        fessConfig.setResultCollapsed(Constants.ON.equalsIgnoreCase(form.resultCollapsed));
-        fessConfig.setLoginLinkEnabled(Constants.ON.equalsIgnoreCase(form.loginLink));
-        fessConfig.setThumbnailEnabled(Constants.ON.equalsIgnoreCase(form.thumbnail));
-        fessConfig.setIncrementalCrawling(Constants.ON.equalsIgnoreCase(form.incrementalCrawling));
+        fessConfig.setLoginRequired(isCheckboxEnabled(form.loginRequired));
+        fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
+        fessConfig.setLoginLinkEnabled(isCheckboxEnabled(form.loginLink));
+        fessConfig.setThumbnailEnabled(isCheckboxEnabled(form.thumbnail));
+        fessConfig.setIncrementalCrawling(isCheckboxEnabled(form.incrementalCrawling));
         fessConfig.setDayForCleanup(form.dayForCleanup);
         fessConfig.setCrawlingThreadCount(form.crawlingThreadCount);
-        fessConfig.setSearchLog(Constants.ON.equalsIgnoreCase(form.searchLog));
-        fessConfig.setUserInfo(Constants.ON.equalsIgnoreCase(form.userInfo));
-        fessConfig.setUserFavorite(Constants.ON.equalsIgnoreCase(form.userFavorite));
-        fessConfig.setWebApiJson(Constants.ON.equalsIgnoreCase(form.webApiJson));
+        fessConfig.setSearchLog(isCheckboxEnabled(form.searchLog));
+        fessConfig.setUserInfo(isCheckboxEnabled(form.userInfo));
+        fessConfig.setUserFavorite(isCheckboxEnabled(form.userFavorite));
+        fessConfig.setWebApiJson(isCheckboxEnabled(form.webApiJson));
         fessConfig.setDefaultLabelValue(form.defaultLabelValue);
         fessConfig.setDefaultSortValue(form.defaultSortValue);
         fessConfig.setVirtualHostValue(form.virtualHostValue);
-        fessConfig.setAppendQueryParameter(Constants.ON.equalsIgnoreCase(form.appendQueryParameter));
+        fessConfig.setAppendQueryParameter(isCheckboxEnabled(form.appendQueryParameter));
         fessConfig.setIgnoreFailureType(form.ignoreFailureType);
         fessConfig.setFailureCountThreshold(form.failureCountThreshold);
-        fessConfig.setWebApiPopularWord(Constants.ON.equalsIgnoreCase(form.popularWord));
+        fessConfig.setWebApiPopularWord(isCheckboxEnabled(form.popularWord));
         fessConfig.setCsvFileEncoding(form.csvFileEncoding);
         fessConfig.setPurgeSearchLogDay(form.purgeSearchLogDay);
         fessConfig.setPurgeJobLogDay(form.purgeJobLogDay);
         fessConfig.setPurgeUserInfoDay(form.purgeUserInfoDay);
         fessConfig.setPurgeByBots(form.purgeByBots);
         fessConfig.setNotificationTo(form.notificationTo);
-        fessConfig.setSuggestSearchLog(Constants.ON.equalsIgnoreCase(form.suggestSearchLog));
-        fessConfig.setSuggestDocuments(Constants.ON.equalsIgnoreCase(form.suggestDocuments));
+        fessConfig.setSuggestSearchLog(isCheckboxEnabled(form.suggestSearchLog));
+        fessConfig.setSuggestDocuments(isCheckboxEnabled(form.suggestDocuments));
         fessConfig.setPurgeSuggestSearchLogDay(form.purgeSuggestSearchLogDay);
         fessConfig.setLdapProviderUrl(form.ldapProviderUrl);
         fessConfig.setLdapSecurityPrincipal(form.ldapSecurityPrincipal);
