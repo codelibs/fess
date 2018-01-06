@@ -21,6 +21,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -201,5 +202,12 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
             current = current.getCause();
         }
         return buf.toString();
+    }
+
+    public static boolean isCheckboxEnabled(final String value) {
+        if (value == null) {
+            return false;
+        }
+        return Constants.ON.equalsIgnoreCase(value) || Constants.TRUE.equalsIgnoreCase(value);
     }
 }

@@ -168,9 +168,9 @@ public class CrawlerLogTests extends CrawlTestBase {
         requestBody.put("target", "all");
         requestBody.put("script_type", "groovy");
         requestBody.put("sort_order", 0);
-        requestBody.put("crawler", Constants.ON);
-        requestBody.put("job_logging", Constants.ON);
-        requestBody.put("available", Constants.ON);
+        requestBody.put("crawler", true);
+        requestBody.put("job_logging", true);
+        requestBody.put("available", true);
         requestBody.put("script_data", buildWebConfigJobScript(webConfigId));
         createJob(requestBody);
     }

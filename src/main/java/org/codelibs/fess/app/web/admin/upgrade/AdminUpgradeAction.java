@@ -131,7 +131,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             return asIndexHtml();
         });
         verifyToken(() -> asIndexHtml());
-        if (startReindex(Constants.ON.equalsIgnoreCase(form.replaceAliases))) {
+        if (startReindex(isCheckboxEnabled(form.replaceAliases))) {
             saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         }
         return redirect(getClass());
