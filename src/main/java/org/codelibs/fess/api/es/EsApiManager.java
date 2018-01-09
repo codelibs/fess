@@ -114,6 +114,7 @@ public class EsApiManager extends BaseApiManager {
 
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
         final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
+        curlRequest.header("Content-Type", "application/json;charset=utf-8");
 
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
