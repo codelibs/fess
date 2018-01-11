@@ -39,9 +39,7 @@ public class PingResponse {
         clusterStatus = response.getStatus().toString();
         try {
             final XContentBuilder builder = XContentFactory.jsonBuilder();
-            builder.startObject();
             response.toXContent(builder, ToXContent.EMPTY_PARAMS);
-            builder.endObject();
             message = builder.string();
         } catch (final IOException e) {
             message = "{ \"error\" : \"" + e.getMessage() + "\"}";
