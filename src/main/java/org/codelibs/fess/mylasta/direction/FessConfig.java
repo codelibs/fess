@@ -243,7 +243,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. noscript,script,style,header,footer,nav,a[rel=nofollow] */
     String CRAWLER_DOCUMENT_HTML_PRUNED_TAGS = "crawler.document.html.pruned.tags";
 
-    /** The key of the configuration. e.g. 200 */
+    /** The key of the configuration. e.g. 120 */
     String CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH = "crawler.document.html.max.digest.length";
 
     /** The key of the configuration. e.g.  */
@@ -516,10 +516,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
-    /** The key of the configuration. e.g. 50 */
+    /** The key of the configuration. e.g. 40 */
     String QUERY_HIGHLIGHT_FRAGMENT_SIZE = "query.highlight.fragment.size";
 
-    /** The key of the configuration. e.g. 5 */
+    /** The key of the configuration. e.g. 3 */
     String QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "query.highlight.number.of.fragments";
 
     /** The key of the configuration. e.g. fvh */
@@ -794,10 +794,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE = "page.thumbnail.purge.max.fetch.size";
 
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE = "page.score.booster.max.fetch.size";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
-    /** The key of the configuration. e.g. 20 */
+    /** The key of the configuration. e.g. 10 */
     String PAGING_SEARCH_PAGE_SIZE = "paging.search.page.size";
 
     /** The key of the configuration. e.g. 100 */
@@ -1932,14 +1935,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.html.max.digest.length'. <br>
-     * The value is, e.g. 200 <br>
+     * The value is, e.g. 120 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlMaxDigestLength();
 
     /**
      * Get the value for the key 'crawler.document.html.max.digest.length' as {@link Integer}. <br>
-     * The value is, e.g. 200 <br>
+     * The value is, e.g. 120 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2798,14 +2801,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.highlight.fragment.size'. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 40 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightFragmentSize();
 
     /**
      * Get the value for the key 'query.highlight.fragment.size' as {@link Integer}. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 40 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2813,14 +2816,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.highlight.number.of.fragments'. <br>
-     * The value is, e.g. 5 <br>
+     * The value is, e.g. 3 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightNumberOfFragments();
 
     /**
      * Get the value for the key 'query.highlight.number.of.fragments' as {@link Integer}. <br>
-     * The value is, e.g. 5 <br>
+     * The value is, e.g. 3 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3863,6 +3866,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageThumbnailPurgeMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.score.booster.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageScoreBoosterMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.score.booster.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageScoreBoosterMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
      * comment: search page
@@ -3881,14 +3899,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'paging.search.page.size'. <br>
-     * The value is, e.g. 20 <br>
+     * The value is, e.g. 10 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPagingSearchPageSize();
 
     /**
      * Get the value for the key 'paging.search.page.size' as {@link Integer}. <br>
-     * The value is, e.g. 20 <br>
+     * The value is, e.g. 10 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6759,6 +6777,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE);
         }
 
+        public String getPageScoreBoosterMaxFetchSize() {
+            return get(FessConfig.PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageScoreBoosterMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE);
+        }
+
         public String getPagingSearchPageStart() {
             return get(FessConfig.PAGING_SEARCH_PAGE_START);
         }
@@ -7697,7 +7723,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH, "//META[@name='description']/@content");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH, "//LINK[@rel='canonical']/@href");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=nofollow]");
-            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "200");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "120");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL, "No title.");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT, "false");
@@ -7788,8 +7814,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "50");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "5");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "40");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "3");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS, "");
@@ -7865,8 +7891,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_RELATEDQUERY_MAX_FETCH_SIZE, "5000");
             defaultMap.put(FessConfig.PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE, "100");
             defaultMap.put(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE, "100");
+            defaultMap.put(FessConfig.PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
-            defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "20");
+            defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED, "false");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_MAX_HEIGHT, "20000");

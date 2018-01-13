@@ -13,6 +13,7 @@
 	<include path="fess_job.xml"/>
 	<include path="fess_thumbnail.xml"/>
 	<include path="fess_sso.xml"/>
+	<include path="fess_score.xml"/>
 
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
