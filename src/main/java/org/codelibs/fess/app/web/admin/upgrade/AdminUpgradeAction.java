@@ -20,7 +20,6 @@ import java.util.Date;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
