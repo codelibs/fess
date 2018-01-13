@@ -263,6 +263,15 @@ public class SystemHelper {
         return StringUtils.abbreviate(str, ComponentUtil.getFessConfig().getMaxLogOutputLengthAsInteger().intValue());
     }
 
+    public String normalizeHtmlLang(final String value) {
+        String defaultLang = ComponentUtil.getFessConfig().getCrawlerDocumentHtmlDefaultLang();
+        if (StringUtil.isNotBlank(defaultLang)) {
+            return defaultLang;
+        }
+
+        return normalizeLang(value);
+    }
+
     public String normalizeLang(final String value) {
         if (StringUtil.isBlank(value)) {
             return null;
