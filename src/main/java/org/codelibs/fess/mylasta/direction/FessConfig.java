@@ -247,6 +247,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH = "crawler.document.html.max.digest.length";
 
     /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_HTML_DEFAULT_LANG = "crawler.document.html.default.lang";
+
+    /** The key of the configuration. e.g.  */
     String CRAWLER_DOCUMENT_FILE_NAME_ENCODING = "crawler.document.file.name.encoding";
 
     /** The key of the configuration. e.g. No title. */
@@ -1947,6 +1950,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerDocumentHtmlMaxDigestLengthAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.lang'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlDefaultLang();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.lang' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentHtmlDefaultLangAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.file.name.encoding'. <br>
@@ -5777,6 +5795,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH);
         }
 
+        public String getCrawlerDocumentHtmlDefaultLang() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_LANG);
+        }
+
+        public Integer getCrawlerDocumentHtmlDefaultLangAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_LANG);
+        }
+
         public String getCrawlerDocumentFileNameEncoding() {
             return get(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING);
         }
@@ -7724,6 +7750,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH, "//LINK[@rel='canonical']/@href");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=nofollow]");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "120");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_LANG, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL, "No title.");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT, "false");

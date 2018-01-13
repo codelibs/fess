@@ -333,7 +333,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // lang
-        final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), true));
+        final String lang = systemHelper.normalizeHtmlLang(getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), true));
         if (lang != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), lang);
         }
