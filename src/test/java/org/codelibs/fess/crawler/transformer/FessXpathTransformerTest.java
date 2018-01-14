@@ -582,6 +582,42 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("bbb aaa", value);
     }
 
+    public void test_getCanonicalUrl() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            @Override
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public String getCrawlerDocumentHtmlCanonicalXpath() {
+                return "//LINK[@rel='canonical'][1]/@href";
+            };
+        };
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setSessionId("test");
+        responseData.setUrl("http://example.com/");
+
+        String data = "<html><head></head><body>aaa</body></html>";
+        Document document = getDocument(data);
+        String value = transformer.getCanonicalUrl(responseData, document);
+        assertNull(value);
+
+        data = "<html><head><link rel=\"canonical\" href=\"http://example.com/\"></head><body>aaa</body></html>";
+        document = getDocument(data);
+        value = transformer.getCanonicalUrl(responseData, document);
+        assertEquals("http://example.com/", value);
+
+        data =
+                "<html><head><link rel=\"canonical\" href=\"http://example1.com/\"><link rel=\"canonical\" href=\"http://example2.com/\"></head><body>aaa</body></html>";
+        document = getDocument(data);
+        value = transformer.getCanonicalUrl(responseData, document);
+        assertEquals("http://example1.com/", value);
+    }
+
     public void test_normalizeCanonicalUrl() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         String value;

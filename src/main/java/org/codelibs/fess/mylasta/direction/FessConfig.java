@@ -237,7 +237,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. //META[@name='description']/@content */
     String CRAWLER_DOCUMENT_HTML_DIGEST_XPATH = "crawler.document.html.digest.xpath";
 
-    /** The key of the configuration. e.g. //LINK[@rel='canonical']/@href */
+    /** The key of the configuration. e.g. //LINK[@rel='canonical'][1]/@href */
     String CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH = "crawler.document.html.canonical.xpath";
 
     /** The key of the configuration. e.g. noscript,script,style,header,footer,nav,a[rel=nofollow] */
@@ -1924,7 +1924,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.html.canonical.xpath'. <br>
-     * The value is, e.g. //LINK[@rel='canonical']/@href <br>
+     * The value is, e.g. //LINK[@rel='canonical'][1]/@href <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlCanonicalXpath();
@@ -7747,7 +7747,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH, "//BODY");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH, "//HTML/@lang");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH, "//META[@name='description']/@content");
-            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH, "//LINK[@rel='canonical']/@href");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CANONICAL_XPATH, "//LINK[@rel='canonical'][1]/@href");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=nofollow]");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "120");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_LANG, "");
