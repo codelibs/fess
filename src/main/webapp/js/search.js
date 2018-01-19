@@ -212,7 +212,7 @@ $(function() {
 			$(img).css('background-image', '');
 			$(img).attr('src', url);
 		});
-		$(imgData).error(function() {
+		$(imgData).on('error', function() {
 			if (limit > 0) {
 				setTimeout(function() {
 					loadImage(img, url, --limit);
