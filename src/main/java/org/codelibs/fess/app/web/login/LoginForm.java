@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.app.web.login;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 public class LoginForm {
 
