@@ -28,7 +28,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.slf4j.Logger;
@@ -155,7 +155,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                         }
                     }
                 } finally {
-                    IOUtils.closeQuietly(br);
+                    CloseableUtil.closeQuietly(br);
                 }
 
                 p.waitFor();

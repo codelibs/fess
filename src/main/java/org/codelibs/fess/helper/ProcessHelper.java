@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.exception.JobProcessingException;
@@ -97,7 +98,7 @@ public class ProcessHelper {
             final Process process = jobProcess.getProcess();
             new Thread(() -> {
                 try {
-                    IOUtils.closeQuietly(process.getInputStream());
+                    CloseableUtil.closeQuietly(process.getInputStream());
                 } catch (final Exception e) {
                     logger.warn("Could not close a process input stream.", e);
                 } finally {
@@ -106,7 +107,7 @@ public class ProcessHelper {
             }, "ProcessCloser-input-" + sessionId).start();
             new Thread(() -> {
                 try {
-                    IOUtils.closeQuietly(process.getErrorStream());
+                    CloseableUtil.closeQuietly(process.getErrorStream());
                 } catch (final Exception e) {
                     logger.warn("Could not close a process error stream.", e);
                 } finally {
@@ -115,7 +116,7 @@ public class ProcessHelper {
             }, "ProcessCloser-error-" + sessionId).start();
             new Thread(() -> {
                 try {
-                    IOUtils.closeQuietly(process.getOutputStream());
+                    CloseableUtil.closeQuietly(process.getOutputStream());
                 } catch (final Exception e) {
                     logger.warn("Could not close a process output stream.", e);
                 } finally {

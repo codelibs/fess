@@ -41,10 +41,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -535,7 +535,7 @@ public class ViewHelper {
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         if (responseData.getHttpStatusCode() == 404) {
             response.httpStatus(responseData.getHttpStatusCode());
-            IOUtils.closeQuietly(responseData);
+            CloseableUtil.closeQuietly(responseData);
             return response;
         }
         writeFileName(response, responseData);
@@ -549,7 +549,7 @@ public class ViewHelper {
                     throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
             } finally {
-                IOUtils.closeQuietly(responseData);
+                CloseableUtil.closeQuietly(responseData);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished to write " + url);

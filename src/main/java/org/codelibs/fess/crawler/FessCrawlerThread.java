@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
@@ -183,7 +183,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
             } finally {
                 if (responseData != null) {
-                    IOUtils.closeQuietly(responseData);
+                    CloseableUtil.closeQuietly(responseData);
                 }
             }
         }

@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
@@ -276,7 +276,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             } catch (final IOException e) {
                 // ignore
             }
-            IOUtils.closeQuietly(writer);
+            CloseableUtil.closeQuietly(writer);
 
             if (isCommit) {
                 try {

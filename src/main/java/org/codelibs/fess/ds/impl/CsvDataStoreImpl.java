@@ -29,8 +29,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FailureUrlService;
@@ -288,7 +288,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
         } catch (final Exception e) {
             throw new DataStoreException("Failed to crawl data when reading csv file.", e);
         } finally {
-            IOUtils.closeQuietly(csvReader);
+            CloseableUtil.closeQuietly(csvReader);
         }
     }
 
