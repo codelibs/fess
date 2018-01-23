@@ -22,14 +22,11 @@ import org.codelibs.fess.helper.SuggestHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author yfujita
  */
 public class AdminSuggestAction extends FessAdminAction {
-    private static final Logger logger = LoggerFactory.getLogger(AdminSuggestAction.class);
 
     // ===================================================================================
     //                                                                           Attribute

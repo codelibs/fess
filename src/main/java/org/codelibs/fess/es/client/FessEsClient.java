@@ -138,7 +138,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.InnerHitBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -397,7 +397,7 @@ public class FessEsClient implements Client {
             }
             source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
             final CreateIndexResponse indexResponse =
-                    client.admin().indices().prepareCreate(indexName).setSource(source, XContentFactory.xContentType(source)).execute()
+                    client.admin().indices().prepareCreate(indexName).setSource(source, XContentType.JSON).execute()
                             .actionGet(fessConfig.getIndexIndicesTimeout());
             if (indexResponse.isAcknowledged()) {
                 logger.info("Created " + indexName + " index.");
@@ -428,9 +428,8 @@ public class FessEsClient implements Client {
             }
             try {
                 final PutMappingResponse putMappingResponse =
-                        client.admin().indices().preparePutMapping(indexName).setType(docType)
-                                .setSource(source, XContentFactory.xContentType(source)).execute()
-                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                        client.admin().indices().preparePutMapping(indexName).setType(docType).setSource(source, XContentType.JSON)
+                                .execute().actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created " + indexName + "/" + docType + " mapping.");
                 } else {
@@ -569,7 +568,7 @@ public class FessEsClient implements Client {
                                 if (result.keySet().contains("index")) {
                                     final IndexRequestBuilder requestBuilder =
                                             client.prepareIndex(configIndex, configType, result.get("index").get("_id")).setSource(line,
-                                                    XContentFactory.xContentType(line));
+                                                    XContentType.JSON);
                                     builder.add(requestBuilder);
                                 }
                             }

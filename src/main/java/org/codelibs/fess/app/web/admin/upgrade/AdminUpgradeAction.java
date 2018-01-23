@@ -155,11 +155,13 @@ public class AdminUpgradeAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /*
     private void upgradeFrom12_0() {
     }
 
     private void upgradeFromAll() {
     }
+    */
 
     private boolean startReindex(final boolean replaceAliases) {
         final String docIndex = "fess";

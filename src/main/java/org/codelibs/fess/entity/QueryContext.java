@@ -38,7 +38,7 @@ import org.lastaflute.web.util.LaRequestUtil;
 public class QueryContext {
     private QueryBuilder queryBuilder;
 
-    private final List<SortBuilder> sortBuilderList = new ArrayList<>();
+    private final List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
 
     private final String queryString;
 
@@ -87,7 +87,7 @@ public class QueryContext {
         this.queryBuilder = queryBuilder;
     }
 
-    public void addSorts(final SortBuilder... sortBuilders) {
+    public void addSorts(final SortBuilder<?>... sortBuilders) {
         stream(sortBuilders).of(stream -> stream.forEach(sortBuilder -> sortBuilderList.add(sortBuilder)));
     }
 
@@ -95,7 +95,7 @@ public class QueryContext {
         return !sortBuilderList.isEmpty();
     }
 
-    public List<SortBuilder> sortBuilders() {
+    public List<SortBuilder<?>> sortBuilders() {
         return sortBuilderList;
     }
 

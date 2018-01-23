@@ -19,11 +19,8 @@ import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.util.GroovyUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DocBoostMatcher {
-    private static final Logger logger = LoggerFactory.getLogger(DocBoostMatcher.class);
 
     private String boostExpression = "0";
 
