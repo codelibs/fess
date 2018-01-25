@@ -17,8 +17,10 @@ package org.codelibs.fess.score;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.exception.FessSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +63,7 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
 
     private AnalyticsReporting analyticsReporting = null;
 
-    private final Map<String, ReportRequest> reportRequestMap = new HashMap<>();
+    private final List<Pair<String[], ReportRequest>> reportRequesList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -69,7 +72,7 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
             return;
         }
 
-        if (reportRequestMap.isEmpty()) {
+        if (reportRequesList.isEmpty()) {
             logger.info("No reports.");
             return;
         }
@@ -111,8 +114,8 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
     @Override
     public long process() {
         long counter = 0;
-        for (final Map.Entry<String, ReportRequest> entry : reportRequestMap.entrySet()) {
-            final GetReportsRequest getReport = new GetReportsRequest().setReportRequests(Arrays.asList(entry.getValue()));
+        for (final Pair<String[], ReportRequest> entry : reportRequesList) {
+            final GetReportsRequest getReport = new GetReportsRequest().setReportRequests(Arrays.asList(entry.getSecond()));
             try {
                 final GetReportsResponse response = analyticsReporting.reports().batchGet(getReport).execute();
                 if (logger.isDebugEnabled()) {
@@ -120,9 +123,9 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
                 }
                 for (final Report report : response.getReports()) {
                     final List<ReportRow> rows = report.getData().getRows();
-                    final String baseUrl = entry.getKey();
+                    final String[] baseUrls = entry.getFirst();
                     if (rows == null) {
-                        logger.info("No data found for " + baseUrl);
+                        logger.info("No data found for " + String.join(",", baseUrls));
                         continue;
                     }
 
@@ -152,14 +155,16 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
                             }
 
                             if (path != null && count != null) {
-                                try {
-                                    final String url = new URL(new URL(baseUrl), path.toString()).toString();
-                                    final Map<String, Object> params = new HashMap<>();
-                                    params.put("url", url);
-                                    params.put("count", count);
-                                    counter += updateScore(params);
-                                } catch (final Exception e) {
-                                    logger.warn("Invalid url: " + baseUrl + " + " + path, e);
+                                for (final String baseUrl : baseUrls) {
+                                    try {
+                                        final String url = normalizeUrl(path, baseUrl);
+                                        final Map<String, Object> params = new HashMap<>();
+                                        params.put("url", url);
+                                        params.put("count", count);
+                                        counter += updateScore(params);
+                                    } catch (final Exception e) {
+                                        logger.warn("Invalid url: " + baseUrl + " + " + path, e);
+                                    }
                                 }
                             }
                         }
@@ -173,6 +178,10 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
         return counter;
     }
 
+    protected String normalizeUrl(String path, final String baseUrl) throws MalformedURLException {
+        return new URL(baseUrl + path.toString()).toString();
+    }
+
     private String toPrettyString(final GenericJson json) {
         try {
             return json.toPrettyString();
@@ -184,7 +193,11 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
         }
     }
 
+    public void addReportRequest(final List<String> urls, final ReportRequest request) {
+        reportRequesList.add(new Pair<String[], ReportRequest>(urls.toArray(new String[urls.size()]), request));
+    }
+
     public void addReportRequest(final String url, final ReportRequest request) {
-        reportRequestMap.put(url, request);
+        reportRequesList.add(new Pair<String[], ReportRequest>(new String[] { url }, request));
     }
 }
