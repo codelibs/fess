@@ -15,15 +15,45 @@
  */
 package org.codelibs.fess.es.config.exbhv;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.codelibs.fess.es.config.bsbhv.BsScheduledJobBhv;
+import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class ScheduledJobBhv extends BsScheduledJobBhv {
+
+    private static final Logger logger = LoggerFactory.getLogger(ScheduledJobBhv.class);
+
     @Override
     protected String asEsIndex() {
         return ComponentUtil.getFessConfig().getIndexConfigIndex();
+    }
+
+    @Override
+    public OptionalEntity<ScheduledJob> selectByPK(final String id) {
+        Exception lastException = null;
+        for (int i = 0; i < 30; i++) {
+            try {
+                return super.selectByPK(id);
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to select a job by " + id, e);
+                }
+                lastException = e;
+                try {
+                    Thread.sleep(RandomUtils.nextLong(500, 5000));
+                } catch (InterruptedException e1) {
+                    // ignore
+                }
+            }
+        }
+        logger.warn("Failed to select a job by " + id, lastException);
+        return OptionalEntity.empty();
     }
 }
