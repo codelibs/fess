@@ -95,8 +95,8 @@ launch_service()
         fess_parms="$fess_parms -Dfess.pidfile=$pidpath"
     fi
 
-    # Make sure we dont use any predefined locale, as we check some exception message strings and rely on english language
-    # As those strings are created by the OS, they are dependant on the configured locale
+    # Make sure we don't use any predefined locale, as we check some exception message strings and rely on english language
+    # As those strings are created by the OS, they are dependent on the configured locale
     LANG=en_US.UTF-8
     LC_ALL=en_US.UTF-8
 

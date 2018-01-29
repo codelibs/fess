@@ -135,7 +135,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     }
 
     // ===================================================================================
-    //                                                                     Login Extention
+    //                                                                     Login Extension
     //                                                                      ==============
 
     @Override
