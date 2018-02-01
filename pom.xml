@@ -241,9 +241,9 @@
 				<artifactId>license-maven-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
-					<header>http://www.codelibs.org/assets/license/header.txt</header>
+					<header>https://www.codelibs.org/assets/license/header.txt</header>
 					<properties>
-						<year>2017</year>
+						<year>2018</year>
 					</properties>
 					<includes>
 						<include>src/**/*.java</include>
