@@ -92,7 +92,7 @@ public class AccessTokenService {
     }
 
     public OptionalEntity<Set<String>> getPermissions(final HttpServletRequest request) {
-        final String token = request.getHeader("Authorization");
+        final String token = ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request);
         if (StringUtil.isNotBlank(token)) {
             return accessTokenBhv
                     .selectEntity(cb -> {

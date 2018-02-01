@@ -18,6 +18,8 @@
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
 
+	<component name="accessTokenHelper" class="org.codelibs.fess.helper.AccessTokenHelper">
+	</component>
 	<component name="activityHelper" class="org.codelibs.fess.helper.ActivityHelper">
 	</component>
 	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">

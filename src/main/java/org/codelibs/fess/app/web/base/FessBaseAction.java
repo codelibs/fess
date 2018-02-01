@@ -23,6 +23,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ViewHelper;
@@ -83,6 +84,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected AccessTokenHelper accessTokenHelper;
 
     @Resource
     protected ViewHelper viewHelper;
