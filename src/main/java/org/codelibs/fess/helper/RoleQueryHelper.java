@@ -160,18 +160,6 @@ public class RoleQueryHelper {
         ComponentUtil.getComponent(AccessTokenService.class).getPermissions(request).ifPresent(p -> p.forEach(roleSet::add));
     }
 
-    protected String getAccessToken(final HttpServletRequest request) {
-        final String token = request.getHeader("Authorization");
-        if (token != null) {
-            final String[] values = token.trim().split(" ");
-            if (values.length == 2 && "Bearer".equals(values[0])) {
-                return values[1];
-            }
-            throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);
-        }
-        return request.getParameter("access_token");
-    }
-
     protected void processParameter(final HttpServletRequest request, final Set<String> roleSet) {
         final String parameter = request.getParameter(parameterKey);
         if (logger.isDebugEnabled()) {
