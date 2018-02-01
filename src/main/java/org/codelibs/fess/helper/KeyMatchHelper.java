@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -78,7 +79,10 @@ public class KeyMatchHelper {
                     });
 
                     if (boolQuery.hasClauses()) {
-                        final String virtualHost = keyMatch.getVirtualHost();
+                        String virtualHost = keyMatch.getVirtualHost();
+                        if (StringUtil.isBlank(virtualHost)) {
+                            virtualHost = StringUtil.EMPTY;
+                        }
                         Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> queryMap = keyMatchQueryMap.get(virtualHost);
                         if (queryMap == null) {
                             queryMap = new HashMap<>();

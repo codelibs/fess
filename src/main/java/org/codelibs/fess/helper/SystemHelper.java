@@ -358,6 +358,7 @@ public class SystemHelper {
         ComponentUtil.getLdapManager().updateConfig();
         ComponentUtil.getRelatedContentHelper().update();
         ComponentUtil.getRelatedQueryHelper().update();
+        ComponentUtil.getKeyMatchHelper().update();
     }
 
     public String updateConfiguration() {
