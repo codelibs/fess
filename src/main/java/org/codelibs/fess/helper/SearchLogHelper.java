@@ -121,7 +121,7 @@ public class SearchLogHelper {
             searchLog.setLanguages(StringUtil.EMPTY);
         }
         final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
-        if (virtualHostKey != null) {
+        if (StringUtil.isNotBlank(virtualHostKey)) {
             searchLog.setVirtualHost(virtualHostKey);
         } else {
             searchLog.setVirtualHost(StringUtil.EMPTY);
