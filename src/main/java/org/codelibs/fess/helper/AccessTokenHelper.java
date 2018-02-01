@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class AccessTokenHelper {
@@ -36,13 +37,19 @@ public class AccessTokenHelper {
     public String getAccessTokenFromRequest(final HttpServletRequest request) {
         final String token = request.getHeader("Authorization");
         if (token != null) {
-            return token;
+            final String[] values = token.trim().split(" ");
+            if (values.length == 2 && "Bearer".equals(values[0])) {
+                return values[1];
+            } else if (values.length == 1) {
+                return values[0];
+            }
+            throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);
         }
         final String name = ComponentUtil.getFessConfig().getApiAccessTokenRequestParameter();
-        if (StringUtil.isBlank(name)) {
-            return null;
+        if (StringUtil.isNotBlank(name)) {
+            return request.getParameter(name);
         }
-        return request.getParameter(name);
+        return null;
     }
 
     public void setRandom(final Random random) {
