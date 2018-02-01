@@ -32,6 +32,7 @@ import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
+import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -80,6 +81,8 @@ import org.slf4j.LoggerFactory;
 public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static final String ACCESS_TOKEN_HELPER = "accessTokenHelper";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
@@ -412,6 +415,10 @@ public final class ComponentUtil {
 
     public static VirtualHostHelper getVirtualHostHelper() {
         return getComponent(VIRTUAL_HOST_HELPER);
+    }
+
+    public static AccessTokenHelper getAccessTokenHelper() {
+        return getComponent(ACCESS_TOKEN_HELPER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

@@ -85,7 +85,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
-            entity.setToken(systemHelper.generateAccessToken());
+            entity.setToken(accessTokenHelper.generateAccessToken());
             try {
                 accessTokenService.store(entity);
             } catch (final Exception e) {

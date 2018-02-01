@@ -24,7 +24,6 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +43,6 @@ import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.LocaleUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
@@ -85,8 +82,6 @@ public class SystemHelper {
     protected String[] supportedLanguages;
 
     protected List<Runnable> shutdownHookList = new ArrayList<>();
-
-    protected Random random = new SecureRandom();
 
     protected AtomicInteger previousClusterState = new AtomicInteger(0);
 
@@ -372,15 +367,6 @@ public class SystemHelper {
         buf.append("RelatedContent: ").append(ComponentUtil.getRelatedContentHelper().update()).append("\n");
         buf.append("RelatedQuery: ").append(ComponentUtil.getRelatedQueryHelper().update()).append("\n");
         return buf.toString();
-    }
-
-    public String generateAccessToken() {
-        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger().intValue(), 0, 0, true, true,
-                null, random);
-    }
-
-    public void setRandom(final Random random) {
-        this.random = random;
     }
 
     public boolean isChangedClusterState(final int status) {

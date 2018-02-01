@@ -151,6 +151,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String API_ACCESS_TOKEN_REQUIRED = "api.access.token.required";
 
+    /** The key of the configuration. e.g.  */
+    String API_ACCESS_TOKEN_REQUEST_PARAMETER = "api.access.token.request.parameter";
+
     /** The key of the configuration. e.g. Radmin-api */
     String API_ADMIN_ACCESS_PERMISSIONS = "api.admin.access.permissions";
 
@@ -1598,6 +1601,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiAccessTokenRequired();
+
+    /**
+     * Get the value for the key 'api.access.token.request.parameter'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiAccessTokenRequestParameter();
+
+    /**
+     * Get the value for the key 'api.access.token.request.parameter' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiAccessTokenRequestParameterAsInteger();
 
     /**
      * Get the value for the key 'api.admin.access.permissions'. <br>
@@ -5603,6 +5621,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_ACCESS_TOKEN_REQUIRED);
         }
 
+        public String getApiAccessTokenRequestParameter() {
+            return get(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER);
+        }
+
+        public Integer getApiAccessTokenRequestParameterAsInteger() {
+            return getAsInteger(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER);
+        }
+
         public String getApiAdminAccessPermissions() {
             return get(FessConfig.API_ADMIN_ACCESS_PERMISSIONS);
         }
@@ -7717,6 +7743,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                             "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en,en_IE,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt,pt_BR,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_LENGTH, "60");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUIRED, "false");
+            defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER, "");
             defaultMap.put(FessConfig.API_ADMIN_ACCESS_PERMISSIONS, "Radmin-api");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");

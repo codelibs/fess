@@ -203,7 +203,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
         verifyToken(() -> asEditHtml());
         getAccessToken(form).ifPresent(
                 entity -> {
-                    entity.setToken(systemHelper.generateAccessToken());
+                    entity.setToken(accessTokenHelper.generateAccessToken());
                     try {
                         accessTokenService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
