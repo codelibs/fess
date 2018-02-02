@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -43,6 +44,8 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     protected List<String> commandList;
 
     protected long commandTimeout = 30 * 1000L;// 30sec
+
+    protected long commandDestroyTimeout = 5 * 1000L;// 5sec
 
     protected File baseDir;
 
@@ -141,7 +144,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
             p = pb.start();
 
-            task = new ProcessDestroyer(p, cmdList);
+            task = new ProcessDestroyer(p, cmdList, commandTimeout);
             try {
                 destoryTimer.schedule(task, commandTimeout);
 
@@ -177,16 +180,19 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
         private final List<String> commandList;
 
-        protected ProcessDestroyer(final Process p, final List<String> commandList) {
+        private long timeout;
+
+        protected ProcessDestroyer(final Process p, final List<String> commandList, final long timeout) {
             this.p = p;
             this.commandList = commandList;
+            this.timeout = timeout;
         }
 
         @Override
         public void run() {
             logger.warn("CommandGenerator is timed out: " + commandList);
             try {
-                p.destroy();
+                p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS);
             } catch (final Exception e) {
                 logger.warn("Failed to stop destroyer.", e);
             }
@@ -203,6 +209,10 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
     public void setBaseDir(final File baseDir) {
         this.baseDir = baseDir;
+    }
+
+    public void setCommandDestroyTimeout(long commandDestroyTimeout) {
+        this.commandDestroyTimeout = commandDestroyTimeout;
     }
 
 }
