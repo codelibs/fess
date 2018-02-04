@@ -47,6 +47,7 @@ import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.index.SuggestDeleteResponse;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
+import org.codelibs.fess.suggest.settings.SuggestSettingsBuilder;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
@@ -97,7 +98,13 @@ public class SuggestHelper {
 
         fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
-        suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSuggestIndex());
+        final SuggestSettingsBuilder settingsBuilder = SuggestSettings.builder();
+        settingsBuilder.bulkTimeout(fessConfig.getIndexBulkTimeout());
+        settingsBuilder.clusterTimeout(fessConfig.getIndexHealthTimeout());
+        settingsBuilder.indexTimeout(fessConfig.getIndexIndexTimeout());
+        settingsBuilder.indicesTimeout(fessConfig.getIndexIndicesTimeout());
+        settingsBuilder.searchTimeout(fessConfig.getIndexSearchTimeout());
+        suggester = Suggester.builder().settings(settingsBuilder).build(fessEsClient, fessConfig.getIndexDocumentSuggestIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
         split(fessConfig.getSuggestFieldIndexContents(), ",").of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(
