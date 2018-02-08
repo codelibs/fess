@@ -321,6 +321,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10485760 */
     String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
 
+    /** The key of the configuration. e.g. default */
+    String INDEX_CODEC = "index.codec";
+
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
 
@@ -2304,6 +2307,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerDataMaxDocumentRequestSizeAsInteger();
+
+    /**
+     * Get the value for the key 'index.codec'. <br>
+     * The value is, e.g. default <br>
+     * comment: index setting
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexCodec();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -6001,6 +6012,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
         }
 
+        public String getIndexCodec() {
+            return get(FessConfig.INDEX_CODEC);
+        }
+
         public String getIndexFieldFavoriteCount() {
             return get(FessConfig.INDEX_FIELD_favorite_count);
         }
@@ -7801,6 +7816,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
+            defaultMap.put(FessConfig.INDEX_CODEC, "default");
             defaultMap.put(FessConfig.INDEX_FIELD_favorite_count, "favorite_count");
             defaultMap.put(FessConfig.INDEX_FIELD_click_count, "click_count");
             defaultMap.put(FessConfig.INDEX_FIELD_config_id, "config_id");

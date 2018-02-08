@@ -1,6 +1,7 @@
 {
   "settings": {
     "index": {
+      "codec": "${fess.index.codec}",
       "refresh_interval": "1s",
       "number_of_shards": 5,
       "number_of_replicas": 0
