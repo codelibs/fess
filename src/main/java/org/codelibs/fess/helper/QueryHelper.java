@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
+import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
@@ -282,6 +283,8 @@ public class QueryHelper {
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldVersion()));
         }
+        split(fessConfig.getQueryAdditionalAnalyzedFields(), ",").of(
+                stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
     }
 
     public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {

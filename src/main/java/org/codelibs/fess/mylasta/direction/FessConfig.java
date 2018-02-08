@@ -556,6 +556,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String QUERY_ADDITIONAL_SORT_FIELDS = "query.additional.sort.fields";
 
     /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_ANALYZED_FIELDS = "query.additional.analyzed.fields";
+
+    /** The key of the configuration. e.g.  */
     String QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS = "query.additional.not.analyzed.fields";
 
     /** The key of the configuration. e.g. UE,U,T,RK,S,LANG */
@@ -2991,6 +2994,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryAdditionalSortFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.analyzed.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalAnalyzedFields();
+
+    /**
+     * Get the value for the key 'query.additional.analyzed.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalAnalyzedFieldsAsInteger();
 
     /**
      * Get the value for the key 'query.additional.not.analyzed.fields'. <br>
@@ -6381,6 +6399,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_ADDITIONAL_SORT_FIELDS);
         }
 
+        public String getQueryAdditionalAnalyzedFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_ANALYZED_FIELDS);
+        }
+
+        public Integer getQueryAdditionalAnalyzedFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_ANALYZED_FIELDS);
+        }
+
         public String getQueryAdditionalNotAnalyzedFields() {
             return get(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS);
         }
@@ -7879,6 +7905,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_SEARCH_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_FACET_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_SORT_FIELDS, "");
+            defaultMap.put(FessConfig.QUERY_ADDITIONAL_ANALYZED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_GSA_RESPONSE_FIELDS, "UE,U,T,RK,S,LANG");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS, "4");
