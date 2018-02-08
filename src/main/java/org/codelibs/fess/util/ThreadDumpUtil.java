@@ -15,22 +15,60 @@
  */
 package org.codelibs.fess.util;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import org.codelibs.core.exception.IORuntimeException;
+import org.codelibs.fess.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ThreadDumpUtil {
     private static final Logger logger = LoggerFactory.getLogger(ThreadDumpUtil.class);
 
+    protected ThreadDumpUtil() {
+        // noop
+    }
+
     public static void printThreadDump() {
-        for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
-            logger.info("Thread: " + entry.getKey());
-            final StackTraceElement[] trace = entry.getValue();
-            for (final StackTraceElement element : trace) {
-                logger.info("\tat " + element);
-            }
+        processThreadDump(logger::info);
+    }
+
+    public static void printThreadDumpAsWarn() {
+        processThreadDump(logger::warn);
+    }
+
+    public static void printThreadDumpAsError() {
+        processThreadDump(logger::error);
+    }
+
+    public static void writeThreadDump(final String file) {
+        try (final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Constants.CHARSET_UTF_8))) {
+            processThreadDump(s -> {
+                try {
+                    writer.write(s);
+                    writer.write('\n');
+                } catch (IOException e) {
+                    throw new IORuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to write a thread dump to " + file, e);
         }
     }
 
+    public static void processThreadDump(Consumer<String> writer) {
+        for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
+            writer.accept("Thread: " + entry.getKey());
+            final StackTraceElement[] trace = entry.getValue();
+            for (final StackTraceElement element : trace) {
+                writer.accept("\tat " + element);
+            }
+        }
+    }
 }
