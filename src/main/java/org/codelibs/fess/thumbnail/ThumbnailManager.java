@@ -77,7 +77,7 @@ public class ThumbnailManager {
 
     protected String imageExtention = "png";
 
-    protected int splitSize = 5;
+    protected int splitSize = 2;
 
     protected int thumbnailTaskQueueSize = 10000;
 
