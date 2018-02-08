@@ -372,7 +372,7 @@ public class ThumbnailManager {
                         }
                     }
                 });
-                ;
+
                 deleteFileMap.values().forEach(v -> deleteFile(v));
                 count += deleteFileMap.size();
             }
@@ -383,6 +383,11 @@ public class ThumbnailManager {
                 Files.delete(path);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Delete " + path);
+                }
+
+                Path parent = path.getParent();
+                while (deleteEmptyDirectory(parent)) {
+                    parent = parent.getParent();
                 }
             } catch (final IOException e) {
                 logger.warn("Failed to delete " + path, e);
@@ -435,10 +440,19 @@ public class ThumbnailManager {
             if (e != null) {
                 logger.warn("I/O exception on " + dir, e);
             }
+            deleteEmptyDirectory(dir);
+            return FileVisitResult.CONTINUE;
+        }
+
+        private boolean deleteEmptyDirectory(final Path dir) throws IOException {
             if (dir.toFile().list().length == 0 && !dir.toFile().getName().equals(THUMBNAILS_DIR_NAME)) {
                 Files.delete(dir);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Delete " + dir);
+                }
+                return true;
             }
-            return FileVisitResult.CONTINUE;
+            return false;
         }
 
     }
