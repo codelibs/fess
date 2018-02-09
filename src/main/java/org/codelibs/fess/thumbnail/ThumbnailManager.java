@@ -77,7 +77,7 @@ public class ThumbnailManager {
 
     protected String imageExtention = "png";
 
-    protected int splitSize = 5;
+    protected int splitSize = 2;
 
     protected int thumbnailTaskQueueSize = 10000;
 
@@ -249,7 +249,7 @@ public class ThumbnailManager {
     public boolean offer(final Map<String, Object> docMap) {
         for (final ThumbnailGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
-                final String path = getImageFilename(docMap);
+                final String path = getImageFilename(docMap, splitSize);
                 final Tuple3<String, String, String> task = generator.createTask(path, docMap);
                 if (task != null) {
                     if (logger.isDebugEnabled()) {
@@ -269,12 +269,12 @@ public class ThumbnailManager {
         return false;
     }
 
-    protected String getImageFilename(final Map<String, Object> docMap) {
+    protected String getImageFilename(final Map<String, Object> docMap, final int nameLength) {
         final StringBuilder buf = new StringBuilder(50);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String docid = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldDocId(), String.class);
         for (int i = 0; i < docid.length(); i++) {
-            if (i > 0 && i % splitSize == 0) {
+            if (i > 0 && i % nameLength == 0) {
                 buf.append('/');
             }
             buf.append(docid.charAt(i));
@@ -284,11 +284,30 @@ public class ThumbnailManager {
     }
 
     public File getThumbnailFile(final Map<String, Object> docMap) {
-        final String thumbnailPath = getImageFilename(docMap);
+        return getThumbnailFile(docMap, splitSize);
+    }
+
+    protected File getThumbnailFile(final Map<String, Object> docMap, final int nameLength) {
+        final String thumbnailPath = getImageFilename(docMap, nameLength);
         if (StringUtil.isNotBlank(thumbnailPath)) {
             final File file = new File(baseDir, thumbnailPath);
             if (file.isFile()) {
                 return file;
+            }
+            // backward compatibility
+            if (nameLength != 5) {
+                final File oldFile = getThumbnailFile(docMap, 5);
+                if (oldFile != null) {
+                    file.getParentFile().mkdirs();
+                    if (oldFile.renameTo(file)) {
+                        return file;
+                    } else {
+                        logger.warn("Failed to rename " + oldFile.getAbsolutePath() + " to " + file.getAbsolutePath());
+                        if (!oldFile.delete()) {
+                            logger.warn("Failed to delete " + oldFile.getAbsolutePath());
+                        }
+                    }
+                }
             }
         }
         return null;
