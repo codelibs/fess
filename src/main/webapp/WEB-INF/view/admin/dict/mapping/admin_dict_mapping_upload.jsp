@@ -80,7 +80,7 @@
 										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.dict_mapping_file" /></label>
 										<div class="col-sm-9">
-											<input type="file" name="mappingFile" />
+											<input type="file" name="charMappingFile" />
 										</div>
 									</div>
 								</div>
