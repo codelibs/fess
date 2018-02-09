@@ -28,7 +28,6 @@ import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +40,6 @@ import javax.annotation.Resource;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
@@ -64,18 +62,12 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.healthmarketscience.jackcess.RuntimeIOException;
-import com.orangesignal.csv.CsvConfig;
-import com.orangesignal.csv.CsvWriter;
-
 /**
  * @author shinsuke
  */
 public class AdminBackupAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminBackupAction.class);
-
-    public static final String CSV_EXTENTION = ".csv";
 
     public static final String NDJSON_EXTENTION = ".ndjson";
 
@@ -154,17 +146,6 @@ public class AdminBackupAction extends FessAdminAction {
                     return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
                 } else if ("favorite_log".equals(name)) {
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
-                }
-            } else if (id.endsWith(CSV_EXTENTION)) {
-                final String name = id.substring(0, id.length() - CSV_EXTENTION.length());
-                if ("search_log".equals(name)) {
-                    return writeCsvResponse(id, getSearchLogCsvWriteCall());
-                } else if ("user_info".equals(name)) {
-                    return writeCsvResponse(id, getUserInfoCsvWriteCall());
-                } else if ("click_log".equals(name)) {
-                    return writeCsvResponse(id, getClickLogCsvWriteCall());
-                } else if ("favorite_log".equals(name)) {
-                    return writeCsvResponse(id, getFavoriteLogCsvWriteCall());
                 }
             } else {
                 final String index;
@@ -286,7 +267,7 @@ public class AdminBackupAction extends FessAdminAction {
                         try {
                             writer.write(buf.toString());
                         } catch (final IOException e) {
-                            throw new RuntimeIOException(e);
+                            throw new IORuntimeException(e);
                         }
                     });
         };
@@ -309,7 +290,7 @@ public class AdminBackupAction extends FessAdminAction {
                 try {
                     writer.write(buf.toString());
                 } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
+                    throw new IORuntimeException(e);
                 }
             });
         };
@@ -335,7 +316,7 @@ public class AdminBackupAction extends FessAdminAction {
                 try {
                     writer.write(buf.toString());
                 } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
+                    throw new IORuntimeException(e);
                 }
             });
         };
@@ -363,153 +344,13 @@ public class AdminBackupAction extends FessAdminAction {
                 try {
                     writer.write(buf.toString());
                 } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
+                    throw new IORuntimeException(e);
                 }
             });
         };
     }
 
-    @Deprecated
-    private StreamResponse writeCsvResponse(final String id, final Consumer<CsvWriter> writeCall) {
-        return asStream(id)
-                .contentTypeOctetStream()
-                .header("Pragma", "no-cache")
-                .header("Cache-Control", "no-cache")
-                .header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT")
-                .stream(out -> {
-                    final CsvConfig cfg = new CsvConfig(',', '"', '"');
-                    cfg.setEscapeDisabled(false);
-                    cfg.setQuoteDisabled(false);
-                    try (final CsvWriter writer =
-                            new CsvWriter(new BufferedWriter(new OutputStreamWriter(out.stream(), fessConfig.getCsvFileEncoding())), cfg)) {
-                        writeCall.accept(writer);
-                        writer.flush();
-                    } catch (final Exception e) {
-                        logger.warn("Failed to write " + id + " to response.", e);
-                    }
-                });
-    }
-
-    @Deprecated
-    public static Consumer<CsvWriter> getSearchLogCsvWriteCall() {
-        return writer -> {
-            final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
-            bhv.selectCursor(cb -> {
-                cb.query().matchAll();
-                cb.query().addOrderBy_RequestedAt_Asc();
-            }, entity -> {
-                final List<String> list = new ArrayList<>();
-                addToList(entity.getQueryId(), list);
-                addToList(entity.getUserInfoId(), list);
-                addToList(entity.getUserSessionId(), list);
-                addToList(entity.getUser(), list);
-                addToList(entity.getSearchWord(), list);
-                addToList(entity.getHitCount(), list);
-                addToList(entity.getQueryPageSize(), list);
-                addToList(entity.getQueryOffset(), list);
-                addToList(entity.getReferer(), list);
-                addToList(entity.getLanguages(), list);
-                addToList(entity.getRoles(), list);
-                addToList(entity.getUserAgent(), list);
-                addToList(entity.getClientIp(), list);
-                addToList(entity.getAccessType(), list);
-                addToList(entity.getQueryTime(), list);
-                addToList(entity.getResponseTime(), list);
-                addToList(entity.getRequestedAt(), list);
-                entity.getSearchFieldLogList().stream().forEach(e -> {
-                    addToList(e.getFirst(), list);
-                    addToList(e.getSecond(), list);
-                });
-                try {
-                    writer.writeValues(list);
-                } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
-                }
-            });
-        };
-    }
-
-    @Deprecated
-    public static Consumer<CsvWriter> getUserInfoCsvWriteCall() {
-        return writer -> {
-            final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
-            bhv.selectCursor(cb -> {
-                cb.query().matchAll();
-                cb.query().addOrderBy_CreatedAt_Asc();
-            }, entity -> {
-                final List<String> list = new ArrayList<>();
-                addToList(entity.getCreatedAt(), list);
-                addToList(entity.getUpdatedAt(), list);
-                try {
-                    writer.writeValues(list);
-                } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
-                }
-            });
-        };
-    }
-
-    @Deprecated
-    public static Consumer<CsvWriter> getFavoriteLogCsvWriteCall() {
-        return writer -> {
-            final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
-            bhv.selectCursor(cb -> {
-                cb.query().matchAll();
-                cb.query().addOrderBy_CreatedAt_Asc();
-            }, entity -> {
-                final List<String> list = new ArrayList<>();
-                addToList(entity.getQueryId(), list);
-                addToList(entity.getUserInfoId(), list);
-                addToList(entity.getDocId(), list);
-                addToList(entity.getUrl(), list);
-                addToList(entity.getCreatedAt(), list);
-                try {
-                    writer.writeValues(list);
-                } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
-                }
-            });
-        };
-    }
-
-    @Deprecated
-    public static Consumer<CsvWriter> getClickLogCsvWriteCall() {
-        return writer -> {
-            final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
-            bhv.selectCursor(cb -> {
-                cb.query().matchAll();
-                cb.query().addOrderBy_RequestedAt_Asc();
-            }, entity -> {
-                final List<String> list = new ArrayList<>();
-                addToList(entity.getQueryId(), list);
-                addToList(entity.getUserSessionId(), list);
-                addToList(entity.getDocId(), list);
-                addToList(entity.getUrl(), list);
-                addToList(entity.getOrder(), list);
-                addToList(entity.getQueryRequestedAt(), list);
-                addToList(entity.getRequestedAt(), list);
-                try {
-                    writer.writeValues(list);
-                } catch (final IOException e) {
-                    throw new RuntimeIOException(e);
-                }
-            });
-        };
-    }
-
-    private static void addToList(final Object value, final List<String> list) {
-        if (value == null) {
-            list.add(StringUtil.EMPTY);
-        } else if (value instanceof LocalDateTime) {
-            list.add(((LocalDateTime) value).format(ISO_8601_FORMATTER));
-        } else if (value instanceof String[]) {
-            String.join(",", (String[]) value);
-        } else {
-            list.add(value.toString());
-        }
-    }
-
-    static public List<Map<String, String>> getBackupItems() {
+    public static List<Map<String, String>> getBackupItems() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.map(name -> {
             final Map<String, String> map = new HashMap<>();
