@@ -72,9 +72,15 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (!ComponentUtil.getFessConfig().isWebApiGsa()) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isWebApiGsa()) {
             return false;
         }
+
+        if (!fessConfig.isAcceptedSearchReferer(request)) {
+            return false;
+        }
+
         final String servletPath = request.getServletPath();
         return servletPath.startsWith(gsaPathPrefix);
     }

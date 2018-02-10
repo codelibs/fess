@@ -38,6 +38,7 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
@@ -54,6 +55,10 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
     @Override
     public boolean matches(final HttpServletRequest request) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isAcceptedSearchReferer(request)) {
+            return false;
+        }
         final String servletPath = request.getServletPath();
         return servletPath.startsWith(pathPrefix);
     }

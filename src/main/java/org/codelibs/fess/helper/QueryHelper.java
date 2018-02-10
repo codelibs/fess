@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.core.stream.StreamUtil.split;
+import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;

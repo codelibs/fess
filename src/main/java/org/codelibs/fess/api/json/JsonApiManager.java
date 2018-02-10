@@ -71,7 +71,20 @@ public class JsonApiManager extends BaseJsonApiManager {
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (!ComponentUtil.getFessConfig().isWebApiJson()) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isWebApiJson()) {
+            final String formatType = request.getParameter("type");
+            switch (getFormatType(formatType)) {
+            case SEARCH:
+            case LABEL:
+            case POPULARWORD:
+                return false;
+            default:
+                break;
+            }
+        }
+
+        if (!fessConfig.isAcceptedSearchReferer(request)) {
             return false;
         }
 

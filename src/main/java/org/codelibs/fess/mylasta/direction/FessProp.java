@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
@@ -71,6 +72,8 @@ import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
+
+    public static final String API_SEARCH_ACCEPT_REFERERS = "apiSearchAcceptReferers";
 
     public static final String QUERY_GSA_RESPONSE_FIELDS = "queryGsaResponseFields";
 
@@ -1762,4 +1765,30 @@ public interface FessProp {
         return gsaResponseFieldSet.contains(name.toLowerCase(Locale.ROOT));
     }
 
+    String getApiSearchAcceptReferers();
+
+    public default boolean isAcceptedSearchReferer(final HttpServletRequest request) {
+        Pattern[] patterns = (Pattern[]) propMap.get(API_SEARCH_ACCEPT_REFERERS);
+        if (patterns == null) {
+            final String refs = getApiSearchAcceptReferers();
+            if (StringUtil.isBlank(refs)) {
+                patterns = new Pattern[0];
+            } else {
+                patterns =
+                        split(refs, "\n").get(
+                                stream -> stream.filter(StringUtil::isNotBlank).map(s -> Pattern.compile(s.trim()))
+                                        .toArray(n -> new Pattern[n]));
+            }
+            propMap.put(API_SEARCH_ACCEPT_REFERERS, patterns);
+        }
+        if (patterns.length == 0) {
+            return true;
+        }
+
+        final String referer = request.getHeader("referer");
+        if (referer == null) {
+            return false;
+        }
+        return Arrays.stream(patterns).anyMatch(p -> p.matcher(referer).matches());
+    }
 }
