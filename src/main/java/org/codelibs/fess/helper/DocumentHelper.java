@@ -149,7 +149,7 @@ public class DocumentHelper {
             if (responseData.getRedirectLocation() != null) {
                 final Set<RequestData> childUrlList = new HashSet<>();
                 childUrlList.add(RequestDataBuilder.newRequestData().get().url(responseData.getRedirectLocation()).build());
-                throw new ChildUrlsException(childUrlList, "Redirected from " + url);
+                throw new ChildUrlsException(childUrlList, this.getClass().getName() + "#RedirectedFrom:" + url);
             }
             responseData.setExecutionTime(System.currentTimeMillis() - startTime);
             responseData.setSessionId(crawlingInfoId);

@@ -215,7 +215,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_IGNORE_ROBOTS_TXT = "crawler.ignore.robots.txt";
 
     /** The key of the configuration. e.g. false */
-    String CRAWLER_IGNORE_META_ROBOTS = "crawler.ignore.meta.robots";
+    String CRAWLER_IGNORE_ROBOTS_TAGS = "crawler.ignore.robots.tags";
 
     /** The key of the configuration. e.g. true */
     String CRAWLER_IGNORE_CONTENT_EXCEPTION = "crawler.ignore.content.exception";
@@ -1869,18 +1869,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isCrawlerIgnoreRobotsTxt();
 
     /**
-     * Get the value for the key 'crawler.ignore.meta.robots'. <br>
+     * Get the value for the key 'crawler.ignore.robots.tags'. <br>
      * The value is, e.g. false <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getCrawlerIgnoreMetaRobots();
+    String getCrawlerIgnoreRobotsTags();
 
     /**
-     * Is the property for the key 'crawler.ignore.meta.robots' true? <br>
+     * Is the property for the key 'crawler.ignore.robots.tags' true? <br>
      * The value is, e.g. false <br>
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
-    boolean isCrawlerIgnoreMetaRobots();
+    boolean isCrawlerIgnoreRobotsTags();
 
     /**
      * Get the value for the key 'crawler.ignore.content.exception'. <br>
@@ -5808,12 +5808,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT);
         }
 
-        public String getCrawlerIgnoreMetaRobots() {
-            return get(FessConfig.CRAWLER_IGNORE_META_ROBOTS);
+        public String getCrawlerIgnoreRobotsTags() {
+            return get(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS);
         }
 
-        public boolean isCrawlerIgnoreMetaRobots() {
-            return is(FessConfig.CRAWLER_IGNORE_META_ROBOTS);
+        public boolean isCrawlerIgnoreRobotsTags() {
+            return is(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS);
         }
 
         public String getCrawlerIgnoreContentException() {
@@ -7833,7 +7833,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
             defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,ftp");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT, "false");
-            defaultMap.put(FessConfig.CRAWLER_IGNORE_META_ROBOTS, "false");
+            defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
             defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404");
             defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");

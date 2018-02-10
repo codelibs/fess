@@ -267,6 +267,112 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("foo1<!--googleoff: index--><A href=\"index.html\"></A><!--googleon: index-->foo5", output);
     }
 
+    public void test_processXRobotsTags_no() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            @Override
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreRobotsTags() {
+                return false;
+            };
+        };
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        transformer.processXRobotsTag(responseData, new ResultData());
+        assertFalse(responseData.isNoFollow());
+    }
+
+    public void test_processXRobotsTag_noindexnofollow() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreRobotsTags() {
+                return false;
+            };
+        };
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.addMetaData("X-Robots-Tag", "noindex,nofollow");
+
+        try {
+            transformer.processXRobotsTag(responseData, new ResultData());
+            fail();
+        } catch (ChildUrlsException e) {
+            assertTrue(e.getChildUrlList().isEmpty());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    public void test_processXRobotsTag_noindex() throws Exception {
+        final String data = "<meta name=\"robots\" content=\"noindex\" /><a href=\"index.html\">aaa</a>";
+
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreRobotsTags() {
+                return false;
+            };
+        };
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setResponseBody(data.getBytes());
+        responseData.addMetaData("X-Robots-Tag", "noindex");
+
+        try {
+            transformer.processXRobotsTag(responseData, new ResultData());
+            fail();
+        } catch (ChildUrlsException e) {
+            assertTrue(e.getChildUrlList().isEmpty());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    public void test_processXRobotsTag_nofollow() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Collections.emptyMap();
+            }
+        };
+        transformer.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCrawlerIgnoreRobotsTags() {
+                return false;
+            };
+        };
+
+        final ResponseData responseData = new ResponseData();
+        responseData.addMetaData("X-Robots-Tag", "nofollow");
+
+        transformer.processXRobotsTag(responseData, new ResultData());
+        assertTrue(responseData.isNoFollow());
+    }
+
     public void test_processMetaRobots_no() throws Exception {
         final String data = "<html><body>foo</body></html>";
         final Document document = getDocument(data);
@@ -281,7 +387,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public boolean isCrawlerIgnoreMetaRobots() {
+            public boolean isCrawlerIgnoreRobotsTags() {
                 return false;
             };
         };
@@ -306,7 +412,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public boolean isCrawlerIgnoreMetaRobots() {
+            public boolean isCrawlerIgnoreRobotsTags() {
                 return false;
             };
         };
@@ -337,7 +443,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public boolean isCrawlerIgnoreMetaRobots() {
+            public boolean isCrawlerIgnoreRobotsTags() {
                 return false;
             };
         };
@@ -368,7 +474,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public boolean isCrawlerIgnoreMetaRobots() {
+            public boolean isCrawlerIgnoreRobotsTags() {
                 return false;
             };
         };
@@ -400,7 +506,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public boolean isCrawlerIgnoreMetaRobots() {
+            public boolean isCrawlerIgnoreRobotsTags() {
                 return false;
             };
         };
