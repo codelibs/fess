@@ -77,10 +77,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return false;
         }
 
-        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
-            return false;
-        }
-
         final String servletPath = request.getServletPath();
         return servletPath.startsWith(gsaPathPrefix);
     }
@@ -93,7 +89,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             processSearchRequest(request, response, chain);
             break;
         default:
-            writeXmlResponse(-1, false, StringUtil.EMPTY, "Not found.");
+            writeXmlResponse(99, false, StringUtil.EMPTY, "Not found.");
             break;
         }
     }
@@ -101,6 +97,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
+            writeXmlResponse(99, false, StringUtil.EMPTY, "Referer is invalid.");
+            return;
+        }
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;

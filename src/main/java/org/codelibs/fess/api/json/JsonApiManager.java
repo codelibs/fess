@@ -84,10 +84,6 @@ public class JsonApiManager extends BaseJsonApiManager {
             }
         }
 
-        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
-            return false;
-        }
-
         final String servletPath = request.getServletPath();
         return servletPath.startsWith(pathPrefix);
     }
@@ -126,6 +122,11 @@ public class JsonApiManager extends BaseJsonApiManager {
     protected void processScrollSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
+            writeJsonResponse(99, StringUtil.EMPTY, "Referer is invalid.");
+            return;
+        }
 
         if (!fessConfig.isApiSearchScroll()) {
             writeJsonResponse(99, StringUtil.EMPTY, "Scroll Search is not available.");

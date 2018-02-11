@@ -55,10 +55,6 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
-            return false;
-        }
         final String servletPath = request.getServletPath();
         return servletPath.startsWith(pathPrefix);
     }
@@ -66,6 +62,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
+            writeJsonResponse(99, StringUtil.EMPTY, "Referer is invalid.");
+            return;
+        }
+
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
