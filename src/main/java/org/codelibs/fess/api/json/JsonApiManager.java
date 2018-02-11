@@ -73,8 +73,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     public boolean matches(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isWebApiJson()) {
-            final String formatType = request.getParameter("type");
-            switch (getFormatType(formatType)) {
+            switch (getFormatType(request)) {
             case SEARCH:
             case LABEL:
             case POPULARWORD:
@@ -95,8 +94,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
-        final String formatType = request.getParameter("type");
-        switch (getFormatType(formatType)) {
+        switch (getFormatType(request)) {
         case SEARCH:
             processSearchRequest(request, response, chain);
             break;

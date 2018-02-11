@@ -88,8 +88,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
-        final String formatType = request.getParameter("type");
-        switch (getFormatType(formatType)) {
+        switch (getFormatType(request)) {
         case SEARCH:
             processSearchRequest(request, response, chain);
             break;

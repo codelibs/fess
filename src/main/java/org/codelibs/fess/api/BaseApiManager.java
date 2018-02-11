@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.exception.IORuntimeException;
@@ -29,10 +30,12 @@ import org.lastaflute.web.util.LaResponseUtil;
 
 public abstract class BaseApiManager implements WebApiManager {
 
+    private static final String API_FORMAT_TYPE = "apiFormatType";
+
     protected String pathPrefix;
 
     protected enum FormatType {
-        SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, OTHER, PING;
+        SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, OTHER, PING, SCROLL;
     }
 
     public String getPathPrefix() {
@@ -43,27 +46,44 @@ public abstract class BaseApiManager implements WebApiManager {
         this.pathPrefix = pathPrefix;
     }
 
-    protected FormatType getFormatType(final String formatType) {
-        if (formatType == null) {
-            return FormatType.SEARCH;
+    protected FormatType getFormatType(final HttpServletRequest request) {
+        FormatType formatType = (FormatType) request.getAttribute(API_FORMAT_TYPE);
+        if (formatType != null) {
+            return formatType;
         }
-        final String type = formatType.toUpperCase(Locale.ROOT);
-        if (FormatType.SEARCH.name().equals(type)) {
-            return FormatType.SEARCH;
-        } else if (FormatType.LABEL.name().equals(type)) {
-            return FormatType.LABEL;
-        } else if (FormatType.POPULARWORD.name().equals(type)) {
-            return FormatType.POPULARWORD;
-        } else if (FormatType.FAVORITE.name().equals(type)) {
-            return FormatType.FAVORITE;
-        } else if (FormatType.FAVORITES.name().equals(type)) {
-            return FormatType.FAVORITES;
-        } else if (FormatType.PING.name().equals(type)) {
-            return FormatType.PING;
+        String value = request.getParameter("type");
+        if (value == null) {
+            final String servletPath = request.getServletPath();
+            final String[] values = servletPath.replaceAll("/+", "/").split("/");
+            if (values.length > 2) {
+                value = values[2];
+            }
+        }
+        if (value == null) {
+            formatType = FormatType.SEARCH;
         } else {
-            // default
-            return FormatType.OTHER;
+            final String type = value.toUpperCase(Locale.ROOT);
+            if (FormatType.SEARCH.name().equals(type)) {
+                formatType = FormatType.SEARCH;
+            } else if (FormatType.LABEL.name().equals(type)) {
+                formatType = FormatType.LABEL;
+            } else if (FormatType.POPULARWORD.name().equals(type)) {
+                formatType = FormatType.POPULARWORD;
+            } else if (FormatType.FAVORITE.name().equals(type)) {
+                formatType = FormatType.FAVORITE;
+            } else if (FormatType.FAVORITES.name().equals(type)) {
+                formatType = FormatType.FAVORITES;
+            } else if (FormatType.PING.name().equals(type)) {
+                formatType = FormatType.PING;
+            } else if (FormatType.SCROLL.name().equals(type)) {
+                formatType = FormatType.SCROLL;
+            } else {
+                // default
+                formatType = FormatType.OTHER;
+            }
         }
+        request.setAttribute(API_FORMAT_TYPE, formatType);
+        return formatType;
     }
 
     public static void write(final String text, final String contentType, final String encoding) {
