@@ -84,7 +84,7 @@ public class JsonApiManager extends BaseJsonApiManager {
             }
         }
 
-        if (!fessConfig.isAcceptedSearchReferer(request)) {
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
             return false;
         }
 

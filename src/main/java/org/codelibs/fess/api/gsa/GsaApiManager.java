@@ -77,7 +77,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return false;
         }
 
-        if (!fessConfig.isAcceptedSearchReferer(request)) {
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
             return false;
         }
 

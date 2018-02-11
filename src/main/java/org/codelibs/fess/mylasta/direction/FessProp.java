@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
@@ -1767,7 +1766,7 @@ public interface FessProp {
 
     String getApiSearchAcceptReferers();
 
-    public default boolean isAcceptedSearchReferer(final HttpServletRequest request) {
+    public default boolean isAcceptedSearchReferer(final String referer) {
         Pattern[] patterns = (Pattern[]) propMap.get(API_SEARCH_ACCEPT_REFERERS);
         if (patterns == null) {
             final String refs = getApiSearchAcceptReferers();
@@ -1785,7 +1784,6 @@ public interface FessProp {
             return true;
         }
 
-        final String referer = request.getHeader("referer");
         if (referer == null) {
             return false;
         }

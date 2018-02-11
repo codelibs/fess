@@ -56,7 +56,7 @@ public class SuggestApiManager extends BaseJsonApiManager {
     @Override
     public boolean matches(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (!fessConfig.isAcceptedSearchReferer(request)) {
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
             return false;
         }
         final String servletPath = request.getServletPath();
