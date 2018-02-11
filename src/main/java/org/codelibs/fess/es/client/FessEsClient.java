@@ -154,6 +154,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.di.exception.ContainerInitFailureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,7 +300,7 @@ public class FessEsClient implements Client {
             }
         }
 
-        waitForYellowStatus();
+        waitForYellowStatus(fessConfig);
 
         indexConfigList.forEach(configName -> {
             final String[] values = configName.split("/");
@@ -590,12 +591,20 @@ public class FessEsClient implements Client {
         }
     }
 
-    private void waitForYellowStatus() {
-        final ClusterHealthResponse response =
-                client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
-                        .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
-        if (logger.isDebugEnabled()) {
-            logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+    private void waitForYellowStatus(final FessConfig fessConfig) {
+        try {
+            final ClusterHealthResponse response =
+                    client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+                            .actionGet(fessConfig.getIndexHealthTimeout());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+            }
+        } catch (Exception e) {
+            final String message =
+                    "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
+                            + ") is not available. Check the state of your Elasticsearch cluster ("
+                            + fessConfig.getElasticsearchClusterName() + ").";
+            throw new ContainerInitFailureException(message, e);
         }
     }
 
