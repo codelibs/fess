@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -176,6 +177,8 @@ public class FessEsClient implements Client {
     protected List<String> indexConfigList = new ArrayList<>();
 
     protected Map<String, List<String>> configListMap = new HashMap<>();
+
+    protected String scrollForSearch = "1m";
 
     protected int sizeForDelete = 100;
 
@@ -630,7 +633,7 @@ public class FessEsClient implements Client {
         }
     }
 
-    public int deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
+    public long deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         SearchResponse response =
@@ -652,8 +655,8 @@ public class FessEsClient implements Client {
             final BulkRequestBuilder bulkRequest = client.prepareBulk();
             for (final SearchHit hit : hits) {
                 bulkRequest.add(client.prepareDelete(index, type, hit.getId()));
+                count++;
             }
-            count += hits.length;
             final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
             if (bulkResponse.hasFailures()) {
                 throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
@@ -707,6 +710,51 @@ public class FessEsClient implements Client {
         final long execTime = System.currentTimeMillis() - startTime;
 
         return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
+    }
+
+    public <T> long scrollSearch(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
+            final EntityCreator<T, SearchResponse, SearchHit> creator, final Function<T, Boolean> cursor) {
+        long count = 0;
+
+        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type).setScroll(scrollForSearch);
+        if (condition.build(searchRequestBuilder)) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+            try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Query DSL:\n" + searchRequestBuilder.toString());
+                }
+                SearchResponse response = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
+
+                String scrollId = response.getScrollId();
+                while (scrollId != null) {
+                    final SearchHits searchHits = response.getHits();
+                    final SearchHit[] hits = searchHits.getHits();
+                    if (hits.length == 0) {
+                        scrollId = null;
+                        break;
+                    }
+
+                    for (final SearchHit hit : hits) {
+                        count++;
+                        if (!cursor.apply(creator.build(response, hit))) {
+                            scrollId = null;
+                            break;
+                        }
+                    }
+
+                    response =
+                            client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute()
+                                    .actionGet(fessConfig.getIndexBulkTimeout());
+                    scrollId = response.getScrollId();
+                }
+            } catch (final SearchPhaseExecutionException e) {
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
+                        "Invalid query: " + searchRequestBuilder, e);
+            }
+        }
+
+        return count;
     }
 
     public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type,
@@ -1376,6 +1424,10 @@ public class FessEsClient implements Client {
 
     public void setScrollForDelete(final String scrollForDelete) {
         this.scrollForDelete = scrollForDelete;
+    }
+
+    public void setScrollForSearch(String scrollForSearch) {
+        this.scrollForSearch = scrollForSearch;
     }
 
     @Override

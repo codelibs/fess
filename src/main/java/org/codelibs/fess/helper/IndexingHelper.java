@@ -140,13 +140,13 @@ public class IndexingHelper {
         return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, 0);
     }
 
-    public int deleteDocumentByUrl(final FessEsClient fessEsClient, final String url) {
+    public long deleteDocumentByUrl(final FessEsClient fessEsClient, final String url) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
                 QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url));
     }
 
-    public int deleteDocumentsByDocId(final FessEsClient fessEsClient, final List<String> docIdList) {
+    public long deleteDocumentsByDocId(final FessEsClient fessEsClient, final List<String> docIdList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), QueryBuilders
                 .idsQuery(fessConfig.getIndexDocumentType()).addIds(docIdList.stream().toArray(n -> new String[n])));

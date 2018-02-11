@@ -16,7 +16,9 @@
 package org.codelibs.fess.app.service;
 
 import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -24,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +57,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.taglib.function.LaFunctions;
@@ -173,7 +178,50 @@ public class SearchService {
 
     }
 
-    public int deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
+    public long scrollSearch(final SearchRequestParams params, final Function<Map<String, Object>, Boolean> cursor,
+            final OptionalThing<FessUserBean> userBean) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        LaRequestUtil.getOptionalRequest().ifPresent(request -> {
+            request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
+            request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
+        });
+
+        final String query =
+                QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
+
+        final int pageSize = params.getPageSize();
+        final String sortField = params.getSort();
+        return fessEsClient.<Map<String, Object>> scrollSearch(
+                fessConfig.getIndexDocumentSearchIndex(),
+                fessConfig.getIndexDocumentType(),
+                searchRequestBuilder -> {
+                    fessConfig.processSearchPreference(searchRequestBuilder, userBean);
+                    return SearchConditionBuilder.builder(searchRequestBuilder)
+                            .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).size(pageSize)
+                            .responseFields(queryHelper.getResponseFields()).searchRequestType(params.getType()).build();
+                },
+                (searchResponse, hit) -> {
+                    final Map<String, Object> source = hit.getSourceAsMap();
+                    if (source != null) {
+                        final Map<String, Object> docMap = new HashMap<>(source);
+                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
+                        docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
+                        return docMap;
+                    }
+                    final Map<String, DocumentField> fields = hit.getFields();
+                    if (fields != null) {
+                        final Map<String, Object> docMap =
+                                fields.entrySet().stream()
+                                        .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
+                        docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
+                        return docMap;
+                    }
+                    return Collections.emptyMap();
+                }, cursor);
+    }
+
+    public long deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
 
         final String query =
                 QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();

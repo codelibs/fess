@@ -160,6 +160,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String API_SEARCH_ACCEPT_REFERERS = "api.search.accept.referers";
 
+    /** The key of the configuration. e.g. false */
+    String API_SEARCH_SCROLL = "api.search.scroll";
+
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
 
@@ -1647,6 +1650,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getApiSearchAcceptReferersAsInteger();
+
+    /**
+     * Get the value for the key 'api.search.scroll'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiSearchScroll();
+
+    /**
+     * Is the property for the key 'api.search.scroll' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isApiSearchScroll();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -5688,6 +5705,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.API_SEARCH_ACCEPT_REFERERS);
         }
 
+        public String getApiSearchScroll() {
+            return get(FessConfig.API_SEARCH_SCROLL);
+        }
+
+        public boolean isApiSearchScroll() {
+            return is(FessConfig.API_SEARCH_SCROLL);
+        }
+
         public String getVirtualHostHeaders() {
             return get(FessConfig.VIRTUAL_HOST_HEADERS);
         }
@@ -7813,6 +7838,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER, "");
             defaultMap.put(FessConfig.API_ADMIN_ACCESS_PERMISSIONS, "Radmin-api");
             defaultMap.put(FessConfig.API_SEARCH_ACCEPT_REFERERS, "");
+            defaultMap.put(FessConfig.API_SEARCH_SCROLL, "false");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");

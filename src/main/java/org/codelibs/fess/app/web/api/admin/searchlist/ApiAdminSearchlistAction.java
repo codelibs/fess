@@ -209,7 +209,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsInvalidQueryUnknown(GLOBAL));
         }
         try {
-            final int count = searchService.deleteByQuery(request, body);
+            final long count = searchService.deleteByQuery(request, body);
             return asJson(new ApiDeleteResponse().count(count).status(Status.OK).result());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
