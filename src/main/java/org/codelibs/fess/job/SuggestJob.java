@@ -146,8 +146,10 @@ public class SuggestJob {
             buf.append(confPath);
             buf.append(cpSeparator);
         }
-        // WEB-INF/suggest/resources
+        // WEB-INF/env/suggest/resources
         buf.append("WEB-INF");
+        buf.append(File.separator);
+        buf.append("env");
         buf.append(File.separator);
         buf.append("suggest");
         buf.append(File.separator);
@@ -166,10 +168,11 @@ public class SuggestJob {
             buf.append(targetClassesDir.getAbsolutePath());
         }
         // WEB-INF/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF/lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
+                + File.separator);
         // WEB-INF/crawler/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/suggest/lib")), "WEB-INF/suggest" + File.separator
-                + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/suggest/lib")), "WEB-INF" + File.separator
+                + "env" + File.separator + "suggest" + File.separator + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -239,7 +242,7 @@ public class SuggestJob {
         File propFile = null;
         try {
             cmdList.add("-p");
-            propFile = File.createTempFile("crawler_", ".properties");
+            propFile = File.createTempFile("suggest_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 final Properties prop = new Properties();

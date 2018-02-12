@@ -18,9 +18,6 @@ package org.codelibs.fess.exec;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.time.LocalDateTime;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 
@@ -32,7 +29,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
-import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.monitor.jvm.JvmInfo;
@@ -47,9 +43,9 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SuggestCreator {
+public class ThumbnailGenerator {
 
-    private static final Logger logger = LoggerFactory.getLogger(SuggestCreator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ThumbnailGenerator.class);
 
     @Resource
     public FessEsClient fessEsClient;
@@ -89,7 +85,7 @@ public class SuggestCreator {
             parser.parseArgument(args);
         } catch (final CmdLineException e) {
             System.err.println(e.getMessage());
-            System.err.println("java " + SuggestCreator.class.getCanonicalName() + " [options...] arguments...");
+            System.err.println("java " + ThumbnailGenerator.class.getCanonicalName() + " [options...] arguments...");
             parser.printUsage(System.err);
             return;
         }
@@ -140,13 +136,13 @@ public class SuggestCreator {
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SuggestCreator is stopped.", e);
+                logger.debug("ThumbnailGenerator is stopped.", e);
             } else if (logger.isInfoEnabled()) {
-                logger.info("SuggestCreator is stopped.");
+                logger.info("ThumbnailGenerator is stopped.");
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("Suggest creator does not work correctly.", t);
+            logger.error("ThumbnailGenerator does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (systemMonitorTask != null) {
@@ -155,7 +151,7 @@ public class SuggestCreator {
             destroyContainer();
         }
 
-        logger.info("Finished SuggestCreator.");
+        logger.info("Finished ThumbnailGenerator.");
         System.exit(exitCode);
     }
 
@@ -172,7 +168,7 @@ public class SuggestCreator {
             systemProperties.reload(options.propertiesPath);
         } else {
             try {
-                final File propFile = File.createTempFile("suggest_", ".properties");
+                final File propFile = File.createTempFile("thumbnail_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
                     logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
@@ -183,81 +179,13 @@ public class SuggestCreator {
             }
         }
 
-        final SuggestCreator creator = ComponentUtil.getComponent(SuggestCreator.class);
-        final LocalDateTime startTime = LocalDateTime.now();
-        int ret = creator.create();
-        if (ret == 0) {
-            ret = creator.purge(startTime);
+        int totalCount = 0;
+        int count = 1;
+        while (count != 0) {
+            count = ComponentUtil.getThumbnailManager().generate();
+            totalCount += count;
         }
-        return ret;
+        logger.info("Created " + totalCount + " thumbnail files.");
+        return 0;
     }
-
-    private int create() {
-        if (!ComponentUtil.getFessConfig().isSuggestDocuments()) {
-            logger.info("Skip create suggest document.");
-            return 0;
-        }
-
-        logger.info("Start create suggest document.");
-
-        final AtomicInteger result = new AtomicInteger(1);
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-
-        logger.info("Create update index.");
-        suggestHelper.suggester().createNextIndex();
-
-        logger.info("storeAllBadWords");
-        suggestHelper.storeAllBadWords(true);
-
-        logger.info("storeAllElevateWords");
-        suggestHelper.storeAllElevateWords(true);
-
-        logger.info("indexFromDocuments");
-        suggestHelper.indexFromDocuments(ret -> {
-            logger.info("Success index from documents.");
-            result.set(0);
-            latch.countDown();
-        }, t -> {
-            logger.error("Failed to update suggest index.", t);
-            latch.countDown();
-        });
-
-        try {
-            latch.await();
-        } catch (final InterruptedException ignore) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Interrupted.", ignore);
-            }
-        }
-
-        logger.info("storeSearchLog");
-        suggestHelper.storeSearchLog();
-
-        logger.info("switchIndex");
-        suggestHelper.suggester().switchIndex();
-
-        logger.info("removeDisableIndices");
-        suggestHelper.suggester().removeDisableIndices();
-
-        return result.get();
-    }
-
-    private int purge(final LocalDateTime time) {
-        final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-
-        try {
-            suggestHelper.purgeDocumentSuggest(time);
-            final long cleanupDay = ComponentUtil.getFessConfig().getPurgeSuggestSearchLogDay();
-            if (cleanupDay > 0) {
-                suggestHelper.purgeSearchlogSuggest(time.minusDays(cleanupDay));
-            }
-            return 0;
-        } catch (final Exception e) {
-            logger.info("Purge error.", e);
-            return 1;
-        }
-    }
-
 }

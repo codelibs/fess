@@ -227,8 +227,10 @@ public class CrawlJob {
             buf.append(confPath);
             buf.append(cpSeparator);
         }
-        // WEB-INF/crawler/resources
+        // WEB-INF/env/crawler/resources
         buf.append("WEB-INF");
+        buf.append(File.separator);
+        buf.append("env");
         buf.append(File.separator);
         buf.append("crawler");
         buf.append(File.separator);
@@ -247,10 +249,11 @@ public class CrawlJob {
             buf.append(targetClassesDir.getAbsolutePath());
         }
         // WEB-INF/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF/lib" + File.separator);
-        // WEB-INF/crawler/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/crawler/lib")), "WEB-INF/crawler" + File.separator
-                + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
+                + File.separator);
+        // WEB-INF/env/crawler/lib
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/crawler/lib")), "WEB-INF" + File.separator
+                + "env" + File.separator + "crawler" + File.separator + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
