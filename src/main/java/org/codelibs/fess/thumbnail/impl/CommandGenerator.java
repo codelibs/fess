@@ -26,8 +26,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.io.CopyUtil;
@@ -37,9 +35,6 @@ import org.slf4j.LoggerFactory;
 
 public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CommandGenerator.class);
-
-    @Resource
-    protected ServletContext application;
 
     protected List<String> commandList;
 
@@ -54,7 +49,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     @PostConstruct
     public void init() {
         if (baseDir == null) {
-            baseDir = new File(application.getRealPath("/"));
+            baseDir = new File(System.getProperty("java.io.tmpdir"));
         }
         destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
     }

@@ -103,6 +103,35 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
+    /** The key of the configuration. e.g. -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -Djdk.io.permissionsUseCanonicalPath=true
+    -server
+    -Xmx128m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseCMSInitiatingOccupancyOnly
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:-OmitStackTraceInFastThrow
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    -Dgroovy.use.classvalue=true
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
+    */
+    String JVM_THUMBNAIL_OPTIONS = "jvm.thumbnail.options";
+
     /** The key of the configuration. e.g. default_crawler */
     String JOB_SYSTEM_JOB_IDS = "job.system.job.ids";
 
@@ -1461,6 +1490,39 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
+
+    /**
+     * Get the value for the key 'jvm.thumbnail.options'. <br>
+     * The value is, e.g. -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -Djdk.io.permissionsUseCanonicalPath=true
+    -server
+    -Xmx128m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseCMSInitiatingOccupancyOnly
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:-OmitStackTraceInFastThrow
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    -Dgroovy.use.classvalue=true
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Dlog4j.skipJansi=true
+    <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJvmThumbnailOptions();
 
     /**
      * Get the value for the key 'job.system.job.ids'. <br>
@@ -5559,6 +5621,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.JVM_SUGGEST_OPTIONS);
         }
 
+        public String getJvmThumbnailOptions() {
+            return get(FessConfig.JVM_THUMBNAIL_OPTIONS);
+        }
+
         public String getJobSystemJobIds() {
             return get(FessConfig.JOB_SYSTEM_JOB_IDS);
         }
@@ -7749,6 +7815,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
                             "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+            defaultMap
+                    .put(FessConfig.JVM_THUMBNAIL_OPTIONS,
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");

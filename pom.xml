@@ -524,6 +524,7 @@
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_config.properties</path>
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_crawler.properties</path>
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_suggest.properties</path>
+								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_thumbnail.properties</path>
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_web.properties</path>
 							</paths>
 							<dst>${packaging.fess.conf.dir}</dst>

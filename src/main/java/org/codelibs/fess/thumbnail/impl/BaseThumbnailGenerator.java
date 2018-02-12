@@ -194,6 +194,11 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                     if (config == null) {
                         throw new ThumbnailGenerationException("No CrawlingConfig: " + configId);
                     }
+
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Generating Thumbnail: " + url);
+                    }
+
                     final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getComponent(CrawlerClientFactory.class);
                     config.initializeClientFactory(crawlerClientFactory);
                     final CrawlerClient client = crawlerClientFactory.getClient(url);

@@ -7,7 +7,7 @@
 	<include path="fess.xml" />
 
 	<include path="crawler_es.xml" />
-	<include path="crawler_thumbnail.xml" />
+	<include path="fess_thumbnail.xml" />
 
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
@@ -18,7 +18,7 @@
 	<component name="duplicateHostHelper" class="org.codelibs.fess.helper.DuplicateHostHelper">
 	</component>
 	<component name="intervalControlHelper" class="org.codelibs.fess.helper.IntervalControlHelper">
-		<!-- 
+		<!--
 		<postConstruct name="addIntervalRule">
 			<arg>"5:00"</arg>
 			<arg>"10:00"</arg>
@@ -29,7 +29,7 @@
 	</component>
 	<component name="indexUpdater" class="org.codelibs.fess.indexer.IndexUpdater"
 		instance="prototype">
-		<!-- 
+		<!--
 		<property name="maxDocumentCacheSize">5</property>
 		<property name="unprocessedDocumentSize">100</property>
 		<property name="threadDump">false</property>
@@ -103,7 +103,7 @@
 		<postConstruct name="add">
 			<arg>"application/vnd.oasis.opendocument.presentation"</arg>
 			<arg>"odp"</arg>
-		</postConstruct>		
+		</postConstruct>
 		<postConstruct name="add">
 			<arg>"application/pdf"</arg>
 			<arg>"pdf"</arg>
