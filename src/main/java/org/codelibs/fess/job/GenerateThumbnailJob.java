@@ -121,7 +121,7 @@ public class GenerateThumbnailJob {
         try {
             executeThumbnailGenerator();
         } catch (final Exception e) {
-            logger.error("Failed to purge user info.", e);
+            logger.error("Failed to generate thumbnails.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
