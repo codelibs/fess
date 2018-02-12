@@ -121,7 +121,7 @@ public class SuggestJob {
         try {
             executeSuggestCreator();
         } catch (final Exception e) {
-            logger.error("Failed to purge user info.", e);
+            logger.error("Failed to create suggest data.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
