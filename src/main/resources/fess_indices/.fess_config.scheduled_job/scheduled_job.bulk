@@ -9,7 +9,7 @@
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"doc_purger"}}
 {"name":"Doc Purger","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"purgeDocJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":5,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"thumbnail_generate"}}
-{"name":"Thumbnail Generator","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"generateThumbnailJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":6,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"name":"Thumbnail Generator","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"generateThumbnailJob\").logLevel(\"info\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":6,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"thumbnail_purger"}}
 {"name":"Thumbnail Purger","target":"all","cronExpression":"0 0 * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"purgeThumbnailJob\").expiry(30 * 24 * 60 * 60 * 1000L).execute();","jobLogging":true,"crawler":false,"available":true,"sortOrder":7,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"reload_config"}}
