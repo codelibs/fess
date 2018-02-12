@@ -112,7 +112,7 @@ public class ThumbnailManager {
         }
 
         thumbnailTaskQueue = new LinkedBlockingQueue<>(thumbnailTaskQueueSize);
-        generating = true;
+        generating = !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess.thumbnail.process"));
         thumbnailQueueThread = new Thread((Runnable) () -> {
             final List<Tuple3<String, String, String>> taskList = new ArrayList<>();
             while (generating) {
