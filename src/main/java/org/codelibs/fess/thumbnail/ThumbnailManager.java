@@ -466,7 +466,11 @@ public class ThumbnailManager {
         }
 
         private boolean deleteEmptyDirectory(final Path dir) throws IOException {
-            if (dir.toFile().list().length == 0 && !dir.toFile().getName().equals(THUMBNAILS_DIR_NAME)) {
+            if (dir == null) {
+                return false;
+            }
+            final File directory = dir.toFile();
+            if (directory.list() != null && directory.list().length == 0 && !THUMBNAILS_DIR_NAME.equals(directory.getName())) {
                 Files.delete(dir);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Delete " + dir);
