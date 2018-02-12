@@ -133,7 +133,13 @@ public class ThumbnailGenerator {
                     TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
                             ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(), true);
 
-            exitCode = process(options);
+            int totalCount = process(options);
+            if (totalCount != 0) {
+                logger.info("Created " + totalCount + " thumbnail files.");
+            } else {
+                logger.info("No new thumbnails found.");
+            }
+            exitCode = 0;
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("ThumbnailGenerator is stopped.", e);
@@ -151,7 +157,6 @@ public class ThumbnailGenerator {
             destroyContainer();
         }
 
-        logger.info("Finished ThumbnailGenerator.");
         System.exit(exitCode);
     }
 
@@ -185,7 +190,6 @@ public class ThumbnailGenerator {
             count = ComponentUtil.getThumbnailManager().generate();
             totalCount += count;
         }
-        logger.info("Created " + totalCount + " thumbnail files.");
-        return 0;
+        return totalCount;
     }
 }

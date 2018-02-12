@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+	<Properties>
+		<Property name="domain.name" value="${sys:fess.log.name:-fess}" />
+		<Property name="log.level" value="${sys:fess.log.level:-info}" />
+		<Property name="root.log.level" value="${sys:fess.log.level:-warn}" />
+		<Property name="log.pattern" value="%d [%t] %-5p %msg%n" />
+		<Property name="log.file.basedir" value="${sys:fess.log.path:-target/logs}" />
+		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
+		<Property name="backup.max.history" value="90" />
+		<Property name="audit.log.pattern" value="%msg%n" />
+	</Properties>
+
+	<Appenders>
+		<Routing name="Console">
+			<Script name="RoutingInit" language="JavaScript"><![CDATA[
+				java.lang.System.getProperty("lasta.env") == null ? "Output" : "NoOutput";]]>
+			</Script>
+			<Routes>
+				<Route key="Output">
+					<Console name="OutputConsole" target="SYSTEM_OUT">
+						<PatternLayout pattern="${log.pattern}" />
+					</Console>
+				</Route>
+				<Route key="NoOutput">
+					<CountingNoOp name="DevNull" />
+				</Route>
+			</Routes>
+		</Routing>
+		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
+			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>${log.pattern}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy fileIndex="max" min="1"
+				max="${backup.max.history}" compressionLevel="9" />
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="org.codelibs.fess" additivity="false" level="${log.level}">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="AppFile" />
+		</Logger>
+		<Root level="${root.log.level}">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="AppFile" />
+		</Root>
+	</Loggers>
+</Configuration>
