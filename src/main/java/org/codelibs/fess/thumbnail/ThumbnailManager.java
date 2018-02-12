@@ -314,7 +314,9 @@ public class ThumbnailManager {
     }
 
     public void add(final ThumbnailGenerator generator) {
-        logger.info(generator.getName() + " is available.");
+        if (logger.isDebugEnabled()) {
+            logger.debug(generator.getName() + " is available.");
+        }
         if (generator.isAvailable()) {
             generatorList.add(generator);
         }
