@@ -56,6 +56,8 @@ public class GenerateThumbnailJob {
 
     protected String logFilePath;
 
+    protected int numOfThreads = 1;
+
     protected String logLevel;
 
     protected String jvmOptions;
@@ -74,6 +76,11 @@ public class GenerateThumbnailJob {
 
     public GenerateThumbnailJob logFilePath(final String logFilePath) {
         this.logFilePath = logFilePath;
+        return this;
+    }
+
+    public GenerateThumbnailJob numOfThreads(final int numOfThreads) {
+        this.numOfThreads = numOfThreads;
         return this;
     }
 
@@ -236,6 +243,8 @@ public class GenerateThumbnailJob {
 
         cmdList.add("--sessionId");
         cmdList.add(sessionId);
+        cmdList.add("--numOfThreads");
+        cmdList.add(Integer.toString(numOfThreads));
 
         File propFile = null;
         try {

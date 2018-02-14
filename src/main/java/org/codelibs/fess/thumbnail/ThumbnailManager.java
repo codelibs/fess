@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -192,11 +193,11 @@ public class ThumbnailManager {
         thumbnailQueueBhv.batchInsert(list);
     }
 
-    public int generate() {
+    public int generate(final ForkJoinPool pool) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> idList = new ArrayList<>();
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
-        thumbnailQueueBhv.selectList(cb -> {
+        pool.submit(() -> thumbnailQueueBhv.selectList(cb -> {
             if (StringUtil.isBlank(fessConfig.getSchedulerTargetName())) {
                 cb.query().setTarget_Equal(Constants.DEFAULT_JOB_TARGET);
             } else {
@@ -204,7 +205,7 @@ public class ThumbnailManager {
             }
             cb.query().addOrderBy_CreatedTime_Asc();
             cb.fetchFirst(fessConfig.getPageThumbnailQueueMaxFetchSizeAsInteger());
-        }).forEach(entity -> {
+        }).parallelStream().forEach(entity -> {
             if (logger.isDebugEnabled()) {
                 logger.debug("Generating thumbnail: " + entity);
             }
@@ -236,7 +237,7 @@ public class ThumbnailManager {
             } catch (final Exception e) {
                 logger.warn("Failed to create thumbnail for " + entity, e);
             }
-        });
+        })).join();
         if (!idList.isEmpty()) {
             thumbnailQueueBhv.queryDelete(cb -> {
                 cb.query().setId_InScope(idList);
