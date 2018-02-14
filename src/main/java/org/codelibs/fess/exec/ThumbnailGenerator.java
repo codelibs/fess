@@ -18,6 +18,7 @@ package org.codelibs.fess.exec;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.Resource;
 
@@ -60,14 +61,19 @@ public class ThumbnailGenerator {
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
         protected String propertiesPath;
 
+        @Option(name = "-t", aliases = "--numOfThreads", metaVar = "numOfThreads", usage = "The number of threads")
+        protected int numOfThreads = 1;
+
         protected Options() {
             // nothing
         }
 
         @Override
         public String toString() {
-            return "Options [sessionId=" + sessionId + ", name=" + name + ", propertiesPath=" + propertiesPath + "]";
+            return "Options [sessionId=" + sessionId + ", name=" + name + ", propertiesPath=" + propertiesPath + ", numOfThreads="
+                    + numOfThreads + "]";
         }
+
     }
 
     static void initializeProbes() {
@@ -186,8 +192,9 @@ public class ThumbnailGenerator {
 
         int totalCount = 0;
         int count = 1;
+        final ForkJoinPool pool = new ForkJoinPool(options.numOfThreads);
         while (count != 0) {
-            count = ComponentUtil.getThumbnailManager().generate();
+            count = ComponentUtil.getThumbnailManager().generate(pool);
             totalCount += count;
         }
         return totalCount;
