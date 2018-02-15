@@ -24,6 +24,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
@@ -40,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QueryResponseList implements List<Map<String, Object>> {
+
+    private static final String ELLIPSIS = "...";
 
     private static final String SCORE = "score";
 
@@ -161,7 +164,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
                         for (int i = 0; i < fragments.length; i++) {
                             texts[i] = fragments[i].string();
                         }
-                        final String value = StringUtils.join(texts, "...");
+                        String value = StringUtils.join(texts, ELLIPSIS);
+                        if (StringUtil.isNotBlank(value) && !fessConfig.endsWithFullstop(value)) {
+                            value = value + ELLIPSIS;
+                        }
                         docMap.put(hlPrefix + highlightField.getName(), value);
                     }
                 }
