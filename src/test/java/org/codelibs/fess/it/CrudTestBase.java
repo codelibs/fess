@@ -200,15 +200,21 @@ public abstract class CrudTestBase extends ITBase {
     // Utilities
     // ================
     protected Response checkGetMethod(final Map<String, Object> body, final String path) {
-        return checkMethodBase(body).get(getApiPath() + "/" + path);
+        Response response = checkMethodBase(body).get(getApiPath() + "/" + path);
+        // logger.debug(response.asString());
+        return response;
     }
 
     protected Response checkPutMethod(final Map<String, Object> body, final String path) {
-        return checkMethodBase(body).put(getApiPath() + "/" + path);
+        Response response = checkMethodBase(body).put(getApiPath() + "/" + path);
+        // logger.debug(response.asString());
+        return response;
     }
 
     protected Response checkPostMethod(final Map<String, Object> body, final String path) {
-        return checkMethodBase(body).post(getApiPath() + "/" + path);
+        Response response = checkMethodBase(body).post(getApiPath() + "/" + path);
+        // logger.debug(response.asString());
+        return response;
     }
 
     protected Response checkDeleteMethod(final String path) {
