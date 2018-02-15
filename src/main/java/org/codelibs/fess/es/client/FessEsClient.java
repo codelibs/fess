@@ -616,11 +616,13 @@ public class FessEsClient implements Client {
     @Override
     @PreDestroy
     public void close() {
-        try {
-            client.admin().indices().prepareFlush().setForce(true).execute()
-                    .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
-        } catch (final Exception e) {
-            logger.warn("Failed to flush indices.", e);
+        if (runner != null) {
+            try {
+                client.admin().indices().prepareFlush().setForce(true).execute()
+                        .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
+            } catch (final Exception e) {
+                logger.warn("Failed to flush indices.", e);
+            }
         }
         try {
             client.close();
