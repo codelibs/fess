@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="deos" basedir=".">
 	<property name="target.dir" value="${basedir}/target/deps" />
-	<property name="crawler.dir" value="${basedir}/src/main/webapp/WEB-INF/crawler" />
-	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/suggest" />
+	<property name="crawler.dir" value="${basedir}/src/main/webapp/WEB-INF/env/crawler" />
+	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/env/suggest" />
+	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
+	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
+	<property name="kopf.branch" value="fess-6.0" />
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
@@ -12,6 +15,7 @@
 		<mkdir dir="${target.dir}" />
 		<mkdir dir="${crawler.dir}/lib" />
 		<mkdir dir="${suggest.dir}/lib" />
+		<mkdir dir="${thumbnail.dir}/lib" />
 		<!-- javax.annotation-api -->
 		<antcall target="download.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
@@ -19,6 +23,17 @@
 			<param name="jar.artifactId" value="javax.annotation-api" />
 			<param name="jar.version" value="1.3.1" />
 		</antcall>
+		<!-- kopf -->
+		<get dest="${target.dir}/kopf.zip">
+			<url url="https://github.com/codelibs/elasticsearch-kopf/archive/${kopf.branch}.zip" />
+		</get>
+		<delete dir="${site.dir}/kopf" />
+		<unzip dest="${site.dir}/kopf" src="${target.dir}/kopf.zip">
+			<patternset>
+				<include name="elasticsearch-kopf-${kopf.branch}/_site/**" />
+			</patternset>
+			<cutdirsmapper dirs="2" />
+		</unzip>
 	</target>
 
 	<target name="download.jar">
@@ -29,5 +44,7 @@
 			todir="${crawler.dir}/lib"/>
 		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar"
 			todir="${suggest.dir}/lib"/>
+		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar"
+			todir="${thumbnail.dir}/lib"/>
 	</target>
 </project>
