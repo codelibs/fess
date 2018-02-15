@@ -96,6 +96,8 @@ public interface FessProp {
 
     public static final String CRAWLER_DOCUMENT_SPACE_CHARS = "crawlerDocumentSpaceChars";
 
+    public static final String CRAWLER_DOCUMENT_FULLSTOP_CHARS = "crawlerDocumentFullstopChars";
+
     public static final String INDEX_ADMIN_ARRAY_FIELD_SET = "indexAdminArrayFieldSet";
 
     public static final String INDEX_ADMIN_DATE_FIELD_SET = "indexAdminDateFieldSet";
@@ -1444,9 +1446,12 @@ public interface FessProp {
     String getCrawlerDocumentSpaceChars();
 
     public default int[] getCrawlerDocumentSpaceCharsAsArray() {
-        int[] spaceChars = (int[]) propMap.get(CRAWLER_DOCUMENT_SPACE_CHARS);
+        return getCrawlerDocumentCharsAsArray(CRAWLER_DOCUMENT_SPACE_CHARS, getCrawlerDocumentSpaceChars());
+    }
+
+    public default int[] getCrawlerDocumentCharsAsArray(final String key, final String spaceStr) {
+        int[] spaceChars = (int[]) propMap.get(key);
         if (spaceChars == null) {
-            final String spaceStr = getCrawlerDocumentSpaceChars();
             if (spaceStr.startsWith("u")) {
                 spaceChars =
                         split(spaceStr, "u").get(
@@ -1459,9 +1464,27 @@ public interface FessProp {
                     spaceChars[i] = spaceStr.codePointAt(i);
                 }
             }
-            propMap.put(CRAWLER_DOCUMENT_SPACE_CHARS, spaceChars);
+            propMap.put(key, spaceChars);
         }
         return spaceChars;
+    }
+
+    String getCrawlerDocumentFullstopChars();
+
+    public default boolean endsWithFullstop(final String s) {
+        if (StringUtil.isBlank(s)) {
+            return false;
+        }
+        for (final int i : getCrawlerDocumentFullstopCharsAsArray()) {
+            if (s.endsWith(String.valueOf(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public default int[] getCrawlerDocumentFullstopCharsAsArray() {
+        return getCrawlerDocumentCharsAsArray(CRAWLER_DOCUMENT_FULLSTOP_CHARS, getCrawlerDocumentFullstopChars());
     }
 
     String getQueryAdditionalResponseFields();

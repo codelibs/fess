@@ -234,6 +234,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu200Cu202Fu205Fu3000uFEFFuFFFDu00B6 */
     String CRAWLER_DOCUMENT_SPACE_CHARS = "crawler.document.space.chars";
 
+    /** The key of the configuration. e.g. u002eu06d4u2e3cu3002 */
+    String CRAWLER_DOCUMENT_FULLSTOP_CHARS = "crawler.document.fullstop.chars";
+
     /** The key of the configuration. e.g. UTF-8 */
     String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
 
@@ -1911,6 +1914,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentSpaceChars();
+
+    /**
+     * Get the value for the key 'crawler.document.fullstop.chars'. <br>
+     * The value is, e.g. u002eu06d4u2e3cu3002 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFullstopChars();
 
     /**
      * Get the value for the key 'crawler.crawling.data.encoding'. <br>
@@ -5879,6 +5889,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.CRAWLER_DOCUMENT_SPACE_CHARS);
         }
 
+        public String getCrawlerDocumentFullstopChars() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FULLSTOP_CHARS);
+        }
+
         public String getCrawlerCrawlingDataEncoding() {
             return get(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING);
         }
@@ -7924,6 +7938,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap
                     .put(FessConfig.CRAWLER_DOCUMENT_SPACE_CHARS,
                             "u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu200Cu202Fu205Fu3000uFEFFuFFFDu00B6");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FULLSTOP_CHARS, "u002eu06d4u2e3cu3002");
             defaultMap.put(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
             defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,ftp");
