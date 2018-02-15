@@ -120,10 +120,25 @@ public class FessPropTest extends UnitFessTestCase {
             }
         };
 
-        int[] spaceChars = fessConfig.getCrawlerDocumentSpaceCharsAsArray();
-        assertEquals(2, spaceChars.length);
-        assertEquals(32, spaceChars[0]);
-        assertEquals(12288, spaceChars[1]);
+        int[] chars = fessConfig.getCrawlerDocumentSpaceCharsAsArray();
+        assertEquals(2, chars.length);
+        assertEquals(32, chars[0]);
+        assertEquals(12288, chars[1]);
+    }
+
+    public void test_getCrawlerDocumentFullstopCharsAsArray() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerDocumentFullstopChars() {
+                return "u0020u3000";
+            }
+        };
+
+        int[] chars = fessConfig.getCrawlerDocumentFullstopCharsAsArray();
+        assertEquals(2, chars.length);
+        assertEquals(32, chars[0]);
+        assertEquals(12288, chars[1]);
     }
 
     public void test_getCrawlerDocumentHtmlPrunedTagsAsArray() throws Exception {
