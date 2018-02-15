@@ -53,8 +53,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="5.6.1" />
-			<param name="plugin.zip.version" value="5.6.1" />
+			<param name="plugin.version" value="5.6.2" />
+			<param name="plugin.zip.version" value="5.6.2" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
