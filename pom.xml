@@ -780,9 +780,10 @@
 									<location>${project.build.directory}/fess/WEB-INF/classes</location>
 									<includes>
 										<include>fess_config.properties</include>
-										<include>fess_env_web.properties</include>
 										<include>fess_env_crawler.properties</include>
 										<include>fess_env_suggest.properties</include>
+										<include>fess_env_thumbnail.properties</include>
+										<include>fess_env_web.properties</include>
 									</includes>
 								</source>
 							</sources>
