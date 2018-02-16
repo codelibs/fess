@@ -418,4 +418,8 @@ public class Constants extends CoreLibConstants {
     public static final String EMPTY_USER_ID = "<empty>";
 
     public static final String CRAWLER_PROCESS_COMMAND_THREAD_DUMP = "thread_dump";
+
+    public static final String FESS_THUMBNAIL_PATH = "fess.thumbnail.path";
+
+    public static final String FESS_VAR_PATH = "fess.var.path";
 }
