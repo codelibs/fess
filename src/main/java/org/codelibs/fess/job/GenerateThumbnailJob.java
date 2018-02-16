@@ -217,6 +217,8 @@ public class GenerateThumbnailJob {
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
         cmdList.add("-Dfess.log.path=" + logFilePath);
+        addSystemProperty(cmdList, Constants.FESS_VAR_PATH, null, null);
+        addSystemProperty(cmdList, Constants.FESS_THUMBNAIL_PATH, null, null);
         addSystemProperty(cmdList, "fess.log.name", "fess-thumbnail", "-thumbnail");
         if (logLevel != null) {
             cmdList.add("-Dfess.log.level=" + logLevel);

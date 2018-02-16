@@ -54,10 +54,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 public class ThumbnailManager {
-    private static final String FESS_THUMBNAIL_PATH = "fess.thumbnail.path";
-
-    private static final String FESS_VAR_PATH = "fess.var.path";
-
     private static final String NOIMAGE_FILE_SUFFIX = ".txt";
 
     protected static final String THUMBNAILS_DIR_NAME = "thumbnails";
@@ -90,11 +86,11 @@ public class ThumbnailManager {
 
     @PostConstruct
     public void init() {
-        final String thumbnailPath = System.getProperty(FESS_THUMBNAIL_PATH);
+        final String thumbnailPath = System.getProperty(Constants.FESS_THUMBNAIL_PATH);
         if (thumbnailPath != null) {
             baseDir = new File(thumbnailPath);
         } else {
-            final String varPath = System.getProperty(FESS_VAR_PATH);
+            final String varPath = System.getProperty(Constants.FESS_VAR_PATH);
             if (varPath != null) {
                 baseDir = new File(varPath, THUMBNAILS_DIR_NAME);
             } else {
@@ -165,7 +161,7 @@ public class ThumbnailManager {
     }
 
     public String getThumbnailPathOption() {
-        return "-D" + FESS_THUMBNAIL_PATH + "=" + baseDir.getAbsolutePath();
+        return "-D" + Constants.FESS_THUMBNAIL_PATH + "=" + baseDir.getAbsolutePath();
     }
 
     protected void storeQueue(final List<Tuple3<String, String, String>> taskList) {
