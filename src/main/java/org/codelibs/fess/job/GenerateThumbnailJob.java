@@ -21,15 +21,14 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -117,8 +116,7 @@ public class GenerateThumbnailJob {
         final StringBuilder resultBuf = new StringBuilder();
 
         if (sessionId == null) { // create session id
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sessionId = sdf.format(new Date());
+            sessionId = RandomStringUtils.randomAlphabetic(15);
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         if (jobExecutor != null) {
