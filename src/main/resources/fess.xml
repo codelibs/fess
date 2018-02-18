@@ -116,6 +116,4 @@
 		<property name="roleSeparator">","</property>
 		 -->
 	</component>
-	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
-	</component>
 </components>

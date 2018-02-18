@@ -9,5 +9,7 @@
 	<component name="fessSuggest" class="org.codelibs.fess.exec.SuggestCreator"
 			   instance="prototype">
 	</component>
+	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
+	</component>
 
 </components>
