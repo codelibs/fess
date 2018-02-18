@@ -15,11 +15,15 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -36,6 +40,8 @@ public class ActivityHelper {
 
     protected String loggerName = "fess.log.audit";
 
+    protected String permissionSeparator = "|";
+
     @PostConstruct
     public void init() {
         logger = LoggerFactory.getLogger(loggerName);
@@ -48,6 +54,10 @@ public class ActivityHelper {
         buf.append('\t');
         buf.append("user:");
         buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append('\t');
+        buf.append("permissions:");
+        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                .filter(StringUtil::isNotBlank).orElse("-"));
         log(buf);
     }
 
@@ -58,6 +68,10 @@ public class ActivityHelper {
         buf.append('\t');
         buf.append("user:");
         buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append('\t');
+        buf.append("permissions:");
+        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                .filter(StringUtil::isNotBlank).orElse("-"));
         log(buf);
     }
 
@@ -97,5 +111,9 @@ public class ActivityHelper {
 
     public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
+    }
+
+    public void setPermissionSeparator(String permissionSeparator) {
+        this.permissionSeparator = permissionSeparator;
     }
 }
