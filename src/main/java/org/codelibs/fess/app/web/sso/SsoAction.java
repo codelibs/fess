@@ -20,6 +20,7 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
@@ -65,6 +66,7 @@ public class SsoAction extends FessLoginAction {
             if (ssoManager.available()) {
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             }
+            activityHelper.loginFailure(OptionalThing.of(loginCredential));
             return redirect(LoginAction.class);
         }
     }

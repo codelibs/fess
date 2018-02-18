@@ -24,9 +24,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
+import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +62,33 @@ public class ActivityHelper {
         buf.append("permissions:");
         buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
                 .filter(StringUtil::isNotBlank).orElse("-"));
+        log(buf);
+    }
+
+    public void loginFailure(final OptionalThing<LoginCredential> credential) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(Action.LOGIN_FAILURE);
+        credential.map(c -> {
+            final StringBuilder buffer = new StringBuilder(100);
+            buffer.append('\t');
+            buffer.append("class:");
+            buffer.append(c.getClass().getSimpleName());
+            if (c instanceof OpenIdConnectCredential) {
+                buffer.append('\t');
+                buffer.append("user:");
+                buffer.append(((OpenIdConnectCredential) c).getEmail());
+            } else if (c instanceof SpnegoCredential) {
+                buffer.append('\t');
+                buffer.append("user:");
+                buffer.append(((SpnegoCredential) c).getUsername());
+            } else if (c instanceof UserPasswordCredential) {
+                buffer.append('\t');
+                buffer.append("user:");
+                buffer.append(((UserPasswordCredential) c).getUser());
+            }
+            return buffer.toString();
+        }).ifPresent(buf::append);
         log(buf);
     }
 
@@ -106,7 +137,7 @@ public class ActivityHelper {
     }
 
     protected enum Action {
-        LOGIN, LOGOUT, ACCESS;
+        LOGIN, LOGOUT, ACCESS, LOGIN_FAILURE;
     }
 
     public void setLoggerName(final String loggerName) {

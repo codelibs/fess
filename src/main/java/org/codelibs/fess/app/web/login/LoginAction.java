@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.login;
 
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
@@ -57,6 +58,7 @@ public class LoginAction extends FessLoginAction {
                 return getHtmlResponse();
             });
         } catch (final LoginFailureException lfe) {
+            activityHelper.loginFailure(OptionalThing.of(new UserPasswordCredential(username, password)));
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
         }
         return redirect(getClass());
