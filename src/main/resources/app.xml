@@ -378,6 +378,8 @@
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
 		<property name="encoding">"UTF-8"</property>
 	</component>
+	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
+	</component>
 	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
 	</component>
 	<component name="userAgentName" class="java.lang.String">
