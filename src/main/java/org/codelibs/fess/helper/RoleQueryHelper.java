@@ -128,7 +128,7 @@ public class RoleQueryHelper {
                             if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
                                 throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
                             }
-                            if (!hasAccessToken) {
+                            if (!hasAccessToken || roleSet.isEmpty()) {
                                 roleSet.addAll(fessConfig.getSearchGuestPermissionList());
                             }
                         });
