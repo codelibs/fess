@@ -63,12 +63,12 @@
 		<crawler.version>1.5.7</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>5.6.2-SNAPSHOT</suggest.version>
+		<suggest.version>5.6.2</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.6.7</elasticsearch.version>
+		<elasticsearch.version>5.6.8</elasticsearch.version>
 		<elasticsearch.min.version>5.3.0</elasticsearch.min.version>
-		<cluster.runner.version>5.6.7.0</cluster.runner.version>
+		<cluster.runner.version>5.6.8.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.23</tomcat.version>
