@@ -175,7 +175,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
         private final List<String> commandList;
 
-        private long timeout;
+        private final long timeout;
 
         protected ProcessDestroyer(final Process p, final List<String> commandList, final long timeout) {
             this.p = p;
@@ -206,7 +206,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         this.baseDir = baseDir;
     }
 
-    public void setCommandDestroyTimeout(long commandDestroyTimeout) {
+    public void setCommandDestroyTimeout(final long commandDestroyTimeout) {
         this.commandDestroyTimeout = commandDestroyTimeout;
     }
 

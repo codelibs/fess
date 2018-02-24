@@ -50,7 +50,7 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
 
     private static final String DIRS_PARAM = "directories";
 
-    private String[] fileSuffixes = new String[] { ".json", ".jsonl" };
+    private final String[] fileSuffixes = new String[] { ".json", ".jsonl" };
 
     @Override
     protected void storeData(final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
@@ -148,9 +148,9 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
 
                 callback.store(paramMap, dataMap);
             }
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             logger.error("Source file " + file + " does not exist.");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.error("IO Error occurred while reading source file.");
         }
     }

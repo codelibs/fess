@@ -236,7 +236,7 @@ public class ViewHelper {
                 // file
                 try {
                     url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
                         logger.warn("Failed to decode " + url, e);
                     }

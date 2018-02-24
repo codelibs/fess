@@ -148,7 +148,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
             try {
                 processHelper.sendCommand(entity.getSessionId(), Constants.CRAWLER_PROCESS_COMMAND_THREAD_DUMP);
                 saveInfo(messages -> messages.addSuccessPrintThreadDump(GLOBAL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to print a thread dump.", e);
                 throwValidationError(messages -> messages.addErrorsFailedToPrintThreadDump(GLOBAL), () -> asListHtml());
             }

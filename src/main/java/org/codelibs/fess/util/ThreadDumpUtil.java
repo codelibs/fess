@@ -53,16 +53,16 @@ public class ThreadDumpUtil {
                 try {
                     writer.write(s);
                     writer.write('\n');
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new IORuntimeException(e);
                 }
             });
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to write a thread dump to " + file, e);
         }
     }
 
-    public static void processThreadDump(Consumer<String> writer) {
+    public static void processThreadDump(final Consumer<String> writer) {
         for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
             writer.accept("Thread: " + entry.getKey());
             final StackTraceElement[] trace = entry.getValue();

@@ -139,7 +139,7 @@ public class ThumbnailGenerator {
                     TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
                             ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(), true);
 
-            int totalCount = process(options);
+            final int totalCount = process(options);
             if (totalCount != 0) {
                 logger.info("Created " + totalCount + " thumbnail files.");
             } else {

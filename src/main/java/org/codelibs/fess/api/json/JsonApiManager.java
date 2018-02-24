@@ -161,7 +161,7 @@ public class JsonApiManager extends BaseJsonApiManager {
                         buf.append('\n');
                         try {
                             response.getWriter().print(buf.toString());
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             throw new IORuntimeException(e);
                         }
                         return true;
@@ -170,8 +170,8 @@ public class JsonApiManager extends BaseJsonApiManager {
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded " + count + " docs");
             }
-        } catch (Exception e) {
-            int status = 9;
+        } catch (final Exception e) {
+            final int status = 9;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a ping request.", e);
             }

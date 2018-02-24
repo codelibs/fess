@@ -27,7 +27,7 @@ public final class DocumentUtil {
     }
 
     public static <T> T getValue(final Map<String, Object> doc, final String key, final Class<T> clazz, final T defaultValue) {
-        T value = getValue(doc, key, clazz);
+        final T value = getValue(doc, key, clazz);
         if (value == null) {
             return defaultValue;
         }

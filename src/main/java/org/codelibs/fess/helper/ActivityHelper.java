@@ -144,7 +144,7 @@ public class ActivityHelper {
         this.loggerName = loggerName;
     }
 
-    public void setPermissionSeparator(String permissionSeparator) {
+    public void setPermissionSeparator(final String permissionSeparator) {
         this.permissionSeparator = permissionSeparator;
     }
 }

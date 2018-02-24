@@ -72,7 +72,7 @@ public class RelatedContentHelper {
                 relatedContentMap.put(key, pair);
             }
             if (entity.getTerm().startsWith(regexPrefix)) {
-                String regex = entity.getTerm().substring(regexPrefix.length());
+                final String regex = entity.getTerm().substring(regexPrefix.length());
                 if (StringUtil.isBlank(regex)) {
                     logger.warn("Unknown regex pattern: " + entity.getTerm());
                 } else {
@@ -114,11 +114,11 @@ public class RelatedContentHelper {
         return term != null ? term.toLowerCase(Locale.ROOT) : term;
     }
 
-    public void setRegexPrefix(String regexPrefix) {
+    public void setRegexPrefix(final String regexPrefix) {
         this.regexPrefix = regexPrefix;
     }
 
-    public void setQueryPlaceHolder(String queryPlaceHolder) {
+    public void setQueryPlaceHolder(final String queryPlaceHolder) {
         this.queryPlaceHolder = queryPlaceHolder;
     }
 

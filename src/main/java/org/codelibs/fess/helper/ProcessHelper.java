@@ -80,8 +80,8 @@ public class ProcessHelper {
         return !runningProcessMap.isEmpty();
     }
 
-    public boolean isProcessRunning(String sessionId) {
-        JobProcess jobProcess = runningProcessMap.get(sessionId);
+    public boolean isProcessRunning(final String sessionId) {
+        final JobProcess jobProcess = runningProcessMap.get(sessionId);
         return jobProcess != null && jobProcess.getProcess().isAlive();
     }
 
@@ -147,14 +147,14 @@ public class ProcessHelper {
         this.processDestroyTimeout = processDestroyTimeout;
     }
 
-    public void sendCommand(String sessionId, String command) {
-        JobProcess jobProcess = runningProcessMap.get(sessionId);
+    public void sendCommand(final String sessionId, final String command) {
+        final JobProcess jobProcess = runningProcessMap.get(sessionId);
         if (jobProcess != null) {
             try {
                 final OutputStream out = jobProcess.getProcess().getOutputStream();
                 IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
                 out.flush();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new JobProcessingException(e);
             }
         } else {

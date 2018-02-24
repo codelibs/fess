@@ -251,11 +251,11 @@ public class Crawler {
                             if (Thread.interrupted()) {
                                 return;
                             }
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             return;
                         }
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     logger.debug("I/O exception.", e);
                 }
             }, "ProcessCommand");

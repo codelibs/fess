@@ -285,15 +285,12 @@ public class FessEsClient implements Client {
         if (StringUtil.isBlank(transportAddressesValue)) {
             final StringBuilder buf = new StringBuilder();
             for (final TransportAddress transportAddress : transportAddressList) {
-                if (transportAddress instanceof TransportAddress) {
-                    if (buf.length() > 0) {
-                        buf.append(',');
-                    }
-                    final TransportAddress inetTransportAddress = (TransportAddress) transportAddress;
-                    buf.append(inetTransportAddress.address().getHostName());
-                    buf.append(':');
-                    buf.append(inetTransportAddress.address().getPort());
+                if (buf.length() > 0) {
+                    buf.append(',');
                 }
+                buf.append(transportAddress.address().getHostName());
+                buf.append(':');
+                buf.append(transportAddress.address().getPort());
             }
             if (buf.length() > 0) {
                 System.setProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES, buf.toString());
@@ -599,7 +596,7 @@ public class FessEsClient implements Client {
             if (logger.isDebugEnabled()) {
                 logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             final String message =
                     "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
                             + ") is not available. Check the state of your Elasticsearch cluster ("
@@ -1437,7 +1434,7 @@ public class FessEsClient implements Client {
         this.scrollForDelete = scrollForDelete;
     }
 
-    public void setScrollForSearch(String scrollForSearch) {
+    public void setScrollForSearch(final String scrollForSearch) {
         this.scrollForSearch = scrollForSearch;
     }
 

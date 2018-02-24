@@ -526,11 +526,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         this.gsaMetaPrefix = gsaMetaPrefix;
     }
 
-    public void setCharsetField(String charsetField) {
+    public void setCharsetField(final String charsetField) {
         this.charsetField = charsetField;
     }
 
-    public void setContentTypeField(String contentTypeField) {
+    public void setContentTypeField(final String contentTypeField) {
         this.contentTypeField = contentTypeField;
     }
 }

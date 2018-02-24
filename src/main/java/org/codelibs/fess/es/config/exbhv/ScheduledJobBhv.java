@@ -49,14 +49,14 @@ public class ScheduledJobBhv extends BsScheduledJobBhv {
         for (int i = 0; i < 30; i++) {
             try {
                 return super.selectByPK(id);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to select a job by " + id, e);
                 }
                 lastException = e;
                 try {
                     Thread.sleep(RandomUtils.nextLong(500, 5000));
-                } catch (InterruptedException e1) {
+                } catch (final InterruptedException e1) {
                     // ignore
                 }
             }

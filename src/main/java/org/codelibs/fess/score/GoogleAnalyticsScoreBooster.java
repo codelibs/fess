@@ -178,7 +178,7 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
         return counter;
     }
 
-    protected String normalizeUrl(String path, final String baseUrl) throws MalformedURLException {
+    protected String normalizeUrl(final String path, final String baseUrl) throws MalformedURLException {
         return new URL(baseUrl + path.toString()).toString();
     }
 
@@ -194,10 +194,10 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
     }
 
     public void addReportRequest(final List<String> urls, final ReportRequest request) {
-        reportRequesList.add(new Pair<String[], ReportRequest>(urls.toArray(new String[urls.size()]), request));
+        reportRequesList.add(new Pair<>(urls.toArray(new String[urls.size()]), request));
     }
 
     public void addReportRequest(final String url, final ReportRequest request) {
-        reportRequesList.add(new Pair<String[], ReportRequest>(new String[] { url }, request));
+        reportRequesList.add(new Pair<>(new String[] { url }, request));
     }
 }

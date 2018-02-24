@@ -518,7 +518,7 @@ public class QueryHelper {
             return QueryBuilders.matchPhraseQuery(f, text);
         }
 
-        UnicodeBlock block = UnicodeBlock.of(text.codePointAt(0));
+        final UnicodeBlock block = UnicodeBlock.of(text.codePointAt(0));
         if (block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS //
                 || block == UnicodeBlock.HIRAGANA //
                 || block == UnicodeBlock.KATAKANA //

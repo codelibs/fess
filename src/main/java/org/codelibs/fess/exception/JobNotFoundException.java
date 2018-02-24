@@ -25,7 +25,7 @@ public class JobNotFoundException extends FessSystemException {
         super(scheduledJob.toString());
     }
 
-    public JobNotFoundException(String message) {
+    public JobNotFoundException(final String message) {
         super(message);
     }
 

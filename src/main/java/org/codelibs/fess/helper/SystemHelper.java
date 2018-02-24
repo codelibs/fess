@@ -259,7 +259,7 @@ public class SystemHelper {
     }
 
     public String normalizeHtmlLang(final String value) {
-        String defaultLang = ComponentUtil.getFessConfig().getCrawlerDocumentHtmlDefaultLang();
+        final String defaultLang = ComponentUtil.getFessConfig().getCrawlerDocumentHtmlDefaultLang();
         if (StringUtil.isNotBlank(defaultLang)) {
             return defaultLang;
         }

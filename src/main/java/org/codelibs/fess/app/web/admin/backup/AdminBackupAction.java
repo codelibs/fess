@@ -189,7 +189,7 @@ public class AdminBackupAction extends FessAdminAction {
                 });
     }
 
-    private static StringBuilder appendJson(String field, Object value, StringBuilder buf) {
+    private static StringBuilder appendJson(final String field, final Object value, final StringBuilder buf) {
         buf.append('"').append(StringEscapeUtils.escapeJson(field)).append('"').append(':');
         if (value == null) {
             buf.append("null");
@@ -210,7 +210,7 @@ public class AdminBackupAction extends FessAdminAction {
         } else if (value instanceof Map) {
             buf.append('{');
             final String json = ((Map<?, ?>) value).entrySet().stream().map(e -> {
-                StringBuilder tempBuf = new StringBuilder();
+                final StringBuilder tempBuf = new StringBuilder();
                 appendJson(e.getKey().toString(), e.getValue(), tempBuf);
                 return tempBuf.toString();
             }).collect(Collectors.joining(","));
@@ -235,7 +235,7 @@ public class AdminBackupAction extends FessAdminAction {
                         cb.query().addOrderBy_RequestedAt_Asc();
                     },
                     entity -> {
-                        StringBuilder buf = new StringBuilder();
+                        final StringBuilder buf = new StringBuilder();
                         buf.append('{');
                         appendJson("id", entity.getId(), buf).append(',');
                         appendJson("query-id", entity.getQueryId(), buf).append(',');
@@ -280,7 +280,7 @@ public class AdminBackupAction extends FessAdminAction {
                 cb.query().matchAll();
                 cb.query().addOrderBy_CreatedAt_Asc();
             }, entity -> {
-                StringBuilder buf = new StringBuilder();
+                final StringBuilder buf = new StringBuilder();
                 buf.append('{');
                 appendJson("id", entity.getId(), buf).append(',');
                 appendJson("created-at", entity.getCreatedAt(), buf).append(',');
@@ -303,7 +303,7 @@ public class AdminBackupAction extends FessAdminAction {
                 cb.query().matchAll();
                 cb.query().addOrderBy_CreatedAt_Asc();
             }, entity -> {
-                StringBuilder buf = new StringBuilder();
+                final StringBuilder buf = new StringBuilder();
                 buf.append('{');
                 appendJson("id", entity.getId(), buf).append(',');
                 appendJson("created-at", entity.getCreatedAt(), buf).append(',');
@@ -329,7 +329,7 @@ public class AdminBackupAction extends FessAdminAction {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
             }, entity -> {
-                StringBuilder buf = new StringBuilder();
+                final StringBuilder buf = new StringBuilder();
                 buf.append('{');
                 appendJson("id", entity.getId(), buf).append(',');
                 appendJson("query-id", entity.getQueryId(), buf).append(',');

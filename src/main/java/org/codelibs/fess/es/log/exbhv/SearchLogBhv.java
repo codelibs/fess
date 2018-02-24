@@ -73,12 +73,12 @@ public class SearchLogBhv extends BsSearchLogBhv {
             if (searchFieldObj instanceof Map) {
                 ((Map<String, ?>) searchFieldObj).entrySet().stream().forEach(e -> {
                     if (e.getValue() instanceof String[]) {
-                        String[] values = (String[]) e.getValue();
+                        final String[] values = (String[]) e.getValue();
                         for (final String v : values) {
                             result.getSearchFieldLogList().add(new Pair<>(e.getKey(), v));
                         }
                     } else if (e.getValue() instanceof List) {
-                        List<String> values = (List<String>) e.getValue();
+                        final List<String> values = (List<String>) e.getValue();
                         for (final String v : values) {
                             result.getSearchFieldLogList().add(new Pair<>(e.getKey(), v));
                         }
@@ -88,7 +88,7 @@ public class SearchLogBhv extends BsSearchLogBhv {
                 });
             }
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }

@@ -25,7 +25,7 @@ public class JobProcessingException extends FessSystemException {
         super(e);
     }
 
-    public JobProcessingException(String message, IOException e) {
+    public JobProcessingException(final String message, final IOException e) {
         super(message, e);
     }
 

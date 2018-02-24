@@ -192,8 +192,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         resultData.setEncoding(charsetName);
     }
 
-    protected void normalizeData(final ResponseData responseData, Map<String, Object> dataMap) {
-        Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
+    protected void normalizeData(final ResponseData responseData, final Map<String, Object> dataMap) {
+        final Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
         if (titleObj != null) {
             dataMap.put(fessConfig.getIndexFieldTitle(),
                     ComponentUtil.getDocumentHelper().getTitle(responseData, titleObj.toString(), dataMap));
@@ -254,7 +254,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected void processXRobotsTag(final ResponseData responseData, final ResultData resultData) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
+        final String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
         if (ignore == null) {
             if (fessConfig.isCrawlerIgnoreRobotsTags()) {
                 return;
