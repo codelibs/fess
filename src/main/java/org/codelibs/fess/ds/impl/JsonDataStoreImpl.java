@@ -50,7 +50,7 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
 
     private static final String DIRS_PARAM = "directories";
 
-    private final String[] fileSuffixes = new String[] { ".json", ".jsonl" };
+    private   String[] fileSuffixes = new String[] { ".json", ".jsonl" };
 
     @Override
     protected void storeData(final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
@@ -83,7 +83,7 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
                 if (dir.isDirectory()) {
                     stream(dir.listFiles()).of(
                             stream -> stream.filter(f -> isDesiredFile(f.getParentFile(), f.getName()))
-                                    .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach(f -> fileList.add(f)));
+                                    .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach( fileList::add));
                 } else {
                     logger.warn(path + " is not a directory.");
                 }
@@ -149,9 +149,13 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
                 callback.store(paramMap, dataMap);
             }
         } catch (final FileNotFoundException e) {
-            logger.error("Source file " + file + " does not exist.");
+            logger.warn("Source file " + file + " does not exist.", e);
         } catch (final IOException e) {
-            logger.error("IO Error occurred while reading source file.");
+            logger.warn("IO Error occurred while reading source file.", e);
         }
+    }
+
+    public void setFileSuffixes(String[] fileSuffixes) {
+        this.fileSuffixes = fileSuffixes;
     }
 }
