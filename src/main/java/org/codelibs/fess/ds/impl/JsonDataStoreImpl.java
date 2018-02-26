@@ -50,7 +50,7 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
 
     private static final String DIRS_PARAM = "directories";
 
-    private   String[] fileSuffixes = new String[] { ".json", ".jsonl" };
+    private String[] fileSuffixes = new String[] { ".json", ".jsonl" };
 
     @Override
     protected void storeData(final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
@@ -83,7 +83,7 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
                 if (dir.isDirectory()) {
                     stream(dir.listFiles()).of(
                             stream -> stream.filter(f -> isDesiredFile(f.getParentFile(), f.getName()))
-                                    .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach( fileList::add));
+                                    .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach(fileList::add));
                 } else {
                     logger.warn(path + " is not a directory.");
                 }
