@@ -36,6 +36,8 @@ import org.lastaflute.web.util.LaResponseUtil;
 
 public abstract class BaseJsonApiManager extends BaseApiManager {
 
+    protected String mimeType = "application/json";
+
     protected void writeJsonResponse(final int status, final String body, final Throwable t) {
         if (t == null) {
             writeJsonResponse(status, body, (String) null);
@@ -100,7 +102,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         if (isJsonp) {
             buf.append(')');
         }
-        write(buf.toString(), "text/javascript+json", Constants.UTF_8);
+        write(buf.toString(), mimeType, Constants.UTF_8);
 
     }
 
@@ -167,6 +169,10 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
             buf.append('\"').append(StringEscapeUtils.escapeJson(obj.toString())).append('\"');
         }
         return buf.toString();
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
 }
