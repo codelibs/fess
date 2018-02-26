@@ -24,15 +24,15 @@
 	<dd>
 		AND 연산자는 선택적 연결 연산자입니다.
 		AND 연산자는 지정한 검색어를 모두 포함한 문서와 일치합니다.
-		예를 들어, Fess과 Solr를 포함하는 문서 검색하려면 다음과 같이 입력합니다.
-		<pre>Fess AND Solr</pre>
+		예를 들어, Fess과 CodeLibs를 포함하는 문서 검색하려면 다음과 같이 입력합니다.
+		<pre>Fess AND CodeLibs</pre>
 	</dd>
 	</dd>
 	<dt>OR검색</dt>
 	<dd>
 		OR 연산자는 지정한 검색어 중 하나를 포함하는 문서에 매치합니다.
-		예를 들어, Fess 또는 Solr를 포함하는 문서를 검색하려면 다음과 같이 입력합니다.
-		<pre>Fess OR Solr</pre>
+		예를 들어, Fess 또는 CodeLibs를 포함하는 문서를 검색하려면 다음과 같이 입력합니다.
+		<pre>Fess OR CodeLibs</pre>
 	</dd>
 	<dt>와일드카드</dt>
 	<dd>
