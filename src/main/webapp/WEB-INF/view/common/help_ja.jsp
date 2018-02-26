@@ -24,15 +24,15 @@
 	<dd>
 		AND 演算子は省略可能な連結演算子です。
 		AND 演算子は指定した検索語をすべて含むドキュメントにマッチします。
-		たとえば、Fess と Solr を含むドキュメント検索するには次のように入力します。
-		<pre>Fess AND Solr</pre>
+		たとえば、Fess と CodeLibs を含むドキュメント検索するには次のように入力します。
+		<pre>Fess AND CodeLibs</pre>
 	</dd>
 	</dd>
 	<dt>OR検索</dt>
 	<dd>
 		OR 演算子は指定した検索語のいずれかを含むドキュメントにマッチします。
-		たとえば、Fess または Solr を含むドキュメントを検索するには次のように入力します。
-		<pre>Fess OR Solr</pre>
+		たとえば、Fess または CodeLibs を含むドキュメントを検索するには次のように入力します。
+		<pre>Fess OR CodeLibs</pre>
 	</dd>
 	<dt>ワイルドカード</dt>
 	<dd>
