@@ -146,7 +146,7 @@ public class FessPropTest extends UnitFessTestCase {
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public String getCrawlerDocumentHtmlPrunedTags() {
-                return "script,div#main,p.image,a[rel=nofollow]";
+                return "script,div#main,p.image,a[rel=nofollow],div[x-y=a-.:_0]";
             }
         };
 
@@ -163,6 +163,9 @@ public class FessPropTest extends UnitFessTestCase {
 
         assertTrue(matchesTag(tags[3], "<a rel=\"nofollow\"></a>"));
         assertFalse(matchesTag(tags[3], "<a></a>"));
+
+        assertTrue(matchesTag(tags[4], "<div x-y=\"a-.:_0\"></div>"));
+        assertFalse(matchesTag(tags[4], "<div x-y=\"a 0\"></div>"));
     }
 
     private boolean matchesTag(final PrunedTag tag, final String text) throws Exception {
