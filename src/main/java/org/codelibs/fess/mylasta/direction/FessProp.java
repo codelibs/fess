@@ -659,7 +659,7 @@ public interface FessProp {
                     final PrunedTag tag = new PrunedTag(matcher.group(1));
                     if (matcher.group(2) != null) {
                         final String attrPair = matcher.group(2).substring(1, matcher.group(2).length() - 1);
-                        final Matcher equalMatcher = Pattern.compile("(\\w+)=(\\w+)").matcher(attrPair);
+                        final Matcher equalMatcher = Pattern.compile("([\\w\\-]+)=(\\S+)").matcher(attrPair);
                         if (equalMatcher.matches()) {
                             tag.setAttr(equalMatcher.group(1), equalMatcher.group(2));
                         }
