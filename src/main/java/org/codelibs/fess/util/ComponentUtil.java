@@ -82,6 +82,8 @@ public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
+    private static final String QUERY_STRING_BUILDER = "queryStringBuilder";
+
     private static final String ACCESS_TOKEN_HELPER = "accessTokenHelper";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
@@ -421,6 +423,10 @@ public final class ComponentUtil {
         return getComponent(ACCESS_TOKEN_HELPER);
     }
 
+    public static QueryStringBuilder getQueryStringBuilder() {
+        return getComponent(QUERY_STRING_BUILDER);
+    }
+
     public static <T> T getComponent(final Class<T> clazz) {
         try {
             return SingletonLaContainer.getComponent(clazz);
@@ -455,6 +461,10 @@ public final class ComponentUtil {
 
     public static boolean hasPopularWordHelper() {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(POPULAR_WORD_HELPER);
+    }
+
+    public static boolean hasRelatedQueryHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(RELATED_QUERY_HELPER);
     }
 
     public static boolean available() {

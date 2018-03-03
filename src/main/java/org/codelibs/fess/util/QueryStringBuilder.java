@@ -15,20 +15,20 @@
  */
 package org.codelibs.fess.util;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 
 public class QueryStringBuilder {
-    private String query;
 
-    private String[] extraQueries;
-
-    private Map<String, String[]> fieldMap;
+    private SearchRequestParams params;
 
     protected String quote(final String value) {
         if (value.split("\\s").length > 1) {
@@ -39,26 +39,40 @@ public class QueryStringBuilder {
 
     public String build() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
         final StringBuilder queryBuf = new StringBuilder(255);
-        if (StringUtil.isNotBlank(query)) {
-            final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
-            final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
-            if (relatedQueries.length == 0) {
-                queryBuf.append('(').append(query).append(')');
-            } else {
-                queryBuf.append('(');
-                queryBuf.append(quote(query));
-                for (final String s : relatedQueries) {
-                    queryBuf.append(" OR ");
-                    queryBuf.append(quote(s));
+
+        Map<String, String[]> conditions = params.getConditions();
+        if (params.hasConditionQuery()) {
+            appendConditions(queryBuf, conditions);
+        } else {
+            final String query = params.getQuery();
+            if (StringUtil.isNotBlank(query)) {
+                if (ComponentUtil.hasRelatedQueryHelper()) {
+                    final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
+                    final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
+                    if (relatedQueries.length == 0) {
+                        queryBuf.append(query);
+                    } else {
+                        queryBuf.append('(');
+                        queryBuf.append(quote(query));
+                        for (final String s : relatedQueries) {
+                            queryBuf.append(" OR ");
+                            queryBuf.append(quote(s));
+                        }
+                        queryBuf.append(')');
+                    }
+                } else {
+                    queryBuf.append(query);
                 }
-                queryBuf.append(')');
             }
         }
-        stream(extraQueries).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= fessConfig.getQueryMaxLengthAsInteger().intValue())
-                        .forEach(q -> queryBuf.append(' ').append(q)));
-        stream(fieldMap).of(stream -> stream.forEach(entry -> {
+
+        stream(params.getExtraQueries()).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(' ').append(q)));
+
+        stream(params.getFields()).of(stream -> stream.forEach(entry -> {
             final String key = entry.getKey();
             final String[] values = entry.getValue();
             if (values == null) {
@@ -79,22 +93,50 @@ public class QueryStringBuilder {
                 queryBuf.append(')');
             }
         }));
-        return queryBuf.toString();
+
+        return queryBuf.toString().trim();
     }
 
-    public static QueryStringBuilder query(final String query) {
-        final QueryStringBuilder builder = new QueryStringBuilder();
-        builder.query = query;
-        return builder;
+    protected void appendConditions(StringBuilder queryBuf, Map<String, String[]> conditions) {
+        if (conditions == null) {
+            return;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
+
+        stream(conditions.get(SearchRequestParams.AS_Q)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(' ').append(q)));
+        stream(conditions.get(SearchRequestParams.AS_EPQ)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" \"").append(escape(q, "\"")).append('"')));
+        stream(conditions.get(SearchRequestParams.AS_OQ)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        oq -> split(oq, " ").get(
+                                s -> s.filter(StringUtil::isNotBlank).reduce(
+                                        (q1, q2) -> escape(q1, "(", ")") + " OR " + escape(q2, "(", ")"))).ifPresent(
+                                q -> queryBuf.append(" (").append(q).append(')'))));
+        stream(conditions.get(SearchRequestParams.AS_NQ)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        eq -> {
+                            final String nq =
+                                    split(eq, " ").get(
+                                            s -> s.filter(StringUtil::isNotBlank).map(q -> "NOT " + q).collect(Collectors.joining(" ")));
+                            queryBuf.append(' ').append(nq);
+                        }));
+
     }
 
-    public QueryStringBuilder extraQueries(final String[] extraQueries) {
-        this.extraQueries = extraQueries;
-        return this;
+    private String escape(final String q, final String... values) {
+        String value = q;
+        for (String s : values) {
+            value = value.replace(s, "\\" + s);
+        }
+        return value;
     }
 
-    public QueryStringBuilder fields(final Map<String, String[]> fieldMap) {
-        this.fieldMap = fieldMap;
+    public QueryStringBuilder params(final SearchRequestParams params) {
+        this.params = params;
         return this;
     }
 }

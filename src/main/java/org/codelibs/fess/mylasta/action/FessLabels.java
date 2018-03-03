@@ -2679,6 +2679,24 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Running as Development mode. For production use, please install a standalone elasticsearch server. */
     public static final String LABELS_development_mode_warning = "{labels.development_mode_warning}";
 
+    /** The key of the message: Advance */
+    public static final String LABELS_ADVANCE = "{labels.advance}";
+
+    /** The key of the message: Advanced Search */
+    public static final String LABELS_advance_search_title = "{labels.advance_search_title}";
+
+    /** The key of the message: All these words: */
+    public static final String LABELS_advance_search_must_queries = "{labels.advance_search_must_queries}";
+
+    /** The key of the message: This exact word or phrase: */
+    public static final String LABELS_advance_search_phrase_query = "{labels.advance_search_phrase_query}";
+
+    /** The key of the message: Any of these words: */
+    public static final String LABELS_advance_search_should_queries = "{labels.advance_search_should_queries}";
+
+    /** The key of the message: None of these words: */
+    public static final String LABELS_advance_search_not_queries = "{labels.advance_search_not_queries}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

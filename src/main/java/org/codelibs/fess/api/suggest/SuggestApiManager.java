@@ -18,6 +18,7 @@ package org.codelibs.fess.api.suggest;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -217,7 +218,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
         @Override
         public Map<String, String[]> getFields() {
-            throw new UnsupportedOperationException();
+            return Collections.emptyMap();
+        }
+
+        @Override
+        public Map<String, String[]> getConditions() {
+            return Collections.emptyMap();
         }
 
         public String[] getTags() {

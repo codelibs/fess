@@ -32,6 +32,8 @@
 	</component>
 	<component name="relatedQueryHelper" class="org.codelibs.fess.helper.RelatedQueryHelper">
 	</component>
+	<component name="queryStringBuilder" class="org.codelibs.fess.util.QueryStringBuilder" instance="prototype">
+	</component>
 	<component name="queryParser" class="org.apache.lucene.queryparser.ext.ExtendableQueryParser" instance="prototype">
 		<arg>org.codelibs.fess.Constants.DEFAULT_FIELD</arg>
 		<arg>

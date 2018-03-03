@@ -47,7 +47,6 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
-import org.codelibs.fess.util.QueryStringBuilder;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
@@ -98,8 +97,7 @@ public class SearchService {
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
         });
 
-        final String query =
-                QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
 
         final int pageStart = params.getStartPosition();
         final int pageSize = params.getPageSize();
@@ -186,8 +184,7 @@ public class SearchService {
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
         });
 
-        final String query =
-                QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
 
         final int pageSize = params.getPageSize();
         final String sortField = params.getSort();
@@ -223,8 +220,7 @@ public class SearchService {
 
     public long deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
 
-        final String query =
-                QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
 
         final QueryContext queryContext = queryHelper.build(params.getType(), query, context -> {
             context.skipRoleQuery();

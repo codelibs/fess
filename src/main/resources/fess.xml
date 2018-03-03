@@ -60,6 +60,10 @@
 			<arg>"searchOptions.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
+			<arg>"advance"</arg>
+			<arg>"advance.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
 			<arg>"help"</arg>
 			<arg>"help.jsp"</arg>
 		</postConstruct>

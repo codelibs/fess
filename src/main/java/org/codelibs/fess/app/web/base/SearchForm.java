@@ -36,6 +36,8 @@ public class SearchForm implements SearchRequestParams {
 
     public Map<String, String[]> fields = new HashMap<>();
 
+    public Map<String, String[]> as = new HashMap<>();
+
     @Size(max = 1000)
     public String q;
 
@@ -143,5 +145,10 @@ public class SearchForm implements SearchRequestParams {
     @Override
     public String getSimilarDocHash() {
         return sdh;
+    }
+
+    @Override
+    public Map<String, String[]> getConditions() {
+        return as;
     }
 }

@@ -78,6 +78,28 @@ public class SearchAction extends FessSearchAction {
     }
 
     @Execute
+    public HtmlResponse advance(final SearchForm form) {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
+        validate(form, messages -> {}, () -> asHtml(virtualHost(path_IndexJsp)).renderWith(data -> {
+            buildInitParams();
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationSearchTop());
+        }));
+        if (!form.hasConditionQuery()) {
+            if (StringUtil.isNotBlank(form.q)) {
+                form.as.put("q", new String[] { form.q });
+            } else {
+                // TODO set default?
+            }
+        }
+        return asHtml(virtualHost(path_AdvanceJsp)).renderWith(data -> {
+            buildInitParams();
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
+        });
+    }
+
+    @Execute
     public HtmlResponse search(final SearchForm form) {
         if (viewHelper.isUseSession()) {
             LaRequestUtil.getOptionalRequest().ifPresent(request -> {
@@ -121,7 +143,7 @@ public class SearchAction extends FessSearchAction {
             }
         }
 
-        if (StringUtil.isBlank(form.q) && form.fields.isEmpty()) {
+        if (StringUtil.isBlank(form.q) && form.fields.isEmpty() && form.as.isEmpty()) {
             // redirect to index page
             form.q = null;
             return redirectToRoot();
@@ -134,6 +156,9 @@ public class SearchAction extends FessSearchAction {
             searchService.search(form, renderData, getUserBean());
             return asHtml(virtualHost(path_SearchJsp)).renderWith(
                     data -> {
+                        if (form.hasConditionQuery()) {
+                            form.q = renderData.getSearchQuery();
+                        }
                         renderData.register(data);
                         RenderDataUtil.register(data, "displayQuery",
                                 getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
@@ -233,18 +258,27 @@ public class SearchAction extends FessSearchAction {
                 }
             }
         }
-        if (!form.fields.isEmpty()) {
-            for (final Map.Entry<String, String[]> entry : form.fields.entrySet()) {
-                final String[] values = entry.getValue();
-                if (values != null) {
-                    for (final String v : values) {
-                        if (StringUtil.isNotBlank(v)) {
-                            pagingQueryList.add("fields." + LaFunctions.u(entry.getKey()) + "=" + LaFunctions.u(v));
-                        }
-                    }
-                }
-            }
-        }
+        form.fields
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null)
+                .forEach(
+                        e -> {
+                            final String key = LaFunctions.u(e.getKey());
+                            stream(e.getValue()).of(
+                                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                                            s -> pagingQueryList.add("fields." + key + "=" + LaFunctions.u(s))));
+                        });
+        form.as.entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null)
+                .forEach(
+                        e -> {
+                            final String key = LaFunctions.u(e.getKey());
+                            stream(e.getValue()).of(
+                                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                                            s -> pagingQueryList.add("as." + key + "=" + LaFunctions.u(s))));
+                        });
         request.setAttribute(Constants.PAGING_QUERY_LIST, pagingQueryList);
     }
 

@@ -361,6 +361,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/wizard/admin_wizard_start.jsp */
     HtmlNext path_AdminWizard_AdminWizardStartJsp = new HtmlNext("/admin/wizard/admin_wizard_start.jsp");
 
+    /** The path of the HTML: /advance.jsp */
+    HtmlNext path_AdvanceJsp = new HtmlNext("/advance.jsp");
+
     /** The path of the HTML: /error/badRequest.jsp */
     HtmlNext path_Error_BadRequestJsp = new HtmlNext("/error/badRequest.jsp");
 
