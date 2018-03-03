@@ -95,7 +95,7 @@ public class SearchAction extends FessSearchAction {
         }
         return asHtml(virtualHost(path_AdvanceJsp)).renderWith(data -> {
             buildInitParams();
-            RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationAdvanceSearch());
         });
     }
 
