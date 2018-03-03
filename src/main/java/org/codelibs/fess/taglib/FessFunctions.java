@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.taglib;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
 import java.math.RoundingMode;
 import java.nio.file.Files;
@@ -31,6 +33,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -293,5 +296,20 @@ public class FessFunctions {
             return input;
         }
         return ComponentUtil.getDocumentHelper().encodeSimilarDocHash(input);
+    }
+
+    public static String join(final Object input) {
+        String[] values = null;
+        if (input instanceof String[]) {
+            values = (String[]) input;
+        } else if (input instanceof List) {
+            values = ((List<?>) input).stream().filter(Objects::nonNull).map(Object::toString).toArray(n -> new String[n]);
+        } else if (input instanceof String) {
+            return input.toString();
+        }
+        if (values != null) {
+            return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining(" ")));
+        }
+        return StringUtil.EMPTY;
     }
 }

@@ -636,6 +636,19 @@ public class JsonApiManager extends BaseJsonApiManager {
         }
 
         @Override
+        public Map<String, String[]> getConditions() {
+            final Map<String, String[]> conditions = new HashMap<>();
+            for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                final String key = entry.getKey();
+                if (key.startsWith("as.")) {
+                    final String[] value = simplifyArray(entry.getValue());
+                    conditions.put(key.substring("as.".length()), value);
+                }
+            }
+            return conditions;
+        }
+
+        @Override
         public String[] getLanguages() {
             return getParamValueArray(request, "lang");
         }

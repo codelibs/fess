@@ -218,4 +218,12 @@
     <function-signature>java.lang.String sdh(java.lang.String)</function-signature>
     <example>${fe:sdh(doc.similar_docs_hash)}</example>
   </function>
+
+  <function>
+    <description>Concatenate strings.</description>
+    <name>join</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String join(java.lang.Object)</function-signature>
+    <example>${fe:join(values)}</example>
+  </function>
 </taglib>
