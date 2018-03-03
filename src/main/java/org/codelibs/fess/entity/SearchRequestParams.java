@@ -26,9 +26,19 @@ import org.codelibs.core.lang.StringUtil;
 
 public interface SearchRequestParams {
 
+    String AS_NQ = "nq";
+
+    String AS_OQ = "oq";
+
+    String AS_EPQ = "epq";
+
+    String AS_Q = "q";
+
     String getQuery();
 
     Map<String, String[]> getFields();
+
+    Map<String, String[]> getConditions();
 
     String[] getLanguages();
 
@@ -51,6 +61,21 @@ public interface SearchRequestParams {
     SearchRequestType getType();
 
     String getSimilarDocHash();
+
+    public default boolean hasConditionQuery() {
+        final Map<String, String[]> conditions = getConditions();
+        return !isEmptyArray(conditions.get(AS_Q))//
+                || !isEmptyArray(conditions.get(AS_EPQ))//
+                || !isEmptyArray(conditions.get(AS_OQ))//
+                || !isEmptyArray(conditions.get(AS_NQ));
+    }
+
+    public default boolean isEmptyArray(String[] values) {
+        if (values == null || values.length == 0) {
+            return true;
+        }
+        return stream(values).get(stream -> stream.allMatch(StringUtil::isBlank));
+    }
 
     public default String[] simplifyArray(final String[] values) {
         return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
