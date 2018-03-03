@@ -143,7 +143,7 @@ public class SearchAction extends FessSearchAction {
             }
         }
 
-        if (StringUtil.isBlank(form.q) && form.fields.isEmpty() && form.as.isEmpty()) {
+        if (StringUtil.isBlank(form.q) && form.fields.isEmpty() && !form.hasConditionQuery()) {
             // redirect to index page
             form.q = null;
             return redirectToRoot();
