@@ -133,6 +133,10 @@
 					<button type="button" class="btn btn-secondary" id="searchOptionsClearButton">
 						<la:message key="labels.search_options_clear" />
 					</button>
+					<la:link href="/search/advance" styleClass="btn btn-info">
+						<i class="fa fa-cog"></i>
+						<la:message key="labels.advance" />
+					</la:link>
 					<button type="button" class="btn btn-secondary pull-right"
 						data-toggle="control-options" data-target="#searchOptions"
 						id="searchOptionsCloseButton">
