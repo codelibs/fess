@@ -385,6 +385,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String NOTIFICATION_SEARCH_TOP = "notification.search.top";
 
+    public static final String NOTIFICATION_ADVANCE_SEARCH = "notification.advance.search";
+
     public static final String MAPPING_TYPE_ARRAY = "array";
 
     public static final String MAPPING_TYPE_STRING = "string";
