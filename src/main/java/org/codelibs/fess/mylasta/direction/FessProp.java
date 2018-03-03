@@ -612,6 +612,10 @@ public interface FessProp {
         return getSystemProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY);
     }
 
+    public default String getNotificationAdvanceSearch() {
+        return getSystemProperty(Constants.NOTIFICATION_ADVANCE_SEARCH, StringUtil.EMPTY);
+    }
+
     public default void setNotificationSearchTop(final String value) {
         setSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, value);
     }
