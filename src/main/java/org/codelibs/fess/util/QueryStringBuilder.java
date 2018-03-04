@@ -124,6 +124,9 @@ public class QueryStringBuilder {
                                             s -> s.filter(StringUtil::isNotBlank).map(q -> "NOT " + q).collect(Collectors.joining(" ")));
                             queryBuf.append(' ').append(nq);
                         }));
+        stream(conditions.get(SearchRequestParams.AS_FILETYPE)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" filetype:\"").append(q.trim()).append('"')));
 
     }
 

@@ -34,6 +34,8 @@ public interface SearchRequestParams {
 
     String AS_Q = "q";
 
+    String AS_FILETYPE = "filetype";
+
     String getQuery();
 
     Map<String, String[]> getFields();
@@ -67,7 +69,8 @@ public interface SearchRequestParams {
         return !isEmptyArray(conditions.get(AS_Q))//
                 || !isEmptyArray(conditions.get(AS_EPQ))//
                 || !isEmptyArray(conditions.get(AS_OQ))//
-                || !isEmptyArray(conditions.get(AS_NQ));
+                || !isEmptyArray(conditions.get(AS_NQ))//
+                || !isEmptyArray(conditions.get(AS_FILETYPE));
     }
 
     public default boolean isEmptyArray(String[] values) {
