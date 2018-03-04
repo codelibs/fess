@@ -2685,17 +2685,38 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Advanced Search */
     public static final String LABELS_advance_search_title = "{labels.advance_search_title}";
 
-    /** The key of the message: All these words: */
+    /** The key of the message: All these words */
     public static final String LABELS_advance_search_must_queries = "{labels.advance_search_must_queries}";
 
-    /** The key of the message: This exact word or phrase: */
+    /** The key of the message: This exact word or phrase */
     public static final String LABELS_advance_search_phrase_query = "{labels.advance_search_phrase_query}";
 
-    /** The key of the message: Any of these words: */
+    /** The key of the message: Any of these words */
     public static final String LABELS_advance_search_should_queries = "{labels.advance_search_should_queries}";
 
-    /** The key of the message: None of these words: */
+    /** The key of the message: None of these words */
     public static final String LABELS_advance_search_not_queries = "{labels.advance_search_not_queries}";
+
+    /** The key of the message: File Type */
+    public static final String LABELS_advance_search_filetype = "{labels.advance_search_filetype}";
+
+    /** The key of the message: All Type */
+    public static final String LABELS_advance_search_filetype_default = "{labels.advance_search_filetype_default}";
+
+    /** The key of the message: HTML */
+    public static final String LABELS_advance_search_filetype_html = "{labels.advance_search_filetype_html}";
+
+    /** The key of the message: PDF */
+    public static final String LABELS_advance_search_filetype_pdf = "{labels.advance_search_filetype_pdf}";
+
+    /** The key of the message: MS Word */
+    public static final String LABELS_advance_search_filetype_word = "{labels.advance_search_filetype_word}";
+
+    /** The key of the message: MS Excel */
+    public static final String LABELS_advance_search_filetype_excel = "{labels.advance_search_filetype_excel}";
+
+    /** The key of the message: MS PowerPoint */
+    public static final String LABELS_advance_search_filetype_powerpoint = "{labels.advance_search_filetype_powerpoint}";
 
     /**
      * Assert the property is not null.
