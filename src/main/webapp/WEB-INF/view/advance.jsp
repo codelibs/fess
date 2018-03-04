@@ -233,6 +233,34 @@
 							</div>
 						</div>
 					</c:if>
+					<div class="form-group row">
+						<label for="as_filetype" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
+								key="labels.advance_search_filetype"
+							/></label>
+						<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+							<select id="as_filetype" name="as.filetype" class="form-control">
+								<option><la:message key="labels.advance_search_filetype_default" /></option>
+								<option value="html" <c:if test="${as.filetype.contains('html')}">selected</c:if>><la:message
+										key="labels.advance_search_filetype_html"
+									/></option>
+								<option value="pdf" <c:if test="${as.filetype.contains('pdf')}">selected</c:if>><la:message
+										key="labels.advance_search_filetype_pdf"
+									/></option>
+								<option value="word" <c:if test="${as.filetype.contains('word')}">selected</c:if>><la:message
+										key="labels.advance_search_filetype_word"
+									/></option>
+								<option value="excel" <c:if test="${as.filetype.contains('excel')}">selected</c:if>><la:message
+										key="labels.advance_search_filetype_excel"
+									/></option>
+								<option value="powerpoint" <c:if test="${as.filetype.contains('powerpoint')}">selected</c:if>><la:message
+										key="labels.advance_search_filetype_powerpoint"
+									/></option>
+							</select>
+						</div>
+						<div class="col-lg-4 hidden-md-down">
+							<!-- TODO -->
+						</div>
+					</div>
 
 					<div class="center">
 						<button type="submit" name="search" id="searchButton" class="btn btn-primary">
