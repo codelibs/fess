@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.it.CrawlTestBase;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;

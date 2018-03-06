@@ -18,8 +18,8 @@ package org.codelibs.fess.it.admin.dict;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
