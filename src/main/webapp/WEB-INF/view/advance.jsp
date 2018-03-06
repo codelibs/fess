@@ -239,7 +239,7 @@
 							/></label>
 						<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
 							<select id="as_filetype" name="as.filetype" class="form-control">
-								<option><la:message key="labels.advance_search_filetype_default" /></option>
+								<option value=""><la:message key="labels.advance_search_filetype_default" /></option>
 								<option value="html" <c:if test="${as.filetype.contains('html')}">selected</c:if>><la:message
 										key="labels.advance_search_filetype_html"
 									/></option>
@@ -256,6 +256,36 @@
 										key="labels.advance_search_filetype_powerpoint"
 									/></option>
 							</select>
+						</div>
+						<div class="col-lg-4 hidden-md-down">
+							<!-- TODO -->
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="as_filetype" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
+								key="labels.advance_search_occt"
+							/></label>
+						<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+							<select id="as_occt" name="as.occt" class="form-control">
+								<option value=""><la:message key="labels.advance_search_occt_default" /></option>
+								<option value="allintitle" <c:if test="${as.occt.contains('allintitle')}">selected</c:if>><la:message
+										key="labels.advance_search_occt_allintitle"
+									/></option>
+								<option value="allinurl" <c:if test="${as.occt.contains('allinurl')}">selected</c:if>><la:message
+										key="labels.advance_search_occt_allinurl"
+									/></option>
+							</select>
+						</div>
+						<div class="col-lg-4 hidden-md-down">
+							<!-- TODO -->
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="as_sitesearch" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
+								key="labels.advance_search_sitesearch"
+							/></label>
+						<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+							<input class="form-control" type="text" id="as_sitesearch" name="as.sitesearch" value="${f:h(fe:join(as.sitesearch))}">
 						</div>
 						<div class="col-lg-4 hidden-md-down">
 							<!-- TODO -->
