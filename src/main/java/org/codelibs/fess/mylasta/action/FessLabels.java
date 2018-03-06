@@ -2718,6 +2718,21 @@ public class FessLabels extends UserMessages {
     /** The key of the message: MS PowerPoint */
     public static final String LABELS_advance_search_filetype_powerpoint = "{labels.advance_search_filetype_powerpoint}";
 
+    /** The key of the message: Terms appearing */
+    public static final String LABELS_advance_search_occt = "{labels.advance_search_occt}";
+
+    /** The key of the message: anywhere in the page */
+    public static final String LABELS_advance_search_occt_default = "{labels.advance_search_occt_default}";
+
+    /** The key of the message: in the title of the page */
+    public static final String LABELS_advance_search_occt_allintitle = "{labels.advance_search_occt_allintitle}";
+
+    /** The key of the message: in the url of the page */
+    public static final String LABELS_advance_search_occt_allinurl = "{labels.advance_search_occt_allinurl}";
+
+    /** The key of the message: Site or domain */
+    public static final String LABELS_advance_search_sitesearch = "{labels.advance_search_sitesearch}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

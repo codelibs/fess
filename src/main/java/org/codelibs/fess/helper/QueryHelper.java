@@ -82,6 +82,8 @@ public class QueryHelper {
 
     protected static final String INURL_FIELD = "inurl";
 
+    protected static final String SITE_FIELD = "site";
+
     @Resource
     protected FessConfig fessConfig;
 
@@ -193,6 +195,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldDocId(), //
                     fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldContent(), //
                     fessConfig.getIndexFieldContentLength(), //
@@ -415,7 +418,10 @@ public class QueryHelper {
                 }
             }
         }
-        return boolQuery;
+        if (boolQuery.hasClauses()) {
+            return boolQuery;
+        }
+        return null;
     }
 
     protected String toLowercaseWildcard(final String value) {
@@ -425,8 +431,15 @@ public class QueryHelper {
         return value;
     }
 
+    protected String getSearchField(final QueryContext context, final String field) {
+        if (Constants.DEFAULT_FIELD.equals(field) && context.getDefaultField() != null) {
+            return context.getDefaultField();
+        }
+        return field;
+    }
+
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
-        final String field = wildcardQuery.getField();
+        final String field = getSearchField(context, wildcardQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text()))
@@ -444,7 +457,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
-        final String field = prefixQuery.getField();
+        final String field = getSearchField(context, prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text()))
@@ -463,7 +476,7 @@ public class QueryHelper {
 
     protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
         final Term term = fuzzyQuery.getTerm();
-        final String field = term.field();
+        final String field = getSearchField(context, term.field());
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
@@ -482,7 +495,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
-        final String field = termRangeQuery.getField();
+        final String field = getSearchField(context, termRangeQuery.getField());
         if (isSearchField(field)) {
             context.addFieldLog(field, termRangeQuery.toString(field));
             final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);
@@ -530,7 +543,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery, final float boost) {
-        final String field = termQuery.getTerm().field();
+        final String field = getSearchField(context, termQuery.getTerm().field());
         final String text = termQuery.getTerm().text();
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))), boost);
@@ -562,8 +575,10 @@ public class QueryHelper {
             }
             context.addSorts(createFieldSortBuilder(sortField, sortOrder));
             return null;
-        } else if (INURL_FIELD.equals(field)) {
+        } else if (INURL_FIELD.equals(field) || fessConfig.getIndexFieldUrl().equals(context.getDefaultField())) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
+        } else if (SITE_FIELD.equals(field)) {
+            return convertSiteQuery(context, text, boost);
         } else if (isSearchField(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
@@ -578,6 +593,10 @@ public class QueryHelper {
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, origQuery).boost(b * boost));
         }
+    }
+
+    protected QueryBuilder convertSiteQuery(final QueryContext context, final String text, final float boost) {
+        return QueryBuilders.prefixQuery(fessConfig.getIndexFieldSite(), text).boost(boost);
     }
 
     private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {

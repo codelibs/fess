@@ -36,6 +36,10 @@ public interface SearchRequestParams {
 
     String AS_FILETYPE = "filetype";
 
+    String AS_SITESEARCH = "sitesearch";
+
+    String AS_OCCURRENCE = "occt";
+
     String getQuery();
 
     Map<String, String[]> getFields();
@@ -70,6 +74,7 @@ public interface SearchRequestParams {
                 || !isEmptyArray(conditions.get(AS_EPQ))//
                 || !isEmptyArray(conditions.get(AS_OQ))//
                 || !isEmptyArray(conditions.get(AS_NQ))//
+                || !isEmptyArray(conditions.get(AS_SITESEARCH))//
                 || !isEmptyArray(conditions.get(AS_FILETYPE));
     }
 

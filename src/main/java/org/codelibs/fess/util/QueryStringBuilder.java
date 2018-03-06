@@ -104,6 +104,9 @@ public class QueryStringBuilder {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
 
+        stream(conditions.get(SearchRequestParams.AS_OCCURRENCE)).of(
+                stream -> stream.filter(q -> isOccurrence(q)).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
+
         stream(conditions.get(SearchRequestParams.AS_Q)).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
                         q -> queryBuf.append(' ').append(q)));
@@ -127,10 +130,16 @@ public class QueryStringBuilder {
         stream(conditions.get(SearchRequestParams.AS_FILETYPE)).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
                         q -> queryBuf.append(" filetype:\"").append(q.trim()).append('"')));
-
+        stream(conditions.get(SearchRequestParams.AS_SITESEARCH)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" site:").append(q.trim())));
     }
 
-    private String escape(final String q, final String... values) {
+    protected boolean isOccurrence(final String value) {
+        return "allintitle".equals(value) || "allinurl".equals(value);
+    }
+
+    protected String escape(final String q, final String... values) {
         String value = q;
         for (String s : values) {
             value = value.replace(s, "\\" + s);
