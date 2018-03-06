@@ -506,7 +506,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. fess_log */
     String INDEX_LOG_INDEX = "index.log.index";
 
-    /** The key of the configuration. e.g. lang,role,label,anchor */
+    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
     /** The key of the configuration. e.g. expires,created,timestamp,last_modified */
@@ -2782,7 +2782,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
-     * The value is, e.g. lang,role,label,anchor <br>
+     * The value is, e.g. lang,role,label,anchor,virtual_host <br>
      * comment: doc management
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -8028,7 +8028,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_CONFIG_INDEX, ".fess_config");
             defaultMap.put(FessConfig.INDEX_USER_INDEX, ".fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
-            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor");
+            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host");
             defaultMap.put(FessConfig.INDEX_ADMIN_DATE_FIELDS, "expires,created,timestamp,last_modified");
             defaultMap.put(FessConfig.INDEX_ADMIN_INTEGER_FIELDS, "");
             defaultMap.put(FessConfig.INDEX_ADMIN_LONG_FIELDS, "content_length,favorite_count,click_count");

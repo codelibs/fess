@@ -296,6 +296,13 @@
 												data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="virtual_host" class="col-sm-3 control-label">virtual_host</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.virtual_host" />
+											<la:textarea property="doc.virtual_host" styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
