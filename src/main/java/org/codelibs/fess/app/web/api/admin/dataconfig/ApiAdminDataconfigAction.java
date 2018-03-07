@@ -145,7 +145,7 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
                                 .collect(Collectors.joining("\n")));
         body.virtualHosts =
                 stream(entity.getVirtualHosts()).get(
-                        stream -> stream.filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                        stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).collect(Collectors.joining("\n")));
         return body;
     }
 }
