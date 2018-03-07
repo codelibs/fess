@@ -153,7 +153,8 @@ public class AdminWebconfigAction extends FessAdminAction {
                                                     .collect(Collectors.joining("\n")));
                             form.virtualHosts =
                                     stream(entity.getVirtualHosts()).get(
-                                            stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.joining("\n")));
+                                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
+                                                    .collect(Collectors.joining("\n")));
                         }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
@@ -195,8 +196,8 @@ public class AdminWebconfigAction extends FessAdminAction {
                                                                     .collect(Collectors.joining("\n")));
                                             form.virtualHosts =
                                                     stream(entity.getVirtualHosts()).get(
-                                                            stream -> stream.filter(StringUtil::isNotBlank).collect(
-                                                                    Collectors.joining("\n")));
+                                                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
+                                                                    .collect(Collectors.joining("\n")));
                                             form.crudMode = crudMode;
                                         })
                                 .orElse(() -> {
@@ -314,7 +315,7 @@ public class AdminWebconfigAction extends FessAdminAction {
                             stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
                                     .toArray(n -> new String[n])));
                     entity.setVirtualHosts(split(form.virtualHosts, "\n").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));
+                            stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).toArray(n -> new String[n])));
                     return entity;
                 });
     }
