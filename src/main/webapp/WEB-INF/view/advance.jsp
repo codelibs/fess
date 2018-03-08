@@ -329,27 +329,11 @@
 			</div>
 			<jsp:include page="footer.jsp" />
 		</div>
-		<div id="searchOptions" class="control-options">
-			<div class="container">
-				<jsp:include page="searchOptions.jsp" />
-				<div>
-					<button type="button" class="btn btn-secondary" id="searchOptionsClearButton">
-						<la:message key="labels.search_options_clear" />
-					</button>
-					<button type="button" class="btn btn-secondary pull-right" data-toggle="control-options"
-						data-target="#searchOptions" id="searchOptionsCloseButton"
-					>
-						<i class="fa fa-times-circle"></i>
-						<la:message key="labels.search_options_close" />
-					</button>
-				</div>
-			</div>
-		</div>
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.2.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/index.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/advance.js')}"></script>
 </body>
 </html>
