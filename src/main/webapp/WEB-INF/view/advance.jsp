@@ -19,51 +19,53 @@
 	<la:form styleClass="form-stacked" action="/search/" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
-			<div id="content" class="container">
-				<ul class="nav navbar-nav pull-right">
-					<c:choose>
-						<c:when test="${!empty username && username != 'guest'}">
-							<li class="nav-item">
-								<div class="dropdown">
-									<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-										aria-expanded="false"
-									> <i class="fa fa-user"></i>${username}
-									</a>
-									<div class="dropdown-menu" aria-labelledby="userMenu">
-										<c:if test="${editableUser == true}">
-											<la:link href="/profile" styleClass="dropdown-item">
-												<la:message key="labels.profile" />
-											</la:link>
-										</c:if>
-										<c:if test="${adminUser == true}">
-											<la:link href="/admin" styleClass="dropdown-item">
-												<la:message key="labels.administration" />
-											</la:link>
-										</c:if>
-										<la:link href="/logout/" styleClass="dropdown-item">
-											<la:message key="labels.logout" />
+			<la:link styleClass="navbar-brand" href="/">
+				<img src="${fe:url('/images/logo-head.png')}"
+					alt="<la:message key="labels.header_brand_name" />" />
+			</la:link>
+			<ul class="nav navbar-nav pull-right">
+				<c:choose>
+					<c:when test="${!empty username && username != 'guest'}">
+						<li class="nav-item">
+							<div class="dropdown">
+								<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+									aria-expanded="false"
+								> <i class="fa fa-user"></i>${username}
+								</a>
+								<div class="dropdown-menu" aria-labelledby="userMenu">
+									<c:if test="${editableUser == true}">
+										<la:link href="/profile" styleClass="dropdown-item">
+											<la:message key="labels.profile" />
 										</la:link>
-									</div>
+									</c:if>
+									<c:if test="${adminUser == true}">
+										<la:link href="/admin" styleClass="dropdown-item">
+											<la:message key="labels.administration" />
+										</la:link>
+									</c:if>
+									<la:link href="/logout/" styleClass="dropdown-item">
+										<la:message key="labels.logout" />
+									</la:link>
 								</div>
-							</li>
-						</c:when>
-						<c:when test="${ pageLoginLink }">
-							<li class="nav-item username"><la:link href="/login" styleClass="nav-link" role="button"
-									aria-haspopup="true" aria-expanded="false"
-								>
-									<i class="fa fa-sign-in"></i>
-									<la:message key="labels.login" />
-								</la:link></li>
-						</c:when>
-					</c:choose>
-					<li class="nav-item"><la:link href="/help" styleClass="nav-link help-link">
-							<i class="fa fa-question-circle"></i>
-							<la:message key="labels.index_help" />
-						</la:link></li>
-				</ul>
-			</div>
+							</div>
+						</li>
+					</c:when>
+					<c:when test="${ pageLoginLink }">
+						<li class="nav-item username"><la:link href="/login" styleClass="nav-link" role="button" aria-haspopup="true"
+								aria-expanded="false"
+							>
+								<i class="fa fa-sign-in"></i>
+								<la:message key="labels.login" />
+							</la:link></li>
+					</c:when>
+				</c:choose>
+				<li class="nav-item"><la:link href="/help" styleClass="nav-link help-link">
+						<i class="fa fa-question-circle"></i>
+						<la:message key="labels.index_help" />
+					</la:link></li>
+			</ul>
 		</nav>
-		<div class="container">
+		<div id="content" class="container">
 			<div class="row content">
 				<div class="center-block">
 					<h2>
@@ -234,6 +236,31 @@
 						</div>
 					</c:if>
 					<div class="form-group row">
+						<label for="as_timestamp" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
+								key="labels.advance_search_timestamp"
+							/></label>
+						<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+							<select id="as_timestamp" name="as.timestamp" class="form-control">
+								<option value=""><la:message key="labels.advance_search_timestamp_default" /></option>
+								<option value="[now-1d/d TO *]"
+									<c:if test="${as.timestamp.contains('[now-1d/d TO *]')}">selected</c:if>
+								><la:message key="labels.advance_search_timestamp_pastday" /></option>
+								<option value="[now-1w/d TO *]"
+									<c:if test="${as.timestamp.contains('[now-1w/d TO *]')}">selected</c:if>
+								><la:message key="labels.advance_search_timestamp_pastweek" /></option>
+								<option value="[now-1M/d TO *]"
+									<c:if test="${as.timestamp.contains('[now-1M/d TO *]')}">selected</c:if>
+								><la:message key="labels.advance_search_timestamp_pastmonth" /></option>
+								<option value="[now-1y/d TO *]"
+									<c:if test="${as.timestamp.contains('[now-1y/d TO *]')}">selected</c:if>
+								><la:message key="labels.advance_search_timestamp_pastyear" /></option>
+							</select>
+						</div>
+						<div class="col-lg-4 hidden-md-down">
+							<!-- TODO -->
+						</div>
+					</div>
+					<div class="form-group row">
 						<label for="as_filetype" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
 								key="labels.advance_search_filetype"
 							/></label>
@@ -262,7 +289,7 @@
 						</div>
 					</div>
 					<div class="form-group row">
-						<label for="as_filetype" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
+						<label for="as_occt" class="col-lg-3 col-md-4 col-sm-5 col-xs-6 col-form-label"><la:message
 								key="labels.advance_search_occt"
 							/></label>
 						<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
