@@ -133,6 +133,9 @@ public class QueryStringBuilder {
         stream(conditions.get(SearchRequestParams.AS_SITESEARCH)).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
                         q -> queryBuf.append(" site:").append(q.trim())));
+        stream(conditions.get(SearchRequestParams.AS_TIMESTAMP)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" timestamp:").append(q.trim())));
     }
 
     protected boolean isOccurrence(final String value) {
