@@ -40,6 +40,8 @@ public interface SearchRequestParams {
 
     String AS_OCCURRENCE = "occt";
 
+    String AS_TIMESTAMP = "timestamp";
+
     String getQuery();
 
     Map<String, String[]> getFields();
@@ -74,6 +76,7 @@ public interface SearchRequestParams {
                 || !isEmptyArray(conditions.get(AS_EPQ))//
                 || !isEmptyArray(conditions.get(AS_OQ))//
                 || !isEmptyArray(conditions.get(AS_NQ))//
+                || !isEmptyArray(conditions.get(AS_TIMESTAMP))//
                 || !isEmptyArray(conditions.get(AS_SITESEARCH))//
                 || !isEmptyArray(conditions.get(AS_FILETYPE));
     }

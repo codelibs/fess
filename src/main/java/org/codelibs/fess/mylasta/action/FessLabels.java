@@ -2733,6 +2733,24 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Site or domain */
     public static final String LABELS_advance_search_sitesearch = "{labels.advance_search_sitesearch}";
 
+    /** The key of the message: Last update */
+    public static final String LABELS_advance_search_timestamp = "{labels.advance_search_timestamp}";
+
+    /** The key of the message: anytime */
+    public static final String LABELS_advance_search_timestamp_default = "{labels.advance_search_timestamp_default}";
+
+    /** The key of the message: past 24 hours */
+    public static final String LABELS_advance_search_timestamp_pastday = "{labels.advance_search_timestamp_pastday}";
+
+    /** The key of the message: past week */
+    public static final String LABELS_advance_search_timestamp_pastweek = "{labels.advance_search_timestamp_pastweek}";
+
+    /** The key of the message: past month */
+    public static final String LABELS_advance_search_timestamp_pastmonth = "{labels.advance_search_timestamp_pastmonth}";
+
+    /** The key of the message: past year */
+    public static final String LABELS_advance_search_timestamp_pastyear = "{labels.advance_search_timestamp_pastyear}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
