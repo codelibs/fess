@@ -265,17 +265,7 @@ public class FessEsClient implements Client {
             client = runner.client();
             addTransportAddress("localhost", runner.node().settings().getAsInt("transport.tcp.port", 9300));
         } else {
-            final Builder settingsBuilder = Settings.builder();
-            settingsBuilder.put("cluster.name", fessConfig.getElasticsearchClusterName());
-            settingsBuilder.put("client.transport.sniff", fessConfig.isElasticsearchTransportSniff());
-            settingsBuilder.put("client.transport.ping_timeout", fessConfig.getElasticsearchTransportPingTimeout());
-            settingsBuilder.put("client.transport.nodes_sampler_interval", fessConfig.getElasticsearchTransportNodesSamplerInterval());
-            final Settings settings = settingsBuilder.build();
-            final TransportClient transportClient = new PreBuiltTransportClient(settings);
-            for (final TransportAddress address : transportAddressList) {
-                transportClient.addTransportAddress(address);
-            }
-            client = transportClient;
+            client = createTransportClient(fessConfig);
         }
 
         if (StringUtil.isBlank(transportAddressesValue)) {
@@ -350,6 +340,20 @@ public class FessEsClient implements Client {
                 logger.warn("Invalid index config name: " + configName);
             }
         });
+    }
+
+    protected Client createTransportClient(final FessConfig fessConfig) {
+        final Builder settingsBuilder = Settings.builder();
+        settingsBuilder.put("cluster.name", fessConfig.getElasticsearchClusterName());
+        settingsBuilder.put("client.transport.sniff", fessConfig.isElasticsearchTransportSniff());
+        settingsBuilder.put("client.transport.ping_timeout", fessConfig.getElasticsearchTransportPingTimeout());
+        settingsBuilder.put("client.transport.nodes_sampler_interval", fessConfig.getElasticsearchTransportNodesSamplerInterval());
+        final Settings settings = settingsBuilder.build();
+        final TransportClient transportClient = new PreBuiltTransportClient(settings);
+        for (final TransportAddress address : transportAddressList) {
+            transportClient.addTransportAddress(address);
+        }
+        return transportClient;
     }
 
     public boolean existsIndex(final String indexName) {
