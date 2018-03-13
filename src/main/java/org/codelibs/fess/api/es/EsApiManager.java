@@ -113,7 +113,7 @@ public class EsApiManager extends BaseApiManager {
         }
 
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
-        final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
+        final CurlRequest curlRequest = ComponentUtil.getCurlHelper().request(httpMethod, path);
 
         final String contentType = request.getHeader("Content-Type");
         if (StringUtil.isNotEmpty(contentType)) {

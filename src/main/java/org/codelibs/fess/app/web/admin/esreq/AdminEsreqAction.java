@@ -30,6 +30,8 @@ import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.helper.CurlHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -82,7 +84,7 @@ public class AdminEsreqAction extends FessAdminAction {
                 return asListHtml(() -> saveToken());
             });
         } else {
-            try (final CurlResponse response = curlRequest.header("Content-Type", "application/json").body(buf.toString()).execute()) {
+            try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
                 final File tempFile = File.createTempFile("esreq_", ".json");
                 try (final InputStream in = response.getContentAsStream()) {
                     CopyUtil.copy(in, tempFile);
@@ -121,22 +123,23 @@ public class AdminEsreqAction extends FessAdminAction {
             return null;
         }
 
-        final String url;
+        final String path;
         if (values[1].startsWith("/")) {
-            url = ResourceUtil.getElasticsearchHttpUrl() + values[1];
+            path = values[1];
         } else {
-            url = ResourceUtil.getElasticsearchHttpUrl() + "/" + values[1];
+            path = "/" + values[1];
         }
 
+        final CurlHelper curlHelper = ComponentUtil.getCurlHelper();
         switch (values[0].toUpperCase(Locale.ROOT)) {
         case "GET":
-            return Curl.get(url);
+            return curlHelper.get(path);
         case "POST":
-            return Curl.post(url);
+            return curlHelper.post(path);
         case "PUT":
-            return Curl.put(url);
+            return curlHelper.put(path);
         case "DELETE":
-            return Curl.delete(url);
+            return curlHelper.delete(path);
         default:
             break;
         }
