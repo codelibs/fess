@@ -51,9 +51,7 @@ public final class UpgradeUtil {
         final String filePath = indexConfigPath + "/" + indexName + "/" + path;
         try {
             final String source = FileUtil.readUTF8(filePath);
-            try (CurlResponse response =
-                    Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", path)
-                            .body(source).execute()) {
+            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                 if (response.getHttpStatusCode() == 200) {
                     logger.info("Register " + path + " to " + indexName);
                     return true;

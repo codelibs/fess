@@ -36,6 +36,7 @@ import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.CurlHelper;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
@@ -81,6 +82,8 @@ import org.slf4j.LoggerFactory;
 public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static final String CURL_HELPER = "curlHelper";
 
     private static final String QUERY_STRING_BUILDER = "queryStringBuilder";
 
@@ -425,6 +428,10 @@ public final class ComponentUtil {
 
     public static QueryStringBuilder getQueryStringBuilder() {
         return getComponent(QUERY_STRING_BUILDER);
+    }
+
+    public static CurlHelper getCurlHelper() {
+        return getComponent(CURL_HELPER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

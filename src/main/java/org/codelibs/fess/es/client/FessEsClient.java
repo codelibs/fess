@@ -372,8 +372,7 @@ public class FessEsClient implements Client {
     public boolean reindex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
         final String source = "{\"source\":{\"index\":\"" + fromIndex + "\"},\"dest\":{\"index\":\"" + toIndex + "\"}}";
         try (CurlResponse response =
-                Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_reindex")
-                        .header("Content-Type", "application/json").param("wait_for_completion", Boolean.toString(waitForCompletion))
+                ComponentUtil.getCurlHelper().post("/_reindex").param("wait_for_completion", Boolean.toString(waitForCompletion))
                         .body(source).execute()) {
             if (response.getHttpStatusCode() == 200) {
                 return true;
@@ -514,8 +513,7 @@ public class FessEsClient implements Client {
                     try {
                         source = FileUtil.readUTF8(filePath);
                         try (CurlResponse response =
-                                Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file")
-                                        .header("Content-Type", "application/json").param("path", path).body(source).execute()) {
+                                ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                             if (response.getHttpStatusCode() == 200) {
                                 logger.info("Register " + path + " to " + index);
                             } else {
@@ -530,9 +528,7 @@ public class FessEsClient implements Client {
                         logger.warn("Failed to register " + filePath, e);
                     }
                 });
-        try (CurlResponse response =
-                Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/flush")
-                        .header("Content-Type", "application/json").execute()) {
+        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/flush").execute()) {
             if (response.getHttpStatusCode() == 200) {
                 logger.info("Flushed config files.");
             } else {
@@ -600,9 +596,7 @@ public class FessEsClient implements Client {
     }
 
     private void waitForConfigSyncStatus() {
-        try (CurlResponse response =
-                Curl.get(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/wait")
-                        .header("Content-Type", "application/json").param("status", "green").execute()) {
+        try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/wait").param("status", "green").execute()) {
             if (response.getHttpStatusCode() == 200) {
                 logger.info("ConfigSync is ready.");
             } else {
