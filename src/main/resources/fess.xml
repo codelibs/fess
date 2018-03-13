@@ -8,6 +8,8 @@
 	<include path="esflute_user.xml"/>
 	<include path="esflute_log.xml"/>
 
+	<component name="curlHelper" class="org.codelibs.fess.helper.CurlHelper">
+	</component>
 	<component name="searchLogHelper" class="org.codelibs.fess.helper.SearchLogHelper">
 		<!-- 
 		<property name="userCheckInterval">5 * 60 * 1000</property>

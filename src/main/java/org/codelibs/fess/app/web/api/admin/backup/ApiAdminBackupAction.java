@@ -115,8 +115,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                 return asStream(filename).contentTypeOctetStream().stream(
                         out -> {
                             try (CurlResponse response =
-                                    Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/" + index + "/_data")
-                                            .header("Content-Type", "application/json").param("format", "json").execute()) {
+                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
                                 out.write(response.getContentAsStream());
                             }
                         });
