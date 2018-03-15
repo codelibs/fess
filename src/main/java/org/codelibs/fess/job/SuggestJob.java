@@ -202,6 +202,7 @@ public class SuggestJob {
             cmdList.add("-Dlasta.env=" + lastaEnv);
         }
 
+        addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
         cmdList.add("-Dfess.suggest.process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");
