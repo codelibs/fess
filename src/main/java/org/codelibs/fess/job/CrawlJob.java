@@ -285,6 +285,7 @@ public class CrawlJob {
             cmdList.add("-Dlasta.env=" + lastaEnv);
         }
 
+        addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
         cmdList.add("-Dfess.crawler.process=true");
         cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
         addSystemProperty(cmdList, "fess.log.name", "fess-crawler", "-crawler");
