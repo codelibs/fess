@@ -104,7 +104,7 @@ public class SearchAction extends FessSearchAction {
         if (viewHelper.isUseSession()) {
             LaRequestUtil.getOptionalRequest().ifPresent(request -> {
                 final HttpSession session = request.getSession(false);
-                if (session != null) {
+                if (session != null && form.num != null) {
                     session.setAttribute(Constants.RESULTS_PER_PAGE, form.num);
                 }
             });
