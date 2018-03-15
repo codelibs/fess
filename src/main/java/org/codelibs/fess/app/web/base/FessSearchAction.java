@@ -25,6 +25,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
@@ -143,6 +144,14 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected void buildFormParams(final SearchForm form) {
+
+        final HttpSession session = request.getSession(false);
+        if (session != null) {
+            final Object resultsPerPage = session.getAttribute(Constants.RESULTS_PER_PAGE);
+            if (resultsPerPage instanceof Integer) {
+                form.num = (Integer) resultsPerPage;
+            }
+        }
 
         // label
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
