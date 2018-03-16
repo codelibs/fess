@@ -31,6 +31,7 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
@@ -89,7 +90,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         }
         buf.append("{\"response\":");
         buf.append("{\"version\":");
-        buf.append(Constants.WEB_API_VERSION);
+        buf.append(ComponentUtil.getSystemHelper().getProductVersion());
         buf.append(',');
         buf.append("\"status\":");
         buf.append(status);

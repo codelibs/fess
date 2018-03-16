@@ -22,17 +22,10 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 
 public class Constants extends CoreLibConstants {
-    public static final int MAJOR_VERSION = 12;
-
-    public static final int MINOR_VERSION = 1;
-
-    public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION) + "." + String.valueOf(MINOR_VERSION);
 
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public static final int DEFAULT_ADMIN_PAGE_NUMBER = 1;
-
-    public static final String WEB_API_VERSION = FESS_VERSION;
 
     public static final String TRUE = "true";
 
@@ -94,6 +87,8 @@ public class Constants extends CoreLibConstants {
     public static final String INCREMENTAL_CRAWLING_PROPERTY = "crawling.incremental";
 
     public static final String CRAWLING_THREAD_COUNT_PROPERTY = "crawling.thread.count";
+
+    public static final String CRAWLING_USER_AGENT_PROPERTY = "crawling.user.agent";
 
     public static final String DAY_FOR_CLEANUP_PROPERTY = "day.for.cleanup";
 

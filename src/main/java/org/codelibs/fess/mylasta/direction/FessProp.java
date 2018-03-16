@@ -624,6 +624,11 @@ public interface FessProp {
         return getSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
     }
 
+    public default String getUserAgentName() {
+        return getSystemProperty(Constants.CRAWLING_USER_AGENT_PROPERTY, "Mozilla/5.0 (compatible; Fess/"
+                + ComponentUtil.getSystemHelper().getProductVersion() + "; +http://fess.codelibs.org/bot.html)");
+    }
+
     //
     // fess_*.properties
     //

@@ -19,11 +19,13 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -48,10 +51,12 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
@@ -85,6 +90,14 @@ public class SystemHelper {
 
     protected AtomicInteger previousClusterState = new AtomicInteger(0);
 
+    protected String version;
+
+    protected int majorVersion;
+
+    protected int minorVersion;
+
+    protected String productVersion;
+
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -117,6 +130,25 @@ public class SystemHelper {
                         });
 
         ComponentUtil.doInitProcesses(p -> p.run());
+
+        parseProjectProperties();
+    }
+
+    protected void parseProjectProperties() {
+        final Path propPath = ResourceUtil.getProjectPropertiesFile();
+        try (final InputStream in = Files.newInputStream(propPath)) {
+            Properties prop = new Properties();
+            prop.load(in);
+            version = prop.getProperty("fess.version", "0.0.0");
+            final String[] values = version.split("\\.");
+            majorVersion = Integer.parseInt(values[0]);
+            minorVersion = Integer.parseInt(values[1]);
+            productVersion = majorVersion + "." + minorVersion;
+            System.setProperty("fess.version", version);
+            System.setProperty("fess.product.version", productVersion);
+        } catch (Exception e) {
+            throw new FessSystemException("Failed to parse project.properties.", e);
+        }
     }
 
     @PreDestroy
@@ -191,15 +223,14 @@ public class SystemHelper {
         if (locale != null) {
             final String lang = locale.getLanguage();
             if (ComponentUtil.getFessConfig().isOnlineHelpSupportedLang(lang)) {
-                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
-                        Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
+                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}", majorVersion + "." + minorVersion);
             }
         }
         return getDefaultHelpLink(url);
     }
 
     protected String getDefaultHelpLink(final String url) {
-        return url.replaceFirst("/\\{lang\\}/", "/").replaceFirst("\\{version\\}", Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
+        return url.replaceFirst("/\\{lang\\}/", "/").replaceFirst("\\{version\\}", majorVersion + "." + minorVersion);
     }
 
     public void addDesignJspFileName(final String key, final String value) {
@@ -385,6 +416,22 @@ public class SystemHelper {
 
     public HtmlResponse getRedirectResponseToRoot(final HtmlResponse response) {
         return response;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public int getMajorVersion() {
+        return majorVersion;
+    }
+
+    public int getMinorVersion() {
+        return minorVersion;
+    }
+
+    public String getProductVersion() {
+        return productVersion;
     }
 
 }

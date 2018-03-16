@@ -24,7 +24,11 @@ public class SystemHelperTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        systemHelper = new SystemHelper();
+        systemHelper = new SystemHelper() {
+            @Override
+            protected void parseProjectProperties() {
+            }
+        };
         systemHelper.init();
     }
 
