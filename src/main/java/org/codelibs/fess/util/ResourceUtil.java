@@ -80,6 +80,10 @@ public class ResourceUtil {
         return getPath("site", names);
     }
 
+    public static Path getProjectPropertiesFile() {
+        return getPath("", "project.properties");
+    }
+
     protected static Path getPath(final String base, final String... names) {
 
         try {

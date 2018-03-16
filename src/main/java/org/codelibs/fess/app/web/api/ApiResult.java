@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
@@ -51,7 +50,7 @@ public class ApiResult {
     }
 
     public static class ApiResponse {
-        protected String version = Constants.WEB_API_VERSION;
+        protected String version = ComponentUtil.getSystemHelper().getProductVersion();
         protected int status;
 
         public ApiResponse status(final Status status) {
