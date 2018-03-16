@@ -384,8 +384,5 @@
 	</component>
 	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
 	</component>
-	<component name="userAgentName" class="java.lang.String">
-		<arg>"Mozilla/5.0 (compatible; Fess/" + org.codelibs.fess.Constants.FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
-	</component>
 
 </components>
