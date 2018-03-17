@@ -117,8 +117,6 @@ public final class ComponentUtil {
 
     private static final String MESSAGE_MANAGER = "messageManager";
 
-    private static final String USER_AGENT_NAME = "userAgentName";
-
     private static final String INDEX_UPDATER = "indexUpdater";
 
     private static final String FILE_TYPE_HELPER = "fileTypeHelper";
@@ -306,10 +304,6 @@ public final class ComponentUtil {
 
     public static IndexUpdater getIndexUpdater() {
         return getComponent(INDEX_UPDATER);
-    }
-
-    public static String getUserAgentName() {
-        return getComponent(USER_AGENT_NAME);
     }
 
     public static KeyMatchHelper getKeyMatchHelper() {
