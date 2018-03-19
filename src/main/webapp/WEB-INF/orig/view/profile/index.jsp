@@ -13,7 +13,7 @@
 	type="text/css" />
 <link href="${fe:url('/css/admin/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/AdminLTE.min.css')}" rel="stylesheet"
+<link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${fe:url('/css/admin/skins/skin-blue.min.css')}"
 	rel="stylesheet" type="text/css" />
