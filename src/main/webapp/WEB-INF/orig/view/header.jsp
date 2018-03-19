@@ -82,6 +82,10 @@
 					<i class="fa fa-search"></i>
 					<la:message key="labels.search" />
 				</button>
+				<la:link href="/search/advance?q=${f:u(q)}${fe:pagingQuery(null)}" styleClass="btn btn-info">
+					<i class="fa fa-cog"></i>
+					<la:message key="labels.advance" />
+				</la:link>
 				<button type="button" class="btn btn-secondary pull-right"
 					data-toggle="control-options" data-target="#searchOptions"
 					id="searchOptionsCloseButton">
