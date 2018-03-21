@@ -1096,6 +1096,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 30 */
     String SUGGEST_POPULAR_WORD_WINDOW_SIZE = "suggest.popular.word.window.size";
 
+    /** The key of the configuration. e.g. 10 */
+    String SUGGEST_POPULAR_WORD_QUERY_FREQ = "suggest.popular.word.query.freq";
+
     /** The key of the configuration. e.g. 1 */
     String SUGGEST_MIN_HIT_COUNT = "suggest.min.hit.count";
 
@@ -4873,6 +4876,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSuggestPopularWordWindowSizeAsInteger();
 
     /**
+     * Get the value for the key 'suggest.popular.word.query.freq'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordQueryFreq();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.query.freq' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordQueryFreqAsInteger();
+
+    /**
      * Get the value for the key 'suggest.min.hit.count'. <br>
      * The value is, e.g. 1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7457,6 +7475,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_WINDOW_SIZE);
         }
 
+        public String getSuggestPopularWordQueryFreq() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_QUERY_FREQ);
+        }
+
+        public Integer getSuggestPopularWordQueryFreqAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_QUERY_FREQ);
+        }
+
         public String getSuggestMinHitCount() {
             return get(FessConfig.SUGGEST_MIN_HIT_COUNT);
         }
@@ -8207,6 +8233,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_EXCLUDES, "");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_SIZE, "10");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_WINDOW_SIZE, "30");
+            defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_QUERY_FREQ, "10");
             defaultMap.put(FessConfig.SUGGEST_MIN_HIT_COUNT, "1");
             defaultMap.put(FessConfig.SUGGEST_FIELD_CONTENTS, "_default");
             defaultMap.put(FessConfig.SUGGEST_FIELD_TAGS, "label");

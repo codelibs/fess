@@ -71,7 +71,8 @@ public class PopularWordHelper {
                         final PopularWordsRequestBuilder popularWordsRequestBuilder =
                                 suggestHelper.suggester().popularWords()
                                         .setSize(fessConfig.getSuggestPopularWordSizeAsInteger().intValue())
-                                        .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger().intValue());
+                                        .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger().intValue())
+                                        .setQueryFreqThreshold(fessConfig.getSuggestPopularWordQueryFreqAsInteger().intValue());
                         popularWordsRequestBuilder.setSeed(baseSeed);
                         stream(baseTags).of(stream -> stream.forEach(tag -> popularWordsRequestBuilder.addTag(tag)));
                         stream(baseRoles).of(stream -> stream.forEach(role -> popularWordsRequestBuilder.addRole(role)));
