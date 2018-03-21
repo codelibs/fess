@@ -45,7 +45,6 @@ import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
-import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;

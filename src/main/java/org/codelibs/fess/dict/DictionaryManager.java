@@ -27,11 +27,9 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

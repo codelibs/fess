@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -41,7 +40,6 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiBackupFilesResponse;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;

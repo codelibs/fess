@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.ActionListener;
