@@ -1123,6 +1123,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10000 */
     String SUGGEST_UPDATE_CONTENTS_LIMIT_NUM = "suggest.update.contents.limit.num";
 
+    /** The key of the configuration. e.g. 50000 */
+    String SUGGEST_UPDATE_CONTENTS_LIMIT_DOC_SIZE = "suggest.update.contents.limit.doc.size";
+
     /** The key of the configuration. e.g. 1 */
     String SUGGEST_SOURCE_READER_SCROLL_SIZE = "suggest.source.reader.scroll.size";
 
@@ -4971,6 +4974,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSuggestUpdateContentsLimitNumAsInteger();
 
     /**
+     * Get the value for the key 'suggest.update.contents.limit.doc.size'. <br>
+     * The value is, e.g. 50000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestUpdateContentsLimitDocSize();
+
+    /**
+     * Get the value for the key 'suggest.update.contents.limit.doc.size' as {@link Integer}. <br>
+     * The value is, e.g. 50000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestUpdateContentsLimitDocSizeAsInteger();
+
+    /**
      * Get the value for the key 'suggest.source.reader.scroll.size'. <br>
      * The value is, e.g. 1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7527,6 +7545,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_NUM);
         }
 
+        public String getSuggestUpdateContentsLimitDocSize() {
+            return get(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_DOC_SIZE);
+        }
+
+        public Integer getSuggestUpdateContentsLimitDocSizeAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_DOC_SIZE);
+        }
+
         public String getSuggestSourceReaderScrollSize() {
             return get(FessConfig.SUGGEST_SOURCE_READER_SCROLL_SIZE);
         }
@@ -8242,6 +8268,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SUGGEST_UPDATE_REQUEST_INTERVAL, "1");
             defaultMap.put(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_NUM_PERCENTAGE, "50%");
             defaultMap.put(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_NUM, "10000");
+            defaultMap.put(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_DOC_SIZE, "50000");
             defaultMap.put(FessConfig.SUGGEST_SOURCE_READER_SCROLL_SIZE, "1");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_CACHE_SIZE, "1000");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_CACHE_EXPIRE, "60");

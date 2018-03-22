@@ -199,6 +199,7 @@ public class SuggestHelper {
                             reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
                             reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
                             reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
+                            reader.setLimitOfDocumentSize(fessConfig.getSuggestUpdateContentsLimitDocSizeAsInteger());
 
                             final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
                             flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
