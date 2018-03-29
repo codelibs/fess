@@ -39,11 +39,11 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<!-- Main Framework -->
-		<dbflute.version>1.1.6</dbflute.version>
-		<lastaflute.version>1.0.4</lastaflute.version>
+		<dbflute.version>1.1.7-RC3</dbflute.version>
+		<lastaflute.version>1.0.6-RC4</lastaflute.version>
 		<lasta.taglib.version>0.7.2</lasta.taglib.version>
-		<lasta.job.version>0.5.2</lasta.job.version>
-		<mailflute.version>0.5.8</mailflute.version>
+		<lasta.job.version>0.5.3</lasta.job.version>
+		<mailflute.version>0.5.9-RC1</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.25</slf4j.version>
@@ -72,7 +72,7 @@
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.23</tomcat.version>
-		<tomcat.boot.version>0.6.0</tomcat.boot.version>
+		<tomcat.boot.version>0.6.2-RC1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
