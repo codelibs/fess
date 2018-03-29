@@ -118,34 +118,37 @@ public class ViewHelper {
 
     public String originalHighlightTagPost = "</em>";
 
-    public String highlightTagPre = "<strong>";
+    protected String highlightTagPre;
 
-    public String highlightTagPost = "</strong>";
+    protected String highlightTagPost;
 
     protected boolean useSession = true;
 
-    private final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
+    protected final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
 
-    private final Map<String, String> initFacetParamMap = new HashMap<>();
+    protected final Map<String, String> initFacetParamMap = new HashMap<>();
 
-    private final Map<String, String> initGeoParamMap = new HashMap<>();
+    protected final Map<String, String> initGeoParamMap = new HashMap<>();
 
-    private final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
+    protected final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
 
     public String cacheTemplateName = "cache";
 
-    private String escapedHighlightPre = null;
+    protected String escapedHighlightPre = null;
 
-    private String escapedHighlightPost = null;
+    protected String escapedHighlightPost = null;
 
     protected ActionHook actionHook = new ActionHook();
 
-    private final Set<String> inlineMimeTypeSet = new HashSet<>();
+    protected final Set<String> inlineMimeTypeSet = new HashSet<>();
 
     @PostConstruct
     public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
         escapedHighlightPost = LaFunctions.h(originalHighlightTagPost);
+        highlightTagPre = fessConfig.getQueryHighlightTagPre();
+        highlightTagPost = fessConfig.getQueryHighlightTagPost();
     }
 
     public String getContentTitle(final Map<String, Object> document) {
