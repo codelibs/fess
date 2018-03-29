@@ -102,12 +102,6 @@ public class ViewHelper {
     @Resource
     protected UserAgentHelper userAgentHelper;
 
-    @Deprecated
-    public int titleLength = 50;
-
-    @Deprecated
-    public int sitePathLength = 50;
-
     public boolean encodeUrlLink = false;
 
     public String urlLinkEncoding = Constants.UTF_8;

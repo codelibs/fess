@@ -81,9 +81,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     private static final String HTML_CANONICAL_XPATH = "html.canonical.xpath";
 
-    @Deprecated
-    private static final String IGNORE_META_ROBOTS = "ignore.meta.robots";
-
     private static final String IGNORE_ROBOTS_TAGS = "ignore.robots.tags";
 
     private static final String META_NAME_THUMBNAIL_CONTENT = "//META[@name=\"thumbnail\" or @name=\"THUMBNAIL\"]/@content";
@@ -204,12 +201,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
         String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
         if (ignore == null) {
-            ignore = configMap.get(IGNORE_META_ROBOTS);
-            if (ignore == null) {
-                if (fessConfig.isCrawlerIgnoreRobotsTags()) {
-                    return;
-                }
-            } else if (Boolean.parseBoolean(ignore)) {
+            if (fessConfig.isCrawlerIgnoreRobotsTags()) {
                 return;
             }
         } else if (Boolean.parseBoolean(ignore)) {
