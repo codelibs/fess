@@ -86,7 +86,7 @@
 												<c:forEach var="doc" varStatus="s" items="${documentItems}">
 													<li class="col-sm-12">
 														<h3 class="title">
-															<a href="${doc.url_link}">${f:h(doc.content_title)}</a>
+															<a href="${doc.url_link}">${doc.content_title}</a>
 														</h3>
 														<div class="body col-sm-10">
 															${doc.content_description}
@@ -102,7 +102,7 @@
 																class="btn btn-xs btn-danger"
 																data-toggle="modal" data-target="#confirmToDelete"
 																data-docid="${f:u(doc.doc_id)}"
-																data-title="${f:h(doc.content_title)}"
+																data-title="${doc.content_title}"
 																data-url="${f:h(doc.url_link)}">
 																<i class="fa fa-trash"></i>
 																<la:message key="labels.search_list_button_delete" />
