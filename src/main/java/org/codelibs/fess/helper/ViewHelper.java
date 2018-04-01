@@ -112,7 +112,7 @@ public class ViewHelper {
 
     public String urlLinkEncoding = Constants.UTF_8;
 
-    public String[] highlightedFields = new String[] { "hl_content", "digest" };
+    protected String[] highlightedFields;
 
     public String originalHighlightTagPre = "<em>";
 
@@ -149,16 +149,25 @@ public class ViewHelper {
         escapedHighlightPost = LaFunctions.h(originalHighlightTagPost);
         highlightTagPre = fessConfig.getQueryHighlightTagPre();
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
+        highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
     }
 
     public String getContentTitle(final Map<String, Object> document) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
+        String title =
+                DocumentUtil.getValue(document, ComponentUtil.getQueryHelper().getHighlightPrefix() + fessConfig.getIndexFieldTitle(),
+                        String.class);
         if (StringUtil.isBlank(title)) {
-            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldFilename(), String.class);
+            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
             if (StringUtil.isBlank(title)) {
-                title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
+                title = DocumentUtil.getValue(document, fessConfig.getIndexFieldFilename(), String.class);
+                if (StringUtil.isBlank(title)) {
+                    title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
+                }
             }
+            title = LaFunctions.h(title);
+        } else {
+            title = escapeHighlight(title).replaceAll("\\.\\.\\.$", StringUtil.EMPTY);
         }
         final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
         if (size > -1) {

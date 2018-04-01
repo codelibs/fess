@@ -1809,4 +1809,12 @@ public interface FessProp {
         }
         return Arrays.stream(patterns).anyMatch(p -> p.matcher(referer).matches());
     }
+
+    String getQueryHighlightContentDescriptionFields();
+
+    public default String[] getQueryHighlightContentDescriptionFieldsAsArray() {
+        return split(getQueryHighlightContentDescriptionFields(), ",").get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
+    }
+
 }

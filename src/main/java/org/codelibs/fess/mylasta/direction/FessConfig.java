@@ -588,6 +588,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. &lt;/strong&gt; */
     String QUERY_HIGHLIGHT_TAG_POST = "query.highlight.tag.post";
 
+    /** The key of the configuration. e.g. hl_content,digest */
+    String QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS = "query.highlight.content.description.fields";
+
     /** The key of the configuration. e.g. 100000 */
     String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
@@ -3069,6 +3072,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTagPost();
+
+    /**
+     * Get the value for the key 'query.highlight.content.description.fields'. <br>
+     * The value is, e.g. hl_content,digest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightContentDescriptionFields();
 
     /**
      * Get the value for the key 'query.max.search.result.offset'. <br>
@@ -6659,6 +6669,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_HIGHLIGHT_TAG_POST);
         }
 
+        public String getQueryHighlightContentDescriptionFields() {
+            return get(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS);
+        }
+
         public String getQueryMaxSearchResultOffset() {
             return get(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
         }
@@ -8276,6 +8290,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_PRE, "<strong>");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_POST, "</strong>");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS, "hl_content,digest");
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_API_RESPONSE_FIELDS, "");
