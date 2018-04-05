@@ -44,7 +44,6 @@ import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
-import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
@@ -153,6 +152,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.di.exception.ContainerInitFailureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,6 +182,8 @@ public class FessEsClient implements Client {
     protected String scrollForDelete = "1m";
 
     protected int maxConfigSyncStatusRetry = 10;
+
+    protected int maxEsStatusRetry = 10;
 
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
@@ -288,7 +290,7 @@ public class FessEsClient implements Client {
             }
         }
 
-        waitForYellowStatus();
+        waitForYellowStatus(fessConfig);
 
         indexConfigList.forEach(configName -> {
             final String[] values = configName.split("/");
@@ -588,13 +590,34 @@ public class FessEsClient implements Client {
         }
     }
 
-    private void waitForYellowStatus() {
-        final ClusterHealthResponse response =
-                client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
-                        .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
-        if (logger.isDebugEnabled()) {
-            logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+    protected void waitForYellowStatus(final FessConfig fessConfig) {
+        Exception cause = null;
+        for (int i = 0; i < maxEsStatusRetry; i++) {
+            try {
+                final ClusterHealthResponse response =
+                        client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+                                .actionGet(fessConfig.getIndexHealthTimeout());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+                }
+                return;
+            } catch (final Exception e) {
+                cause = e;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to access to Elasticsearch:" + i, cause);
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
+        final String message =
+                "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
+                        + ") is not available. Check the state of your Elasticsearch cluster (" + fessConfig.getElasticsearchClusterName()
+                        + ").";
+        throw new ContainerInitFailureException(message, cause);
     }
 
     protected void waitForConfigSyncStatus() {
@@ -1395,6 +1418,10 @@ public class FessEsClient implements Client {
 
     public void setMaxConfigSyncStatusRetry(int maxConfigSyncStatusRetry) {
         this.maxConfigSyncStatusRetry = maxConfigSyncStatusRetry;
+    }
+
+    public void setMaxEsStatusRetry(int maxEsStatusRetry) {
+        this.maxEsStatusRetry = maxEsStatusRetry;
     }
 
     @Override
