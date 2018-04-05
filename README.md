@@ -58,6 +58,10 @@ For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess
 
 Please see [MIGRATION.md](https://github.com/codelibs/fess/blob/master/MIGRATION.md).
 
+## X-Pack Support
+
+Please see [fess-xpack](https://github.com/codelibs/fess-xpack).
+
 ## Localization
 
 ### Japanese
