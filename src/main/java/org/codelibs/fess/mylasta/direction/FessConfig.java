@@ -522,7 +522,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String INDEX_SEARCH_TIMEOUT = "index.search.timeout";
 
     /** The key of the configuration. e.g. 3m */
-    String INDEX_SCROLL_SEARCH_TIMEOUT_TIMEOUT = "index.scroll.search.timeout.timeout";
+    String INDEX_SCROLL_SEARCH_TIMEOUT = "index.scroll.search.timeout";
 
     /** The key of the configuration. e.g. 3m */
     String INDEX_INDEX_TIMEOUT = "index.index.timeout";
@@ -2809,11 +2809,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexSearchTimeout();
 
     /**
-     * Get the value for the key 'index.scroll.search.timeout.timeout'. <br>
+     * Get the value for the key 'index.scroll.search.timeout'. <br>
      * The value is, e.g. 3m <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getIndexScrollSearchTimeoutTimeout();
+    String getIndexScrollSearchTimeout();
 
     /**
      * Get the value for the key 'index.index.timeout'. <br>
@@ -6339,8 +6339,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_SEARCH_TIMEOUT);
         }
 
-        public String getIndexScrollSearchTimeoutTimeout() {
-            return get(FessConfig.INDEX_SCROLL_SEARCH_TIMEOUT_TIMEOUT);
+        public String getIndexScrollSearchTimeout() {
+            return get(FessConfig.INDEX_SCROLL_SEARCH_TIMEOUT);
         }
 
         public String getIndexIndexTimeout() {
@@ -7967,7 +7967,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_ADMIN_DOUBLE_FIELDS, "");
             defaultMap.put(FessConfig.INDEX_ADMIN_REQUIRED_FIELDS, "url,title,role,boost");
             defaultMap.put(FessConfig.INDEX_SEARCH_TIMEOUT, "3m");
-            defaultMap.put(FessConfig.INDEX_SCROLL_SEARCH_TIMEOUT_TIMEOUT, "3m");
+            defaultMap.put(FessConfig.INDEX_SCROLL_SEARCH_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_INDEX_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_BULK_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_DELETE_TIMEOUT, "3m");
