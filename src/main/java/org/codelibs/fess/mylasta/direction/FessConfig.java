@@ -591,6 +591,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String QUERY_ADDITIONAL_API_RESPONSE_FIELDS = "query.additional.api.response.fields";
 
     /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_SCROLL_RESPONSE_FIELDS = "query.additional.scroll.response.fields";
+
+    /** The key of the configuration. e.g.  */
     String QUERY_ADDITIONAL_CACHE_RESPONSE_FIELDS = "query.additional.cache.response.fields";
 
     /** The key of the configuration. e.g.  */
@@ -3073,6 +3076,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryAdditionalApiResponseFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.scroll.response.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalScrollResponseFields();
+
+    /**
+     * Get the value for the key 'query.additional.scroll.response.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalScrollResponseFieldsAsInteger();
 
     /**
      * Get the value for the key 'query.additional.cache.response.fields'. <br>
@@ -6583,6 +6601,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_ADDITIONAL_API_RESPONSE_FIELDS);
         }
 
+        public String getQueryAdditionalScrollResponseFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_SCROLL_RESPONSE_FIELDS);
+        }
+
+        public Integer getQueryAdditionalScrollResponseFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_SCROLL_RESPONSE_FIELDS);
+        }
+
         public String getQueryAdditionalCacheResponseFields() {
             return get(FessConfig.QUERY_ADDITIONAL_CACHE_RESPONSE_FIELDS);
         }
@@ -8150,6 +8176,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_API_RESPONSE_FIELDS, "");
+            defaultMap.put(FessConfig.QUERY_ADDITIONAL_SCROLL_RESPONSE_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_CACHE_RESPONSE_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_HIGHLIGHTED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_SEARCH_FIELDS, "");

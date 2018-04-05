@@ -195,7 +195,7 @@ public class SearchService {
                     fessConfig.processSearchPreference(searchRequestBuilder, userBean);
                     return SearchConditionBuilder.builder(searchRequestBuilder)
                             .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).size(pageSize)
-                            .responseFields(queryHelper.getResponseFields()).searchRequestType(params.getType()).build();
+                            .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
                 },
                 (searchResponse, hit) -> {
                     final Map<String, Object> source = hit.getSourceAsMap();

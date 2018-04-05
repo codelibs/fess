@@ -138,34 +138,32 @@ public class JsonApiManager extends BaseJsonApiManager {
         final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
         try {
             response.setContentType("application/x-ndjson; charset=UTF-8");
-            final long count =
-                    searchService.scrollSearch(params, doc -> {
-                        buf.setLength(0);
-                        buf.append('{');
-                        boolean first2 = true;
-                        for (final Map.Entry<String, Object> entry : doc.entrySet()) {
-                            final String name = entry.getKey();
-                            if (StringUtil.isNotBlank(name) && entry.getValue() != null
-                                    && ComponentUtil.getQueryHelper().isApiResponseField(name)) {
-                                if (!first2) {
-                                    buf.append(',');
-                                } else {
-                                    first2 = false;
-                                }
-                                buf.append(escapeJson(name));
-                                buf.append(':');
-                                buf.append(escapeJson(entry.getValue()));
-                            }
+            final long count = searchService.scrollSearch(params, doc -> {
+                buf.setLength(0);
+                buf.append('{');
+                boolean first2 = true;
+                for (final Map.Entry<String, Object> entry : doc.entrySet()) {
+                    final String name = entry.getKey();
+                    if (StringUtil.isNotBlank(name) && entry.getValue() != null) {
+                        if (!first2) {
+                            buf.append(',');
+                        } else {
+                            first2 = false;
                         }
-                        buf.append('}');
-                        buf.append('\n');
-                        try {
-                            response.getWriter().print(buf.toString());
-                        } catch (final IOException e) {
-                            throw new IORuntimeException(e);
-                        }
-                        return true;
-                    }, OptionalThing.empty());
+                        buf.append(escapeJson(name));
+                        buf.append(':');
+                        buf.append(escapeJson(entry.getValue()));
+                    }
+                }
+                buf.append('}');
+                buf.append('\n');
+                try {
+                    response.getWriter().print(buf.toString());
+                } catch (final IOException e) {
+                    throw new IORuntimeException(e);
+                }
+                return true;
+            }, OptionalThing.empty());
             response.flushBuffer();
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded " + count + " docs");

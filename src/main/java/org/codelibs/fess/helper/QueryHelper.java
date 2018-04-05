@@ -107,6 +107,8 @@ public class QueryHelper {
 
     protected String[] responseFields;
 
+    protected String[] scrollResponseFields;
+
     protected String[] cacheResponseFields;
 
     protected String[] highlightedFields;
@@ -139,6 +141,31 @@ public class QueryHelper {
     public void init() {
         if (responseFields == null) {
             responseFields = fessConfig.getQueryAdditionalResponseFields(//
+                    SCORE_FIELD, //
+                    fessConfig.getIndexFieldId(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldBoost(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldDigest(), //
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldThumbnail(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldConfigId(), //
+                    fessConfig.getIndexFieldLang(), //
+                    fessConfig.getIndexFieldHasCache());
+        }
+        if (scrollResponseFields == null) {
+            scrollResponseFields = fessConfig.getQueryAdditionalScrollResponseFields(//
                     SCORE_FIELD, //
                     fessConfig.getIndexFieldId(), //
                     fessConfig.getIndexFieldDocId(), //
@@ -713,6 +740,14 @@ public class QueryHelper {
      */
     public void setResponseFields(final String[] responseFields) {
         this.responseFields = responseFields;
+    }
+
+    public String[] getScrollResponseFields() {
+        return scrollResponseFields;
+    }
+
+    public void setScrollResponseFields(String[] scrollResponseFields) {
+        this.scrollResponseFields = scrollResponseFields;
     }
 
     public String[] getCacheResponseFields() {
