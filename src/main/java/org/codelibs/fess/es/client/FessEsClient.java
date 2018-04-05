@@ -186,6 +186,8 @@ public class FessEsClient implements Client {
 
     protected int maxConfigSyncStatusRetry = 10;
 
+    protected int maxEsStatusRetry = 10;
+
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
     }
@@ -589,21 +591,34 @@ public class FessEsClient implements Client {
         }
     }
 
-    private void waitForYellowStatus(final FessConfig fessConfig) {
-        try {
-            final ClusterHealthResponse response =
-                    client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
-                            .actionGet(fessConfig.getIndexHealthTimeout());
-            if (logger.isDebugEnabled()) {
-                logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+    protected void waitForYellowStatus(final FessConfig fessConfig) {
+        Exception cause = null;
+        for (int i = 0; i < maxEsStatusRetry; i++) {
+            try {
+                final ClusterHealthResponse response =
+                        client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+                                .actionGet(fessConfig.getIndexHealthTimeout());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+                }
+                return;
+            } catch (final Exception e) {
+                cause = e;
             }
-        } catch (final Exception e) {
-            final String message =
-                    "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
-                            + ") is not available. Check the state of your Elasticsearch cluster ("
-                            + fessConfig.getElasticsearchClusterName() + ").";
-            throw new ContainerInitFailureException(message, e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to access to Elasticsearch:" + i, cause);
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
+        final String message =
+                "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
+                        + ") is not available. Check the state of your Elasticsearch cluster (" + fessConfig.getElasticsearchClusterName()
+                        + ").";
+        throw new ContainerInitFailureException(message, cause);
     }
 
     protected void waitForConfigSyncStatus() {
@@ -1453,6 +1468,10 @@ public class FessEsClient implements Client {
 
     public void setMaxConfigSyncStatusRetry(int maxConfigSyncStatusRetry) {
         this.maxConfigSyncStatusRetry = maxConfigSyncStatusRetry;
+    }
+
+    public void setMaxEsStatusRetry(int maxEsStatusRetry) {
+        this.maxEsStatusRetry = maxEsStatusRetry;
     }
 
     @Override
