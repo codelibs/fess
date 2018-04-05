@@ -185,6 +185,8 @@ public class FessEsClient implements Client {
 
     protected String scrollForDelete = "1m";
 
+    protected int maxConfigSyncStatusRetry = 10;
+
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
     }
@@ -601,20 +603,35 @@ public class FessEsClient implements Client {
         }
     }
 
-    private void waitForConfigSyncStatus() {
-        try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/wait").param("status", "green").execute()) {
-            if (response.getHttpStatusCode() == 200) {
-                logger.info("ConfigSync is ready.");
-            } else {
-                if (response.getContentException() != null) {
-                    throw new FessSystemException("Configsync is not available.", response.getContentException());
+    protected void waitForConfigSyncStatus() {
+        FessSystemException cause = null;
+        for (int i = 0; i < maxConfigSyncStatusRetry; i++) {
+            try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/wait").param("status", "green").execute()) {
+                final int httpStatusCode = response.getHttpStatusCode();
+                if (httpStatusCode == 200) {
+                    logger.info("ConfigSync is ready.");
+                    return;
                 } else {
-                    throw new FessSystemException("Configsync is not available.", response.getContentException());
+                    final String message = "Configsync is not available. HTTP Status is " + httpStatusCode;
+                    if (response.getContentException() != null) {
+                        throw new FessSystemException(message, response.getContentException());
+                    } else {
+                        throw new FessSystemException(message);
+                    }
                 }
+            } catch (final Exception e) {
+                cause = new FessSystemException("Configsync is not available.", e);
             }
-        } catch (final IOException e) {
-            throw new FessSystemException("Configsync is not available.", e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to access to configsync:" + i, cause);
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
+        throw cause;
     }
 
     @Override
@@ -1396,6 +1413,10 @@ public class FessEsClient implements Client {
 
     public void setScrollForDelete(final String scrollForDelete) {
         this.scrollForDelete = scrollForDelete;
+    }
+
+    public void setMaxConfigSyncStatusRetry(int maxConfigSyncStatusRetry) {
+        this.maxConfigSyncStatusRetry = maxConfigSyncStatusRetry;
     }
 
     @Override
