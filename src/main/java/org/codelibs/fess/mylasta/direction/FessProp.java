@@ -1506,6 +1506,16 @@ public interface FessProp {
         return list.toArray(new String[list.size()]);
     }
 
+    String getQueryAdditionalScrollResponseFields();
+
+    public default String[] getQueryAdditionalScrollResponseFields(final String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalScrollResponseFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
     String getQueryAdditionalCacheResponseFields();
 
     public default String[] getQueryAdditionalCacheResponseFields(final String... fields) {
