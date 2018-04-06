@@ -36,7 +36,7 @@
 						<div>
 							<h3 class="title ellipsis media-heading">
 								<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
-									data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
+									data-id="${doc.doc_id}" data-order="${s.index}">${doc.content_title}</a>
 							</h3>
 							<div class="body">
 								<div>
@@ -189,7 +189,7 @@
 		<ul class="pagination">
 			<c:if test="${existPrevPage}">
 				<li class="prev"><la:link aria-label="Previous"
-						href="/search/prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+						href="/search/prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 						<span aria-hidden="true">&laquo;</span>
 						<span class="sr-only"><la:message key="labels.prev_page" /></span>
 					</la:link></li>
@@ -205,12 +205,12 @@
 					<c:if test="${pageNumber < currentPageNumber - 2 || pageNumber > currentPageNumber + 2}">class="hidden-xs"</c:if>
 					<c:if test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="active"</c:if>>
 					<la:link
-						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
+						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
 				<li class="next"><la:link aria-label="Next"
-						href="/search/next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+						href="/search/next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 						<span class="sr-only"><la:message key="labels.next_page" /></span>
 						<span aria-hidden="true">&raquo;</span>
 					</la:link></li>
