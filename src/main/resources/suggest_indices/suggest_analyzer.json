@@ -1377,7 +1377,7 @@
       },
       "limit_token_count_filter": {
         "type": "limit",
-        "max_token_count": 10000
+        "max_token_count": 2147483647
       },
       "stemmer_en_filter": {
         "type": "stemmer",
