@@ -83,7 +83,7 @@ public class AdminLogAction extends FessAdminAction {
         if (StringUtil.isNotBlank(logFilePath)) {
             final Path logDirPath = Paths.get(logFilePath);
             try (Stream<Path> stream = Files.list(logDirPath)) {
-                stream.filter(entry -> isLogFilename(entry.getFileName().toString())).forEach(filePath -> {
+                stream.filter(entry -> isLogFilename(entry.getFileName().toString())).sorted().forEach(filePath -> {
                     final Map<String, Object> map = new HashMap<>();
                     final String name = filePath.getFileName().toString();
                     map.put("id", Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
