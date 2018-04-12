@@ -31,6 +31,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 public class ResourceUtil {
+    private static final String FESS_APP_TYPE = "FESS_APP_TYPE";
+
+    private static final String FESS_APP_DOCKER = "docker";
+
     protected ResourceUtil() {
         // nothing
     }
@@ -45,6 +49,13 @@ public class ResourceUtil {
     }
 
     public static Path getConfPath(final String... names) {
+        final String fessAppType = System.getenv(FESS_APP_TYPE);
+        if (FESS_APP_DOCKER.equalsIgnoreCase(fessAppType)) {
+            final Path confPath = Paths.get("/opt/fess", names);
+            if (Files.exists(confPath)) {
+                return confPath;
+            }
+        }
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             return Paths.get(confPath, names);
