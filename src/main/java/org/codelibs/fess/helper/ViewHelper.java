@@ -154,10 +154,11 @@ public class ViewHelper {
 
     public String getContentTitle(final Map<String, Object> document) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
         String title =
                 DocumentUtil.getValue(document, ComponentUtil.getQueryHelper().getHighlightPrefix() + fessConfig.getIndexFieldTitle(),
                         String.class);
-        if (StringUtil.isBlank(title)) {
+        if (StringUtil.isBlank(title) || title.length() > size - 3) {
             title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
             if (StringUtil.isBlank(title)) {
                 title = DocumentUtil.getValue(document, fessConfig.getIndexFieldFilename(), String.class);
@@ -169,7 +170,6 @@ public class ViewHelper {
         } else {
             title = escapeHighlight(title).replaceAll("\\.\\.\\.$", StringUtil.EMPTY);
         }
-        final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
         if (size > -1) {
             return StringUtils.abbreviate(title, size);
         } else {
