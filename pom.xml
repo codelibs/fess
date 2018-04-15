@@ -50,7 +50,7 @@
 		<log4j.version>2.9.1</log4j.version>
 		<jackson.version>2.8.10</jackson.version>
 		<commons.fileupload.version>1.3.3</commons.fileupload.version>
-		<asm.version>6.1.1</asm.version>
+		<asm.version>5.0.4</asm.version>
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
