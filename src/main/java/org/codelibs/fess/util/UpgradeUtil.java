@@ -16,12 +16,10 @@
 package org.codelibs.fess.util;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.function.Consumer;
 
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.ActionListener;
@@ -52,11 +50,7 @@ public final class UpgradeUtil {
         final String filePath = indexConfigPath + "/" + indexName + "/" + path;
         try {
             final String source = FileUtil.readUTF8(filePath);
-            CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source);
-            if(SslUtil.isSslSecure()) {
-            	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
-            }
-            try (CurlResponse response = curlRequest.execute()) {
+            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                 if (response.getHttpStatusCode() == 200) {
                     logger.info("Register " + path + " to " + indexName);
                     return true;
