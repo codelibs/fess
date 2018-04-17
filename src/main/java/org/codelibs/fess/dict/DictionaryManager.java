@@ -27,9 +27,12 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.io.FileUtil;
+import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.fess.util.SslUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +50,13 @@ public class DictionaryManager {
     }
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
-        try (CurlResponse response =
-                ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
-                        .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
+    	
+        CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_configsync/file").param("fields", "path,@timestamp")
+                .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize());
+        if(SslUtil.isSslSecure()) {
+        	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+        }    	
+        try (CurlResponse response = curlRequest.execute()) {
             final Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
@@ -93,9 +100,12 @@ public class DictionaryManager {
             }
 
             // TODO use stream
-                try (CurlResponse response =
-                        ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
-                                .body(FileUtil.readUTF8(file)).execute()) {
+            CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
+                    .body(FileUtil.readUTF8(file));
+            if(SslUtil.isSslSecure()) {
+            	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+            }
+                try (CurlResponse response = curlRequest.execute()) {
                     final Map<String, Object> contentMap = response.getContentAsMap();
                     if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                         throw new DictionaryException("Failed to update " + dictFile.getPath());
@@ -111,7 +121,11 @@ public class DictionaryManager {
 
     public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
         try {
-            return ComponentUtil.getCurlHelper().get("/_configsync/file").param("path", dictFile.getPath()).execute().getContentAsStream();
+        	CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath());
+            if(SslUtil.isSslSecure()) {
+            	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+            }
+            return curlRequest.execute().getContentAsStream();
         } catch (final IOException e) {
             throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
         }
