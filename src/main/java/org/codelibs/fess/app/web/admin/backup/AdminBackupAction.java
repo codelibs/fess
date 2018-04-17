@@ -41,6 +41,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -51,6 +52,7 @@ import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.codelibs.fess.util.SslUtil;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -99,7 +101,11 @@ public class AdminBackupAction extends FessAdminAction {
                     logger.warn("Failed to process system.properties file: " + form.bulkFile.getFileName(), e);
                 }
             } else {
-                try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
+            	CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_bulk");
+                if(SslUtil.isSslSecure()) {
+                	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+                }
+                try (CurlResponse response = curlRequest.onConnect((req, con) -> {
                     con.setDoOutput(true);
                     try (InputStream in = form.bulkFile.getInputStream(); OutputStream out = con.getOutputStream()) {
                         CopyUtil.copy(in, out);
@@ -155,8 +161,11 @@ public class AdminBackupAction extends FessAdminAction {
                 }
                 return asStream(filename).contentTypeOctetStream().stream(
                         out -> {
-                            try (CurlResponse response =
-                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
+                        	CurlRequest curlRequest = ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json");
+                            if(SslUtil.isSslSecure()) {
+                            	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+                            }
+                            try (CurlResponse response = curlRequest.execute()) {
                                 out.write(response.getContentAsStream());
                             }
                         });
