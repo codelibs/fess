@@ -65,6 +65,10 @@ set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.shutdownHookEnabled=false
 set JAVA_OPTS=%JAVA_OPTS% -Dlog4j2.disable.jmx=true
 set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.skipJansi=true
 
+REM SSL truststore for certificate validation over https
+REM JAVA_OPTS=%JAVA_OPTS% -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks
+REM JAVA_OPTS=%JAVA_OPTS% -Djavax.net.ssl.trustStorePassword=changeit
+
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDetails
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCTimeStamps
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDateStamps

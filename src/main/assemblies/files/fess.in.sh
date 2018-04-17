@@ -18,13 +18,6 @@ fi
 #ES_TRANSPORT_URL=localhost:9300
 #FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
 
-# In case the ES cluster is SSL secured (Searchguard)
-#SSL_ENABLED=false
-#SG_SSL_TRANSPORT_PEMKEY_FILEPATH=/path/to/the/key
-#SG_SSL_TRANSPORT_PEMCERT_FILEPATH=/path/to/the/CERTIFICATE
-#SG_SSL_TRANSPORT_PEMCA_FILEPATH=/path/to/the/CA
-#SG_SSL_HTTP_USER_PWD=user:pwd
-
 # SSL truststore for certificate validation over https
 #JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks"
 #JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStorePassword=changeit"
@@ -123,23 +116,8 @@ fi
 if [ "x$ES_HTTP_URL" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.http_address=$ES_HTTP_URL"
 fi
-if [ "x$SSL_ENABLED" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.ssl.enabled=$SSL_ENABLED"
-fi
 if [ "x$ES_TRANSPORT_URL" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.transport_addresses=$ES_TRANSPORT_URL"
-fi
-if [ "x$SG_SSL_TRANSPORT_PEMKEY_FILEPATH" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dsg.ssl.transport.pemkeyfilepath=$SG_SSL_TRANSPORT_PEMKEY_FILEPATH"
-fi
-if [ "x$SG_SSL_TRANSPORT_PEMCERT_FILEPATH" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dsg.ssl.transport.pemcertfilepath=$SG_SSL_TRANSPORT_PEMCERT_FILEPATH"
-fi
-if [ "x$SG_SSL_TRANSPORT_PEMCA_FILEPATH" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dsg.ssl.transport.pemcafilepath=$SG_SSL_TRANSPORT_PEMCA_FILEPATH"
-fi
-if [ "x$SG_SSL_HTTP_USER_PWD" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dsg.ssl.http.user_pwd=$SG_SSL_HTTP_USER_PWD"
 fi
 if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.dictionary.path=$FESS_DICTIONARY_PATH"

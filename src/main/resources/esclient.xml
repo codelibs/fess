@@ -6,6 +6,14 @@
 		<property name="settings">
 			{"http.cors.enabled":"true",
 			 "http.cors.allow-origin":"*"}
+<!--
+			{"http.cors.enabled":"true",
+			 "http.cors.allow-origin":"*",
+			 "searchguard.ssl.transport.pemkey_filepath":"/path/to/the/key",
+			 "searchguard.ssl.transport.pemcert_filepath":"/path/to/the/CERTIFICATE",
+			 "searchguard.ssl.transport.pemtrustedcas_filepath":"/path/to/the/CA"
+			 }
+ -->
 		</property>
 		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">

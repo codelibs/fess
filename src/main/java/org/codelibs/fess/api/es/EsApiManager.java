@@ -42,7 +42,6 @@ import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.codelibs.fess.util.SslUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.slf4j.Logger;
@@ -115,9 +114,6 @@ public class EsApiManager extends BaseApiManager {
 
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
         final CurlRequest curlRequest = ComponentUtil.getCurlHelper().request(httpMethod, path);
-        if(SslUtil.isSslSecure()) {
-        	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
-        }
 
         final String contentType = request.getHeader("Content-Type");
         if (StringUtil.isNotEmpty(contentType)) {

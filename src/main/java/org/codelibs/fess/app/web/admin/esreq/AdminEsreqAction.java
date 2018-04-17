@@ -31,7 +31,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.CurlHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.SslUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -83,9 +82,6 @@ public class AdminEsreqAction extends FessAdminAction {
                 return asListHtml(() -> saveToken());
             });
         } else {
-            if(SslUtil.isSslSecure()) {
-            	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
-            }
             try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
                 final File tempFile = File.createTempFile("esreq_", ".json");
                 try (final InputStream in = response.getContentAsStream()) {
