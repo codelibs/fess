@@ -45,6 +45,7 @@ import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
+import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
@@ -61,6 +62,7 @@ import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
+import org.codelibs.fess.util.SslUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
@@ -352,6 +354,23 @@ public class FessEsClient implements Client {
         settingsBuilder.put("client.transport.sniff", fessConfig.isElasticsearchTransportSniff());
         settingsBuilder.put("client.transport.ping_timeout", fessConfig.getElasticsearchTransportPingTimeout());
         settingsBuilder.put("client.transport.nodes_sampler_interval", fessConfig.getElasticsearchTransportNodesSamplerInterval());
+        if(SslUtil.isSslSecure()) {
+        	if(SslUtil.SSL_KEY_PATH != "") {
+                settingsBuilder.put("searchguard.ssl.transport.pemkey_filepath", SslUtil.SSL_KEY_PATH);
+        	} else {
+                logger.warn("Missing SSL_KEY_PATH as sg.ssl.transport.pemkeyfilepath");
+        	}
+        	if(SslUtil.SSL_CERT_PATH != "") {
+                settingsBuilder.put("searchguard.ssl.transport.pemcert_filepath", SslUtil.SSL_CERT_PATH);
+        	} else {
+                logger.warn("Missing SSL_CERT_PATH as sg.ssl.transport.pemcertfilepath");
+        	}
+        	if(SslUtil.SSL_CA_PATH != "") {
+                settingsBuilder.put("searchguard.ssl.transport.pemtrustedcas_filepath", SslUtil.SSL_CA_PATH);
+        	} else {
+                logger.warn("Missing SSL_CA_PATH as sg.ssl.transport.pemcafilepath");
+        	}
+        }
         final Settings settings = settingsBuilder.build();
         final TransportClient transportClient = new PreBuiltTransportClient(settings);
         for (final TransportAddress address : transportAddressList) {
@@ -375,9 +394,13 @@ public class FessEsClient implements Client {
 
     public boolean reindex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
         final String source = "{\"source\":{\"index\":\"" + fromIndex + "\"},\"dest\":{\"index\":\"" + toIndex + "\"}}";
+        CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_reindex").param("wait_for_completion", Boolean.toString(waitForCompletion))
+                .body(source);
+        if(SslUtil.isSslSecure()) {
+        	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+        }
         try (CurlResponse response =
-                ComponentUtil.getCurlHelper().post("/_reindex").param("wait_for_completion", Boolean.toString(waitForCompletion))
-                        .body(source).execute()) {
+        		curlRequest.execute()) {
             if (response.getHttpStatusCode() == 200) {
                 return true;
             } else {
@@ -517,8 +540,11 @@ public class FessEsClient implements Client {
                     final String filePath = indexConfigPath + "/" + index + "/" + path;
                     try {
                         source = FileUtil.readUTF8(filePath);
-                        try (CurlResponse response =
-                                ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
+                        CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source);
+                        if(SslUtil.isSslSecure()) {
+                        	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+                        }
+                        try (CurlResponse response = curlRequest.execute()) {
                             if (response.getHttpStatusCode() == 200) {
                                 logger.info("Register " + path + " to " + index);
                             } else {
@@ -533,7 +559,11 @@ public class FessEsClient implements Client {
                         logger.warn("Failed to register " + filePath, e);
                     }
                 });
-        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/flush").execute()) {
+        CurlRequest curlRequest = ComponentUtil.getCurlHelper().post("/_configsync/flush");
+        if(SslUtil.isSslSecure()) {
+        	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+        }
+        try (CurlResponse response = curlRequest.execute()) {
             if (response.getHttpStatusCode() == 200) {
                 logger.info("Flushed config files.");
             } else {
@@ -624,7 +654,11 @@ public class FessEsClient implements Client {
     protected void waitForConfigSyncStatus() {
         FessSystemException cause = null;
         for (int i = 0; i < maxConfigSyncStatusRetry; i++) {
-            try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/wait").param("status", "green").execute()) {
+        	CurlRequest curlRequest = ComponentUtil.getCurlHelper().get("/_configsync/wait").param("status", "green");
+            if(SslUtil.isSslSecure()) {
+            	curlRequest.header("Authorization", SslUtil.getBasicAuthEncodedCredentials());
+            }
+            try (CurlResponse response = curlRequest.execute()) {
                 final int httpStatusCode = response.getHttpStatusCode();
                 if (httpStatusCode == 200) {
                     logger.info("ConfigSync is ready.");
