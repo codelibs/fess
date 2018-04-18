@@ -66,7 +66,7 @@
 		<suggest.version>5.6.3</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.6.8</elasticsearch.version>
+		<elasticsearch.version>5.6.9</elasticsearch.version>
 		<elasticsearch.min.version>5.3.0</elasticsearch.min.version>
 		<cluster.runner.version>5.6.8.0</cluster.runner.version>
 
