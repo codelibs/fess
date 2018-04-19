@@ -15,22 +15,30 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.bsentity.BsPathMapping;
+import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class PathMapping extends BsPathMapping {
 
+    private static final Logger logger = LoggerFactory.getLogger(PathMapping.class);
+
     private static final long serialVersionUID = 1L;
 
-    private Pattern regexPattern;
+    protected Pattern userAgentPattern;
 
-    private Pattern userAgentPattern;
+    protected Pattern regexPattern;
+
+    protected BiFunction<String, Matcher, String> pathMapper;
 
     public String getId() {
         return asDocMeta().id();
@@ -48,11 +56,23 @@ public class PathMapping extends BsPathMapping {
         asDocMeta().version(version);
     }
 
-    public Matcher getMatcher(final CharSequence input) {
+    public String process(final String input) {
         if (regexPattern == null) {
             regexPattern = Pattern.compile(getRegex());
         }
-        return regexPattern.matcher(input);
+        final Matcher matcher = regexPattern.matcher(input);
+        if (matcher.find()) {
+            if (pathMapper == null) {
+                final String replacement = StringUtil.isNotBlank(getReplacement()) ? getReplacement() : StringUtil.EMPTY;
+                pathMapper = ComponentUtil.getPathMappingHelper().createPathMatcher(matcher, replacement);
+            }
+            try {
+                return pathMapper.apply(input, matcher);
+            } catch (Exception e) {
+                logger.warn("Failed to apply " + pathMapper, e);
+            }
+        }
+        return input;
     }
 
     public boolean hasUAMathcer() {
