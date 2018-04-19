@@ -362,6 +362,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. default */
     String INDEX_CODEC = "index.codec";
 
+    /** The key of the configuration. e.g. 5 */
+    String INDEX_number_of_shards = "index.number_of_shards";
+
+    /** The key of the configuration. e.g. 0-1 */
+    String INDEX_auto_expand_replicas = "index.auto_expand_replicas";
+
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
 
@@ -2443,6 +2449,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexCodec();
+
+    /**
+     * Get the value for the key 'index.number_of_shards'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexNumberOfShards();
+
+    /**
+     * Get the value for the key 'index.number_of_shards' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexNumberOfShardsAsInteger();
+
+    /**
+     * Get the value for the key 'index.auto_expand_replicas'. <br>
+     * The value is, e.g. 0-1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAutoExpandReplicas();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -6249,6 +6277,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_CODEC);
         }
 
+        public String getIndexNumberOfShards() {
+            return get(FessConfig.INDEX_number_of_shards);
+        }
+
+        public Integer getIndexNumberOfShardsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_number_of_shards);
+        }
+
+        public String getIndexAutoExpandReplicas() {
+            return get(FessConfig.INDEX_auto_expand_replicas);
+        }
+
         public String getIndexFieldFavoriteCount() {
             return get(FessConfig.INDEX_FIELD_favorite_count);
         }
@@ -8100,6 +8140,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
             defaultMap.put(FessConfig.INDEX_CODEC, "default");
+            defaultMap.put(FessConfig.INDEX_number_of_shards, "5");
+            defaultMap.put(FessConfig.INDEX_auto_expand_replicas, "0-1");
             defaultMap.put(FessConfig.INDEX_FIELD_favorite_count, "favorite_count");
             defaultMap.put(FessConfig.INDEX_FIELD_click_count, "click_count");
             defaultMap.put(FessConfig.INDEX_FIELD_config_id, "config_id");

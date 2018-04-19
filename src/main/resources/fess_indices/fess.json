@@ -3,8 +3,9 @@
     "index": {
       "codec": "${fess.index.codec}",
       "refresh_interval": "1s",
-      "number_of_shards": 5,
-      "number_of_replicas": 0
+      "number_of_shards": "${fess.index.number_of_shards}",
+      "number_of_replicas": 0,
+      "auto_expand_replicas": "${fess.index.auto_expand_replicas}"
     },
     "analysis": {
       "char_filter": {

@@ -404,6 +404,8 @@ public class FessEsClient implements Client {
             }
             source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
             source = source.replaceAll(Pattern.quote("${fess.index.codec}"), fessConfig.getIndexCodec());
+            source = source.replaceAll(Pattern.quote("${fess.index.number_of_shards}"), fessConfig.getIndexNumberOfShards());
+            source = source.replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), fessConfig.getIndexAutoExpandReplicas());
             final CreateIndexResponse indexResponse =
                     client.admin().indices().prepareCreate(indexName).setSource(source, XContentType.JSON).execute()
                             .actionGet(fessConfig.getIndexIndicesTimeout());
