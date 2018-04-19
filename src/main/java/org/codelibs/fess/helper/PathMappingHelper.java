@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +29,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.GroovyUtil;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -36,6 +39,10 @@ import org.slf4j.LoggerFactory;
 public class PathMappingHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(PathMappingHelper.class);
+
+    private static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
+
+    private static final String GROOVY_MATCHER = "groovy:";
 
     private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
 
@@ -126,18 +133,31 @@ public class PathMappingHelper {
         return replaceUrl(cachedPathMappingList, url);
     }
 
+    public BiFunction<String, Matcher, String> createPathMatcher(final Matcher matcher, final String replacement) {
+        if (replacement.equals(FUNCTION_ENCODEURL_MATCHER)) {
+            return (u, m) -> DocumentUtil.encodeUrl(u);
+        } else if (replacement.startsWith(GROOVY_MATCHER)) {
+            final String template = replacement.substring(GROOVY_MATCHER.length());
+            return (u, m) -> {
+                final Map<String, Object> paramMap = new HashMap<>();
+                paramMap.put("url", u);
+                paramMap.put("matcher", m);
+                final Object value = GroovyUtil.evaluate(template, paramMap);
+                if (value == null) {
+                    return u;
+                }
+                return value.toString();
+            };
+        } else {
+            return (u, m) -> m.replaceAll(replacement);
+        }
+    }
+
     private String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
             if (matchUserAgent(pathMapping)) {
-                final Matcher matcher = pathMapping.getMatcher(newUrl);
-                if (matcher.find()) {
-                    String replacement = pathMapping.getReplacement();
-                    if (replacement == null) {
-                        replacement = StringUtil.EMPTY;
-                    }
-                    newUrl = matcher.replaceAll(replacement);
-                }
+                newUrl = pathMapping.process(newUrl);
             }
         }
         return newUrl;

@@ -15,11 +15,16 @@
  */
 package org.codelibs.fess.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.taglib.FessFunctions;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public final class DocumentUtil {
 
@@ -106,5 +111,24 @@ public final class DocumentUtil {
             }
         }
         return null;
+    }
+
+    public static String encodeUrl(final String url) {
+        final String enc =
+                LaRequestUtil.getOptionalRequest().filter(req -> req.getCharacterEncoding() != null).map(req -> req.getCharacterEncoding())
+                        .orElse(Constants.UTF_8);
+        final StringBuilder buf = new StringBuilder(url.length() + 100);
+        for (final char c : url.toCharArray()) {
+            if (CharUtil.isUrlChar(c)) {
+                buf.append(c);
+            } else {
+                try {
+                    buf.append(URLEncoder.encode(String.valueOf(c), enc));
+                } catch (final UnsupportedEncodingException e) {
+                    buf.append(c);
+                }
+            }
+        }
+        return buf.toString();
     }
 }

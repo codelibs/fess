@@ -21,7 +21,6 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
@@ -40,7 +39,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,29 +144,11 @@ public class GoAction extends FessSearchAction {
                     return redirect(ErrorAction.class);
                 }
             } else {
-                return redirect(targetUrl + hash);
+                return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
             }
         } else {
-            return redirect(targetUrl + hash);
+            return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
         }
-    }
-
-    protected ActionResponse redirect(final String url) {
-        final HttpServletRequest request2 = LaRequestUtil.getRequest();
-        final String enc = request2.getCharacterEncoding() == null ? Constants.UTF_8 : request2.getCharacterEncoding();
-        final StringBuilder buf = new StringBuilder(url.length() + 100);
-        for (final char c : url.toCharArray()) {
-            if (CharUtil.isUrlChar(c)) {
-                buf.append(c);
-            } else {
-                try {
-                    buf.append(URLEncoder.encode(String.valueOf(c), enc));
-                } catch (final UnsupportedEncodingException e) {
-                    buf.append(c);
-                }
-            }
-        }
-        return HtmlResponse.fromRedirectPathAsIs(buf.toString());
     }
 
     protected boolean isFileSystemPath(final String url) {
