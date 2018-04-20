@@ -61,8 +61,10 @@ public class ThumbnailAction extends FessSearchAction {
 
         final File thumbnailFile = thumbnailManager.getThumbnailFile(doc);
         if (thumbnailFile == null) {
+            if (fessConfig.isThumbnailEnabled()) {
+                thumbnailManager.offer(doc);
+            }
             // 404
-            thumbnailManager.offer(doc);
             throw responseManager.new404("Thumbnail for " + form.docId + " is under generating.");
         }
 
