@@ -189,7 +189,7 @@ public class ThumbnailManager {
         thumbnailQueueBhv.batchInsert(list);
     }
 
-    public int generate(final ForkJoinPool pool) {
+    public int generate(final ForkJoinPool pool, final boolean cleanup) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> idList = new ArrayList<>();
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
@@ -202,36 +202,13 @@ public class ThumbnailManager {
             cb.query().addOrderBy_CreatedTime_Asc();
             cb.fetchFirst(fessConfig.getPageThumbnailQueueMaxFetchSizeAsInteger());
         }).parallelStream().forEach(entity -> {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Generating thumbnail: " + entity);
-            }
             idList.add(entity.getId());
-            final String generatorName = entity.getGenerator();
-            try {
-                final File outputFile = new File(baseDir, entity.getPath());
-                final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
-                if (!noImageFile.isFile() || System.currentTimeMillis() - noImageFile.lastModified() > noImageExpired) {
-                    if (noImageFile.isFile() && !noImageFile.delete()) {
-                        logger.warn("Failed to delete " + noImageFile.getAbsolutePath());
-                    }
-                    final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
-                    if (generator.isAvailable()) {
-                        if (!generator.generate(entity.getThumbnailId(), outputFile)) {
-                            new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
-                        } else {
-                            final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
-                            if (interval > 0) {
-                                Thread.sleep(interval);
-                            }
-                        }
-                    } else {
-                        logger.warn(generatorName + " is not available.");
-                    }
-                } else if (logger.isDebugEnabled()) {
-                    logger.debug("No image file exists: " + noImageFile.getAbsolutePath());
+            if (cleanup) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Removing thumbnail queue: " + entity);
                 }
-            } catch (final Exception e) {
-                logger.warn("Failed to create thumbnail for " + entity, e);
+            } else {
+                process(fessConfig, entity);
             }
         })).join();
         if (!idList.isEmpty()) {
@@ -241,6 +218,39 @@ public class ThumbnailManager {
             thumbnailQueueBhv.refresh();
         }
         return idList.size();
+    }
+
+    protected void process(final FessConfig fessConfig, ThumbnailQueue entity) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Processing thumbnail: " + entity);
+        }
+        final String generatorName = entity.getGenerator();
+        try {
+            final File outputFile = new File(baseDir, entity.getPath());
+            final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
+            if (!noImageFile.isFile() || System.currentTimeMillis() - noImageFile.lastModified() > noImageExpired) {
+                if (noImageFile.isFile() && !noImageFile.delete()) {
+                    logger.warn("Failed to delete " + noImageFile.getAbsolutePath());
+                }
+                final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
+                if (generator.isAvailable()) {
+                    if (!generator.generate(entity.getThumbnailId(), outputFile)) {
+                        new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
+                    } else {
+                        final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
+                        if (interval > 0) {
+                            Thread.sleep(interval);
+                        }
+                    }
+                } else {
+                    logger.warn(generatorName + " is not available.");
+                }
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("No image file exists: " + noImageFile.getAbsolutePath());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to create thumbnail for " + entity, e);
+        }
     }
 
     public boolean offer(final Map<String, Object> docMap) {

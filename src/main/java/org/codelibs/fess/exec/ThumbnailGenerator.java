@@ -64,6 +64,9 @@ public class ThumbnailGenerator {
         @Option(name = "-t", aliases = "--numOfThreads", metaVar = "numOfThreads", usage = "The number of threads")
         protected int numOfThreads = 1;
 
+        @Option(name = "-c", aliases = "--cleanup", usage = "Clean-Up mode")
+        protected boolean cleanup;
+
         protected Options() {
             // nothing
         }
@@ -194,7 +197,7 @@ public class ThumbnailGenerator {
         int count = 1;
         final ForkJoinPool pool = new ForkJoinPool(options.numOfThreads);
         while (count != 0) {
-            count = ComponentUtil.getThumbnailManager().generate(pool);
+            count = ComponentUtil.getThumbnailManager().generate(pool, options.cleanup);
             totalCount += count;
         }
         return totalCount;

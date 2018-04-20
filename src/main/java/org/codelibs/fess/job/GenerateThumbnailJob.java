@@ -57,6 +57,8 @@ public class GenerateThumbnailJob {
 
     protected int numOfThreads = 1;
 
+    protected boolean cleanup = false;
+
     protected String logLevel;
 
     protected String jvmOptions;
@@ -80,6 +82,11 @@ public class GenerateThumbnailJob {
 
     public GenerateThumbnailJob numOfThreads(final int numOfThreads) {
         this.numOfThreads = numOfThreads;
+        return this;
+    }
+
+    public GenerateThumbnailJob cleanup() {
+        this.cleanup = true;
         return this;
     }
 
@@ -246,6 +253,9 @@ public class GenerateThumbnailJob {
         cmdList.add(sessionId);
         cmdList.add("--numOfThreads");
         cmdList.add(Integer.toString(numOfThreads));
+        if (cleanup) {
+            cmdList.add("--cleanup");
+        }
 
         File propFile = null;
         try {
