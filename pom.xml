@@ -63,7 +63,7 @@
 		<crawler.version>2.1.2</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.2.1</suggest.version>
+		<suggest.version>6.2.2</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>6.2.4</elasticsearch.version>
