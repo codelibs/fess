@@ -226,7 +226,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected HtmlResponse redirectToRoot() {
-        return systemHelper.getRedirectResponseToRoot(newHtmlResponseAsRedirect("/"));
+        return systemHelper.getRedirectResponseToRoot(newHtmlResponseAsRediect("/"));
     }
 
     protected HtmlNext virtualHost(final HtmlNext path) {
