@@ -107,7 +107,7 @@ public class SearchService {
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            fessConfig.processSearchPreference(searchRequestBuilder, userBean);
+                            queryHelper.processSearchPreference(searchRequestBuilder, userBean);
                             return SearchConditionBuilder.builder(searchRequestBuilder)
                                     .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
                                     .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
@@ -192,7 +192,7 @@ public class SearchService {
                 fessConfig.getIndexDocumentSearchIndex(),
                 fessConfig.getIndexDocumentType(),
                 searchRequestBuilder -> {
-                    fessConfig.processSearchPreference(searchRequestBuilder, userBean);
+                    queryHelper.processSearchPreference(searchRequestBuilder, userBean);
                     return SearchConditionBuilder.builder(searchRequestBuilder)
                             .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).size(pageSize)
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
@@ -287,7 +287,7 @@ public class SearchService {
                     }
                     builder.setQuery(boolQuery);
                     builder.setFetchSource(fields, null);
-                    fessConfig.processSearchPreference(builder, userBean);
+                    queryHelper.processSearchPreference(builder, userBean);
                     return true;
                 });
 
@@ -314,7 +314,7 @@ public class SearchService {
                     builder.setQuery(boolQuery);
                     builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
                     builder.setFetchSource(fields, null);
-                    fessConfig.processSearchPreference(builder, userBean);
+                    queryHelper.processSearchPreference(builder, userBean);
                     return true;
                 });
     }

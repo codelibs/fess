@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -55,9 +56,11 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -724,6 +727,37 @@ public class QueryHelper {
 
     public boolean isApiResponseField(final String field) {
         return apiResponseFieldSet.contains(field);
+    }
+
+    public void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean) {
+        userBean.map(user -> {
+            if (user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
+                return Constants.SEARCH_PREFERENCE_LOCAL;
+            }
+            return user.getUserId();
+        }).ifPresent(p -> searchRequestBuilder.setPreference(p)).orElse(() -> LaRequestUtil.getOptionalRequest().map(r -> {
+            final HttpSession session = r.getSession(false);
+            if (session != null) {
+                return session.getId();
+            }
+            final String preference = r.getParameter("preference");
+            if (preference != null) {
+                return Integer.toString(preference.hashCode());
+            }
+            final Object accessType = r.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
+            if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
+                final String pref = fessConfig.getQueryJsonDefaultPreference();
+                if (StringUtil.isNotBlank(pref)) {
+                    return pref;
+                }
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_XML.equals(accessType)) {
+                final String pref = fessConfig.getQueryGsaDefaultPreference();
+                if (StringUtil.isNotBlank(pref)) {
+                    return pref;
+                }
+            }
+            return null;
+        }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
     }
 
     /**
