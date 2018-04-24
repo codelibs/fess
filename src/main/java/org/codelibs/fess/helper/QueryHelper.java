@@ -752,7 +752,7 @@ public class QueryHelper {
                 if (StringUtil.isNotBlank(pref)) {
                     return pref;
                 }
-            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_XML.equals(accessType)) {
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
                 final String pref = fessConfig.getQueryGsaDefaultPreference();
                 if (StringUtil.isNotBlank(pref)) {
                     return pref;

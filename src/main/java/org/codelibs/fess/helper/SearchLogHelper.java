@@ -107,8 +107,8 @@ public class SearchLogHelper {
         final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
         if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_XML.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_XML);
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
         } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
         } else {

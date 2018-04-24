@@ -249,7 +249,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_LOG_ACCESS_TYPE_JSON = "json";
 
-    public static final String SEARCH_LOG_ACCESS_TYPE_XML = "xml";
+    public static final String SEARCH_LOG_ACCESS_TYPE_GSA = "gsa";
 
     public static final String SEARCH_LOG_ACCESS_TYPE_WEB = "web";
 

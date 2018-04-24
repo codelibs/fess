@@ -107,7 +107,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         String errMsg = StringUtil.EMPTY;
         String query = null;
         final StringBuilder buf = new StringBuilder(1000);
-        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_XML);
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
         boolean xmlDtd = false;
         try {
             final SearchRenderData data = new SearchRenderData();
