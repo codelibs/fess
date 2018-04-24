@@ -638,6 +638,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String QUERY_DEFAULT_LANGUAGES = "query.default.languages";
 
+    /** The key of the configuration. e.g. _local */
+    String QUERY_JSON_DEFAULT_PREFERENCE = "query.json.default.preference";
+
+    /** The key of the configuration. e.g. _local */
+    String QUERY_GSA_DEFAULT_PREFERENCE = "query.gsa.default.preference";
+
     /** The key of the configuration. e.g. ar=ar
     bg=bg
     bn=bn
@@ -3298,6 +3304,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryDefaultLanguagesAsInteger();
+
+    /**
+     * Get the value for the key 'query.json.default.preference'. <br>
+     * The value is, e.g. _local <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryJsonDefaultPreference();
+
+    /**
+     * Get the value for the key 'query.gsa.default.preference'. <br>
+     * The value is, e.g. _local <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaDefaultPreference();
 
     /**
      * Get the value for the key 'query.language.mapping'. <br>
@@ -6745,6 +6765,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_DEFAULT_LANGUAGES);
         }
 
+        public String getQueryJsonDefaultPreference() {
+            return get(FessConfig.QUERY_JSON_DEFAULT_PREFERENCE);
+        }
+
+        public String getQueryGsaDefaultPreference() {
+            return get(FessConfig.QUERY_GSA_DEFAULT_PREFERENCE);
+        }
+
         public String getQueryLanguageMapping() {
             return get(FessConfig.QUERY_LANGUAGE_MAPPING);
         }
@@ -8232,6 +8260,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE, "0");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_SORTS, "");
             defaultMap.put(FessConfig.QUERY_DEFAULT_LANGUAGES, "");
+            defaultMap.put(FessConfig.QUERY_JSON_DEFAULT_PREFERENCE, "_local");
+            defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_PREFERENCE, "_local");
             defaultMap
                     .put(FessConfig.QUERY_LANGUAGE_MAPPING,
                             "ar=ar\nbg=bg\nbn=bn\nca=ca\nckb-iq=ckb-iq\nckb_IQ=ckb-iq\ncs=cs\nda=da\nde=de\nel=el\nen=en\nen-ie=en-ie\nen_IE=en-ie\nes=es\net=et\neu=eu\nfa=fa\nfi=fi\nfr=fr\ngl=gl\ngu=gu\nhe=he\nhi=hi\nhr=hr\nhu=hu\nhy=hy\nid=id\nit=it\nja=ja\nko=ko\nlt=lt\nlv=lv\nmk=mk\nml=ml\nnl=nl\nno=no\npa=pa\npl=pl\npt=pt\npt-br=pt-br\npt_BR=pt-br\nro=ro\nru=ru\nsi=si\nsq=sq\nsv=sv\nta=ta\nte=te\nth=th\ntl=tl\ntr=tr\nuk=uk\nur=ur\nvi=vi\nzh-cn=zh-cn\nzh_CN=zh-cn\nzh-tw=zh-tw\nzh_TW=zh-tw\nzh=zh\n");

@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
-import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
@@ -57,13 +56,11 @@ import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.JobConcurrentExec;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.RequiredValidator;
 import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
 import org.lastaflute.web.validation.theme.typed.FloatTypeValidator;
@@ -1076,25 +1073,6 @@ public interface FessProp {
 
     public default boolean isValidCrawlerFileProtocol(final String url) {
         return stream(getCrawlerFileProtocolsAsArray()).get(stream -> stream.anyMatch(s -> url.startsWith(s)));
-    }
-
-    public default void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean) {
-        userBean.map(user -> {
-            if (user.hasRoles(getAuthenticationAdminRolesAsArray())) {
-                return Constants.SEARCH_PREFERENCE_LOCAL;
-            }
-            return user.getUserId();
-        }).ifPresent(p -> searchRequestBuilder.setPreference(p)).orElse(() -> LaRequestUtil.getOptionalRequest().map(r -> {
-            final HttpSession session = r.getSession(false);
-            if (session != null) {
-                return session.getId();
-            }
-            final String preference = r.getParameter("preference");
-            if (preference != null) {
-                return Integer.toString(preference.hashCode());
-            }
-            return null;
-        }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
     }
 
     String getRoleSearchDefaultPermissions();
