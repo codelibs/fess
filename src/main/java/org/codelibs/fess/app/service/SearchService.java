@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.service;
 
 import java.text.NumberFormat;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +42,7 @@ import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -198,23 +198,32 @@ public class SearchService {
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
                 },
                 (searchResponse, hit) -> {
+                    final Map<String, Object> docMap = new HashMap<>();
                     final Map<String, Object> source = hit.getSourceAsMap();
                     if (source != null) {
-                        final Map<String, Object> docMap = new HashMap<>(source);
-                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
-                        docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
-                        return docMap;
+                        docMap.putAll(source);
                     }
                     final Map<String, DocumentField> fields = hit.getFields();
                     if (fields != null) {
-                        final Map<String, Object> docMap =
-                                fields.entrySet().stream()
-                                        .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
-                        docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
-                        return docMap;
+                        docMap.putAll(fields.entrySet().stream()
+                                .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues())));
                     }
-                    return Collections.emptyMap();
+
+                    final ViewHelper viewHelper = ComponentUtil.getViewHelper();
+                    if (viewHelper != null && !docMap.isEmpty()) {
+                        docMap.put(fessConfig.getResponseFieldContentTitle(), viewHelper.getContentTitle(docMap));
+                        docMap.put(fessConfig.getResponseFieldContentDescription(), viewHelper.getContentDescription(docMap));
+                        docMap.put(fessConfig.getResponseFieldUrlLink(), viewHelper.getUrlLink(docMap));
+                        docMap.put(fessConfig.getResponseFieldSitePath(), viewHelper.getSitePath(docMap));
+                    }
+
+                    if (!docMap.containsKey(Constants.SCORE)) {
+                        docMap.put(Constants.SCORE, hit.getScore());
+                    }
+
+                    docMap.put(fessConfig.getIndexFieldId(), hit.getId());
+                    docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
+                    return docMap;
                 }, cursor);
     }
 
