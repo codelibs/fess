@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -43,8 +44,6 @@ import org.slf4j.LoggerFactory;
 public class QueryResponseList implements List<Map<String, Object>> {
 
     private static final String ELLIPSIS = "...";
-
-    private static final String SCORE = "score";
 
     private static final Logger logger = LoggerFactory.getLogger(QueryResponseList.class);
 
@@ -186,8 +185,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
             docMap.put(fessConfig.getResponseFieldSitePath(), viewHelper.getSitePath(docMap));
         }
 
-        if (!docMap.containsKey(SCORE)) {
-            docMap.put(SCORE, searchHit.getScore());
+        if (!docMap.containsKey(Constants.SCORE)) {
+            docMap.put(Constants.SCORE, searchHit.getScore());
         }
         return docMap;
     }
