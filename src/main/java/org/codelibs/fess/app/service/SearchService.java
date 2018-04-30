@@ -193,7 +193,7 @@ public class SearchService {
                 fessConfig.getIndexDocumentType(),
                 searchRequestBuilder -> {
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean);
-                    return SearchConditionBuilder.builder(searchRequestBuilder)
+                    return SearchConditionBuilder.builder(searchRequestBuilder).scroll()
                             .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).size(pageSize)
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
                 },

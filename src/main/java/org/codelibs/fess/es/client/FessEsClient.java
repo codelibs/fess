@@ -972,6 +972,7 @@ public class FessEsClient implements Client {
         private FacetInfo facetInfo;
         private String similarDocHash;
         private SearchRequestType searchRequestType = SearchRequestType.SEARCH;
+        private boolean isScroll = false;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
             return new SearchConditionBuilder(searchRequestBuilder);
@@ -1020,6 +1021,11 @@ public class FessEsClient implements Client {
 
         public SearchConditionBuilder facetInfo(final FacetInfo facetInfo) {
             this.facetInfo = facetInfo;
+            return this;
+        }
+
+        public SearchConditionBuilder scroll() {
+            this.isScroll = true;
             return this;
         }
 
@@ -1109,7 +1115,8 @@ public class FessEsClient implements Client {
                         }));
             }
 
-            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && fessConfig.isResultCollapsed() && similarDocHash == null) {
+            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && !isScroll && fessConfig.isResultCollapsed()
+                    && similarDocHash == null) {
                 searchRequestBuilder.setCollapse(getCollapseBuilder(fessConfig));
             }
 
