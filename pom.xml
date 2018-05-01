@@ -54,9 +54,9 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<junit.jupiter.version>5.1.1</junit.jupiter.version>
-		<junit.vintage.version>${junit.version}.3</junit.vintage.version>
-		<junit.platform.version>1.1.1</junit.platform.version>
+		<junit.jupiter.version>5.0.2</junit.jupiter.version>
+		<junit.vintage.version>${junit.version}.0</junit.vintage.version>
+		<junit.platform.version>1.0.0</junit.platform.version>
 		<utflute.version>0.8.5</utflute.version>
 
 		<!-- Crawler -->
@@ -190,7 +190,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.21.0</version>
+				<version>2.19.1</version>
 				<configuration>
 					<includes>
 						<include>${test.include.path}</include>
