@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.bsentity.BsPathMapping;
-import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.helper.PathMappingHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class PathMapping extends BsPathMapping {
         asDocMeta().version(version);
     }
 
-    public String process(final String input) {
+    public String process(final PathMappingHelper pathMappingHelper, final String input) {
         if (regexPattern == null) {
             regexPattern = Pattern.compile(getRegex());
         }
@@ -64,7 +64,7 @@ public class PathMapping extends BsPathMapping {
         if (matcher.find()) {
             if (pathMapper == null) {
                 final String replacement = StringUtil.isNotBlank(getReplacement()) ? getReplacement() : StringUtil.EMPTY;
-                pathMapper = ComponentUtil.getPathMappingHelper().createPathMatcher(matcher, replacement);
+                pathMapper = pathMappingHelper.createPathMatcher(matcher, replacement);
             }
             try {
                 return pathMapper.apply(input, matcher);
