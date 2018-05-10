@@ -531,20 +531,20 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                             buf.append(".desc");
                         }
                     }
+                    buf.append(",score.desc");
                     return buf.toString();
-                } else if ("meta".equals(values[0])) {
-                    if (values.length > 1) {
-                        final StringBuilder buf = new StringBuilder();
-                        buf.append(values[1]);
-                        if (values.length > 2) {
-                            if ("A".equals(values[2])) {
-                                buf.append(".asc");
-                            } else if ("D".equals(values[2])) {
-                                buf.append(".desc");
-                            }
+                } else if ("meta".equals(values[0]) && values.length > 1) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append(values[1]);
+                    if (values.length > 2) {
+                        if ("A".equals(values[2])) {
+                            buf.append(".asc");
+                        } else if ("D".equals(values[2])) {
+                            buf.append(".desc");
                         }
-                        return buf.toString();
                     }
+                    buf.append(",score.desc");
+                    return buf.toString();
                 }
             }
 
