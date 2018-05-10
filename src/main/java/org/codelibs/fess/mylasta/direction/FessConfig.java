@@ -614,6 +614,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. UE,U,T,RK,S,LANG */
     String QUERY_GSA_RESPONSE_FIELDS = "query.gsa.response.fields";
 
+    /** The key of the configuration. e.g. en */
+    String QUERY_GSA_DEFAULT_LANG = "query.gsa.default.lang";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_GSA_DEFAULT_SORT = "query.gsa.default.sort";
+
     /** The key of the configuration. e.g. 4 */
     String QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS = "query.collapse.max.concurrent.group.results";
 
@@ -3207,6 +3213,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaResponseFields();
+
+    /**
+     * Get the value for the key 'query.gsa.default.lang'. <br>
+     * The value is, e.g. en <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaDefaultLang();
+
+    /**
+     * Get the value for the key 'query.gsa.default.sort'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaDefaultSort();
+
+    /**
+     * Get the value for the key 'query.gsa.default.sort' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryGsaDefaultSortAsInteger();
 
     /**
      * Get the value for the key 'query.collapse.max.concurrent.group.results'. <br>
@@ -6687,6 +6715,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_GSA_RESPONSE_FIELDS);
         }
 
+        public String getQueryGsaDefaultLang() {
+            return get(FessConfig.QUERY_GSA_DEFAULT_LANG);
+        }
+
+        public String getQueryGsaDefaultSort() {
+            return get(FessConfig.QUERY_GSA_DEFAULT_SORT);
+        }
+
+        public Integer getQueryGsaDefaultSortAsInteger() {
+            return getAsInteger(FessConfig.QUERY_GSA_DEFAULT_SORT);
+        }
+
         public String getQueryCollapseMaxConcurrentGroupResults() {
             return get(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS);
         }
@@ -8210,6 +8250,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_ANALYZED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_GSA_RESPONSE_FIELDS, "UE,U,T,RK,S,LANG");
+            defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_LANG, "en");
+            defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_SORT, "");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS, "4");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_NAME, "similar_docs");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE, "0");
