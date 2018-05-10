@@ -16,6 +16,7 @@
 package org.codelibs.fess.api.gsa;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -60,6 +61,9 @@ import org.slf4j.LoggerFactory;
 public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final Logger logger = LoggerFactory.getLogger(GsaApiManager.class);
 
+    private static final String OUTPUT_XML = "xml"; // or xml_no_dtd
+    // http://www.google.com/google.dtd.
+
     private static final String GSA_META_SUFFIX = "_s";
 
     protected String gsaPathPrefix = "/gsa";
@@ -94,12 +98,28 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
+    protected void appendParam(final StringBuilder buf, final String name, final String value) throws UnsupportedEncodingException {
+        appendParam(buf, name, value, URLEncoder.encode(value, Constants.UTF_8));
+    }
+
+    protected void appendParam(final StringBuilder buf, final String name, final String value, final String original)
+            throws UnsupportedEncodingException {
+        buf.append("<PARAM name=\"");
+        buf.append(escapeXml(name));
+        buf.append("\" value=\"");
+        buf.append(escapeXml(value));
+        buf.append("\" original_value=\"");
+        buf.append(escapeXml(original));
+        buf.append("\"/>");
+    }
+
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final boolean xmlDtd = OUTPUT_XML.equals(request.getParameter("output"));
 
         if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
-            writeXmlResponse(99, false, StringUtil.EMPTY, "Referer is invalid.");
+            writeXmlResponse(99, xmlDtd, StringUtil.EMPTY, "Referer is invalid.");
             return;
         }
 
@@ -108,7 +128,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         String query = null;
         final StringBuilder buf = new StringBuilder(1000);
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
-        boolean xmlDtd = false;
         try {
             final SearchRenderData data = new SearchRenderData();
             final GsaRequestParams params = new GsaRequestParams(request, fessConfig);
@@ -124,10 +143,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             if (StringUtil.isNotBlank(getFieldsParam)) {
                 getFields.addAll(Arrays.asList(getFieldsParam.split("\\.")));
             }
-            // DTD
-            if ("xml".equals(request.getParameter("output"))) {
-                xmlDtd = true;
-            }
             final StringBuilder requestUri = new StringBuilder(request.getRequestURI());
             if (request.getQueryString() != null) {
                 requestUri.append("?").append(request.getQueryString());
@@ -138,88 +153,92 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final String oe = "UTF-8";
             // IP address
             final String ip = ComponentUtil.getViewHelper().getClientIp(request);
-            final String start = request.getParameter("start");
-            long startNumber = 1;
-            if (StringUtil.isNotBlank(start)) {
-                startNumber = Long.parseLong(start) + 1;
-            }
-            long endNumber = startNumber + data.getPageSize() - 1;
-            if (endNumber > allRecordCount) {
-                endNumber = allRecordCount;
-            }
 
-            buf.append("<Q>");
-            buf.append(escapeXml(query));
-            buf.append("</Q>");
             buf.append("<TM>");
             buf.append(execTime);
             buf.append("</TM>");
+            buf.append("<Q>");
+            buf.append(escapeXml(query));
+            buf.append("</Q>");
             for (final Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
                 final String[] values = entry.getValue();
                 if (values == null) {
                     continue;
                 }
                 final String key = entry.getKey();
+                if ("sort".equals(key)) {
+                    continue;
+                }
                 for (final String value : values) {
-                    buf.append("<PARAM name=\"");
-                    buf.append(key);
-                    buf.append("\" value=\"");
-                    buf.append(value);
-                    buf.append("\" original_value=\"");
-                    buf.append(URLEncoder.encode(value, Constants.UTF_8));
-                    buf.append("\"/>");
+                    appendParam(buf, key, value);
                 }
             }
-            buf.append("<PARAM name=\"ie\" value=\"");
-            buf.append(ie);
-            buf.append("\" original_value=\"");
-            buf.append(URLEncoder.encode(ie, Constants.UTF_8));
-            buf.append("\"/>");
-            buf.append("<PARAM name=\"oe\" value=\"");
-            buf.append(oe);
-            buf.append("\" original_value=\"");
-            buf.append(URLEncoder.encode(ie, Constants.UTF_8));
-            buf.append("\"/>");
-            buf.append("<PARAM name=\"ip\" value=\"");
-            buf.append(ip);
-            buf.append("\" original_value=\"");
-            buf.append(URLEncoder.encode(ie, Constants.UTF_8));
-            buf.append("\"/>");
+            appendParam(buf, "ie", ie);
+            if (request.getParameter("oe") == null) {
+                appendParam(buf, "oe", oe);
+            }
+            final String[] langs = params.getLanguages();
+            if (langs.length > 0) {
+                appendParam(buf, "inlang", langs[0]);
+                appendParam(buf, "ulang", langs[0]);
+            }
+            appendParam(buf, "ip", ip);
+            appendParam(buf, "access", "p");
+            appendParam(buf, "sort", params.getSortParam(), params.getSortParam());
+            appendParam(buf, "entqr", "3");
+            appendParam(buf, "entqrm", "0");
+            appendParam(buf, "wc", "200");
+            appendParam(buf, "wc_mc", "1");
             if (!documentItems.isEmpty()) {
                 buf.append("<RES SN=\"");
-                buf.append(startNumber);
+                buf.append(data.getCurrentStartRecordNumber());
                 buf.append("\" EN=\"");
-                buf.append(endNumber);
+                buf.append(data.getCurrentEndRecordNumber());
                 buf.append("\">");
                 buf.append("<M>");
                 buf.append(allRecordCount);
                 buf.append("</M>");
-                if (endNumber < allRecordCount) {
+                if (data.isExistPrevPage() || data.isExistNextPage()) {
                     buf.append("<NB>");
-                    buf.append("<NU>");
-                    buf.append(escapeXml(uriQueryString.replaceFirst("start=([^&]+)", "start=" + endNumber)));
-                    buf.append("</NU>");
+                    if (data.isExistPrevPage()) {
+                        long s = data.getCurrentStartRecordNumber() - data.getPageSize() - 1;
+                        if (s < 0) {
+                            s = 0;
+                        }
+                        buf.append("<PU>");
+                        buf.append(escapeXml(uriQueryString.replaceFirst("start=([0-9]+)", "start=" + s)));
+                        buf.append("</PU>");
+                    }
+                    if (data.isExistNextPage()) {
+                        buf.append("<NU>");
+                        buf.append(escapeXml(uriQueryString.replaceFirst("start=([0-9]+)", "start=" + data.getCurrentEndRecordNumber())));
+                        buf.append("</NU>");
+                    }
                     buf.append("</NB>");
                 }
-                long recordNumber = startNumber;
+                long recordNumber = data.getCurrentStartRecordNumber();
                 for (final Map<String, Object> document : documentItems) {
                     buf.append("<R N=\"");
                     buf.append(recordNumber);
                     buf.append("\">");
                     final String url = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
-                    document.remove(fessConfig.getIndexFieldUrl());
                     document.put("UE", url);
                     document.put("U", URLDecoder.decode(url, Constants.UTF_8));
-                    document.put("T", DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class));
-                    document.remove(fessConfig.getIndexFieldTitle());
-                    final float score = DocumentUtil.getValue(document, fessConfig.getIndexFieldBoost(), Float.class, Float.valueOf(0));
-                    document.remove(fessConfig.getIndexFieldBoost());
-                    document.put("RK", (int) (score * 10));
-                    document.put("S",
-                            DocumentUtil
-                                    .getValue(document, fessConfig.getResponseFieldContentDescription(), String.class, StringUtil.EMPTY)
-                                    .replaceAll("<(/*)em>", "<$1b>"));
-                    document.remove(fessConfig.getResponseFieldContentDescription());
+                    document.put("T", DocumentUtil.getValue(document, fessConfig.getResponseFieldContentTitle(), String.class));
+                    final float score = DocumentUtil.getValue(document, Constants.SCORE, Float.class, Float.NaN);
+                    int rk = 10;
+                    if (!Float.isNaN(score)) {
+                        if (score < 0.0) {
+                            rk = 0;
+                        } else if (score > 1.0) {
+                            rk = 10;
+                        } else {
+                            rk = (int) (score * 10.0);
+                        }
+                    }
+                    document.put("RK", rk);
+                    document.put("S", DocumentUtil.getValue(document, fessConfig.getResponseFieldContentDescription(), String.class,
+                            StringUtil.EMPTY));
                     final String lang = DocumentUtil.getValue(document, fessConfig.getIndexFieldLang(), String.class);
                     if (StringUtil.isNotBlank(lang)) {
                         document.put("LANG", lang);
@@ -251,6 +270,14 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                             }
                         }
                     }
+                    buf.append("<ENT_SOURCE>").append(escapeXml("FESS")).append("</ENT_SOURCE>");
+                    String lastModified = DocumentUtil.getValue(document, fessConfig.getIndexFieldLastModified(), String.class);
+                    if (StringUtil.isBlank(lastModified)) {
+                        lastModified = StringUtil.EMPTY;
+                    }
+                    lastModified = lastModified.split("T")[0];
+                    buf.append("<FS NAME=\"date\" VALUE=\"").append(escapeXml(lastModified)).append("\"/>");
+
                     buf.append("<HAS>");
                     buf.append("<L/>");
                     buf.append("<C SZ=\"");
@@ -407,9 +434,15 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         private int pageSize = -1;
 
+        private String sortParam;
+
         protected GsaRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
             this.request = request;
             this.fessConfig = fessConfig;
+            this.sortParam = request.getParameter("sort");
+            if (this.sortParam == null) {
+                this.sortParam = fessConfig.getQueryGsaDefaultSort();
+            }
         }
 
         @Override
@@ -430,6 +463,9 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                 if (key.startsWith("fields.")) {
                     final String[] value = simplifyArray(entry.getValue());
                     fields.put(key.substring("fields.".length()), value);
+                } else if ("site".equals(key)) {
+                    final String[] value = simplifyArray(entry.getValue());
+                    fields.put("label", value);
                 }
             }
             return fields;
@@ -450,7 +486,14 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public String[] getLanguages() {
-            return getParamValueArray(request, "lang");
+            final String[] langs = getParamValueArray(request, "ulang");
+            if (langs.length > 0) {
+                return langs;
+            }
+            if (request.getHeader("Accept-Language") != null) {
+                return Collections.list(request.getLocales()).stream().map(l -> l.getLanguage()).toArray(n -> new String[n]);
+            }
+            return new String[] { fessConfig.getQueryGsaDefaultLang() };
         }
 
         @Override
@@ -463,9 +506,50 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return createFacetInfo(request);
         }
 
+        public String getSortParam() {
+            return sortParam;
+        }
+
         @Override
         public String getSort() {
-            return request.getParameter("sort");
+            // Sort By Relevance (Default)
+            // Sort By Date: date:<direction>:<mode>:<format>
+            // Sort by Metadata: meta:<name>:<direction>:<mode>:<language>:<case>:<numeric>
+            if (StringUtil.isBlank(sortParam)) {
+                return null;
+            }
+
+            final String[] values = sortParam.split(":");
+            if (values.length > 0) {
+                if ("date".equals(values[0])) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append(fessConfig.getIndexFieldTimestamp());
+                    if (values.length > 1) {
+                        if ("A".equals(values[1])) {
+                            buf.append(".asc");
+                        } else if ("D".equals(values[1])) {
+                            buf.append(".desc");
+                        }
+                    }
+                    return buf.toString();
+                } else if ("meta".equals(values[0])) {
+                    if (values.length > 1) {
+                        final StringBuilder buf = new StringBuilder();
+                        buf.append(values[1]);
+                        if (values.length > 2) {
+                            if ("A".equals(values[2])) {
+                                buf.append(".asc");
+                            } else if ("D".equals(values[2])) {
+                                buf.append(".desc");
+                            }
+                        }
+                        return buf.toString();
+                    }
+                }
+            }
+
+            sortParam = "";
+            return null;
         }
 
         @Override
