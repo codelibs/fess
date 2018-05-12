@@ -40,6 +40,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminSysteminfoAction extends FessAdminAction {
 
+    private static final String MASKED_VALUE = "XXXXXXXX";
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -110,16 +112,22 @@ public class AdminSysteminfoAction extends FessAdminAction {
 
     public static List<Map<String, String>> getFessPropItems(final FessConfig fessConfig) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
-            itemList.add(createItem(entry.getKey(), entry.getValue()));
-        }
+        ComponentUtil.getSystemProperties().entrySet().stream().forEach(e -> {
+            final String k = e.getKey().toString();
+            final String value;
+            if (isMaskedValue(k)) {
+                value = MASKED_VALUE;
+            } else {
+                value = e.getValue().toString();
+            }
+            itemList.add(createItem(k, value));
+        });
         if (fessConfig instanceof ObjectiveConfig) {
             ObjectiveConfig config = (ObjectiveConfig) fessConfig;
             config.keySet().stream().forEach(k -> {
                 final String value;
-                if ("http.proxy.password".equals(k) || "spnego.preauth.password".equals(k) || "oic.client.secret".equals(k)) {
-                    value = "XXXXXXXX";
+                if (isMaskedValue(k)) {
+                    value = MASKED_VALUE;
                 } else {
                     value = config.get(k);
                 }
@@ -127,6 +135,15 @@ public class AdminSysteminfoAction extends FessAdminAction {
             });
         }
         return itemList;
+    }
+
+    protected static boolean isMaskedValue(final String key) {
+        return "http.proxy.password".equals(key) //
+                || "ldap.admin.security.credentials".equals(key) //
+                || "spnego.preauth.password".equals(key) //
+                || "app.cipher.key".equals(key) //
+                || "oic.client.id".equals(key) //
+                || "oic.client.secret".equals(key);
     }
 
     public static List<Map<String, String>> getBugReportItems() {
