@@ -44,12 +44,16 @@ import org.codelibs.core.misc.Pair;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
+import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
+import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
@@ -59,6 +63,7 @@ import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 
 /**
  * @author shinsuke
@@ -73,6 +78,15 @@ public class AdminBackupAction extends FessAdminAction {
 
     @Resource
     private AsyncManager asyncManager;
+
+    @Resource
+    private WebConfigBhv webConfigBhv;
+
+    @Resource
+    private FileConfigBhv fileConfigBhv;
+
+    @Resource
+    private LabelTypeBhv labelTypeBhv;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -98,6 +112,16 @@ public class AdminBackupAction extends FessAdminAction {
                 } catch (final IOException e) {
                     logger.warn("Failed to process system.properties file: " + form.bulkFile.getFileName(), e);
                 }
+            } else if (fileName.startsWith("gsa") && fileName.endsWith(".xml")) {
+                GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
+                try (final InputStream in = form.bulkFile.getInputStream()) {
+                    configParser.parse(new InputSource(in));
+                } catch (final IOException e) {
+                    logger.warn("Failed to process gsa.xml file: " + form.bulkFile.getFileName(), e);
+                }
+                configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
+                configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
+                labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
             } else {
                 try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
                     con.setDoOutput(true);
