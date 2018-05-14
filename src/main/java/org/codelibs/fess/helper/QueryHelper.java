@@ -218,7 +218,6 @@ public class QueryHelper {
         }
         if (highlightedFields == null) {
             highlightedFields = fessConfig.getQueryAdditionalHighlightedFields( //
-                    fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldContent());
         }
         if (searchFields == null) {
