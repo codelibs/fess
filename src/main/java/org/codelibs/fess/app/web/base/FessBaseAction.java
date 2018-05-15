@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.annotation.Resource;
@@ -192,6 +193,10 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     protected static void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
         BeanUtil.copyBeanToBean(src, dest, option);
+    }
+
+    protected static void copyMapToBean(final Map<String, ? extends Object> src, final Object dest, final Consumer<CopyOptions> option) {
+        BeanUtil.copyMapToBean(src, dest, option);
     }
 
     protected static <T> T copyBeanToNewBean(final Object src, final Class<T> destClass) {
