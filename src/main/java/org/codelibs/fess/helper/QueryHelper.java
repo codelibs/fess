@@ -218,7 +218,6 @@ public class QueryHelper {
         }
         if (highlightedFields == null) {
             highlightedFields = fessConfig.getQueryAdditionalHighlightedFields( //
-                    fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldContent());
         }
         if (searchFields == null) {
@@ -584,28 +583,31 @@ public class QueryHelper {
             context.addHighlightedQuery(text);
             return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         } else if ("sort".equals(field)) {
-            final String[] values = text.split("\\.");
-            if (values.length > 2) {
-                throw new InvalidQueryException(
-                        messages -> messages.addErrorsInvalidQuerySortValue(UserMessages.GLOBAL_PROPERTY_KEY, text), "Invalid sort field: "
-                                + termQuery);
-            }
-            final String sortField = values[0];
-            if (!isSortField(sortField)) {
-                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
-                        UserMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
-            }
-            SortOrder sortOrder;
-            if (values.length == 2) {
-                sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
-                if (sortOrder == null) {
-                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
-                            UserMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
-                }
-            } else {
-                sortOrder = SortOrder.ASC;
-            }
-            context.addSorts(createFieldSortBuilder(sortField, sortOrder));
+            split(text, ",").of(
+                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                            t -> {
+                                final String[] values = t.split("\\.");
+                                if (values.length > 2) {
+                                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySortValue(
+                                            UserMessages.GLOBAL_PROPERTY_KEY, text), "Invalid sort field: " + termQuery);
+                                }
+                                final String sortField = values[0];
+                                if (!isSortField(sortField)) {
+                                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
+                                            UserMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
+                                }
+                                SortOrder sortOrder;
+                                if (values.length == 2) {
+                                    sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
+                                    if (sortOrder == null) {
+                                        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
+                                                UserMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
+                                    }
+                                } else {
+                                    sortOrder = SortOrder.ASC;
+                                }
+                                context.addSorts(createFieldSortBuilder(sortField, sortOrder));
+                            }));
             return null;
         } else if (INURL_FIELD.equals(field) || fessConfig.getIndexFieldUrl().equals(context.getDefaultField())) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);

@@ -42,7 +42,7 @@ public class ApiAdminSysteminfoAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> get$index() {
         final List<Map<String, String>> bugReportItems = getBugReportItems();
         final List<Map<String, String>> envItems = getEnvItems();
-        final List<Map<String, String>> fessPropItems = getFessPropItems();
+        final List<Map<String, String>> fessPropItems = getFessPropItems(fessConfig);
         final List<Map<String, String>> propItems = getPropItems();
         return asJson(new ApiResult.ApiSystemInfoResponse().bugReportProps(bugReportItems).envProps(envItems).fessProps(fessPropItems)
                 .systemProps(propItems).status(ApiResult.Status.OK).result());

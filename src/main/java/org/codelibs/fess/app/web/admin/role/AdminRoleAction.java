@@ -209,6 +209,7 @@ public class AdminRoleAction extends FessAdminAction {
 
     public static OptionalEntity<Role> getRole(final CreateForm form) {
         return getEntity(form).map(entity -> {
+            copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;
         });

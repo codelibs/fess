@@ -26,8 +26,10 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.lastaflute.core.direction.ObjectiveConfig;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -37,6 +39,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminSysteminfoAction extends FessAdminAction {
+
+    private static final String MASKED_VALUE = "XXXXXXXX";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -83,7 +87,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     }
 
     protected void registerFessPropItems(final RenderData data) {
-        RenderDataUtil.register(data, "fessPropItems", getFessPropItems());
+        RenderDataUtil.register(data, "fessPropItems", getFessPropItems(fessConfig));
     }
 
     protected void registerBugReportItems(final RenderData data) {
@@ -106,13 +110,40 @@ public class AdminSysteminfoAction extends FessAdminAction {
         return itemList;
     }
 
-    public static List<Map<String, String>> getFessPropItems() {
+    public static List<Map<String, String>> getFessPropItems(final FessConfig fessConfig) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
-            itemList.add(createItem(entry.getKey(), entry.getValue()));
+        ComponentUtil.getSystemProperties().entrySet().stream().forEach(e -> {
+            final String k = e.getKey().toString();
+            final String value;
+            if (isMaskedValue(k)) {
+                value = MASKED_VALUE;
+            } else {
+                value = e.getValue().toString();
+            }
+            itemList.add(createItem(k, value));
+        });
+        if (fessConfig instanceof ObjectiveConfig) {
+            ObjectiveConfig config = (ObjectiveConfig) fessConfig;
+            config.keySet().stream().forEach(k -> {
+                final String value;
+                if (isMaskedValue(k)) {
+                    value = MASKED_VALUE;
+                } else {
+                    value = config.get(k);
+                }
+                itemList.add(createItem(k, value));
+            });
         }
         return itemList;
+    }
+
+    protected static boolean isMaskedValue(final String key) {
+        return "http.proxy.password".equals(key) //
+                || "ldap.admin.security.credentials".equals(key) //
+                || "spnego.preauth.password".equals(key) //
+                || "app.cipher.key".equals(key) //
+                || "oic.client.id".equals(key) //
+                || "oic.client.secret".equals(key);
     }
 
     public static List<Map<String, String>> getBugReportItems() {

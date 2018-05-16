@@ -75,6 +75,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Dlog4j.shutdownHookEnabled=false
     -Dlog4j2.disable.jmx=true
     -Dlog4j.skipJansi=true
+    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
+    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
     */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
@@ -129,6 +131,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Dlog4j.shutdownHookEnabled=false
     -Dlog4j2.disable.jmx=true
     -Dlog4j.skipJansi=true
+    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
+    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
     */
     String JVM_THUMBNAIL_OPTIONS = "jvm.thumbnail.options";
 
@@ -622,6 +626,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. UE,U,T,RK,S,LANG */
     String QUERY_GSA_RESPONSE_FIELDS = "query.gsa.response.fields";
+
+    /** The key of the configuration. e.g. en */
+    String QUERY_GSA_DEFAULT_LANG = "query.gsa.default.lang";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_GSA_DEFAULT_SORT = "query.gsa.default.sort";
 
     /** The key of the configuration. e.g. 4 */
     String QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS = "query.collapse.max.concurrent.group.results";
@@ -1498,6 +1508,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Dlog4j.shutdownHookEnabled=false
     -Dlog4j2.disable.jmx=true
     -Dlog4j.skipJansi=true
+    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
+    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
     <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1561,6 +1573,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Dlog4j.shutdownHookEnabled=false
     -Dlog4j2.disable.jmx=true
     -Dlog4j.skipJansi=true
+    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
+    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
     <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -3237,6 +3251,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaResponseFields();
+
+    /**
+     * Get the value for the key 'query.gsa.default.lang'. <br>
+     * The value is, e.g. en <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaDefaultLang();
+
+    /**
+     * Get the value for the key 'query.gsa.default.sort'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaDefaultSort();
+
+    /**
+     * Get the value for the key 'query.gsa.default.sort' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryGsaDefaultSortAsInteger();
 
     /**
      * Get the value for the key 'query.collapse.max.concurrent.group.results'. <br>
@@ -6729,6 +6765,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_GSA_RESPONSE_FIELDS);
         }
 
+        public String getQueryGsaDefaultLang() {
+            return get(FessConfig.QUERY_GSA_DEFAULT_LANG);
+        }
+
+        public String getQueryGsaDefaultSort() {
+            return get(FessConfig.QUERY_GSA_DEFAULT_SORT);
+        }
+
+        public Integer getQueryGsaDefaultSortAsInteger() {
+            return getAsInteger(FessConfig.QUERY_GSA_DEFAULT_SORT);
+        }
+
         public String getQueryCollapseMaxConcurrentGroupResults() {
             return get(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS);
         }
@@ -8079,13 +8127,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
                             "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap
                     .put(FessConfig.JVM_THUMBNAIL_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");
@@ -8255,6 +8303,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_ANALYZED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_GSA_RESPONSE_FIELDS, "UE,U,T,RK,S,LANG");
+            defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_LANG, "en");
+            defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_SORT, "");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS, "4");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_NAME, "similar_docs");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE, "0");

@@ -148,27 +148,31 @@ public class ViewHelper {
 
     public String getContentTitle(final Map<String, Object> document) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
-        String title =
-                DocumentUtil.getValue(document, ComponentUtil.getQueryHelper().getHighlightPrefix() + fessConfig.getIndexFieldTitle(),
-                        String.class);
-        if (StringUtil.isBlank(title) || title.length() > size - 3) {
-            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
+        String title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
+        if (StringUtil.isBlank(title)) {
+            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldFilename(), String.class);
             if (StringUtil.isBlank(title)) {
-                title = DocumentUtil.getValue(document, fessConfig.getIndexFieldFilename(), String.class);
-                if (StringUtil.isBlank(title)) {
-                    title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
-                }
+                title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
             }
-            title = LaFunctions.h(title);
-        } else {
-            title = escapeHighlight(title).replaceAll("\\.\\.\\.$", StringUtil.EMPTY);
         }
+        final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
         if (size > -1) {
-            return StringUtils.abbreviate(title, size);
-        } else {
-            return title;
+            title = StringUtils.abbreviate(title, size);
         }
+        final String value = LaFunctions.h(title);
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            @SuppressWarnings("unchecked")
+            final Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
+            if (querySet != null) {
+                String t = value;
+                for (final String query : querySet) {
+                    final String target = LaFunctions.h(query);
+                    t = t.replace(target, highlightTagPre + target + highlightTagPost);
+                }
+                return t;
+            }
+            return value;
+        }).orElse(value);
     }
 
     public String getContentDescription(final Map<String, Object> document) {
