@@ -40,4 +40,27 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals(3, labelTypes.length);
     }
 
+    public void test_escape() {
+        // https://www.google.com/support/enterprise/static/gsa/docs/admin/70/gsa_doc_set/admin_crawl/url_patterns.html#1076127
+        assertEscapePattern("", "# Test");
+        assertEscapePattern(".*\\Q!/\\E.*", "!/");
+        assertEscapePattern("\\Qindex.html\\E", "index.html");
+        assertEscapePattern("^\\Qhttp://\\E.*", "^http://");
+        assertEscapePattern(".*\\Qindex.html\\E$", "index.html$");
+        assertEscapePattern("^\\Qhttp://www.codelibs.org/page.html\\E$", "^http://www.codelibs.org/page.html$");
+        assertEscapePattern("\\Qhttp://www.codelibs.org/\\E.*", "http://www.codelibs.org/");
+        assertEscapePattern("\\Qsmb://server/test/\\E.*", "smb://server/test/");
+        assertEscapePattern(".*\\Q?\\E.*", "contains:?");
+        assertEscapePattern(".*\\Q\001\\E.*", "contains:\001");
+        assertEscapePattern("(?i).*\\.exe$", "regexpIgnoreCase:\\.exe$");
+        assertEscapePattern("(?i)index.html", "regexpIgnoreCase:index.html");
+        assertEscapePattern(".*\\.exe$", "regexp:\\.exe$");
+        assertEscapePattern("index.html", "regexp:index.html");
+    }
+
+    private void assertEscapePattern(String expect, String value) {
+        GsaConfigParser parser = new GsaConfigParser();
+        assertEquals(expect, parser.getFilterPath(value));
+    }
+
 }
