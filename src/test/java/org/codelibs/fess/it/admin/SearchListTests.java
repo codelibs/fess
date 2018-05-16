@@ -71,6 +71,7 @@ public class SearchListTests extends CrudTestBase {
         final String keyProp = NAME_PREFIX + id;
         doc.put(KEY_PROPERTY, keyProp);
         doc.put("url", "http://example.com/" + id);
+        doc.put("title", id);
         doc.put("boost", id);
         doc.put("role", "Rguest");
 
@@ -89,9 +90,6 @@ public class SearchListTests extends CrudTestBase {
 
     @Override
     protected Map<String, Object> getUpdateMap() {
-        // TODO
-        assertTrue(false);
-
         final Map<String, Object> updateMap = new HashMap<>();
         updateMap.put("click_count", 100);
         return updateMap;
@@ -101,7 +99,7 @@ public class SearchListTests extends CrudTestBase {
     void crudTest() {
         testCreate();
         testRead();
-        //testUpdate(); // TODO
+        testUpdate();
         testDelete();
     }
 }
