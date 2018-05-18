@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.lucene.index.Term;
@@ -750,18 +751,28 @@ public class QueryHelper {
             }
             final Object accessType = r.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
             if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
-                final String pref = fessConfig.getQueryJsonDefaultPreference();
-                if (StringUtil.isNotBlank(pref)) {
-                    return pref;
-                }
+                return processJsonSearchPreference(r);
             } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
-                final String pref = fessConfig.getQueryGsaDefaultPreference();
-                if (StringUtil.isNotBlank(pref)) {
-                    return pref;
-                }
+                return processGsaSearchPreference(r);
             }
             return null;
         }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
+    }
+
+    protected String processJsonSearchPreference(final HttpServletRequest req) {
+        final String pref = fessConfig.getQueryJsonDefaultPreference();
+        if (StringUtil.isNotBlank(pref)) {
+            return pref;
+        }
+        return null;
+    }
+
+    protected String processGsaSearchPreference(final HttpServletRequest req) {
+        final String pref = fessConfig.getQueryGsaDefaultPreference();
+        if (StringUtil.isNotBlank(pref)) {
+            return pref;
+        }
+        return null;
     }
 
     /**
