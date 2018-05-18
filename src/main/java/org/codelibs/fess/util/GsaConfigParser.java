@@ -121,6 +121,7 @@ public class GsaConfigParser extends DefaultHandler {
             labelType = new LabelType();
             labelType.setName(name);
             labelType.setValue(name);
+            labelType.setPermissions(new String[] {"Rguest"});
             labelType.setCreatedBy(Constants.SYSTEM_USER);
             labelType.setCreatedTime(now);
             labelType.setUpdatedBy(Constants.SYSTEM_USER);
@@ -177,6 +178,7 @@ public class GsaConfigParser extends DefaultHandler {
                     webConfig.setExcludedUrls(parseFilterPaths(globalParams.get(BAD_URLS), true, false));
                     webConfig.setExcludedDocUrls(StringUtil.EMPTY);
                     webConfig.setUserAgent(userAgent);
+                    webConfig.setPermissions(new String[] {"Rguest"});
                     webConfig.setCreatedBy(Constants.SYSTEM_USER);
                     webConfig.setCreatedTime(now);
                     webConfig.setUpdatedBy(Constants.SYSTEM_USER);
@@ -200,6 +202,7 @@ public class GsaConfigParser extends DefaultHandler {
                     fileConfig.setIncludedDocPaths(StringUtil.EMPTY);
                     fileConfig.setExcludedPaths(parseFilterPaths(globalParams.get(BAD_URLS), false, true));
                     fileConfig.setExcludedDocPaths(StringUtil.EMPTY);
+                    fileConfig.setPermissions(new String[] {"Rguest"});
                     fileConfig.setCreatedBy(Constants.SYSTEM_USER);
                     fileConfig.setCreatedTime(now);
                     fileConfig.setUpdatedBy(Constants.SYSTEM_USER);
