@@ -31,6 +31,7 @@ import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.GroovyUtil;
+import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -66,6 +67,11 @@ public class PathMappingHelper {
                 cb.fetchFirst(ComponentUtil.getFessConfig().getPagePathMappingMaxFetchSizeAsInteger());
             });
             return cachedPathMappingList.size();
+        } catch (final ComponentNotFoundException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to load path mappings.", e);
+            }
+            cachedPathMappingList = new ArrayList<>();
         } catch (final Exception e) {
             logger.warn("Failed to load path mappings.", e);
         }
