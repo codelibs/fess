@@ -21,15 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.BoostDocumentRuleService;
-import org.codelibs.fess.app.service.FailureUrlService;
-import org.codelibs.fess.app.service.FileAuthenticationService;
-import org.codelibs.fess.app.service.FileConfigService;
-import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.CrawlerStatus;
@@ -37,6 +30,8 @@ import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.crawler.service.impl.EsDataService;
 import org.codelibs.fess.crawler.service.impl.EsUrlFilterService;
 import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
+import org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv;
+import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
@@ -50,45 +45,27 @@ public class WebFsIndexHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(WebFsIndexHelper.class);
 
-    @Resource
-    public WebConfigService webConfigService;
+    protected long maxAccessCount = Long.MAX_VALUE;
 
-    @Resource
-    protected FileConfigService fileConfigService;
+    protected long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
 
-    @Resource
-    protected FileAuthenticationService fileAuthenticationService;
+    protected int indexUpdaterPriority = Thread.MAX_PRIORITY;
 
-    @Resource
-    public FailureUrlService failureUrlService;
+    protected int crawlerPriority = Thread.NORM_PRIORITY;
 
-    @Resource
-    protected BoostDocumentRuleService boostDocumentRuleService;
-
-    @Resource
-    protected CrawlingConfigHelper crawlingConfigHelper;
-
-    public long maxAccessCount = Long.MAX_VALUE;
-
-    public long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
-
-    public int indexUpdaterPriority = Thread.MAX_PRIORITY;
-
-    public int crawlerPriority = Thread.NORM_PRIORITY;
-
-    private final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<Crawler>());
+    protected final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<Crawler>());
 
     public void crawl(final String sessionId, final List<String> webConfigIdList, final List<String> fileConfigIdList) {
         final boolean runAll = webConfigIdList == null && fileConfigIdList == null;
         final List<WebConfig> webConfigList;
         if (runAll || webConfigIdList != null) {
-            webConfigList = webConfigService.getWebConfigListByIds(webConfigIdList);
+            webConfigList = ComponentUtil.getCrawlingConfigHelper().getWebConfigListByIds(webConfigIdList);
         } else {
             webConfigList = Collections.emptyList();
         }
         final List<FileConfig> fileConfigList;
         if (runAll || fileConfigIdList != null) {
-            fileConfigList = fileConfigService.getFileConfigListByIds(fileConfigIdList);
+            fileConfigList = ComponentUtil.getCrawlingConfigHelper().getFileConfigListByIds(fileConfigIdList);
         } else {
             fileConfigList = Collections.emptyList();
         }
@@ -117,7 +94,7 @@ public class WebFsIndexHelper {
         final List<String> crawlerStatusList = new ArrayList<>();
         // Web
         for (final WebConfig webConfig : webConfigList) {
-            final String sid = crawlingConfigHelper.store(sessionId, webConfig);
+            final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, webConfig);
 
             // create crawler
             final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
@@ -209,7 +186,7 @@ public class WebFsIndexHelper {
             }
 
             // failure url
-            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
+            final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(webConfig.getConfigId());
             for (final String u : excludedUrlList) {
                 if (StringUtil.isNotBlank(u)) {
                     final String urlValue = Pattern.quote(u.trim());
@@ -233,7 +210,7 @@ public class WebFsIndexHelper {
 
         // File
         for (final FileConfig fileConfig : fileConfigList) {
-            final String sid = crawlingConfigHelper.store(sessionId, fileConfig);
+            final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, fileConfig);
 
             // create crawler
             final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
@@ -351,7 +328,7 @@ public class WebFsIndexHelper {
             }
 
             // failure url
-            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(fileConfig.getConfigId());
+            final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(fileConfig.getConfigId());
             if (excludedUrlList != null) {
                 for (final String u : excludedUrlList) {
                     if (StringUtil.isNotBlank(u)) {
@@ -382,7 +359,7 @@ public class WebFsIndexHelper {
         indexUpdater.setSessionIdList(sessionIdList);
         indexUpdater.setDaemon(true);
         indexUpdater.setCrawlerList(crawlerList);
-        boostDocumentRuleService.getAvailableBoostDocumentRuleList().forEach(rule -> {
+        getAvailableBoostDocumentRuleList().forEach(rule -> {
             indexUpdater.addDocBoostMatcher(new org.codelibs.fess.indexer.DocBoostMatcher(rule));
         });
         indexUpdater.start();
@@ -478,9 +455,17 @@ public class WebFsIndexHelper {
 
         for (final String sid : sessionIdList) {
             // remove config
-            crawlingConfigHelper.remove(sid);
+            ComponentUtil.getCrawlingConfigHelper().remove(sid);
             deleteCrawlData(sid);
         }
+    }
+
+    protected List<BoostDocumentRule> getAvailableBoostDocumentRuleList() {
+        return ComponentUtil.getComponent(BoostDocumentRuleBhv.class).selectList(cb -> {
+            cb.query().matchAll();
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageDocboostMaxFetchSizeAsInteger());
+        });
     }
 
     protected void deleteCrawlData(final String sid) {
@@ -509,6 +494,22 @@ public class WebFsIndexHelper {
         } catch (final Exception e) {
             logger.warn("Failed to delete AccessResult for " + sid, e);
         }
+    }
+
+    public void setMaxAccessCount(final long maxAccessCount) {
+        this.maxAccessCount = maxAccessCount;
+    }
+
+    public void setCrawlingExecutionInterval(final long crawlingExecutionInterval) {
+        this.crawlingExecutionInterval = crawlingExecutionInterval;
+    }
+
+    public void setIndexUpdaterPriority(final int indexUpdaterPriority) {
+        this.indexUpdaterPriority = indexUpdaterPriority;
+    }
+
+    public void setCrawlerPriority(final int crawlerPriority) {
+        this.crawlerPriority = crawlerPriority;
     }
 
 }

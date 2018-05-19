@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
 public class SearchLogHelper {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogHelper.class);
 
-    public long userCheckInterval = 5 * 60 * 1000L;// 5 min
+    protected long userCheckInterval = 5 * 60 * 1000L;// 5 min
 
-    public int userInfoCacheSize = 1000;
+    protected int userInfoCacheSize = 1000;
 
     protected volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<>();
 
@@ -328,5 +328,13 @@ public class SearchLogHelper {
                 logger.warn("Failed to update clickCounts", e);
             }
         }
+    }
+
+    public void setUserCheckInterval(final long userCheckInterval) {
+        this.userCheckInterval = userCheckInterval;
+    }
+
+    public void setUserInfoCacheSize(final int userInfoCacheSize) {
+        this.userInfoCacheSize = userInfoCacheSize;
     }
 }

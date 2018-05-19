@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -88,21 +87,6 @@ public class QueryHelper {
 
     protected static final String SITE_FIELD = "site";
 
-    @Resource
-    protected FessConfig fessConfig;
-
-    @Resource
-    protected RoleQueryHelper roleQueryHelper;
-
-    @Resource
-    protected SystemHelper systemHelper;
-
-    @Resource
-    protected KeyMatchHelper keyMatchHelper;
-
-    @Resource
-    protected VirtualHostHelper virtualHostHelper;
-
     protected Set<String> apiResponseFieldSet;
 
     protected Set<String> highlightFieldSet = new HashSet<>();
@@ -143,6 +127,7 @@ public class QueryHelper {
 
     @PostConstruct
     public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (responseFields == null) {
             responseFields = fessConfig.getQueryAdditionalResponseFields(//
                     SCORE_FIELD, //
@@ -348,10 +333,10 @@ public class QueryHelper {
             // nothing to do
             break;
         default:
-            final String key = virtualHostHelper.getVirtualHostKey();
+            final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
             if (StringUtil.isNotBlank(key)) {
                 queryContext.addQuery(boolQuery -> {
-                    boolQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldVirtualHost(), key));
+                    boolQuery.filter(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), key));
                 });
             }
             break;
@@ -359,13 +344,13 @@ public class QueryHelper {
     }
 
     protected void buildRoleQuery(final QueryContext queryContext, final SearchRequestType searchRequestType) {
-        if (roleQueryHelper != null && queryContext.roleQueryEnabled()) {
-            final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
+        if (queryContext.roleQueryEnabled()) {
+            final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
             if (!roleSet.isEmpty()) {
                 queryContext.addQuery(boolQuery -> {
                     final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
                     roleSet.stream().forEach(name -> {
-                        roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
+                        roleQuery.should(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldRole(), name));
                     });
                     boolQuery.filter(roleQuery);
                 });
@@ -375,10 +360,9 @@ public class QueryHelper {
 
     protected void buildBoostQuery(final QueryContext queryContext) {
         queryContext.addFunctionScore(list -> {
-            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(fessConfig.getIndexFieldBoost())));
-            if (keyMatchHelper != null) {
-                keyMatchHelper.buildQuery(queryContext.getDefaultKeyword(), list);
-            }
+            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(ComponentUtil.getFessConfig()
+                    .getIndexFieldBoost())));
+            ComponentUtil.getKeyMatchHelper().buildQuery(queryContext.getDefaultKeyword(), list);
             list.addAll(boostFunctionList);
         });
     }
@@ -558,6 +542,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder buildMatchPhraseQuery(final String f, final String text) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (text == null || text.length() != 1
                 || (!fessConfig.getIndexFieldTitle().equals(f) && !fessConfig.getIndexFieldContent().equals(f))) {
             return QueryBuilders.matchPhraseQuery(f, text);
@@ -577,6 +562,7 @@ public class QueryHelper {
     protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery, final float boost) {
         final String field = getSearchField(context, termQuery.getTerm().field());
         final String text = termQuery.getTerm().text();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))), boost);
         } else if (Constants.DEFAULT_FIELD.equals(field)) {
@@ -631,7 +617,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertSiteQuery(final QueryContext context, final String text, final float boost) {
-        return QueryBuilders.prefixQuery(fessConfig.getIndexFieldSite(), text).boost(boost);
+        return QueryBuilders.prefixQuery(ComponentUtil.getFessConfig().getIndexFieldSite(), text).boost(boost);
     }
 
     private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {
@@ -659,6 +645,7 @@ public class QueryHelper {
 
     private QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryBuilder titleQuery =
                 builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue());
         boolQuery.should(titleQuery);
@@ -685,8 +672,8 @@ public class QueryHelper {
     }
 
     protected OptionalThing<String[]> getQueryLanguages() {
-        return LaRequestUtil.getOptionalRequest()
-                .map(request -> fessConfig.getQueryLanguages(request.getLocales(),
+        return LaRequestUtil.getOptionalRequest().map(
+                request -> ComponentUtil.getFessConfig().getQueryLanguages(request.getLocales(),
                         (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
@@ -736,7 +723,7 @@ public class QueryHelper {
 
     public void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean) {
         userBean.map(user -> {
-            if (user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
+            if (user.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray())) {
                 return Constants.SEARCH_PREFERENCE_LOCAL;
             }
             return user.getUserId();
@@ -760,7 +747,7 @@ public class QueryHelper {
     }
 
     protected String processJsonSearchPreference(final HttpServletRequest req) {
-        final String pref = fessConfig.getQueryJsonDefaultPreference();
+        final String pref = ComponentUtil.getFessConfig().getQueryJsonDefaultPreference();
         if (StringUtil.isNotBlank(pref)) {
             return pref;
         }
@@ -768,7 +755,7 @@ public class QueryHelper {
     }
 
     protected String processGsaSearchPreference(final HttpServletRequest req) {
-        final String pref = fessConfig.getQueryGsaDefaultPreference();
+        final String pref = ComponentUtil.getFessConfig().getQueryGsaDefaultPreference();
         if (StringUtil.isNotBlank(pref)) {
             return pref;
         }
@@ -793,7 +780,7 @@ public class QueryHelper {
         return scrollResponseFields;
     }
 
-    public void setScrollResponseFields(String[] scrollResponseFields) {
+    public void setScrollResponseFields(final String[] scrollResponseFields) {
         this.scrollResponseFields = scrollResponseFields;
     }
 

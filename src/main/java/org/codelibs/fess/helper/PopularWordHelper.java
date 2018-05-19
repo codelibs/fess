@@ -39,11 +39,11 @@ import com.google.common.cache.CacheBuilder;
 public class PopularWordHelper {
     private static final Logger logger = LoggerFactory.getLogger(PopularWordHelper.class);
 
-    private static final char CACHE_KEY_SPLITTER = '\n';
+    protected static final char CACHE_KEY_SPLITTER = '\n';
 
-    private Cache<String, List<String>> cache;
+    protected Cache<String, List<String>> cache;
 
-    private FessConfig fessConfig;
+    protected FessConfig fessConfig;
 
     @PostConstruct
     public void init() {

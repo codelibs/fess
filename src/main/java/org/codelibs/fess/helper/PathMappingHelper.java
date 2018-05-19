@@ -40,13 +40,13 @@ public class PathMappingHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(PathMappingHelper.class);
 
-    private static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
+    protected static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
 
-    private static final String GROOVY_MATCHER = "groovy:";
+    protected static final String GROOVY_MATCHER = "groovy:";
 
-    private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
+    protected final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
 
-    volatile List<PathMapping> cachedPathMappingList = null;
+    protected volatile List<PathMapping> cachedPathMappingList = null;
 
     @PostConstruct
     public void init() {

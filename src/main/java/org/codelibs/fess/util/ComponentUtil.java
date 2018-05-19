@@ -16,7 +16,9 @@
 package org.codelibs.fess.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -71,6 +73,7 @@ import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.security.PrimaryCipher;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.JobManager;
@@ -82,6 +85,8 @@ import org.slf4j.LoggerFactory;
 public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static Map<String, Object> componentMap = new HashMap<>();
 
     private static final String CURL_HELPER = "curlHelper";
 
@@ -341,7 +346,8 @@ public final class ComponentUtil {
         if (fessConfig != null) {
             return fessConfig;
         }
-        return getComponent(FessConfig.class);
+        fessConfig = getComponent(FessConfig.class);
+        return fessConfig;
     }
 
     public static SuggestHelper getSuggestHelper() {
@@ -449,6 +455,13 @@ public final class ComponentUtil {
             } else {
                 throw new ContainerNotAvailableException(componentName);
             }
+        } catch (ComponentNotFoundException e) {
+            if (componentMap.containsKey(componentName)) {
+                @SuppressWarnings("unchecked")
+                final T c = (T) componentMap.get(componentName);
+                return c;
+            }
+            throw e;
         }
     }
 
@@ -486,7 +499,11 @@ public final class ComponentUtil {
         ComponentUtil.fessConfig = fessConfig;
         if (fessConfig == null) {
             FessProp.propMap.clear();
+            componentMap.clear();
         }
     }
 
+    public static void register(final Object instance, final String name) {
+        componentMap.put(name, instance);
+    }
 }

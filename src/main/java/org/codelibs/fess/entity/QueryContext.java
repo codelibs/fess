@@ -169,7 +169,7 @@ public class QueryContext {
         return defaultField;
     }
 
-    public void setDefaultField(String defaultField) {
+    public void setDefaultField(final String defaultField) {
         this.defaultField = defaultField;
     }
 }

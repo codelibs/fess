@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -37,10 +36,7 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public class UserInfoHelper {
-    private static final String USER_BEAN = "lastaflute.action.USER_BEAN.FessUserBean";
-
-    @Resource
-    protected SearchLogHelper searchLogHelper;
+    protected static final String USER_BEAN = "lastaflute.action.USER_BEAN.FessUserBean";
 
     protected int resultDocIdsCacheSize = 20;
 
@@ -133,7 +129,7 @@ public class UserInfoHelper {
     }
 
     protected void updateUserSessionId(final String userCode) {
-        searchLogHelper.updateUserInfo(userCode);
+        ComponentUtil.getSearchLogHelper().updateUserInfo(userCode);
 
         final HttpServletRequest request = LaRequestUtil.getRequest();
         request.setAttribute(Constants.USER_CODE, userCode);

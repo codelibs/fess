@@ -82,12 +82,4 @@ public class BoostDocumentRuleService {
 
     }
 
-    public List<BoostDocumentRule> getAvailableBoostDocumentRuleList() {
-        return boostDocumentRuleBhv.selectList(cb -> {
-            cb.query().matchAll();
-            cb.query().addOrderBy_SortOrder_Asc();
-            cb.fetchFirst(fessConfig.getPageDocboostMaxFetchSizeAsInteger());
-        });
-    }
-
 }

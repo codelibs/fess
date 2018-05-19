@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ActivityHelper {
-    private Logger logger = null;
+    protected Logger logger = null;
 
     protected String loggerName = "fess.log.audit";
 

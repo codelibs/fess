@@ -18,9 +18,9 @@ package org.codelibs.fess.helper;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class UserAgentHelper {
-    private static final String USER_AGENT = "user-agent";
+    protected static final String USER_AGENT = "user-agent";
 
-    private static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
+    protected static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
 
     public UserAgentType getUserAgentType() {
         return LaRequestUtil.getOptionalRequest().map(request -> {

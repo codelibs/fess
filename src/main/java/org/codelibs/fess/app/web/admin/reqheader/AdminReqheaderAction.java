@@ -104,7 +104,7 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
-        RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null).isEmpty());
 
         // restore from pager
         copyBeanToBean(reqHeaderPager, form, op -> op.include("id"));
@@ -273,7 +273,7 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
+        final List<WebConfig> webConfigList = crawlingConfigHelper.getAllWebConfigList(false, false, false, null);
         for (final WebConfig webConfig : webConfigList) {
             itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
         }
@@ -305,7 +305,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminReqheader_AdminReqheaderJsp).renderWith(data -> {
             RenderDataUtil.register(data, "requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
-                RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null)
+                RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null)
                         .isEmpty());
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {

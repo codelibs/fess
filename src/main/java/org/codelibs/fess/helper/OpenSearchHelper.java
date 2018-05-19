@@ -38,13 +38,13 @@ import org.slf4j.LoggerFactory;
 public class OpenSearchHelper {
     private static final Logger logger = LoggerFactory.getLogger(OpenSearchHelper.class);
 
-    public String osddPath;
+    protected String osddPath;
 
-    public String encoding = Constants.UTF_8;
+    protected String encoding = Constants.UTF_8;
 
-    public String contentType = "text/xml"; // "application/opensearchdescription+xml";
+    protected String contentType = "text/xml"; // "application/opensearchdescription+xml"
 
-    private File osddFile;
+    protected File osddFile;
 
     @PostConstruct
     public void init() {
@@ -74,5 +74,17 @@ public class OpenSearchHelper {
                 out.write(ins);
             }
         });
+    }
+
+    public void setOsddPath(final String osddPath) {
+        this.osddPath = osddPath;
+    }
+
+    public void setEncoding(final String encoding) {
+        this.encoding = encoding;
+    }
+
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
     }
 }
