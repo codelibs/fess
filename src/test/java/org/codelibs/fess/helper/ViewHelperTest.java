@@ -17,7 +17,6 @@ package org.codelibs.fess.helper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,21 +36,24 @@ public class ViewHelperTest extends UnitFessTestCase {
 
     private File propertiesFile;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         propertiesFile = File.createTempFile("test", ".properties");
+        FileUtil.writeBytes(propertiesFile.getAbsolutePath(), new byte[0]);
         propertiesFile.deleteOnExit();
         DynamicProperties systemProps = new DynamicProperties(propertiesFile);
         ComponentUtil.register(systemProps, "systemProperties");
         userAgentHelper = new UserAgentHelper();
         ComponentUtil.register(userAgentHelper, "userAgentHelper");
         pathMappingHelper = new PathMappingHelper();
-        pathMappingHelper.cachedPathMappingList = new ArrayList<>();
+        pathMappingHelper.init();
         ComponentUtil.register(pathMappingHelper, "pathMappingHelper");
         viewHelper = new ViewHelper();
         viewHelper.init();
     }
 
+    @Override
     public void tearDown() throws Exception {
         propertiesFile.delete();
         super.tearDown();
@@ -135,8 +137,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         PathMapping pathMapping = new PathMapping();
         pathMapping.setRegex("ftp:");
         pathMapping.setReplacement("file:");
-        pathMappingHelper.cachedPathMappingList = new ArrayList<>();
-        pathMappingHelper.cachedPathMappingList.add(pathMapping);
+        ComponentUtil.getPathMappingHelper().cachedPathMappingList.add(pathMapping);
         // ftp->file
         assertUrlLink("ftp:/home/taro/test.txt", //
                 "file://home/taro/test.txt");
