@@ -88,33 +88,6 @@ public class WebConfigService {
         });
     }
 
-    public List<WebConfig> getAllWebConfigList() {
-        return getAllWebConfigList(true, true, true, null);
-    }
-
-    public List<WebConfig> getWebConfigListByIds(final List<String> idList) {
-        if (idList == null) {
-            return getAllWebConfigList();
-        } else {
-            return getAllWebConfigList(true, true, false, idList);
-        }
-    }
-
-    public List<WebConfig> getAllWebConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
-            final List<String> idList) {
-        return webConfigBhv.selectList(cb -> {
-            if (available) {
-                cb.query().setAvailable_Equal(Constants.T);
-            }
-            if (idList != null) {
-                cb.query().setId_InScope(idList);
-            }
-            cb.query().addOrderBy_SortOrder_Asc();
-            cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(fessConfig.getPageWebConfigMaxFetchSizeAsInteger());
-        });
-    }
-
     public OptionalEntity<WebConfig> getWebConfig(final String id) {
         return webConfigBhv.selectByPK(id).map(entity -> {
 

@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 public class IntervalControlHelper {
     private static final Logger logger = LoggerFactory.getLogger(IntervalControlHelper.class);
 
-    private volatile boolean crawlerRunning = true;
+    protected volatile boolean crawlerRunning = true;
 
-    public long crawlerWaitMillis = 10000;
+    protected long crawlerWaitMillis = 10000;
 
     protected List<IntervalRule> ruleList = new ArrayList<>();
 
@@ -193,6 +193,10 @@ public class IntervalControlHelper {
             throw new FessSystemException("Invalid format: " + time);
         }
         return values;
+    }
+
+    public void setCrawlerWaitMillis(final long crawlerWaitMillis) {
+        this.crawlerWaitMillis = crawlerWaitMillis;
     }
 
 }

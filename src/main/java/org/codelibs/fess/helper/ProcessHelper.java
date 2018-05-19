@@ -39,9 +39,9 @@ import org.slf4j.LoggerFactory;
 public class ProcessHelper {
     private static final Logger logger = LoggerFactory.getLogger(ProcessHelper.class);
 
-    private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
-    private int processDestroyTimeout = 10;
+    protected int processDestroyTimeout = 10;
 
     @PreDestroy
     public void destroy() {

@@ -37,7 +37,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
@@ -79,38 +78,29 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper {
 
-    private static final String CONTENT_DISPOSITION = "Content-Disposition";
-
-    private static final String HL_CACHE = "hl_cache";
-
-    private static final String QUERIES = "queries";
-
-    private static final String CACHE_MSG = "cache_msg";
-
-    private static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
-
-    private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
-
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
 
-    @Resource
-    protected DynamicProperties systemProperties;
+    protected static final String CONTENT_DISPOSITION = "Content-Disposition";
 
-    @Resource
-    protected PathMappingHelper pathMappingHelper;
+    protected static final String HL_CACHE = "hl_cache";
 
-    @Resource
-    protected UserAgentHelper userAgentHelper;
+    protected static final String QUERIES = "queries";
 
-    public boolean encodeUrlLink = false;
+    protected static final String CACHE_MSG = "cache_msg";
 
-    public String urlLinkEncoding = Constants.UTF_8;
+    protected static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
+
+    protected static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
+
+    protected boolean encodeUrlLink = false;
+
+    protected String urlLinkEncoding = Constants.UTF_8;
 
     protected String[] highlightedFields;
 
-    public String originalHighlightTagPre = "<em>";
+    protected String originalHighlightTagPre = "<em>";
 
-    public String originalHighlightTagPost = "</em>";
+    protected String originalHighlightTagPost = "</em>";
 
     protected String highlightTagPre;
 
@@ -126,7 +116,7 @@ public class ViewHelper {
 
     protected final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
 
-    public String cacheTemplateName = "cache";
+    protected String cacheTemplateName = "cache";
 
     protected String escapedHighlightPre = null;
 
@@ -207,9 +197,7 @@ public class ViewHelper {
         final boolean isSmbOrFtpUrl = isSmbUrl || isFtpUrl;
 
         // replacing url with mapping data
-        if (pathMappingHelper != null) {
-            url = pathMappingHelper.replaceUrl(url);
-        }
+        url = ComponentUtil.getPathMappingHelper().replaceUrl(url);
 
         final boolean isHttpUrl = url.startsWith("http:") || url.startsWith("https:");
 
@@ -263,7 +251,8 @@ public class ViewHelper {
         final int pos = url.indexOf(':', 5);
         final boolean isLocalFile = pos > 0 && pos < 12;
 
-        final UserAgentType ua = userAgentHelper.getUserAgentType();
+        final UserAgentType ua = ComponentUtil.getUserAgentHelper().getUserAgentType();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         switch (ua) {
         case IE:
             if (isLocalFile) {
@@ -437,7 +426,7 @@ public class ViewHelper {
             if (!ComponentUtil.getFessConfig().isHtmlMimetypeForCache(mimetype)) {
                 cache = StringEscapeUtils.escapeHtml4(cache);
             }
-            cache = pathMappingHelper.replaceUrls(cache);
+            cache = ComponentUtil.getPathMappingHelper().replaceUrls(cache);
             if (queries != null && queries.length > 0) {
                 doc.put(HL_CACHE, replaceHighlightQueries(cache, queries));
             } else {
@@ -696,5 +685,25 @@ public class ViewHelper {
         public void hookFinally(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
+    }
+
+    public void setEncodeUrlLink(final boolean encodeUrlLink) {
+        this.encodeUrlLink = encodeUrlLink;
+    }
+
+    public void setUrlLinkEncoding(final String urlLinkEncoding) {
+        this.urlLinkEncoding = urlLinkEncoding;
+    }
+
+    public void setOriginalHighlightTagPre(final String originalHighlightTagPre) {
+        this.originalHighlightTagPre = originalHighlightTagPre;
+    }
+
+    public void setOriginalHighlightTagPost(final String originalHighlightTagPost) {
+        this.originalHighlightTagPost = originalHighlightTagPost;
+    }
+
+    public void setCacheTemplateName(final String cacheTemplateName) {
+        this.cacheTemplateName = cacheTemplateName;
     }
 }

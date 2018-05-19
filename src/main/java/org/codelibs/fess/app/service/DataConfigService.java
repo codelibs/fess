@@ -74,33 +74,6 @@ public class DataConfigService {
 
     }
 
-    public List<DataConfig> getAllDataConfigList() {
-        return getAllDataConfigList(true, true, true, null);
-    }
-
-    public List<DataConfig> getDataConfigListByIds(final List<String> idList) {
-        if (idList == null) {
-            return getAllDataConfigList();
-        } else {
-            return getAllDataConfigList(true, true, false, idList);
-        }
-    }
-
-    public List<DataConfig> getAllDataConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
-            final List<String> idList) {
-        return dataConfigBhv.selectList(cb -> {
-            if (available) {
-                cb.query().setAvailable_Equal(Constants.T);
-            }
-            if (idList != null) {
-                cb.query().setId_InScope(idList);
-            }
-            cb.query().addOrderBy_SortOrder_Asc();
-            cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(fessConfig.getPageDataConfigMaxFetchSizeAsInteger());
-        });
-    }
-
     public OptionalEntity<DataConfig> getDataConfig(final String id) {
         return dataConfigBhv.selectByPK(id).map(entity -> {
 

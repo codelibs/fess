@@ -612,7 +612,7 @@ public class FessEsClient implements Client {
             }
             try {
                 Thread.sleep(1000L);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 // ignore
             }
         }
@@ -647,7 +647,7 @@ public class FessEsClient implements Client {
             }
             try {
                 Thread.sleep(1000L);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 // ignore
             }
         }
@@ -1475,11 +1475,11 @@ public class FessEsClient implements Client {
         this.scrollForSearch = scrollForSearch;
     }
 
-    public void setMaxConfigSyncStatusRetry(int maxConfigSyncStatusRetry) {
+    public void setMaxConfigSyncStatusRetry(final int maxConfigSyncStatusRetry) {
         this.maxConfigSyncStatusRetry = maxConfigSyncStatusRetry;
     }
 
-    public void setMaxEsStatusRetry(int maxEsStatusRetry) {
+    public void setMaxEsStatusRetry(final int maxEsStatusRetry) {
         this.maxEsStatusRetry = maxEsStatusRetry;
     }
 

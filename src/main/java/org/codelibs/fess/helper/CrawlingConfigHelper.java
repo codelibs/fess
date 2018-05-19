@@ -15,19 +15,35 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
+import org.codelibs.fess.es.config.exbhv.FailureUrlBhv;
+import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
+import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
+import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.es.config.exentity.FailureUrl;
+import org.codelibs.fess.es.config.exentity.FileConfig;
+import org.codelibs.fess.es.config.exentity.WebConfig;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.cbean.result.ListResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,4 +137,120 @@ public class CrawlingConfigHelper {
         return crawlingConfigMap.get(sessionId);
     }
 
+    public List<WebConfig> getAllWebConfigList() {
+        return getAllWebConfigList(true, true, true, null);
+    }
+
+    public List<WebConfig> getWebConfigListByIds(final List<String> idList) {
+        if (idList == null) {
+            return getAllWebConfigList();
+        } else {
+            return getAllWebConfigList(true, true, false, idList);
+        }
+    }
+
+    public List<WebConfig> getAllWebConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
+            final List<String> idList) {
+        return ComponentUtil.getComponent(WebConfigBhv.class).selectList(cb -> {
+            if (available) {
+                cb.query().setAvailable_Equal(Constants.T);
+            }
+            if (idList != null) {
+                cb.query().setId_InScope(idList);
+            }
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger());
+        });
+    }
+
+    public List<FileConfig> getAllFileConfigList() {
+        return getAllFileConfigList(true, true, true, null);
+    }
+
+    public List<FileConfig> getFileConfigListByIds(final List<String> idList) {
+        if (idList == null) {
+            return getAllFileConfigList();
+        } else {
+            return getAllFileConfigList(true, true, false, idList);
+        }
+    }
+
+    public List<FileConfig> getAllFileConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
+            final List<String> idList) {
+        return ComponentUtil.getComponent(FileConfigBhv.class).selectList(cb -> {
+            if (available) {
+                cb.query().setAvailable_Equal(Constants.T);
+            }
+            if (idList != null) {
+                cb.query().setId_InScope(idList);
+            }
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger());
+        });
+    }
+
+    public List<DataConfig> getAllDataConfigList() {
+        return getAllDataConfigList(true, true, true, null);
+    }
+
+    public List<DataConfig> getDataConfigListByIds(final List<String> idList) {
+        if (idList == null) {
+            return getAllDataConfigList();
+        } else {
+            return getAllDataConfigList(true, true, false, idList);
+        }
+    }
+
+    public List<DataConfig> getAllDataConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
+            final List<String> idList) {
+        return ComponentUtil.getComponent(DataConfigBhv.class).selectList(cb -> {
+            if (available) {
+                cb.query().setAvailable_Equal(Constants.T);
+            }
+            if (idList != null) {
+                cb.query().setId_InScope(idList);
+            }
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageDataConfigMaxFetchSizeAsInteger());
+        });
+    }
+
+    public List<String> getExcludedUrlList(final String configId) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int failureCount = fessConfig.getFailureCountThreshold();
+        final String ignoreFailureType = fessConfig.getIgnoreFailureType();
+
+        if (failureCount < 0) {
+            return Collections.emptyList();
+        }
+
+        final int count = failureCount;
+        final ListResultBean<FailureUrl> list = ComponentUtil.getComponent(FailureUrlBhv.class).selectList(cb -> {
+            cb.query().setConfigId_Equal(configId);
+            cb.query().setErrorCount_GreaterEqual(count);
+            cb.fetchFirst(fessConfig.getPageFailureUrlMaxFetchSizeAsInteger());
+        });
+        if (list.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Pattern pattern = null;
+        if (StringUtil.isNotBlank(ignoreFailureType)) {
+            pattern = Pattern.compile(ignoreFailureType);
+        }
+        final List<String> urlList = new ArrayList<>();
+        for (final FailureUrl failureUrl : list) {
+            if (pattern != null) {
+                if (!pattern.matcher(failureUrl.getErrorName()).matches()) {
+                    urlList.add(failureUrl.getUrl());
+                }
+            } else {
+                urlList.add(failureUrl.getUrl());
+            }
+        }
+        return urlList;
+    }
 }

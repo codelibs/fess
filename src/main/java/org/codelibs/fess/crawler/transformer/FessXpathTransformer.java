@@ -199,7 +199,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
+        final String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
         if (ignore == null) {
             if (fessConfig.isCrawlerIgnoreRobotsTags()) {
                 return;

@@ -41,7 +41,8 @@ import org.slf4j.LoggerFactory;
 
 public class JobHelper {
     private static final Logger logger = LoggerFactory.getLogger(JobHelper.class);
-    private int monitorInterval = 60 * 60;// 1hour
+
+    protected int monitorInterval = 60 * 60;// 1hour
 
     public void register(final ScheduledJob scheduledJob) {
         final JobManager jobManager = ComponentUtil.getJobManager();

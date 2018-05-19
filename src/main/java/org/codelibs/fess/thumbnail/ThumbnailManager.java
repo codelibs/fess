@@ -220,7 +220,7 @@ public class ThumbnailManager {
         return idList.size();
     }
 
-    protected void process(final FessConfig fessConfig, ThumbnailQueue entity) {
+    protected void process(final FessConfig fessConfig, final ThumbnailQueue entity) {
         if (logger.isDebugEnabled()) {
             logger.debug("Processing thumbnail: " + entity);
         }

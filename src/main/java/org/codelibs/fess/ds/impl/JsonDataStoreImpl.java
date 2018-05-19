@@ -155,7 +155,7 @@ public class JsonDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    public void setFileSuffixes(String[] fileSuffixes) {
+    public void setFileSuffixes(final String[] fileSuffixes) {
         this.fileSuffixes = fileSuffixes;
     }
 }

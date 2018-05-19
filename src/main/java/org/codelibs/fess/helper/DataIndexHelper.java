@@ -21,11 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
@@ -45,20 +42,14 @@ public class DataIndexHelper {
 
     private static final String DELETE_OLD_DOCS = "delete_old_docs";
 
-    @Resource
-    public DataConfigService dataConfigService;
+    protected long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
 
-    @Resource
-    protected CrawlingConfigHelper crawlingConfigHelper;
+    protected int crawlerPriority = Thread.NORM_PRIORITY;
 
-    public long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
-
-    public int crawlerPriority = Thread.NORM_PRIORITY;
-
-    private final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<DataCrawlingThread>());
+    protected final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<DataCrawlingThread>());
 
     public void crawl(final String sessionId) {
-        final List<DataConfig> configList = dataConfigService.getAllDataConfigList();
+        final List<DataConfig> configList = ComponentUtil.getCrawlingConfigHelper().getAllDataConfigList();
 
         if (configList.isEmpty()) {
             // nothing
@@ -72,7 +63,7 @@ public class DataIndexHelper {
     }
 
     public void crawl(final String sessionId, final List<String> configIdList) {
-        final List<DataConfig> configList = dataConfigService.getDataConfigListByIds(configIdList);
+        final List<DataConfig> configList = ComponentUtil.getCrawlingConfigHelper().getDataConfigListByIds(configIdList);
 
         if (configList.isEmpty()) {
             // nothing
@@ -97,7 +88,7 @@ public class DataIndexHelper {
         final List<String> dataCrawlingThreadStatusList = new ArrayList<>();
         for (final DataConfig dataConfig : configList) {
             final Map<String, String> initParamMap = new HashMap<>();
-            final String sid = crawlingConfigHelper.store(sessionId, dataConfig);
+            final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, dataConfig);
             sessionIdList.add(sid);
 
             initParamMap.put(Constants.SESSION_ID, sessionId);
@@ -189,7 +180,7 @@ public class DataIndexHelper {
 
         for (final String sid : sessionIdList) {
             // remove config
-            crawlingConfigHelper.remove(sid);
+            ComponentUtil.getCrawlingConfigHelper().remove(sid);
         }
 
     }
@@ -310,5 +301,13 @@ public class DataIndexHelper {
                 }
             }
         }
+    }
+
+    public void setCrawlingExecutionInterval(final long crawlingExecutionInterval) {
+        this.crawlingExecutionInterval = crawlingExecutionInterval;
+    }
+
+    public void setCrawlerPriority(final int crawlerPriority) {
+        this.crawlerPriority = crawlerPriority;
     }
 }

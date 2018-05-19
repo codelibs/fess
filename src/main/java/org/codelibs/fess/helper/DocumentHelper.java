@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class DocumentHelper {
     private static final Logger logger = LoggerFactory.getLogger(DocumentHelper.class);
 
-    private static final String SIMILAR_DOC_HASH_PREFIX = "$";
+    protected static final String SIMILAR_DOC_HASH_PREFIX = "$";
 
     public String getTitle(final ResponseData responseData, final String title, final Map<String, Object> dataMap) {
         if (title == null) {
