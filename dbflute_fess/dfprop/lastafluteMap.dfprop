@@ -52,7 +52,15 @@ map:{
     #    ; fess.freeGen.mail.targetDir = ./playsql/data/mail
     #}
 
-    ; isSuppressDescriptionInList = true
-    ; isSuppressAuthorInList = true
+    # you can adjust LastaDoc contents
+    ; lastaDocContentsMap = map:{
+        ; headerMap = map:{
+            #; isSuppressSchemaHtmlLink = true
+        }
+        ; actionMap = map:{
+            ; isSuppressDescriptionInList = true
+            ; isSuppressAuthorInList = true
+        }
+    }
 }
 # ----------------/
