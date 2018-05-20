@@ -51,5 +51,8 @@ map:{
     #; overrideMap = map:{
     #    ; fess.freeGen.mail.targetDir = ./playsql/data/mail
     #}
+
+    ; isSuppressDescriptionInList = true
+    ; isSuppressAuthorInList = true
 }
 # ----------------/

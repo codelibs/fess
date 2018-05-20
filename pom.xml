@@ -39,7 +39,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<!-- Main Framework -->
-		<dbflute.version>1.1.7</dbflute.version>
+		<dbflute.version>1.1.8</dbflute.version>
 		<lastaflute.version>1.0.8</lastaflute.version>
 		<lasta.taglib.version>0.7.2</lasta.taglib.version>
 		<lasta.job.version>0.5.3</lasta.job.version>
