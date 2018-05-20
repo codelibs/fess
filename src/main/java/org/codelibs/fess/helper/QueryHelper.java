@@ -77,7 +77,9 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper {
 
-    private static final String ES_SCORE_FIELD = "_score";
+    protected static final String PREFERENCE_QUERY = "_query";
+
+    protected static final String ES_SCORE_FIELD = "_score";
 
     protected static final String SCORE_SORT_VALUE = "score";
 
@@ -721,7 +723,8 @@ public class QueryHelper {
         return apiResponseFieldSet.contains(field);
     }
 
-    public void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean) {
+    public void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean,
+            final String query) {
         userBean.map(user -> {
             if (user.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray())) {
                 return Constants.SEARCH_PREFERENCE_LOCAL;
@@ -738,25 +741,29 @@ public class QueryHelper {
             }
             final Object accessType = r.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
             if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
-                return processJsonSearchPreference(r);
+                return processJsonSearchPreference(r, query);
             } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
-                return processGsaSearchPreference(r);
+                return processGsaSearchPreference(r, query);
             }
             return null;
         }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
     }
 
-    protected String processJsonSearchPreference(final HttpServletRequest req) {
+    protected String processJsonSearchPreference(final HttpServletRequest req, final String query) {
         final String pref = ComponentUtil.getFessConfig().getQueryJsonDefaultPreference();
-        if (StringUtil.isNotBlank(pref)) {
+        if (PREFERENCE_QUERY.equals(pref)) {
+            return Integer.toString(query.hashCode());
+        } else if (StringUtil.isNotBlank(pref)) {
             return pref;
         }
         return null;
     }
 
-    protected String processGsaSearchPreference(final HttpServletRequest req) {
+    protected String processGsaSearchPreference(final HttpServletRequest req, final String query) {
         final String pref = ComponentUtil.getFessConfig().getQueryGsaDefaultPreference();
-        if (StringUtil.isNotBlank(pref)) {
+        if (PREFERENCE_QUERY.equals(pref)) {
+            return Integer.toString(query.hashCode());
+        } else if (StringUtil.isNotBlank(pref)) {
             return pref;
         }
         return null;

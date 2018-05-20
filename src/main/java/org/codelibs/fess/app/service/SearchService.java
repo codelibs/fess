@@ -97,20 +97,23 @@ public class SearchService {
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
         });
 
-        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
-
         final int pageStart = params.getStartPosition();
         final int pageSize = params.getPageSize();
         final String sortField = params.getSort();
+        final String query;
+        if (StringUtil.isBlank(sortField)) {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build();
+        } else {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
+        }
         final List<Map<String, Object>> documentItems =
                 fessEsClient.search(
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            queryHelper.processSearchPreference(searchRequestBuilder, userBean);
-                            return SearchConditionBuilder.builder(searchRequestBuilder)
-                                    .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
-                                    .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
+                            queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
+                            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
+                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
                                     .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
                                     .searchRequestType(params.getType()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
@@ -184,17 +187,20 @@ public class SearchService {
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
         });
 
-        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
-
         final int pageSize = params.getPageSize();
         final String sortField = params.getSort();
+        final String query;
+        if (StringUtil.isBlank(sortField)) {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build();
+        } else {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
+        }
         return fessEsClient.<Map<String, Object>> scrollSearch(
                 fessConfig.getIndexDocumentSearchIndex(),
                 fessConfig.getIndexDocumentType(),
                 searchRequestBuilder -> {
-                    queryHelper.processSearchPreference(searchRequestBuilder, userBean);
-                    return SearchConditionBuilder.builder(searchRequestBuilder).scroll()
-                            .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).size(pageSize)
+                    queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
+                    return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
                 },
                 (searchResponse, hit) -> {
@@ -296,7 +302,7 @@ public class SearchService {
                     }
                     builder.setQuery(boolQuery);
                     builder.setFetchSource(fields, null);
-                    queryHelper.processSearchPreference(builder, userBean);
+                    queryHelper.processSearchPreference(builder, userBean, docId);
                     return true;
                 });
 
@@ -323,7 +329,7 @@ public class SearchService {
                     builder.setQuery(boolQuery);
                     builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
                     builder.setFetchSource(fields, null);
-                    queryHelper.processSearchPreference(builder, userBean);
+                    queryHelper.processSearchPreference(builder, userBean, String.join(StringUtil.EMPTY, docIds));
                     return true;
                 });
     }
