@@ -6,31 +6,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.search_title" /></title>
-<link href="${fe:url('/css/style-base.css')}" rel="stylesheet"
+<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
 </head>
-<body class="help">
+<body>
 	<jsp:include page="header.jsp" />
-	<div class="container">
+	<main class="container">
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col">
 
 				<jsp:include page="${helpPage}" />
 
 			</div>
 		</div>
-		<p class="pull-right move-to-top">
+		<div class="text-right">
 			<a href="#"><la:message key="labels.footer_back_to_top" /></a>
-		</p>
-		<jsp:include page="footer.jsp" />
-	</div>
+		</div>
+	</main>
+	<jsp:include page="footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
 		src="${fe:url('/js/jquery-3.2.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/help.js')}"></script>
 </body>
