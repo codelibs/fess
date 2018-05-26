@@ -564,6 +564,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10000 */
     String QUERY_TIMEOUT = "query.timeout";
 
+    /** The key of the configuration. e.g. true */
+    String QUERY_TIMEOUT_LOGGING = "query.timeout.logging";
+
     /** The key of the configuration. e.g. location */
     String QUERY_GEO_FIELDS = "query.geo.fields";
 
@@ -2993,6 +2996,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryTimeoutAsInteger();
+
+    /**
+     * Get the value for the key 'query.timeout.logging'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryTimeoutLogging();
+
+    /**
+     * Is the property for the key 'query.timeout.logging' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryTimeoutLogging();
 
     /**
      * Get the value for the key 'query.geo.fields'. <br>
@@ -6625,6 +6642,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_TIMEOUT);
         }
 
+        public String getQueryTimeoutLogging() {
+            return get(FessConfig.QUERY_TIMEOUT_LOGGING);
+        }
+
+        public boolean isQueryTimeoutLogging() {
+            return is(FessConfig.QUERY_TIMEOUT_LOGGING);
+        }
+
         public String getQueryGeoFields() {
             return get(FessConfig.QUERY_GEO_FIELDS);
         }
@@ -8282,6 +8307,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_INDICES_TIMEOUT, "1m");
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
+            defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
