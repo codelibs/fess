@@ -61,12 +61,16 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchService {
 
     // ===================================================================================
     //                                                                            Constant
     //
+
+    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -114,6 +118,16 @@ public class SearchService {
                                     .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
                                     .searchRequestType(params.getType()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
+                            searchResponse.ifPresent(r -> {
+                                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
+                                    // partial results
+                                    StringBuilder buf = new StringBuilder(1000);
+                                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
+                                            .append(",\"request\":").append(searchRequestBuilder.toString())//
+                                            .append(",\"response\":").append(r.toString()).append('}');
+                                    logger.warn(buf.toString());
+                                }
+                            });
                             final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
                             queryResponseList.init(searchResponse, pageStart, pageSize);
                             return queryResponseList;
