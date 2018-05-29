@@ -180,7 +180,8 @@ public class AdminBackupAction extends FessAdminAction {
                 return asStream(filename).contentTypeOctetStream().stream(
                         out -> {
                             try (CurlResponse response =
-                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
+                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json")
+                                            .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
                                 out.write(response.getContentAsStream());
                             }
                         });
