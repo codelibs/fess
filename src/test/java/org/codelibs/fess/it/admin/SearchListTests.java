@@ -16,13 +16,18 @@
 package org.codelibs.fess.it.admin;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import io.restassured.path.json.JsonPath;
 
 @Tag("it")
 public class SearchListTests extends CrudTestBase {
@@ -66,15 +71,13 @@ public class SearchListTests extends CrudTestBase {
 
     @Override
     protected Map<String, Object> createTestParam(int id) {
-
+        final Map<String, Object> requestBody = new HashMap<>();
         final Map<String, Object> doc = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
         doc.put(KEY_PROPERTY, keyProp);
         doc.put("url", "http://example.com/" + id);
         doc.put("boost", id);
         doc.put("role", "Rguest");
-
-        final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("doc", doc);
         return requestBody;
     }
@@ -89,19 +92,58 @@ public class SearchListTests extends CrudTestBase {
 
     @Override
     protected Map<String, Object> getUpdateMap() {
-        // TODO
-        assertTrue(false);
-
         final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put("click_count", 100);
+//        updateMap.put("click_count", 100);
         return updateMap;
+    }
+
+    @Override
+    protected void testUpdate() {
+
+        // Test: update settings api
+        final Map<String, Object> updateMap = getUpdateMap();
+        final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
+        List<Map<String, Object>> settings = getItemList(searchBody);
+
+        for (Map<String, Object> setting : settings) {
+            final Map<String, Object> requestBody = new HashMap<>(updateMap);
+            final String idKey = getIdKey();
+
+            requestBody.put("version", 1);
+            requestBody.put("crud_mode", 2);
+
+            if (setting.containsKey(idKey)) {
+                requestBody.put(idKey, setting.get(idKey));
+            }
+
+            final Map<String, Object> doc = new HashMap<>();
+            doc.put("doc_id", setting.get("doc_id"));
+            doc.put("url", setting.get("url_link"));
+            doc.put("title", setting.get("title"));
+            doc.put("role", "Rguest");
+            doc.put("boost", setting.get("boost"));
+            //            doc.put("click_count", 100);  // Validation Error
+            requestBody.put("doc", doc);
+
+            checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+            refresh();
+        }
+
+        checkUpdate();
+    }
+
+    @Override
+    protected List<Map<String, Object>> getItemList(final Map<String, Object> body) {
+        final String response = checkMethodBase(body).get(getApiPath() + "/" + getListEndpointSuffix()).asString();
+        final List<Map<String, Object>> results = JsonPath.from(response).getList("response.docs");
+        return results;
     }
 
     @Test
     void crudTest() {
         testCreate();
         testRead();
-        //testUpdate(); // TODO
+        testUpdate();
         testDelete();
     }
 }
