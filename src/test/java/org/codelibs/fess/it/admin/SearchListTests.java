@@ -93,8 +93,7 @@ public class SearchListTests extends CrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        //        final Map<String, Object> doc = new HashMap<>();
-        updateMap.put("click_count", 100);
+//        updateMap.put("click_count", 100);
         return updateMap;
     }
 
@@ -102,15 +101,14 @@ public class SearchListTests extends CrudTestBase {
     protected void testUpdate() {
 
         // Test: update settings api
-        //        final Set<String> keySet = createTestParam(0).keySet();
         final Map<String, Object> updateMap = getUpdateMap();
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         List<Map<String, Object>> settings = getItemList(searchBody);
-        //        logger.info("size of settings = " + settings.size());
 
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>(updateMap);
             final String idKey = getIdKey();
+
             requestBody.put("version", 1);
             requestBody.put("crud_mode", 2);
 
@@ -124,32 +122,9 @@ public class SearchListTests extends CrudTestBase {
             doc.put("title", setting.get("title"));
             doc.put("role", "Rguest");
             doc.put("boost", setting.get("boost"));
-            //            doc.put("click_count", "100");  // Validation Error
+            //            doc.put("click_count", 100);  // Validation Error
             requestBody.put("doc", doc);
-            /* 
-                        // for debugging
-                        logger.info("elements of requestBody...");
 
-                        Set<String> keySet = requestBody.keySet();
-                        for (String key : keySet) {
-                            if (requestBody.get(key) != null) {
-                                logger.info(key + ", " + requestBody.get(key).toString());
-                            } else {
-                                logger.info(key + ", null");
-                            }
-                        }
-
-                        logger.info("elements of setting...");
-
-                        keySet = setting.keySet();
-                        for (String key : keySet) {
-                            if (setting.get(key) != null) {
-                                logger.info(key + ", " + setting.get(key).toString());
-                            } else {
-                                logger.info(key + ", null");
-                            }
-                        }
-            */
             checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
             refresh();
         }
@@ -159,7 +134,7 @@ public class SearchListTests extends CrudTestBase {
 
     @Override
     protected List<Map<String, Object>> getItemList(final Map<String, Object> body) {
-        final String response = checkMethodBase(body).get(API_PATH + "/" + LIST_ENDPOINT_SUFFIX).asString();
+        final String response = checkMethodBase(body).get(getApiPath() + "/" + getListEndpointSuffix()).asString();
         final List<Map<String, Object>> results = JsonPath.from(response).getList("response.docs");
         return results;
     }
