@@ -68,7 +68,7 @@ public class LdapManager {
     protected FessConfig fessConfig;
 
     @PostConstruct
-    protected void init() {
+    public void init() {
         fessConfig = ComponentUtil.getFessConfig();
     }
 
