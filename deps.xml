@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="deos" basedir=".">
+<project name="deps" basedir=".">
 	<property name="target.dir" value="${basedir}/target/deps" />
+	<property name="webinf.dir" value="${basedir}/src/main/webapp/WEB-INF" />
 	<property name="crawler.dir" value="${basedir}/src/main/webapp/WEB-INF/env/crawler" />
 	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/env/suggest" />
 	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
@@ -13,15 +14,21 @@
 
 	<target name="install.jars">
 		<mkdir dir="${target.dir}" />
+		<delete dir="${webinf.dir}/lib" />
+		<mkdir dir="${webinf.dir}/lib" />
+		<delete dir="${crawler.dir}/lib" />
 		<mkdir dir="${crawler.dir}/lib" />
+		<delete dir="${suggest.dir}/lib" />
 		<mkdir dir="${suggest.dir}/lib" />
+		<delete dir="${thumbnail.dir}/lib" />
 		<mkdir dir="${thumbnail.dir}/lib" />
 		<!-- javax.annotation-api -->
-		<antcall target="download.jar">
+		<antcall target="install.env.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="javax/annotation" />
 			<param name="jar.artifactId" value="javax.annotation-api" />
 			<param name="jar.version" value="1.3.1" />
+			<param name="file.version" value="1.3.1" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}/kopf.zip">
@@ -34,17 +41,65 @@
 			</patternset>
 			<cutdirsmapper dirs="2" />
 		</unzip>
+		<!-- fess-ds-csv -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-csv" />
+			<param name="jar.version" value="12.2.0-SNAPSHOT" />
+			<param name="file.version" value="12.2.0-20180531.123118-2" />
+		</antcall>
+		<!-- fess-ds-db -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-db" />
+			<param name="jar.version" value="12.2.0-SNAPSHOT" />
+			<param name="file.version" value="12.2.0-20180531.123917-1" />
+		</antcall>
+		<!-- fess-ds-elasticsearch -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-elasticsearch" />
+			<param name="jar.version" value="12.2.0-SNAPSHOT" />
+			<param name="file.version" value="12.2.0-20180531.131708-2" />
+		</antcall>
+		<!-- fess-ds-gitbucket -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-gitbucket" />
+			<param name="jar.version" value="12.2.0-SNAPSHOT" />
+			<param name="file.version" value="12.2.0-20180531.123534-1" />
+		</antcall>
+		<!-- fess-ds-json -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-json" />
+			<param name="jar.version" value="12.2.0-SNAPSHOT" />
+			<param name="file.version" value="12.2.0-20180531.123347-1" />
+		</antcall>
 	</target>
 
-	<target name="download.jar">
+	<target name="install.env.jar">
 		<get dest="${target.dir}">
-			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${jar.version}.jar" />
+			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
 		</get>
-		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar"
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
 			todir="${crawler.dir}/lib"/>
-		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar"
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
 			todir="${suggest.dir}/lib"/>
-		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar"
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
 			todir="${thumbnail.dir}/lib"/>
+	</target>
+
+	<target name="install.lib.jar">
+		<get dest="${target.dir}">
+			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
+		</get>
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
+			todir="${webinf.dir}/lib"/>
 	</target>
 </project>
