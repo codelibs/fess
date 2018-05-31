@@ -1215,6 +1215,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String LDAP_MAX_USERNAME_LENGTH = "ldap.max.username.length";
 
     /** The key of the configuration. e.g. true */
+    String LDAP_IGNORE_NETBIOS_NAME = "ldap.ignore.netbios.name";
+
+    /** The key of the configuration. e.g. true */
     String LDAP_ROLE_SEARCH_USER_ENABLED = "ldap.role.search.user.enabled";
 
     /** The key of the configuration. e.g. true */
@@ -5313,6 +5316,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getLdapMaxUsernameLengthAsInteger();
 
     /**
+     * Get the value for the key 'ldap.ignore.netbios.name'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapIgnoreNetbiosName();
+
+    /**
+     * Is the property for the key 'ldap.ignore.netbios.name' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapIgnoreNetbiosName();
+
+    /**
      * Get the value for the key 'ldap.role.search.user.enabled'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7858,6 +7875,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.LDAP_MAX_USERNAME_LENGTH);
         }
 
+        public String getLdapIgnoreNetbiosName() {
+            return get(FessConfig.LDAP_IGNORE_NETBIOS_NAME);
+        }
+
+        public boolean isLdapIgnoreNetbiosName() {
+            return is(FessConfig.LDAP_IGNORE_NETBIOS_NAME);
+        }
+
         public String getLdapRoleSearchUserEnabled() {
             return get(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED);
         }
@@ -8506,6 +8531,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES, "groupOfNames");
             defaultMap.put(FessConfig.LDAP_ADMIN_SYNC_PASSWORD, "true");
             defaultMap.put(FessConfig.LDAP_MAX_USERNAME_LENGTH, "-1");
+            defaultMap.put(FessConfig.LDAP_IGNORE_NETBIOS_NAME, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_GROUP_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED, "true");
