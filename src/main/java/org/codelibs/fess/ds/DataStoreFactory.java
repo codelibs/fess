@@ -16,17 +16,26 @@
 package org.codelibs.fess.ds;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DataStoreFactory {
+    private static final Logger logger = LoggerFactory.getLogger(DataStoreFactory.class);
+
     protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<>();
 
     public void add(final String name, final DataStore dataStore) {
         if (name == null || dataStore == null) {
             throw new IllegalArgumentException("name or dataStore is null.");
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Loaded " + name);
         }
         dataStoreMap.put(name, dataStore);
     }
@@ -39,6 +48,7 @@ public class DataStoreFactory {
         final Set<String> nameSet = dataStoreMap.keySet();
         final List<String> nameList = new ArrayList<>();
         nameList.addAll(nameSet);
+        Collections.sort(nameList);
         return nameList;
     }
 
