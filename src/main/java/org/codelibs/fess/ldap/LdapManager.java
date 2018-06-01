@@ -181,6 +181,9 @@ public class LdapManager {
         // LDAP: cn=%s
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, ldapUser.getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("filter: " + filter);
+        }
         search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
             processSearchRoles(result, (entryDn, name) -> {
                 final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
@@ -194,6 +197,9 @@ public class LdapManager {
             });
         });
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("roleList: " + roleList);
+        }
         return roleList.toArray(new String[roleList.size()]);
     }
 
@@ -212,7 +218,10 @@ public class LdapManager {
                 if (attrValue != null) {
                     final String entryDn = attrValue.toString();
 
-                    String name = getSearchRoleName(entryDn);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("entryDn: " + entryDn);
+                    }
+                    final String name = getSearchRoleName(entryDn);
                     if (name != null) {
                         consumer.accept(entryDn, name);
                     }
@@ -243,9 +252,19 @@ public class LdapManager {
             if (values.length == 0) {
                 return null;
             } else if (values.length == 1) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("name(1): " + values[0]);
+                }
                 return values[0];
             }
-            return String.join("\\", Arrays.copyOfRange(values, 1, values.length));
+            name = String.join("\\", Arrays.copyOfRange(values, 1, values.length));
+            if (logger.isDebugEnabled()) {
+                logger.debug("name(2): " + name);
+            }
+            return name;
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("name: " + name);
         }
         return name;
     }
