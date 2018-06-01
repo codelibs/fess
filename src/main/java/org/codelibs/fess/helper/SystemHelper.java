@@ -137,7 +137,7 @@ public class SystemHelper {
     protected void parseProjectProperties() {
         final Path propPath = ResourceUtil.getProjectPropertiesFile();
         try (final InputStream in = Files.newInputStream(propPath)) {
-            Properties prop = new Properties();
+            final Properties prop = new Properties();
             prop.load(in);
             version = prop.getProperty("fess.version", "0.0.0");
             final String[] values = version.split("\\.");
@@ -146,7 +146,7 @@ public class SystemHelper {
             productVersion = majorVersion + "." + minorVersion;
             System.setProperty("fess.version", version);
             System.setProperty("fess.product.version", productVersion);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new FessSystemException("Failed to parse project.properties.", e);
         }
     }

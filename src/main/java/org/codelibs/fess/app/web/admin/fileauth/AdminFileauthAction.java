@@ -106,7 +106,7 @@ public class AdminFileauthAction extends FessAdminAction {
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "fileAuthenticationItems",
                 fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-        RenderDataUtil.register(data, "displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllFileConfigList(false, false, false, null).isEmpty());
         // restore from pager
         copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));
     }
@@ -283,7 +283,7 @@ public class AdminFileauthAction extends FessAdminAction {
 
     protected void registerFileConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final List<FileConfig> fileConfigList = fileConfigService.getAllFileConfigList(false, false, false, null);
+        final List<FileConfig> fileConfigList = crawlingConfigHelper.getAllFileConfigList(false, false, false, null);
         for (final FileConfig fileConfig : fileConfigList) {
             itemList.add(createItem(fileConfig.getName(), fileConfig.getId().toString()));
         }
@@ -317,8 +317,8 @@ public class AdminFileauthAction extends FessAdminAction {
                 data -> {
                     RenderDataUtil.register(data, "fileAuthenticationItems",
                             fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-                    RenderDataUtil.register(data, "displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null)
-                            .isEmpty());
+                    RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper
+                            .getAllFileConfigList(false, false, false, null).isEmpty());
                 }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));

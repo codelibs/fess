@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.SAXParser;
@@ -120,6 +121,7 @@ public class GsaConfigParser extends DefaultHandler {
             labelType = new LabelType();
             labelType.setName(name);
             labelType.setValue(name);
+            labelType.setPermissions(new String[] { "Rguest" });
             labelType.setCreatedBy(Constants.SYSTEM_USER);
             labelType.setCreatedTime(now);
             labelType.setUpdatedBy(Constants.SYSTEM_USER);
@@ -176,6 +178,7 @@ public class GsaConfigParser extends DefaultHandler {
                     webConfig.setExcludedUrls(parseFilterPaths(globalParams.get(BAD_URLS), true, false));
                     webConfig.setExcludedDocUrls(StringUtil.EMPTY);
                     webConfig.setUserAgent(userAgent);
+                    webConfig.setPermissions(new String[] { "Rguest" });
                     webConfig.setCreatedBy(Constants.SYSTEM_USER);
                     webConfig.setCreatedTime(now);
                     webConfig.setUpdatedBy(Constants.SYSTEM_USER);
@@ -199,6 +202,7 @@ public class GsaConfigParser extends DefaultHandler {
                     fileConfig.setIncludedDocPaths(StringUtil.EMPTY);
                     fileConfig.setExcludedPaths(parseFilterPaths(globalParams.get(BAD_URLS), false, true));
                     fileConfig.setExcludedDocPaths(StringUtil.EMPTY);
+                    fileConfig.setPermissions(new String[] { "Rguest" });
                     fileConfig.setCreatedBy(Constants.SYSTEM_USER);
                     fileConfig.setCreatedTime(now);
                     fileConfig.setUpdatedBy(Constants.SYSTEM_USER);
@@ -214,7 +218,7 @@ public class GsaConfigParser extends DefaultHandler {
 
     @Override
     public void characters(final char[] ch, final int start, final int length) throws SAXException {
-        String text = new String(ch, start, length);
+        final String text = new String(ch, start, length);
         if (logger.isDebugEnabled()) {
             logger.debug("Text: " + text);
         }
@@ -223,29 +227,7 @@ public class GsaConfigParser extends DefaultHandler {
 
     protected String parseFilterPaths(final String text, final boolean web, final boolean file) {
         return split(text, "\n").get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(s -> {
-            if (s.startsWith("#")) {
-                return null;
-            } else if (s.startsWith(CONTAINS)) {
-                final String v = s.substring(CONTAINS.length());
-                final StringBuilder buf = new StringBuilder(100);
-                return appendFileterPath(buf, escape(v));
-            } else if (s.startsWith(REGEXP_IGNORE_CASE)) {
-                final String v = s.substring(REGEXP_IGNORE_CASE.length());
-                final StringBuilder buf = new StringBuilder(100);
-                buf.append("(?i)");
-                return appendFileterPath(buf, unescape(v));
-            } else if (s.startsWith(REGEXP)) {
-                final String v = s.substring(REGEXP.length());
-                final StringBuilder buf = new StringBuilder(100);
-                return appendFileterPath(buf, unescape(v));
-            } else if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))) {
-                return escape(s) + ".*";
-            } else if (Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
-                return escape(s) + ".*";
-            } else {
-                final StringBuilder buf = new StringBuilder(100);
-                return appendFileterPath(buf, escape(s));
-            }
+            return getFilterPath(s);
         }).filter(s -> {
             if (StringUtil.isBlank(s)) {
                 return false;
@@ -260,15 +242,43 @@ public class GsaConfigParser extends DefaultHandler {
         }).collect(Collectors.joining("\n")));
     }
 
+    protected String getFilterPath(final String s) {
+        if (s.startsWith("#")) {
+            return StringUtil.EMPTY;
+        } else if (s.startsWith(CONTAINS)) {
+            final String v = s.substring(CONTAINS.length());
+            final StringBuilder buf = new StringBuilder(100);
+            return ".*" + appendFileterPath(buf, escape(v)) + ".*";
+        } else if (s.startsWith(REGEXP_IGNORE_CASE)) {
+            final String v = s.substring(REGEXP_IGNORE_CASE.length());
+            final StringBuilder buf = new StringBuilder(100);
+            buf.append("(?i)");
+            return appendFileterPath(buf, unescape(v));
+        } else if (s.startsWith(REGEXP)) {
+            final String v = s.substring(REGEXP.length());
+            final StringBuilder buf = new StringBuilder(100);
+            return appendFileterPath(buf, unescape(v));
+        } else if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))) {
+            return escape(s) + ".*";
+        } else if (Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
+            return escape(s) + ".*";
+        } else {
+            final StringBuilder buf = new StringBuilder(100);
+            return appendFileterPath(buf, escape(s));
+        }
+    }
+
     protected String escape(final String s) {
-        return s.replace(".", "\\.")//
-                .replace("+", "\\+")//
-                .replace("*", "\\*")//
-                .replace("[", "\\[")//
-                .replace("]", "\\]")//
-                .replace("(", "\\(")//
-                .replace("(", "\\)")//
-                .replace("?", "\\?");
+        if (s.startsWith("#")) {
+            return StringUtil.EMPTY;
+        } else if (s.startsWith("^") && s.endsWith("$")) {
+            return "^" + Pattern.quote(s.substring(1, s.length() - 1)) + "$";
+        } else if (s.startsWith("^")) {
+            return "^" + Pattern.quote(s.substring(1));
+        } else if (s.endsWith("$")) {
+            return Pattern.quote(s.substring(0, s.length() - 1)) + "$";
+        }
+        return Pattern.quote(s);
     }
 
     protected String unescape(final String s) {
@@ -276,12 +286,24 @@ public class GsaConfigParser extends DefaultHandler {
     }
 
     protected String appendFileterPath(final StringBuilder buf, final String v) {
-        if (!v.startsWith("^")) {
-            buf.append(".*");
+        if (StringUtil.isBlank(v)) {
+            return StringUtil.EMPTY;
         }
-        buf.append(v);
-        if (!v.endsWith("$")) {
+
+        if (v.startsWith("^")) {
+            buf.append(v);
+            if (!v.endsWith("$")) {
+                buf.append(".*");
+            }
+        } else if (v.endsWith("$")) {
             buf.append(".*");
+            buf.append(v);
+        } else if (v.endsWith("/\\E")) {
+            buf.append(".*");
+            buf.append(v);
+            buf.append(".*");
+        } else {
+            buf.append(v);
         }
         return buf.toString();
     }

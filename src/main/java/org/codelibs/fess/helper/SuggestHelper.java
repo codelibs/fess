@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
@@ -62,16 +61,7 @@ import org.slf4j.LoggerFactory;
 public class SuggestHelper {
     private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
 
-    private static final String TEXT_SEP = " ";
-
-    @Resource
-    protected ElevateWordBhv elevateWordBhv;
-
-    @Resource
-    protected BadWordBhv badWordBhv;
-
-    @Resource
-    protected FessEsClient fessEsClient;
+    protected static final String TEXT_SEP = " ";
 
     protected Suggester suggester;
 
@@ -96,6 +86,7 @@ public class SuggestHelper {
         split(fessConfig.getSuggestFieldRoles(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(roleFieldNameSet::add));
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
 
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
         final SuggestSettingsBuilder settingsBuilder = SuggestSettings.builder();
@@ -112,7 +103,7 @@ public class SuggestHelper {
         suggester.createIndexIfNothing();
 
         final Set<String> undefinedAnalyzer = suggester.settings().analyzer().checkAnalyzer();
-        if (undefinedAnalyzer.size() > 0) {
+        if (!undefinedAnalyzer.isEmpty()) {
             logger.warn("Undefined lang analyzer. " + undefinedAnalyzer.toString());
         }
 
@@ -194,8 +185,8 @@ public class SuggestHelper {
                 .indexFromDocument(
                         () -> {
                             final ESSourceReader reader =
-                                    new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
-                                            fessConfig.getIndexDocumentType());
+                                    new ESSourceReader(ComponentUtil.getFessEsClient(), suggester.settings(),
+                                            fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType());
                             reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
                             reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
                             reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
@@ -225,7 +216,8 @@ public class SuggestHelper {
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
-        SuggestUtil.deleteByQuery(fessEsClient, suggester.settings(), suggester.getIndex(), suggester.getType(), boolQueryBuilder);
+        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), suggester.getType(),
+                boolQueryBuilder);
     }
 
     public void purgeSearchlogSuggest(final LocalDateTime time) {
@@ -237,7 +229,8 @@ public class SuggestHelper {
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
-        SuggestUtil.deleteByQuery(fessEsClient, suggester.settings(), suggester.getIndex(), suggester.getType(), boolQueryBuilder);
+        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), suggester.getType(),
+                boolQueryBuilder);
     }
 
     public long getAllWordsNum() {
@@ -285,7 +278,7 @@ public class SuggestHelper {
     public void storeAllElevateWords(final boolean apply) {
         deleteAllElevateWord(apply);
 
-        final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
+        final List<ElevateWord> list = ComponentUtil.getComponent(ElevateWordBhv.class).selectList(cb -> {
             cb.query().matchAll();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageElevateWordMaxFetchSizeAsInteger());
         });
@@ -298,7 +291,7 @@ public class SuggestHelper {
     }
 
     public void deleteAllElevateWord(final boolean apply) {
-        final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
+        final List<ElevateWord> list = ComponentUtil.getComponent(ElevateWordBhv.class).selectList(cb -> {
             cb.query().matchAll();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageElevateWordMaxFetchSizeAsInteger());
         });
@@ -349,7 +342,7 @@ public class SuggestHelper {
 
     public void storeAllBadWords(final boolean apply) {
         deleteAllBadWords();
-        final List<BadWord> list = badWordBhv.selectList(cb -> {
+        final List<BadWord> list = ComponentUtil.getComponent(BadWordBhv.class).selectList(cb -> {
             cb.query().matchAll();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageBadWordMaxFetchSizeAsInteger());
         });

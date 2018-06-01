@@ -24,7 +24,6 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -33,7 +32,6 @@ import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public class QueryHelperTest extends UnitFessTestCase {
 
@@ -49,17 +47,15 @@ public class QueryHelperTest extends UnitFessTestCase {
                 queryParser.setDefaultOperator(QueryParser.Operator.AND);
                 return queryParser;
             }
-
         };
         File file = File.createTempFile("test", ".properties");
         file.deleteOnExit();
         FileUtil.writeBytes(file.getAbsolutePath(), "ldap.security.principal=%s@fess.codelibs.local".getBytes("UTF-8"));
         DynamicProperties systemProps = new DynamicProperties(file);
-        SingletonLaContainerFactory.getContainer().register(systemProps, "systemProperties");
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        registerMock(fessConfig);
-        registerMock(new SystemHelper());
-        registerMock(new VirtualHostHelper());
+        ComponentUtil.register(systemProps, "systemProperties");
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
+        ComponentUtil.register(new KeyMatchHelper(), "keyMatchHelper");
         inject(queryHelper);
         queryHelper.init();
     }

@@ -42,7 +42,7 @@ public class QueryStringBuilder {
         final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
         final StringBuilder queryBuf = new StringBuilder(255);
 
-        Map<String, String[]> conditions = params.getConditions();
+        final Map<String, String[]> conditions = params.getConditions();
         if (params.hasConditionQuery()) {
             appendConditions(queryBuf, conditions);
         } else {
@@ -97,7 +97,7 @@ public class QueryStringBuilder {
         return queryBuf.toString().trim();
     }
 
-    protected void appendConditions(StringBuilder queryBuf, Map<String, String[]> conditions) {
+    protected void appendConditions(final StringBuilder queryBuf, final Map<String, String[]> conditions) {
         if (conditions == null) {
             return;
         }
@@ -144,7 +144,7 @@ public class QueryStringBuilder {
 
     protected String escape(final String q, final String... values) {
         String value = q;
-        for (String s : values) {
+        for (final String s : values) {
             value = value.replace(s, "\\" + s);
         }
         return value;

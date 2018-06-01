@@ -172,7 +172,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         return buf.toString();
     }
 
-    public void setMimeType(String mimeType) {
+    public void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
     }
 

@@ -19,11 +19,11 @@ public class GsaConfigException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public GsaConfigException(String message, Throwable cause) {
+    public GsaConfigException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public GsaConfigException(String message) {
+    public GsaConfigException(final String message) {
         super(message);
     }
 

@@ -61,12 +61,16 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchService {
 
     // ===================================================================================
     //                                                                            Constant
     //
+
+    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -97,23 +101,36 @@ public class SearchService {
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
         });
 
-        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
-
         final int pageStart = params.getStartPosition();
         final int pageSize = params.getPageSize();
         final String sortField = params.getSort();
+        final String query;
+        if (StringUtil.isBlank(sortField)) {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build();
+        } else {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
+        }
         final List<Map<String, Object>> documentItems =
                 fessEsClient.search(
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            queryHelper.processSearchPreference(searchRequestBuilder, userBean);
-                            return SearchConditionBuilder.builder(searchRequestBuilder)
-                                    .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
-                                    .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
+                            queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
+                            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
+                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
                                     .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
                                     .searchRequestType(params.getType()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
+                            searchResponse.ifPresent(r -> {
+                                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
+                                    // partial results
+                                    StringBuilder buf = new StringBuilder(1000);
+                                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
+                                            .append(",\"request\":").append(searchRequestBuilder.toString())//
+                                            .append(",\"response\":").append(r.toString()).append('}');
+                                    logger.warn(buf.toString());
+                                }
+                            });
                             final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
                             queryResponseList.init(searchResponse, pageStart, pageSize);
                             return queryResponseList;
@@ -184,17 +201,20 @@ public class SearchService {
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
         });
 
-        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
-
         final int pageSize = params.getPageSize();
         final String sortField = params.getSort();
+        final String query;
+        if (StringUtil.isBlank(sortField)) {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build();
+        } else {
+            query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
+        }
         return fessEsClient.<Map<String, Object>> scrollSearch(
                 fessConfig.getIndexDocumentSearchIndex(),
                 fessConfig.getIndexDocumentType(),
                 searchRequestBuilder -> {
-                    queryHelper.processSearchPreference(searchRequestBuilder, userBean);
-                    return SearchConditionBuilder.builder(searchRequestBuilder).scroll()
-                            .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).size(pageSize)
+                    queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
+                    return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
                 },
                 (searchResponse, hit) -> {
@@ -296,7 +316,7 @@ public class SearchService {
                     }
                     builder.setQuery(boolQuery);
                     builder.setFetchSource(fields, null);
-                    queryHelper.processSearchPreference(builder, userBean);
+                    queryHelper.processSearchPreference(builder, userBean, docId);
                     return true;
                 });
 
@@ -323,7 +343,7 @@ public class SearchService {
                     builder.setQuery(boolQuery);
                     builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
                     builder.setFetchSource(fields, null);
-                    queryHelper.processSearchPreference(builder, userBean);
+                    queryHelper.processSearchPreference(builder, userBean, String.join(StringUtil.EMPTY, docIds));
                     return true;
                 });
     }

@@ -16,10 +16,7 @@
 package org.codelibs.fess.app.service;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
@@ -37,7 +34,6 @@ import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -120,41 +116,6 @@ public class FailureUrlService {
             cb.query().setErrorName_Wildcard(failureUrlPager.errorName);
         }
 
-    }
-
-    public List<String> getExcludedUrlList(final String configId) {
-        final int failureCount = fessConfig.getFailureCountThreshold();
-        final String ignoreFailureType = fessConfig.getIgnoreFailureType();
-
-        if (failureCount < 0) {
-            return Collections.emptyList();
-        }
-
-        final int count = failureCount;
-        final ListResultBean<FailureUrl> list = failureUrlBhv.selectList(cb -> {
-            cb.query().setConfigId_Equal(configId);
-            cb.query().setErrorCount_GreaterEqual(count);
-            cb.fetchFirst(fessConfig.getPageFailureUrlMaxFetchSizeAsInteger());
-        });
-        if (list.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        Pattern pattern = null;
-        if (StringUtil.isNotBlank(ignoreFailureType)) {
-            pattern = Pattern.compile(ignoreFailureType);
-        }
-        final List<String> urlList = new ArrayList<>();
-        for (final FailureUrl failureUrl : list) {
-            if (pattern != null) {
-                if (!pattern.matcher(failureUrl.getErrorName()).matches()) {
-                    urlList.add(failureUrl.getUrl());
-                }
-            } else {
-                urlList.add(failureUrl.getUrl());
-            }
-        }
-        return urlList;
     }
 
     public void deleteByConfigId(final String configId) {

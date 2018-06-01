@@ -119,7 +119,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 // branch is empty when git repository is empty.
                 if (StringUtil.isNotEmpty(branch)) {
                     final String refStr = getGitRef(rootURL, authToken, owner, name, branch);
-                    logger.info("Crawl " + owner + "/" + name);
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Crawl " + owner + "/" + name);
+                    }
                     // crawl and store file contents recursively
                     crawlFileContents(
                             rootURL,
@@ -139,7 +141,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                             });
                 }
 
-                logger.info("Crawl issues in " + owner + "/" + name);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Crawl issues in " + owner + "/" + name);
+                }
                 // store issues
                 for (int issueId = 1; issueId <= issueCount + pullCount; issueId++) {
                     storeIssueById(rootURL, authToken, issueLabel, owner, name, new Integer(issueId), roleList, crawlingConfig, callback,
@@ -150,7 +154,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                     }
                 }
 
-                logger.info("Crawl Wiki in " + owner + "/" + name);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Crawl Wiki in " + owner + "/" + name);
+                }
                 // crawl Wiki
                 storeWikiContents(rootURL, authToken, wikiLabel, owner, name, roleList, crawlingConfig, callback, paramMap, scriptMap,
                         defaultDataMap, readInterval);
@@ -229,7 +235,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             }
         } while (repoList.size() < totalCount);
 
-        logger.info("There exist " + repoList.size() + " repositories");
+        if (logger.isInfoEnabled()) {
+            logger.info("There exist " + repoList.size() + " repositories");
+        }
         return repoList;
     }
 
@@ -389,7 +397,6 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
 
         for (final String page : pageList) {
-            // FIXME: URL encoding (e.g. page name that contains spaces)
             final String pageUrl = wikiUrl + "/contents/" + page + ".md";
             final String viewUrl = rootURL + owner + "/" + name + "/wiki/" + page;
 
@@ -399,7 +406,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
             final Map<String, Object> dataMap = new HashMap<>();
             dataMap.putAll(defaultDataMap);
-            dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"), pageUrl));
+            dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"),
+                    pageUrl.replace("+", "%20")));
 
             dataMap.put("url", viewUrl);
             dataMap.put("role", roleList);
@@ -408,7 +416,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             // TODO scriptMap
 
             callback.store(paramMap, dataMap);
-            logger.info("Stored " + pageUrl);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Stored " + pageUrl);
+            }
 
             if (readInterval > 0) {
                 sleep(readInterval);
@@ -453,7 +463,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    private String encode(final String rootURL, final String path, final String query) {
+    protected String encode(final String rootURL, final String path, final String query) {
         try {
             final URI rootURI = new URI(rootURL);
             final URI uri =

@@ -17,7 +17,6 @@ package org.codelibs.fess.helper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,10 +30,33 @@ import org.codelibs.fess.util.ComponentUtil;
 public class ViewHelperTest extends UnitFessTestCase {
     public ViewHelper viewHelper;
 
+    private UserAgentHelper userAgentHelper;
+
+    private PathMappingHelper pathMappingHelper;
+
+    private File propertiesFile;
+
+    @Override
     public void setUp() throws Exception {
         super.setUp();
+        propertiesFile = File.createTempFile("test", ".properties");
+        FileUtil.writeBytes(propertiesFile.getAbsolutePath(), new byte[0]);
+        propertiesFile.deleteOnExit();
+        DynamicProperties systemProps = new DynamicProperties(propertiesFile);
+        ComponentUtil.register(systemProps, "systemProperties");
+        userAgentHelper = new UserAgentHelper();
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+        pathMappingHelper = new PathMappingHelper();
+        pathMappingHelper.init();
+        ComponentUtil.register(pathMappingHelper, "pathMappingHelper");
         viewHelper = new ViewHelper();
         viewHelper.init();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        propertiesFile.delete();
+        super.tearDown();
     }
 
     public void test_getUrlLink() throws IOException {
@@ -88,15 +110,13 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertUrlLink("ftp://www.codelibs.org/%z", //
                 "ftp://www.codelibs.org/%z");
 
-        viewHelper.userAgentHelper = new UserAgentHelper() {
+        userAgentHelper = new UserAgentHelper() {
             public UserAgentType getUserAgentType() {
                 return UserAgentType.IE;
             }
         };
-        File tempFile = File.createTempFile("test", ".properties");
-        FileUtil.writeBytes(tempFile.getAbsolutePath(), new byte[0]);
-        tempFile.deleteOnExit();
-        viewHelper.systemProperties = new DynamicProperties(tempFile);
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+        FileUtil.writeBytes(propertiesFile.getAbsolutePath(), new byte[0]);
 
         // file
         assertUrlLink("file:/home/taro/test.txt", //
@@ -117,9 +137,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         PathMapping pathMapping = new PathMapping();
         pathMapping.setRegex("ftp:");
         pathMapping.setReplacement("file:");
-        viewHelper.pathMappingHelper = new PathMappingHelper();
-        viewHelper.pathMappingHelper.cachedPathMappingList = new ArrayList<>();
-        viewHelper.pathMappingHelper.cachedPathMappingList.add(pathMapping);
+        ComponentUtil.getPathMappingHelper().cachedPathMappingList.add(pathMapping);
         // ftp->file
         assertUrlLink("ftp:/home/taro/test.txt", //
                 "file://home/taro/test.txt");

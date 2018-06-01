@@ -34,11 +34,11 @@ import org.slf4j.LoggerFactory;
 public class IndexingHelper {
     private static final Logger logger = LoggerFactory.getLogger(IndexingHelper.class);
 
-    public int maxRetryCount = 5;
+    protected int maxRetryCount = 5;
 
-    public int defaultRowSize = 100;
+    protected int defaultRowSize = 100;
 
-    public long requestInterval = 500;
+    protected long requestInterval = 500;
 
     public void sendDocuments(final FessEsClient fessEsClient, final DocList docList) {
         if (docList.isEmpty()) {
@@ -198,5 +198,17 @@ public class IndexingHelper {
                     return true;
                 });
 
+    }
+
+    public void setMaxRetryCount(final int maxRetryCount) {
+        this.maxRetryCount = maxRetryCount;
+    }
+
+    public void setDefaultRowSize(final int defaultRowSize) {
+        this.defaultRowSize = defaultRowSize;
+    }
+
+    public void setRequestInterval(final long requestInterval) {
+        this.requestInterval = requestInterval;
     }
 }

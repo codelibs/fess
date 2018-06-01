@@ -42,7 +42,7 @@ public class SambaHelper {
 
     public static final int SID_TYPE_WKN_GRP = 5;
 
-    private FessConfig fessConfig;
+    protected FessConfig fessConfig;
 
     @PostConstruct
     public void init() {

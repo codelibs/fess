@@ -68,7 +68,7 @@ public class PathMapping extends BsPathMapping {
             }
             try {
                 return pathMapper.apply(input, matcher);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to apply " + pathMapper, e);
             }
         }

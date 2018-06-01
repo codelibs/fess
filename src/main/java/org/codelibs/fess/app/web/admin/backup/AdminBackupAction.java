@@ -113,7 +113,7 @@ public class AdminBackupAction extends FessAdminAction {
                     logger.warn("Failed to process system.properties file: " + form.bulkFile.getFileName(), e);
                 }
             } else if (fileName.startsWith("gsa") && fileName.endsWith(".xml")) {
-                GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
+                final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
                 try (final InputStream in = form.bulkFile.getInputStream()) {
                     configParser.parse(new InputSource(in));
                 } catch (final IOException e) {
@@ -180,7 +180,8 @@ public class AdminBackupAction extends FessAdminAction {
                 return asStream(filename).contentTypeOctetStream().stream(
                         out -> {
                             try (CurlResponse response =
-                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
+                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json")
+                                            .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
                                 out.write(response.getContentAsStream());
                             }
                         });

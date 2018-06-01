@@ -15,9 +15,11 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
 import org.codelibs.fess.exception.UserRoleLoginException;
+import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
@@ -30,6 +32,12 @@ import org.lastaflute.web.util.LaServletContextUtil;
  * @author jflute
  */
 public abstract class FessAdminAction extends FessBaseAction {
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    @Resource
+    protected CrawlingConfigHelper crawlingConfigHelper;
 
     // ===================================================================================
     //                                                                        Small Helper

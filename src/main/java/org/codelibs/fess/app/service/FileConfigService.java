@@ -80,33 +80,6 @@ public class FileConfigService {
         });
     }
 
-    public List<FileConfig> getAllFileConfigList() {
-        return getAllFileConfigList(true, true, true, null);
-    }
-
-    public List<FileConfig> getFileConfigListByIds(final List<String> idList) {
-        if (idList == null) {
-            return getAllFileConfigList();
-        } else {
-            return getAllFileConfigList(true, true, false, idList);
-        }
-    }
-
-    public List<FileConfig> getAllFileConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
-            final List<String> idList) {
-        return fileConfigBhv.selectList(cb -> {
-            if (available) {
-                cb.query().setAvailable_Equal(Constants.T);
-            }
-            if (idList != null) {
-                cb.query().setId_InScope(idList);
-            }
-            cb.query().addOrderBy_SortOrder_Asc();
-            cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(fessConfig.getPageFileConfigMaxFetchSizeAsInteger());
-        });
-    }
-
     public OptionalEntity<FileConfig> getFileConfig(final String id) {
         return fileConfigBhv.selectByPK(id).map(entity -> {
 

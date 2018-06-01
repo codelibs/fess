@@ -51,31 +51,31 @@ import org.slf4j.LoggerFactory;
  */
 public class RoleQueryHelper {
 
-    private static final String USER_ROLES = "userRoles";
-
     private static final Logger logger = LoggerFactory.getLogger(RoleQueryHelper.class);
 
-    public CachedCipher cipher;
+    protected static final String USER_ROLES = "userRoles";
 
-    public String valueSeparator = "\n";
+    protected CachedCipher cipher;
 
-    public String roleSeparator = ",";
+    protected String valueSeparator = "\n";
 
-    public String parameterKey;
+    protected String roleSeparator = ",";
 
-    public boolean encryptedParameterValue = true;
+    protected String parameterKey;
 
-    public String headerKey;
+    protected boolean encryptedParameterValue = true;
 
-    public boolean encryptedHeaderValue = true;
+    protected String headerKey;
 
-    public String cookieKey;
+    protected boolean encryptedHeaderValue = true;
 
-    public boolean encryptedCookieValue = true;
+    protected String cookieKey;
+
+    protected boolean encryptedCookieValue = true;
 
     protected Map<String, String> cookieNameMap;
 
-    private final List<String> defaultRoleList = new ArrayList<>();
+    protected final List<String> defaultRoleList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -256,6 +256,42 @@ public class RoleQueryHelper {
             cookieNameMap = new HashMap<>();
         }
         cookieNameMap.put(cookieName, roleName);
+    }
+
+    public void setCipher(final CachedCipher cipher) {
+        this.cipher = cipher;
+    }
+
+    public void setValueSeparator(final String valueSeparator) {
+        this.valueSeparator = valueSeparator;
+    }
+
+    public void setRoleSeparator(final String roleSeparator) {
+        this.roleSeparator = roleSeparator;
+    }
+
+    public void setParameterKey(final String parameterKey) {
+        this.parameterKey = parameterKey;
+    }
+
+    public void setEncryptedParameterValue(final boolean encryptedParameterValue) {
+        this.encryptedParameterValue = encryptedParameterValue;
+    }
+
+    public void setHeaderKey(final String headerKey) {
+        this.headerKey = headerKey;
+    }
+
+    public void setEncryptedHeaderValue(final boolean encryptedHeaderValue) {
+        this.encryptedHeaderValue = encryptedHeaderValue;
+    }
+
+    public void setCookieKey(final String cookieKey) {
+        this.cookieKey = cookieKey;
+    }
+
+    public void setEncryptedCookieValue(final boolean encryptedCookieValue) {
+        this.encryptedCookieValue = encryptedCookieValue;
     }
 
 }

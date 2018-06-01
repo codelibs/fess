@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -41,9 +40,6 @@ import org.slf4j.LoggerFactory;
 
 public class LabelTypeHelper {
     private static final Logger logger = LoggerFactory.getLogger(LabelTypeHelper.class);
-
-    @Resource
-    protected RoleQueryHelper roleQueryHelper;
 
     protected volatile List<LabelTypeItem> labelTypeItemList = new ArrayList<>();
 
@@ -92,7 +88,7 @@ public class LabelTypeHelper {
         }
 
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
+        final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
         if (roleSet.isEmpty()) {
             for (final LabelTypeItem item : labelList) {
                 if (item.getPermissions().length == 0) {

@@ -81,7 +81,7 @@ public interface SearchRequestParams {
                 || !isEmptyArray(conditions.get(AS_FILETYPE));
     }
 
-    public default boolean isEmptyArray(String[] values) {
+    public default boolean isEmptyArray(final String[] values) {
         if (values == null || values.length == 0) {
             return true;
         }
