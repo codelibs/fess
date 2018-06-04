@@ -15,50 +15,52 @@
  */
 package org.codelibs.fess.util;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class KuromojiCSVUtilTest extends UnitFessTestCase {
     public void test_parse() {
-        // ArrayListいらなくない？
         String value;
-        ArrayList<String> expected;
-        ArrayList<String> actual;
+        List<String> expected;
+        List<String> actual;
 
         value = "フェス";
         expected = Arrays.asList("フェス");
         actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
+        assertThat(actual, is(expected));
 
-        value = "フェス, Fess";
+        value = "フェス,Fess";
         expected = Arrays.asList("フェス", "Fess");
         actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
+        assertThat(actual, is(expected));
 
-        value = "Fess, フェス";
+        value = "Fess,フェス";
         expected = Arrays.asList("Fess", "フェス");
         actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
+        assertThat(actual, is(expected));
 
-        value = "\"Fess, FESS\"";
-        expected = Arrays.asList("Fess, FESS");
+        value = "\"Fess,FESS\"";
+        expected = Arrays.asList("\"Fess,FESS\"");
         actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
-
-        value = "";
-        expected = Arrays.asList();
-        actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
+        assertThat(actual, is(expected));
 
         value = " ";
         expected = Arrays.asList(" ");
         actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
+        assertThat(actual, is(expected));
+
+        value = "";
+        expected = Arrays.asList("");
+        actual = Arrays.asList(KuromojiCSVUtil.parse(value));
+        assertThat(actual, is(expected));
 
         value = "\"Fess\"Fess\"";
         expected = Arrays.asList();
         actual = Arrays.asList(KuromojiCSVUtil.parse(value));
-        assertArrayEquals(expected.toArray(),actual.toArray());
+        assertThat(actual, is(expected));
     }
 }
