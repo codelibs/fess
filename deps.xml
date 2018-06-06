@@ -47,7 +47,7 @@
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-csv" />
 			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180531.123118-2" />
+			<param name="file.version" value="12.2.0-20180602.214338-6" />
 		</antcall>
 		<!-- fess-ds-db -->
 		<antcall target="install.lib.jar">
@@ -55,7 +55,7 @@
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-db" />
 			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180531.123917-1" />
+			<param name="file.version" value="12.2.0-20180602.214532-5" />
 		</antcall>
 		<!-- fess-ds-elasticsearch -->
 		<antcall target="install.lib.jar">
@@ -63,7 +63,7 @@
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-elasticsearch" />
 			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180531.131708-2" />
+			<param name="file.version" value="12.2.0-20180602.214718-6" />
 		</antcall>
 		<!-- fess-ds-gitbucket -->
 		<antcall target="install.lib.jar">
@@ -71,7 +71,7 @@
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-gitbucket" />
 			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180531.123534-1" />
+			<param name="file.version" value="12.2.0-20180602.214859-5" />
 		</antcall>
 		<!-- fess-ds-json -->
 		<antcall target="install.lib.jar">
@@ -79,7 +79,7 @@
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-json" />
 			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180531.123347-1" />
+			<param name="file.version" value="12.2.0-20180602.215057-5" />
 		</antcall>
 	</target>
 
