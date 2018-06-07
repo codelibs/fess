@@ -22,3 +22,4 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertTrue(MemoryUtil.getUsedMemory() >= 0);
     }
 }
+
