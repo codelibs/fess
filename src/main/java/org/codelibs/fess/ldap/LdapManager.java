@@ -18,7 +18,6 @@ package org.codelibs.fess.ldap;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -247,22 +246,7 @@ public class LdapManager {
         } else {
             name = entryDn.substring(start, end);
         }
-        if (fessConfig.isLdapIgnoreNetbiosName()) {
-            final String[] values = name.split("\\\\");
-            if (values.length == 0) {
-                return null;
-            } else if (values.length == 1) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("name(1): " + values[0]);
-                }
-                return values[0];
-            }
-            name = String.join("\\", Arrays.copyOfRange(values, 1, values.length));
-            if (logger.isDebugEnabled()) {
-                logger.debug("name(2): " + name);
-            }
-            return name;
-        }
+        name = fessConfig.getCanonicalLdapName(name);
         if (logger.isDebugEnabled()) {
             logger.debug("name: " + name);
         }
