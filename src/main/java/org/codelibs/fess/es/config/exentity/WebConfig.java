@@ -238,16 +238,10 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
                 rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
 
-        final String proxyHost = (String) paramMap.get("proxyHost");
-        final String proxyPort = (String) paramMap.get("proxyPort");
-        if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
-            // proxy credentials
-            if (paramMap.get("proxyUsername") != null && paramMap.get("proxyPassword") != null) {
-                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(paramMap.remove("proxyUsername")
-                        .toString(), paramMap.remove("proxyPassword").toString()));
-            }
-        } else {
-            initializeDefaultHttpProxy(paramMap);
+        // proxy credentials
+        if (paramMap.get("proxyUsername") != null && paramMap.get("proxyPassword") != null) {
+            paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(paramMap.remove("proxyUsername")
+                    .toString(), paramMap.remove("proxyPassword").toString()));
         }
 
         return paramMap;

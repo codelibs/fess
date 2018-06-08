@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<footer role="contentinfo">
-	<div class="container text-center">
-		<p class="textmuted">
+<footer class="bd-footer text-muted" role="contentinfo">
+	<div id="footer" class="container center">
+		<p>
 			<la:message key="labels.footer.copyright" />
 		</p>
 	</div>

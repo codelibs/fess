@@ -250,8 +250,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             if (proxyUsername != null && proxyPassword != null) {
                 factoryParamMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(proxyUsername, proxyPassword));
             }
-        } else {
-            initializeDefaultHttpProxy(factoryParamMap);
         }
 
         // file auth

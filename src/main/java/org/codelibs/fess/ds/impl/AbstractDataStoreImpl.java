@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds;
+package org.codelibs.fess.ds.impl;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
@@ -25,7 +25,8 @@ import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.ds.callback.IndexUpdateCallback;
+import org.codelibs.fess.ds.DataStore;
+import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -35,19 +36,13 @@ import org.codelibs.fess.util.GroovyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractDataStore implements DataStore {
+public abstract class AbstractDataStoreImpl implements DataStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractDataStore.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractDataStoreImpl.class);
 
     public String mimeType = "application/datastore";
 
     protected boolean alive = true;
-
-    public void register() {
-        ComponentUtil.getDataStoreFactory().add(getName(), this);
-    }
-
-    protected abstract String getName();
 
     @Override
     public void stop() {

@@ -17,7 +17,6 @@ package org.codelibs.fess.ds;
 
 import java.util.Map;
 
-import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 
 public interface DataStore {

@@ -6,11 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.profile.title" /></title>
-<link href="${fe:url('/css/admin/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/skins/skin-blue.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/style-base.css')}" rel="stylesheet"
+	type="text/css" />
+<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/style.css')}" rel="stylesheet"
+	type="text/css" />
+<link href="${fe:url('/css/admin/font-awesome.min.css')}"
+	rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet"
+	type="text/css" />
+<link href="${fe:url('/css/admin/skins/skin-blue.min.css')}"
+	rel="stylesheet" type="text/css" />
 <!--[if lt IE 9]>
 <script src="${fe:url('/css/admin/html5shiv.min.js')}"></script>
 <script src="${fe:url('/css/admin/respond.min.js')}"></script>
@@ -67,28 +73,36 @@
 							     placeholder="${ph_confirm_password}" />
 					</div>
 				</div>
-				<div class="text-center">
-					<la:link href="/"
-						styleClass="btn btn-default">
-						<i class="fa fa-arrow-circle-left"></i>
-						<la:message key="labels.profile.back" />
-					</la:link>
-					<button type="submit" name="changePassword"
-						class="btn btn-warning"
-						value="<la:message key="labels.profile.update"/>">
-						<i class="fa fa-pencil"></i>
-						<la:message key="labels.profile.update" />
-					</button>
+				<div class="row">
+					<div class="col-xs-2"></div>
+					<!-- /.col -->
+					<div class="col-xs-8">
+						<la:link href="/"
+							styleClass="btn btn-default">
+							<i class="fa fa-arrow-circle-left"></i>
+							<la:message key="labels.profile.back" />
+						</la:link>
+						<button type="submit" name="changePassword"
+							class="btn btn-warning"
+							value="<la:message key="labels.profile.update"/>">
+							<i class="fa fa-pencil"></i>
+							<la:message key="labels.profile.update" />
+						</button>
+					</div>
+					<!-- /.col -->
+					<div class="col-xs-2"></div>
+					<!-- /.col -->
 				</div>
 			</la:form>
 		</div>
 		<!-- /.login-box-body -->
 	</div>
 	<!-- /.login-box -->
+	<jsp:include page="../footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
-		src="${fe:url('/js/admin/jquery-3.2.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/admin/bootstrap.min.js')}"></script>
+		src="${fe:url('/js/jquery-3.2.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/profile.js')}"></script>
 </body>
 </html>

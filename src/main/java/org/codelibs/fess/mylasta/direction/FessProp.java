@@ -1817,18 +1817,4 @@ public interface FessProp {
                 stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
-    boolean isLdapIgnoreNetbiosName();
-
-    public default String getCanonicalLdapName(final String name) {
-        if (isLdapIgnoreNetbiosName()) {
-            final String[] values = name.split("\\\\");
-            if (values.length == 0) {
-                return null;
-            } else if (values.length == 1) {
-                return values[0];
-            }
-            return String.join("\\", Arrays.copyOfRange(values, 1, values.length));
-        }
-        return name;
-    }
 }

@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds.callback;
+package org.codelibs.fess.ds.impl;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
@@ -40,6 +40,7 @@ import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.crawler.transformer.Transformer;
+import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.helper.IndexingHelper;
@@ -66,8 +67,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     private int executorTerminationTimeout = 300;
 
-    public FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback, final CrawlerClientFactory crawlerClientFactory,
-            final int nThreads) {
+    protected FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback,
+            final CrawlerClientFactory crawlerClientFactory, final int nThreads) {
         this.indexUpdateCallback = indexUpdateCallback;
         this.crawlerClientFactory = crawlerClientFactory;
         executor = newFixedThreadPool(nThreads < 1 ? 1 : nThreads);

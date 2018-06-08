@@ -93,7 +93,7 @@ public class SearchListTests extends CrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        //        updateMap.put("click_count", 100);
+//        updateMap.put("click_count", 100);
         return updateMap;
     }
 

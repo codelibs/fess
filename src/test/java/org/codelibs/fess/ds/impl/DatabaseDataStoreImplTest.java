@@ -13,33 +13,20 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds;
+package org.codelibs.fess.ds.impl;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.ds.callback.IndexUpdateCallback;
-import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
-public class AbstractDataStoreTest extends UnitFessTestCase {
-    public AbstractDataStore dataStore;
+public class DatabaseDataStoreImplTest extends UnitFessTestCase {
+    public DatabaseDataStoreImpl databaseDataStore;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        dataStore = new AbstractDataStore() {
-            @Override
-            protected String getName() {
-                return "Test";
-            }
-
-            @Override
-            protected void storeData(DataConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,
-                    Map<String, String> scriptMap, Map<String, Object> defaultDataMap) {
-                // TODO nothing
-            }
-        };
+        databaseDataStore = new DatabaseDataStoreImpl();
     }
 
     public void test_convertValue() {
@@ -50,24 +37,24 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
         paramMap.put("param3", "PARAM3*");
 
         value = "\"abc\"";
-        assertEquals("abc", dataStore.convertValue(value, paramMap));
+        assertEquals("abc", databaseDataStore.convertValue(value, paramMap));
 
         value = "param1";
-        assertEquals("PARAM1", dataStore.convertValue(value, paramMap));
+        assertEquals("PARAM1", databaseDataStore.convertValue(value, paramMap));
 
         value = "param2";
-        assertEquals("PARAM2+", dataStore.convertValue(value, paramMap));
+        assertEquals("PARAM2+", databaseDataStore.convertValue(value, paramMap));
 
         value = "\"123\"+param2+\",\"+param3+\"abc\"";
-        assertEquals("123PARAM2+,PARAM3*abc", dataStore.convertValue(value, paramMap));
+        assertEquals("123PARAM2+,PARAM3*abc", databaseDataStore.convertValue(value, paramMap));
 
         value = null;
-        assertEquals("", dataStore.convertValue(value, paramMap));
+        assertEquals("", databaseDataStore.convertValue(value, paramMap));
 
         value = "";
-        assertEquals("", dataStore.convertValue(value, paramMap));
+        assertEquals("", databaseDataStore.convertValue(value, paramMap));
 
         value = " ";
-        assertNull(dataStore.convertValue(value, paramMap));
+        assertNull(databaseDataStore.convertValue(value, paramMap));
     }
 }

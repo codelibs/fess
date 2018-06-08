@@ -13,13 +13,14 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds.callback;
+package org.codelibs.fess.ds.impl;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -50,7 +51,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     /* (non-Javadoc)
-     * @see org.codelibs.fess.ds.callback.IndexUpdateCallback#store(java.util.Map)
+     * @see org.codelibs.fess.ds.impl.IndexUpdateCallback#store(java.util.Map)
      */
     @Override
     public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {

@@ -6,11 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.login.title" /></title>
-<link href="${fe:url('/css/admin/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/skins/skin-blue.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/style-base.css')}" rel="stylesheet"
+	type="text/css" />
+<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/style.css')}" rel="stylesheet"
+	type="text/css" />
+<link href="${fe:url('/css/admin/font-awesome.min.css')}"
+	rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet"
+	type="text/css" />
+<link href="${fe:url('/css/admin/skins/skin-blue.min.css')}"
+	rel="stylesheet" type="text/css" />
 <!--[if lt IE 9]>
 <script src="${fe:url('/css/admin/html5shiv.min.js')}"></script>
 <script src="${fe:url('/css/admin/respond.min.js')}"></script>
@@ -58,23 +64,31 @@
 							placeholder="${ph_password}" />
 					</div>
 				</div>
-				<div class="text-center">
-					<button type="submit" name="login"
-						class="btn btn-primary btn-block btn-flat"
-						value="<la:message key="labels.login"/>">
-						<i class="fa fa-sign-in"></i>
-						<la:message key="labels.login" />
-					</button>
+				<div class="row">
+					<div class="col-xs-3"></div>
+					<!-- /.col -->
+					<div class="col-xs-6">
+						<button type="submit" name="login"
+							class="btn btn-primary btn-block btn-flat"
+							value="<la:message key="labels.login"/>">
+							<i class="fa fa-sign-in"></i>
+							<la:message key="labels.login" />
+						</button>
+					</div>
+					<!-- /.col -->
+					<div class="col-xs-3"></div>
+					<!-- /.col -->
 				</div>
 			</la:form>
 		</div>
 		<!-- /.login-box-body -->
 	</div>
 	<!-- /.login-box -->
+	<jsp:include page="../footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
-		src="${fe:url('/js/admin/jquery-3.2.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/admin/bootstrap.min.js')}"></script>
+		src="${fe:url('/js/jquery-3.2.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/login.js')}"></script>
 </body>
 </html>

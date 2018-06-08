@@ -57,6 +57,6 @@ public class SambaHelper {
     }
 
     protected String createSearchRole(final int type, final String name) {
-        return type + fessConfig.getCanonicalLdapName(name);
+        return type + name;
     }
 }

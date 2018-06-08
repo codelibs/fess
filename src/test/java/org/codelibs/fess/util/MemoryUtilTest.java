@@ -18,9 +18,8 @@ package org.codelibs.fess.util;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class MemoryUtilTest extends UnitFessTestCase {
-
     public void test_getUsedMemory() {
         assertTrue(MemoryUtil.getUsedMemory() >= 0);
     }
-
 }
+
