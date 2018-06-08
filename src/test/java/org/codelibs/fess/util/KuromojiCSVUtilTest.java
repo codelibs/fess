@@ -21,7 +21,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class KuromojiCSVUtilTest extends UnitFessTestCase {
     public void test_parse() {
-        // ArrayListいらなくない？
         String value;
         ArrayList<String> expected;
         ArrayList<String> actual;
