@@ -18,7 +18,9 @@ package org.codelibs.fess.helper;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -26,6 +28,7 @@ import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 public class ViewHelperTest extends UnitFessTestCase {
     public ViewHelper viewHelper;
@@ -209,7 +212,7 @@ public class ViewHelperTest extends UnitFessTestCase {
     }
 
     public void test_escapeHighlight() {
-        viewHelper = new ViewHelper();
+        ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
 
         String text = "";
@@ -284,5 +287,42 @@ public class ViewHelperTest extends UnitFessTestCase {
         sitePath = "1.2.3.4/user/";
         docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
+    }
+
+    public void test_getContentTitle() {
+        final Set<String> querySet = new HashSet<>();
+        ViewHelper viewHelper = new ViewHelper() {
+            @Override
+            protected OptionalThing<Set<String>> getQuerySet() {
+                return OptionalThing.of(querySet);
+            }
+        };
+        viewHelper.init();
+
+        querySet.add("aaa");
+
+        final Map<String, Object> document = new HashMap<>();
+        document.put("title", "");
+        assertEquals("", viewHelper.getContentTitle(document));
+
+        document.put("title", "111");
+        assertEquals("111", viewHelper.getContentTitle(document));
+
+        document.put("title", "aaa");
+        assertEquals("<strong>aaa</strong>", viewHelper.getContentTitle(document));
+
+        document.put("title", "AAA");
+        assertEquals("<strong>AAA</strong>", viewHelper.getContentTitle(document));
+
+        document.put("title", "111AaA222bbb");
+        assertEquals("111<strong>AaA</strong>222bbb", viewHelper.getContentTitle(document));
+
+        document.put("title", "aaaAAA");
+        assertEquals("<strong>aaa</strong><strong>AAA</strong>", viewHelper.getContentTitle(document));
+
+        querySet.add("BBB");
+
+        document.put("title", "111AaA222bbb");
+        assertEquals("111<strong>AaA</strong>222<strong>bbb</strong>", viewHelper.getContentTitle(document));
     }
 }
