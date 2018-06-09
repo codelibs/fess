@@ -60,6 +60,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
@@ -150,19 +151,30 @@ public class ViewHelper {
             title = StringUtils.abbreviate(title, size);
         }
         final String value = LaFunctions.h(title);
+        return getQuerySet().map(
+                querySet -> {
+                    String t = value;
+                    for (final String query : querySet) {
+                        final String target = LaFunctions.h(query);
+                        final Matcher matcher =
+                                Pattern.compile(target, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(t);
+                        final StringBuffer buf = new StringBuffer(t.length() + 100);
+                        while (matcher.find()) {
+                            matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
+                        }
+                        matcher.appendTail(buf);
+                        t = buf.toString();
+                    }
+                    return t;
+                }).orElse(value);
+    }
+
+    protected OptionalThing<Set<String>> getQuerySet() {
         return LaRequestUtil.getOptionalRequest().map(req -> {
             @SuppressWarnings("unchecked")
             final Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
-            if (querySet != null) {
-                String t = value;
-                for (final String query : querySet) {
-                    final String target = LaFunctions.h(query);
-                    t = t.replace(target, highlightTagPre + target + highlightTagPost);
-                }
-                return t;
-            }
-            return value;
-        }).orElse(value);
+            return querySet;
+        }).filter(s -> s != null);
     }
 
     public String getContentDescription(final Map<String, Object> document) {
