@@ -65,6 +65,11 @@ public class PermissionHelperTest extends UnitFessTestCase {
             public String getRoleSearchRolePrefix() {
                 return "";
             }
+
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
         });
         try {
             assertEquals("guest", permissionHelper.encode("{role}guest"));

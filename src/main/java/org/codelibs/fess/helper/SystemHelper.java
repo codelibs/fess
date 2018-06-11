@@ -376,7 +376,11 @@ public class SystemHelper {
     }
 
     protected String createSearchRole(final String type, final String name) {
-        return type + name;
+        final String value = type + ComponentUtil.getFessConfig().getCanonicalLdapName(name);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Role: " + type + ":" + name + "=" + value);
+        }
+        return value;
     }
 
     public void reloadConfiguration() {
