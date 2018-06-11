@@ -195,7 +195,6 @@ public class SearchService {
 
     public long scrollSearch(final SearchRequestParams params, final Function<Map<String, Object>, Boolean> cursor,
             final OptionalThing<FessUserBean> userBean) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
             request.setAttribute(Constants.REQUEST_QUERIES, params.getQuery());
