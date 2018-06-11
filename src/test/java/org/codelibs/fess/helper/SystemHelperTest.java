@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class SystemHelperTest extends UnitFessTestCase {
 
@@ -85,6 +87,21 @@ public class SystemHelperTest extends UnitFessTestCase {
 
         value = "zh_TW";
         assertEquals("zh_TW", systemHelper.normalizeLang(value));
+    }
+
+    public void test_createSearchRole() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+        });
+
+        assertEquals("", systemHelper.createSearchRole("", ""));
+        assertEquals("aaa", systemHelper.createSearchRole("", "aaa"));
+        assertEquals("bbb", systemHelper.createSearchRole("", "aaa\\bbb"));
+        assertEquals("bbb\\ccc", systemHelper.createSearchRole("", "aaa\\bbb\\ccc"));
     }
 
 }

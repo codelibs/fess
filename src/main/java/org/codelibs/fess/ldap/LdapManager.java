@@ -240,17 +240,11 @@ public class LdapManager {
         start += 3;
 
         int end = entryDn.indexOf(',', start);
-        String name;
         if (end == -1) {
-            name = entryDn.substring(start);
+            return entryDn.substring(start);
         } else {
-            name = entryDn.substring(start, end);
+            return entryDn.substring(start, end);
         }
-        name = fessConfig.getCanonicalLdapName(name);
-        if (logger.isDebugEnabled()) {
-            logger.debug("name: " + name);
-        }
-        return name;
     }
 
     protected void setAttributeValue(final List<SearchResult> result, final String name, final Consumer<Object> consumer) {

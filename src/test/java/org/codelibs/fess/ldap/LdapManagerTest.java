@@ -34,10 +34,10 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("aaa", ldapManager.getSearchRoleName("cn=aaa"));
         assertEquals("aaa", ldapManager.getSearchRoleName("CN=aaa"));
         assertEquals("aaa", ldapManager.getSearchRoleName("cn=aaa,du=test"));
-        assertEquals("bbb", ldapManager.getSearchRoleName("cn=aaa\\bbb"));
-        assertEquals("bbb", ldapManager.getSearchRoleName("cn=aaa\\bbb,du=test"));
-        assertEquals("bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\bbb\\ccc"));
-        assertEquals("bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\bbb\\ccc,du=test\""));
+        assertEquals("aaa\\bbb", ldapManager.getSearchRoleName("cn=aaa\\bbb"));
+        assertEquals("aaa\\bbb", ldapManager.getSearchRoleName("cn=aaa\\bbb,du=test"));
+        assertEquals("aaa\\bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\bbb\\ccc"));
+        assertEquals("aaa\\bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\bbb\\ccc,du=test\""));
 
         assertNull(ldapManager.getSearchRoleName(null));
         assertNull(ldapManager.getSearchRoleName(""));
