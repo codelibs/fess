@@ -37,6 +37,7 @@ public class DocMapTest extends UnitFessTestCase {
         value.put(keys[3], "str");
         docMap = new DocMap(value);
         assertFalse(docMap.isEmpty());
+        // todo
         
         docMap.clear();
     }
