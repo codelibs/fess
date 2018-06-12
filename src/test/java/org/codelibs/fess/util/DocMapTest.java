@@ -36,14 +36,8 @@ public class DocMapTest extends UnitFessTestCase {
         value.put(keys[2], "ja");
         value.put(keys[3], "str");
         docMap = new DocMap(value);
-
-        Set<Map.Entry<String, Object>> actual = docMap.entrySet();
-        Iterator<Map.Entry<String, Object>> iterator = actual.iterator();
-
-        int i = 0;
-        for (Map.Entry<String, Object> entry : actual) {
-            i++;
-        }
+        assertTrue(docMap.isEmpty());
+        
         docMap.clear();
     }
 }
