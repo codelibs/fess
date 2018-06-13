@@ -17,6 +17,8 @@ package org.codelibs.fess.util;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
 
@@ -27,23 +29,20 @@ public class DocMapTest extends UnitFessTestCase {
         Map<String, Object> value = new LinkedHashMap<>();
         DocMap docMap = new DocMap(value);
         assertTrue(docMap.isEmpty());
-
         value.clear();
-        List<String> keys = Arrays.asList("test_2", "test_0", "lang", "test_1");
 
-        value.put(keys[0], true);
-        value.put(keys[1], 1000);
-        value.put(keys[2], "ja");
-        value.put(keys[3], "str");
+        List<String> keys = Arrays.asList("test_2", "test_0", "lang", "test_1");
+        value.put(keys.get(0), true);
+        value.put(keys.get(1), 1000);
+        value.put(keys.get(2), "ja");
+        value.put(keys.get(3), "str");
         docMap = new DocMap(value);
+        assertFalse(docMap.isEmpty());
 
         Set<Map.Entry<String, Object>> actual = docMap.entrySet();
-        Iterator<Map.Entry<String, Object>> iterator = actual.iterator();
-
-        int i = 0;
-        for (Map.Entry<String, Object> entry : actual) {
-            i++;
-        }
+        assertTrue(actual.size() == keys.size());
         docMap.clear();
+
+        assertTrue(docMap.isEmpty());
     }
 }
