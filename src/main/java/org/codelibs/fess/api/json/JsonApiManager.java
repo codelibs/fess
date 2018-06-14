@@ -270,16 +270,14 @@ public class JsonApiManager extends BaseJsonApiManager {
             buf.append(",\"requested_time\":");
             buf.append(requestedTime);
             final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(params.getQuery());
-            if (relatedQueries.length > 0) {
-                buf.append(",\"related_query\":");
-                buf.append(escapeJson(relatedQueries));
-            }
+            buf.append(",\"related_query\":");
+            buf.append(escapeJson(relatedQueries));
             final String[] relatedContents = relatedContentHelper.getRelatedContents(params.getQuery());
             buf.append(",\"related_contents\":");
             buf.append(escapeJson(relatedContents));
+            buf.append(',');
+            buf.append("\"result\":[");
             if (!documentItems.isEmpty()) {
-                buf.append(',');
-                buf.append("\"result\":[");
                 boolean first1 = true;
                 for (final Map<String, Object> document : documentItems) {
                     if (!first1) {
@@ -305,13 +303,13 @@ public class JsonApiManager extends BaseJsonApiManager {
                     }
                     buf.append('}');
                 }
-                buf.append(']');
             }
+            buf.append(']');
             if (facetResponse != null && facetResponse.hasFacetResponse()) {
                 // facet field
+                buf.append(',');
+                buf.append("\"facet_field\":[");
                 if (facetResponse.getFieldList() != null) {
-                    buf.append(',');
-                    buf.append("\"facet_field\":[");
                     boolean first1 = true;
                     for (final Field field : facetResponse.getFieldList()) {
                         if (!first1) {
@@ -338,12 +336,12 @@ public class JsonApiManager extends BaseJsonApiManager {
                         buf.append(']');
                         buf.append('}');
                     }
-                    buf.append(']');
                 }
+                buf.append(']');
                 // facet q
+                buf.append(',');
+                buf.append("\"facet_query\":[");
                 if (facetResponse.getQueryCountMap() != null) {
-                    buf.append(',');
-                    buf.append("\"facet_query\":[");
                     boolean first1 = true;
                     for (final Map.Entry<String, Long> entry : facetResponse.getQueryCountMap().entrySet()) {
                         if (!first1) {
@@ -357,8 +355,8 @@ public class JsonApiManager extends BaseJsonApiManager {
                         buf.append(entry.getValue());
                         buf.append('}');
                     }
-                    buf.append(']');
                 }
+                buf.append(']');
             }
         } catch (final Exception e) {
             status = 1;
@@ -639,16 +637,16 @@ public class JsonApiManager extends BaseJsonApiManager {
 
             final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
             buf.append("\"num\":").append(docIdList.size());
+            buf.append(", \"doc_ids\":[");
             if (!docIdList.isEmpty()) {
-                buf.append(", \"doc_ids\":[");
                 for (int i = 0; i < docIdList.size(); i++) {
                     if (i > 0) {
                         buf.append(',');
                     }
                     buf.append(escapeJson(docIdList.get(i)));
                 }
-                buf.append(']');
             }
+            buf.append(']');
             body = buf.toString();
         } catch (final Exception e) {
             if (e instanceof WebApiException) {
