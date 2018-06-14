@@ -157,6 +157,9 @@ public class ViewHelper {
             title = StringUtils.abbreviate(title, size);
         }
         final String value = LaFunctions.h(title);
+        if (!fessConfig.isResponseHighlightContentTitleEnabled()) {
+            return value;
+        }
         return getQuerySet().map(
                 querySet -> {
                     String t = value;

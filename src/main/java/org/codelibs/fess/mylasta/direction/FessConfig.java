@@ -492,6 +492,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 50 */
     String RESPONSE_MAX_SITE_PATH_LENGTH = "response.max.site.path.length";
 
+    /** The key of the configuration. e.g. true */
+    String RESPONSE_HIGHLIGHT_content_title_ENABLED = "response.highlight.content_title.enabled";
+
     /** The key of the configuration. e.g. fess.search */
     String INDEX_DOCUMENT_SEARCH_INDEX = "index.document.search.index";
 
@@ -2794,6 +2797,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getResponseMaxSitePathLengthAsInteger();
+
+    /**
+     * Get the value for the key 'response.highlight.content_title.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseHighlightContentTitleEnabled();
+
+    /**
+     * Is the property for the key 'response.highlight.content_title.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isResponseHighlightContentTitleEnabled();
 
     /**
      * Get the value for the key 'index.document.search.index'. <br>
@@ -6547,6 +6564,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH);
         }
 
+        public String getResponseHighlightContentTitleEnabled() {
+            return get(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED);
+        }
+
+        public boolean isResponseHighlightContentTitleEnabled() {
+            return is(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED);
+        }
+
         public String getIndexDocumentSearchIndex() {
             return get(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX);
         }
@@ -8308,6 +8333,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_FIELD_site_path, "site_path");
             defaultMap.put(FessConfig.RESPONSE_MAX_TITLE_LENGTH, "50");
             defaultMap.put(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH, "50");
+            defaultMap.put(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED, "true");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_TYPE, "doc");
