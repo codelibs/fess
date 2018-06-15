@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.core.lang.StringUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 
 public class AccessTokenHelperTest extends UnitFessTestCase {
