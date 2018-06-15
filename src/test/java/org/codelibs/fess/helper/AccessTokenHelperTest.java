@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 
 public class AccessTokenHelperTest extends UnitFessTestCase {
@@ -61,13 +62,6 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         final String token = accessTokenHelper.generateAccessToken();
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", token);
-        assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
-    }
-
-    public void test_getAccessTokenFromRequest_ok2() {
-        final String token = accessTokenHelper.generateAccessToken();
-        MockletHttpServletRequest req = getMockRequest();
-        req.setParameter(ComponentUtil.getFessConfig().getApiAccessTokenRequestParameter(), token);
         assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
