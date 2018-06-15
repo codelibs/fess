@@ -261,7 +261,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
             final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
             failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url, new ContentNotFoundException(
-                    url));
+                    urlQueue.getParentUrl(), url));
         }
     }
 
