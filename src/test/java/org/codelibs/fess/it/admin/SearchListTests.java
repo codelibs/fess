@@ -15,13 +15,11 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;

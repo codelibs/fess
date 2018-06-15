@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.api.json;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +58,6 @@ import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
@@ -371,9 +372,9 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected String toGeoRequestString(final GeoInfo geoInfo) {
-        try {
-            final XContentBuilder builder = XContentFactory.jsonBuilder();
-            return geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string();
+        try (OutputStream out =
+                geoInfo.toQueryBuilder().toXContent(XContentFactory.jsonBuilder(), ToXContent.EMPTY_PARAMS).getOutputStream()) {
+            return ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
         } catch (final Exception e) {
             return "{\"error\":\"" + detailedMessage(e) + "\"}";
         }

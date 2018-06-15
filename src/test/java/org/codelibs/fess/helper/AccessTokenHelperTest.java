@@ -15,14 +15,13 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
-import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 
 public class AccessTokenHelperTest extends UnitFessTestCase {

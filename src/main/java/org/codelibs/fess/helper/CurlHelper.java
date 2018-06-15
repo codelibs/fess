@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
-import org.codelibs.elasticsearch.runner.net.Curl.Method;
-import org.codelibs.elasticsearch.runner.net.CurlRequest;
+import org.codelibs.curl.Curl.Method;
+import org.codelibs.curl.CurlRequest;
 import org.codelibs.fess.util.ResourceUtil;
 
 public class CurlHelper {

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.timer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.timer.TimeoutTarget;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse;
@@ -179,14 +182,16 @@ public class SystemMonitorTarget implements TimeoutTarget {
         try {
             final FessEsClient esClient = ComponentUtil.getFessEsClient();
             final NodesStatsResponse response =
-                    esClient.admin().cluster().prepareNodesStats().ingest(false).setBreaker(false).setDiscovery(false).setFs(true)
+                    esClient.admin().cluster().prepareNodesStats().setIngest(false).setBreaker(false).setDiscovery(false).setFs(true)
                             .setHttp(false).setIndices(true).setJvm(true).setOs(true).setProcess(true).setScript(false).setThreadPool(true)
                             .setTransport(true).execute().actionGet(10000L);
             final XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
-            response.toXContent(builder, ToXContent.EMPTY_PARAMS);
+            response.toXContent(XContentFactory.jsonBuilder(), ToXContent.EMPTY_PARAMS);
             builder.endObject();
-            stats = builder.string();
+            try (OutputStream out = builder.getOutputStream()) {
+                stats = ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
+            }
         } catch (final Exception e) {
             logger.debug("Failed to access Elasticsearch stats.", e);
         }

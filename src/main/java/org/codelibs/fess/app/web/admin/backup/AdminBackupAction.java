@@ -41,7 +41,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;

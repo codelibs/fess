@@ -27,7 +27,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.curl.CurlResponse;
+import org.codelibs.elasticsearch.runner.net.EcrCurl;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -50,7 +51,7 @@ public class DictionaryManager {
         try (CurlResponse response =
                 ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
                         .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
-            final Map<String, Object> contentMap = response.getContentAsMap();
+            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
             return fileList
@@ -96,7 +97,7 @@ public class DictionaryManager {
                 try (CurlResponse response =
                         ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
                                 .body(FileUtil.readUTF8(file)).execute()) {
-                    final Map<String, Object> contentMap = response.getContentAsMap();
+                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
                     if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                         throw new DictionaryException("Failed to update " + dictFile.getPath());
                     }

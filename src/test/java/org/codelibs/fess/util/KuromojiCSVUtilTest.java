@@ -15,10 +15,11 @@
  */
 package org.codelibs.fess.util;
 
-import java.util.List;
-import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 

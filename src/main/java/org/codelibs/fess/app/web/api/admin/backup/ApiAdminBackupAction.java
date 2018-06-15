@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiBackupFilesResponse;

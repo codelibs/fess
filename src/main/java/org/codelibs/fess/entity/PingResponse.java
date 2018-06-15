@@ -15,13 +15,15 @@
  */
 package org.codelibs.fess.entity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
 public class PingResponse {
@@ -37,10 +39,8 @@ public class PingResponse {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
         clusterName = response.getClusterName();
         clusterStatus = response.getStatus().toString();
-        try {
-            final XContentBuilder builder = XContentFactory.jsonBuilder();
-            response.toXContent(builder, ToXContent.EMPTY_PARAMS);
-            message = builder.string();
+        try (OutputStream out = response.toXContent(XContentFactory.jsonBuilder(), ToXContent.EMPTY_PARAMS).getOutputStream()) {
+            message = ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
         } catch (final IOException e) {
             message = "{ \"error\" : \"" + e.getMessage() + "\"}";
         }
