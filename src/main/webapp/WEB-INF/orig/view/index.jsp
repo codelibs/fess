@@ -143,7 +143,7 @@
 								<i class="fa fa-search"></i>
 								<la:message key="labels.index_form_search_btn" />
 							</button>
-							<button type="button" class="btn"
+							<button type="button" class="btn btn-outline-secondary"
 								data-toggle="control-options" data-target="#searchOptions"
 								id="searchOptionsButton">
 								<i class="fa fa-cog"></i>

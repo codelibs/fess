@@ -178,7 +178,7 @@
 	<nav id="subfooter" class="mx-auto">
 		<ul class="pagination">
 			<c:if test="${existPrevPage}">
-				<li class="page-item"><la:link class="page-link" aria-label="Previous"
+				<li class="page-item"><la:link styleClass="page-link" aria-label="Previous"
 						href="/search/prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 						<span aria-hidden="true">&laquo;</span>
 						<span class="sr-only"><la:message key="labels.prev_page" /></span>
@@ -197,12 +197,12 @@
 						<c:when test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="page-item active"</c:when>
 						<c:otherwise>class="page-item"</c:otherwise>
 					</c:choose>>
-					<la:link class="page-link"
+					<la:link styleClass="page-link"
 						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
-				<li class="page-item"><la:link class="page-link" aria-label="Next"
+				<li class="page-item"><la:link styleClass="page-link" aria-label="Next"
 						href="/search/next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 						<span class="sr-only"><la:message key="labels.next_page" /></span>
 						<span aria-hidden="true">&raquo;</span>

@@ -331,7 +331,7 @@
 			</div>
 
 			<div class="row">
-				<button type="submit" name="search" id="searchButton" class="btn btn-primary btn-lg mx-auto">
+				<button type="submit" name="search" id="searchButton" class="btn btn-primary mx-auto">
 					<i class="fa fa-search"></i>
 					<la:message key="labels.index_form_search_btn" />
 				</button>
