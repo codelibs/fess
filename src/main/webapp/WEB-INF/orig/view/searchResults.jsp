@@ -36,7 +36,7 @@
 						<div>
 							<h3 class="title ellipsis media-heading">
 								<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
-									data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
+									data-id="${doc.doc_id}" data-order="${s.index}">${doc.content_title}</a>
 							</h3>
 							<div class="body">
 								<div>
