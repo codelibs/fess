@@ -46,6 +46,8 @@ public class SearchLog extends BsSearchLog {
 
     private Map<String, Object> fields;
 
+    private List<Map<String, Object>> documentList = new ArrayList<>();
+
     public String getId() {
         return asDocMeta().id();
     }
@@ -66,6 +68,10 @@ public class SearchLog extends BsSearchLog {
         if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
             searchFieldLogList.add(new Pair<>(name, value));
         }
+    }
+
+    public void addDocument(final Map<String, Object> doc) {
+        documentList.add(doc);
     }
 
     public void setSearchQuery(final String query) {
@@ -104,6 +110,7 @@ public class SearchLog extends BsSearchLog {
                 searchFieldLogList.stream().collect(
                         Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
         sourceMap.put("searchField", searchFieldMap);
+        sourceMap.put("documents", documentList);
         return sourceMap;
     }
 
@@ -126,11 +133,12 @@ public class SearchLog extends BsSearchLog {
 
     @Override
     public String toString() {
-        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", userInfo=" + userInfo + ", accessType=" + accessType + ", user="
-                + user + ", roles=" + Arrays.toString(roles) + ", queryId=" + queryId + ", clientIp=" + clientIp + ", hitCount=" + hitCount
-                + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", referer=" + referer + ", requestedAt="
-                + requestedAt + ", responseTime=" + responseTime + ", queryTime=" + queryTime + ", searchWord=" + searchWord
-                + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId=" + userSessionId + ", docMeta=" + docMeta
-                + ", languages=" + languages + "]";
+        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", userInfo=" + userInfo + ", fields=" + fields + ", accessType="
+                + accessType + ", clientIp=" + clientIp + ", hitCount=" + hitCount + ", languages=" + languages + ", queryId=" + queryId
+                + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", queryTime=" + queryTime + ", referer=" + referer
+                + ", requestedAt=" + requestedAt + ", responseTime=" + responseTime + ", roles=" + Arrays.toString(roles) + ", searchWord="
+                + searchWord + ", user=" + user + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId="
+                + userSessionId + ", virtualHost=" + virtualHost + ", documents=" + documentList + "]";
     }
+
 }

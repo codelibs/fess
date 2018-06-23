@@ -752,6 +752,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
     String INDEX_BACKUP_LOG_TARGETS = "index.backup.log.targets";
 
+    /** The key of the configuration. e.g. true */
+    String LOGGING_SEARCH_INCLUDE_DOCS = "logging.search.include.docs";
+
     /** The key of the configuration. e.g. 4000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
 
@@ -3593,6 +3596,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupLogTargets();
+
+    /**
+     * Get the value for the key 'logging.search.include.docs'. <br>
+     * The value is, e.g. true <br>
+     * comment: logging
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLoggingSearchIncludeDocs();
+
+    /**
+     * Is the property for the key 'logging.search.include.docs' true? <br>
+     * The value is, e.g. true <br>
+     * comment: logging
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLoggingSearchIncludeDocs();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -6964,6 +6983,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_BACKUP_LOG_TARGETS);
         }
 
+        public String getLoggingSearchIncludeDocs() {
+            return get(FessConfig.LOGGING_SEARCH_INCLUDE_DOCS);
+        }
+
+        public boolean isLoggingSearchIncludeDocs() {
+            return is(FessConfig.LOGGING_SEARCH_INCLUDE_DOCS);
+        }
+
         public String getFormAdminMaxInputSize() {
             return get(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE);
         }
@@ -8402,6 +8429,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS, ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
+            defaultMap.put(FessConfig.LOGGING_SEARCH_INCLUDE_DOCS, "true");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");

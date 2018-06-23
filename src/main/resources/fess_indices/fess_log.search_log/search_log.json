@@ -11,6 +11,14 @@
             "type": "keyword"
           }
         }
+      },
+      {
+        "documents": {
+          "path_match": "documents.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
       }
     ],
     "properties": {

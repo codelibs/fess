@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,19 @@ public class SearchLogHelper {
             }
         }
 
+        addDocumentsInResponse(queryResponseList, searchLog);
+
         searchLogQueue.add(searchLog);
+    }
+
+    protected void addDocumentsInResponse(final QueryResponseList queryResponseList, final SearchLog searchLog) {
+        if (ComponentUtil.getFessConfig().isLoggingSearchIncludeDocs()) {
+            queryResponseList.stream().forEach(res -> {
+                final Map<String, Object> map = new HashMap<>();
+                Arrays.stream(ComponentUtil.getQueryHelper().getResponseFields()).forEach(s -> map.put(s, res.get(s)));
+                searchLog.addDocument(map);
+            });
+        }
     }
 
     public void addClickLog(final ClickLog clickLog) {
