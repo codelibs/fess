@@ -4,7 +4,7 @@
 	<property name="target.dir" value="${basedir}/target/plugins" />
 
 	<!-- Maven Repository -->
-	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/releases" />
+	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
 	<property name="maven.release.repo.url" value="http://central.maven.org/maven2" />
 
 	<target name="install.plugins">
@@ -74,6 +74,17 @@
 			<param name="plugin.version" value="6.3.1" />
 			<param name="plugin.zip.version" value="6.3.1" />
 		</antcall>
+		<!-- learning-to-rank -->
+		<!--
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="learning-to-rank" />
+			<param name="plugin.version" value="6.3.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.3.0-20180627.070011-1" />
+		</antcall>
+		-->
 
 		<antcall target="remove.jars" />
 	</target>
@@ -103,6 +114,12 @@
 				<include name="dataformat/xmlbeans-*" />
 				<include name="langfield/jackson-*" />
 				<include name="minhash/guava-*" />
+				<!--
+				<include name="learning-to-rank/lucene-expressions-*" />
+				<include name="learning-to-rank/antlr4-runtime-*" />
+				<include name="learning-to-rank/compiler-*" />
+				<include name="learning-to-rank/asm-*" />
+				-->
 			</fileset>
 		</delete>
 	</target>
