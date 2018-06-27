@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -156,19 +157,15 @@ public class ViewHelper {
         }
         return getQuerySet().map(
                 querySet -> {
-                    String t = value;
-                    for (final String query : querySet) {
-                        final String target = LaFunctions.h(query);
-                        final Matcher matcher =
-                                Pattern.compile(target, Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(t);
-                        final StringBuffer buf = new StringBuffer(t.length() + 100);
-                        while (matcher.find()) {
-                            matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
-                        }
-                        matcher.appendTail(buf);
-                        t = buf.toString();
+                    final Matcher matcher =
+                            Pattern.compile(querySet.stream().map(LaFunctions::h).map(Pattern::quote).collect(Collectors.joining("|")),
+                                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(value);
+                    final StringBuffer buf = new StringBuffer(value.length() + 100);
+                    while (matcher.find()) {
+                        matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
                     }
-                    return t;
+                    matcher.appendTail(buf);
+                    return buf.toString();
                 }).orElse(value);
     }
 

@@ -209,6 +209,10 @@ public class ViewHelperTest extends UnitFessTestCase {
         text = "1ABC2";
         queries = new String[] { "abc" };
         assertEquals("1<strong>abc</strong>2", viewHelper.replaceHighlightQueries(text, queries));
+
+        text = "abc on exy";
+        queries = new String[] { "on" };
+        assertEquals("abc <strong>on</strong> exy", viewHelper.replaceHighlightQueries(text, queries));
     }
 
     public void test_escapeHighlight() {
@@ -324,5 +328,10 @@ public class ViewHelperTest extends UnitFessTestCase {
 
         document.put("title", "111AaA222bbb");
         assertEquals("111<strong>AaA</strong>222<strong>bbb</strong>", viewHelper.getContentTitle(document));
+
+        querySet.add("on");
+        document.put("title", "on 111 strong on aaaa");
+        assertEquals("<strong>on</strong> 111 str<strong>on</strong>g <strong>on</strong> <strong>aaa</strong>a",
+                viewHelper.getContentTitle(document));
     }
 }
