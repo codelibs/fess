@@ -69,6 +69,8 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.search.rescore.QueryRescorerBuilder;
+import org.elasticsearch.search.rescore.RescorerBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -126,6 +128,8 @@ public class QueryHelper {
     protected Map<String, String> fieldBoostMap = new HashMap<>();
 
     protected List<FilterFunctionBuilder> boostFunctionList = new ArrayList<>();
+
+    protected List<RescorerBuilder<?>> rescorerList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -946,5 +950,17 @@ public class QueryHelper {
 
     public void addBoostFunction(final QueryBuilder filter, final ScoreFunctionBuilder<?> scoreFunction) {
         boostFunctionList.add(new FilterFunctionBuilder(filter, scoreFunction));
+    }
+
+    public RescorerBuilder<?>[] getRescorers() {
+        return rescorerList.toArray(new RescorerBuilder<?>[rescorerList.size()]);
+    }
+
+    public void addRescorer(final RescorerBuilder<?> rescorer) {
+        rescorerList.add(rescorer);
+    }
+
+    public void addRescorer(final String query, final int windowSize) {
+        rescorerList.add(new QueryRescorerBuilder(QueryBuilders.wrapperQuery(query)).windowSize(windowSize));
     }
 }

@@ -1066,6 +1066,9 @@ public class FessEsClient implements Client {
                 searchRequestBuilder.setFetchSource(responseFields, null);
             }
 
+            // rescorer
+            stream(queryHelper.getRescorers()).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
+
             // sort
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
 
