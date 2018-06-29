@@ -982,6 +982,18 @@ public class FessEsClient implements Client {
             this.searchRequestBuilder = searchRequestBuilder;
         }
 
+        public Map<String, Object> condition() {
+            final Map<String, Object> params = new HashMap<>();
+            params.put("query", query);
+            params.put("responseFields", responseFields);
+            params.put("offset", offset);
+            params.put("size", size);
+            //            params.put("geoInfo", geoInfo);
+            //            params.put("facetInfo", facetInfo);
+            params.put("similarDocHash", similarDocHash);
+            return params;
+        }
+
         public SearchConditionBuilder query(final String query) {
             this.query = query;
             return this;
@@ -1067,7 +1079,7 @@ public class FessEsClient implements Client {
             }
 
             // rescorer
-            stream(queryHelper.getRescorers()).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
+            stream(queryHelper.getRescorers(condition())).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
 
             // sort
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
