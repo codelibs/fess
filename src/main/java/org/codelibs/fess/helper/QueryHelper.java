@@ -55,6 +55,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.es.query.StoredLtrQueryBuilder;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -952,15 +953,13 @@ public class QueryHelper {
         boostFunctionList.add(new FilterFunctionBuilder(filter, scoreFunction));
     }
 
-    public RescorerBuilder<?>[] getRescorers() {
+    public RescorerBuilder<?>[] getRescorers(final Map<String, Object> params) {
+        rescorerList.clear();
+        rescorerList.add(new QueryRescorerBuilder(new StoredLtrQueryBuilder().modelName("model_6").params(params)).windowSize(100));
         return rescorerList.toArray(new RescorerBuilder<?>[rescorerList.size()]);
     }
 
     public void addRescorer(final RescorerBuilder<?> rescorer) {
         rescorerList.add(rescorer);
-    }
-
-    public void addRescorer(final String query, final int windowSize) {
-        rescorerList.add(new QueryRescorerBuilder(QueryBuilders.wrapperQuery(query)).windowSize(windowSize));
     }
 }
