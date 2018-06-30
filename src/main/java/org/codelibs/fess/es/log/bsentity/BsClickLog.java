@@ -37,6 +37,9 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** urlId */
+    protected String urlId;
+
     /** docId */
     protected String docId;
 
@@ -79,6 +82,9 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
+        if (urlId != null) {
+            addFieldToSource(sourceMap, "urlId", urlId);
+        }
         if (docId != null) {
             addFieldToSource(sourceMap, "docId", docId);
         }
@@ -113,6 +119,7 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(urlId);
         sb.append(dm).append(docId);
         sb.append(dm).append(order);
         sb.append(dm).append(queryId);
@@ -130,6 +137,16 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public String getUrlId() {
+        checkSpecifiedProperty("urlId");
+        return convertEmptyToNull(urlId);
+    }
+
+    public void setUrlId(String value) {
+        registerModifiedProperty("urlId");
+        this.urlId = value;
+    }
+
     public String getDocId() {
         checkSpecifiedProperty("docId");
         return convertEmptyToNull(docId);

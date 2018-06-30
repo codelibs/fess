@@ -4,6 +4,9 @@
     "mappings" : {
       "click_log" : {
         "properties" : {
+          "urlId" : {
+            "type" : "keyword"
+          },
           "docId" : {
             "type" : "keyword"
           },

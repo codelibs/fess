@@ -176,6 +176,10 @@ public class BsClickLogCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
+        public void columnUrlId() {
+            doColumn("urlId");
+        }
+
         public void columnDocId() {
             doColumn("docId");
         }

@@ -79,6 +79,7 @@ public class ClickLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
+        setupEpg(_epgMap, et -> ((ClickLog) et).getUrlId(), (et, vl) -> ((ClickLog) et).setUrlId(DfTypeUtil.toString(vl)), "urlId");
         setupEpg(_epgMap, et -> ((ClickLog) et).getDocId(), (et, vl) -> ((ClickLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
         setupEpg(_epgMap, et -> ((ClickLog) et).getOrder(), (et, vl) -> ((ClickLog) et).setOrder(DfTypeUtil.toInteger(vl)), "order");
         setupEpg(_epgMap, et -> ((ClickLog) et).getQueryId(), (et, vl) -> ((ClickLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
@@ -125,6 +126,8 @@ public class ClickLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
+    protected final ColumnInfo _columnUrlId = cci("urlId", "urlId", null, null, String.class, "urlId", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnOrder = cci("order", "order", null, null, Integer.class, "order", null, false, false, false,
@@ -139,6 +142,10 @@ public class ClickLogDbm extends AbstractDBMeta {
             null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId",
             null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnUrlId() {
+        return _columnUrlId;
+    }
 
     public ColumnInfo columnDocId() {
         return _columnDocId;
@@ -170,6 +177,7 @@ public class ClickLogDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
+        ls.add(columnUrlId());
         ls.add(columnDocId());
         ls.add(columnOrder());
         ls.add(columnQueryId());

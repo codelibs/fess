@@ -108,6 +108,134 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setUrlId_Terms() {
+        setUrlId_Terms(null);
+    }
+
+    public void setUrlId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setUrlId_Terms("urlId", opLambda, null);
+    }
+
+    public void setUrlId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_Terms("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrlId_SignificantTerms() {
+        setUrlId_SignificantTerms(null);
+    }
+
+    public void setUrlId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setUrlId_SignificantTerms("urlId", opLambda, null);
+    }
+
+    public void setUrlId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_SignificantTerms("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrlId_IpRange() {
+        setUrlId_IpRange(null);
+    }
+
+    public void setUrlId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setUrlId_IpRange("urlId", opLambda, null);
+    }
+
+    public void setUrlId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_IpRange("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrlId_Count() {
+        setUrlId_Count(null);
+    }
+
+    public void setUrlId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setUrlId_Count("urlId", opLambda);
+    }
+
+    public void setUrlId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Cardinality() {
+        setUrlId_Cardinality(null);
+    }
+
+    public void setUrlId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setUrlId_Cardinality("urlId", opLambda);
+    }
+
+    public void setUrlId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Missing() {
+        setUrlId_Missing(null);
+    }
+
+    public void setUrlId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setUrlId_Missing("urlId", opLambda, null);
+    }
+
+    public void setUrlId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_Missing("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setDocId_Terms() {
         setDocId_Terms(null);
     }

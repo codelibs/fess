@@ -185,6 +185,228 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setUrlId_Equal(String urlId) {
+        setUrlId_Term(urlId, null);
+    }
+
+    public void setUrlId_Equal(String urlId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrlId_Term(urlId, opLambda);
+    }
+
+    public void setUrlId_Term(String urlId) {
+        setUrlId_Term(urlId, null);
+    }
+
+    public void setUrlId_Term(String urlId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_NotEqual(String urlId) {
+        setUrlId_NotTerm(urlId, null);
+    }
+
+    public void setUrlId_NotTerm(String urlId) {
+        setUrlId_NotTerm(urlId, null);
+    }
+
+    public void setUrlId_NotEqual(String urlId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUrlId_NotTerm(urlId, opLambda);
+    }
+
+    public void setUrlId_NotTerm(String urlId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUrlId_Term(urlId), opLambda);
+    }
+
+    public void setUrlId_Terms(Collection<String> urlIdList) {
+        setUrlId_Terms(urlIdList, null);
+    }
+
+    public void setUrlId_Terms(Collection<String> urlIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("urlId", urlIdList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_InScope(Collection<String> urlIdList) {
+        setUrlId_Terms(urlIdList, null);
+    }
+
+    public void setUrlId_InScope(Collection<String> urlIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUrlId_Terms(urlIdList, opLambda);
+    }
+
+    public void setUrlId_Match(String urlId) {
+        setUrlId_Match(urlId, null);
+    }
+
+    public void setUrlId_Match(String urlId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_MatchPhrase(String urlId) {
+        setUrlId_MatchPhrase(urlId, null);
+    }
+
+    public void setUrlId_MatchPhrase(String urlId, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_MatchPhrasePrefix(String urlId) {
+        setUrlId_MatchPhrasePrefix(urlId, null);
+    }
+
+    public void setUrlId_MatchPhrasePrefix(String urlId, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Fuzzy(String urlId) {
+        setUrlId_Fuzzy(urlId, null);
+    }
+
+    public void setUrlId_Fuzzy(String urlId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Prefix(String urlId) {
+        setUrlId_Prefix(urlId, null);
+    }
+
+    public void setUrlId_Prefix(String urlId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Wildcard(String urlId) {
+        setUrlId_Wildcard(urlId, null);
+    }
+
+    public void setUrlId_Wildcard(String urlId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Regexp(String urlId) {
+        setUrlId_Regexp(urlId, null);
+    }
+
+    public void setUrlId_Regexp(String urlId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_SpanTerm(String urlId) {
+        setUrlId_SpanTerm("urlId", null);
+    }
+
+    public void setUrlId_SpanTerm(String urlId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_GreaterThan(String urlId) {
+        setUrlId_GreaterThan(urlId, null);
+    }
+
+    public void setUrlId_GreaterThan(String urlId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = urlId;
+        RangeQueryBuilder builder = regRangeQ("urlId", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_LessThan(String urlId) {
+        setUrlId_LessThan(urlId, null);
+    }
+
+    public void setUrlId_LessThan(String urlId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = urlId;
+        RangeQueryBuilder builder = regRangeQ("urlId", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_GreaterEqual(String urlId) {
+        setUrlId_GreaterEqual(urlId, null);
+    }
+
+    public void setUrlId_GreaterEqual(String urlId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = urlId;
+        RangeQueryBuilder builder = regRangeQ("urlId", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_LessEqual(String urlId) {
+        setUrlId_LessEqual(urlId, null);
+    }
+
+    public void setUrlId_LessEqual(String urlId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = urlId;
+        RangeQueryBuilder builder = regRangeQ("urlId", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Exists() {
+        setUrlId_Exists(null);
+    }
+
+    public void setUrlId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_CommonTerms(String urlId) {
+        setUrlId_CommonTerms(urlId, null);
+    }
+
+    public void setUrlId_CommonTerms(String urlId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("urlId", urlId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_UrlId_Asc() {
+        regOBA("urlId");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_UrlId_Desc() {
+        regOBD("urlId");
+        return this;
+    }
+
     public void setDocId_Equal(String docId) {
         setDocId_Term(docId, null);
     }

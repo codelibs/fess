@@ -4,6 +4,9 @@
       "enabled": true
     },
     "properties": {
+      "urlId": {
+        "type": "keyword"
+      },
       "docId": {
         "type": "keyword"
       },
