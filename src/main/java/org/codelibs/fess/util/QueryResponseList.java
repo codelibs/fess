@@ -142,7 +142,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
     }
 
     private Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
-        final Map<String, Object> docMap = new HashMap<>();
+        final Map<String, Object> docMap = new HashMap<>(32);
         if (searchHit.getSourceAsMap() == null) {
             searchHit.getFields().forEach((key, value) -> {
                 docMap.put(key, value.getValue());
@@ -187,6 +187,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
         if (!docMap.containsKey(Constants.SCORE)) {
             docMap.put(Constants.SCORE, searchHit.getScore());
+        }
+
+        if (!docMap.containsKey(fessConfig.getIndexFieldId())) {
+            docMap.put(fessConfig.getIndexFieldId(), searchHit.getId());
         }
         return docMap;
     }

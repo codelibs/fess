@@ -55,10 +55,10 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.es.query.StoredLtrQueryBuilder;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.score.QueryRescorer;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -70,7 +70,6 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.elasticsearch.search.rescore.QueryRescorerBuilder;
 import org.elasticsearch.search.rescore.RescorerBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -130,7 +129,7 @@ public class QueryHelper {
 
     protected List<FilterFunctionBuilder> boostFunctionList = new ArrayList<>();
 
-    protected List<RescorerBuilder<?>> rescorerList = new ArrayList<>();
+    protected List<QueryRescorer> queryRescorerList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -954,12 +953,10 @@ public class QueryHelper {
     }
 
     public RescorerBuilder<?>[] getRescorers(final Map<String, Object> params) {
-        rescorerList.clear();
-        rescorerList.add(new QueryRescorerBuilder(new StoredLtrQueryBuilder().modelName("model_6").params(params)).windowSize(100));
-        return rescorerList.toArray(new RescorerBuilder<?>[rescorerList.size()]);
+        return queryRescorerList.stream().map(r -> r.evaluate(params)).toArray(n -> new RescorerBuilder<?>[n]);
     }
 
-    public void addRescorer(final RescorerBuilder<?> rescorer) {
-        rescorerList.add(rescorer);
+    public void addQueryRescorer(final QueryRescorer rescorer) {
+        queryRescorerList.add(rescorer);
     }
 }

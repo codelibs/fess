@@ -110,6 +110,16 @@
 		<postConstruct name="addHighlightField">
 			<arg>"content"</arg>
 		</postConstruct>
+		<!--
+		<postConstruct name="addQueryRescorer">
+			<arg>
+				<component class="org.codelibs.fess.score.LtrQueryRescorer">
+					<property name="modelName">"model_6"</property>
+					<property name="windowSize">100</property>
+				</component>
+			</arg>
+		</postConstruct>
+		-->
 	</component>
 	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
 		<postConstruct name="addFacetQueryView">

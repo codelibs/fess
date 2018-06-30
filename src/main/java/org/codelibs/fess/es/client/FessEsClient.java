@@ -159,6 +159,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 
 public class FessEsClient implements Client {
@@ -219,8 +220,12 @@ public class FessEsClient implements Client {
     }
 
     public void addTransportAddress(final String host, final int port) {
+        transportAddressList.add(new TransportAddress(getInetAddressByName(host), port));
+    }
+
+    protected InetAddress getInetAddressByName(final String host) {
         try {
-            transportAddressList.add(new TransportAddress(InetAddress.getByName(host), port));
+            return InetAddress.getByName(host);
         } catch (final UnknownHostException e) {
             throw new FessSystemException("Failed to resolve the hostname: " + host, e);
         }
@@ -269,10 +274,11 @@ public class FessEsClient implements Client {
                 });
                 runner.build(config);
             }
-            client = runner.client();
-            addTransportAddress("localhost", runner.node().settings().getAsInt("transport.tcp.port", 9300));
+            final int port = runner.node().settings().getAsInt("transport.tcp.port", 9300);
+            client = createTransportClient(fessConfig, Lists.newArrayList(new TransportAddress(getInetAddressByName("localhost"), port)));
+            addTransportAddress("localhost", port);
         } else {
-            client = createTransportClient(fessConfig);
+            client = createTransportClient(fessConfig, transportAddressList);
         }
 
         if (StringUtil.isBlank(transportAddressesValue)) {
@@ -346,7 +352,7 @@ public class FessEsClient implements Client {
         });
     }
 
-    protected Client createTransportClient(final FessConfig fessConfig) {
+    protected Client createTransportClient(final FessConfig fessConfig, final List<TransportAddress> transportAddressList) {
         final Builder settingsBuilder = Settings.builder();
         settingsBuilder.put("cluster.name", fessConfig.getElasticsearchClusterName());
         settingsBuilder.put("client.transport.sniff", fessConfig.isElasticsearchTransportSniff());
