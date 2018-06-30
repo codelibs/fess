@@ -145,10 +145,10 @@ public class SearchLogHelper {
     }
 
     protected void addDocumentsInResponse(final QueryResponseList queryResponseList, final SearchLog searchLog) {
-        if (ComponentUtil.getFessConfig().isLoggingSearchIncludeDocs()) {
+        if (ComponentUtil.getFessConfig().isLoggingSearchDocsEnabled()) {
             queryResponseList.stream().forEach(res -> {
                 final Map<String, Object> map = new HashMap<>();
-                Arrays.stream(ComponentUtil.getQueryHelper().getResponseFields()).forEach(s -> map.put(s, res.get(s)));
+                Arrays.stream(ComponentUtil.getFessConfig().getLoggingSearchDocsFieldsAsArray()).forEach(s -> map.put(s, res.get(s)));
                 searchLog.addDocument(map);
             });
         }

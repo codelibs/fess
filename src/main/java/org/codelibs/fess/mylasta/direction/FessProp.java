@@ -69,6 +69,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String LOGGING_SEARCH_DOCS_FIELDS = "loggingSearchDocsFields";
+
     public static final String API_SEARCH_ACCEPT_REFERERS = "apiSearchAcceptReferers";
 
     public static final String QUERY_GSA_RESPONSE_FIELDS = "queryGsaResponseFields";
@@ -1830,5 +1832,16 @@ public interface FessProp {
             return String.join("\\", Arrays.copyOfRange(values, 1, values.length));
         }
         return name;
+    }
+
+    String getLoggingSearchDocsFields();
+
+    public default String[] getLoggingSearchDocsFieldsAsArray() {
+        String[] fields = (String[]) propMap.get(LOGGING_SEARCH_DOCS_FIELDS);
+        if (fields == null) {
+            fields = split(getLoggingSearchDocsFields(), ",").get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
+            propMap.put(LOGGING_SEARCH_DOCS_FIELDS, fields);
+        }
+        return fields;
     }
 }
