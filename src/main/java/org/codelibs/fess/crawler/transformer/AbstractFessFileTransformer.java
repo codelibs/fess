@@ -63,8 +63,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jcifs.smb.ACE;
-import jcifs.smb.SID;
+import jcifs.SID;
 
 public abstract class AbstractFessFileTransformer extends AbstractTransformer implements FessTransformer {
 
@@ -448,10 +447,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final List<String> roleTypeList = new ArrayList<>();
         if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb:")) {
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-            final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-            if (aces != null) {
-                for (final ACE item : aces) {
-                    final SID sid = item.getSID();
+            final SID[] sids = (SID[]) responseData.getMetaDataMap().get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
+            if (sids != null) {
+                for (final SID sid : sids) {
                     final String accountId = sambaHelper.getAccountId(sid);
                     if (accountId != null) {
                         roleTypeList.add(accountId);

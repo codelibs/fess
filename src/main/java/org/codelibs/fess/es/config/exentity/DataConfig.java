@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -330,7 +331,11 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         } else if (Constants.DIGEST.equals(scheme)) {
             authScheme = new DigestScheme();
         } else if (Constants.NTLM.equals(scheme)) {
-            authScheme = new NTLMScheme(new JcifsEngine());
+            final Properties props = new Properties();
+            paramMap.entrySet().stream().filter(e -> e.getKey().startsWith("jcifs.")).forEach(e -> {
+                props.setProperty(e.getKey(), e.getValue());
+            });
+            authScheme = new NTLMScheme(new JcifsEngine(props));
         } else if (Constants.FORM.equals(scheme)) {
             final String prefix = CRAWLER_WEB_AUTH + "." + webAuthName + ".";
             final Map<String, String> parameterMap =

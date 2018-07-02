@@ -52,8 +52,7 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jcifs.smb.ACE;
-import jcifs.smb.SID;
+import jcifs.SID;
 
 public class FessCrawlerThread extends CrawlerThread {
     private static final Logger logger = LoggerFactory.getLogger(FessCrawlerThread.class);
@@ -91,10 +90,9 @@ public class FessCrawlerThread extends CrawlerThread {
                             return true;
                         }
 
-                        final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-                        if (aces != null) {
-                            for (final ACE item : aces) {
-                                final SID sid = item.getSID();
+                        final SID[] sids = (SID[]) responseData.getMetaDataMap().get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
+                        if (sids != null) {
+                            for (final SID sid : sids) {
                                 final String accountId = sambaHelper.getAccountId(sid);
                                 if (accountId != null) {
                                     roleTypeList.add(accountId);

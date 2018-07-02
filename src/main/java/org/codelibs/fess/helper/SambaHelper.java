@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
-import jcifs.smb.SID;
+import jcifs.SID;
 
 public class SambaHelper {
 
