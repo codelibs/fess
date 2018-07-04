@@ -214,7 +214,7 @@ public class LabelTypeHelper {
                     } else {
                         buf.append(split);
                     }
-                    buf.append(path.trim());
+                    buf.append(ComponentUtil.getSystemHelper().normalizePath(path));
                 }
                 this.includedPaths = Pattern.compile(buf.toString());
             }
@@ -228,7 +228,7 @@ public class LabelTypeHelper {
                     } else {
                         buf.append(split);
                     }
-                    buf.append(path.trim());
+                    buf.append(ComponentUtil.getSystemHelper().normalizePath(path));
                 }
                 this.excludedPaths = Pattern.compile(buf.toString());
             }
@@ -242,13 +242,23 @@ public class LabelTypeHelper {
             if (includedPaths != null) {
                 if (includedPaths.matcher(path).matches()) {
                     if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                        }
                         return false;
                     }
                     return true;
                 }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Path " + path + " wasn't matched against the include paths expression " + includedPaths.toString());
+                }
                 return false;
             } else {
-                return !excludedPaths.matcher(path).matches();
+                boolean match = !excludedPaths.matcher(path).matches();
+                if (!match && logger.isDebugEnabled()) {
+                    logger.debug("Path " + path + " matched against the excludes paths expression " + includedPaths.toString());
+                }
+                return match;
             }
         }
 

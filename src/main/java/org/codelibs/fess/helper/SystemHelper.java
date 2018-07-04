@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -211,6 +212,19 @@ public class SystemHelper {
         } catch (final UnsupportedEncodingException e) {
             return path;
         }
+    }
+
+    public String normalizePath(final String path) {
+
+        if (StringUtil.isBlank(path) || path.trim().startsWith("#")) {
+            return StringUtils.EMPTY;
+        }
+
+        if (path.startsWith("contains:")) {
+            return (".*" + Pattern.quote(path.trim().substring("contains:".length())) + ".*");
+        }
+
+        return path.trim();
     }
 
     public String getHelpLink(final String name) {
