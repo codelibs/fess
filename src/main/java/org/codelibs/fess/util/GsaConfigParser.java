@@ -47,11 +47,13 @@ public class GsaConfigParser extends DefaultHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GsaConfigParser.class);
 
-    protected static final String REGEXP = "regexp:";
+    public static final String REGEXP = "regexp:";
 
-    protected static final String REGEXP_IGNORE_CASE = "regexpIgnoreCase:";
+    public static final String REGEXP_CASE = "regexpCase:";
 
-    protected static final String CONTAINS = "contains:";
+    public static final String REGEXP_IGNORE_CASE = "regexpIgnoreCase:";
+
+    public static final String CONTAINS = "contains:";
 
     protected static final String COLLECTIONS = "collections";
 
@@ -253,6 +255,10 @@ public class GsaConfigParser extends DefaultHandler {
             final String v = s.substring(REGEXP_IGNORE_CASE.length());
             final StringBuilder buf = new StringBuilder(100);
             buf.append("(?i)");
+            return appendFileterPath(buf, unescape(v));
+        } else if (s.startsWith(REGEXP_CASE)) {
+            final String v = s.substring(REGEXP_CASE.length());
+            final StringBuilder buf = new StringBuilder(100);
             return appendFileterPath(buf, unescape(v));
         } else if (s.startsWith(REGEXP)) {
             final String v = s.substring(REGEXP.length());

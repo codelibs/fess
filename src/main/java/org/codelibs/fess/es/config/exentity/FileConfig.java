@@ -149,8 +149,9 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 final List<Pattern> pathPatterList = new ArrayList<>();
                 final String[] paths = getIncludedDocPaths().split("[\r\n]");
                 for (final String u : paths) {
-                    if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        pathPatterList.add(Pattern.compile(systemHelper.encodeUrlFilter(u.trim())));
+                    final String v = systemHelper.normalizeConfigPath(u);
+                    if (StringUtil.isNotBlank(v)) {
+                        pathPatterList.add(Pattern.compile(systemHelper.encodeUrlFilter(v)));
                     }
                 }
                 includedDocPathPatterns = pathPatterList.toArray(new Pattern[pathPatterList.size()]);
@@ -164,8 +165,9 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 final List<Pattern> pathPatterList = new ArrayList<>();
                 final String[] paths = getExcludedDocPaths().split("[\r\n]");
                 for (final String u : paths) {
-                    if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        pathPatterList.add(Pattern.compile(systemHelper.encodeUrlFilter(u.trim())));
+                    final String v = systemHelper.normalizeConfigPath(u);
+                    if (StringUtil.isNotBlank(v)) {
+                        pathPatterList.add(Pattern.compile(systemHelper.encodeUrlFilter(v)));
                     }
                 }
                 excludedDocPathPatterns = pathPatterList.toArray(new Pattern[pathPatterList.size()]);

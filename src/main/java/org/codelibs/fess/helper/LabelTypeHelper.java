@@ -205,6 +205,7 @@ public class LabelTypeHelper {
         public LabelTypePattern(final String value, final String includedPaths, final String excludedPaths) {
             this.value = value;
 
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             if (StringUtil.isNotBlank(includedPaths)) {
                 final StringBuilder buf = new StringBuilder(100);
                 char split = 0;
@@ -214,7 +215,10 @@ public class LabelTypeHelper {
                     } else {
                         buf.append(split);
                     }
-                    buf.append(ComponentUtil.getSystemHelper().normalizePath(path));
+                    final String normalizePath = systemHelper.normalizeConfigPath(path);
+                    if (StringUtil.isNotBlank(normalizePath)) {
+                        buf.append(normalizePath);
+                    }
                 }
                 this.includedPaths = Pattern.compile(buf.toString());
             }
@@ -228,7 +232,10 @@ public class LabelTypeHelper {
                     } else {
                         buf.append(split);
                     }
-                    buf.append(ComponentUtil.getSystemHelper().normalizePath(path));
+                    final String normalizePath = systemHelper.normalizeConfigPath(path);
+                    if (StringUtil.isNotBlank(normalizePath)) {
+                        buf.append(normalizePath);
+                    }
                 }
                 this.excludedPaths = Pattern.compile(buf.toString());
             }

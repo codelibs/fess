@@ -34,6 +34,7 @@ import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.codelibs.fess.es.config.bsentity.BsWebConfig;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
@@ -144,16 +145,16 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     protected synchronized void initDocUrlPattern() {
 
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         if (includedDocUrlPatterns == null) {
             if (StringUtil.isNotBlank(getIncludedDocUrls())) {
                 final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getIncludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
-                    final String v = ComponentUtil.getSystemHelper().normalizePath(u);
-                    if (v.isEmpty()) {
-                        break;
+                    final String v = systemHelper.normalizeConfigPath(u);
+                    if (StringUtil.isNotBlank(v)) {
+                        urlPatterList.add(Pattern.compile(v));
                     }
-                    urlPatterList.add(Pattern.compile(v));
                 }
                 includedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
             } else {
@@ -166,11 +167,10 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
                 final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getExcludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
-                    final String v = ComponentUtil.getSystemHelper().normalizePath(u);
-                    if (v.isEmpty()) {
-                        break;
+                    final String v = systemHelper.normalizeConfigPath(u);
+                    if (StringUtil.isNotBlank(v)) {
+                        urlPatterList.add(Pattern.compile(v));
                     }
-                    urlPatterList.add(Pattern.compile(v));
                 }
                 excludedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
             } else if (includedDocUrlPatterns.length > 0) {

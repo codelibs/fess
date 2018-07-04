@@ -104,11 +104,14 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("bbb\\ccc", systemHelper.createSearchRole("", "aaa\\bbb\\ccc"));
     }
 
-    public void normalizePaths() {
-        assertEquals("", systemHelper.normalizePath(""));
-        assertEquals(".*Q\\www.domain.com/test\\E.*", systemHelper.normalizePath("Contains:www.domain.com/test"));
-        assertEquals(".*Q\\/test\\E.*", systemHelper.normalizePath("Contains:/test/"));
-        assertEquals("www.domain.com/test", systemHelper.normalizePath("www.domain.com/test"));
-        assertEquals(".*domain.com/.*", systemHelper.normalizePath(".*domain.com/.*"));
+    public void test_normalizeConfigPath() {
+        assertEquals("", systemHelper.normalizeConfigPath(""));
+        assertEquals(".*\\Qwww.domain.com/test\\E.*", systemHelper.normalizeConfigPath("contains:www.domain.com/test"));
+        assertEquals(".*\\Q/test/\\E.*", systemHelper.normalizeConfigPath("contains:/test/"));
+        assertEquals("www.domain.com/test", systemHelper.normalizeConfigPath("www.domain.com/test"));
+        assertEquals(".*domain.com/.*", systemHelper.normalizeConfigPath(".*domain.com/.*"));
+        assertEquals("aaa", systemHelper.normalizeConfigPath("regexp:aaa"));
+        assertEquals("aaa", systemHelper.normalizeConfigPath("regexpCase:aaa"));
+        assertEquals("(?i)aaa", systemHelper.normalizeConfigPath("regexpIgnoreCase:aaa"));
     }
 }

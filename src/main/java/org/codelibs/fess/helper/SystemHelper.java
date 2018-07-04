@@ -57,6 +57,7 @@ import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
@@ -75,6 +76,7 @@ import com.google.common.cache.LoadingCache;
 import com.ibm.icu.util.ULocale;
 
 public class SystemHelper {
+
     private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
 
     protected final Map<String, String> designJspFileNameMap = new LinkedHashMap<>();
@@ -214,17 +216,34 @@ public class SystemHelper {
         }
     }
 
-    public String normalizePath(final String path) {
+    public String normalizeConfigPath(final String path) {
 
-        if (StringUtil.isBlank(path) || path.trim().startsWith("#")) {
+        if (StringUtil.isBlank(path)) {
             return StringUtils.EMPTY;
         }
 
-        if (path.startsWith("contains:")) {
-            return (".*" + Pattern.quote(path.trim().substring("contains:".length())) + ".*");
+        String p = path.trim();
+        if (p.startsWith("#")) {
+            return StringUtils.EMPTY;
         }
 
-        return path.trim();
+        if (p.startsWith(GsaConfigParser.CONTAINS)) {
+            return ".*" + Pattern.quote(p.substring(GsaConfigParser.CONTAINS.length())) + ".*";
+        }
+
+        if (p.startsWith(GsaConfigParser.REGEXP)) {
+            return p.substring(GsaConfigParser.REGEXP.length());
+        }
+
+        if (p.startsWith(GsaConfigParser.REGEXP_CASE)) {
+            return p.substring(GsaConfigParser.REGEXP_CASE.length());
+        }
+
+        if (p.startsWith(GsaConfigParser.REGEXP_IGNORE_CASE)) {
+            return "(?i)" + p.substring(GsaConfigParser.REGEXP_IGNORE_CASE.length());
+        }
+
+        return p;
     }
 
     public String getHelpLink(final String name) {
