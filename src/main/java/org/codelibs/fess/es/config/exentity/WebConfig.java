@@ -149,9 +149,11 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
                 final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getIncludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
-                    if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        urlPatterList.add(Pattern.compile(u.trim()));
+                    final String v = ComponentUtil.getSystemHelper().normalizePath(u);
+                    if (v.isEmpty()) {
+                        break;
                     }
+                    urlPatterList.add(Pattern.compile(v));
                 }
                 includedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
             } else {
@@ -164,9 +166,11 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
                 final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getExcludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
-                    if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        urlPatterList.add(Pattern.compile(u.trim()));
+                    final String v = ComponentUtil.getSystemHelper().normalizePath(u);
+                    if (v.isEmpty()) {
+                        break;
                     }
+                    urlPatterList.add(Pattern.compile(v));
                 }
                 excludedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
             } else if (includedDocUrlPatterns.length > 0) {

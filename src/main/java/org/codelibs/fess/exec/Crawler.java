@@ -126,7 +126,7 @@ public class Crawler {
         public String expires;
 
         protected Options() {
-            // noghing
+            // nothing
         }
 
         protected List<String> getWebConfigIdList() {
