@@ -29,15 +29,6 @@
 			<param name="plugin.version" value="6.3.1" />
 			<param name="plugin.zip.version" value="6.3.1" />
 		</antcall>
-		<!-- analysis-synonym -->
-		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
-			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="analysis-synonym" />
-			<param name="plugin.version" value="6.3.1" />
-			<param name="plugin.zip.version" value="6.3.1" />
-		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />

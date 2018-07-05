@@ -530,6 +530,10 @@
           "seed" : 1,
           "bit" : 2,
           "size" : 64
+        },
+        "synonym_filter" : {
+          "type" : "synonym_graph",
+          "synonyms_path": "${fess.dictionary.path}synonym.txt"
         }
       },
       "tokenizer": {
@@ -554,19 +558,15 @@
             "sentence_detector": false,
             "ambiguities_resolved": false
         },
-        "unigram_synonym_tokenizer": {
-          "type": "ngram_synonym",
-          "n": "1",
-          "synonyms_path": "${fess.dictionary.path}synonym.txt",
-          "dynamic_reload":true,
-          "reload_interval":"1m"
+        "unigram_tokenizer": {
+          "type": "ngram",
+          "min_gram": "1",
+          "max_gram": "1"
         },
-        "bigram_synonym_tokenizer": {
-          "type": "ngram_synonym",
-          "n": "2",
-          "synonyms_path": "${fess.dictionary.path}synonym.txt",
-          "dynamic_reload":true,
-          "reload_interval":"1m"
+        "bigram_tokenizer": {
+          "type": "ngram",
+          "min_gram": "2",
+          "max_gram": "2"
         }
       },
       "analyzer": {
@@ -976,12 +976,13 @@
           "char_filter": [
             "mapping_filter"
           ],
-          "tokenizer": "unigram_synonym_tokenizer",
+          "tokenizer": "unigram_tokenizer",
           "filter": [
             "alphanum_word_filter",
-            "cjk_bigram",
-            "stopword_en_filter",
             "lowercase",
+            "stopword_en_filter",
+            "synonym_filter",
+            "cjk_bigram",
             "english_keywords",
             "stemmer_en_filter"
           ]
@@ -998,12 +999,14 @@
           "char_filter": [
             "mapping_ja_filter"
           ],
-          "tokenizer": "unigram_synonym_tokenizer",
+          "tokenizer": "unigram_tokenizer",
           "filter": [
             "alphanum_word_filter",
-            "cjk_bigram",
-            "stopword_en_filter",
             "lowercase",
+            "stopword_en_filter",
+            "synonym_filter",
+            "cjk_bigram",
+            "english_keywords",
             "stemmer_en_filter",
             "minhash_filter"
           ]
