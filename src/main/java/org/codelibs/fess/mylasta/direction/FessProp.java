@@ -628,6 +628,22 @@ public interface FessProp {
                 + ComponentUtil.getSystemHelper().getProductVersion() + "; +http://fess.codelibs.org/bot.html)");
     }
 
+    public default void setLtrModelName(final String value) {
+        setSystemProperty(Constants.LTR_MODEL_NAME_PROPERTY, value);
+    }
+
+    public default String getLtrModelName() {
+        return getSystemProperty(Constants.LTR_MODEL_NAME_PROPERTY, StringUtil.EMPTY);
+    }
+
+    public default void setLtrWindowSize(final int value) {
+        setSystemPropertyAsInt(Constants.LTR_WINDOW_SIZE_PROPERTY, value);
+    }
+
+    public default int getLtrWindowSize() {
+        return getSystemPropertyAsInt(Constants.LTR_WINDOW_SIZE_PROPERTY, 100);
+    }
+
     //
     // fess_*.properties
     //

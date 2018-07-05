@@ -953,7 +953,7 @@ public class QueryHelper {
     }
 
     public RescorerBuilder<?>[] getRescorers(final Map<String, Object> params) {
-        return queryRescorerList.stream().map(r -> r.evaluate(params)).toArray(n -> new RescorerBuilder<?>[n]);
+        return queryRescorerList.stream().map(r -> r.evaluate(params)).filter(b -> b != null).toArray(n -> new RescorerBuilder<?>[n]);
     }
 
     public void addQueryRescorer(final QueryRescorer rescorer) {

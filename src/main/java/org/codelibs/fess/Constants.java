@@ -144,6 +144,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY = "purge.suggest.searchlog.day";
 
+    public static final String LTR_MODEL_NAME_PROPERTY = "ltr.model.name";
+
+    public static final String LTR_WINDOW_SIZE_PROPERTY = "ltr.window.size";
+
     public static final String REQUEST_QUERIES = "fess.Queries";
 
     public static final String HIGHLIGHT_QUERIES = "fess.HighlightQueries";

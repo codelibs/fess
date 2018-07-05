@@ -17,26 +17,23 @@ package org.codelibs.fess.score;
 
 import java.util.Map;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.query.StoredLtrQueryBuilder;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.search.rescore.QueryRescorerBuilder;
 import org.elasticsearch.search.rescore.RescorerBuilder;
 
 public class LtrQueryRescorer implements QueryRescorer {
 
-    protected String modelName;
-
-    protected int windowSize = 100;
-
     @Override
     public RescorerBuilder<?> evaluate(Map<String, Object> params) {
-        return new QueryRescorerBuilder(new StoredLtrQueryBuilder().modelName(modelName).params(params)).windowSize(windowSize);
-    }
-
-    public void setModelName(String modelName) {
-        this.modelName = modelName;
-    }
-
-    public void setWindowSize(int windowSize) {
-        this.windowSize = windowSize;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String modelName = fessConfig.getLtrModelName();
+        if (StringUtil.isBlank(modelName)) {
+            return null;
+        }
+        return new QueryRescorerBuilder(new StoredLtrQueryBuilder().modelName(modelName).params(params)).windowSize(fessConfig
+                .getLtrWindowSize());
     }
 }
