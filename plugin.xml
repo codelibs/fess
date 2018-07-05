@@ -112,12 +112,10 @@
 				<include name="dataformat/xmlbeans-*" />
 				<include name="langfield/jackson-*" />
 				<include name="minhash/guava-*" />
-				<!--
 				<include name="learning-to-rank/lucene-expressions-*" />
 				<include name="learning-to-rank/antlr4-runtime-*" />
 				<include name="learning-to-rank/compiler-*" />
 				<include name="learning-to-rank/asm-*" />
-				-->
 			</fileset>
 		</delete>
 	</target>
