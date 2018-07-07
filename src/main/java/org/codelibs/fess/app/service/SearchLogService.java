@@ -17,8 +17,15 @@ package org.codelibs.fess.app.service;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.pager.SearchLogPager;
+import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
+import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.dbflute.cbean.result.PagingResultBean;
 
 public class SearchLogService {
 
@@ -26,7 +33,16 @@ public class SearchLogService {
     private SearchLogBhv searchLogBhv;
 
     @Resource
+    private ClickLogBhv clickLogBhv;
+
+    @Resource
+    private FavoriteLogBhv favoriteLogBhv;
+
+    @Resource
     private SystemHelper systemHelper;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public void deleteBefore(final int days) {
         searchLogBhv.queryDelete(cb -> {
@@ -34,4 +50,31 @@ public class SearchLogService {
         });
     }
 
+    public PagingResultBean<?> getSearchLogList(SearchLogPager pager) {
+        final PagingResultBean<?> list;
+        if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(pager.logType)) {
+            list = clickLogBhv.selectPage(cb -> {
+                cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
+                cb.query().addOrderBy_RequestedAt_Desc();
+            });
+        } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(pager.logType)) {
+            list = favoriteLogBhv.selectPage(cb -> {
+                cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
+                cb.query().addOrderBy_CreatedAt_Desc();
+            });
+        } else {
+            list = searchLogBhv.selectPage(cb -> {
+                cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
+                cb.query().addOrderBy_RequestedAt_Desc();
+            });
+        }
+
+        // update pager
+        BeanUtil.copyBeanToBean(list, pager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+        pager.setPageNumberList(list.pageRange(op -> {
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
+        }).createPageNumberList());
+
+        return list;
+    }
 }

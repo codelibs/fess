@@ -100,6 +100,10 @@ public class SearchLog extends BsSearchLog {
         fields.put(key, value);
     }
 
+    public String getLogMessage() {
+        return getSearchWord();
+    }
+
     @Override
     public Map<String, Object> toSource() {
         final Map<String, Object> sourceMap = super.toSource();

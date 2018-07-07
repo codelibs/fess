@@ -244,6 +244,12 @@
 							<span><la:message key="labels.menu_system_info" /></span>
 						</la:link></li>
 
+					<li <c:if test="${param.menuType=='searchLog'}">class="active"</c:if>><la:link
+							href="/admin/searchlog/">
+							<i class='fa fa-circle-o'></i>
+							<span><la:message key="labels.menu_searchLog" /></span>
+						</la:link></li>
+
 					<li <c:if test="${param.menuType=='jobLog'}">class="active"</c:if>><la:link
 							href="/admin/joblog/">
 							<i class='fa fa-circle-o'></i>

@@ -455,6 +455,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Account Filter */
     public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
 
+    /** The key of the message: Group Filter */
+    public static final String LABELS_LDAP_GROUP_FILTER = "{labels.ldapGroupFilter}";
+
     /** The key of the message: memberOf Attribute */
     public static final String LABELS_LDAP_MEMBEROF_ATTRIBUTE = "{labels.ldapMemberofAttribute}";
 
@@ -2387,6 +2390,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Account Filter */
     public static final String LABELS_ldap_account_filter = "{labels.ldap_account_filter}";
+
+    /** The key of the message: Group Filter */
+    public static final String LABELS_ldap_group_filter = "{labels.ldap_group_filter}";
 
     /** The key of the message: memberOf Attribute */
     public static final String LABELS_ldap_memberof_attribute = "{labels.ldap_memberof_attribute}";

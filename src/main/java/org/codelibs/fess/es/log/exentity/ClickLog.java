@@ -52,6 +52,10 @@ public class ClickLog extends BsClickLog {
         fields.put(key, value);
     }
 
+    public String getLogMessage() {
+        return getUrl();
+    }
+
     @Override
     public Map<String, Object> toSource() {
         final Map<String, Object> sourceMap = super.toSource();

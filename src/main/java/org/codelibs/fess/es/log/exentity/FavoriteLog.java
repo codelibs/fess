@@ -52,6 +52,14 @@ public class FavoriteLog extends BsFavoriteLog {
         fields.put(key, value);
     }
 
+    public String getLogMessage() {
+        return getUrl();
+    }
+
+    public LocalDateTime getRequestedAt() {
+        return getCreatedAt();
+    }
+
     @Override
     public Map<String, Object> toSource() {
         final Map<String, Object> sourceMap = super.toSource();
