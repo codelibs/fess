@@ -277,6 +277,7 @@ public class FessEsClient implements Client {
             final int port = runner.node().settings().getAsInt("transport.tcp.port", 9300);
             client = createTransportClient(fessConfig, Lists.newArrayList(new TransportAddress(getInetAddressByName("localhost"), port)));
             addTransportAddress("localhost", port);
+            logger.warn("Embedded Elasticsearch is running. This configuration is not recommended for production use.");
         } else {
             client = createTransportClient(fessConfig, transportAddressList);
         }
