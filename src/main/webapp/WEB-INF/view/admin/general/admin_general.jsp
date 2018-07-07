@@ -404,6 +404,16 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="ldapGroupFilter"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_group_filter" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapGroupFilter" />
+											<la:text styleId="ldapGroupFilter" property="ldapGroupFilter"
+												styleClass="form-control" autocomplete="off" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="ldapMemberofAttribute"
 											class="col-sm-3 control-label"><la:message
 												key="labels.ldap_memberof_attribute" /></label>

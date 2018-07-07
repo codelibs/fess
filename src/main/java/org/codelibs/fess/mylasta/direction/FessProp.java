@@ -603,6 +603,14 @@ public interface FessProp {
         return getSystemProperty(Constants.LDAP_ACCOUNT_FILTER);
     }
 
+    public default void setLdapGroupFilter(final String value) {
+        setSystemProperty(Constants.LDAP_GROUP_FILTER, value);
+    }
+
+    public default String getLdapGroupFilter() {
+        return getSystemProperty(Constants.LDAP_GROUP_FILTER, StringUtil.EMPTY);
+    }
+
     public default void setNotificationLogin(final String value) {
         setSystemProperty(Constants.NOTIFICATION_LOGIN, value);
     }

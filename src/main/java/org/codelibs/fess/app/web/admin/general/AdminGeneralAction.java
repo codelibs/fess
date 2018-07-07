@@ -160,6 +160,7 @@ public class AdminGeneralAction extends FessAdminAction {
         }
         fessConfig.setLdapBaseDn(form.ldapBaseDn);
         fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
+        fessConfig.setLdapGroupFilter(form.ldapGroupFilter);
         fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute);
         fessConfig.setNotificationLogin(form.notificationLogin);
         fessConfig.setNotificationSearchTop(form.notificationSearchTop);
@@ -204,6 +205,7 @@ public class AdminGeneralAction extends FessAdminAction {
                 StringUtil.isNotBlank(fessConfig.getLdapAdminSecurityCredentials()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
         form.ldapBaseDn = fessConfig.getLdapBaseDn();
         form.ldapAccountFilter = fessConfig.getLdapAccountFilter();
+        form.ldapGroupFilter = fessConfig.getLdapGroupFilter();
         form.ldapMemberofAttribute = fessConfig.getLdapMemberofAttribute();
         form.notificationLogin = fessConfig.getNotificationLogin();
         form.notificationSearchTop = fessConfig.getNotificationSearchTop();

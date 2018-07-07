@@ -20,9 +20,11 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -169,40 +171,81 @@ public class LdapManager {
         return new LdapUser(env, username);
     }
 
-    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter) {
+    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter, final String groupFilter) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final List<String> roleList = new ArrayList<>();
+        final Set<String> roleSet = new HashSet<>();
 
         if (fessConfig.isLdapRoleSearchUserEnabled()) {
-            roleList.add(systemHelper.getSearchRoleByUser(ldapUser.getName()));
+            roleSet.add(systemHelper.getSearchRoleByUser(ldapUser.getName()));
         }
 
         // LDAP: cn=%s
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, ldapUser.getName());
         if (logger.isDebugEnabled()) {
-            logger.debug("filter: " + filter);
+            logger.debug("Account Filter: " + filter);
         }
         search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
-            processSearchRoles(result, (entryDn, name) -> {
-                final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
-                if (isRole) {
-                    if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                        roleList.add(systemHelper.getSearchRoleByRole(name));
-                    }
-                } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-                    roleList.add(systemHelper.getSearchRoleByGroup(name));
+            processSearchRoles(result, entryDn -> {
+                updateSearchRoles(roleSet, entryDn);
+
+                if (StringUtil.isNotBlank(groupFilter)) {
+                    processSubRoles(ldapUser, bindDn, entryDn, groupFilter, roleSet);
                 }
             });
         });
 
         if (logger.isDebugEnabled()) {
-            logger.debug("roleList: " + roleList);
+            logger.debug("role: " + roleSet);
         }
-        return roleList.toArray(new String[roleList.size()]);
+        return roleSet.toArray(new String[roleSet.size()]);
+    }
+
+    protected void processSubRoles(final LdapUser ldapUser, final String bindDn, final String dn, final String groupFilter,
+            final Set<String> roleSet) {
+        // (member:1.2.840.113556.1.4.1941:=%s)
+        final String filter = String.format(groupFilter, dn);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Group Filter: " + filter);
+        }
+        search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
+            for (final SearchResult srcrslt : result) {
+                String groupDn = srcrslt.getNameInNamespace();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("groupDn: " + groupDn);
+                }
+                updateSearchRoles(roleSet, groupDn);
+            }
+        });
+    }
+
+    protected void updateSearchRoles(final Set<String> roleSet, String entryDn) {
+        final String name = getSearchRoleName(entryDn);
+        if (StringUtil.isBlank(name)) {
+            return;
+        }
+
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+        if (isRole) {
+            if (fessConfig.isLdapRoleSearchRoleEnabled()) {
+                roleSet.add(systemHelper.getSearchRoleByRole(name));
+            }
+        } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
+            roleSet.add(systemHelper.getSearchRoleByGroup(name));
+        }
     }
 
     protected void processSearchRoles(final List<SearchResult> result, final BiConsumer<String, String> consumer) throws NamingException {
+        processSearchRoles(result, entryDn -> {
+            final String name = getSearchRoleName(entryDn);
+            if (name != null) {
+                consumer.accept(entryDn, name);
+            }
+        });
+    }
+
+    protected void processSearchRoles(final List<SearchResult> result, final Consumer<String> consumer) throws NamingException {
         for (final SearchResult srcrslt : result) {
             final Attributes attrs = srcrslt.getAttributes();
 
@@ -220,10 +263,7 @@ public class LdapManager {
                     if (logger.isDebugEnabled()) {
                         logger.debug("entryDn: " + entryDn);
                     }
-                    final String name = getSearchRoleName(entryDn);
-                    if (name != null) {
-                        consumer.accept(entryDn, name);
-                    }
+                    consumer.accept(entryDn);
                 }
             }
         }
