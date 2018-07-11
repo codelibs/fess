@@ -603,6 +603,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
     /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_DEFAULT_FIELDS = "query.additional.default.fields";
+
+    /** The key of the configuration. e.g.  */
     String QUERY_ADDITIONAL_RESPONSE_FIELDS = "query.additional.response.fields";
 
     /** The key of the configuration. e.g.  */
@@ -3144,6 +3147,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryMaxSearchResultOffsetAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.default.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalDefaultFields();
+
+    /**
+     * Get the value for the key 'query.additional.default.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalDefaultFieldsAsInteger();
 
     /**
      * Get the value for the key 'query.additional.response.fields'. <br>
@@ -6791,6 +6809,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
         }
 
+        public String getQueryAdditionalDefaultFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_DEFAULT_FIELDS);
+        }
+
+        public Integer getQueryAdditionalDefaultFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_DEFAULT_FIELDS);
+        }
+
         public String getQueryAdditionalResponseFields() {
             return get(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS);
         }
@@ -8428,6 +8454,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_POST, "</strong>");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS, "hl_content,digest");
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
+            defaultMap.put(FessConfig.QUERY_ADDITIONAL_DEFAULT_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_API_RESPONSE_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_SCROLL_RESPONSE_FIELDS, "");

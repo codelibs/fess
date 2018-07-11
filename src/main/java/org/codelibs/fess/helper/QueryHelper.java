@@ -50,6 +50,7 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.BytesRef;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -130,6 +131,8 @@ public class QueryHelper {
     protected List<FilterFunctionBuilder> boostFunctionList = new ArrayList<>();
 
     protected List<QueryRescorer> queryRescorerList = new ArrayList<>();
+
+    protected List<Pair<String, Float>> additionalDefaultList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -311,6 +314,20 @@ public class QueryHelper {
         }
         split(fessConfig.getQueryAdditionalAnalyzedFields(), ",").of(
                 stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
+        split(fessConfig.getQueryAdditionalDefaultFields(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+            final Pair<String, Float> pair = new Pair<>();
+            final String[] values = s.split(":");
+            if (values.length == 1) {
+                pair.setFirst(values[0].trim());
+                pair.setSecond(1.0f);
+            } else if (values.length > 1) {
+                pair.setFirst(values[0]);
+                pair.setSecond(Float.parseFloat(values[1]));
+            } else {
+                return null;
+            }
+            return pair;
+        }).forEach(additionalDefaultList::add));
     }
 
     public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {
@@ -626,7 +643,7 @@ public class QueryHelper {
         return QueryBuilders.prefixQuery(ComponentUtil.getFessConfig().getIndexFieldSite(), text).boost(boost);
     }
 
-    private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {
+    protected QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {
         final Term[] terms = query.getTerms();
         if (terms.length == 0) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -640,7 +657,7 @@ public class QueryHelper {
         return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
     }
 
-    private boolean isSearchField(final String field) {
+    protected boolean isSearchField(final String field) {
         for (final String searchField : searchFields) {
             if (searchField.equals(field)) {
                 return true;
@@ -649,7 +666,7 @@ public class QueryHelper {
         return false;
     }
 
-    private QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
+    protected QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryBuilder titleQuery =
@@ -670,6 +687,10 @@ public class QueryHelper {
                                             .getQueryBoostContentLangAsDecimal().floatValue());
                             boolQuery.should(contentLangQuery);
                         })));
+        additionalDefaultList.stream().forEach(f -> {
+            final QueryBuilder query = builder.apply(f.getFirst(), f.getSecond());
+            boolQuery.should(query);
+        });
         return boolQuery;
     }
 
@@ -683,7 +704,7 @@ public class QueryHelper {
                         (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
-    private boolean isSortField(final String field) {
+    protected boolean isSortField(final String field) {
         for (final String f : sortFields) {
             if (f.equals(field)) {
                 return true;

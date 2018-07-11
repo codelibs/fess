@@ -566,6 +566,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Job Log */
     public static final String LABELS_menu_jobLog = "{labels.menu_jobLog}";
 
+    /** The key of the message: Search Log */
+    public static final String LABELS_menu_searchLog = "{labels.menu_searchLog}";
+
     /** The key of the message: Failure URL */
     public static final String LABELS_menu_failure_url = "{labels.menu_failure_url}";
 
@@ -2517,10 +2520,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Destination Indicator */
     public static final String LABELS_DESTINATION_INDICATOR = "{labels.destinationIndicator}";
 
-    /** The key of the message: Internationali SDNNumber */
+    /** The key of the message: International ISDN Number */
     public static final String LABELS_user_internationaliSDNNumber = "{labels.user_internationaliSDNNumber}";
 
-    /** The key of the message: Internationali SDNNumber */
+    /** The key of the message: International ISDN Number */
     public static final String LABELS_INTERNATIONALISDN_NUMBER = "{labels.internationaliSDNNumber}";
 
     /** The key of the message: State */
@@ -2756,6 +2759,30 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: past year */
     public static final String LABELS_advance_search_timestamp_pastyear = "{labels.advance_search_timestamp_pastyear}";
+
+    /** The key of the message: Search Log */
+    public static final String LABELS_searchlog_configuration = "{labels.searchlog_configuration}";
+
+    /** The key of the message: Search Log */
+    public static final String LABELS_searchlog_title = "{labels.searchlog_title}";
+
+    /** The key of the message: Log Type */
+    public static final String LABELS_searchlog_log_type = "{labels.searchlog_log_type}";
+
+    /** The key of the message: Search Log */
+    public static final String LABELS_searchlog_log_type_search = "{labels.searchlog_log_type_search}";
+
+    /** The key of the message: Click Log */
+    public static final String LABELS_searchlog_log_type_click = "{labels.searchlog_log_type_click}";
+
+    /** The key of the message: Favorite Log */
+    public static final String LABELS_searchlog_log_type_favorite = "{labels.searchlog_log_type_favorite}";
+
+    /** The key of the message: Message */
+    public static final String LABELS_searchlog_log_message = "{labels.searchlog_log_message}";
+
+    /** The key of the message: Time */
+    public static final String LABELS_searchlog_requested_time = "{labels.searchlog_requested_time}";
 
     /**
      * Assert the property is not null.
