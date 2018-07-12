@@ -2784,6 +2784,21 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Time */
     public static final String LABELS_searchlog_requested_time = "{labels.searchlog_requested_time}";
 
+    /** The key of the message: Log Details */
+    public static final String LABELS_searchlog_configuration_details = "{labels.searchlog_configuration_details}";
+
+    /** The key of the message: Search Log */
+    public static final String LABELS_searchlog_configuration_link_top = "{labels.searchlog_configuration_link_top}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_searchlog_configuration_link_details = "{labels.searchlog_configuration_link_details}";
+
+    /** The key of the message: Back */
+    public static final String LABELS_searchlog_configuration_button_back = "{labels.searchlog_configuration_button_back}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_searchlog_configuration_button_delete = "{labels.searchlog_configuration_button_delete}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

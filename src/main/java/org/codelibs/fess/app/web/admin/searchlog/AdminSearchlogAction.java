@@ -20,21 +20,18 @@ import javax.annotation.Resource;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SearchLogPager;
 import org.codelibs.fess.app.service.SearchLogService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  */
 public class AdminSearchlogAction extends FessAdminAction {
-
-    private static final Logger logger = LoggerFactory.getLogger(AdminSearchlogAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -111,35 +108,41 @@ public class AdminSearchlogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
-    //    @Execute
-    //    public HtmlResponse details(final int crudMode, final String id) {
-    //        verifyCrudMode(crudMode, CrudMode.DETAILS);
-    //        saveToken();
-    //        return statsService.getCrawlingInfo(id).map(entity -> {
-    //            return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
-    //                op.setup(form -> {
-    //                    copyBeanToBean(entity, form, copyOp -> {
-    //                        copyOp.excludeNull();
-    //                    });
-    //                    form.crudMode = crudMode;
-    //                });
-    //            }).renderWith(data -> {
-    //                RenderDataUtil.register(data, "crawlingInfoParamItems", statsService.getCrawlingInfoParamList(id));
-    //            });
-    //        }).orElseGet(() -> {
-    //            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-    //            return null;
-    //        });
-    //    }
+    @Execute
+    public HtmlResponse details(final int crudMode, final String logType, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                form.id = id;
+                form.logType = logType;
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
+            RenderDataUtil.register(data, "logParamItems", searchLogService.getSearchLogMap(logType, id));
+        });
+    }
 
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    @Execute
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
+        searchLogService.getSearchLog(form.logType, form.id).alwaysPresent(e -> {
+            searchLogService.deleteSearchLog(e);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        });
+        return redirect(getClass());
+    }
 
     @Execute
     public HtmlResponse deleteall() {
-        verifyToken(() -> asListHtml());
+        verifyToken(this::asListHtml);
         searchLogPager.clear();
+        // TODO delete logs
         saveInfo(messages -> messages.addSuccessCrawlingInfoDeleteAll(GLOBAL));
         return redirect(getClass());
     }
@@ -155,7 +158,7 @@ public class AdminSearchlogAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 
@@ -168,12 +171,12 @@ public class AdminSearchlogAction extends FessAdminAction {
             RenderDataUtil.register(data, "searchLogItems", searchLogService.getSearchLogList(searchLogPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(searchLogPager, form, op -> op.include("id"));
+                copyBeanToBean(searchLogPager, form, op -> op.include("logType"));
             });
         });
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp);
+        return asHtml(path_AdminSearchlog_AdminSearchlogDetailsJsp);
     }
 }

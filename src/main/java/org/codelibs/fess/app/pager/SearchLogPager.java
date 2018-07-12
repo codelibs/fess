@@ -48,7 +48,7 @@ public class SearchLogPager implements Serializable {
 
     private int currentPageNumber;
 
-    public String logType;
+    public String logType = LOG_TYPE_SEARCH;
 
     public String id;
 

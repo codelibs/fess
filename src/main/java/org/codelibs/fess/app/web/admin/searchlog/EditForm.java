@@ -22,7 +22,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author shinsuke
- * @author Shunji Makino
  */
 public class EditForm {
 
@@ -37,25 +36,8 @@ public class EditForm {
     @Size(max = 1000)
     public String id;
 
-    @Required
-    @Size(max = 20)
-    public String sessionId;
-
-    @Size(max = 20)
-    public String name;
-
-    public String expiredTime;
-
-    @ValidateTypeFailure
-    public Long createdTime;
-
     public void initialize() {
-
         id = null;
-        sessionId = null;
-        name = null;
-        expiredTime = null;
-        createdTime = null;
-
+        logType = null;
     }
 }

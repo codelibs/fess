@@ -130,12 +130,18 @@ public class FessFunctions {
     }
 
     public static String formatDate(final Date date) {
+        if (date == null) {
+            return StringUtil.EMPTY;
+        }
         final SimpleDateFormat sdf = new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT);
         sdf.setTimeZone(Constants.TIMEZONE_UTC);
         return sdf.format(date);
     }
 
     public static String formatDate(final LocalDateTime date) {
+        if (date == null) {
+            return StringUtil.EMPTY;
+        }
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
     }
 

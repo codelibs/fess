@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.crawling_info_configuration" /></title>
+		key="labels.searchlog_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -11,27 +11,28 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="log" />
-			<jsp:param name="menuType" value="crawlingInfo" />
+			<jsp:param name="menuType" value="searchLog" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.crawling_info_title_confirm" />
+					<la:message key="labels.searchlog_configuration_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="/admin/crawlinginfo">
-							<la:message key="labels.crawling_info_link_top" />
+					<li><la:link href="/admin/searchlog">
+							<la:message key="labels.searchlog_configuration_link_top" />
 						</la:link></li>
 					<c:if test="${crudMode == 4}">
 						<li class="active"><la:message
-								key="labels.crawling_info_link_details" /></li>
+								key="labels.searchlog_configuration_link_details" /></li>
 					</c:if>
 				</ol>
 			</section>
 			<section class="content">
-				<la:form action="/admin/crawlinginfo/">
+				<la:form action="/admin/searchlog/">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==4}">
+						<la:hidden property="logType" />
 						<la:hidden property="id" />
 					</c:if>
 					<div class="row">
@@ -40,23 +41,12 @@
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
 								<div class="box-header with-border">
 									<h3 class="box-title">
-										<c:if test="${crudMode == 1}">
-											<la:message key="labels.crawling_info_link_create" />
-										</c:if>
-										<c:if test="${crudMode == 2}">
-											<la:message key="labels.crawling_info_link_update" />
-										</c:if>
-										<c:if test="${crudMode == 3}">
-											<la:message key="labels.crawling_info_link_delete" />
-										</c:if>
-										<c:if test="${crudMode == 4}">
-											<la:message key="labels.crawling_info_link_details" />
-										</c:if>
+										<la:message key="labels.searchlog_configuration_link_details" />
 									</h3>
 									<div class="btn-group pull-right">
-										<la:link href="/admin/crawlinginfo"
+										<la:link href="/admin/searchlog"
 											styleClass="btn btn-primary btn-xs">
-											<la:message key="labels.crawling_info_link_top" />
+											<la:message key="labels.searchlog_configuration_link_top" />
 										</la:link>
 									</div>
 								</div>
@@ -72,16 +62,9 @@
 									<%-- Form Fields --%>
 									<table class="table table-bordered">
 										<tbody>
-											<tr>
-												<th><la:message
-														key="labels.crawling_info_session_id" /></th>
-												<td><a
-													href="${fe:url('/admin/searchlist/search')}?q=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
-													<la:hidden property="sessionId" /></td>
-											</tr>
-											<c:forEach var="info" items="${crawlingInfoParamItems}">
+											<c:forEach var="info" items="${logParamItems}">
 												<tr>
-													<th>${f:h(info.keyMsg)}</th>
+													<th>${f:h(info.key)}</th>
 													<td>${f:h(info.value)}</td>
 												</tr>
 											</c:forEach>
@@ -92,15 +75,15 @@
 								<div class="box-footer">
 									<c:if test="${crudMode == 4}">
 										<button type="submit" class="btn btn-default" name="back"
-											value="<la:message key="labels.crawling_info_button_back" />">
+											value="<la:message key="labels.searchlog_configuration_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
-											<la:message key="labels.crawling_info_button_back" />
+											<la:message key="labels.searchlog_configuration_button_back" />
 										</button>
 										<button type="button" class="btn btn-danger" name="delete"
 											data-toggle="modal" data-target="#confirmToDelete"
-											value="<la:message key="labels.crawling_info_button_delete" />">
+											value="<la:message key="labels.searchlog_configuration_button_delete" />">
 											<i class="fa fa-trash"></i>
-											<la:message key="labels.crawling_info_button_delete" />
+											<la:message key="labels.searchlog_configuration_button_delete" />
 										</button>
 										<div class="modal modal-danger fade" id="confirmToDelete"
 											tabindex="-1" role="dialog">
@@ -135,13 +118,6 @@
 												</div>
 											</div>
 										</div>
-										<c:if test="${running}">
-										<button type="submit" class="btn btn-warning" name="threaddump"
-											value="<la:message key="labels.crawling_info_thread_dump" />">
-											<i class="fa fa-bolt"></i>
-											<la:message key="labels.crawling_info_thread_dump" />
-										</button>
-										</c:if>
 									</c:if>
 								</div>
 								<!-- /.box-footer -->
