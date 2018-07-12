@@ -35,17 +35,17 @@ public class AccessContextLogic {
     //                                                                  Resource Interface
     //                                                                  ==================
     @FunctionalInterface
-    public static interface UserTypeSupplier {
+    public interface UserTypeSupplier {
         OptionalThing<String> supply();
     }
 
     @FunctionalInterface
-    public static interface UserBeanSupplier {
+    public interface UserBeanSupplier {
         OptionalThing<FessUserBean> supply();
     }
 
     @FunctionalInterface
-    public static interface AppTypeSupplier {
+    public interface AppTypeSupplier {
         String supply();
     }
 

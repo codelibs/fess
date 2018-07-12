@@ -70,7 +70,7 @@ public interface SearchRequestParams {
 
     String getSimilarDocHash();
 
-    public default boolean hasConditionQuery() {
+    default boolean hasConditionQuery() {
         final Map<String, String[]> conditions = getConditions();
         return !isEmptyArray(conditions.get(AS_Q))//
                 || !isEmptyArray(conditions.get(AS_EPQ))//
@@ -81,22 +81,22 @@ public interface SearchRequestParams {
                 || !isEmptyArray(conditions.get(AS_FILETYPE));
     }
 
-    public default boolean isEmptyArray(final String[] values) {
+    default boolean isEmptyArray(final String[] values) {
         if (values == null || values.length == 0) {
             return true;
         }
         return stream(values).get(stream -> stream.allMatch(StringUtil::isBlank));
     }
 
-    public default String[] simplifyArray(final String[] values) {
+    default String[] simplifyArray(final String[] values) {
         return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
-    public default String[] getParamValueArray(final HttpServletRequest request, final String param) {
+    default String[] getParamValueArray(final HttpServletRequest request, final String param) {
         return simplifyArray(request.getParameterValues(param));
     }
 
-    public default FacetInfo createFacetInfo(final HttpServletRequest request) {
+    default FacetInfo createFacetInfo(final HttpServletRequest request) {
         final String[] fields = getParamValueArray(request, "facet.field");
         final String[] queries = getParamValueArray(request, "facet.query");
         if (fields.length == 0 && queries.length == 0) {
@@ -124,7 +124,7 @@ public interface SearchRequestParams {
         return facetInfo;
     }
 
-    public default GeoInfo createGeoInfo(final HttpServletRequest request) {
+    default GeoInfo createGeoInfo(final HttpServletRequest request) {
         return new GeoInfo(request);
     }
 

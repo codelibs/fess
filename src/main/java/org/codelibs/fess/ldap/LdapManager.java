@@ -210,7 +210,7 @@ public class LdapManager {
         }
         search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
             for (final SearchResult srcrslt : result) {
-                String groupDn = srcrslt.getNameInNamespace();
+                final String groupDn = srcrslt.getNameInNamespace();
                 if (logger.isDebugEnabled()) {
                     logger.debug("groupDn: " + groupDn);
                 }
@@ -219,7 +219,7 @@ public class LdapManager {
         });
     }
 
-    protected void updateSearchRoles(final Set<String> roleSet, String entryDn) {
+    protected void updateSearchRoles(final Set<String> roleSet, final String entryDn) {
         final String name = getSearchRoleName(entryDn);
         if (StringUtil.isBlank(name)) {
             return;
@@ -279,7 +279,7 @@ public class LdapManager {
         }
         start += 3;
 
-        int end = entryDn.indexOf(',', start);
+        final int end = entryDn.indexOf(',', start);
         if (end == -1) {
             return entryDn.substring(start);
         } else {

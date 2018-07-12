@@ -81,7 +81,7 @@ public class SearchLogHelper {
                 .expireAfterWrite(userCheckInterval, TimeUnit.MILLISECONDS)//
                 .build(new CacheLoader<String, UserInfo>() {
                     @Override
-                    public UserInfo load(String key) throws Exception {
+                    public UserInfo load(final String key) throws Exception {
                         return storeUserInfo(key);
                     }
                 });
@@ -223,7 +223,7 @@ public class SearchLogHelper {
         if (StringUtil.isNotBlank(userCode)) {
             try {
                 return OptionalEntity.of(userInfoCache.get(userCode));
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to access UserInfo cache.", e);
                 }

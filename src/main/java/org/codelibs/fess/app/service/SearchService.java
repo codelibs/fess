@@ -124,7 +124,7 @@ public class SearchService {
                             searchResponse.ifPresent(r -> {
                                 if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
                                     // partial results
-                                    StringBuilder buf = new StringBuilder(1000);
+                                    final StringBuilder buf = new StringBuilder(1000);
                                     buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
                                             .append(",\"request\":").append(searchRequestBuilder.toString())//
                                             .append(",\"response\":").append(r.toString()).append('}');

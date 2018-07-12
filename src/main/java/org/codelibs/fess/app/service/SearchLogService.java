@@ -60,7 +60,7 @@ public class SearchLogService {
         });
     }
 
-    public PagingResultBean<?> getSearchLogList(SearchLogPager pager) {
+    public PagingResultBean<?> getSearchLogList(final SearchLogPager pager) {
         final PagingResultBean<?> list;
         if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(pager.logType)) {
             list = clickLogBhv.selectPage(cb -> {
@@ -101,7 +101,7 @@ public class SearchLogService {
     public Map<String, String> getSearchLogMap(final String logType, final String id) {
         if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
             return clickLogBhv.selectByPK(id).map(e -> {
-                Map<String, String> params = new LinkedHashMap<>();
+                final Map<String, String> params = new LinkedHashMap<>();
                 params.put("ID", e.getId());
                 params.put("Query ID", e.getQueryId());
                 params.put("Doc ID", e.getDocId());
@@ -115,7 +115,7 @@ public class SearchLogService {
             }).get();
         } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
             return favoriteLogBhv.selectByPK(id).map(e -> {
-                Map<String, String> params = new LinkedHashMap<>();
+                final Map<String, String> params = new LinkedHashMap<>();
                 params.put("ID", e.getId());
                 params.put("Query ID", e.getQueryId());
                 params.put("Doc ID", e.getDocId());
@@ -127,7 +127,7 @@ public class SearchLogService {
             }).get();
         } else {
             return searchLogBhv.selectByPK(id).map(e -> {
-                Map<String, String> params = new LinkedHashMap<>();
+                final Map<String, String> params = new LinkedHashMap<>();
                 params.put("ID", e.getId());
                 params.put("Query ID", e.getQueryId());
                 params.put("User Info ID", e.getUserInfoId());
@@ -154,11 +154,11 @@ public class SearchLogService {
         }
     }
 
-    private String toNumberString(Number value) {
+    private String toNumberString(final Number value) {
         return value != null ? value.toString() : StringUtil.EMPTY;
     }
 
-    public void deleteSearchLog(Object e) {
+    public void deleteSearchLog(final Object e) {
         if (e instanceof ClickLog) {
             clickLogBhv.delete((ClickLog) e);
         } else if (e instanceof FavoriteLog) {

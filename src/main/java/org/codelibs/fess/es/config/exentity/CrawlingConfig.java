@@ -48,7 +48,7 @@ public interface CrawlingConfig {
 
     Map<String, String> getConfigParameterMap(ConfigName name);
 
-    public default void initializeDefaultHttpProxy(final Map<String, Object> paramMap) {
+    default void initializeDefaultHttpProxy(final Map<String, Object> paramMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String proxyHost = fessConfig.getHttpProxyHost();
         final String proxyPort = fessConfig.getHttpProxyPort();
@@ -67,7 +67,7 @@ public interface CrawlingConfig {
     public enum ConfigType {
         WEB("W"), FILE("F"), DATA("D");
 
-        private final String typePrefix;
+        private String typePrefix;
 
         ConfigType(final String typePrefix) {
             this.typePrefix = typePrefix;
@@ -77,7 +77,7 @@ public interface CrawlingConfig {
             return typePrefix;
         }
 
-        public String getConfigId(final String id) {
+        String getConfigId(final String id) {
             if (id == null) {
                 return null;
             }

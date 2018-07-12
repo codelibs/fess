@@ -261,7 +261,7 @@ public class LabelTypeHelper {
                 }
                 return false;
             } else {
-                boolean match = !excludedPaths.matcher(path).matches();
+                final boolean match = !excludedPaths.matcher(path).matches();
                 if (!match && logger.isDebugEnabled()) {
                     logger.debug("Path " + path + " matched against the excludes paths expression " + includedPaths.toString());
                 }

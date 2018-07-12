@@ -46,7 +46,7 @@ public class SearchLog extends BsSearchLog {
 
     private Map<String, Object> fields;
 
-    private List<Map<String, Object>> documentList = new ArrayList<>();
+    private final List<Map<String, Object>> documentList = new ArrayList<>();
 
     public String getId() {
         return asDocMeta().id();

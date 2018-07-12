@@ -27,7 +27,7 @@ import org.elasticsearch.search.rescore.RescorerBuilder;
 public class LtrQueryRescorer implements QueryRescorer {
 
     @Override
-    public RescorerBuilder<?> evaluate(Map<String, Object> params) {
+    public RescorerBuilder<?> evaluate(final Map<String, Object> params) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String modelName = fessConfig.getLtrModelName();
         if (StringUtil.isBlank(modelName)) {

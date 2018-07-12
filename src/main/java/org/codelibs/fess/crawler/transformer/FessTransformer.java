@@ -36,13 +36,13 @@ import org.slf4j.Logger;
 
 public interface FessTransformer {
 
-    public static Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
+    Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
     FessConfig getFessConfig();
 
     Logger getLogger();
 
-    public default String getHost(final String u) {
+    default String getHost(final String u) {
         if (StringUtil.isBlank(u)) {
             return StringUtil.EMPTY; // empty
         }
@@ -67,7 +67,7 @@ public interface FessTransformer {
         return url;
     }
 
-    public default String getSite(final String u, final String encoding) {
+    default String getSite(final String u, final String encoding) {
         if (StringUtil.isBlank(u)) {
             return StringUtil.EMPTY; // empty
         }
@@ -107,7 +107,7 @@ public interface FessTransformer {
         return abbreviateSite(url);
     }
 
-    public default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
+    default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getIndexFieldUrl().equals(key)) {
             dataMap.put(key, value);
@@ -135,8 +135,7 @@ public interface FessTransformer {
         }
     }
 
-    public default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value,
-            final String template) {
+    default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template) {
         Object target = value;
         if (template != null) {
             final Map<String, Object> contextMap = new HashMap<>();
@@ -164,7 +163,7 @@ public interface FessTransformer {
         }
     }
 
-    public default String evaluateValue(final String template, final Map<String, Object> paramMap) {
+    default String evaluateValue(final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }
@@ -176,11 +175,11 @@ public interface FessTransformer {
         return value.toString();
     }
 
-    public default int getMaxSiteLength() {
+    default int getMaxSiteLength() {
         return getFessConfig().getCrawlerDocumentMaxSiteLengthAsInteger();
     }
 
-    public default String abbreviateSite(final String value) {
+    default String abbreviateSite(final String value) {
         final int maxSiteLength = getMaxSiteLength();
         if (maxSiteLength > -1) {
             return StringUtils.abbreviate(value, maxSiteLength);
@@ -189,7 +188,7 @@ public interface FessTransformer {
         }
     }
 
-    public default String getFileName(final String url, final String encoding) {
+    default String getFileName(final String url, final String encoding) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY;
         }
@@ -216,7 +215,7 @@ public interface FessTransformer {
         return u;
     }
 
-    public default String decodeUrlAsName(final String url, final boolean escapePlus) {
+    default String decodeUrlAsName(final String url, final boolean escapePlus) {
         if (url == null) {
             return null;
         }
@@ -249,7 +248,7 @@ public interface FessTransformer {
         }
     }
 
-    public default String getParentEncoding(final String parentUrl, final String sessionId) {
+    default String getParentEncoding(final String parentUrl, final String sessionId) {
         final String key = sessionId + ":" + parentUrl;
         String enc = parentEncodingMap.get(key);
         if (enc != null) {

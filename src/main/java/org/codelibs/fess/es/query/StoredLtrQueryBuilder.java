@@ -64,7 +64,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
     }
 
     @Override
-    protected void doWriteTo(StreamOutput out) throws IOException {
+    protected void doWriteTo(final StreamOutput out) throws IOException {
         out.writeOptionalString(modelName);
         out.writeOptionalString(featureSetName);
         out.writeMap(params);
@@ -73,7 +73,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
     }
 
     @Override
-    protected void doXContent(XContentBuilder builder, Params params) throws IOException {
+    protected void doXContent(final XContentBuilder builder, final Params params) throws IOException {
         builder.startObject(NAME);
         if (modelName != null) {
             builder.field(MODEL_NAME.getPreferredName(), modelName);
@@ -95,12 +95,12 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
     }
 
     @Override
-    protected Query doToQuery(QueryShardContext context) throws IOException {
+    protected Query doToQuery(final QueryShardContext context) throws IOException {
         throw new UnsupportedOperationException("Query processing is not supported.");
     }
 
     @Override
-    protected boolean doEquals(StoredLtrQueryBuilder other) {
+    protected boolean doEquals(final StoredLtrQueryBuilder other) {
         return Objects.equals(modelName, other.modelName) && Objects.equals(featureSetName, other.featureSetName)
                 && Objects.equals(storeName, other.storeName) && Objects.equals(params, other.params)
                 && Objects.equals(activeFeatures, other.activeFeatures);
@@ -115,7 +115,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
         return modelName;
     }
 
-    public StoredLtrQueryBuilder modelName(String modelName) {
+    public StoredLtrQueryBuilder modelName(final String modelName) {
         this.modelName = Objects.requireNonNull(modelName);
         return this;
     }
@@ -124,7 +124,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
         return featureSetName;
     }
 
-    public StoredLtrQueryBuilder featureSetName(String featureSetName) {
+    public StoredLtrQueryBuilder featureSetName(final String featureSetName) {
         this.featureSetName = featureSetName;
         return this;
     }
@@ -133,7 +133,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
         return storeName;
     }
 
-    public StoredLtrQueryBuilder storeName(String storeName) {
+    public StoredLtrQueryBuilder storeName(final String storeName) {
         this.storeName = storeName;
         return this;
     }
@@ -142,7 +142,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
         return params;
     }
 
-    public StoredLtrQueryBuilder params(Map<String, Object> params) {
+    public StoredLtrQueryBuilder params(final Map<String, Object> params) {
         this.params = Objects.requireNonNull(params);
         return this;
     }
@@ -151,7 +151,7 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
         return activeFeatures;
     }
 
-    public StoredLtrQueryBuilder activeFeatures(List<String> activeFeatures) {
+    public StoredLtrQueryBuilder activeFeatures(final List<String> activeFeatures) {
         this.activeFeatures = Objects.requireNonNull(activeFeatures);
         return this;
     }

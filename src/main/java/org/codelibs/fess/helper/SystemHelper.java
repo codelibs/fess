@@ -222,7 +222,7 @@ public class SystemHelper {
             return StringUtils.EMPTY;
         }
 
-        String p = path.trim();
+        final String p = path.trim();
         if (p.startsWith("#")) {
             return StringUtils.EMPTY;
         }

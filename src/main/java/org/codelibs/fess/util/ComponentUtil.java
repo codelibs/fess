@@ -455,7 +455,7 @@ public final class ComponentUtil {
             } else {
                 throw new ContainerNotAvailableException(componentName);
             }
-        } catch (ComponentNotFoundException e) {
+        } catch (final ComponentNotFoundException e) {
             if (componentMap.containsKey(componentName)) {
                 @SuppressWarnings("unchecked")
                 final T c = (T) componentMap.get(componentName);
