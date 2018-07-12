@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -215,7 +216,7 @@ public class SearchLogHelper {
             e.setUpdatedAt(now);
             return e;
         });
-        new Thread(() -> userInfoBhv.insertOrUpdate(userInfo)).start();
+        ForkJoinPool.commonPool().execute(() -> userInfoBhv.insertOrUpdate(userInfo));
         return userInfo;
     }
 

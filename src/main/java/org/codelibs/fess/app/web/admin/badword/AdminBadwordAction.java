@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.Resource;
 
@@ -285,14 +286,14 @@ public class AdminBadwordAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
-        new Thread(() -> {
+        ForkJoinPool.commonPool().execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
-        }).start();
+        });
         saveInfo(messages -> messages.addSuccessUploadBadWord(GLOBAL));
         return redirect(getClass());
     }

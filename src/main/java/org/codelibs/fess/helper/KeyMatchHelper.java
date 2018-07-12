@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.PostConstruct;
 
@@ -56,7 +57,7 @@ public class KeyMatchHelper {
     }
 
     public void update() {
-        new Thread(() -> reload(reloadInterval)).start();
+        ForkJoinPool.commonPool().execute(() -> reload(reloadInterval));
     }
 
     public List<KeyMatch> getAvailableKeyMatchList() {

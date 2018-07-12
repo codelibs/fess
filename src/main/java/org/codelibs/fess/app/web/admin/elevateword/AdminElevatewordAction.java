@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -319,7 +320,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
-        new Thread(() -> {
+        ForkJoinPool.commonPool().execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.elevateWordFile.getInputStream(), getCsvEncoding()))) {
                 elevateWordService.importCsv(reader);
                 suggestHelper.deleteAllElevateWord(false);
@@ -327,7 +328,7 @@ public class AdminElevatewordAction extends FessAdminAction {
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
-        }).start();
+        });
         saveInfo(messages -> messages.addSuccessUploadElevateWord(GLOBAL));
         return redirect(getClass());
     }
