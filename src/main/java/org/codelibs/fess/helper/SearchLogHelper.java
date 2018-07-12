@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
@@ -48,6 +49,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
@@ -55,22 +57,34 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 public class SearchLogHelper {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogHelper.class);
 
-    protected long userCheckInterval = 5 * 60 * 1000L;// 5 min
+    protected long userCheckInterval = 10 * 60 * 1000L;// 10 min
 
-    protected int userInfoCacheSize = 1000;
+    protected int userInfoCacheSize = 10000;
 
     protected volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<>();
 
     protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<>();
 
-    protected Map<String, Long> userInfoCache;
+    protected LoadingCache<String, UserInfo> userInfoCache;
 
     @PostConstruct
     public void init() {
-        userInfoCache = new LruHashMap<>(userInfoCacheSize);
+        userInfoCache = CacheBuilder.newBuilder()//
+                .maximumSize(userInfoCacheSize)//
+                .expireAfterWrite(userCheckInterval, TimeUnit.MILLISECONDS)//
+                .build(new CacheLoader<String, UserInfo>() {
+                    @Override
+                    public UserInfo load(String key) throws Exception {
+                        return storeUserInfo(key);
+                    }
+                });
     }
 
     public void addSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId, final String query,
@@ -84,6 +98,7 @@ public class SearchLogHelper {
             final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
+                searchLog.setUserInfo(getUserInfo(userCode));
             }
         }
 
@@ -186,28 +201,35 @@ public class SearchLogHelper {
         });
     }
 
-    public void updateUserInfo(final String userCode) {
-        final long current = System.currentTimeMillis();
-        final Long time = userInfoCache.get(userCode);
-        if (time == null || current - time.longValue() > userCheckInterval) {
+    protected UserInfo storeUserInfo(final String userCode) {
+        final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
 
-            final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTimeAsLocalDateTime();
+        final UserInfo userInfo = userInfoBhv.selectByPK(userCode).map(e -> {
+            e.setUpdatedAt(now);
+            return e;
+        }).orElseGet(() -> {
+            final UserInfo e = new UserInfo();
+            e.setId(userCode);
+            e.setCreatedAt(now);
+            e.setUpdatedAt(now);
+            return e;
+        });
+        new Thread(() -> userInfoBhv.insertOrUpdate(userInfo)).start();
+        return userInfo;
+    }
 
-            final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTimeAsLocalDateTime();
-            userInfoBhv.selectByPK(userCode).ifPresent(userInfo -> {
-                userInfo.setUpdatedAt(now);
-                new Thread(() -> {
-                    userInfoBhv.insertOrUpdate(userInfo);
-                }).start();
-            }).orElse(() -> {
-                final UserInfo userInfo = new UserInfo();
-                userInfo.setId(userCode);
-                userInfo.setCreatedAt(now);
-                userInfo.setUpdatedAt(now);
-                userInfoBhv.insert(userInfo);
-            });
-            userInfoCache.put(userCode, current);
+    public OptionalEntity<UserInfo> getUserInfo(final String userCode) {
+        if (StringUtil.isNotBlank(userCode)) {
+            try {
+                return OptionalEntity.of(userInfoCache.get(userCode));
+            } catch (ExecutionException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to access UserInfo cache.", e);
+                }
+            }
         }
+        return OptionalEntity.empty();
     }
 
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
@@ -274,7 +296,7 @@ public class SearchLogHelper {
         }
     }
 
-    private void storeSearchLogList(final List<SearchLog> searchLogList) {
+    protected void storeSearchLogList(final List<SearchLog> searchLogList) {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
         searchLogBhv.batchUpdate(searchLogList, op -> {
             op.setRefreshPolicy(Constants.TRUE);

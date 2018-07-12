@@ -129,7 +129,7 @@ public class UserInfoHelper {
     }
 
     protected void updateUserSessionId(final String userCode) {
-        ComponentUtil.getSearchLogHelper().updateUserInfo(userCode);
+        ComponentUtil.getSearchLogHelper().getUserInfo(userCode);
 
         final HttpServletRequest request = LaRequestUtil.getRequest();
         request.setAttribute(Constants.USER_CODE, userCode);

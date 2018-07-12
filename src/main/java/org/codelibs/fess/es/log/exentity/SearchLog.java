@@ -90,6 +90,9 @@ public class SearchLog extends BsSearchLog {
 
     public void setUserInfo(final OptionalEntity<UserInfo> userInfo) {
         this.userInfo = userInfo;
+        userInfo.ifPresent(e -> {
+            super.setUserInfoId(e.getId());
+        });
     }
 
     public List<Pair<String, String>> getSearchFieldLogList() {
