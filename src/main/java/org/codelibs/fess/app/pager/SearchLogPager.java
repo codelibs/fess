@@ -50,7 +50,13 @@ public class SearchLogPager implements Serializable {
 
     public String logType = LOG_TYPE_SEARCH;
 
-    public String id;
+    public String queryId;
+
+    public String userSessionId;
+
+    public String requestedTimeRange;
+
+    public String accessType;
 
     public void clear() {
         allRecordCount = 0;
@@ -60,7 +66,10 @@ public class SearchLogPager implements Serializable {
         pageSize = getDefaultPageSize();
         currentPageNumber = getDefaultCurrentPageNumber();
 
-        id = null;
+        queryId = null;
+        userSessionId = null;
+        requestedTimeRange = null;
+        accessType = null;
         logType = LOG_TYPE_SEARCH;
 
     }

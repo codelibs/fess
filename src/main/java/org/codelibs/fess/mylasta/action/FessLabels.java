@@ -2799,6 +2799,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Delete */
     public static final String LABELS_searchlog_configuration_button_delete = "{labels.searchlog_configuration_button_delete}";
 
+    /** The key of the message: Query ID */
+    public static final String LABELS_searchlog_queryid = "{labels.searchlog_queryid}";
+
+    /** The key of the message: User ID */
+    public static final String LABELS_searchlog_usersessionid = "{labels.searchlog_usersessionid}";
+
+    /** The key of the message: Time */
+    public static final String LABELS_searchlog_requestedtime = "{labels.searchlog_requestedtime}";
+
+    /** The key of the message: Access Type */
+    public static final String LABELS_searchlog_accesstype = "{labels.searchlog_accesstype}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

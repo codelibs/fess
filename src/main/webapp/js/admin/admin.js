@@ -50,15 +50,17 @@ $(function() {
 		$(this).val(picker.startDate.format('YYYY-MM-DD'));
 	});
 	$('input.form-control.daterange').daterangepicker({
+		autoUpdateInput : false,
 		timePicker : false,
 		singleDatePicker : false,
 		locale : {
 			format : 'YYYY-MM-DD'
 		}
 	}).on('apply.daterangepicker', function(ev, picker) {
-		$(this).val(picker.startDate.format('YYYY-MM-DD'));
+		$(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
 	});
 	$('input.form-control.datetime').daterangepicker({
+		autoUpdateInput : false,
 		timePicker : true,
 		timePickerIncrement : 10,
 		singleDatePicker : true,
@@ -69,6 +71,7 @@ $(function() {
 		$(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
 	});
 	$('input.form-control.datetimerange').daterangepicker({
+		autoUpdateInput : false,
 		timePicker : true,
 		timePickerIncrement : 10,
 		singleDatePicker : false,
@@ -76,7 +79,7 @@ $(function() {
 			format : 'YYYY-MM-DD HH:mm'
 		}
 	}).on('apply.daterangepicker', function(ev, picker) {
-		$(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
+		$(this).val(picker.startDate.format('YYYY-MM-DD HH:mm') + ' - ' + picker.endDate.format('YYYY-MM-DD HH:mm'));
 	});
 
 	// Time picker

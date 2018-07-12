@@ -22,4 +22,11 @@ public class SearchForm {
 
     public String logType;
 
+    public String queryId;
+
+    public String userSessionId;
+
+    public String requestedTimeRange;
+
+    public String accessType;
 }

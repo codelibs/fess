@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,8 +40,11 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchLogService {
+    private static final Logger logger = LoggerFactory.getLogger(SearchLogService.class);
 
     @Resource
     private SearchLogBhv searchLogBhv;
@@ -66,16 +73,85 @@ public class SearchLogService {
             list = clickLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_RequestedAt_Desc();
+                if (StringUtil.isNotBlank(pager.queryId)) {
+                    cb.query().setQueryId_Term(pager.queryId);
+                }
+                if (StringUtil.isNotBlank(pager.userSessionId)) {
+                    cb.query().setUserSessionId_Term(pager.userSessionId);
+                }
+                if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
+                    String[] values = pager.requestedTimeRange.split(" - ");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    try {
+                        if (values.length > 0) {
+                            cb.query().setRequestedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
+                        }
+                        if (values.length > 1) {
+                            cb.query().setRequestedAt_LessEqual(LocalDateTime.parse(values[1], formatter));
+                        }
+                    } catch (Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                        }
+                    }
+                }
             });
         } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(pager.logType)) {
             list = favoriteLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_CreatedAt_Desc();
+                if (StringUtil.isNotBlank(pager.queryId)) {
+                    cb.query().setQueryId_Term(pager.queryId);
+                }
+                if (StringUtil.isNotBlank(pager.userSessionId)) {
+                    cb.query().setUserInfoId_Term(pager.userSessionId);
+                }
+                if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
+                    String[] values = pager.requestedTimeRange.split(" - ");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    try {
+                        if (values.length > 0) {
+                            cb.query().setCreatedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
+                        }
+                        if (values.length > 1) {
+                            cb.query().setCreatedAt_LessEqual(parseDateTime(values[1], formatter));
+                        }
+                    } catch (Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                        }
+                    }
+                }
             });
         } else {
             list = searchLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_RequestedAt_Desc();
+                if (StringUtil.isNotBlank(pager.queryId)) {
+                    cb.query().setQueryId_Term(pager.queryId);
+                }
+                if (StringUtil.isNotBlank(pager.userSessionId)) {
+                    cb.query().setUserSessionId_Term(pager.userSessionId);
+                }
+                if (StringUtil.isNotBlank(pager.accessType)) {
+                    cb.query().setAccessType_Term(pager.accessType);
+                }
+                if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
+                    String[] values = pager.requestedTimeRange.split(" - ");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    try {
+                        if (values.length > 0) {
+                            cb.query().setRequestedAt_GreaterEqual(parseDateTime(values[0], formatter));
+                        }
+                        if (values.length > 1) {
+                            cb.query().setRequestedAt_LessEqual(LocalDateTime.parse(values[1], formatter));
+                        }
+                    } catch (Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                        }
+                    }
+                }
             });
         }
 
@@ -86,6 +162,10 @@ public class SearchLogService {
         }).createPageNumberList());
 
         return list;
+    }
+
+    protected LocalDateTime parseDateTime(String value, DateTimeFormatter formatter) {
+        return LocalDateTime.parse(value, formatter).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
     public OptionalEntity<?> getSearchLog(final String logType, final String id) {

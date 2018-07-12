@@ -57,6 +57,36 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="queryIdSearch" class="col-sm-2 control-label"><la:message
+												key="labels.searchlog_queryid" /></label>
+										<div class="col-sm-4">
+											<la:text styleId="queryIdSearch" property="queryId" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="userSessionIdSearch" class="col-sm-2 control-label"><la:message
+												key="labels.searchlog_usersessionid" /></label>
+										<div class="col-sm-4">
+											<la:text styleId="userSessionIdSearch" property="userSessionId" styleClass="form-control" />
+										</div>
+									</div>
+									<c:if test="${logType == 'search'}">
+									<div class="form-group">
+										<label for="accessTypeSearch" class="col-sm-2 control-label"><la:message
+												key="labels.searchlog_accesstype" /></label>
+										<div class="col-sm-4">
+											<la:text styleId="accessTypeSearch" property="accessType" styleClass="form-control" />
+										</div>
+									</div>
+									</c:if>
+									<div class="form-group">
+										<label for="requestedTimeRangeSearch" class="col-sm-2 control-label"><la:message
+												key="labels.searchlog_requestedtime" /></label>
+										<div class="col-sm-4">
+											<la:text styleId="requestedTimeRangeSearch" property="requestedTimeRange" styleClass="form-control datetimerange" />
+										</div>
+									</div>
+									<div class="form-group">
 										<div class="col-sm-offset-2 col-sm-10">
 											<button type="submit" class="btn btn-primary" id="submit"
 												name="search"

@@ -65,7 +65,12 @@
 											<c:forEach var="info" items="${logParamItems}">
 												<tr>
 													<th>${f:h(info.key)}</th>
-													<td>${f:h(info.value)}</td>
+													<c:choose>
+													<c:when test="${info.key == 'Query ID'}"><td><la:link href="/admin/searchlog/search?logType=search&amp;queryId=${f:u(info.value)}&amp;userSessionId=&amp;requestedTimeRange=&amp;accessType=">${f:h(info.value)}</la:link></td></c:when>
+													<c:when test="${info.key == 'User Info ID'}"><td><la:link href="/admin/searchlog/search?logType=search&amp;queryId=&amp;userSessionId=${f:u(info.value)}&amp;requestedTimeRange=&amp;accessType=">${f:h(info.value)}</la:link></td></c:when>
+													<c:when test="${info.key == 'User Session ID'}"><td><la:link href="/admin/searchlog/search?logType=search&amp;queryId=&amp;userSessionId=${f:u(info.value)}&amp;requestedTimeRange=&amp;accessType=">${f:h(info.value)}</la:link></td></c:when>
+													<c:otherwise><td>${f:h(info.value)}</td></c:otherwise>
+													</c:choose>
 												</tr>
 											</c:forEach>
 										</tbody>
