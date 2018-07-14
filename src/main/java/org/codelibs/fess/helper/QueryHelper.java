@@ -596,7 +596,8 @@ public class QueryHelper {
                                 context.addSorts(createFieldSortBuilder(sortField, sortOrder));
                             }));
             return null;
-        } else if (INURL_FIELD.equals(field) || fessConfig.getIndexFieldUrl().equals(context.getDefaultField())) {
+        } else if (INURL_FIELD.equals(field)
+                || (StringUtil.equals(field, context.getDefaultField()) && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
         } else if (SITE_FIELD.equals(field)) {
             return convertSiteQuery(context, text, boost);
