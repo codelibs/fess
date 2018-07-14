@@ -450,7 +450,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-warning" name="update"
 										value="<la:message key="labels.crawl_button_update" />">
-										<i class="fa fa-pencil"></i>
+										<i class="fa fa-pencil-alt"></i>
 										<la:message key="labels.crawl_button_update" />
 									</button>
 								</div>

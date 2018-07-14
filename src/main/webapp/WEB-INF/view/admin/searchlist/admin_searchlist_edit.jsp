@@ -324,7 +324,7 @@
 										</la:link>
 										<button type="submit" class="btn btn-warning" name="update"
 											value="<la:message key="labels.crud_button_update" />">
-											<i class="fa fa-pencil"></i>
+											<i class="fa fa-pencil-alt"></i>
 											<la:message key="labels.crud_button_update" />
 										</button>
 									</c:if>

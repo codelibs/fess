@@ -88,7 +88,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="crawlingConfig"
 										value="<la:message key="labels.wizard_button_register_again"/>">
-										<i class="fa fa-repeat"></i>
+										<i class="fa fa-redo-alt"></i>
 										<la:message key="labels.wizard_button_register_again" />
 									</button>
 									<button type="submit" class="btn btn-success"

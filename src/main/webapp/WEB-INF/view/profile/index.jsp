@@ -76,7 +76,7 @@
 					<button type="submit" name="changePassword"
 						class="btn btn-warning"
 						value="<la:message key="labels.profile.update"/>">
-						<i class="fa fa-pencil"></i>
+						<i class="fa fa-pencil-alt"></i>
 						<la:message key="labels.profile.update" />
 					</button>
 				</div>

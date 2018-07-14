@@ -119,7 +119,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-warning" name="edit"
 										value="<la:message key="labels.design_edit_button" />">
-										<i class="fa fa-pencil"></i>
+										<i class="fa fa-pencil-alt"></i>
 										<la:message key="labels.design_edit_button" />
 									</button>
 									<button type="submit" class="btn btn-danger"
