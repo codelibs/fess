@@ -101,6 +101,26 @@
 							</div>
 							<!-- /.box -->
 						</div>
+						<div class="col-md-12">
+							<div class="box box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">
+										<la:message key="labels.diagnostic_logs" />
+									</h3>
+								</div>
+								<!-- /.box-header -->
+								<div class="box-footer">
+									<button type="submit" class="btn btn-primary"
+										name="downloadLogs"
+										value="<la:message key="labels.download_diagnostic_logs_button"/>">
+										<i class="fa fa-arrow-circle-right"></i>
+										<la:message key="labels.download_diagnostic_logs_button" />
+									</button>
+								</div>
+								<!-- /.box-footer -->
+							</div>
+							<!-- /.box -->
+						</div>
 					</la:form>
 				</div>
 			</section>

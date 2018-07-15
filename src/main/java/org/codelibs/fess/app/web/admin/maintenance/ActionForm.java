@@ -20,7 +20,7 @@ import javax.validation.constraints.Size;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class UpgradeForm {
+public class ActionForm {
     @Size(max = 10)
     public String replaceAliases = Constants.ON;
 
