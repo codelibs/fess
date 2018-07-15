@@ -20,20 +20,8 @@ import java.util.Date;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
-import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
-import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
-import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
-import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
-import org.codelibs.fess.es.config.exbhv.LabelToRoleBhv;
-import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
-import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.elasticsearch.action.ActionListener;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -51,44 +39,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //
-    @Resource
-    protected RoleBhv roleBhv;
-
-    @Resource
-    protected RoleTypeBhv roleTypeBhv;
-
-    @Resource
-    protected LabelToRoleBhv labelToRoleBhv;
-
-    @Resource
-    protected LabelTypeBhv labelTypeBhv;
-
-    @Resource
-    protected WebConfigToRoleBhv webConfigToRoleBhv;
-
-    @Resource
-    protected WebConfigBhv webConfigBhv;
-
-    @Resource
-    protected FileConfigToRoleBhv fileConfigToRoleBhv;
-
-    @Resource
-    protected FileConfigBhv fileConfigBhv;
-
-    @Resource
-    protected DataConfigToRoleBhv dataConfigToRoleBhv;
-
-    @Resource
-    protected DataConfigBhv dataConfigBhv;
-
-    @Resource
-    protected ElevateWordBhv elevateWordBhv;
 
     @Resource
     protected FessEsClient fessEsClient;
-
-    @Resource
-    private ScheduledJobService scheduledJobService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -120,6 +73,24 @@ public class AdminMaintenanceAction extends FessAdminAction {
         if (startReindex(isCheckboxEnabled(form.replaceAliases), form.numberOfShardsForDoc, form.autoExpandReplicasForDoc)) {
             saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         }
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse clearCrawlerIndex(final UpgradeForm form) {
+        validate(form, messages -> {}, this::asIndexHtml);
+        verifyToken(this::asIndexHtml);
+        fessEsClient
+                .admin()
+                .indices()
+                .prepareDelete(//
+                        fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
+                        fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
+                        fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
+                .execute(
+                        ActionListener.wrap(res -> logger.info("Deleted .crawler indices."),
+                                e -> logger.warn("Failed to delete .crawler.* indices.", e)));
+        saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
 

@@ -2823,6 +2823,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Auto expand replicas */
     public static final String LABELS_auto_expand_replicas_for_doc = "{labels.auto_expand_replicas_for_doc}";
 
+    /** The key of the message: Crawler Indices */
+    public static final String LABELS_clear_crawler_index = "{labels.clear_crawler_index}";
+
+    /** The key of the message: Clear .crawler Indices */
+    public static final String LABELS_clear_crawler_index_button = "{labels.clear_crawler_index_button}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
