@@ -512,6 +512,24 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .crawler */
     String INDEX_DOCUMENT_CRAWLER_INDEX = "index.document.crawler.index";
 
+    /** The key of the configuration. e.g. 10 */
+    String INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_shards = "index.document.crawler.queue.number_of_shards";
+
+    /** The key of the configuration. e.g. 10 */
+    String INDEX_DOCUMENT_CRAWLER_DATA_number_of_shards = "index.document.crawler.data.number_of_shards";
+
+    /** The key of the configuration. e.g. 10 */
+    String INDEX_DOCUMENT_CRAWLER_FILTER_number_of_shards = "index.document.crawler.filter.number_of_shards";
+
+    /** The key of the configuration. e.g. 1 */
+    String INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_replicas = "index.document.crawler.queue.number_of_replicas";
+
+    /** The key of the configuration. e.g. 1 */
+    String INDEX_DOCUMENT_CRAWLER_DATA_number_of_replicas = "index.document.crawler.data.number_of_replicas";
+
+    /** The key of the configuration. e.g. 1 */
+    String INDEX_DOCUMENT_CRAWLER_FILTER_number_of_replicas = "index.document.crawler.filter.number_of_replicas";
+
     /** The key of the configuration. e.g. .fess_config */
     String INDEX_CONFIG_INDEX = "index.config.index";
 
@@ -1128,6 +1146,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. searchlog */
     String ONLINE_HELP_NAME_SEARCHLOG = "online.help.name.searchlog";
+
+    /** The key of the configuration. e.g. maintenance */
+    String ONLINE_HELP_NAME_MAINTENANCE = "online.help.name.maintenance";
 
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
@@ -2863,6 +2884,96 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerIndex();
+
+    /**
+     * Get the value for the key 'index.document.crawler.queue.number_of_shards'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerQueueNumberOfShards();
+
+    /**
+     * Get the value for the key 'index.document.crawler.queue.number_of_shards' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDocumentCrawlerQueueNumberOfShardsAsInteger();
+
+    /**
+     * Get the value for the key 'index.document.crawler.data.number_of_shards'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerDataNumberOfShards();
+
+    /**
+     * Get the value for the key 'index.document.crawler.data.number_of_shards' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDocumentCrawlerDataNumberOfShardsAsInteger();
+
+    /**
+     * Get the value for the key 'index.document.crawler.filter.number_of_shards'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerFilterNumberOfShards();
+
+    /**
+     * Get the value for the key 'index.document.crawler.filter.number_of_shards' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDocumentCrawlerFilterNumberOfShardsAsInteger();
+
+    /**
+     * Get the value for the key 'index.document.crawler.queue.number_of_replicas'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerQueueNumberOfReplicas();
+
+    /**
+     * Get the value for the key 'index.document.crawler.queue.number_of_replicas' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDocumentCrawlerQueueNumberOfReplicasAsInteger();
+
+    /**
+     * Get the value for the key 'index.document.crawler.data.number_of_replicas'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerDataNumberOfReplicas();
+
+    /**
+     * Get the value for the key 'index.document.crawler.data.number_of_replicas' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDocumentCrawlerDataNumberOfReplicasAsInteger();
+
+    /**
+     * Get the value for the key 'index.document.crawler.filter.number_of_replicas'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerFilterNumberOfReplicas();
+
+    /**
+     * Get the value for the key 'index.document.crawler.filter.number_of_replicas' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDocumentCrawlerFilterNumberOfReplicasAsInteger();
 
     /**
      * Get the value for the key 'index.config.index'. <br>
@@ -5010,6 +5121,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameSearchlog();
 
     /**
+     * Get the value for the key 'online.help.name.maintenance'. <br>
+     * The value is, e.g. maintenance <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameMaintenance();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6653,6 +6771,54 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_DOCUMENT_CRAWLER_INDEX);
         }
 
+        public String getIndexDocumentCrawlerQueueNumberOfShards() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_shards);
+        }
+
+        public Integer getIndexDocumentCrawlerQueueNumberOfShardsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_shards);
+        }
+
+        public String getIndexDocumentCrawlerDataNumberOfShards() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_shards);
+        }
+
+        public Integer getIndexDocumentCrawlerDataNumberOfShardsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_shards);
+        }
+
+        public String getIndexDocumentCrawlerFilterNumberOfShards() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_shards);
+        }
+
+        public Integer getIndexDocumentCrawlerFilterNumberOfShardsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_shards);
+        }
+
+        public String getIndexDocumentCrawlerQueueNumberOfReplicas() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_replicas);
+        }
+
+        public Integer getIndexDocumentCrawlerQueueNumberOfReplicasAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_replicas);
+        }
+
+        public String getIndexDocumentCrawlerDataNumberOfReplicas() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_replicas);
+        }
+
+        public Integer getIndexDocumentCrawlerDataNumberOfReplicasAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_replicas);
+        }
+
+        public String getIndexDocumentCrawlerFilterNumberOfReplicas() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_replicas);
+        }
+
+        public Integer getIndexDocumentCrawlerFilterNumberOfReplicasAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_replicas);
+        }
+
         public String getIndexConfigIndex() {
             return get(FessConfig.INDEX_CONFIG_INDEX);
         }
@@ -7777,6 +7943,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_SEARCHLOG);
         }
 
+        public String getOnlineHelpNameMaintenance() {
+            return get(FessConfig.ONLINE_HELP_NAME_MAINTENANCE);
+        }
+
         public String getOnlineHelpSupportedLangs() {
             return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
@@ -8424,6 +8594,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_DOCUMENT_TYPE, "doc");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX, "fess");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_INDEX, ".crawler");
+            defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_shards, "10");
+            defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_shards, "10");
+            defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_shards, "10");
+            defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_replicas, "1");
+            defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_replicas, "1");
+            defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_replicas, "1");
             defaultMap.put(FessConfig.INDEX_CONFIG_INDEX, ".fess_config");
             defaultMap.put(FessConfig.INDEX_USER_INDEX, ".fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
@@ -8614,6 +8790,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ACCESSTOKEN, "accesstoken");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SUGGEST, "suggest");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEARCHLOG, "searchlog");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_MAINTENANCE, "maintenance");
             defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "ja");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_SEED, "0");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_TAGS, "");

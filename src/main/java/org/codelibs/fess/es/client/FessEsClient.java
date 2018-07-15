@@ -311,7 +311,7 @@ public class FessEsClient implements Client {
                     final boolean exists = existsIndex(fessConfig.getIndexDocumentUpdateIndex());
                     if (!exists) {
                         indexName = generateNewIndexName(configIndex);
-                        createIndex(configIndex, configType, indexName);
+                        createIndex(configIndex, indexName);
                         createAlias(configIndex, indexName);
                     } else {
                         client.admin().cluster().prepareHealth(fessConfig.getIndexDocumentUpdateIndex()).setWaitForYellowStatus().execute()
@@ -341,7 +341,7 @@ public class FessEsClient implements Client {
                     }
                     final boolean exists = existsIndex(indexName);
                     if (!exists) {
-                        createIndex(configIndex, configType, indexName);
+                        createIndex(configIndex, indexName);
                         createAlias(configIndex, indexName);
                     }
                 }
@@ -396,7 +396,12 @@ public class FessEsClient implements Client {
         return false;
     }
 
-    public boolean createIndex(final String index, final String docType, final String indexName) {
+    public boolean createIndex(final String index, final String indexName) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return createIndex(index, indexName, fessConfig.getIndexNumberOfShards(), fessConfig.getIndexAutoExpandReplicas());
+    }
+
+    public boolean createIndex(final String index, final String indexName, final String numberOfShards, final String autoExpandReplicas) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         waitForConfigSyncStatus();
@@ -411,8 +416,8 @@ public class FessEsClient implements Client {
             }
             source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
             source = source.replaceAll(Pattern.quote("${fess.index.codec}"), fessConfig.getIndexCodec());
-            source = source.replaceAll(Pattern.quote("${fess.index.number_of_shards}"), fessConfig.getIndexNumberOfShards());
-            source = source.replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), fessConfig.getIndexAutoExpandReplicas());
+            source = source.replaceAll(Pattern.quote("${fess.index.number_of_shards}"), numberOfShards);
+            source = source.replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), autoExpandReplicas);
             final CreateIndexResponse indexResponse =
                     client.admin().indices().prepareCreate(indexName).setSource(source, XContentType.JSON).execute()
                             .actionGet(fessConfig.getIndexIndicesTimeout());

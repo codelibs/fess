@@ -290,6 +290,13 @@
 							<span><la:message key="labels.menu_backup" /></span>
 						</la:link></li>
 
+					<li
+						<c:if test="${param.menuType=='maintenance'}">class="active"</c:if>><la:link
+							href="/admin/maintenance/">
+							<i class='fa fa-genderless'></i>
+							<span><la:message key="labels.menu_maintenance" /></span>
+						</la:link></li>
+
 				</ul></li>
 			<c:if test="${fe:fileExists('/WEB-INF/view/common/admin/sidebar_extra.jsp')}">
 				<c:import url="/WEB-INF/view/common/admin/sidebar_extra.jsp" />

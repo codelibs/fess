@@ -581,6 +581,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Access Token */
     public static final String LABELS_menu_access_token = "{labels.menu_access_token}";
 
+    /** The key of the message: Maintenance */
+    public static final String LABELS_menu_maintenance = "{labels.menu_maintenance}";
+
     /** The key of the message: Related Content */
     public static final String LABELS_menu_related_content = "{labels.menu_related_content}";
 
@@ -2810,6 +2813,15 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Access Type */
     public static final String LABELS_searchlog_accesstype = "{labels.searchlog_accesstype}";
+
+    /** The key of the message: Maintenance */
+    public static final String LABELS_maintenance_title_configuration = "{labels.maintenance_title_configuration}";
+
+    /** The key of the message: The number of shards */
+    public static final String LABELS_number_of_shards_for_doc = "{labels.number_of_shards_for_doc}";
+
+    /** The key of the message: Auto expand replicas */
+    public static final String LABELS_auto_expand_replicas_for_doc = "{labels.auto_expand_replicas_for_doc}";
 
     /**
      * Assert the property is not null.

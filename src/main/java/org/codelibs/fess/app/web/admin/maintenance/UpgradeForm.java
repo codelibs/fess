@@ -13,11 +13,20 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.upgrade;
+package org.codelibs.fess.app.web.admin.maintenance;
 
-import org.lastaflute.web.validation.Required;
+import javax.validation.constraints.Size;
+
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class UpgradeForm {
-    @Required
-    public String targetVersion;
+    @Size(max = 10)
+    public String replaceAliases = Constants.ON;
+
+    @Size(max = 10)
+    public String numberOfShardsForDoc = ComponentUtil.getFessConfig().getIndexNumberOfShards();
+
+    @Size(max = 10)
+    public String autoExpandReplicasForDoc = ComponentUtil.getFessConfig().getIndexAutoExpandReplicas();
 }

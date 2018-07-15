@@ -13,7 +13,10 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.upgrade;
+package org.codelibs.fess.app.web.admin.maintenance;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.annotation.Resource;
 
@@ -31,24 +34,19 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
-import org.codelibs.fess.util.UpgradeUtil;
-import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.action.ActionListener;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AdminUpgradeAction extends FessAdminAction {
+public class AdminMaintenanceAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(AdminUpgradeAction.class);
-
-    private static final String VERSION_12_0 = "12.0";
-
-    private static final String VERSION_12_1 = "12.1";
+    private static final Logger logger = LoggerFactory.getLogger(AdminMaintenanceAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -90,7 +88,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     protected FessEsClient fessEsClient;
 
     @Resource
-    protected ScheduledJobService scheduledJobService;
+    private ScheduledJobService scheduledJobService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -98,7 +96,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameUpgrade()));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameMaintenance()));
     }
 
     // ===================================================================================
@@ -112,61 +110,35 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private HtmlResponse asIndexHtml() {
-        return asHtml(path_AdminUpgrade_AdminUpgradeJsp).useForm(UpgradeForm.class);
+        return asHtml(path_AdminMaintenance_AdminMaintenanceJsp).useForm(UpgradeForm.class);
     }
 
     @Execute
-    public HtmlResponse upgradeFrom(final UpgradeForm form) {
+    public HtmlResponse reindexOnly(final UpgradeForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-
-        if (VERSION_12_0.equals(form.targetVersion)) {
-            try {
-                upgradeFrom12_0();
-                upgradeFrom12_1();
-                upgradeFromAll();
-
-                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
-
-                systemHelper.reloadConfiguration();
-            } catch (final Exception e) {
-                logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_12_0, e.getLocalizedMessage()));
-            }
-        } else if (VERSION_12_1.equals(form.targetVersion)) {
-            try {
-                upgradeFrom12_1();
-                upgradeFromAll();
-
-                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
-
-                systemHelper.reloadConfiguration();
-            } catch (final Exception e) {
-                logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_12_1, e.getLocalizedMessage()));
-            }
-        } else {
-            saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
+        if (startReindex(isCheckboxEnabled(form.replaceAliases), form.numberOfShardsForDoc, form.autoExpandReplicasForDoc)) {
+            saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         }
         return redirect(getClass());
     }
 
-    private void upgradeFrom12_0() {
-        // nothing
-    }
-
-    private void upgradeFrom12_1() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
-
-        UpgradeUtil.putMapping(indicesClient, "fess_log.search_log", "search_log", "{\"dynamic_templates\": ["
-                + "{\"documents\": {\"path_match\": \"documents.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
-                + "]}");
-        UpgradeUtil.addFieldMapping(indicesClient, "fess_log.click_log", "click_log", "urlId",
-                "{\"properties\":{\"urlId\":{\"type\":\"keyword\"}}}");
-    }
-
-    private void upgradeFromAll() {
-        // nothing
+    private boolean startReindex(final boolean replaceAliases, final String numberOfShards, final String autoExpandReplicas) {
+        final String docIndex = "fess";
+        final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
+        final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+        if (fessEsClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas)) {
+            fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
+                fessEsClient.addMapping(docIndex, "doc", toIndex);
+                fessEsClient.reindex(fromIndex, toIndex, replaceAliases);
+                if (replaceAliases && !fessEsClient.updateAlias(toIndex)) {
+                    logger.warn("Failed to update aliases for " + fromIndex + " and " + toIndex);
+                }
+            }, e -> logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex, e)));
+            return true;
+        }
+        saveError(messages -> messages.addErrorsFailedToReindex(GLOBAL, fromIndex, toIndex));
+        return false;
     }
 
 }
