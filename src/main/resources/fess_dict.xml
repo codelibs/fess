@@ -9,9 +9,6 @@
 			<arg>kuromojiDictCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
-			<arg>seunjeonDictCreator</arg>
-		</postConstruct>
-		<postConstruct name="addCreator">
 			<arg>synonymCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
@@ -24,9 +21,6 @@
 
 	<component name="kuromojiDictCreator"
 		class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
-	</component>
-	<component name="seunjeonDictCreator"
-		class="org.codelibs.fess.dict.seunjeon.SeunjeonCreator">
 	</component>
 	<component name="synonymCreator"
 		class="org.codelibs.fess.dict.synonym.SynonymCreator">

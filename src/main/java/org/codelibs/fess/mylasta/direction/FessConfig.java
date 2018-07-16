@@ -1042,9 +1042,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. kuromoji */
     String ONLINE_HELP_NAME_DICT_KUROMOJI = "online.help.name.dict.kuromoji";
 
-    /** The key of the configuration. e.g. seunjeon */
-    String ONLINE_HELP_NAME_DICT_SEUNJEON = "online.help.name.dict.seunjeon";
-
     /** The key of the configuration. e.g. protwords */
     String ONLINE_HELP_NAME_DICT_PROTWORDS = "online.help.name.dict.protwords";
 
@@ -4876,13 +4873,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameDictKuromoji();
 
     /**
-     * Get the value for the key 'online.help.name.dict.seunjeon'. <br>
-     * The value is, e.g. seunjeon <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getOnlineHelpNameDictSeunjeon();
-
-    /**
      * Get the value for the key 'online.help.name.dict.protwords'. <br>
      * The value is, e.g. protwords <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7803,10 +7793,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_DICT_KUROMOJI);
         }
 
-        public String getOnlineHelpNameDictSeunjeon() {
-            return get(FessConfig.ONLINE_HELP_NAME_DICT_SEUNJEON);
-        }
-
         public String getOnlineHelpNameDictProtwords() {
             return get(FessConfig.ONLINE_HELP_NAME_DICT_PROTWORDS);
         }
@@ -8755,7 +8741,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_SYNONYM, "synonym");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT, "dict");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_KUROMOJI, "kuromoji");
-            defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_SEUNJEON, "seunjeon");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_PROTWORDS, "protwords");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_MAPPING, "mapping");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_WEBCONFIG, "webconfig");
