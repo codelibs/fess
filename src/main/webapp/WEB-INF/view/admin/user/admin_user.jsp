@@ -67,6 +67,9 @@
 									</div>
 									<c:set var="pager" value="${userPager}" scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/user/list/${pager.allPageCount}";</script>
+									</c:if>
 								</c:if>
 							</div>
 							<!-- /.box-body -->
