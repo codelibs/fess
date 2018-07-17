@@ -40,6 +40,10 @@
           "type": "stemmer",
           "name": "english"
         },
+        "english_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}en/stemmer_override.txt"
+        },
         "possessive_stemmer_en_filter": {
           "type": "stemmer",
           "name": "possessive_english"
@@ -670,6 +674,7 @@
             "truncate20_filter",
             "lowercase",
             "english_keywords",
+            "english_override",
             "possessive_stemmer_en_filter"
           ]
         },
@@ -979,6 +984,7 @@
             "synonym_filter",
             "cjk_bigram",
             "english_keywords",
+            "english_override",
             "stemmer_en_filter"
           ]
         },
@@ -1002,6 +1008,7 @@
             "synonym_filter",
             "cjk_bigram",
             "english_keywords",
+            "english_override",
             "stemmer_en_filter",
             "minhash_filter"
           ]
