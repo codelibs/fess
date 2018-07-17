@@ -172,6 +172,10 @@
 			<arg>"fess"</arg>
 			<arg>"zh-tw/stopwords.txt"</arg>
 		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"nl/stemmer_override.txt"</arg>
+		</postConstruct>
 		<!-- fess index -->
 		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>

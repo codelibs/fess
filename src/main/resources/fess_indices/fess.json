@@ -162,12 +162,7 @@
         },
         "dutch_override": {
           "type":       "stemmer_override",
-          "rules": [
-            "fiets=>fiets",
-            "bromfiets=>bromfiets",
-            "ei=>eier",
-            "kind=>kinder"
-          ]
+          "rules_path": "${fess.dictionary.path}nl/stemmer_override.txt"
         },
         "english_keywords": {
           "type":       "keyword_marker",
