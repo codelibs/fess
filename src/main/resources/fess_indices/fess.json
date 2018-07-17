@@ -50,7 +50,7 @@
         },
         "stopword_en_filter": {
           "type": "stop",
-          "stopwords": "_english_"
+          "stopwords_path": "${fess.dictionary.path}en/stopwords.txt"
         },
         "arabic_stop": {
           "type":       "stop",

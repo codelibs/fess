@@ -166,6 +166,10 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"en/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"zh-cn/stopwords.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
