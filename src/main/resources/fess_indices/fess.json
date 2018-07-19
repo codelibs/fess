@@ -54,7 +54,7 @@
         },
         "arabic_stop": {
           "type":       "stop",
-          "stopwords":  "_arabic_"
+          "stopwords_path": "${fess.dictionary.path}ar/stopwords.txt"
         },
         "arabic_keywords": {
           "type":       "keyword_marker",
@@ -64,9 +64,13 @@
           "type":       "stemmer",
           "language":   "arabic"
         },
+        "arabic_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}ar/stemmer_override.txt"
+        },
         "armenian_stop": {
           "type":       "stop",
-          "stopwords":  "_armenian_"
+          "stopwords_path": "${fess.dictionary.path}hy/stopwords.txt"
         },
         "armenian_keywords": {
           "type":       "keyword_marker",
@@ -76,9 +80,13 @@
           "type":       "stemmer",
           "language":   "armenian"
         },
+        "armenian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}hy/stemmer_override.txt"
+        },
         "basque_stop": {
           "type":       "stop",
-          "stopwords":  "_basque_"
+          "stopwords_path": "${fess.dictionary.path}eu/stopwords.txt"
         },
         "basque_keywords": {
           "type":       "keyword_marker",
@@ -88,9 +96,13 @@
           "type":       "stemmer",
           "language":   "basque"
         },
+        "basque_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}eu/stemmer_override.txt"
+        },
         "brazilian_stop": {
           "type":       "stop",
-          "stopwords":  "_brazilian_"
+          "stopwords_path": "${fess.dictionary.path}pt-br/stopwords.txt"
         },
         "brazilian_keywords": {
           "type":       "keyword_marker",
@@ -100,9 +112,13 @@
           "type":       "stemmer",
           "language":   "brazilian"
         },
+        "brazilian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}pt-br/stemmer_override.txt"
+        },
         "bulgarian_stop": {
           "type":       "stop",
-          "stopwords":  "_bulgarian_"
+          "stopwords_path": "${fess.dictionary.path}bg/stopwords.txt"
         },
         "bulgarian_keywords": {
           "type":       "keyword_marker",
@@ -112,13 +128,17 @@
           "type":       "stemmer",
           "language":   "bulgarian"
         },
+        "bulgarian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}bg/stemmer_override.txt"
+        },
         "catalan_elision": {
-        "type":         "elision",
+            "type":     "elision",
             "articles": [ "d", "l", "m", "n", "s", "t"]
         },
         "catalan_stop": {
           "type":       "stop",
-          "stopwords":  "_catalan_"
+          "stopwords_path": "${fess.dictionary.path}ca/stopwords.txt"
         },
         "catalan_keywords": {
           "type":       "keyword_marker",
@@ -128,9 +148,13 @@
           "type":       "stemmer",
           "language":   "catalan"
         },
+        "catalan_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}ca/stemmer_override.txt"
+        },
         "czech_stop": {
           "type":       "stop",
-          "stopwords":  "_czech_"
+          "stopwords_path": "${fess.dictionary.path}cs/stopwords.txt"
         },
         "czech_keywords": {
           "type":       "keyword_marker",
@@ -140,9 +164,13 @@
           "type":       "stemmer",
           "language":   "czech"
         },
+        "czech_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}cs/stemmer_override.txt"
+        },
         "danish_stop": {
           "type":       "stop",
-          "stopwords":  "_danish_"
+          "stopwords_path": "${fess.dictionary.path}da/stopwords.txt"
         },
         "danish_keywords": {
           "type":       "keyword_marker",
@@ -152,9 +180,13 @@
           "type":       "stemmer",
           "language":   "danish"
         },
+        "danish_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}da/stemmer_override.txt"
+        },
         "dutch_stop": {
           "type":       "stop",
-          "stopwords":  "_dutch_"
+          "stopwords_path": "${fess.dictionary.path}nl/stopwords.txt"
         },
         "dutch_keywords": {
           "type":       "keyword_marker",
@@ -174,7 +206,7 @@
         },
         "finnish_stop": {
           "type":       "stop",
-          "stopwords":  "_finnish_"
+          "stopwords_path": "${fess.dictionary.path}fi/stopwords.txt"
         },
         "finnish_keywords": {
           "type":       "keyword_marker",
@@ -183,6 +215,10 @@
         "finnish_stemmer": {
           "type":       "stemmer",
           "language":   "finnish"
+        },
+        "finnish_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}fi/stemmer_override.txt"
         },
         "french_elision": {
           "type":         "elision",
@@ -195,7 +231,7 @@
         },
         "french_stop": {
           "type":       "stop",
-          "stopwords":  "_french_"
+          "stopwords_path": "${fess.dictionary.path}fr/stopwords.txt"
         },
         "french_keywords": {
           "type":       "keyword_marker",
@@ -205,9 +241,13 @@
           "type":       "stemmer",
           "language":   "light_french"
         },
+        "french_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}fr/stemmer_override.txt"
+        },
         "galician_stop": {
           "type":       "stop",
-          "stopwords":  "_galician_"
+          "stopwords_path": "${fess.dictionary.path}gl/stopwords.txt"
         },
         "galician_keywords": {
           "type":       "keyword_marker",
@@ -217,9 +257,13 @@
           "type":       "stemmer",
           "language":   "galician"
         },
+        "galician_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}gl/stemmer_override.txt"
+        },
         "german_stop": {
           "type":       "stop",
-          "stopwords":  "_german_"
+          "stopwords_path": "${fess.dictionary.path}de/stopwords.txt"
         },
         "german_keywords": {
           "type":       "keyword_marker",
@@ -229,9 +273,13 @@
           "type":       "stemmer",
           "language":   "light_german"
         },
+        "german_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}de/stemmer_override.txt"
+        },
         "greek_stop": {
           "type":       "stop",
-          "stopwords":  "_greek_"
+          "stopwords_path": "${fess.dictionary.path}el/stopwords.txt"
         },
         "greek_lowercase": {
           "type":       "lowercase",
@@ -245,9 +293,13 @@
           "type":       "stemmer",
           "language":   "greek"
         },
+        "greek_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}el/stemmer_override.txt"
+        },
         "hindi_stop": {
           "type":       "stop",
-          "stopwords":  "_hindi_"
+          "stopwords_path": "${fess.dictionary.path}hi/stopwords.txt"
         },
         "hindi_keywords": {
           "type":       "keyword_marker",
@@ -257,9 +309,13 @@
           "type":       "stemmer",
           "language":   "hindi"
         },
+        "hindi_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}hi/stemmer_override.txt"
+        },
         "hungarian_stop": {
           "type":       "stop",
-          "stopwords":  "_hungarian_"
+          "stopwords_path": "${fess.dictionary.path}hu/stopwords.txt"
         },
         "hungarian_keywords": {
           "type":       "keyword_marker",
@@ -269,9 +325,13 @@
           "type":       "stemmer",
           "language":   "hungarian"
         },
+        "hungarian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}hu/stemmer_override.txt"
+        },
         "indonesian_stop": {
           "type":       "stop",
-          "stopwords":  "_indonesian_"
+          "stopwords_path": "${fess.dictionary.path}id/stopwords.txt"
         },
         "indonesian_keywords": {
           "type":       "keyword_marker",
@@ -281,13 +341,17 @@
           "type":       "stemmer",
           "language":   "indonesian"
         },
+        "indonesian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}id/stemmer_override.txt"
+        },
         "irish_elision": {
           "type":       "elision",
           "articles": [ "h", "n", "t" ]
         },
         "irish_stop": {
           "type":       "stop",
-          "stopwords":  "_irish_"
+          "stopwords_path": "${fess.dictionary.path}en-ie/stopwords.txt"
         },
         "irish_lowercase": {
           "type":       "lowercase",
@@ -301,6 +365,10 @@
           "type":       "stemmer",
           "language":   "irish"
         },
+        "irish_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}en-ie/stemmer_override.txt"
+        },
         "italian_elision": {
           "type":         "elision",
           "articles": [
@@ -312,7 +380,7 @@
         },
         "italian_stop": {
           "type":       "stop",
-          "stopwords":  "_italian_"
+          "stopwords_path": "${fess.dictionary.path}it/stopwords.txt"
         },
         "italian_keywords": {
           "type":       "keyword_marker",
@@ -321,6 +389,10 @@
         "italian_stemmer": {
           "type":       "stemmer",
           "language":   "light_italian"
+        },
+        "italian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}it/stemmer_override.txt"
         },
         "japanese_pos_filter" : {
           "type" : "fess_japanese_part_of_speech",
@@ -370,7 +442,7 @@
         },
         "latvian_stop": {
           "type":       "stop",
-          "stopwords":  "_latvian_"
+          "stopwords_path": "${fess.dictionary.path}lv/stopwords.txt"
         },
         "latvian_keywords": {
           "type":       "keyword_marker",
@@ -380,9 +452,13 @@
           "type":       "stemmer",
           "language":   "latvian"
         },
+        "latvian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}lv/stemmer_override.txt"
+        },
         "lithuanian_stop": {
           "type":       "stop",
-          "stopwords":  "_lithuanian_"
+          "stopwords_path": "${fess.dictionary.path}lt/stopwords.txt"
         },
         "lithuanian_keywords": {
           "type":       "keyword_marker",
@@ -392,9 +468,13 @@
           "type":       "stemmer",
           "language":   "lithuanian"
         },
+        "lithuanian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}lt/stemmer_override.txt"
+        },
         "norwegian_stop": {
           "type":       "stop",
-          "stopwords":  "_norwegian_"
+          "stopwords_path": "${fess.dictionary.path}no/stopwords.txt"
         },
         "norwegian_keywords": {
           "type":       "keyword_marker",
@@ -404,13 +484,17 @@
           "type":       "stemmer",
           "language":   "norwegian"
         },
+        "norwegian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}no/stemmer_override.txt"
+        },
         "persian_stop": {
           "type":       "stop",
-          "stopwords":  "_persian_"
+          "stopwords_path": "${fess.dictionary.path}fa/stopwords.txt"
         },
         "portuguese_stop": {
           "type":       "stop",
-          "stopwords":  "_portuguese_"
+          "stopwords_path": "${fess.dictionary.path}pt/stopwords.txt"
         },
         "portuguese_keywords": {
           "type":       "keyword_marker",
@@ -420,9 +504,13 @@
           "type":       "stemmer",
           "language":   "light_portuguese"
         },
+        "portuguese_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}pt/stemmer_override.txt"
+        },
         "romanian_stop": {
           "type":       "stop",
-          "stopwords":  "_romanian_"
+          "stopwords_path": "${fess.dictionary.path}ro/stopwords.txt"
         },
         "romanian_keywords": {
           "type":       "keyword_marker",
@@ -432,9 +520,13 @@
           "type":       "stemmer",
           "language":   "romanian"
         },
+        "romanian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}ro/stemmer_override.txt"
+        },
         "russian_stop": {
           "type":       "stop",
-          "stopwords":  "_russian_"
+          "stopwords_path": "${fess.dictionary.path}ru/stopwords.txt"
         },
         "russian_keywords": {
           "type":       "keyword_marker",
@@ -444,13 +536,17 @@
           "type":       "stemmer",
           "language":   "russian"
         },
+        "russian_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}ru/stemmer_override.txt"
+        },
         "simplified_chinese_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}zh-cn/stopwords.txt"
         },
         "sorani_stop": {
           "type":       "stop",
-          "stopwords":  "_sorani_"
+          "stopwords_path": "${fess.dictionary.path}ckb-iq/stopwords.txt"
         },
         "sorani_keywords": {
           "type":       "keyword_marker",
@@ -460,9 +556,13 @@
           "type":       "stemmer",
           "language":   "sorani"
         },
+        "sorani_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}ckb-iq/stemmer_override.txt"
+        },
         "spanish_stop": {
           "type":       "stop",
-          "stopwords":  "_spanish_"
+          "stopwords_path": "${fess.dictionary.path}es/stopwords.txt"
         },
         "spanish_keywords": {
           "type":       "keyword_marker",
@@ -472,9 +572,13 @@
           "type":       "stemmer",
           "language":   "light_spanish"
         },
+        "spanish_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}es/stemmer_override.txt"
+        },
         "swedish_stop": {
           "type":       "stop",
-          "stopwords":  "_swedish_"
+          "stopwords_path": "${fess.dictionary.path}sv/stopwords.txt"
         },
         "swedish_keywords": {
           "type":       "keyword_marker",
@@ -484,9 +588,13 @@
           "type":       "stemmer",
           "language":   "swedish"
         },
+        "swedish_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}sv/stemmer_override.txt"
+        },
         "thai_stop": {
           "type":       "stop",
-          "stopwords":  "_thai_"
+          "stopwords_path": "${fess.dictionary.path}th/stopwords.txt"
         },
         "traditional_chinese_stop": {
           "type":       "stop",
@@ -494,7 +602,7 @@
         },
         "turkish_stop": {
           "type":       "stop",
-          "stopwords":  "_turkish_"
+          "stopwords_path": "${fess.dictionary.path}tr/stopwords.txt"
         },
         "turkish_lowercase": {
           "type":       "lowercase",
@@ -508,9 +616,13 @@
           "type":       "stemmer",
           "language":   "turkish"
         },
+        "turkish_override": {
+          "type":       "stemmer_override",
+          "rules_path": "${fess.dictionary.path}tr/stemmer_override.txt"
+        },
         "vietnamese_stop": {
           "type":       "stop",
-          "stopwords": ["bị", "bởi", "cả", "các", "cái", "cần", "càng", "chỉ", "chiếc", "cho", "chứ", "chưa", "chuyện", "có", "có thể", "cứ", "của", "cùng", "cũng", "đã", "đang", "đây", "để", "đến nỗi", "đều", "điều", "do", "đó", "được", "dưới", "gì", "khi", "không", "là", "lại", "lên", "lúc", "mà", "mỗi", "một cách", "này", "nên", "nếu", "ngay", "nhiều", "như", "nhưng", "những", "nơi", "nữa", "phải", "qua", "ra", "rằng", "rằng", "rất", "rất", "rồi", "sau", "sẽ", "so", "sự", "tại", "theo", "thì", "trên", "trước", "từ", "từng", "và", "vẫn", "vào", "vậy", "vì", "việc", "với", "vừa"]
+          "stopwords_path": "${fess.dictionary.path}vi/stopwords.txt"
         },
         "truncate10_filter" : {
           "type" : "truncate",
@@ -578,6 +690,7 @@
             "arabic_stop",
             "arabic_normalization",
             "arabic_keywords",
+            "arabic_override",
             "arabic_stemmer"
           ]
         },
@@ -588,6 +701,7 @@
             "lowercase",
             "armenian_stop",
             "armenian_keywords",
+            "armenian_override",
             "armenian_stemmer"
           ]
         },
@@ -598,6 +712,7 @@
             "lowercase",
             "basque_stop",
             "basque_keywords",
+            "basque_override",
             "basque_stemmer"
           ]
         },
@@ -608,6 +723,7 @@
             "lowercase",
             "brazilian_stop",
             "brazilian_keywords",
+            "brazilian_override",
             "brazilian_stemmer"
           ]
         },
@@ -618,6 +734,7 @@
             "lowercase",
             "bulgarian_stop",
             "bulgarian_keywords",
+            "bulgarian_override",
             "bulgarian_stemmer"
           ]
         },
@@ -630,6 +747,7 @@
             "lowercase",
             "catalan_stop",
             "catalan_keywords",
+            "catalan_override",
             "catalan_stemmer"
           ]
         },
@@ -641,6 +759,7 @@
             "lowercase",
             "czech_stop",
             "czech_keywords",
+            "czech_override",
             "czech_stemmer"
           ]
         },
@@ -652,6 +771,7 @@
             "lowercase",
             "danish_stop",
             "danish_keywords",
+            "danish_override",
             "danish_stemmer"
           ]
         },
@@ -686,6 +806,7 @@
             "lowercase",
             "finnish_stop",
             "finnish_keywords",
+            "finnish_override",
             "finnish_stemmer"
           ]
         },
@@ -698,6 +819,7 @@
             "lowercase",
             "french_stop",
             "french_keywords",
+            "french_override",
             "french_stemmer"
           ]
         },
@@ -708,6 +830,7 @@
             "lowercase",
             "galician_stop",
             "galician_keywords",
+            "galician_override",
             "galician_stemmer"
           ]
         },
@@ -719,6 +842,7 @@
             "lowercase",
             "german_stop",
             "german_normalization",
+            "german_override",
             "german_stemmer"
           ]
         },
@@ -730,6 +854,7 @@
             "greek_lowercase",
             "greek_stop",
             "greek_keywords",
+            "greek_override",
             "greek_stemmer"
           ]
         },
@@ -743,6 +868,7 @@
             "hindi_normalization",
             "hindi_stop",
             "hindi_keywords",
+            "hindi_override",
             "hindi_stemmer"
           ]
         },
@@ -754,6 +880,7 @@
             "lowercase",
             "hungarian_stop",
             "hungarian_keywords",
+            "hungarian_override",
             "hungarian_stemmer"
           ]
         },
@@ -765,6 +892,7 @@
             "lowercase",
             "indonesian_stop",
             "indonesian_keywords",
+            "indonesian_override",
             "indonesian_stemmer"
           ]
         },
@@ -776,6 +904,7 @@
             "irish_elision",
             "irish_lowercase",
             "irish_keywords",
+            "irish_override",
             "irish_stemmer"
           ]
         },
@@ -788,6 +917,7 @@
             "lowercase",
             "italian_stop",
             "italian_keywords",
+            "italian_override",
             "italian_stemmer"
           ]
         },
@@ -822,6 +952,7 @@
             "lowercase",
             "latvian_stop",
             "latvian_keywords",
+            "latvian_override",
             "latvian_stemmer"
           ]
         },
@@ -833,6 +964,7 @@
             "lowercase",
             "lithuanian_stop",
             "lithuanian_keywords",
+            "lithuanian_override",
             "lithuanian_stemmer"
           ]
         },
@@ -844,6 +976,7 @@
             "lowercase",
             "norwegian_stop",
             "norwegian_keywords",
+            "norwegian_override",
             "norwegian_stemmer"
           ]
         },
@@ -867,6 +1000,7 @@
             "lowercase",
             "portuguese_stop",
             "portuguese_keywords",
+            "portuguese_override",
             "portuguese_stemmer"
           ]
         },
@@ -877,6 +1011,7 @@
             "truncate20_filter",
             "lowercase",
             "romanian_stop",
+            "romanian_override",
             "romanian_stemmer"
           ]
         },
@@ -888,6 +1023,7 @@
             "lowercase",
             "russian_stop",
             "russian_keywords",
+            "russian_override",
             "russian_stemmer"
           ]
         },
@@ -907,6 +1043,7 @@
             "lowercase",
             "sorani_stop",
             "sorani_keywords",
+            "sorani_override",
             "sorani_stemmer"
           ]
         },
@@ -918,6 +1055,7 @@
             "lowercase",
             "spanish_stop",
             "spanish_keywords",
+            "spanish_override",
             "spanish_stemmer"
           ]
         },
@@ -929,6 +1067,7 @@
             "lowercase",
             "swedish_stop",
             "swedish_keywords",
+            "swedish_override",
             "swedish_stemmer"
           ]
         },
@@ -959,6 +1098,7 @@
             "turkish_lowercase",
             "turkish_stop",
             "turkish_keywords",
+            "turkish_override",
             "turkish_stemmer"
           ]
         },
