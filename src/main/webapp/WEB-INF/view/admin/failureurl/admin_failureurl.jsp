@@ -126,6 +126,9 @@
 										</div>
 										<c:set var="pager" value="${failureUrlPager}" scope="request" />
 										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+										<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+											<script>location.href = "${contextPath}/admin/failureurl/list/${pager.allPageCount}";</script>
+										</c:if>
 										<div class="row">
 											<la:form action="/admin/failureurl/">
 												<div class="col-sm-12 center">

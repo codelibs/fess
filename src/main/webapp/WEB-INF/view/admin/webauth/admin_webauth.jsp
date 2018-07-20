@@ -80,6 +80,9 @@
 										</table>
 										<c:set var="pager" value="${webAuthPager}" scope="request" />
 										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+										<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+											<script>location.href = "${contextPath}/admin/webauth/list/${pager.allPageCount}";</script>
+										</c:if>
 									</c:if>
 								</div>
 								<!-- /.box-body -->

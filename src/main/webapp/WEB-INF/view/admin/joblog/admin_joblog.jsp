@@ -105,6 +105,9 @@
 									</div>
 									<c:set var="pager" value="${jobLogPager}" scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/joblog/list/${pager.allPageCount}";</script>
+									</c:if>
 									<div class="row">
 										<la:form action="/admin/joblog/">
 											<div class="col-sm-12 center">

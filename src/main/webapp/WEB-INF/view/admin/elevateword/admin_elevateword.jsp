@@ -96,6 +96,9 @@
 									<c:set var="pager" value="${elevateWordPager}"
 										scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/elevateword/list/${pager.allPageCount}";</script>
+									</c:if>
 								</c:if>
 							</div>
 							<!-- /.box-body -->

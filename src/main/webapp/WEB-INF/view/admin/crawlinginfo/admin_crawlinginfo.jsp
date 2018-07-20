@@ -107,6 +107,9 @@
 									<c:set var="pager" value="${crawlingInfoPager}"
 										scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/crawlinginfo/list/${pager.allPageCount}";</script>
+									</c:if>
 									<div class="row">
 										<la:form action="/admin/crawlinginfo/">
 											<div class="col-sm-12 center">
