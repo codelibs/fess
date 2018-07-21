@@ -440,6 +440,14 @@
             "連体詞"
           ]
         },
+        "japanese_stop": {
+          "type":       "stop",
+          "stopwords_path": "${fess.dictionary.path}ja/stopwords.txt"
+        },
+        "korean_stop": {
+          "type":       "stop",
+          "stopwords_path": "${fess.dictionary.path}ko/stopwords.txt"
+        },
         "latvian_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}lv/stopwords.txt"
@@ -933,7 +941,8 @@
             "fess_japanese_baseform",
             "fess_japanese_stemmer",
             "japanese_pos_filter",
-            "lowercase"
+            "lowercase",
+            "japanese_stop"
           ]
         },
         "korean_analyzer": {
@@ -941,7 +950,8 @@
           "tokenizer":"korean_tokenizer",
           "filter": [
             "truncate10_filter",
-            "lowercase"
+            "lowercase",
+            "korean_stop"
           ]
         },
         "latvian_analyzer": {

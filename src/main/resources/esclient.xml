@@ -362,10 +362,6 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"fa/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
 			<arg>"fi/stemmer_override.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
@@ -395,14 +391,6 @@
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"it/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"ja/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"ko/stemmer_override.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
@@ -442,23 +430,7 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"th/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
 			<arg>"tr/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"vi/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"zh-cn/stemmer_override.txt"</arg>
-		</postConstruct>
-		<postConstruct name="addConfigFile">
-			<arg>"fess"</arg>
-			<arg>"zh-tw/stemmer_override.txt"</arg>
 		</postConstruct>
 		<!-- fess index -->
 		<postConstruct name="addIndexConfig">
