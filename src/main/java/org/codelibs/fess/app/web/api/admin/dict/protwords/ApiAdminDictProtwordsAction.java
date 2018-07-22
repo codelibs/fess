@@ -69,7 +69,7 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
-        final ProtwordsItem entity = createProtwordsItem(body, () -> {
+        final ProtwordsItem entity = createProtwordsItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
             return null;
         }).orElseGet(() -> {
@@ -87,7 +87,7 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final ProtwordsItem entity = createProtwordsItem(body, () -> {
+        final ProtwordsItem entity = createProtwordsItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));
             return null;
         }).orElseGet(() -> {

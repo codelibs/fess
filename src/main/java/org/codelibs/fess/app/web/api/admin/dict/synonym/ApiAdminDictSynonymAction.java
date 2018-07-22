@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.dict.synonym;
 
+import static org.codelibs.fess.app.web.admin.dict.synonym.AdminDictSynonymAction.createSynonymItem;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,6 @@ import javax.annotation.Resource;
 import org.codelibs.fess.app.pager.SynonymPager;
 import org.codelibs.fess.app.service.SynonymService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.dict.synonym.AdminDictSynonymAction;
 import org.codelibs.fess.app.web.admin.dict.synonym.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
@@ -69,7 +70,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
-        final SynonymItem entity = new AdminDictSynonymAction().createSynonymItem(body, () -> {
+        final SynonymItem entity = createSynonymItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
             return null;
         }).orElseGet(() -> {
@@ -87,7 +88,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final SynonymItem entity = new AdminDictSynonymAction().createSynonymItem(body, () -> {
+        final SynonymItem entity = createSynonymItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));
             return null;
         }).orElseGet(() -> {

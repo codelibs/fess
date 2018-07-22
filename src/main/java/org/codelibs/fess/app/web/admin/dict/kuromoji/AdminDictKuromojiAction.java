@@ -29,6 +29,7 @@ import org.codelibs.fess.app.service.KuromojiService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -39,6 +40,8 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author shinsuke
@@ -269,7 +272,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        createKuromojiItem(form).ifPresent(
+        createKuromojiItem(form, () -> asEditHtml()).ifPresent(
                 entity -> {
                     try {
                         kuromojiService.store(form.dictId, entity);
@@ -289,7 +292,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        createKuromojiItem(form).ifPresent(
+        createKuromojiItem(form, () -> asEditHtml()).ifPresent(
                 entity -> {
                     try {
                         kuromojiService.store(form.dictId, entity);
@@ -349,7 +352,16 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    public static OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
+    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createKuromojiItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<KuromojiItem> createKuromojiItem(final FessBaseAction action, final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             entity.setNewToken(form.token);
             entity.setNewSegmentation(form.segmentation);

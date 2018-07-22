@@ -29,6 +29,7 @@ import org.codelibs.fess.app.service.ProtwordsService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.protwords.ProtwordsItem;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -40,6 +41,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author ma2tani
@@ -327,10 +329,20 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    public static OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
+    protected OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createProtwordsItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<ProtwordsItem> createProtwordsItem(final FessBaseAction action, final CreateForm form,
+            final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String newInput = form.input;
-            validateProtwordsString(newInput, "input", hook);
+            validateProtwordsString(action, newInput, "input", hook);
             entity.setNewInput(newInput);
             return entity;
         });
@@ -347,10 +359,8 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         }
     }
 
-    private static void validateProtwordsString(final String values, final String propertyName, final VaErrorHook hook) {
-        if (values.length() == 0) {
-            return;
-        }
+    private static void validateProtwordsString(final FessBaseAction action, final String values, final String propertyName,
+            final VaErrorHook hook) {
         // TODO validation
     }
 

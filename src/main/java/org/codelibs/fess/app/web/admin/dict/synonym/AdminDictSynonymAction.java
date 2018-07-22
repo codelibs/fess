@@ -31,6 +31,7 @@ import org.codelibs.fess.app.service.SynonymService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.synonym.SynonymItem;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -42,6 +43,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author shinsuke
@@ -303,6 +305,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
                                 () -> asEditHtml());
                     }
                 }).orElse(() -> {
+            saveToken();
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asEditHtml());
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
@@ -337,7 +340,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<SynonymItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<SynonymItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final SynonymItem entity = new SynonymItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
@@ -353,13 +356,22 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    public OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form, final VaErrorHook hook) {
+    protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createSynonymItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<SynonymItem> createSynonymItem(final FessBaseAction action, final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
-            validateSynonymString(newInputs, "inputs", hook);
+            validateSynonymString(action, newInputs, "inputs", hook);
             entity.setNewInputs(newInputs);
             final String[] newOutputs = splitLine(form.outputs);
-            validateSynonymString(newOutputs, "outputs", hook);
+            validateSynonymString(action, newOutputs, "outputs", hook);
             entity.setNewOutputs(newOutputs);
             return entity;
         });
@@ -376,25 +388,26 @@ public class AdminDictSynonymAction extends FessAdminAction {
         }
     }
 
-    private void validateSynonymString(final String[] values, final String propertyName, final VaErrorHook hook) {
+    private static void validateSynonymString(final FessBaseAction action, final String[] values, final String propertyName,
+            final VaErrorHook hook) {
         if (values.length == 0) {
             return;
         }
         for (final String value : values) {
             if (value.indexOf(',') >= 0) {
-                throwValidationError(messages -> {
+                action.throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
                 }, hook);
             }
             if (value.indexOf("=>") >= 0) {
-                throwValidationError(messages -> {
+                action.throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
                 }, hook);
             }
         }
     }
 
-    private String[] splitLine(final String value) {
+    private static String[] splitLine(final String value) {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }

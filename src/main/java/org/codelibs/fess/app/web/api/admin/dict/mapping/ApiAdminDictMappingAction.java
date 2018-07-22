@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.api.admin.dict.mapping;
 
+import static org.codelibs.fess.app.web.admin.dict.mapping.AdminDictMappingAction.createCharMappingItem;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,6 @@ import javax.annotation.Resource;
 import org.codelibs.fess.app.pager.CharMappingPager;
 import org.codelibs.fess.app.service.CharMappingService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.dict.mapping.AdminDictMappingAction;
 import org.codelibs.fess.app.web.admin.dict.mapping.UploadForm;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
@@ -69,7 +70,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
-        final CharMappingItem entity = new AdminDictMappingAction().createCharMappingItem(body, () -> {
+        final CharMappingItem entity = createCharMappingItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
             return null;
         }).orElseGet(() -> {
@@ -87,7 +88,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final CharMappingItem entity = new AdminDictMappingAction().createCharMappingItem(body, () -> {
+        final CharMappingItem entity = createCharMappingItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));
             return null;
         }).orElseGet(() -> {

@@ -31,6 +31,7 @@ import org.codelibs.fess.app.service.CharMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -42,6 +43,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author nullpos
@@ -337,7 +339,7 @@ public class AdminDictMappingAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<CharMappingItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<CharMappingItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final CharMappingItem entity = new CharMappingItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY);
@@ -353,10 +355,20 @@ public class AdminDictMappingAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    public OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
+    protected OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createCharMappingItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<CharMappingItem> createCharMappingItem(final FessBaseAction action, final CreateForm form,
+            final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
-            validateMappingString(newInputs, "inputs", hook);
+            validateMappingString(action, newInputs, "inputs", hook);
             entity.setNewInputs(newInputs);
             final String newOutput = form.output;
             entity.setNewOutput(newOutput);
@@ -375,18 +387,19 @@ public class AdminDictMappingAction extends FessAdminAction {
         }
     }
 
-    private void validateMappingString(final String[] values, final String propertyName, final VaErrorHook hook) {
+    private static void validateMappingString(final FessBaseAction action, final String[] values, final String propertyName,
+            final VaErrorHook hook) {
         if (values.length == 0) {
             return;
         }
         for (final String value : values) {
             if (value.indexOf(',') >= 0) {
-                throwValidationError(messages -> {
+                action.throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
                 }, hook);
             }
             if (value.indexOf("=>") >= 0) {
-                throwValidationError(messages -> {
+                action.throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
                 }, hook);
             }

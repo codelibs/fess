@@ -70,7 +70,10 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
-        final KuromojiItem entity = createKuromojiItem(body).orElseGet(() -> {
+        final KuromojiItem entity = createKuromojiItem(this, body, () -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
+            return null;
+        }).orElseGet(() -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
             return null;
         });
@@ -85,7 +88,10 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        final KuromojiItem entity = createKuromojiItem(body).orElseGet(() -> {
+        final KuromojiItem entity = createKuromojiItem(this, body, () -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));
+            return null;
+        }).orElseGet(() -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(body.id)));
             return null;
         });
