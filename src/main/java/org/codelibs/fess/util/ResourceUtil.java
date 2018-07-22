@@ -28,9 +28,12 @@ import javax.servlet.ServletContext;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 public class ResourceUtil {
+    private static final String FESS_OVERRIDE_CONF_PATH = "FESS_OVERRIDE_CONF_PATH";
+
     private static final String FESS_APP_TYPE = "FESS_APP_TYPE";
 
     private static final String FESS_APP_DOCKER = "docker";
@@ -48,9 +51,26 @@ public class ResourceUtil {
         return fessConfig.getElasticsearchHttpUrl();
     }
 
+    public static String getAppType() {
+        final String appType = System.getenv(FESS_APP_TYPE);
+        if (StringUtil.isNotBlank(appType)) {
+            return appType;
+        }
+        return StringUtil.EMPTY;
+    }
+
+    public static OptionalEntity<String> getOverrideConfPath() {
+        if (FESS_APP_DOCKER.equalsIgnoreCase(getAppType())) {
+            final String confPath = System.getenv(FESS_OVERRIDE_CONF_PATH);
+            if (StringUtil.isNotBlank(confPath)) {
+                return OptionalEntity.of(confPath);
+            }
+        }
+        return OptionalEntity.empty();
+    }
+
     public static Path getConfPath(final String... names) {
-        final String fessAppType = System.getenv(FESS_APP_TYPE);
-        if (FESS_APP_DOCKER.equalsIgnoreCase(fessAppType)) {
+        if (FESS_APP_DOCKER.equalsIgnoreCase(getAppType())) {
             final Path confPath = Paths.get("/opt/fess", names);
             if (Files.exists(confPath)) {
                 return confPath;

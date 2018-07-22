@@ -42,6 +42,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
+import org.codelibs.fess.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -222,6 +223,10 @@ public class CrawlJob {
         // -cp
         cmdList.add("-cp");
         final StringBuilder buf = new StringBuilder(100);
+        ResourceUtil.getOverrideConfPath().ifPresent(p -> {
+            buf.append(p);
+            buf.append(cpSeparator);
+        });
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             buf.append(confPath);
