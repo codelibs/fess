@@ -25,6 +25,9 @@ public class ActionForm {
     public String replaceAliases = Constants.ON;
 
     @Size(max = 10)
+    public String resetDictionaries = Constants.ON;
+
+    @Size(max = 10)
     public String numberOfShardsForDoc = ComponentUtil.getFessConfig().getIndexNumberOfShards();
 
     @Size(max = 10)

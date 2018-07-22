@@ -398,14 +398,17 @@ public class FessEsClient implements Client {
 
     public boolean createIndex(final String index, final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return createIndex(index, indexName, fessConfig.getIndexNumberOfShards(), fessConfig.getIndexAutoExpandReplicas());
+        return createIndex(index, indexName, fessConfig.getIndexNumberOfShards(), fessConfig.getIndexAutoExpandReplicas(), true);
     }
 
-    public boolean createIndex(final String index, final String indexName, final String numberOfShards, final String autoExpandReplicas) {
+    public boolean createIndex(final String index, final String indexName, final String numberOfShards, final String autoExpandReplicas,
+            final boolean uploadConfig) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        waitForConfigSyncStatus();
-        sendConfigFiles(index);
+        if (uploadConfig) {
+            waitForConfigSyncStatus();
+            sendConfigFiles(index);
+        }
 
         final String indexConfigFile = indexConfigPath + "/" + index + ".json";
         try {

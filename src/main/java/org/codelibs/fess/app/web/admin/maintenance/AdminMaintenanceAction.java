@@ -90,7 +90,8 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse reindexOnly(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        if (startReindex(isCheckboxEnabled(form.replaceAliases), form.numberOfShardsForDoc, form.autoExpandReplicasForDoc)) {
+        if (startReindex(isCheckboxEnabled(form.replaceAliases), isCheckboxEnabled(form.resetDictionaries), form.numberOfShardsForDoc,
+                form.autoExpandReplicasForDoc)) {
             saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         }
         return redirect(getClass());
@@ -258,11 +259,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         return name.endsWith(".log") || name.endsWith(".log.gz");
     }
 
-    protected boolean startReindex(final boolean replaceAliases, final String numberOfShards, final String autoExpandReplicas) {
+    protected boolean startReindex(final boolean replaceAliases, final boolean resetDictionaries, final String numberOfShards,
+            final String autoExpandReplicas) {
         final String docIndex = "fess";
         final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-        if (fessEsClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas)) {
+        if (fessEsClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
             fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 fessEsClient.addMapping(docIndex, "doc", toIndex);
                 fessEsClient.reindex(fromIndex, toIndex, replaceAliases);

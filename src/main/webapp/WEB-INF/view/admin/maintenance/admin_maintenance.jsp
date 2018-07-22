@@ -52,6 +52,18 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="resetDictionaries" class="col-sm-3 control-label"><la:message
+												key="labels.reset_dictionaries" /></label>
+										<div class="col-sm-9">
+											<la:errors property="resetDictionaries" />
+											<div class="checkbox">
+												<label> <la:checkbox styleId="resetDictionaries" property="resetDictionaries" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="numberOfShardsForDoc" class="col-sm-3 control-label"><la:message
 												key="labels.number_of_shards_for_doc" /></label>
 										<div class="col-sm-9">
