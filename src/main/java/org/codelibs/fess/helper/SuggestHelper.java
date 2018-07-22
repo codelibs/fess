@@ -43,6 +43,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
 import org.codelibs.fess.suggest.entity.SuggestItem;
+import org.codelibs.fess.suggest.exception.SuggestSettingsException;
 import org.codelibs.fess.suggest.index.SuggestDeleteResponse;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
@@ -97,9 +98,13 @@ public class SuggestHelper {
         settingsBuilder.searchTimeout(fessConfig.getIndexSearchTimeout());
         suggester = Suggester.builder().settings(settingsBuilder).build(fessEsClient, fessConfig.getIndexDocumentSuggestIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-        split(fessConfig.getSuggestFieldIndexContents(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(
-                        field -> suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field)));
+        split(fessConfig.getSuggestFieldIndexContents(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(field -> {
+            try {
+                suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
+            } catch (final SuggestSettingsException e) {
+                logger.warn("Failed to add " + field, e);
+            }
+        }));
         suggester.createIndexIfNothing();
 
         final Set<String> undefinedAnalyzer = suggester.settings().analyzer().checkAnalyzer();
