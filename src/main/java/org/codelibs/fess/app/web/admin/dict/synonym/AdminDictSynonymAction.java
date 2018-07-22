@@ -72,6 +72,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        synonymPager.clear();
         return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).renderWith(data -> {
             searchPaging(data, form);
         });

@@ -69,6 +69,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        protwordsPager.clear();
         return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
             searchPaging(data, form);
         });

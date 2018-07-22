@@ -69,6 +69,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        kuromojiPager.clear();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
         });

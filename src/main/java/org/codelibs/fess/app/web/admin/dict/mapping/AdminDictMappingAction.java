@@ -72,6 +72,7 @@ public class AdminDictMappingAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        charMappingPager.clear();
         return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
             searchPaging(data, form);
         });
