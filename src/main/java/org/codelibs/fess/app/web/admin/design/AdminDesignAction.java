@@ -207,7 +207,7 @@ public class AdminDesignAction extends FessAdminAction {
             return null;
         }
         validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
+        verifyTokenKeep(() -> asListHtml());
         return asStream(file.getName()).contentTypeOctetStream().stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
