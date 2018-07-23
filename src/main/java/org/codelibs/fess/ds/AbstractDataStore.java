@@ -107,6 +107,11 @@ public abstract class AbstractDataStore implements DataStore {
         // content_length
         // last_modified
         // id
+        // virtual_host
+        final String[] virtualHosts = config.getVirtualHosts();
+        if (virtualHosts != null) {
+            defaultDataMap.put(fessConfig.getIndexFieldVirtualHost(), mimeType);
+        }
 
         storeData(config, callback, paramMap, configScriptMap, defaultDataMap);
 
