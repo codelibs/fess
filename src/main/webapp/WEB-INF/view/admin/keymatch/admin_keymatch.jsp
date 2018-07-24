@@ -108,6 +108,9 @@
 											</ul>
 										</div>
 									</div>
+									<c:if test="${keyMatchPager.currentPageNumber > keyMatchPager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/keymatch/list/${keyMatchPager.allPageCount}";</script>
+									</c:if>
 								</c:if>
 							</div>
 							<!-- /.box-body -->
