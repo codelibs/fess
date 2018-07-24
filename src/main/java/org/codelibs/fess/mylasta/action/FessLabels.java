@@ -623,10 +623,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Fess */
     public static final String LABELS_search_title = "{labels.search_title}";
 
-    /** The key of the message: Popular Words:  */
+    /** The key of the message: Popular Words: */
     public static final String LABELS_search_popular_word_word = "{labels.search_popular_word_word}";
 
-    /** The key of the message: Related Words:  */
+    /** The key of the message: Related Words: */
     public static final String LABELS_search_related_queries = "{labels.search_related_queries}";
 
     /** The key of the message: -- Sort -- */
@@ -680,10 +680,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: {0} bytes */
     public static final String LABELS_search_result_size = "{labels.search_result_size}";
 
-    /** The key of the message: Registered:  */
+    /** The key of the message: Registered: */
     public static final String LABELS_search_result_created = "{labels.search_result_created}";
 
-    /** The key of the message: Last Modified:  */
+    /** The key of the message: Last Modified: */
     public static final String LABELS_search_result_last_modified = "{labels.search_result_last_modified}";
 
     /** The key of the message: Like */
@@ -1686,8 +1686,7 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
     /** The key of the message: system.properties does not exist. Default values are applied. */
-    public static final String LABELS_system_info_system_properties_does_not_exist =
-            "{labels.system_info_system_properties_does_not_exist}";
+    public static final String LABELS_system_info_system_properties_does_not_exist = "{labels.system_info_system_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
     public static final String LABELS_file_auth_configuration = "{labels.file_auth_configuration}";
@@ -2030,6 +2029,45 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Protwords File */
     public static final String LABELS_dict_protwords_file = "{labels.dict_protwords_file}";
+
+    /** The key of the message: Stopwords List */
+    public static final String LABELS_dict_stopwords_configuration = "{labels.dict_stopwords_configuration}";
+
+    /** The key of the message: Stopwords List */
+    public static final String LABELS_dict_stopwords_title = "{labels.dict_stopwords_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_stopwords_list_link = "{labels.dict_stopwords_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_stopwords_link_create = "{labels.dict_stopwords_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_stopwords_link_edit = "{labels.dict_stopwords_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_stopwords_link_delete = "{labels.dict_stopwords_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_stopwords_link_details = "{labels.dict_stopwords_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_stopwords_link_download = "{labels.dict_stopwords_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_stopwords_link_upload = "{labels.dict_stopwords_link_upload}";
+
+    /** The key of the message: Source */
+    public static final String LABELS_dict_stopwords_source = "{labels.dict_stopwords_source}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_stopwords_button_download = "{labels.dict_stopwords_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_stopwords_button_upload = "{labels.dict_stopwords_button_upload}";
+
+    /** The key of the message: Stopwords File */
+    public static final String LABELS_dict_stopwords_file = "{labels.dict_stopwords_file}";
 
     /** The key of the message: Doc Boost */
     public static final String LABELS_boost_document_rule_configuration = "{labels.boost_document_rule_configuration}";
@@ -2646,7 +2684,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: No match */
     public static final String LABELS_facet_is_not_found = "{labels.facet_is_not_found}";
 
-    /** The key of the message: Score:  */
+    /** The key of the message: Score: */
     public static final String LABELS_doc_score = "{labels.doc_score}";
 
     /** The key of the message: Running as Development mode. For production use, please install a standalone elasticsearch server. */

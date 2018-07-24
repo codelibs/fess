@@ -123,14 +123,28 @@ public interface FessHtmlPath {
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsDetailsJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_details.jsp");
 
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_download.jsp */
-    HtmlNext path_AdminDictProtwords_AdminDictProtwordsDownloadJsp =
-            new HtmlNext("/admin/dict/protwords/admin_dict_protwords_download.jsp");
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsDownloadJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_download.jsp");
 
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_edit.jsp */
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsEditJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_edit.jsp");
 
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_upload.jsp */
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsUploadJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_upload.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_details.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsDetailsJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_details.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_download.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsDownloadJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_download.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_edit.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsEditJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_edit.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_upload.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsUploadJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_upload.jsp");
 
     /** The path of the HTML: /admin/dict/synonym/admin_dict_synonym.jsp */
     HtmlNext path_AdminDictSynonym_AdminDictSynonymJsp = new HtmlNext("/admin/dict/synonym/admin_dict_synonym.jsp");
@@ -256,8 +270,7 @@ public interface FessHtmlPath {
     HtmlNext path_AdminRelatedcontent_AdminRelatedcontentJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent.jsp");
 
     /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_details.jsp */
-    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentDetailsJsp =
-            new HtmlNext("/admin/relatedcontent/admin_relatedcontent_details.jsp");
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentDetailsJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent_details.jsp");
 
     /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_edit.jsp */
     HtmlNext path_AdminRelatedcontent_AdminRelatedcontentEditJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent_edit.jsp");

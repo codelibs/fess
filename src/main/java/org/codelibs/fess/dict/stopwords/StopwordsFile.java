@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.dict.protwords;
+package org.codelibs.fess.dict.stopwords;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -38,18 +38,18 @@ import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.dbflute.optional.OptionalEntity;
 
-public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
-    private static final String PROTWORDS = "protwords";
+public class StopwordsFile extends DictionaryFile<StopwordsItem> {
+    private static final String STOPWORDS = "stopwords";
 
-    List<ProtwordsItem> protwordsItemList;
+    List<StopwordsItem> stopwordsItemList;
 
-    public ProtwordsFile(final String id, final String path, final Date timestamp) {
+    public StopwordsFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
 
     @Override
     public String getType() {
-        return PROTWORDS;
+        return STOPWORDS;
     }
 
     @Override
@@ -58,62 +58,62 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     }
 
     @Override
-    public synchronized OptionalEntity<ProtwordsItem> get(final long id) {
-        if (protwordsItemList == null) {
+    public synchronized OptionalEntity<StopwordsItem> get(final long id) {
+        if (stopwordsItemList == null) {
             reload(null, null);
         }
 
-        for (final ProtwordsItem ProtwordsItem : protwordsItemList) {
-            if (id == ProtwordsItem.getId()) {
-                return OptionalEntity.of(ProtwordsItem);
+        for (final StopwordsItem StopwordsItem : stopwordsItemList) {
+            if (id == StopwordsItem.getId()) {
+                return OptionalEntity.of(StopwordsItem);
             }
         }
         return OptionalEntity.empty();
     }
 
     @Override
-    public synchronized PagingList<ProtwordsItem> selectList(final int offset, final int size) {
-        if (protwordsItemList == null) {
+    public synchronized PagingList<StopwordsItem> selectList(final int offset, final int size) {
+        if (stopwordsItemList == null) {
             reload(null, null);
         }
 
-        if (offset >= protwordsItemList.size() || offset < 0) {
-            return new PagingList<>(Collections.<ProtwordsItem> emptyList(), offset, size, protwordsItemList.size());
+        if (offset >= stopwordsItemList.size() || offset < 0) {
+            return new PagingList<>(Collections.<StopwordsItem> emptyList(), offset, size, stopwordsItemList.size());
         }
 
         int toIndex = offset + size;
-        if (toIndex > protwordsItemList.size()) {
-            toIndex = protwordsItemList.size();
+        if (toIndex > stopwordsItemList.size()) {
+            toIndex = stopwordsItemList.size();
         }
 
-        return new PagingList<>(protwordsItemList.subList(offset, toIndex), offset, size, protwordsItemList.size());
+        return new PagingList<>(stopwordsItemList.subList(offset, toIndex), offset, size, stopwordsItemList.size());
     }
 
     @Override
-    public synchronized void insert(final ProtwordsItem item) {
+    public synchronized void insert(final StopwordsItem item) {
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
             reload(updater, null);
         }
     }
 
     @Override
-    public synchronized void update(final ProtwordsItem item) {
+    public synchronized void update(final StopwordsItem item) {
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
             reload(updater, null);
         }
     }
 
     @Override
-    public synchronized void delete(final ProtwordsItem item) {
-        final ProtwordsItem ProtwordsItem = item;
-        ProtwordsItem.setNewInput(StringUtil.EMPTY);
+    public synchronized void delete(final StopwordsItem item) {
+        final StopwordsItem StopwordsItem = item;
+        StopwordsItem.setNewInput(StringUtil.EMPTY);
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
             reload(updater, null);
         }
     }
 
     protected void reload(final SynonymUpdater updater, final InputStream in) {
-        final List<ProtwordsItem> itemList = new ArrayList<>();
+        final List<StopwordsItem> itemList = new ArrayList<>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;
@@ -134,9 +134,9 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
                 if (input.length() > 0) {
                     id++;
-                    final ProtwordsItem item = new ProtwordsItem(id, input);
+                    final StopwordsItem item = new StopwordsItem(id, input);
                     if (updater != null) {
-                        final ProtwordsItem newItem = updater.write(item);
+                        final StopwordsItem newItem = updater.write(item);
                         if (newItem != null) {
                             itemList.add(newItem);
                         } else {
@@ -148,12 +148,12 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                 }
             }
             if (updater != null) {
-                final ProtwordsItem item = updater.commit();
+                final StopwordsItem item = updater.commit();
                 if (item != null) {
                     itemList.add(item);
                 }
             }
-            protwordsItemList = itemList;
+            stopwordsItemList = itemList;
         } catch (final IOException e) {
             throw new DictionaryException("Failed to parse " + path, e);
         }
@@ -191,7 +191,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
     @Override
     public String toString() {
-        return "SynonymFile [path=" + path + ", protwordsItemList=" + protwordsItemList + ", id=" + id + "]";
+        return "SynonymFile [path=" + path + ", stopwordsItemList=" + stopwordsItemList + ", id=" + id + "]";
     }
 
     protected class SynonymUpdater implements Closeable {
@@ -202,11 +202,11 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
         protected Writer writer;
 
-        protected ProtwordsItem item;
+        protected StopwordsItem item;
 
-        protected SynonymUpdater(final ProtwordsItem newItem) {
+        protected SynonymUpdater(final StopwordsItem newItem) {
             try {
-                newFile = File.createTempFile(PROTWORDS, ".txt");
+                newFile = File.createTempFile(STOPWORDS, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
             } catch (final IOException e) {
                 if (newFile != null) {
@@ -217,7 +217,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             item = newItem;
         }
 
-        public ProtwordsItem write(final ProtwordsItem oldItem) {
+        public StopwordsItem write(final StopwordsItem oldItem) {
             try {
                 if (item != null && item.getId() == oldItem.getId() && item.isUpdated()) {
                     if (item.equals(oldItem)) {
@@ -226,7 +226,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                                 // update
                                 writer.write(item.toLineString());
                                 writer.write(Constants.LINE_SEPARATOR);
-                                return new ProtwordsItem(item.getId(), item.getNewInput());
+                                return new StopwordsItem(item.getId(), item.getNewInput());
                             } else {
                                 return null;
                             }
@@ -234,7 +234,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                             item.setNewInput(null);
                         }
                     } else {
-                        throw new DictionaryException("Protwords file was updated: old=" + oldItem + " : new=" + item);
+                        throw new DictionaryException("Stopwords file was updated: old=" + oldItem + " : new=" + item);
                     }
                 } else {
                     writer.write(oldItem.toLineString());
@@ -255,7 +255,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             }
         }
 
-        public ProtwordsItem commit() {
+        public StopwordsItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {
                 try {
@@ -280,7 +280,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
             if (isCommit) {
                 try {
-                    dictionaryManager.store(ProtwordsFile.this, newFile);
+                    dictionaryManager.store(StopwordsFile.this, newFile);
                 } finally {
                     newFile.delete();
                 }

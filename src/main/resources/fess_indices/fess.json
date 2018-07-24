@@ -440,6 +440,14 @@
             "連体詞"
           ]
         },
+        "japanese_stop": {
+          "type":       "stop",
+          "stopwords_path": "${fess.dictionary.path}ja/stopwords.txt"
+        },
+        "korean_stop": {
+          "type":       "stop",
+          "stopwords_path": "${fess.dictionary.path}ko/stopwords.txt"
+        },
         "latvian_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}lv/stopwords.txt"
@@ -491,6 +499,10 @@
         "persian_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}fa/stopwords.txt"
+        },
+        "persian_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}fa/protwords.txt"
         },
         "portuguese_stop": {
           "type":       "stop",
@@ -595,6 +607,10 @@
         "thai_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}th/stopwords.txt"
+        },
+        "thai_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}th/protwords.txt"
         },
         "traditional_chinese_stop": {
           "type":       "stop",
@@ -933,7 +949,8 @@
             "fess_japanese_baseform",
             "fess_japanese_stemmer",
             "japanese_pos_filter",
-            "lowercase"
+            "lowercase",
+            "japanese_stop"
           ]
         },
         "korean_analyzer": {
@@ -941,7 +958,8 @@
           "tokenizer":"korean_tokenizer",
           "filter": [
             "truncate10_filter",
-            "lowercase"
+            "lowercase",
+            "korean_stop"
           ]
         },
         "latvian_analyzer": {

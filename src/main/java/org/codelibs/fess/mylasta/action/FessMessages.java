@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import org.codelibs.fess.mylasta.action.FessLabels;
 import org.lastaflute.core.message.UserMessage;
 
 /**
@@ -262,6 +263,12 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Failed to upload the Protwords file. */
     public static final String ERRORS_failed_to_upload_protwords_file = "{errors.failed_to_upload_protwords_file}";
+
+    /** The key of the message: Failed to download the Stopwords file. */
+    public static final String ERRORS_failed_to_download_stopwords_file = "{errors.failed_to_download_stopwords_file}";
+
+    /** The key of the message: Failed to upload the Stopwords file. */
+    public static final String ERRORS_failed_to_upload_stopwords_file = "{errors.failed_to_upload_stopwords_file}";
 
     /** The key of the message: Failed to download the Elevate file. */
     public static final String ERRORS_failed_to_download_elevate_file = "{errors.failed_to_download_elevate_file}";
@@ -1600,6 +1607,34 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUploadProtwordsFile(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_upload_protwords_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_download_stopwords_file' with parameters.
+     * <pre>
+     * message: Failed to download the Stopwords file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToDownloadStopwordsFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_download_stopwords_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_upload_stopwords_file' with parameters.
+     * <pre>
+     * message: Failed to upload the Stopwords file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToUploadStopwordsFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_upload_stopwords_file));
         return this;
     }
 
