@@ -1277,7 +1277,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>spnego</artifactId>
-			<version>1.0</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>

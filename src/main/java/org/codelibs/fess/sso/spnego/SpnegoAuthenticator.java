@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.io.ResourceUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.FessSystemException;
@@ -126,7 +127,19 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         @Override
         public String getInitParameter(final String name) {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
-                return fessConfig.getSpnegoLoggerLevel();
+                if (StringUtil.isNotBlank(fessConfig.getSpnegoLoggerLevel())) {
+                    return fessConfig.getSpnegoLoggerLevel();
+                } else if (logger.isDebugEnabled()) {
+                    return "3";
+                } else if (logger.isInfoEnabled()) {
+                    return "5";
+                } else if (logger.isWarnEnabled()) {
+                    return "6";
+                } else if (logger.isErrorEnabled()) {
+                    return "7";
+                } else {
+                    return "0";
+                }
             } else if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
                 return getResourcePath(fessConfig.getSpnegoLoginConf());
             } else if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
@@ -149,6 +162,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 return fessConfig.getSpnegoAllowLocalhost();
             } else if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
                 return fessConfig.getSpnegoAllowDelegation();
+            } else if (SpnegoHttpFilter.Constants.EXCLUDE_DIRS.equals(name)) {
+                return fessConfig.getSpnegoExcludeDirs();
             }
             return null;
         }

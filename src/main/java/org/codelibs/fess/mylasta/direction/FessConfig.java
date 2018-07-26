@@ -1372,7 +1372,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. none */
     String SSO_TYPE = "sso.type";
 
-    /** The key of the configuration. e.g. 0 */
+    /** The key of the configuration. e.g.  */
     String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
 
     /** The key of the configuration. e.g. krb5.conf */
@@ -1407,6 +1407,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. false */
     String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
+
+    /** The key of the configuration. e.g.  */
+    String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";
 
     /** The key of the configuration. e.g. __CLIENT_ID__ */
     String OIC_CLIENT_ID = "oic.client.id";
@@ -5819,14 +5822,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'spnego.logger.level'. <br>
-     * The value is, e.g. 0 <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSpnegoLoggerLevel();
 
     /**
      * Get the value for the key 'spnego.logger.level' as {@link Integer}. <br>
-     * The value is, e.g. 0 <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5943,6 +5946,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isSpnegoAllowDelegation();
+
+    /**
+     * Get the value for the key 'spnego.exclude.dirs'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoExcludeDirs();
+
+    /**
+     * Get the value for the key 'spnego.exclude.dirs' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSpnegoExcludeDirsAsInteger();
 
     /**
      * Get the value for the key 'oic.client.id'. <br>
@@ -8393,6 +8411,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.SPNEGO_ALLOW_DELEGATION);
         }
 
+        public String getSpnegoExcludeDirs() {
+            return get(FessConfig.SPNEGO_EXCLUDE_DIRS);
+        }
+
+        public Integer getSpnegoExcludeDirsAsInteger() {
+            return getAsInteger(FessConfig.SPNEGO_EXCLUDE_DIRS);
+        }
+
         public String getOicClientId() {
             return get(FessConfig.OIC_CLIENT_ID);
         }
@@ -8851,7 +8877,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ATTR_GID_NUMBER, "gidNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_HOME_DIRECTORY, "homeDirectory");
             defaultMap.put(FessConfig.SSO_TYPE, "none");
-            defaultMap.put(FessConfig.SPNEGO_LOGGER_LEVEL, "0");
+            defaultMap.put(FessConfig.SPNEGO_LOGGER_LEVEL, "");
             defaultMap.put(FessConfig.SPNEGO_KRB5_CONF, "krb5.conf");
             defaultMap.put(FessConfig.SPNEGO_LOGIN_CONF, "auth_login.conf");
             defaultMap.put(FessConfig.SPNEGO_PREAUTH_USERNAME, "username");
@@ -8863,6 +8889,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SPNEGO_PROMPT_NTLM, "true");
             defaultMap.put(FessConfig.SPNEGO_ALLOW_LOCALHOST, "true");
             defaultMap.put(FessConfig.SPNEGO_ALLOW_DELEGATION, "false");
+            defaultMap.put(FessConfig.SPNEGO_EXCLUDE_DIRS, "");
             defaultMap.put(FessConfig.OIC_CLIENT_ID, "__CLIENT_ID__");
             defaultMap.put(FessConfig.OIC_CLIENT_SECRET, "__CLIENT_SECRET__");
             defaultMap.put(FessConfig.OIC_AUTH_SERVER_URL, "https://accounts.google.com/o/oauth2/auth");
