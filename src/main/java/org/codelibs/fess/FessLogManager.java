@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -22,16 +24,54 @@ public class FessLogManager extends LogManager {
 
     private static final String ORG_APACHE_LOGGING_LOG4J_JUL_LOG_MANAGER = "org.apache.logging.log4j.jul.LogManager";
 
+    private static final LogManager manager;
+
+    static {
+        manager = AccessController.doPrivileged(new PrivilegedAction<LogManager>() {
+            @Override
+            public LogManager run() {
+                LogManager mgr = null;
+                String cname = null;
+                try {
+                    cname = System.getProperty("java.util.logging.manager");
+                    if (cname != null) {
+                        try {
+                            Class<?> clz = ClassLoader.getSystemClassLoader().loadClass(cname);
+                            mgr = (LogManager) clz.newInstance();
+                        } catch (ClassNotFoundException ex) {
+                            Class<?> clz = Thread.currentThread().getContextClassLoader().loadClass(cname);
+                            mgr = (LogManager) clz.newInstance();
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Could not load Logmanager \"" + cname + "\"");
+                    ex.printStackTrace();
+                }
+                if (mgr == null) {
+                    mgr = new DefaultLogManager();
+                }
+                return mgr;
+
+            }
+        });
+    }
+
+    private static class DefaultLogManager extends LogManager {
+        DefaultLogManager() {
+            super();
+        }
+    }
+
     @Override
     public Logger getLogger(final String name) {
-        final LogManager logManager = getLogManager(ORG_APACHE_LOGGING_LOG4J_JUL_LOG_MANAGER);
+        final LogManager logManager = createLogManager(ORG_APACHE_LOGGING_LOG4J_JUL_LOG_MANAGER);
         if (logManager != null) {
             return logManager.getLogger(name);
         }
-        return LogManager.getLogManager().getLogger(name);
+        return manager.getLogger(name);
     }
 
-    private LogManager getLogManager(final String cname) {
+    private LogManager createLogManager(final String cname) {
         try {
             try {
                 final Class<?> clz = ClassLoader.getSystemClassLoader().loadClass(cname);
