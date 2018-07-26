@@ -157,7 +157,7 @@ public class PathMappingHelper {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
             if (matchUserAgent(pathMapping)) {
-                newUrl = pathMapping.process(newUrl);
+                newUrl = pathMapping.process(this, newUrl);
             }
         }
         return newUrl;
