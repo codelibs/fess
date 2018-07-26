@@ -41,7 +41,7 @@
 		<!-- Main Framework -->
 		<dbflute.version>1.1.8</dbflute.version>
 		<lastaflute.version>1.0.8</lastaflute.version>
-		<lasta.taglib.version>0.7.3-RC1</lasta.taglib.version>
+		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.3</lasta.job.version>
 		<mailflute.version>0.6.0</mailflute.version>
 
