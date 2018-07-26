@@ -64,7 +64,6 @@ set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.recycler.maxCapacityPerThread=0
 set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.shutdownHookEnabled=false
 set JAVA_OPTS=%JAVA_OPTS% -Dlog4j2.disable.jmx=true
 set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.skipJansi=true
-set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=org.codelibs.fess.FessLogManager
 
 REM SSL truststore for certificate validation over https
 REM JAVA_OPTS=%JAVA_OPTS% -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks
