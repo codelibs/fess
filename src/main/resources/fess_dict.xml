@@ -15,6 +15,9 @@
 			<arg>protwordsCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
+			<arg>stopwordsCreator</arg>
+		</postConstruct>
+		<postConstruct name="addCreator">
 			<arg>charMappingCreator</arg>
 		</postConstruct>
 	</component>
@@ -27,6 +30,9 @@
 	</component>
 	<component name="protwordsCreator"
 		class="org.codelibs.fess.dict.protwords.ProtwordsCreator">
+	</component>
+	<component name="stopwordsCreator"
+		class="org.codelibs.fess.dict.stopwords.StopwordsCreator">
 	</component>
 	<component name="charMappingCreator"
 		class="org.codelibs.fess.dict.mapping.CharMappingCreator">

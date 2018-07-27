@@ -500,6 +500,10 @@
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}fa/stopwords.txt"
         },
+        "persian_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}fa/protwords.txt"
+        },
         "portuguese_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}pt/stopwords.txt"
@@ -603,6 +607,10 @@
         "thai_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}th/stopwords.txt"
+        },
+        "thai_keywords": {
+          "type":       "keyword_marker",
+          "keywords_path": "${fess.dictionary.path}th/protwords.txt"
         },
         "traditional_chinese_stop": {
           "type":       "stop",
