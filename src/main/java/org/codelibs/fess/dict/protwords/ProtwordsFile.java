@@ -91,14 +91,14 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
     @Override
     public synchronized void insert(final ProtwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
             reload(updater, null);
         }
     }
 
     @Override
     public synchronized void update(final ProtwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
             reload(updater, null);
         }
     }
@@ -107,12 +107,12 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     public synchronized void delete(final ProtwordsItem item) {
         final ProtwordsItem ProtwordsItem = item;
         ProtwordsItem.setNewInput(StringUtil.EMPTY);
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
             reload(updater, null);
         }
     }
 
-    protected void reload(final SynonymUpdater updater, final InputStream in) {
+    protected void reload(final ProtwordsUpdater updater, final InputStream in) {
         final List<ProtwordsItem> itemList = new ArrayList<>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
@@ -184,17 +184,17 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     }
 
     public synchronized void update(final InputStream in) throws IOException {
-        try (SynonymUpdater updater = new SynonymUpdater(null)) {
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(null)) {
             reload(updater, in);
         }
     }
 
     @Override
     public String toString() {
-        return "SynonymFile [path=" + path + ", protwordsItemList=" + protwordsItemList + ", id=" + id + "]";
+        return "ProtwordsFile [path=" + path + ", protwordsItemList=" + protwordsItemList + ", id=" + id + "]";
     }
 
-    protected class SynonymUpdater implements Closeable {
+    protected class ProtwordsUpdater implements Closeable {
 
         protected boolean isCommit = false;
 
@@ -204,7 +204,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
         protected ProtwordsItem item;
 
-        protected SynonymUpdater(final ProtwordsItem newItem) {
+        protected ProtwordsUpdater(final ProtwordsItem newItem) {
             try {
                 newFile = File.createTempFile(PROTWORDS, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
