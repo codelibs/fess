@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -56,6 +57,14 @@ public class EsApiManager extends BaseApiManager {
 
     public EsApiManager() {
         setPathPrefix(ADMIN_SERVER);
+    }
+
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        ComponentUtil.getWebApiManagerFactory().add(this);
     }
 
     @Override

@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -73,6 +74,14 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     protected String charsetField = "charset";
 
     protected String contentTypeField = "content_type";
+
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        ComponentUtil.getWebApiManagerFactory().add(this);
+    }
 
     @Override
     public boolean matches(final HttpServletRequest request) {

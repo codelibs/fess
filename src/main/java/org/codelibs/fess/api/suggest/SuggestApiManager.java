@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +53,14 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
     public SuggestApiManager() {
         setPathPrefix("/suggest");
+    }
+
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        ComponentUtil.getWebApiManagerFactory().add(this);
     }
 
     @Override
