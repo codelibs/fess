@@ -17,18 +17,27 @@ package org.codelibs.fess.dict.kuromoji;
 
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KuromojiCreator extends DictionaryCreator {
+    private static final Logger logger = LoggerFactory.getLogger(KuromojiCreator.class);
 
     public KuromojiCreator() {
         super("kuromoji.*\\.txt");
     }
 
-    public KuromojiCreator(final String pattern) {
-        super(pattern);
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        dictionaryManager.addCreator(this);
     }
 
     @Override

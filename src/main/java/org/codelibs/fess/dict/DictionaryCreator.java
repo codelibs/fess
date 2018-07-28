@@ -19,11 +19,15 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import javax.annotation.Resource;
+
 import org.codelibs.fess.Constants;
 
 public abstract class DictionaryCreator {
+
     protected Pattern pattern;
 
+    @Resource
     protected DictionaryManager dictionaryManager;
 
     public DictionaryCreator(final String pattern) {

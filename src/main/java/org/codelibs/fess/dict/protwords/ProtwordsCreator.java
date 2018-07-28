@@ -17,18 +17,27 @@ package org.codelibs.fess.dict.protwords;
 
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProtwordsCreator extends DictionaryCreator {
+    private static final Logger logger = LoggerFactory.getLogger(ProtwordsCreator.class);
 
     public ProtwordsCreator() {
         super("protwords.*\\.txt");
     }
 
-    public ProtwordsCreator(final String pattern) {
-        super(pattern);
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        dictionaryManager.addCreator(this);
     }
 
     @Override
