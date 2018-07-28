@@ -97,6 +97,26 @@
 							<div class="box box-primary">
 								<div class="box-header with-border">
 									<h3 class="box-title">
+										<la:message key="labels.reload_doc_index" />
+									</h3>
+								</div>
+								<!-- /.box-header -->
+								<div class="box-footer">
+									<button type="submit" class="btn btn-primary"
+										name="reloadDocIndex"
+										value="<la:message key="labels.reload_doc_index_button"/>">
+										<i class="fa fa-arrow-circle-right"></i>
+										<la:message key="labels.reload_doc_index_button" />
+									</button>
+								</div>
+								<!-- /.box-footer -->
+							</div>
+							<!-- /.box -->
+						</div>
+						<div class="col-md-12">
+							<div class="box box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">
 										<la:message key="labels.clear_crawler_index" />
 									</h3>
 								</div>

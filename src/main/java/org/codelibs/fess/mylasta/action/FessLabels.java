@@ -2889,6 +2889,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Download Logs */
     public static final String LABELS_download_diagnostic_logs_button = "{labels.download_diagnostic_logs_button}";
 
+    /** The key of the message: Reload Doc Index */
+    public static final String LABELS_reload_doc_index = "{labels.reload_doc_index}";
+
+    /** The key of the message: Reload */
+    public static final String LABELS_reload_doc_index_button = "{labels.reload_doc_index_button}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

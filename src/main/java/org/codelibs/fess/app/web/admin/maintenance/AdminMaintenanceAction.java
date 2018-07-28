@@ -98,6 +98,31 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     @Execute
+    public HtmlResponse reloadDocIndex(final ActionForm form) {
+        validate(form, messages -> {}, this::asIndexHtml);
+        verifyToken(this::asIndexHtml);
+        final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
+        fessEsClient
+                .admin()
+                .indices()
+                .prepareClose(docIndex)
+                .execute(
+                        ActionListener.wrap(
+                                res -> {
+                                    logger.info("Close " + docIndex);
+                                    fessEsClient
+                                            .admin()
+                                            .indices()
+                                            .prepareOpen(docIndex)
+                                            .execute(
+                                                    ActionListener.wrap(res2 -> logger.info("Open " + docIndex),
+                                                            e -> logger.warn("Failed to open " + docIndex, e)));
+                                }, e -> logger.warn("Failed to close " + docIndex, e)));
+        saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+        return redirect(getClass());
+    }
+
+    @Execute
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
