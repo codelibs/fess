@@ -25,10 +25,10 @@ import org.junit.jupiter.api.Test;
 public class StemmerOverrideTests extends DictCrudTestBase {
 
     private static final String NAME_PREFIX = "stemmerOvberrideTest_";
-    private static final String API_PATH = "/api/admin/dict/stemmerovberride";
+    private static final String API_PATH = "/api/admin/dict/stemmeroverride";
     private static final String LIST_ENDPOINT_SUFFIX = "settings";
     private static final String ITEM_ENDPOINT_SUFFIX = "setting";
-    private static final String DICT_TYPE = "stemmerovberride";
+    private static final String DICT_TYPE = "stemmeroverride";
 
     private static final String KEY_PROPERTY = "input";
 
