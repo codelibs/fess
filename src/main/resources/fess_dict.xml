@@ -12,6 +12,9 @@
 			<arg>synonymCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
+			<arg>stemmerOverrideCreator</arg>
+		</postConstruct>
+		<postConstruct name="addCreator">
 			<arg>protwordsCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
@@ -27,6 +30,9 @@
 	</component>
 	<component name="synonymCreator"
 		class="org.codelibs.fess.dict.synonym.SynonymCreator">
+	</component>
+	<component name="stemmerOverrideCreator"
+		class="org.codelibs.fess.dict.stemmeroverride.StemmerOverrideCreator">
 	</component>
 	<component name="protwordsCreator"
 		class="org.codelibs.fess.dict.protwords.ProtwordsCreator">

@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.mylasta.action;
 
-import org.codelibs.fess.mylasta.action.FessLabels;
 import org.lastaflute.core.message.UserMessage;
 
 /**
@@ -252,6 +251,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upload the Synonym file. */
     public static final String ERRORS_failed_to_upload_synonym_file = "{errors.failed_to_upload_synonym_file}";
 
+    /** The key of the message: Failed to download the Stemmer Override file. */
+    public static final String ERRORS_failed_to_download_stemmeroverride_file = "{errors.failed_to_download_stemmeroverride_file}";
+
+    /** The key of the message: Failed to upload the Stemmer Override file. */
+    public static final String ERRORS_failed_to_upload_stemmeroverride_file = "{errors.failed_to_upload_stemmeroverride_file}";
+
     /** The key of the message: Failed to download the Kuromoji file. */
     public static final String ERRORS_failed_to_download_kuromoji_file = "{errors.failed_to_download_kuromoji_file}";
 
@@ -425,6 +430,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Uploaded Synonym file. */
     public static final String SUCCESS_upload_synonym_file = "{success.upload_synonym_file}";
+
+    /** The key of the message: Uploaded Stemmer Override file. */
+    public static final String SUCCESS_upload_stemmeroverride_file = "{success.upload_stemmeroverride_file}";
 
     /** The key of the message: Uploaded Kuromoji file. */
     public static final String SUCCESS_upload_kuromoji_file = "{success.upload_kuromoji_file}";
@@ -1555,6 +1563,34 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_download_stemmeroverride_file' with parameters.
+     * <pre>
+     * message: Failed to download the Stemmer Override file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToDownloadStemmeroverrideFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_download_stemmeroverride_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_upload_stemmeroverride_file' with parameters.
+     * <pre>
+     * message: Failed to upload the Stemmer Override file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToUploadStemmeroverrideFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_upload_stemmeroverride_file));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.failed_to_download_kuromoji_file' with parameters.
      * <pre>
      * message: Failed to download the Kuromoji file.
@@ -2392,6 +2428,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUploadSynonymFile(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_upload_synonym_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.upload_stemmeroverride_file' with parameters.
+     * <pre>
+     * message: Uploaded Stemmer Override file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUploadStemmeroverrideFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_upload_stemmeroverride_file));
         return this;
     }
 

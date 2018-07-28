@@ -362,14 +362,23 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Synonym File */
     public static final String LABELS_SYNONYM_FILE = "{labels.synonymFile}";
 
+    /** The key of the message: Stopwords File */
+    public static final String LABELS_STOPWORDS_FILE = "{labels.stopwordsFile}";
+
+    /** The key of the message: Stemmer Override File */
+    public static final String LABELS_STEMMER_OVERRIDE_FILE = "{labels.stemmerOverrideFile}";
+
+    /** The key of the message: Mapping File */
+    public static final String LABELS_MAPPING_FILE = "{labels.mappingFile}";
+
+    /** The key of the message: Protwords File */
+    public static final String LABELS_PROTWORDS_FILE = "{labels.protwordsFile}";
+
     /** The key of the message: Additional Word File */
     public static final String LABELS_ELEVATE_WORD_FILE = "{labels.elevateWordFile}";
 
     /** The key of the message: Bad Word File */
     public static final String LABELS_BAD_WORD_FILE = "{labels.badWordFile}";
-
-    /** The key of the message: Mapping File */
-    public static final String LABELS_MAPPING_FILE = "{labels.mappingFile}";
 
     /** The key of the message: Boost Expr */
     public static final String LABELS_BOOST_EXPR = "{labels.boostExpr}";
@@ -1686,7 +1695,8 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
     /** The key of the message: system.properties does not exist. Default values are applied. */
-    public static final String LABELS_system_info_system_properties_does_not_exist = "{labels.system_info_system_properties_does_not_exist}";
+    public static final String LABELS_system_info_system_properties_does_not_exist =
+            "{labels.system_info_system_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
     public static final String LABELS_file_auth_configuration = "{labels.file_auth_configuration}";
@@ -1900,6 +1910,48 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Synonym File */
     public static final String LABELS_dict_synonym_file = "{labels.dict_synonym_file}";
+
+    /** The key of the message: Stemmer Override List */
+    public static final String LABELS_dict_stemmeroverride_configuration = "{labels.dict_stemmeroverride_configuration}";
+
+    /** The key of the message: Stemmer Override List */
+    public static final String LABELS_dict_stemmeroverride_title = "{labels.dict_stemmeroverride_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_stemmeroverride_list_link = "{labels.dict_stemmeroverride_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_stemmeroverride_link_create = "{labels.dict_stemmeroverride_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_stemmeroverride_link_edit = "{labels.dict_stemmeroverride_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_stemmeroverride_link_delete = "{labels.dict_stemmeroverride_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_stemmeroverride_link_details = "{labels.dict_stemmeroverride_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_stemmeroverride_link_download = "{labels.dict_stemmeroverride_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_stemmeroverride_link_upload = "{labels.dict_stemmeroverride_link_upload}";
+
+    /** The key of the message: Source */
+    public static final String LABELS_dict_stemmeroverride_source = "{labels.dict_stemmeroverride_source}";
+
+    /** The key of the message: Target */
+    public static final String LABELS_dict_stemmeroverride_target = "{labels.dict_stemmeroverride_target}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_stemmeroverride_button_download = "{labels.dict_stemmeroverride_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_stemmeroverride_button_upload = "{labels.dict_stemmeroverride_button_upload}";
+
+    /** The key of the message: Stemmer Override File */
+    public static final String LABELS_dict_stemmeroverride_file = "{labels.dict_stemmeroverride_file}";
 
     /** The key of the message: Mapping List */
     public static final String LABELS_dict_mapping_configuration = "{labels.dict_mapping_configuration}";

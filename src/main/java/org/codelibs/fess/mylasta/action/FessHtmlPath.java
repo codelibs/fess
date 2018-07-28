@@ -123,13 +123,34 @@ public interface FessHtmlPath {
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsDetailsJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_details.jsp");
 
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_download.jsp */
-    HtmlNext path_AdminDictProtwords_AdminDictProtwordsDownloadJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_download.jsp");
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsDownloadJsp =
+            new HtmlNext("/admin/dict/protwords/admin_dict_protwords_download.jsp");
 
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_edit.jsp */
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsEditJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_edit.jsp");
 
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_upload.jsp */
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsUploadJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_upload.jsp");
+
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride.jsp");
+
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_details.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideDetailsJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_details.jsp");
+
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_download.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideDownloadJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_download.jsp");
+
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_edit.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideEditJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_edit.jsp");
+
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_upload.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideUploadJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_upload.jsp");
 
     /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords.jsp */
     HtmlNext path_AdminDictStopwords_AdminDictStopwordsJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords.jsp");
@@ -138,7 +159,8 @@ public interface FessHtmlPath {
     HtmlNext path_AdminDictStopwords_AdminDictStopwordsDetailsJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_details.jsp");
 
     /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_download.jsp */
-    HtmlNext path_AdminDictStopwords_AdminDictStopwordsDownloadJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_download.jsp");
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsDownloadJsp =
+            new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_download.jsp");
 
     /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_edit.jsp */
     HtmlNext path_AdminDictStopwords_AdminDictStopwordsEditJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_edit.jsp");
@@ -270,7 +292,8 @@ public interface FessHtmlPath {
     HtmlNext path_AdminRelatedcontent_AdminRelatedcontentJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent.jsp");
 
     /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_details.jsp */
-    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentDetailsJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent_details.jsp");
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentDetailsJsp =
+            new HtmlNext("/admin/relatedcontent/admin_relatedcontent_details.jsp");
 
     /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_edit.jsp */
     HtmlNext path_AdminRelatedcontent_AdminRelatedcontentEditJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent_edit.jsp");
