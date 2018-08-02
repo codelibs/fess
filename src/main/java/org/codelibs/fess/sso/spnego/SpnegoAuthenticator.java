@@ -81,7 +81,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                         principal = authenticator.authenticate(request, spnegoResponse);
                     } catch (final Exception e) {
                         final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
-                        logger.error(msg);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(msg);
+                        }
                         throw new SsoLoginException(msg, e);
                     }
 
@@ -96,7 +98,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     // assert
                     if (null == principal) {
                         final String msg = "Principal was null.";
-                        logger.error(msg);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(msg);
+                        }
                         throw new SsoLoginException(msg);
                     }
 
