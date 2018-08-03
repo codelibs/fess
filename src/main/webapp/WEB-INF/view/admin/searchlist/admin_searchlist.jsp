@@ -115,13 +115,13 @@
 										<div class="row">
 											<div class="col-sm-12 text-center">
 												<ul class="pagination pagination-sm">
-													<c:if test="${existPrePage}">
+													<c:if test="${existPrevPage}">
 														<li class="prev"><la:link
 																href="prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
 																<la:message key="labels.prev_page" />
 															</la:link></li>
 													</c:if>
-													<c:if test="${!existPrePage}">
+													<c:if test="${!existPrevPage}">
 														<li class="prev disabled"><a href="#"><la:message
 																	key="labels.prev_page" /></a></li>
 													</c:if>
