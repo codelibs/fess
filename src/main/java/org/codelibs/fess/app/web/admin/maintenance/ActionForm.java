@@ -17,15 +17,14 @@ package org.codelibs.fess.app.web.admin.maintenance;
 
 import javax.validation.constraints.Size;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class ActionForm {
     @Size(max = 10)
-    public String replaceAliases = Constants.ON;
+    public String replaceAliases;
 
     @Size(max = 10)
-    public String resetDictionaries = Constants.ON;
+    public String resetDictionaries;
 
     @Size(max = 10)
     public String numberOfShardsForDoc = ComponentUtil.getFessConfig().getIndexNumberOfShards();

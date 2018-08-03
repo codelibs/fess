@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
@@ -83,7 +84,10 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     private HtmlResponse asIndexHtml() {
-        return asHtml(path_AdminMaintenance_AdminMaintenanceJsp).useForm(ActionForm.class);
+        return asHtml(path_AdminMaintenance_AdminMaintenanceJsp).useForm(ActionForm.class, op -> op.setup(f -> {
+            f.replaceAliases = Constants.ON;
+            f.resetDictionaries = Constants.ON;
+        }));
     }
 
     @Execute
