@@ -31,7 +31,7 @@
 						class="fa fa-question-circle"></i></a></li>
 				</c:if>
 				<li><a href="${contextPath}/logout"><i
-						class="fa fa-sign-out"></i></a></li>
+						class="fa fa-sign-out-alt"></i></a></li>
 			</ul>
 		</div>
 	</nav>
