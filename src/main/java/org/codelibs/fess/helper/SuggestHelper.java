@@ -107,11 +107,6 @@ public class SuggestHelper {
         }));
         suggester.createIndexIfNothing();
 
-        final Set<String> undefinedAnalyzer = suggester.settings().analyzer().checkAnalyzer();
-        if (!undefinedAnalyzer.isEmpty()) {
-            logger.warn("Undefined lang analyzer. " + undefinedAnalyzer.toString());
-        }
-
         if (ComponentUtil.hasPopularWordHelper()) {
             popularWordHelper = ComponentUtil.getPopularWordHelper();
         }

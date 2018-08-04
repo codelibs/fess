@@ -208,13 +208,13 @@ public class SuggestCreator {
         logger.info("Create update index.");
         suggestHelper.suggester().createNextIndex();
 
-        logger.info("storeAllBadWords");
+        logger.info("Store all bad words.");
         suggestHelper.storeAllBadWords(true);
 
-        logger.info("storeAllElevateWords");
+        logger.info("Store all elevate words.");
         suggestHelper.storeAllElevateWords(true);
 
-        logger.info("indexFromDocuments");
+        logger.info("Parse words from indexed documents.");
         suggestHelper.indexFromDocuments(ret -> {
             logger.info("Success index from documents.");
             result.set(0);
@@ -232,13 +232,13 @@ public class SuggestCreator {
             }
         }
 
-        logger.info("storeSearchLog");
+        logger.info("Store search logs.");
         suggestHelper.storeSearchLog();
 
-        logger.info("switchIndex");
+        logger.info("Switch indices.");
         suggestHelper.suggester().switchIndex();
 
-        logger.info("removeDisableIndices");
+        logger.info("Remove old indices.");
         suggestHelper.suggester().removeDisableIndices();
 
         return result.get();
