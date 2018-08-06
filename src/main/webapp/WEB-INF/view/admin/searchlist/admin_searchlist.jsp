@@ -102,7 +102,7 @@
 																class="btn btn-xs btn-danger"
 																data-toggle="modal" data-target="#confirmToDelete"
 																data-docid="${f:u(doc.doc_id)}"
-																data-title="${doc.content_title}"
+																data-title="${fe:replace(doc.content_title, '<[^>]+>', '')}"
 																data-url="${f:h(doc.url_link)}">
 																<i class="fa fa-trash"></i>
 																<la:message key="labels.search_list_button_delete" />

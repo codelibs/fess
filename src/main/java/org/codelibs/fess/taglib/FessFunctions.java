@@ -318,4 +318,11 @@ public class FessFunctions {
         }
         return StringUtil.EMPTY;
     }
+
+    public static String replace(final Object input, final String regex, final String replacement) {
+        if (input == null) {
+            return StringUtil.EMPTY;
+        }
+        return input.toString().replaceAll(regex, replacement);
+    }
 }
