@@ -925,30 +925,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGING_SEARCH_PAGE_MAX_SIZE = "paging.search.page.max.size";
 
-    /** The key of the configuration. e.g. false */
-    String THUMBNAIL_HTML_PHANTOMJS_ENABLED = "thumbnail.html.phantomjs.enabled";
-
-    /** The key of the configuration. e.g. 20000 */
-    String THUMBNAIL_HTML_PHANTOMJS_MAX_HEIGHT = "thumbnail.html.phantomjs.max.height";
-
-    /** The key of the configuration. e.g. 600000 */
-    String THUMBNAIL_HTML_PHANTOMJS_KEEP_ALIVE = "thumbnail.html.phantomjs.keep.alive";
-
-    /** The key of the configuration. e.g. 1200 */
-    String THUMBNAIL_HTML_PHANTOMJS_WINDOW_WIDTH = "thumbnail.html.phantomjs.window.width";
-
-    /** The key of the configuration. e.g. 800 */
-    String THUMBNAIL_HTML_PHANTOMJS_WINDOW_HEIGHT = "thumbnail.html.phantomjs.window.height";
-
-    /** The key of the configuration. e.g. 100 */
-    String THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_WIDTH = "thumbnail.html.phantomjs.thumbnail.width";
-
-    /** The key of the configuration. e.g. 100 */
-    String THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_HEIGHT = "thumbnail.html.phantomjs.thumbnail.height";
-
-    /** The key of the configuration. e.g. png */
-    String THUMBNAIL_HTML_PHANTOMJS_FORMAT = "thumbnail.html.phantomjs.format";
-
     /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_MIN_WIDTH = "thumbnail.html.image.min.width";
 
@@ -4446,117 +4422,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPagingSearchPageMaxSizeAsInteger();
 
     /**
-     * Get the value for the key 'thumbnail.html.phantomjs.enabled'. <br>
-     * The value is, e.g. false <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsEnabled();
-
-    /**
-     * Is the property for the key 'thumbnail.html.phantomjs.enabled' true? <br>
-     * The value is, e.g. false <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isThumbnailHtmlPhantomjsEnabled();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.max.height'. <br>
-     * The value is, e.g. 20000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsMaxHeight();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.max.height' as {@link Integer}. <br>
-     * The value is, e.g. 20000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlPhantomjsMaxHeightAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.keep.alive'. <br>
-     * The value is, e.g. 600000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsKeepAlive();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.keep.alive' as {@link Integer}. <br>
-     * The value is, e.g. 600000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlPhantomjsKeepAliveAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.window.width'. <br>
-     * The value is, e.g. 1200 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsWindowWidth();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.window.width' as {@link Integer}. <br>
-     * The value is, e.g. 1200 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlPhantomjsWindowWidthAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.window.height'. <br>
-     * The value is, e.g. 800 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsWindowHeight();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.window.height' as {@link Integer}. <br>
-     * The value is, e.g. 800 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlPhantomjsWindowHeightAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.width'. <br>
-     * The value is, e.g. 100 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsThumbnailWidth();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.width' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlPhantomjsThumbnailWidthAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.height'. <br>
-     * The value is, e.g. 100 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsThumbnailHeight();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.thumbnail.height' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlPhantomjsThumbnailHeightAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.phantomjs.format'. <br>
-     * The value is, e.g. png <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlPhantomjsFormat();
-
-    /**
      * Get the value for the key 'thumbnail.html.image.min.width'. <br>
      * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7595,66 +7460,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE);
         }
 
-        public String getThumbnailHtmlPhantomjsEnabled() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED);
-        }
-
-        public boolean isThumbnailHtmlPhantomjsEnabled() {
-            return is(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED);
-        }
-
-        public String getThumbnailHtmlPhantomjsMaxHeight() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_MAX_HEIGHT);
-        }
-
-        public Integer getThumbnailHtmlPhantomjsMaxHeightAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_PHANTOMJS_MAX_HEIGHT);
-        }
-
-        public String getThumbnailHtmlPhantomjsKeepAlive() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_KEEP_ALIVE);
-        }
-
-        public Integer getThumbnailHtmlPhantomjsKeepAliveAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_PHANTOMJS_KEEP_ALIVE);
-        }
-
-        public String getThumbnailHtmlPhantomjsWindowWidth() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_WINDOW_WIDTH);
-        }
-
-        public Integer getThumbnailHtmlPhantomjsWindowWidthAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_PHANTOMJS_WINDOW_WIDTH);
-        }
-
-        public String getThumbnailHtmlPhantomjsWindowHeight() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_WINDOW_HEIGHT);
-        }
-
-        public Integer getThumbnailHtmlPhantomjsWindowHeightAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_PHANTOMJS_WINDOW_HEIGHT);
-        }
-
-        public String getThumbnailHtmlPhantomjsThumbnailWidth() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_WIDTH);
-        }
-
-        public Integer getThumbnailHtmlPhantomjsThumbnailWidthAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_WIDTH);
-        }
-
-        public String getThumbnailHtmlPhantomjsThumbnailHeight() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_HEIGHT);
-        }
-
-        public Integer getThumbnailHtmlPhantomjsThumbnailHeightAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_HEIGHT);
-        }
-
-        public String getThumbnailHtmlPhantomjsFormat() {
-            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_FORMAT);
-        }
-
         public String getThumbnailHtmlImageMinWidth() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH);
         }
@@ -8756,14 +8561,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED, "false");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_MAX_HEIGHT, "20000");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_KEEP_ALIVE, "600000");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_WINDOW_WIDTH, "1200");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_WINDOW_HEIGHT, "800");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_WIDTH, "100");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_THUMBNAIL_HEIGHT, "100");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_PHANTOMJS_FORMAT, "png");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO, "3.0");
