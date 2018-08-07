@@ -80,14 +80,14 @@
 			<div class="container">
 				<jsp:include page="searchOptions.jsp" />
 				<div>
-					<button type="button" class="btn" id="searchOptionsClearButton">
+					<button type="button" class="btn btn-light" id="searchOptionsClearButton">
 						<la:message key="labels.search_options_clear" />
 					</button>
 					<la:link href="/search/advance" styleClass="btn btn-info">
 						<i class="fa fa-cog"></i>
 						<la:message key="labels.advance" />
 					</la:link>
-					<button type="button" class="btn pull-right"
+					<button type="button" class="btn btn-light pull-right"
 						data-toggle="control-options" data-target="#searchOptions"
 						id="searchOptionsCloseButton">
 						<i class="fa fa-times-circle"></i>

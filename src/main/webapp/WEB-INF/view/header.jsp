@@ -11,7 +11,7 @@
 						class="align-items-center" />
 				</la:link>
 				<div
-					class="navbar-form col-md-6 col-sm-8 col-6 mr-auto p-0"
+					class="navbar-form col-md-6 col-sm-8 col-7 mr-auto p-0"
 					role="search">
 					<div class="input-group">
 						<la:text property="q" maxlength="1000" styleId="query"
@@ -21,7 +21,7 @@
 								class="btn btn-primary">
 								<i class="fa fa-search"></i>
 							</button>
-							<button type="button" class="btn"
+							<button type="button" class="btn btn-light"
 								data-toggle="control-options" data-target="#searchOptions"
 								id="searchOptionsButton">
 								<i class="fa fa-cog"></i> <span class="sr-only"><la:message
@@ -80,18 +80,14 @@
 		<div class="container">
 			<jsp:include page="/WEB-INF/view/searchOptions.jsp" />
 			<div>
-				<button type="button" class="btn" id="searchOptionsClearButton">
+				<button type="button" class="btn btn-light" id="searchOptionsClearButton">
 					<la:message key="labels.search_options_clear" />
-				</button>
-				<button type="submit" class="btn btn-primary">
-					<i class="fa fa-search"></i>
-					<la:message key="labels.search" />
 				</button>
 				<la:link href="/search/advance?q=${f:u(q)}${fe:pagingQuery(null)}" styleClass="btn btn-info">
 					<i class="fa fa-cog"></i>
 					<la:message key="labels.advance" />
 				</la:link>
-				<button type="button" class="btn pull-right"
+				<button type="button" class="btn btn-light pull-right"
 					data-toggle="control-options" data-target="#searchOptions"
 					id="searchOptionsCloseButton">
 					<i class="fa fa-times-circle"></i>
