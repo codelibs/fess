@@ -43,6 +43,7 @@
 		<property name="defaultOperator">org.apache.lucene.queryparser.classic.QueryParser$Operator.AND</property>
 	</component>
 	<component name="facetInfo" class="org.codelibs.fess.entity.FacetInfo">
+		<property name="sort">"count.desc"</property>
 		<property name="size">100</property>
 		<property name="minDocCount">1</property>
 		<property name="field">["label"]</property>

@@ -1114,11 +1114,7 @@ public class FessEsClient implements Client {
                                 final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                                 final TermsAggregationBuilder termsBuilder =
                                         AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
-                                if ("term".equals(facetInfo.sort) || "key".equals(facetInfo.sort)) {
-                                    termsBuilder.order(BucketOrder.key(true));
-                                } else if ("count".equals(facetInfo.sort)) {
-                                    termsBuilder.order(BucketOrder.count(true));
-                                }
+                                termsBuilder.order(facetInfo.getBucketOrder());
                                 if (facetInfo.size != null) {
                                     termsBuilder.size(facetInfo.size);
                                 }

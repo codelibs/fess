@@ -55,7 +55,7 @@ public class FacetResponse {
     }
 
     public static class Field {
-        protected Map<String, Long> valueCountMap = new HashMap<>();
+        protected Map<String, Long> valueCountMap = new LinkedHashMap<>();
 
         protected String name;
 
