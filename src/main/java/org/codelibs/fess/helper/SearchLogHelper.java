@@ -26,13 +26,13 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
@@ -216,7 +216,7 @@ public class SearchLogHelper {
             e.setUpdatedAt(now);
             return e;
         });
-        ForkJoinPool.commonPool().execute(() -> userInfoBhv.insertOrUpdate(userInfo));
+        CommonPoolUtil.execute(() -> userInfoBhv.insertOrUpdate(userInfo));
         return userInfo;
     }
 

@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
@@ -57,7 +57,7 @@ public class KeyMatchHelper {
     }
 
     public void update() {
-        ForkJoinPool.commonPool().execute(() -> reload(reloadInterval));
+        CommonPoolUtil.execute(() -> reload(reloadInterval));
     }
 
     public List<KeyMatch> getAvailableKeyMatchList() {
@@ -73,13 +73,22 @@ public class KeyMatchHelper {
         getAvailableKeyMatchList().stream().forEach(
                 keyMatch -> {
                     final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Loading KeyMatch Query: " + keyMatch.getQuery() + ", Size: " + keyMatch.getMaxSize());
+                    }
                     getDocumentList(keyMatch).stream().map(doc -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Loaded KeyMatch doc: " + doc);
+                        }
                         return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                     }).forEach(docId -> {
                         boolQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
                     });
 
                     if (boolQuery.hasClauses()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Loaded KeyMatch Boost Query: " + boolQuery);
+                        }
                         String virtualHost = keyMatch.getVirtualHost();
                         if (StringUtil.isBlank(virtualHost)) {
                             virtualHost = StringUtil.EMPTY;
@@ -91,6 +100,8 @@ public class KeyMatchHelper {
                         }
                         queryMap.put(toLowerCase(keyMatch.getTerm()),
                                 new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("No KeyMatch boost docs");
                     }
 
                     if (interval > 0) {

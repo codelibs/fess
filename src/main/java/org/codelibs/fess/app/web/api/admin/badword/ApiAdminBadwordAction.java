@@ -27,11 +27,11 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -146,7 +146,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$upload(final UploadForm body) {
         validateApi(body, messages -> {});
-        ForkJoinPool.commonPool().execute(() -> {
+        CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(body.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords(false);

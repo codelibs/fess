@@ -24,11 +24,11 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -286,7 +286,7 @@ public class AdminBadwordAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
-        ForkJoinPool.commonPool().execute(() -> {
+        CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords(false);

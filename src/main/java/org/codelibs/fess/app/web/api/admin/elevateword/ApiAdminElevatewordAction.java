@@ -28,11 +28,11 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
@@ -158,7 +158,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$upload(final UploadForm body) {
         validateApi(body, messages -> {});
-        ForkJoinPool.commonPool().execute(() -> {
+        CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(body.elevateWordFile.getInputStream(), getCsvEncoding()))) {
                 elevateWordService.importCsv(reader);
                 suggestHelper.storeAllElevateWords(false);
