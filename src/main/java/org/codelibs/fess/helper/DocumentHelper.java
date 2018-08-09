@@ -192,7 +192,9 @@ public class DocumentHelper {
                     new BufferedReader(new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(decode)), Constants.UTF_8))) {
                 return ReaderUtil.readText(reader);
             } catch (final IOException e) {
-                logger.warn("Failed to decode " + hash, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to decode " + hash, e);
+                }
             }
         }
         return hash;
