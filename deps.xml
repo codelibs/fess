@@ -43,43 +43,43 @@
 		</unzip>
 		<!-- fess-ds-csv -->
 		<antcall target="install.lib.jar">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-csv" />
-			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180617.205928-7" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
 		</antcall>
 		<!-- fess-ds-db -->
 		<antcall target="install.lib.jar">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-db" />
-			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180617.210112-6" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
 		</antcall>
 		<!-- fess-ds-elasticsearch -->
 		<antcall target="install.lib.jar">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-elasticsearch" />
-			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180617.205746-7" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
 		</antcall>
 		<!-- fess-ds-gitbucket -->
 		<antcall target="install.lib.jar">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-gitbucket" />
-			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180617.210253-6" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
 		</antcall>
 		<!-- fess-ds-json -->
 		<antcall target="install.lib.jar">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-json" />
-			<param name="jar.version" value="12.2.0-SNAPSHOT" />
-			<param name="file.version" value="12.2.0-20180617.210428-6" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
 		</antcall>
 	</target>
 
