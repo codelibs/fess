@@ -1132,6 +1132,7 @@
           ],
           "tokenizer": "unigram_tokenizer",
           "filter": [
+            "disable_graph",
             "alphanum_word_filter",
             "cjk_bigram",
             "lowercase",
