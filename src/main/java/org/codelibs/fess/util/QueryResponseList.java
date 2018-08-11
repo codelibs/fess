@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
 
 public class QueryResponseList implements List<Map<String, Object>> {
 
-    private static final String ELLIPSIS = "...";
-
     private static final Logger logger = LoggerFactory.getLogger(QueryResponseList.class);
 
-    private final List<Map<String, Object>> parent;
+    protected static final String ELLIPSIS = "...";
+
+    protected final List<Map<String, Object>> parent;
 
     /** The value of current page number. */
     protected int pageSize;
@@ -141,7 +141,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
         calculatePageInfo(start, pageSize);
     }
 
-    private Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
+    protected Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
         final Map<String, Object> docMap = new HashMap<>(32);
         if (searchHit.getSourceAsMap() == null) {
             searchHit.getFields().forEach((key, value) -> {
