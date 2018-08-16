@@ -69,6 +69,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        stopwordsPager.clear();
         return asHtml(path_AdminDictStopwords_AdminDictStopwordsJsp).renderWith(data -> {
             searchPaging(data, form);
         });
