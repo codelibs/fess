@@ -184,6 +184,8 @@ public class FessEsClient implements Client {
 
     protected int maxEsStatusRetry = 10;
 
+    protected String clusterName = "elasticsearch";
+
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
     }
@@ -230,7 +232,7 @@ public class FessEsClient implements Client {
         if (StringUtil.isBlank(httpAddress)) {
             if (runner == null) {
                 runner = new ElasticsearchClusterRunner();
-                final Configs config = newConfigs().clusterName(fessConfig.getElasticsearchClusterName()).numOfNode(1).useLogger();
+                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
                 final String esDir = System.getProperty("fess.es.dir");
                 if (esDir != null) {
                     config.basePath(esDir);
@@ -586,8 +588,7 @@ public class FessEsClient implements Client {
         }
         final String message =
                 "Elasticsearch (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
-                        + ") is not available. Check the state of your Elasticsearch cluster (" + fessConfig.getElasticsearchClusterName()
-                        + ").";
+                        + ") is not available. Check the state of your Elasticsearch cluster (" + clusterName + ").";
         throw new ContainerInitFailureException(message, cause);
     }
 
@@ -1174,6 +1175,10 @@ public class FessEsClient implements Client {
         T build(R response, H hit);
     }
 
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
+
     //
     // Elasticsearch Client
     //
@@ -1499,5 +1504,4 @@ public class FessEsClient implements Client {
     public void fieldCaps(final FieldCapabilitiesRequest request, final ActionListener<FieldCapabilitiesResponse> listener) {
         client.fieldCaps(request, listener);
     }
-
 }

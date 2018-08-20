@@ -15,7 +15,6 @@ fi
 
 # External elasticsearch cluster
 #ES_HTTP_URL=http://localhost:9200
-#ES_TRANSPORT_URL=localhost:9300
 #FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
 
 # SSL truststore for certificate validation over https

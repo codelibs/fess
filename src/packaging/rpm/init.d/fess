@@ -56,7 +56,6 @@ export FESS_DICTIONARY_PATH
 export FESS_HEAP_SIZE
 export ES_HOME
 export ES_HTTP_URL
-export ES_TRANSPORT_URL
 export FESS_JAVA_OPTS
 export JAVA_HOME
 

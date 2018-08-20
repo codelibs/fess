@@ -25,20 +25,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
 
-    /** The key of the configuration. e.g. elasticsearch */
-    String ELASTICSEARCH_CLUSTER_NAME = "elasticsearch.cluster.name";
-
     /** The key of the configuration. e.g. http://localhost:9201 */
     String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
-
-    /** The key of the configuration. e.g. false */
-    String ELASTICSEARCH_TRANSPORT_SNIFF = "elasticsearch.transport.sniff";
-
-    /** The key of the configuration. e.g. 1m */
-    String ELASTICSEARCH_TRANSPORT_ping_timeout = "elasticsearch.transport.ping_timeout";
-
-    /** The key of the configuration. e.g. 5s */
-    String ELASTICSEARCH_TRANSPORT_nodes_sampler_interval = "elasticsearch.transport.nodes_sampler_interval";
 
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORISM = "app.cipher.algorism";
@@ -1442,47 +1430,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getDomainTitle();
 
     /**
-     * Get the value for the key 'elasticsearch.cluster.name'. <br>
-     * The value is, e.g. elasticsearch <br>
+     * Get the value for the key 'elasticsearch.http.url'. <br>
+     * The value is, e.g. http://localhost:9201 <br>
      * comment: Elasticsearch
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchClusterName();
-
-    /**
-     * Get the value for the key 'elasticsearch.http.url'. <br>
-     * The value is, e.g. http://localhost:9201 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
     String getElasticsearchHttpUrl();
-
-    /**
-     * Get the value for the key 'elasticsearch.transport.sniff'. <br>
-     * The value is, e.g. false <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getElasticsearchTransportSniff();
-
-    /**
-     * Is the property for the key 'elasticsearch.transport.sniff' true? <br>
-     * The value is, e.g. false <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isElasticsearchTransportSniff();
-
-    /**
-     * Get the value for the key 'elasticsearch.transport.ping_timeout'. <br>
-     * The value is, e.g. 1m <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getElasticsearchTransportPingTimeout();
-
-    /**
-     * Get the value for the key 'elasticsearch.transport.nodes_sampler_interval'. <br>
-     * The value is, e.g. 5s <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getElasticsearchTransportNodesSamplerInterval();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -5924,28 +5877,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.DOMAIN_TITLE);
         }
 
-        public String getElasticsearchClusterName() {
-            return get(FessConfig.ELASTICSEARCH_CLUSTER_NAME);
-        }
-
         public String getElasticsearchHttpUrl() {
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
-        }
-
-        public String getElasticsearchTransportSniff() {
-            return get(FessConfig.ELASTICSEARCH_TRANSPORT_SNIFF);
-        }
-
-        public boolean isElasticsearchTransportSniff() {
-            return is(FessConfig.ELASTICSEARCH_TRANSPORT_SNIFF);
-        }
-
-        public String getElasticsearchTransportPingTimeout() {
-            return get(FessConfig.ELASTICSEARCH_TRANSPORT_ping_timeout);
-        }
-
-        public String getElasticsearchTransportNodesSamplerInterval() {
-            return get(FessConfig.ELASTICSEARCH_TRANSPORT_nodes_sampler_interval);
         }
 
         public String getAppCipherAlgorism() {
@@ -8292,11 +8225,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
             defaultMap.put(FessConfig.DOMAIN_TITLE, "Fess");
-            defaultMap.put(FessConfig.ELASTICSEARCH_CLUSTER_NAME, "elasticsearch");
             defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_URL, "http://localhost:9201");
-            defaultMap.put(FessConfig.ELASTICSEARCH_TRANSPORT_SNIFF, "false");
-            defaultMap.put(FessConfig.ELASTICSEARCH_TRANSPORT_ping_timeout, "1m");
-            defaultMap.put(FessConfig.ELASTICSEARCH_TRANSPORT_nodes_sampler_interval, "5s");
             defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
