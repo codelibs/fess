@@ -36,6 +36,7 @@ import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl.Method;
 import org.codelibs.curl.CurlRequest;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.exception.FessSystemException;
@@ -136,7 +137,7 @@ public class EsApiManager extends BaseApiManager {
                 curlRequest.param(entry.getKey(), entry.getValue()[0]);
             }
         });
-        curlRequest.onConnect((req, con) -> {
+        final CurlResponse curlResponse = curlRequest.onConnect((req, con) -> {
             con.setDoOutput(true);
             if (httpMethod != Method.GET) {
                 try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
@@ -145,27 +146,20 @@ public class EsApiManager extends BaseApiManager {
                     throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, e);
                 }
             }
-        }).execute(con -> {
-            try (ServletOutputStream out = response.getOutputStream()) {
-                try (InputStream in = con.getInputStream()) {
-                    response.setStatus(con.getResponseCode());
-                    CopyUtil.copy(in, out);
-                } catch (final Exception e) {
-                    response.setStatus(con.getResponseCode());
-                    try (InputStream err = con.getErrorStream()) {
-                        CopyUtil.copy(err, out);
-                    }
-                }
-            } catch (final ClientAbortException e) {
+        }).execute();
+
+        try (ServletOutputStream out = response.getOutputStream(); InputStream in = curlResponse.getContentAsStream()) {
+            response.setStatus(curlResponse.getHttpStatusCode());
+            CopyUtil.copy(in, out);
+        } catch (final ClientAbortException e) {
+            logger.debug("Client aborts this request.", e);
+        } catch (final Exception e) {
+            if (e.getCause() instanceof ClientAbortException) {
                 logger.debug("Client aborts this request.", e);
-            } catch (final Exception e) {
-                if (e.getCause() instanceof ClientAbortException) {
-                    logger.debug("Client aborts this request.", e);
-                } else {
-                    throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-                }
+            } else {
+                throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
-        });
+        }
     }
 
     protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {

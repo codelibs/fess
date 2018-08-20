@@ -203,13 +203,9 @@ public class Crawler {
 
         initializeProbes();
 
-        final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-        if (StringUtil.isNotBlank(transportAddresses)) {
-            System.setProperty(EsClient.TRANSPORT_ADDRESSES, transportAddresses);
-        }
-        final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
-        if (StringUtil.isNotBlank(clusterName)) {
-            System.setProperty(EsClient.CLUSTER_NAME, clusterName);
+        final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        if (StringUtil.isNotBlank(httpAddress)) {
+            System.setProperty(EsClient.HTTP_ADDRESS, httpAddress);
         }
 
         TimeoutTask systemMonitorTask = null;

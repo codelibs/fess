@@ -197,17 +197,10 @@ public class GenerateThumbnailJob {
         cmdList.add(buf.toString());
 
         if (useLocaleElasticsearch) {
-            final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-            if (StringUtil.isNotBlank(transportAddresses)) {
-                cmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+            final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+            if (StringUtil.isNotBlank(httpAddress)) {
+                cmdList.add("-D" + Constants.FESS_ES_HTTP_ADDRESS + "=" + httpAddress);
             }
-        }
-
-        final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
-        if (StringUtil.isNotBlank(clusterName)) {
-            cmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
-        } else {
-            cmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + fessConfig.getElasticsearchClusterName());
         }
 
         final String systemLastaEnv = System.getProperty("lasta.env");

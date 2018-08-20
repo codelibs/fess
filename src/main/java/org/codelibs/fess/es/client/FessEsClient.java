@@ -44,6 +44,7 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
+import org.codelibs.elasticsearch.client.HttpClient;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
 import org.codelibs.fess.Constants;
@@ -130,13 +131,10 @@ import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.Settings.Builder;
-import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.InnerHitBuilder;
@@ -150,7 +148,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.di.exception.ContainerInitFailureException;
 import org.slf4j.Logger;
@@ -158,7 +155,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 
 public class FessEsClient implements Client {
@@ -166,7 +162,7 @@ public class FessEsClient implements Client {
 
     protected ElasticsearchClusterRunner runner;
 
-    protected List<TransportAddress> transportAddressList = new ArrayList<>();
+    protected String httpAddress;
 
     protected Client client;
 
@@ -218,10 +214,6 @@ public class FessEsClient implements Client {
         return this.runner != null;
     }
 
-    public void addTransportAddress(final String host, final int port) {
-        transportAddressList.add(new TransportAddress(getInetAddressByName(host), port));
-    }
-
     protected InetAddress getInetAddressByName(final String host) {
         try {
             return InetAddress.getByName(host);
@@ -234,24 +226,8 @@ public class FessEsClient implements Client {
     public void open() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        final String transportAddressesValue = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-        if (StringUtil.isNotBlank(transportAddressesValue)) {
-            for (final String transportAddressValue : transportAddressesValue.split(",")) {
-                final String[] addressPair = transportAddressValue.trim().split(":");
-                if (addressPair.length < 3) {
-                    final String host = addressPair[0];
-                    int port = 9300;
-                    if (addressPair.length == 2) {
-                        port = Integer.parseInt(addressPair[1]);
-                    }
-                    addTransportAddress(host, port);
-                } else {
-                    logger.warn("Invalid address format: " + transportAddressValue);
-                }
-            }
-        }
-
-        if (transportAddressList.isEmpty()) {
+        String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        if (StringUtil.isBlank(httpAddress)) {
             if (runner == null) {
                 runner = new ElasticsearchClusterRunner();
                 final Configs config = newConfigs().clusterName(fessConfig.getElasticsearchClusterName()).numOfNode(1).useLogger();
@@ -273,27 +249,14 @@ public class FessEsClient implements Client {
                 });
                 runner.build(config);
             }
-            final int port = runner.node().settings().getAsInt("transport.tcp.port", 9300);
-            client = createTransportClient(fessConfig, Lists.newArrayList(new TransportAddress(getInetAddressByName("localhost"), port)));
-            addTransportAddress("localhost", port);
+            final int port = runner.node().settings().getAsInt("http.port", 9200);
+            httpAddress = "http://localhost:" + port;
             logger.warn("Embedded Elasticsearch is running. This configuration is not recommended for production use.");
-        } else {
-            client = createTransportClient(fessConfig, transportAddressList);
         }
+        client = createHttpClient(fessConfig, httpAddress);
 
-        if (StringUtil.isBlank(transportAddressesValue)) {
-            final StringBuilder buf = new StringBuilder();
-            for (final TransportAddress transportAddress : transportAddressList) {
-                if (buf.length() > 0) {
-                    buf.append(',');
-                }
-                buf.append(transportAddress.address().getHostName());
-                buf.append(':');
-                buf.append(transportAddress.address().getPort());
-            }
-            if (buf.length() > 0) {
-                System.setProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES, buf.toString());
-            }
+        if (StringUtil.isNotBlank(httpAddress)) {
+            System.setProperty(Constants.FESS_ES_HTTP_ADDRESS, httpAddress);
         }
 
         waitForYellowStatus(fessConfig);
@@ -352,18 +315,9 @@ public class FessEsClient implements Client {
         });
     }
 
-    protected Client createTransportClient(final FessConfig fessConfig, final List<TransportAddress> transportAddressList) {
-        final Builder settingsBuilder = Settings.builder();
-        settingsBuilder.put("cluster.name", fessConfig.getElasticsearchClusterName());
-        settingsBuilder.put("client.transport.sniff", fessConfig.isElasticsearchTransportSniff());
-        settingsBuilder.put("client.transport.ping_timeout", fessConfig.getElasticsearchTransportPingTimeout());
-        settingsBuilder.put("client.transport.nodes_sampler_interval", fessConfig.getElasticsearchTransportNodesSamplerInterval());
-        final Settings settings = settingsBuilder.build();
-        final TransportClient transportClient = new PreBuiltTransportClient(settings);
-        for (final TransportAddress address : transportAddressList) {
-            transportClient.addTransportAddress(address);
-        }
-        return transportClient;
+    protected Client createHttpClient(final FessConfig fessConfig, final String host) {
+        final Settings settings = Settings.builder().putList("http.hosts", host).build();
+        return new HttpClient(settings, null);
     }
 
     public boolean existsIndex(final String indexName) {
@@ -631,7 +585,7 @@ public class FessEsClient implements Client {
             }
         }
         final String message =
-                "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
+                "Elasticsearch (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
                         + ") is not available. Check the state of your Elasticsearch cluster (" + fessConfig.getElasticsearchClusterName()
                         + ").";
         throw new ContainerInitFailureException(message, cause);

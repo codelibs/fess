@@ -317,9 +317,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String MATCHES_ALL_QUERY = "*:*";
 
-    public static final String FESS_ES_TRANSPORT_ADDRESSES = "fess.es.transport_addresses";
-
-    public static final String FESS_ES_CLUSTER_NAME = "fess.es.cluster_name";
+    public static final String FESS_ES_HTTP_ADDRESS = "fess.es.http_address";
 
     public static final int DEFAULT_PAGE_SIZE = 20;
 
