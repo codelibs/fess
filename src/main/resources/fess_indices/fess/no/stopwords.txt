@@ -1,4 +1,4 @@
-# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/norwegian_stop.txt
+﻿# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/norwegian_stop.txt
 og
 i
 jeg
@@ -10,7 +10,7 @@ den
 til
 er
 som
-pa
+på
 de
 med
 han
@@ -18,7 +18,7 @@ av
 ikke
 ikkje
 der
-sa
+så
 var
 meg
 seg
@@ -32,7 +32,7 @@ mitt
 ha
 hadde
 hun
-na
+nå
 over
 da
 ved
@@ -51,7 +51,7 @@ eller
 hva
 skal
 selv
-sjol
+sjøl
 her
 alle
 vil
@@ -61,8 +61,8 @@ blei
 blitt
 kunne
 inn
-nar
-vare
+når
+være
 kom
 noen
 noe
@@ -82,7 +82,7 @@ si
 sine
 sitt
 mot
-a
+å
 meget
 hvorfor
 dette
@@ -96,25 +96,25 @@ blir
 samme
 hvilken
 hvilke
-sann
+sånn
 inni
 mellom
-var
+vår
 hver
 hvem
 vors
 hvis
-bade
+både
 bare
 enn
 fordi
-for
+før
 mange
-ogsa
+også
 slik
-vart
-vare
-bae
+vært
+være
+båe
 begge
 siden
 dykk
@@ -124,14 +124,14 @@ deira
 deires
 deim
 di
-da
+då
 eg
 ein
 eit
 eitt
 elles
 honom
-hja
+hjå
 ho
 hoe
 henne

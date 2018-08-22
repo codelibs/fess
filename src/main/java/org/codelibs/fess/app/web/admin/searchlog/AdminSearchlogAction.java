@@ -73,6 +73,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         saveToken();
+        searchLogPager.clear();
         copyBeanToBean(form, searchLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             searchPaging(data, form);
