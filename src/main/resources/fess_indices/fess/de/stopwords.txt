@@ -1,4 +1,4 @@
-# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/german_stop.txt
+﻿# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/german_stop.txt
 aber
 alle
 allem
@@ -35,7 +35,7 @@ des
 dem
 die
 das
-das
+daß
 derselbe
 derselben
 denselben
@@ -90,7 +90,7 @@ eurem
 euren
 eurer
 eures
-fur
+für
 gegen
 gewesen
 hab
@@ -135,8 +135,8 @@ keinem
 keinen
 keiner
 keines
-konnen
-konnte
+können
+könnte
 machen
 man
 manche
@@ -184,7 +184,7 @@ soll
 sollte
 sondern
 sonst
-uber
+über
 um
 und
 uns
@@ -198,7 +198,7 @@ viel
 vom
 von
 vor
-wahrend
+während
 war
 waren
 warst
@@ -223,8 +223,8 @@ wirst
 wo
 wollen
 wollte
-wurde
-wurden
+würde
+würden
 zu
 zum
 zur

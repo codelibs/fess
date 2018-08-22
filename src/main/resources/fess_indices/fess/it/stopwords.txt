@@ -1,4 +1,4 @@
-# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/italian_stop.txt
+﻿# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/italian_stop.txt
 ad
 al
 allo
@@ -94,7 +94,7 @@ una
 ma
 ed
 se
-perche
+perché
 anche
 come
 dov
@@ -103,7 +103,7 @@ che
 chi
 cui
 non
-piu
+più
 quale
 quanto
 quanti
@@ -135,9 +135,9 @@ hanno
 abbia
 abbiate
 abbiano
-avro
+avrò
 avrai
-avra
+avrà
 avremo
 avrete
 avranno
@@ -170,15 +170,15 @@ avuti
 avute
 sono
 sei
-e
+è
 siamo
 siete
 sia
 siate
 siano
-saro
+sarò
 sarai
-sara
+sarà
 saremo
 sarete
 saranno
@@ -212,9 +212,9 @@ fanno
 faccia
 facciate
 facciano
-faro
+farò
 farai
-fara
+farà
 faremo
 farete
 faranno
@@ -249,9 +249,9 @@ stanno
 stia
 stiate
 stiano
-staro
+starò
 starai
-stara
+starà
 staremo
 starete
 staranno

@@ -1,4 +1,4 @@
-# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/danish_stop.txt
+﻿# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/danish_stop.txt
 og
 i
 jeg
@@ -9,7 +9,7 @@ den
 til
 er
 som
-pa
+på
 de
 med
 han
@@ -52,8 +52,8 @@ vil
 blev
 kunne
 ind
-nar
-vare
+når
+være
 dog
 noget
 ville
@@ -66,7 +66,7 @@ denne
 end
 dette
 mit
-ogsa
+også
 under
 have
 dig
@@ -89,7 +89,7 @@ mange
 ad
 bliver
 hendes
-varet
+været
 thi
 jer
-sadan
+sådan
