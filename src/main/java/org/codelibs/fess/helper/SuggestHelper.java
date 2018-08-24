@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
@@ -87,6 +89,8 @@ public class SuggestHelper {
 
     protected PopularWordHelper popularWordHelper = null;
 
+    public long searchStoreIntervalMinute = 1;
+
     @PostConstruct
     public void init() {
         fessConfig = ComponentUtil.getFessConfig();
@@ -136,7 +140,7 @@ public class SuggestHelper {
     }
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
-        final Set<String> sessionIdSet = new HashSet<>();
+        final Map<String, LocalDateTime> sessionIdMap = new HashMap<>();
         searchLogList.stream().forEach(
                 searchLog -> {
                     if (searchLog.getHitCount() == null
@@ -144,9 +148,20 @@ public class SuggestHelper {
                         return;
                     }
 
-                    final String sessionId = searchLog.getUserSessionId();
-                    if (sessionId == null || sessionIdSet.contains(sessionId)) {
+                    final String sessionId;
+                    if (searchLog.getUserSessionId() != null) {
+                        sessionId = searchLog.getUserSessionId();
+                    } else {
+                        sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
+                    }
+
+                    final LocalDateTime requestedAt = searchLog.getRequestedAt();
+                    if (sessionId == null) {
                         return;
+                    } else if (sessionIdMap.containsKey(sessionId)) {
+                        if (sessionIdMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt)) {
+                            return;
+                        }
                     }
 
                     final StringBuilder sb = new StringBuilder(100);
@@ -180,7 +195,7 @@ public class SuggestHelper {
                         if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
                                     tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
-                            sessionIdSet.add(sessionId);
+                            sessionIdMap.put(sessionId, requestedAt);
                         }
                     }
                 });
