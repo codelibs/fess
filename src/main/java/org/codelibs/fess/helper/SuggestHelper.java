@@ -35,6 +35,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
@@ -140,7 +141,7 @@ public class SuggestHelper {
     }
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
-        final Map<String, LocalDateTime> sessionIdMap = new HashMap<>();
+        final Map<String, LocalDateTime> duplicateSessionMap = new HashMap<>();
         searchLogList.stream().forEach(
                 searchLog -> {
                     if (searchLog.getHitCount() == null
@@ -152,14 +153,18 @@ public class SuggestHelper {
                     if (searchLog.getUserSessionId() != null) {
                         sessionId = searchLog.getUserSessionId();
                     } else {
-                        sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
+                        if (Constants.SEARCH_LOG_ACCESS_TYPE_WEB.equals(searchLog.getAccessType())) {
+                            sessionId = searchLog.getClientIp();
+                        } else {
+                            sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
+                        }
                     }
 
                     final LocalDateTime requestedAt = searchLog.getRequestedAt();
                     if (sessionId == null) {
                         return;
-                    } else if (sessionIdMap.containsKey(sessionId)) {
-                        if (sessionIdMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt)) {
+                    } else if (duplicateSessionMap.containsKey(sessionId)) {
+                        if (duplicateSessionMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt)) {
                             return;
                         }
                     }
@@ -195,7 +200,7 @@ public class SuggestHelper {
                         if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
                                     tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
-                            sessionIdMap.put(sessionId, requestedAt);
+                            duplicateSessionMap.put(sessionId, requestedAt);
                         }
                     }
                 });
