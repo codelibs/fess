@@ -61,8 +61,8 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build() {
-        float titleBoost = 0.2f;
-        float contentBoost = 0.1f;
+        float titleBoost = 0.01f;
+        float contentBoost = 0.005f;
 
         assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), buildQuery("QUERY"));
         assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), buildQuery(" QUERY"));
