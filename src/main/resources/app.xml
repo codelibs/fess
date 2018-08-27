@@ -105,6 +105,7 @@
 	</component>
 	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
 		<property name="defaultFacetInfo">facetInfo</property>
+		<property name="lowercaseWildcard">false</property>
 		<postConstruct name="addHighlightField">
 			<arg>"title"</arg>
 		</postConstruct>
