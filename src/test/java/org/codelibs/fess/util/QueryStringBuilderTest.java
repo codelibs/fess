@@ -52,9 +52,9 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
     public void test_conditions_oq() {
         final String k = "oq";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
-        assertEquals("(aaa)", getAsQuery(Collections.singletonMap(k, new String[] { "aaa" })));
+        assertEquals("aaa", getAsQuery(Collections.singletonMap(k, new String[] { "aaa" })));
         assertEquals("(aaa OR bbb)", getAsQuery(Collections.singletonMap(k, new String[] { "aaa bbb" })));
-        assertEquals("(aaa OR bbb) (ccc)", getAsQuery(Collections.singletonMap(k, new String[] { "aaa bbb", "ccc" })));
+        assertEquals("(aaa OR bbb) ccc", getAsQuery(Collections.singletonMap(k, new String[] { "aaa bbb", "ccc" })));
         assertEquals("(aaa OR bbb) (ccc OR ddd)", getAsQuery(Collections.singletonMap(k, new String[] { "aaa bbb", "ccc ddd" })));
         assertEquals("(aaa OR bbb)", getAsQuery("111", Collections.singletonMap(k, new String[] { "aaa bbb" })));
     }
