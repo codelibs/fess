@@ -28,6 +28,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 
 public class QueryStringBuilder {
 
+    private static final String OR_ALT = "||";
+
+    private static final String OR = " OR ";
+
     private SearchRequestParams params;
 
     protected String quote(final String value) {
@@ -42,35 +46,15 @@ public class QueryStringBuilder {
         final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
         final StringBuilder queryBuf = new StringBuilder(255);
 
-        final Map<String, String[]> conditions = params.getConditions();
-        if (params.hasConditionQuery()) {
-            appendConditions(queryBuf, conditions);
-        } else {
-            final String query = params.getQuery();
-            if (StringUtil.isNotBlank(query)) {
-                if (ComponentUtil.hasRelatedQueryHelper()) {
-                    final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
-                    final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
-                    if (relatedQueries.length == 0) {
-                        queryBuf.append(query);
-                    } else {
-                        queryBuf.append('(');
-                        queryBuf.append(quote(query));
-                        for (final String s : relatedQueries) {
-                            queryBuf.append(" OR ");
-                            queryBuf.append(quote(s));
-                        }
-                        queryBuf.append(')');
-                    }
-                } else {
-                    queryBuf.append(query);
-                }
-            }
+        final String query = buildBaseQuery();
+        if (StringUtil.isNotBlank(query)) {
+            queryBuf.append(query);
         }
 
         stream(params.getExtraQueries()).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        q -> queryBuf.append(' ').append(q)));
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(q -> {
+                    appendQuery(queryBuf, q);
+                }));
 
         stream(params.getFields()).of(stream -> stream.forEach(entry -> {
             final String key = entry.getKey();
@@ -86,7 +70,7 @@ public class QueryStringBuilder {
                     if (first) {
                         first = false;
                     } else {
-                        queryBuf.append(" OR ");
+                        queryBuf.append(OR);
                     }
                     queryBuf.append(key).append(":\"").append(value).append('\"');
                 }
@@ -94,6 +78,47 @@ public class QueryStringBuilder {
             }
         }));
 
+        return queryBuf.toString().trim();
+    }
+
+    protected void appendQuery(final StringBuilder queryBuf, String q) {
+        final boolean exists = q.indexOf(OR) != -1 || q.indexOf(OR_ALT) != -1;
+        queryBuf.append(' ');
+        if (exists) {
+            queryBuf.append('(');
+        }
+        queryBuf.append(q);
+        if (exists) {
+            queryBuf.append(')');
+        }
+    }
+
+    protected String buildBaseQuery() {
+        final StringBuilder queryBuf = new StringBuilder(255);
+        if (params.hasConditionQuery()) {
+            appendConditions(queryBuf, params.getConditions());
+        } else {
+            final String query = params.getQuery();
+            if (StringUtil.isNotBlank(query)) {
+                if (ComponentUtil.hasRelatedQueryHelper()) {
+                    final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
+                    final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
+                    if (relatedQueries.length == 0) {
+                        appendQuery(queryBuf, query);
+                    } else {
+                        queryBuf.append('(');
+                        queryBuf.append(quote(query));
+                        for (final String s : relatedQueries) {
+                            queryBuf.append(OR);
+                            queryBuf.append(quote(s));
+                        }
+                        queryBuf.append(')');
+                    }
+                } else {
+                    appendQuery(queryBuf, query);
+                }
+            }
+        }
         return queryBuf.toString().trim();
     }
 
@@ -116,9 +141,10 @@ public class QueryStringBuilder {
         stream(conditions.get(SearchRequestParams.AS_OQ)).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
                         oq -> split(oq, " ").get(
-                                s -> s.filter(StringUtil::isNotBlank).reduce(
-                                        (q1, q2) -> escape(q1, "(", ")") + " OR " + escape(q2, "(", ")"))).ifPresent(
-                                q -> queryBuf.append(" (").append(q).append(')'))));
+                                s -> s.filter(StringUtil::isNotBlank).reduce((q1, q2) -> escape(q1, "(", ")") + OR + escape(q2, "(", ")")))
+                                .ifPresent(q -> {
+                                    appendQuery(queryBuf, q);
+                                })));
         stream(conditions.get(SearchRequestParams.AS_NQ)).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
                         eq -> {
