@@ -34,8 +34,8 @@ public class DataStoreFactory {
         if (name == null || dataStore == null) {
             throw new IllegalArgumentException("name or dataStore is null.");
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Loaded " + name);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Loaded " + name);
         }
         dataStoreMap.put(name, dataStore);
     }
