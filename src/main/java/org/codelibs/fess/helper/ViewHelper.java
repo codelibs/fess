@@ -124,6 +124,8 @@ public class ViewHelper {
 
     protected String escapedHighlightPost = null;
 
+    protected String highlightSplitPattern;
+
     protected ActionHook actionHook = new ActionHook();
 
     protected final Set<String> inlineMimeTypeSet = new HashSet<>();
@@ -136,6 +138,7 @@ public class ViewHelper {
         highlightTagPre = fessConfig.getQueryHighlightTagPre();
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
+        highlightSplitPattern = fessConfig.getQueryHighlightSplitPattern();
     }
 
     public String getContentTitle(final Map<String, Object> document) {
@@ -189,7 +192,19 @@ public class ViewHelper {
     }
 
     protected String escapeHighlight(final String text) {
-        return LaFunctions.h(text).replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
+        final String escaped = LaFunctions.h(text);
+        final String[] values = escaped.split(highlightSplitPattern, 2);
+        final String value;
+        if (values.length > 1) {
+            if (values[0].indexOf(escapedHighlightPre) == -1) {
+                value = values[1];
+            } else {
+                value = escaped;
+            }
+        } else {
+            value = values[0];
+        }
+        return value.replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
     }
 
     protected String removeHighlightTag(final String str) {
