@@ -587,10 +587,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
-    /** The key of the configuration. e.g. 40 */
+    /** The key of the configuration. e.g. [\p{Cc}\p{Z}\u3002] */
+    String QUERY_HIGHLIGHT_SPLIT_PATTERN = "query.highlight.split.pattern";
+
+    /** The key of the configuration. e.g. 80 */
     String QUERY_HIGHLIGHT_FRAGMENT_SIZE = "query.highlight.fragment.size";
 
-    /** The key of the configuration. e.g. 3 */
+    /** The key of the configuration. e.g. 2 */
     String QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "query.highlight.number.of.fragments";
 
     /** The key of the configuration. e.g. fvh */
@@ -733,13 +736,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
-    /** The key of the configuration. e.g. 0.2 */
+    /** The key of the configuration. e.g. 0.01 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
     /** The key of the configuration. e.g. 1.0 */
     String QUERY_BOOST_TITLE_LANG = "query.boost.title.lang";
 
-    /** The key of the configuration. e.g. 0.1 */
+    /** The key of the configuration. e.g. 0.005 */
     String QUERY_BOOST_CONTENT = "query.boost.content";
 
     /** The key of the configuration. e.g. 0.5 */
@@ -3122,15 +3125,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isQueryReplaceTermWithPrefixQuery();
 
     /**
+     * Get the value for the key 'query.highlight.split.pattern'. <br>
+     * The value is, e.g. [\p{Cc}\p{Z}\u3002] <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightSplitPattern();
+
+    /**
      * Get the value for the key 'query.highlight.fragment.size'. <br>
-     * The value is, e.g. 40 <br>
+     * The value is, e.g. 80 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightFragmentSize();
 
     /**
      * Get the value for the key 'query.highlight.fragment.size' as {@link Integer}. <br>
-     * The value is, e.g. 40 <br>
+     * The value is, e.g. 80 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3138,14 +3148,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.highlight.number.of.fragments'. <br>
-     * The value is, e.g. 3 <br>
+     * The value is, e.g. 2 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightNumberOfFragments();
 
     /**
      * Get the value for the key 'query.highlight.number.of.fragments' as {@link Integer}. <br>
-     * The value is, e.g. 3 <br>
+     * The value is, e.g. 2 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3537,7 +3547,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title'. <br>
-     * The value is, e.g. 0.2 <br>
+     * The value is, e.g. 0.01 <br>
      * comment: boost
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -3545,7 +3555,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 0.2 <br>
+     * The value is, e.g. 0.01 <br>
      * comment: boost
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
@@ -3569,14 +3579,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.content'. <br>
-     * The value is, e.g. 0.1 <br>
+     * The value is, e.g. 0.005 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContent();
 
     /**
      * Get the value for the key 'query.boost.content' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 0.1 <br>
+     * The value is, e.g. 0.005 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -6761,6 +6771,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
         }
 
+        public String getQueryHighlightSplitPattern() {
+            return get(FessConfig.QUERY_HIGHLIGHT_SPLIT_PATTERN);
+        }
+
         public String getQueryHighlightFragmentSize() {
             return get(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE);
         }
@@ -8397,8 +8411,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "40");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "3");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_SPLIT_PATTERN, "[\\p{Cc}\\p{Z}\\u3002]");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "80");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "2");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_PRE, "<strong>");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_POST, "</strong>");
@@ -8428,9 +8443,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap
                     .put(FessConfig.QUERY_LANGUAGE_MAPPING,
                             "ar=ar\nbg=bg\nbn=bn\nca=ca\nckb-iq=ckb-iq\nckb_IQ=ckb-iq\ncs=cs\nda=da\nde=de\nel=el\nen=en\nen-ie=en-ie\nen_IE=en-ie\nes=es\net=et\neu=eu\nfa=fa\nfi=fi\nfr=fr\ngl=gl\ngu=gu\nhe=he\nhi=hi\nhr=hr\nhu=hu\nhy=hy\nid=id\nit=it\nja=ja\nko=ko\nlt=lt\nlv=lv\nmk=mk\nml=ml\nnl=nl\nno=no\npa=pa\npl=pl\npt=pt\npt-br=pt-br\npt_BR=pt-br\nro=ro\nru=ru\nsi=si\nsq=sq\nsv=sv\nta=ta\nte=te\nth=th\ntl=tl\ntr=tr\nuk=uk\nur=ur\nvi=vi\nzh-cn=zh-cn\nzh_CN=zh-cn\nzh-tw=zh-tw\nzh_TW=zh-tw\nzh=zh\n");
-            defaultMap.put(FessConfig.QUERY_BOOST_TITLE, "0.2");
+            defaultMap.put(FessConfig.QUERY_BOOST_TITLE, "0.01");
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE_LANG, "1.0");
-            defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.1");
+            defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.005");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.5");
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2");
