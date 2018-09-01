@@ -46,6 +46,7 @@
 											<la:select styleId="targetVersion" property="targetVersion" styleClass="form-control">
 												<la:option value="12.0">12.0</la:option>
 												<la:option value="12.1">12.1</la:option>
+												<la:option value="12.2">12.2</la:option>
 											</la:select>
 										</div>
 									</div>

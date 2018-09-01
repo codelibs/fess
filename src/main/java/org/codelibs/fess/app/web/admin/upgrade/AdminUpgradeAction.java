@@ -50,6 +50,8 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private static final String VERSION_12_1 = "12.1";
 
+    private static final String VERSION_12_2 = "12.2";
+
     // ===================================================================================
     //                                                                           Attribute
     //
@@ -124,6 +126,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             try {
                 upgradeFrom12_0();
                 upgradeFrom12_1();
+                upgradeFrom12_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -136,6 +139,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         } else if (VERSION_12_1.equals(form.targetVersion)) {
             try {
                 upgradeFrom12_1();
+                upgradeFrom12_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -144,6 +148,18 @@ public class AdminUpgradeAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_12_1, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_12_2.equals(form.targetVersion)) {
+            try {
+                upgradeFrom12_2();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_12_2, e.getLocalizedMessage()));
             }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
@@ -163,6 +179,10 @@ public class AdminUpgradeAction extends FessAdminAction {
                 + "]}");
         UpgradeUtil.addFieldMapping(indicesClient, "fess_log.click_log", "click_log", "urlId",
                 "{\"properties\":{\"urlId\":{\"type\":\"keyword\"}}}");
+    }
+
+    private void upgradeFrom12_2() {
+        // nothing
     }
 
     private void upgradeFromAll() {
