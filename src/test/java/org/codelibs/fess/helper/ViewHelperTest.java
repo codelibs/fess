@@ -221,6 +221,9 @@ public class ViewHelperTest extends UnitFessTestCase {
         String text;
 
         text = "111 222" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals("111 222" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
+
+        text = "111.222" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
         assertEquals("222" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
 
         text = "111\n222" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
