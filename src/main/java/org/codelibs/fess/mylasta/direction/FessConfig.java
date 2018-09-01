@@ -599,10 +599,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
-    /** The key of the configuration. e.g. [\p{Cc}\p{Z}\u3002] */
-    String QUERY_HIGHLIGHT_SPLIT_PATTERN = "query.highlight.split.pattern";
+    /** The key of the configuration. e.g. !.?։؟۔܀܁܂।၊။።፧፨᙮᠃᠉‼‽⁇⁈⁉。﹒﹗！．？｡ */
+    String QUERY_HIGHLIGHT_TERMINAL_CHARS = "query.highlight.terminal.chars";
 
-    /** The key of the configuration. e.g. 80 */
+    /** The key of the configuration. e.g. 60 */
     String QUERY_HIGHLIGHT_FRAGMENT_SIZE = "query.highlight.fragment.size";
 
     /** The key of the configuration. e.g. 2 */
@@ -3172,22 +3172,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isQueryReplaceTermWithPrefixQuery();
 
     /**
-     * Get the value for the key 'query.highlight.split.pattern'. <br>
-     * The value is, e.g. [\p{Cc}\p{Z}\u3002] <br>
+     * Get the value for the key 'query.highlight.terminal.chars'. <br>
+     * The value is, e.g. !.?։؟۔܀܁܂।၊။።፧፨᙮᠃᠉‼‽⁇⁈⁉。﹒﹗！．？｡ <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getQueryHighlightSplitPattern();
+    String getQueryHighlightTerminalChars();
 
     /**
      * Get the value for the key 'query.highlight.fragment.size'. <br>
-     * The value is, e.g. 80 <br>
+     * The value is, e.g. 60 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightFragmentSize();
 
     /**
      * Get the value for the key 'query.highlight.fragment.size' as {@link Integer}. <br>
-     * The value is, e.g. 80 <br>
+     * The value is, e.g. 60 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6838,8 +6838,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
         }
 
-        public String getQueryHighlightSplitPattern() {
-            return get(FessConfig.QUERY_HIGHLIGHT_SPLIT_PATTERN);
+        public String getQueryHighlightTerminalChars() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS);
         }
 
         public String getQueryHighlightFragmentSize() {
@@ -8482,8 +8482,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_SPLIT_PATTERN, "[\\p{Cc}\\p{Z}\\u3002]");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "80");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS, "!.?։؟۔܀܁܂।၊။።፧፨᙮᠃᠉‼‽⁇⁈⁉。﹒﹗！．？｡");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "60");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "2");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_PRE, "<strong>");
