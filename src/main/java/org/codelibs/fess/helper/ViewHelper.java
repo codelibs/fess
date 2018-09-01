@@ -124,7 +124,7 @@ public class ViewHelper {
 
     protected String escapedHighlightPost = null;
 
-    protected String highlightSplitPattern;
+    protected Set<Integer> hihglightTerminalCharSet = new HashSet<>();
 
     protected ActionHook actionHook = new ActionHook();
 
@@ -138,7 +138,7 @@ public class ViewHelper {
         highlightTagPre = fessConfig.getQueryHighlightTagPre();
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
-        highlightSplitPattern = fessConfig.getQueryHighlightSplitPattern();
+        fessConfig.getQueryHighlightTerminalChars().codePoints().forEach(hihglightTerminalCharSet::add);
     }
 
     public String getContentTitle(final Map<String, Object> document) {
@@ -193,17 +193,16 @@ public class ViewHelper {
 
     protected String escapeHighlight(final String text) {
         final String escaped = LaFunctions.h(text);
-        final String[] values = escaped.split(highlightSplitPattern, 2);
-        final String value;
-        if (values.length > 1) {
-            if (values[0].indexOf(escapedHighlightPre) == -1) {
-                value = values[1];
-            } else {
-                value = escaped;
+        int pos = escaped.indexOf(escapedHighlightPre);
+        while (pos >= 0) {
+            int c = escaped.codePointAt(pos);
+            if (Character.isISOControl(c) || hihglightTerminalCharSet.contains(c)) {
+                break;
             }
-        } else {
-            value = values[0];
+            pos--;
         }
+
+        final String value = escaped.substring(pos + 1);
         return value.replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
     }
 
