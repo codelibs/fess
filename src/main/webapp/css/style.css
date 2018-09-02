@@ -130,6 +130,7 @@ h3 {
 
 #result .thumbnail {
 	width: 100px;
+	min-height: 30px;
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
 }
