@@ -31,6 +31,7 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.UpgradeUtil;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
@@ -182,7 +183,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom12_2() {
-        // nothing
+        ComponentUtil.getThumbnailManager().migrate();
     }
 
     private void upgradeFromAll() {
