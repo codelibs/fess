@@ -37,12 +37,14 @@
 				</h3>
 				<div class="body">
 					<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
-						<a class="link mr-3 d-none d-sm-flex" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
+					<div class="mr-3">
+						<a class="link d-none d-sm-flex" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
 							data-order="${s.index}"
 						> <img src="${fe:url('/images/blank.png')}"
 							data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}" class="thumbnail"
 						>
 						</a>
+					</div>
 					</c:if>
 					<div class="description">${doc.content_description}</div>
 				</div>
