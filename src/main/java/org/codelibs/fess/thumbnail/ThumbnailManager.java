@@ -17,6 +17,7 @@ package org.codelibs.fess.thumbnail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -30,6 +31,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -277,9 +279,13 @@ public class ThumbnailManager {
     }
 
     protected String getImageFilename(final Map<String, Object> docMap) {
-        final StringBuilder buf = new StringBuilder(50);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String docid = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldDocId(), String.class);
+        return getImageFilename(docid);
+    }
+
+    protected String getImageFilename(final String docid) {
+        final StringBuilder buf = new StringBuilder(50);
         for (int i = 0; i < docid.length(); i++) {
             if (i > 0 && i % splitSize == 0) {
                 buf.append('/');
@@ -468,6 +474,36 @@ public class ThumbnailManager {
             return false;
         }
 
+    }
+
+    public void migrate() {
+        new Thread(() -> {
+            final Path basePath = baseDir.toPath();
+            final String suffix = "." + imageExtention;
+            try (Stream<Path> paths = Files.walk(basePath)) {
+                paths.filter(path -> path.toFile().getName().endsWith(imageExtention)).forEach(path -> {
+                    final Path subPath = basePath.relativize(path);
+                    final String docId = subPath.toString().replace("/", StringUtil.EMPTY).replace(suffix, StringUtil.EMPTY);
+                    final String filename = getImageFilename(docId);
+                    final Path newPath = basePath.resolve(filename);
+                    if (!path.equals(newPath)) {
+                        try {
+                            try {
+                                Files.createDirectories(newPath.getParent());
+                            } catch (final FileAlreadyExistsException e) {
+                                // ignore
+                    }
+                    Files.move(path, newPath);
+                    logger.info("Move " + path + " to " + newPath);
+                } catch (IOException e) {
+                    logger.warn("Failed to move " + path, e);
+                }
+            }
+        }       );
+            } catch (IOException e) {
+                logger.warn("Failed to migrate thumbnail images.", e);
+            }
+        }, "ThumbnailMigrator").start();
     }
 
     public void setThumbnailPathCacheSize(final int thumbnailPathCacheSize) {
