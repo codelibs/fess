@@ -68,6 +68,7 @@
 		<!-- Elasticsearch -->
 		<elasticsearch.version>6.4.0</elasticsearch.version>
 		<elasticsearch.min.version>6.3.0</elasticsearch.min.version>
+		<elasticsearch.httpclient.version>6.4.0-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -1202,7 +1203,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>elasticsearch-httpclient</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>${elasticsearch.httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
