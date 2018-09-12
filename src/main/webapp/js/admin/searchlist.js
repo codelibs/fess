@@ -1,7 +1,7 @@
 $(function() {
-  var SEP_CHAR = "-";
-  var langCode;
-  var browserLang =
+  var SEP_CHAR = "-",
+      langCode,
+      browserLang =
     (window.navigator.languages && window.navigator.languages[0]) ||
     window.navigator.language ||
     window.navigator.userLanguage ||

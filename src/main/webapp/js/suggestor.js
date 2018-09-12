@@ -1,27 +1,29 @@
 (function($) {
   $.fn.suggestor = function(setting) {
-    var $boxElement;
-    var $textArea;
-    var inputText = "";
-    var isFocusList = false;
-    var listNum = 0;
-    var listSelNum = 0;
-    var isMouseHover = false;
-    var started = false;
-    var interval = 5;
+    var $boxElement,
+        $textArea,
+        inputText = "",
+        isFocusList = false,
+        listNum = 0,
+        listSelNum = 0,
+        isMouseHover = false,
+        started = false,
+        interval = 5,
 
-    var settingMinTerm = 1;
-    var settingAjaxInfo;
-    var settingAdjustWidthVal;
-    var $settingSearchForm;
-    var listSelectedCssInfo;
-    var listDeselectedCssInfo;
-    var boxCssInfo;
+        settingMinTerm = 1,
+        settingAjaxInfo,
+        settingAdjustWidthVal,
+        $settingSearchForm,
+        listSelectedCssInfo,
+        listDeselectedCssInfo,
+        boxCssInfo,
 
-    var suggestingSts = false;
+        suggestingSts = false,
 
-    var suggestor = {
+        suggestor = {
       init: function($element, setting) {
+        var suggestor;
+
         suggestingSts = false;
         $boxElement = $("<div/>");
         $boxElement.addClass("suggestorBox");
@@ -76,7 +78,7 @@
         );
 
         this.resize();
-        var suggestor = this;
+        suggestor = this;
         $(window).resize(function() {
           suggestor.resize();
         });
@@ -129,37 +131,44 @@
           return;
         }
 
-        var hits = obj.response.result.hits;
-        var suggestor = this;
+        var hits = obj.response.result.hits,
+            suggestor = this,
+            reslist,
+            $olEle,
+            str,
+            chkCorrectWord,
+            $tmpli,
+            $liEle,
+            i, j, k;
 
         listNum = 0;
         if (typeof hits !== "undefined") {
-          var reslist = [];
-          for (var i = 0; i < hits.length; i++) {
+          reslist = [];
+          for (i = 0; i < hits.length; i++) {
             reslist.push(hits[i].text);
           }
-          var $olEle = $("<ol/>");
+          $olEle = $("<ol/>");
           $olEle.css("list-style", "none");
           $olEle.css("padding", "0");
           $olEle.css("margin", "2px");
 
           for (
-            var j = 0;
+            j = 0;
             j < reslist.length && listNum < settingAjaxInfo.num;
             j++
           ) {
-            var str = reslist[j];
-            var chkCorrectWord = true;
+            str = reslist[j];
+            chkCorrectWord = true;
 
-            var $tmpli = $($olEle.children("li"));
-            for (var k = 0; k < $tmpli.length; k++) {
+            $tmpli = $($olEle.children("li"));
+            for (k = 0; k < $tmpli.length; k++) {
               if (str === $($tmpli.get(k)).html()) {
                 chkCorrectWord = false;
               }
             }
 
             if (chkCorrectWord) {
-              var $liEle = $("<li/>");
+              $liEle = $("<li/>");
               $liEle.html(str);
               $liEle.click(function() {
                 var str = $(this).html();

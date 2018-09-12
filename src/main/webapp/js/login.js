@@ -8,8 +8,9 @@ $(function() {
     .focus();
 
   $("section.content input").keypress(function(e) {
+    var $submitButton;
     if (e.which === 13) {
-      var $submitButton = $("input#submit, button#submit");
+      $submitButton = $("input#submit, button#submit");
       if ($submitButton.length > 0) {
         $submitButton[0].submit();
       }
@@ -35,10 +36,10 @@ $(function() {
   });
 
   $("#confirmToDelete").on("show.bs.modal", function(event) {
-    var button = $(event.relatedTarget);
-    var docId = button.data("docid");
-    var title = button.data("title");
-    var url = button.data("url");
+    var button = $(event.relatedTarget),
+        docId = button.data("docid"),
+        title = button.data("title"),
+        url = button.data("url");
 
     $(this)
       .find(".modal-body #delete-doc-title")
