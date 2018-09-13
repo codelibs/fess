@@ -1,6 +1,6 @@
 $(function() {
-  var $searchButton = $("#searchButton");
-  var contextPath = $("#contextPath").val();
+  var $searchButton = $("#searchButton"),
+      contextPath = $("#contextPath").val();
 
   $("#searchForm").on("submit", function(e) {
     $searchButton.attr("disabled", true);

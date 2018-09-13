@@ -1,200 +1,236 @@
 (function($) {
   $.fn.suggestor = function(setting) {
-    var $boxElement;
-    var $textArea;
-    var inputText = "";
-    var isFocusList = false;
-    var listNum = 0;
-    var listSelNum = 0;
-    var isMouseHover = false;
-    var started = false;
-    var interval = 5;
+    var $boxElement,
+        $textArea,
+        inputText = "",
+        isFocusList = false,
+        listNum = 0,
+        listSelNum = 0,
+        isMouseHover = false,
+        started = false,
+        interval = 5,
 
-    var settingMinTerm = 1;
-    var settingAjaxInfo;
-    var settingAdjustWidthVal;
-    var $settingSearchForm;
-    var listSelectedCssInfo;
-    var listDeselectedCssInfo;
-    var boxCssInfo;
+        settingMinTerm = 1,
+        settingAjaxInfo,
+        settingAdjustWidthVal,
+        $settingSearchForm,
+        listSelectedCssInfo,
+        listDeselectedCssInfo,
+        boxCssInfo,
 
-    var suggestingSts = false;
+        suggestingSts = false,
 
-    var suggestor = {
-      init: function($element, setting) {
-        suggestingSts = false;
-        $boxElement = $("<div/>");
-        $boxElement.addClass("suggestorBox");
+        suggestor = {
+          init: function($element, setting) {
+            var suggestor;
 
-        //style sheet
-        $boxElement.css("display", "none");
-        $boxElement.css("position", "absolute");
-        $boxElement.css("text-align", "left");
-        $boxElement.css("font-size", $element.css("font-size"));
-        if (typeof setting.boxCssInfo === "undefined") {
-          $boxElement.css("border", "1px solid #cccccc");
-          $boxElement.css(
-            "-webkit-box-shadow",
-            "0 3px 2px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(236, 236, 236, 0.6)"
-          );
-          $boxElement.css(
-            "-moz-box-shadow",
-            "0 3px 2px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(236, 236, 236, 0.6)"
-          );
-          $boxElement.css(
-            "box-shadow",
-            "0 3px 2px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(236, 236, 236, 0.6)"
-          );
-          $boxElement.css("background-color", "#fff");
-        } else {
-          $boxElement.css(setting.boxCssInfo);
-        }
-
-        $textArea = $element;
-        $textArea.attr("autocomplete", "off");
-
-        isFocusList = false;
-        inputText = $textArea.val();
-
-        //settings
-        settingAjaxInfo = setting.ajaxinfo;
-        settingMinTerm = setting.minterm;
-        $settingSearchForm = setting.searchForm;
-        listSelectedCssInfo = setting.listSelectedCssInfo;
-        listDeselectedCssInfo = setting.listDeselectedCssInfo;
-        settingAdjustWidthVal = setting.adjustWidthVal;
-
-        boxCssInfo = setting.boxCssInfo;
-
-        $boxElement.hover(
-          function() {
-            isMouseHover = true;
-          },
-          function() {
-            isMouseHover = false;
-          }
-        );
-
-        this.resize();
-        var suggestor = this;
-        $(window).resize(function() {
-          suggestor.resize();
-        });
-
-        $("body").append($boxElement);
-      },
-
-      suggest: function() {
-        suggestingSts = true;
-
-        this.resize();
-
-        var suggestor = this;
-        inputText = $textArea.val();
-
-        listNum = 0;
-        listSelNum = 0;
-
-        if (inputText.length < settingMinTerm) {
-          $boxElement.css("display", "none");
-          suggestingSts = false;
-          return;
-        }
-
-        $.ajax({
-          url: settingAjaxInfo.url,
-          type: "get",
-          dataType: "jsonp",
-          cache: false,
-          data: {
-            query: $textArea.val(),
-            fields: settingAjaxInfo.fn,
-            num: settingAjaxInfo.num * 2,
-            lang: settingAjaxInfo.lang
-          },
-          traditional: true
-        })
-          .done(function(obj) {
-            suggestor.createAutoCompleteList(obj);
-          })
-          .fail(function(a, obj, b) {
             suggestingSts = false;
-            return;
-          });
-      },
+            $boxElement = $("<div/>");
+            $boxElement.addClass("suggestorBox");
 
-      createAutoCompleteList: function(obj) {
-        if (obj.response.status !== 0) {
-          $boxElement.css("display", "none");
-          return;
-        }
-
-        var hits = obj.response.result.hits;
-        var suggestor = this;
-
-        listNum = 0;
-        if (typeof hits !== "undefined") {
-          var reslist = [];
-          for (var i = 0; i < hits.length; i++) {
-            reslist.push(hits[i].text);
-          }
-          var $olEle = $("<ol/>");
-          $olEle.css("list-style", "none");
-          $olEle.css("padding", "0");
-          $olEle.css("margin", "2px");
-
-          for (
-            var j = 0;
-            j < reslist.length && listNum < settingAjaxInfo.num;
-            j++
-          ) {
-            var str = reslist[j];
-            var chkCorrectWord = true;
-
-            var $tmpli = $($olEle.children("li"));
-            for (var k = 0; k < $tmpli.length; k++) {
-              if (str === $($tmpli.get(k)).html()) {
-                chkCorrectWord = false;
-              }
+            //style sheet
+            $boxElement.css("display", "none");
+            $boxElement.css("position", "absolute");
+            $boxElement.css("text-align", "left");
+            $boxElement.css("font-size", $element.css("font-size"));
+            if (typeof setting.boxCssInfo === "undefined") {
+              $boxElement.css("border", "1px solid #cccccc");
+              $boxElement.css(
+                "-webkit-box-shadow",
+                "0 3px 2px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(236, 236, 236, 0.6)"
+              );
+              $boxElement.css(
+                "-moz-box-shadow",
+                "0 3px 2px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(236, 236, 236, 0.6)"
+              );
+              $boxElement.css(
+                "box-shadow",
+                "0 3px 2px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(236, 236, 236, 0.6)"
+              );
+              $boxElement.css("background-color", "#fff");
+            } else {
+              $boxElement.css(setting.boxCssInfo);
             }
 
-            if (chkCorrectWord) {
-              var $liEle = $("<li/>");
-              $liEle.html(str);
-              $liEle.click(function() {
-                var str = $(this).html();
-                suggestor.fixList();
-                $textArea.val(str);
-                if (typeof $settingSearchForm !== "undefined") {
-                  $settingSearchForm.submit();
-                  //$settingSearchForm.trigger("submit");
-                }
+            $textArea = $element;
+            $textArea.attr("autocomplete", "off");
+
+            isFocusList = false;
+            inputText = $textArea.val();
+
+            //settings
+            settingAjaxInfo = setting.ajaxinfo;
+            settingMinTerm = setting.minterm;
+            $settingSearchForm = setting.searchForm;
+            listSelectedCssInfo = setting.listSelectedCssInfo;
+            listDeselectedCssInfo = setting.listDeselectedCssInfo;
+            settingAdjustWidthVal = setting.adjustWidthVal;
+
+            boxCssInfo = setting.boxCssInfo;
+
+            $boxElement.hover(
+              function() {
+                isMouseHover = true;
+              },
+              function() {
+                isMouseHover = false;
+              }
+            );
+
+            this.resize();
+            suggestor = this;
+            $(window).resize(function() {
+              suggestor.resize();
+            });
+
+            $("body").append($boxElement);
+          },
+
+          suggest: function() {
+            suggestingSts = true;
+
+            this.resize();
+
+            var suggestor = this;
+            inputText = $textArea.val();
+
+            listNum = 0;
+            listSelNum = 0;
+
+            if (inputText.length < settingMinTerm) {
+              $boxElement.css("display", "none");
+              suggestingSts = false;
+              return;
+            }
+
+            $.ajax({
+              url: settingAjaxInfo.url,
+              type: "get",
+              dataType: "jsonp",
+              cache: false,
+              data: {
+                query: $textArea.val(),
+                fields: settingAjaxInfo.fn,
+                num: settingAjaxInfo.num * 2,
+                lang: settingAjaxInfo.lang
+              },
+              traditional: true
+            })
+              .done(function(obj) {
+                suggestor.createAutoCompleteList(obj);
+              })
+              .fail(function(a, obj, b) {
+                suggestingSts = false;
+                return;
               });
-              $liEle.hover(
-                function() {
-                  listSelNum =
-                    $(this)
-                      .closest("ol")
-                      .children("li")
-                      .index(this) + 1;
-                  $(this)
-                    .closest("ol")
-                    .children("li")
-                    .each(function(i) {
-                      if (i === listSelNum - 1) {
-                        if (typeof listSelectedCssInfo === "undefined") {
-                          $(this).css("background-color", "#e5e5e5");
-                        } else {
-                          $(this).css(listSelectedCssInfo);
-                        }
-                      } else {
+          },
+
+          createAutoCompleteList: function(obj) {
+            if (obj.response.status !== 0) {
+              $boxElement.css("display", "none");
+              return;
+            }
+
+            var hits = obj.response.result.hits,
+                suggestor = this,
+                reslist,
+                $olEle,
+                str,
+                chkCorrectWord,
+                $tmpli,
+                $liEle,
+                i, j, k;
+
+            listNum = 0;
+            if (typeof hits !== "undefined") {
+              reslist = [];
+              for (i = 0; i < hits.length; i++) {
+                reslist.push(hits[i].text);
+              }
+              $olEle = $("<ol/>");
+              $olEle.css("list-style", "none");
+              $olEle.css("padding", "0");
+              $olEle.css("margin", "2px");
+
+              for (
+                j = 0;
+                j < reslist.length && listNum < settingAjaxInfo.num;
+                j++
+              ) {
+                str = reslist[j];
+                chkCorrectWord = true;
+
+                $tmpli = $($olEle.children("li"));
+                for (k = 0; k < $tmpli.length; k++) {
+                  if (str === $($tmpli.get(k)).html()) {
+                    chkCorrectWord = false;
+                  }
+                }
+
+                if (chkCorrectWord) {
+                  $liEle = $("<li/>");
+                  $liEle.html(str);
+                  $liEle.click(function() {
+                    var str = $(this).html();
+                    suggestor.fixList();
+                    $textArea.val(str);
+                    if (typeof $settingSearchForm !== "undefined") {
+                      $settingSearchForm.submit();
+                      //$settingSearchForm.trigger("submit");
+                    }
+                  });
+                  $liEle.hover(
+                    function() {
+                      listSelNum =
+                        $(this)
+                          .closest("ol")
+                          .children("li")
+                          .index(this) + 1;
+                      $(this)
+                        .closest("ol")
+                        .children("li")
+                        .each(function(i) {
+                          if (i === listSelNum - 1) {
+                            if (typeof listSelectedCssInfo === "undefined") {
+                              $(this).css("background-color", "#e5e5e5");
+                            } else {
+                              $(this).css(listSelectedCssInfo);
+                            }
+                          } else {
+                            if (typeof listDeselectedCssInfo !== "undefined") {
+                              $(this).css(listDeselectedCssInfo);
+                            } else {
+                              if (
+                                typeof boxCssInfo === "undefined" ||
+                                typeof boxCssInfo["background-color"] ===
+                                  "undefined"
+                              ) {
+                                $(this).css("background-color", "#ffffff");
+                              } else {
+                                $(this).css(
+                                  "background-color",
+                                  boxCssInfo["background-color"]
+                                );
+                              }
+                            }
+                          }
+                        });
+                    },
+                    function() {
+                      if (
+                        listSelNum ===
+                        $(this)
+                          .closest("ol")
+                          .children("li")
+                          .index(this) +
+                          1
+                      ) {
                         if (typeof listDeselectedCssInfo !== "undefined") {
                           $(this).css(listDeselectedCssInfo);
                         } else {
                           if (
                             typeof boxCssInfo === "undefined" ||
-                            typeof boxCssInfo["background-color"] ===
-                              "undefined"
+                            typeof boxCssInfo["background-color"] === "undefined"
                           ) {
                             $(this).css("background-color", "#ffffff");
                           } else {
@@ -204,143 +240,116 @@
                             );
                           }
                         }
-                      }
-                    });
-                },
-                function() {
-                  if (
-                    listSelNum ===
-                    $(this)
-                      .closest("ol")
-                      .children("li")
-                      .index(this) +
-                      1
-                  ) {
-                    if (typeof listDeselectedCssInfo !== "undefined") {
-                      $(this).css(listDeselectedCssInfo);
-                    } else {
-                      if (
-                        typeof boxCssInfo === "undefined" ||
-                        typeof boxCssInfo["background-color"] === "undefined"
-                      ) {
-                        $(this).css("background-color", "#ffffff");
-                      } else {
-                        $(this).css(
-                          "background-color",
-                          boxCssInfo["background-color"]
-                        );
+                        listSelNum = 0;
                       }
                     }
-                    listSelNum = 0;
+                  );
+
+                  $liEle.css("padding", "2px");
+
+                  $olEle.append($liEle);
+                  listNum++;
+                }
+              }
+
+              if (listNum > 0 && $textArea.val().length >= settingMinTerm) {
+                $boxElement.html("");
+                $boxElement.append($olEle);
+                $boxElement.css("display", "block");
+              } else {
+                $boxElement.css("display", "none");
+              }
+            } else {
+              $boxElement.css("display", "none");
+            }
+            this.resize();
+
+            suggestingSts = false;
+          },
+
+          selectlist: function(direction) {
+            if ($boxElement.css("display") === "none") {
+              return;
+            }
+
+            if (direction === "down") {
+              listSelNum++;
+            } else if (direction === "up") {
+              listSelNum--;
+            } else {
+              return;
+            }
+
+            isFocusList = true;
+
+            if (listSelNum < 0) {
+              listSelNum = listNum;
+            } else if (listSelNum > listNum) {
+              listSelNum = 0;
+            }
+
+            $boxElement
+              .children("ol")
+              .children("li")
+              .each(function(i) {
+                if (i === listSelNum - 1) {
+                  if (typeof listSelectedCssInfo === "undefined") {
+                    $(this).css("background-color", "#e5e5e5");
+                  } else {
+                    $(this).css(listSelectedCssInfo);
+                  }
+                  $textArea.val($(this).html());
+                } else {
+                  if (typeof listDeselectedCssInfo !== "undefined") {
+                    $(this).css(listDeselectedCssInfo);
+                  } else {
+                    if (
+                      typeof boxCssInfo === "undefined" ||
+                      typeof boxCssInfo["background-color"] === "undefined"
+                    ) {
+                      $(this).css("background-color", "#ffffff");
+                    } else {
+                      $(this).css(
+                        "background-color",
+                        boxCssInfo["background-color"]
+                      );
+                    }
                   }
                 }
+              });
+            if (listSelNum === 0) {
+              $textArea.val(inputText);
+            }
+          },
+
+          fixList: function() {
+            if (listSelNum > 0) {
+              $textArea.val(
+                $(
+                  $boxElement
+                    .children("ol")
+                    .children("li")
+                    .get(listSelNum - 1)
+                ).html()
               );
-
-              $liEle.css("padding", "2px");
-
-              $olEle.append($liEle);
-              listNum++;
             }
-          }
+            inputText = $textArea.val();
 
-          if (listNum > 0 && $textArea.val().length >= settingMinTerm) {
-            $boxElement.html("");
-            $boxElement.append($olEle);
-            $boxElement.css("display", "block");
-          } else {
+            isFocusList = false;
             $boxElement.css("display", "none");
-          }
-        } else {
-          $boxElement.css("display", "none");
-        }
-        this.resize();
+            listNum = 0;
+          },
 
-        suggestingSts = false;
-      },
-
-      selectlist: function(direction) {
-        if ($boxElement.css("display") === "none") {
-          return;
-        }
-
-        if (direction === "down") {
-          listSelNum++;
-        } else if (direction === "up") {
-          listSelNum--;
-        } else {
-          return;
-        }
-
-        isFocusList = true;
-
-        if (listSelNum < 0) {
-          listSelNum = listNum;
-        } else if (listSelNum > listNum) {
-          listSelNum = 0;
-        }
-
-        $boxElement
-          .children("ol")
-          .children("li")
-          .each(function(i) {
-            if (i === listSelNum - 1) {
-              if (typeof listSelectedCssInfo === "undefined") {
-                $(this).css("background-color", "#e5e5e5");
-              } else {
-                $(this).css(listSelectedCssInfo);
-              }
-              $textArea.val($(this).html());
-            } else {
-              if (typeof listDeselectedCssInfo !== "undefined") {
-                $(this).css(listDeselectedCssInfo);
-              } else {
-                if (
-                  typeof boxCssInfo === "undefined" ||
-                  typeof boxCssInfo["background-color"] === "undefined"
-                ) {
-                  $(this).css("background-color", "#ffffff");
-                } else {
-                  $(this).css(
-                    "background-color",
-                    boxCssInfo["background-color"]
-                  );
-                }
-              }
+          resize: function() {
+            $boxElement.css("top", $textArea.offset().top + $textArea.height() + 6);
+            $boxElement.css("left", $textArea.offset().left);
+            $boxElement.css("height", "auto");
+            $boxElement.css("width", "auto");
+            if ($boxElement.width() < $textArea.width() + settingAdjustWidthVal) {
+              $boxElement.width($textArea.width() + settingAdjustWidthVal);
             }
-          });
-        if (listSelNum === 0) {
-          $textArea.val(inputText);
-        }
-      },
-
-      fixList: function() {
-        if (listSelNum > 0) {
-          $textArea.val(
-            $(
-              $boxElement
-                .children("ol")
-                .children("li")
-                .get(listSelNum - 1)
-            ).html()
-          );
-        }
-        inputText = $textArea.val();
-
-        isFocusList = false;
-        $boxElement.css("display", "none");
-        listNum = 0;
-      },
-
-      resize: function() {
-        $boxElement.css("top", $textArea.offset().top + $textArea.height() + 6);
-        $boxElement.css("left", $textArea.offset().left);
-        $boxElement.css("height", "auto");
-        $boxElement.css("width", "auto");
-        if ($boxElement.width() < $textArea.width() + settingAdjustWidthVal) {
-          $boxElement.width($textArea.width() + settingAdjustWidthVal);
-        }
-      }
-    };
+          }
+        };
 
     suggestor.init($(this), setting);
 

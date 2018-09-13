@@ -1,9 +1,10 @@
 $(function() {
-  var $result = $("#result");
-  var $queryId = $("#queryId");
-  var $favorites = $(".favorite", $result);
-  var $searchButton = $("#searchButton");
-  var contextPath = $("#contextPath").val();
+  var $result = $("#result"),
+      $queryId = $("#queryId"),
+      $favorites = $(".favorite", $result),
+      $searchButton = $("#searchButton"),
+      contextPath = $("#contextPath").val(),
+      loadImage;
 
   $("#searchForm").on("submit", function(e) {
     $searchButton.attr("disabled", true);
@@ -44,7 +45,9 @@ $(function() {
       queryId = $("#queryId").val(),
       order = $(this).attr("data-order"),
       url = $(this).attr("href"),
-      buf = [];
+      buf = [],
+      hashIndex,
+      hashStr;
     buf.push(contextPath);
     buf.push("/go/?rt=");
     buf.push(rt);
@@ -55,9 +58,9 @@ $(function() {
     buf.push("&order=");
     buf.push(order);
 
-    var hashIndex = url.indexOf("#");
+    hashIndex = url.indexOf("#");
     if (hashIndex >= 0) {
-      var hashStr = url.substring(hashIndex);
+      hashStr = url.substring(hashIndex);
       buf.push("&hash=");
       buf.push(encodeURIComponent(hashStr));
     }
@@ -69,16 +72,18 @@ $(function() {
     var docId = $(this).attr("data-id"),
       rt = $("#rt").val(),
       url = $(this).attr("href"),
-      buf = [];
+      buf = [],
+      hashIndex,
+      hashStr;
     buf.push(contextPath);
     buf.push("/go/?rt=");
     buf.push(rt);
     buf.push("&docId=");
     buf.push(docId);
 
-    var hashIndex = url.indexOf("#");
+    hashIndex = url.indexOf("#");
     if (hashIndex >= 0) {
-      var hashStr = url.substring(hashIndex);
+      hashStr = url.substring(hashIndex);
       buf.push("&hash=");
       buf.push(encodeURIComponent(hashStr));
       buf.push(hashStr);
@@ -86,11 +91,13 @@ $(function() {
   });
 
   $result.on("click", "a.favorite", function(e) {
-    var $favorite = $(this);
-    var values = $favorite.attr("href").split("#");
+    var $favorite = $(this),
+        values = $favorite.attr("href").split("#"),
+        actionUrl,
+        docId;
     if (values.length === 2 && $queryId.length > 0) {
-      var actionUrl = contextPath + "/json";
-      var docId = values[1];
+      actionUrl = contextPath + "/json";
+      docId = values[1];
       $.ajax({
         dataType: "json",
         cache: false,
@@ -104,13 +111,15 @@ $(function() {
         }
       })
         .done(function(data) {
+          var $favorited,
+              $favoritedCount;
           if (
             data.response.status === 0 &&
             typeof data.response.result !== "undefined" &&
             data.response.result === "ok"
           ) {
-            var $favorited = $favorite.siblings(".favorited");
-            var $favoritedCount = $(".favorited-count", $favorited);
+            $favorited = $favorite.siblings(".favorited");
+            $favoritedCount = $(".favorited-count", $favorited);
             $favoritedCount.css("display", "none");
             $favorite.fadeOut(1000, function() {
               $favorited.fadeIn(1000);
@@ -139,27 +148,31 @@ $(function() {
       }
     })
       .done(function(data) {
+        var docIds,
+            i;
         if (
           data.response.status === 0 &&
           typeof data.response.num !== "undefined" &&
           data.response.num > 0
         ) {
-          var docIds = data.response.doc_ids;
-          for (var i = 0; i < docIds.length; i++) {
+          docIds = data.response.doc_ids;
+          for (i = 0; i < docIds.length; i++) {
             docIds[i] = "#" + docIds[i];
           }
           $favorites.each(function(index) {
-            var $favorite = $(this);
-            var url = $favorite.attr("href");
-            var found = false;
-            for (var i = 0; i < docIds.length; i++) {
+            var $favorite = $(this),
+                url = $favorite.attr("href"),
+                found = false,
+                $favorited,
+                i;
+            for (i = 0; i < docIds.length; i++) {
               if (url === docIds[i]) {
                 found = true;
                 break;
               }
             }
             if (found) {
-              var $favorited = $favorite.siblings(".favorited");
+              $favorited = $favorite.siblings(".favorited");
               $favorite.fadeOut(1000, function() {
                 $favorited.fadeIn(1000);
               });
@@ -173,10 +186,11 @@ $(function() {
   }
 
   $result.on("click", ".more a", function(e) {
-    var $moreLink = $(this);
-    var value = $moreLink.attr("href");
+    var $moreLink = $(this),
+        value = $moreLink.attr("href"),
+        $info;
     if (value !== "") {
-      var $info = $(value + " .info");
+      $info = $(value + " .info");
       if ($info.length > 0) {
         $moreLink.fadeOut(500, function() {
           $info.slideDown("slow");
@@ -219,7 +233,7 @@ $(function() {
 
   IMG_LOADING_DELAY = 200;
   IMG_LOADING_MAX = 0;
-  var loadImage = function(img, url, limit) {
+  loadImage = function(img, url, limit) {
     var imgData = new Image();
     $(imgData).on("load", function() {
       $(img).css("background-image", "");
