@@ -5,7 +5,8 @@
 	<component name="fessEsClient" class="org.codelibs.fess.es.client.FessEsClient">
 		<property name="settings">
 			{"http.cors.enabled":"true",
-			 "http.cors.allow-origin":"*"}
+			 "http.cors.allow-origin":"*",
+			 "action.auto_create_index":"-*"}
 <!--
 			{"http.cors.enabled":"true",
 			 "http.cors.allow-origin":"*",
