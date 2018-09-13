@@ -116,7 +116,7 @@ Launch Fess Server and run the following command:
 
 To run a single test case, you can use:
 
-    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201 -Dtest=SearchApiTests"
+    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201" -Dtest=SearchApiTests
 
 ### Translate In Your Language
 
