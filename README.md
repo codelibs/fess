@@ -62,6 +62,18 @@ Please see [MIGRATION.md](https://github.com/codelibs/fess/blob/master/MIGRATION
 
 Please see [fess-xpack](https://github.com/codelibs/fess-xpack).
 
+## Data Store
+
+Fess crawls the following Storage or API:
+
+ - [Confluence/JIRA](https://github.com/codelibs/fess-ds-atlassian)
+ - [CSV](https://github.com/codelibs/fess-ds-csv)
+ - [Database](https://github.com/codelibs/fess-ds-db)
+ - [Elasticsearch](https://github.com/codelibs/fess-ds-elasticsearch)
+ - [Gitbucket](https://github.com/codelibs/fess-ds-gitbucket)
+ - [JSON](https://github.com/codelibs/fess-ds-json)
+ - [Slack](https://github.com/codelibs/fess-ds-slack)
+
 ## Localization
 
 ### Japanese
