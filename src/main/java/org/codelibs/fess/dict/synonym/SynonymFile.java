@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.dict.synonym;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -33,6 +32,7 @@ import java.util.List;
 
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
@@ -60,7 +60,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     @Override
     public synchronized OptionalEntity<SynonymItem> get(final long id) {
         if (synonymItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         for (final SynonymItem synonymItem : synonymItemList) {
@@ -74,7 +74,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     @Override
     public synchronized PagingList<SynonymItem> selectList(final int offset, final int size) {
         if (synonymItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         if (offset >= synonymItemList.size() || offset < 0) {
@@ -92,14 +92,14 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     @Override
     public synchronized void insert(final SynonymItem item) {
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
     @Override
     public synchronized void update(final SynonymItem item) {
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
@@ -109,14 +109,21 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         synonymItem.setNewInputs(StringUtil.EMPTY_STRINGS);
         synonymItem.setNewOutputs(StringUtil.EMPTY_STRINGS);
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
+        }
+    }
+
+    protected void reload(final SynonymUpdater updater) {
+        try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
+            reload(updater, curlResponse.getContentAsStream());
+        } catch (final IOException e) {
+            throw new DictionaryException("Failed to parse " + path, e);
         }
     }
 
     protected void reload(final SynonymUpdater updater, final InputStream in) {
         final List<SynonymItem> itemList = new ArrayList<>();
-        try (BufferedReader reader =
-                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -248,10 +255,6 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
     public String getSimpleName() {
         return new File(path).getName();
-    }
-
-    public InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
     }
 
     public synchronized void update(final InputStream in) throws IOException {
