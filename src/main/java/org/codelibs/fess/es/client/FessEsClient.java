@@ -1491,8 +1491,8 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public FieldCapabilitiesRequestBuilder prepareFieldCaps() {
-        return client.prepareFieldCaps();
+    public FieldCapabilitiesRequestBuilder prepareFieldCaps(String... indices) {
+        return client.prepareFieldCaps(indices);
     }
 
     @Override
