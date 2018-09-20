@@ -17,7 +17,6 @@ package org.codelibs.fess.dict;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -110,12 +109,8 @@ public class DictionaryManager {
         });
     }
 
-    public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
-        try {
-            return ComponentUtil.getCurlHelper().get("/_configsync/file").param("path", dictFile.getPath()).execute().getContentAsStream();
-        } catch (final IOException e) {
-            throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
-        }
+    public CurlResponse getContentResponse(final DictionaryFile<? extends DictionaryItem> dictFile) {
+        return ComponentUtil.getCurlHelper().get("/_configsync/file").param("path", dictFile.getPath()).execute();
     }
 
     public void addCreator(final DictionaryCreator creator) {

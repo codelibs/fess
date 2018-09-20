@@ -137,7 +137,7 @@ public class EsApiManager extends BaseApiManager {
                 curlRequest.param(entry.getKey(), entry.getValue()[0]);
             }
         });
-        final CurlResponse curlResponse = curlRequest.onConnect((req, con) -> {
+        try (final CurlResponse curlResponse = curlRequest.onConnect((req, con) -> {
             con.setDoOutput(true);
             if (httpMethod != Method.GET) {
                 try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
@@ -146,13 +146,14 @@ public class EsApiManager extends BaseApiManager {
                     throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, e);
                 }
             }
-        }).execute();
+        }).execute()) {
 
-        try (ServletOutputStream out = response.getOutputStream(); InputStream in = curlResponse.getContentAsStream()) {
-            response.setStatus(curlResponse.getHttpStatusCode());
-            CopyUtil.copy(in, out);
-        } catch (final ClientAbortException e) {
-            logger.debug("Client aborts this request.", e);
+            try (ServletOutputStream out = response.getOutputStream(); InputStream in = curlResponse.getContentAsStream()) {
+                response.setStatus(curlResponse.getHttpStatusCode());
+                CopyUtil.copy(in, out);
+            } catch (final ClientAbortException e) {
+                logger.debug("Client aborts this request.", e);
+            }
         } catch (final Exception e) {
             if (e.getCause() instanceof ClientAbortException) {
                 logger.debug("Client aborts this request.", e);

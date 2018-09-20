@@ -210,9 +210,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return stopwordsService.getStopwordsFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                try (InputStream inputStream = file.getInputStream()) {
-                    out.write(inputStream);
-                }
+                file.writeOut(out);
             });
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL), () -> downloadpage(form.dictId));
