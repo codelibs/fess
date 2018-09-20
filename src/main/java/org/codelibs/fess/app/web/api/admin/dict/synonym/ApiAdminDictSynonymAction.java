@@ -136,9 +136,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         return synonymService.getSynonymFile(body.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                try (InputStream inputStream = file.getInputStream()) {
-                    out.write(inputStream);
-                }
+                file.writeOut(out);
             });
         }).orElseGet(() -> {
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));

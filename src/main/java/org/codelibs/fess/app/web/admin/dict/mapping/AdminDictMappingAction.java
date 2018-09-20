@@ -217,9 +217,7 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return charMappingService.getCharMappingFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                try (InputStream inputStream = file.getInputStream()) {
-                    out.write(inputStream);
-                }
+                file.writeOut(out);
             });
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL), () -> downloadpage(form.dictId));

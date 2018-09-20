@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.dict.stemmeroverride;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -35,6 +34,7 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
@@ -66,7 +66,7 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
     @Override
     public synchronized OptionalEntity<StemmerOverrideItem> get(final long id) {
         if (stemmerOverrideItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         for (final StemmerOverrideItem stemmerOverrideItem : stemmerOverrideItemList) {
@@ -80,7 +80,7 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
     @Override
     public synchronized PagingList<StemmerOverrideItem> selectList(final int offset, final int size) {
         if (stemmerOverrideItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         if (offset >= stemmerOverrideItemList.size() || offset < 0) {
@@ -98,14 +98,14 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
     @Override
     public synchronized void insert(final StemmerOverrideItem item) {
         try (StemmerOverrideUpdater updater = new StemmerOverrideUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
     @Override
     public synchronized void update(final StemmerOverrideItem item) {
         try (StemmerOverrideUpdater updater = new StemmerOverrideUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
@@ -115,15 +115,22 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
         stemmerOverrideItem.setNewInput(StringUtil.EMPTY);
         stemmerOverrideItem.setNewOutput(StringUtil.EMPTY);
         try (StemmerOverrideUpdater updater = new StemmerOverrideUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
+        }
+    }
+
+    protected void reload(final StemmerOverrideUpdater updater) {
+        try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
+            reload(updater, curlResponse.getContentAsStream());
+        } catch (final IOException e) {
+            throw new DictionaryException("Failed to parse " + path, e);
         }
     }
 
     protected void reload(final StemmerOverrideUpdater updater, final InputStream in) {
         final Pattern parsePattern = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$");
         final List<StemmerOverrideItem> itemList = new ArrayList<>();
-        try (BufferedReader reader =
-                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -187,10 +194,6 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
 
     public String getSimpleName() {
         return new File(path).getName();
-    }
-
-    public InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
     }
 
     public synchronized void update(final InputStream in) throws IOException {

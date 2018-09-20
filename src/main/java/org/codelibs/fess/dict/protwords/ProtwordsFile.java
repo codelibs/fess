@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.dict.protwords;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -33,6 +32,7 @@ import java.util.List;
 
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
@@ -60,7 +60,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     @Override
     public synchronized OptionalEntity<ProtwordsItem> get(final long id) {
         if (protwordsItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         for (final ProtwordsItem ProtwordsItem : protwordsItemList) {
@@ -74,7 +74,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     @Override
     public synchronized PagingList<ProtwordsItem> selectList(final int offset, final int size) {
         if (protwordsItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         if (offset >= protwordsItemList.size() || offset < 0) {
@@ -92,14 +92,14 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     @Override
     public synchronized void insert(final ProtwordsItem item) {
         try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
     @Override
     public synchronized void update(final ProtwordsItem item) {
         try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
@@ -108,14 +108,21 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
         final ProtwordsItem ProtwordsItem = item;
         ProtwordsItem.setNewInput(StringUtil.EMPTY);
         try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
+        }
+    }
+
+    protected void reload(final ProtwordsUpdater updater) {
+        try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
+            reload(updater, curlResponse.getContentAsStream());
+        } catch (final IOException e) {
+            throw new DictionaryException("Failed to parse " + path, e);
         }
     }
 
     protected void reload(final ProtwordsUpdater updater, final InputStream in) {
         final List<ProtwordsItem> itemList = new ArrayList<>();
-        try (BufferedReader reader =
-                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -177,10 +184,6 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
     public String getSimpleName() {
         return new File(path).getName();
-    }
-
-    public InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
     }
 
     public synchronized void update(final InputStream in) throws IOException {
