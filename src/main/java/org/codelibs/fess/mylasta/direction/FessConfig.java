@@ -776,6 +776,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 4000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
 
+    /** The key of the configuration. e.g. false */
+    String FORM_ADMIN_LABEL_IN_CONFIG_ENABLED = "form.admin.label.in.config.enabled";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
@@ -3720,6 +3723,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getFormAdminMaxInputSizeAsInteger();
+
+    /**
+     * Get the value for the key 'form.admin.label.in.config.enabled'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFormAdminLabelInConfigEnabled();
+
+    /**
+     * Is the property for the key 'form.admin.label.in.config.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isFormAdminLabelInConfigEnabled();
 
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
@@ -7061,6 +7078,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE);
         }
 
+        public String getFormAdminLabelInConfigEnabled() {
+            return get(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED);
+        }
+
+        public boolean isFormAdminLabelInConfigEnabled() {
+            return is(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED);
+        }
+
         public String getAuthenticationAdminUsers() {
             return get(FessConfig.AUTHENTICATION_ADMIN_USERS);
         }
@@ -8460,6 +8485,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     .put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,
                             "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
+            defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
             defaultMap.put(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS, "");

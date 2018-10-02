@@ -321,6 +321,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     }
 
     protected void registerRolesAndLabels(final RenderData data) {
+        RenderDataUtil.register(data, "labelSettingEnabled", fessConfig.isFormAdminLabelInConfigEnabled());
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
         RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
