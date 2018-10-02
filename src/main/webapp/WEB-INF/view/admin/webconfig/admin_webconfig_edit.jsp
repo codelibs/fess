@@ -182,7 +182,7 @@
 												rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
+									<div class="form-group"<c:if test="${!labelSettingEnabled}"> style="display:none"</c:if>>
 										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">

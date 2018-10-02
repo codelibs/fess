@@ -122,9 +122,9 @@
 												<td>${f:br(f:h(virtualHosts))}<la:hidden
 														property="virtualHosts" /></td>
 											</tr>
-											<tr>
+											<tr<c:if test="${!labelSettingEnabled}"> style="display:none"</c:if>>
 												<th><la:message key="labels.label_type" /></th>
-												<td><c:forEach var="l" varStatus="s"
+												<td>${labelSettingEnabled}<c:forEach var="l" varStatus="s"
 														items="${labelTypeItems}">
 														<c:forEach var="ltid" varStatus="s"
 															items="${labelTypeIds}">
