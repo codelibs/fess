@@ -151,7 +151,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 final ImageReadParam param = reader.getDefaultReadParam();
                 final int width = reader.getWidth(0);
                 final int height = reader.getHeight(0);
-                if (!fessConfig.validateThumbnailSize(width, height)) {
+                if (fessConfig.isThumbnailHtmlImageGeneratorValidation() && !fessConfig.validateThumbnailSize(width, height)) {
                     return Result.INVALID_SIZE;
                 }
                 final int samplingWidth = width / fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger();
