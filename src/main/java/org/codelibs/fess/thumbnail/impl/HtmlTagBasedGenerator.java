@@ -98,9 +98,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                             logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl());
                             break;
                         case INVALID_SIZE:
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Invalid thumbnail size: " + thumbnailId + " -> " + responseData.getUrl());
-                            }
+                            logger.warn("Invalid thumbnail size: " + thumbnailId + " -> " + responseData.getUrl());
                             break;
                         default:
                             logger.error("Unknown thumbnail result: " + thumbnailId + " -> " + responseData.getUrl());
