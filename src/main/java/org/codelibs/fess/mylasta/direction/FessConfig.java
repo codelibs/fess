@@ -958,6 +958,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. svg,html,css,js */
     String THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS = "thumbnail.html.image.exclude.extensions";
 
+    /** The key of the configuration. e.g. true */
+    String THUMBNAIL_HTML_IMAGE_GENERATOR_VALIDATION = "thumbnail.html.image.generator.validation";
+
     /** The key of the configuration. e.g. 0 */
     String THUMBNAIL_GENERATOR_INTERVAL = "thumbnail.generator.interval";
 
@@ -4558,6 +4561,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getThumbnailHtmlImageExcludeExtensions();
 
     /**
+     * Get the value for the key 'thumbnail.html.image.generator.validation'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlImageGeneratorValidation();
+
+    /**
+     * Is the property for the key 'thumbnail.html.image.generator.validation' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isThumbnailHtmlImageGeneratorValidation();
+
+    /**
      * Get the value for the key 'thumbnail.generator.interval'. <br>
      * The value is, e.g. 0 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7542,6 +7559,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS);
         }
 
+        public String getThumbnailHtmlImageGeneratorValidation() {
+            return get(FessConfig.THUMBNAIL_HTML_IMAGE_GENERATOR_VALIDATION);
+        }
+
+        public boolean isThumbnailHtmlImageGeneratorValidation() {
+            return is(FessConfig.THUMBNAIL_HTML_IMAGE_GENERATOR_VALIDATION);
+        }
+
         public String getThumbnailGeneratorInterval() {
             return get(FessConfig.THUMBNAIL_GENERATOR_INTERVAL);
         }
@@ -8586,6 +8611,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_FORMAT, "png");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_XPATH, "//IMG");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS, "svg,html,css,js");
+            defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_GENERATOR_VALIDATION, "true");
             defaultMap.put(FessConfig.THUMBNAIL_GENERATOR_INTERVAL, "0");
             defaultMap.put(FessConfig.THUMBNAIL_GENERATOR_TARGETS, "all");
             defaultMap.put(FessConfig.THUMBNAIL_CRAWLER_ENABLED, "true");
