@@ -100,6 +100,11 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         case INVALID_SIZE:
                             logger.warn("Invalid thumbnail size: " + thumbnailId + " -> " + responseData.getUrl());
                             break;
+                        case NO_IMAGE:
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("No thumbnail: " + thumbnailId + " -> " + responseData.getUrl());
+                            }
+                            break;
                         default:
                             logger.error("Unknown thumbnail result: " + thumbnailId + " -> " + responseData.getUrl());
                             break;
@@ -151,6 +156,9 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 final ImageReadParam param = reader.getDefaultReadParam();
                 final int width = reader.getWidth(0);
                 final int height = reader.getHeight(0);
+                if (width <= 0 || height <= 0) {
+                    return Result.NO_IMAGE;
+                }
                 if (fessConfig.isThumbnailHtmlImageGeneratorValidation() && !fessConfig.validateThumbnailSize(width, height)) {
                     return Result.INVALID_SIZE;
                 }
@@ -176,6 +184,6 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     }
 
     protected enum Result {
-        OK, FAILED, INVALID_SIZE;
+        OK, FAILED, INVALID_SIZE, NO_IMAGE;
     }
 }
