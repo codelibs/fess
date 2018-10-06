@@ -159,7 +159,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 if (width <= 0 || height <= 0) {
                     return Result.NO_IMAGE;
                 }
-                if (fessConfig.isThumbnailHtmlImageGeneratorValidation() && !fessConfig.validateThumbnailSize(width, height)) {
+                if (!fessConfig.validateThumbnailSize(width, height)) {
                     return Result.INVALID_SIZE;
                 }
                 final int samplingWidth = width / fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger();
