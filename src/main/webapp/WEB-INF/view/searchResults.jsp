@@ -4,7 +4,7 @@
 	<div class="col">
 		<p>
 			<la:message key="labels.search_result_status"
-				arg0="${f:h(displayQuery)}" arg1="${f:h(allRecordCount)}"
+				arg0="${displayQuery}" arg1="${f:h(allRecordCount)}"
 				arg2="${f:h(currentStartRecordNumber)}"
 				arg3="${f:h(currentEndRecordNumber)}" />
 			<c:if test="${execTime!=null}">
