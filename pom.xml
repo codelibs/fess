@@ -1225,7 +1225,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>25.1-jre</version>
+			<version>26.0-jre</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1252,7 +1252,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
-			<version>1.23.0</version>
+			<version>1.25.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1267,7 +1267,7 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-jackson2</artifactId>
-			<version>1.23.0</version>
+			<version>1.25.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
@@ -1297,7 +1297,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.7</version>
+			<version>3.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
@@ -1307,7 +1307,7 @@
 		<dependency>
 			<groupId>com.google.apis</groupId>
 			<artifactId>google-api-services-analyticsreporting</artifactId>
-			<version>v4-rev124-1.23.0</version>
+			<version>v4-rev127-1.25.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -1408,8 +1408,8 @@
 		<!-- groovy -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy-all</artifactId>
-			<version>2.4.15</version>
+			<artifactId>groovy</artifactId>
+			<version>2.5.2</version>
 		</dependency>
 
 		<!-- Tomcat -->
@@ -1468,7 +1468,7 @@
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
-			<version>3.1.0</version>
+			<version>3.1.1</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
