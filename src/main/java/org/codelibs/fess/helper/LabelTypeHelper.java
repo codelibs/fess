@@ -263,7 +263,7 @@ public class LabelTypeHelper {
             } else {
                 final boolean match = !excludedPaths.matcher(path).matches();
                 if (!match && logger.isDebugEnabled()) {
-                    logger.debug("Path " + path + " matched against the excludes paths expression " + includedPaths.toString());
+                    logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
                 }
                 return match;
             }
