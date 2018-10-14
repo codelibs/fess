@@ -260,7 +260,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                                 final String tagName =
                                         name.replaceFirst("^" + gsaMetaPrefix, StringUtil.EMPTY).replaceAll(GSA_META_SUFFIX + "\\z",
                                                 StringUtil.EMPTY);
-                                if (getFields != null && getFields.contains(tagName)) {
+                                if (getFields.contains(tagName)) {
                                     buf.append("<MT N=\"");
                                     buf.append(tagName);
                                     buf.append("\" V=\"");
