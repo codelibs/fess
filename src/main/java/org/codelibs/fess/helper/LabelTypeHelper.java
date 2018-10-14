@@ -261,11 +261,13 @@ public class LabelTypeHelper {
                 }
                 return false;
             } else {
-                final boolean match = !excludedPaths.matcher(path).matches();
-                if (!match && logger.isDebugEnabled()) {
-                    logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                    }
+                    return false;
                 }
-                return match;
+                return true;
             }
         }
 
