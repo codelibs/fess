@@ -134,10 +134,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                 }
 
                 final String inputStrings = line;
-                String input = null;
-                if (inputStrings != null) {
-                    input = unescape(inputStrings);
-                }
+                String input = unescape(inputStrings);
 
                 if (input.length() > 0) {
                     id++;
