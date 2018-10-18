@@ -128,6 +128,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         }
         final WebRenderData renderData = new WebRenderData();
         form.initialize();
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
         try {
             searchService.search(form, renderData, getUserBean());
             return asListHtml().renderWith(data -> {
