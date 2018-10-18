@@ -259,6 +259,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_LOG_ACCESS_TYPE_WEB = "web";
 
+    public static final String SEARCH_LOG_ACCESS_TYPE_ADMIN = "admin";
+
     public static final String SEARCH_LOG_ACCESS_TYPE_OTHER = "other";
 
     public static final String RESULTS_PER_PAGE = "resultsPerPage";

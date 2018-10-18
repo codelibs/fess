@@ -128,6 +128,8 @@ public class SearchLogHelper {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
         } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(accessType)) {
+            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
         } else {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
         }
