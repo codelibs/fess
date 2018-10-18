@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.app.web.admin.searchlog;
 
+import org.codelibs.fess.app.pager.SearchLogPager;
+import org.codelibs.fess.util.ComponentUtil;
+import org.jsoup.helper.StringUtil;
+
 /**
  * @author shinsuke
  */
@@ -29,4 +33,26 @@ public class SearchForm {
     public String requestedTimeRange;
 
     public String accessType;
+
+    public String size;
+
+    public void setPageSize(final int size) {
+        this.size = Integer.toString(size);
+    }
+
+    public int getPageSize() {
+        if (StringUtil.isBlank(size)) {
+            return SearchLogPager.DEFAULT_PAGE_SIZE;
+        }
+        try {
+            int value = Integer.parseInt(size);
+            if (value <= 0 || value > ComponentUtil.getFessConfig().getPageSearchlogMaxFetchSizeAsInteger()) {
+                return SearchLogPager.DEFAULT_PAGE_SIZE;
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            // ignore
+            return SearchLogPager.DEFAULT_PAGE_SIZE;
+        }
+    }
 }

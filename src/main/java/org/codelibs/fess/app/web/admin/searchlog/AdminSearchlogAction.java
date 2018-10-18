@@ -33,7 +33,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminSearchlogAction extends FessAdminAction {
 
-    private static final String[] CONDITION_FIELDS = new String[] { "logType", "queryId", "userSessionId", "requestedTimeRange" };
+    private static final String[] CONDITION_FIELDS =
+            new String[] { "logType", "queryId", "userSessionId", "requestedTimeRange", "pageSize" };
 
     // ===================================================================================
     //                                                                           Attribute
@@ -75,6 +76,7 @@ public class AdminSearchlogAction extends FessAdminAction {
         saveToken();
         searchLogPager.clear();
         copyBeanToBean(form, searchLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        searchLogPager.setPageSize(form.getPageSize());
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
