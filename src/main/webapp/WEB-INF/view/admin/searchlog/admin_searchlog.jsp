@@ -53,6 +53,14 @@
 												<la:option value="search"><la:message key="labels.searchlog_log_type_search" /></la:option>
 												<la:option value="click"><la:message key="labels.searchlog_log_type_click" /></la:option>
 												<la:option value="favorite"><la:message key="labels.searchlog_log_type_favorite" /></la:option>
+												<la:option value="search_count_hour_agg"><la:message key="labels.searchlog_log_type_search_count_hour" /></la:option>
+												<la:option value="search_count_day_agg"><la:message key="labels.searchlog_log_type_search_count_day" /></la:option>
+												<la:option value="search_user_hour_agg"><la:message key="labels.searchlog_log_type_search_user_hour" /></la:option>
+												<la:option value="search_user_day_agg"><la:message key="labels.searchlog_log_type_search_user_day" /></la:option>
+												<la:option value="search_reqtimeavg_hour_agg"><la:message key="labels.searchlog_log_type_search_reqtimeavg_hour" /></la:option>
+												<la:option value="search_reqtimeavg_day_agg"><la:message key="labels.searchlog_log_type_search_reqtimeavg_day" /></la:option>
+												<la:option value="search_keyword_agg"><la:message key="labels.searchlog_log_type_search_keyword" /></la:option>
+												<la:option value="search_zerohit_agg"><la:message key="labels.searchlog_log_type_search_zerohit" /></la:option>
 											</la:select>
 										</div>
 									</div>
@@ -116,20 +124,48 @@
 											<table class="table table-bordered table-striped dataTable">
 												<thead>
 													<tr>
+														<c:if test="${!logType.endsWith('_agg')}">
 														<th class="col-sm-3"><la:message
 																key="labels.searchlog_requested_time" /></th>
 														<th><la:message
 																key="labels.searchlog_log_message" /></th>
+														</c:if>
+														<c:if test="${logType.startsWith('search_count_') or logType.startsWith('search_user_')}">
+														<th><la:message
+																key="labels.searchlog_requested_time" /></th>
+														<th class="col-sm-3"><la:message
+																key="labels.searchlog_count" /></th>
+														</c:if>
+														<c:if test="${logType.startsWith('search_reqtimeavg_')}">
+														<th><la:message
+																key="labels.searchlog_requested_time" /></th>
+														<th class="col-sm-3"><la:message
+																key="labels.searchlog_value" /></th>
+														</c:if>
+														<c:if test="${logType.startsWith('search_keyword_') or logType.startsWith('search_zerohit_')}">
+														<th><la:message
+																key="labels.searchlog_value" /></th>
+														<th class="col-sm-3"><la:message
+																key="labels.searchlog_count" /></th>
+														</c:if>
 													</tr>
 												</thead>
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${searchLogItems}">
+														<c:if test="${!logType.endsWith('_agg')}">
 														<tr
 															data-href="${contextPath}/admin/searchlog/details/4/${f:u(logType)}/${f:u(data.id)}">
 															<td>${f:h(data.requestedAt)}</td>
 															<td>${f:h(data.logMessage)}</td>
 														</tr>
+														</c:if>
+														<c:if test="${logType.endsWith('_agg')}">
+														<tr>
+															<td>${f:h(data.key)}</td>
+															<td>${f:h(data.count)}</td>
+														</tr>
+														</c:if>
 													</c:forEach>
 												</tbody>
 											</table>
