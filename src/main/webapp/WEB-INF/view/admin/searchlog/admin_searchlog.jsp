@@ -95,6 +95,20 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="logTypeSearch" class="col-sm-2 control-label"><la:message
+												key="labels.searchlog_size" /></label>
+										<div class="col-sm-4">
+											<la:select styleId="size" property="size"
+												styleClass="form-control">
+												<la:option value="25">25</la:option>
+												<la:option value="50">50</la:option>
+												<la:option value="100">100</la:option>
+												<la:option value="200">500</la:option>
+												<la:option value="1000">1000</la:option>
+											</la:select>
+										</div>
+									</div>
+									<div class="form-group">
 										<div class="col-sm-offset-2 col-sm-10">
 											<button type="submit" class="btn btn-primary" id="submit"
 												name="search"
