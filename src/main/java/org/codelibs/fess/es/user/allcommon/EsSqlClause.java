@@ -69,4 +69,18 @@ public class EsSqlClause extends AbstractSqlClause {
     protected String createSqlSuffix() {
         return null;
     }
+
+    @Override
+    public void fetchFirst(int fetchSize) {
+        _fetchScopeEffective = true;
+        if (fetchSize < 0) {
+            String msg = "Argument[fetchSize] should be plus: " + fetchSize;
+            throw new IllegalArgumentException(msg);
+        }
+        _fetchStartIndex = 0;
+        _fetchSize = fetchSize;
+        _fetchPageNumber = 1;
+        doClearFetchPageClause();
+        doFetchFirst();
+    }
 }

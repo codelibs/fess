@@ -26,7 +26,27 @@ public class SearchLogPager implements Serializable {
 
     public static final String LOG_TYPE_SEARCH = "search";
 
+    public static final String LOG_TYPE_SEARCH_COUNT_HOUR = "search_count_hour_agg";
+
+    public static final String LOG_TYPE_SEARCH_COUNT_DAY = "search_count_day_agg";
+
+    public static final String LOG_TYPE_SEARCH_USER_HOUR = "search_user_hour_agg";
+
+    public static final String LOG_TYPE_SEARCH_USER_DAY = "search_user_day_agg";
+
+    public static final String LOG_TYPE_SEARCH_REQTIMEAVG_HOUR = "search_reqtimeavg_hour_agg";
+
+    public static final String LOG_TYPE_SEARCH_REQTIMEAVG_DAY = "search_reqtimeavg_day_agg";
+
+    public static final String LOG_TYPE_SEARCH_KEYWORD = "search_keyword_agg";
+
+    public static final String LOG_TYPE_SEARCH_ZEROHIT = "search_zerohit_agg";
+
+    public static final String LOG_TYPE_SEARCH_ZEROCLICK = "search_zeroclick_agg";
+
     public static final String LOG_TYPE_CLICK = "click";
+
+    public static final String LOG_TYPE_CLICK_TOP = "click_top_agg";
 
     public static final String LOG_TYPE_FAVORITE = "favorite";
 

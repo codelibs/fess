@@ -2835,11 +2835,44 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Favorite Log */
     public static final String LABELS_searchlog_log_type_favorite = "{labels.searchlog_log_type_favorite}";
 
+    /** The key of the message: Keywords */
+    public static final String LABELS_searchlog_log_type_search_keyword = "{labels.searchlog_log_type_search_keyword}";
+
+    /** The key of the message: Zero Hits */
+    public static final String LABELS_searchlog_log_type_search_zerohit = "{labels.searchlog_log_type_search_zerohit}";
+
+    /** The key of the message: Zero Clicks */
+    public static final String LABELS_searchlog_log_type_search_zeroclick = "{labels.searchlog_log_type_search_zeroclick}";
+
+    /** The key of the message: Keyword by Hour */
+    public static final String LABELS_searchlog_log_type_search_count_hour = "{labels.searchlog_log_type_search_count_hour}";
+
+    /** The key of the message: Keyword by Day */
+    public static final String LABELS_searchlog_log_type_search_count_day = "{labels.searchlog_log_type_search_count_day}";
+
+    /** The key of the message: User by Hour */
+    public static final String LABELS_searchlog_log_type_search_user_hour = "{labels.searchlog_log_type_search_user_hour}";
+
+    /** The key of the message: User by Day */
+    public static final String LABELS_searchlog_log_type_search_user_day = "{labels.searchlog_log_type_search_user_day}";
+
+    /** The key of the message: Request Time Avg. by Hour */
+    public static final String LABELS_searchlog_log_type_search_reqtimeavg_hour = "{labels.searchlog_log_type_search_reqtimeavg_hour}";
+
+    /** The key of the message: Request Time Avg. by Day */
+    public static final String LABELS_searchlog_log_type_search_reqtimeavg_day = "{labels.searchlog_log_type_search_reqtimeavg_day}";
+
     /** The key of the message: Message */
     public static final String LABELS_searchlog_log_message = "{labels.searchlog_log_message}";
 
     /** The key of the message: Time */
     public static final String LABELS_searchlog_requested_time = "{labels.searchlog_requested_time}";
+
+    /** The key of the message: Value */
+    public static final String LABELS_searchlog_value = "{labels.searchlog_value}";
+
+    /** The key of the message: Count */
+    public static final String LABELS_searchlog_count = "{labels.searchlog_count}";
 
     /** The key of the message: Log Details */
     public static final String LABELS_searchlog_configuration_details = "{labels.searchlog_configuration_details}";
