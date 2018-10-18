@@ -71,6 +71,7 @@ Fess crawls the following Storage or API:
  - [Database](https://github.com/codelibs/fess-ds-db)
  - [Elasticsearch](https://github.com/codelibs/fess-ds-elasticsearch)
  - [Gitbucket](https://github.com/codelibs/fess-ds-gitbucket)
+ - [G Suite](https://github.com/codelibs/fess-ds-gsuite)
  - [JSON](https://github.com/codelibs/fess-ds-json)
  - [Slack](https://github.com/codelibs/fess-ds-slack)
 
