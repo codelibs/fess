@@ -67,7 +67,6 @@
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>6.4.2</elasticsearch.version>
-		<elasticsearch.min.version>6.3.0</elasticsearch.min.version>
 		<elasticsearch.httpclient.version>6.4.0-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
@@ -728,9 +727,6 @@
 						<passphrase>${gpg.passphrase}</passphrase>
 					</keyPassphrase>
 					-->
-					<requires>
-						<require>elasticsearch &gt;= ${elasticsearch.min.version}</require>
-					</requires>
 					<mappings>
 						<!-- app -->
 						<mapping>
