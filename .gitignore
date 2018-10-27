@@ -1,33 +1,45 @@
-/target/
-/work/
-/bin/
-/mydbflute/
-/solr/data/
-/src/main/webapp/WEB-INF/classes/
-/src/main/webapp/WEB-INF/lib/
-/src/main/webapp/WEB-INF/site/
-/src/main/webapp/WEB-INF/env/crawler/lib/
-/src/main/webapp/WEB-INF/env/suggest/lib/
-/src/main/webapp/WEB-INF/env/thumbnail/lib/
-/src/main/webapp/WEB-INF/thumbnails/
-/src/main/webapp/jar/
-/dbflute_fess/log/*.log
-/dbflute_h2/log/*.log
-/dbflute_mysql/log/*.log
-/dbflute_oracle/log/*.log
-/src/main/webapp/WEB-INF/conf/*.properties
-/src/main/webapp/WEB-INF/db/*.lock.db
-/src/main/webapp/WEB-INF/logs/fess*
-/.settings/
+# common
+/target
+/build
+/bin
+.DS_Store
+
+# IntelliJ IDEA
+**/.idea/*
+!**/.idea/inspectionProfiles
+!**/.idea/codeStyleSettings.xml
+!**/.idea/misc.xml
+!**/.idea/saveactions_settings.xml
+**/*.iml
+/out
+
+# Gradle
+/.gradle
+
+# Tomcat
+/tomcat.*
+
+# DBFlute
+/dbflute-intro.*
+/mydbflute/intro_resources
+
+# LastaFlute
+trial_config.ignored
+
+# Fess
 .project
 .classpath
-*.iml
-.idea
-.DS_Store
+/dbflute_fess/log/*.log
+/dbflute_fess/output/doc/lastadoc-fess.html
+/dbflute_fess/schema/project-lastadoc-fess.json
+/mydbflute/
 /plugins/
-/tomcat.8080/
-dbflute_fess/output/doc/lastadoc-fess.html
-dbflute_fess/schema/project-lastadoc-fess.json
-src/main/resources/fess_indices/.fess_config.access_token/access_token.bulk
-src/main/resources/ga_client_secrets.p12
-src/main/webapp/WEB-INF/project.properties
+/src/main/resources/fess_indices/.fess_config.access_token/access_token.bulk
+/src/main/resources/ga_client_secrets.p12
+/src/main/webapp/WEB-INF/project.properties
+/src/main/webapp/WEB-INF/conf/*.properties
+/src/main/webapp/WEB-INF/env/*/lib/
+/src/main/webapp/WEB-INF/lib/
+/src/main/webapp/WEB-INF/site/
+/src/main/webapp/WEB-INF/thumbnails/
+
