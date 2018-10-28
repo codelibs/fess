@@ -155,8 +155,8 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
                     continue;
                 }
 
-                String input = m.group(1).trim();
-                String output = m.group(2).trim();
+                final String input = m.group(1).trim();
+                final String output = m.group(2).trim();
 
                 if (input == null || output == null) {
                     logger.warn("Failed to parse " + line + " in " + path);

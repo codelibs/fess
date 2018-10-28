@@ -81,24 +81,31 @@ public class StemmerOverrideItem extends DictionaryItem {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        StemmerOverrideItem other = (StemmerOverrideItem) obj;
+        }
+        final StemmerOverrideItem other = (StemmerOverrideItem) obj;
         if (input == null) {
-            if (other.input != null)
+            if (other.input != null) {
                 return false;
-        } else if (!input.equals(other.input))
+            }
+        } else if (!input.equals(other.input)) {
             return false;
+        }
         if (output == null) {
-            if (other.output != null)
+            if (other.output != null) {
                 return false;
-        } else if (!output.equals(other.output))
+            }
+        } else if (!output.equals(other.output)) {
             return false;
+        }
         return true;
     }
 

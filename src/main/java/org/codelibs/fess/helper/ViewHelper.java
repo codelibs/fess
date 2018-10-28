@@ -195,7 +195,7 @@ public class ViewHelper {
         final String escaped = LaFunctions.h(text);
         int pos = escaped.indexOf(escapedHighlightPre);
         while (pos >= 0) {
-            int c = escaped.codePointAt(pos);
+            final int c = escaped.codePointAt(pos);
             if (Character.isISOControl(c) || hihglightTerminalCharSet.contains(c)) {
                 break;
             }

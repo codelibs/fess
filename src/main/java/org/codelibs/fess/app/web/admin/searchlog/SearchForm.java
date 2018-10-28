@@ -45,12 +45,12 @@ public class SearchForm {
             return SearchLogPager.DEFAULT_PAGE_SIZE;
         }
         try {
-            int value = Integer.parseInt(size);
+            final int value = Integer.parseInt(size);
             if (value <= 0 || value > ComponentUtil.getFessConfig().getPageSearchlogMaxFetchSizeAsInteger()) {
                 return SearchLogPager.DEFAULT_PAGE_SIZE;
             }
             return value;
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             // ignore
             return SearchLogPager.DEFAULT_PAGE_SIZE;
         }

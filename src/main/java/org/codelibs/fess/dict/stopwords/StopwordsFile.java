@@ -134,7 +134,7 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
                 }
 
                 final String inputStrings = line;
-                String input = unescape(inputStrings);
+                final String input = unescape(inputStrings);
 
                 if (input.length() > 0) {
                     id++;

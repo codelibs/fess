@@ -1175,7 +1175,7 @@ public class FessEsClient implements Client {
         T build(R response, H hit);
     }
 
-    public void setClusterName(String clusterName) {
+    public void setClusterName(final String clusterName) {
         this.clusterName = clusterName;
     }
 
@@ -1491,7 +1491,7 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public FieldCapabilitiesRequestBuilder prepareFieldCaps(String... indices) {
+    public FieldCapabilitiesRequestBuilder prepareFieldCaps(final String... indices) {
         return client.prepareFieldCaps(indices);
     }
 

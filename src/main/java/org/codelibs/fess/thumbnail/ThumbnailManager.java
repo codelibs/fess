@@ -495,12 +495,12 @@ public class ThumbnailManager {
                     }
                     Files.move(path, newPath);
                     logger.info("Move " + path + " to " + newPath);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     logger.warn("Failed to move " + path, e);
                 }
             }
         }       );
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.warn("Failed to migrate thumbnail images.", e);
             }
         }, "ThumbnailMigrator").start();

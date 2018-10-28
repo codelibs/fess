@@ -82,7 +82,7 @@ public class PopularWordHelper {
                         try {
                             popularWordsRequestBuilder.execute().getResponse().getItems().stream()
                                     .forEach(item -> wordList.add(item.getText()));
-                        } catch (SuggesterException e) {
+                        } catch (final SuggesterException e) {
                             logger.warn("Failed to generate popular words.", e);
                         }
 
