@@ -61,6 +61,8 @@
 												<la:option value="search_reqtimeavg_day_agg"><la:message key="labels.searchlog_log_type_search_reqtimeavg_day" /></la:option>
 												<la:option value="search_keyword_agg"><la:message key="labels.searchlog_log_type_search_keyword" /></la:option>
 												<la:option value="search_zerohit_agg"><la:message key="labels.searchlog_log_type_search_zerohit" /></la:option>
+												<la:option value="click_count_agg"><la:message key="labels.searchlog_log_type_click_count" /></la:option>
+												<la:option value="favorite_count_agg"><la:message key="labels.searchlog_log_type_favorite_count" /></la:option>
 											</la:select>
 										</div>
 									</div>
@@ -156,7 +158,7 @@
 														<th class="col-sm-3"><la:message
 																key="labels.searchlog_value" /></th>
 														</c:if>
-														<c:if test="${logType.startsWith('search_keyword_') or logType.startsWith('search_zerohit_')}">
+														<c:if test="${logType.startsWith('search_keyword_') or logType.startsWith('search_zerohit_')} or logType.endsWith('_count_agg')}">
 														<th><la:message
 																key="labels.searchlog_value" /></th>
 														<th class="col-sm-3"><la:message

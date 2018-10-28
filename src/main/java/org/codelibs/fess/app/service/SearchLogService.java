@@ -95,27 +95,54 @@ public class SearchLogService {
 
     public List<?> getSearchLogList(final SearchLogPager pager) {
         final EsPagingResultBean<?> list;
-        if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(pager.logType)
-                || SearchLogPager.LOG_TYPE_CLICK_TOP.equalsIgnoreCase(pager.logType)) {
+        if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) clickLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_RequestedAt_Desc();
                 createClickLogCondition(pager, cb);
             });
-        } else if (SearchLogPager.LOG_TYPE_CLICK_TOP.equalsIgnoreCase(pager.logType)) {
+        } else if (SearchLogPager.LOG_TYPE_CLICK_COUNT.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) clickLogBhv.selectPage(cb -> {
                 cb.fetchFirst(0);
                 createClickLogCondition(pager, cb);
-                cb.aggregation().filter("top_click_filter", null, null, aggs -> {
-                    aggs.setUrl_Count();
-                });
+                cb.aggregation().setUrl_Terms(SearchLogPager.LOG_TYPE_CLICK_COUNT, op -> {
+                    op.size(pager.getPageSize());
+                }, null);
             });
+            final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_CLICK_COUNT);
+            final List<? extends Terms.Bucket> buckets = agg.getBuckets();
+            updatePagerByAgg(pager, buckets.size());
+            return buckets.stream().map(e -> {
+                final Map<String, Object> map = new HashMap<>();
+                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
+                map.put(KEY, e.getKeyAsString());
+                map.put(COUNT, e.getDocCount());
+                return map;
+            }).collect(Collectors.toList());
         } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) favoriteLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_CreatedAt_Desc();
                 createFavoriteLogCondition(pager, cb);
             });
+        } else if (SearchLogPager.LOG_TYPE_FAVORITE_COUNT.equalsIgnoreCase(pager.logType)) {
+            list = (EsPagingResultBean<?>) favoriteLogBhv.selectPage(cb -> {
+                cb.fetchFirst(0);
+                createFavoriteLogCondition(pager, cb);
+                cb.aggregation().setUrl_Terms(SearchLogPager.LOG_TYPE_FAVORITE_COUNT, op -> {
+                    op.size(pager.getPageSize());
+                }, null);
+            });
+            final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_FAVORITE_COUNT);
+            final List<? extends Terms.Bucket> buckets = agg.getBuckets();
+            updatePagerByAgg(pager, buckets.size());
+            return buckets.stream().map(e -> {
+                final Map<String, Object> map = new HashMap<>();
+                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
+                map.put(KEY, e.getKeyAsString());
+                map.put(COUNT, e.getDocCount());
+                return map;
+            }).collect(Collectors.toList());
         } else if (SearchLogPager.LOG_TYPE_SEARCH_COUNT_HOUR.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
                 cb.fetchFirst(0);
