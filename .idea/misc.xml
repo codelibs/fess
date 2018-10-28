@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="EntryPointsManager">
-    <writeAnnotations>
-      <writeAnnotation name="javax.annotation.Resource" />
-      <writeAnnotation name="javax.inject.Inject" />
-      <writeAnnotation name="com.google.inject" />
-      <writeAnnotation name="org.springframework.beans.factory.annotation.Autowired" />
-    </writeAnnotations>
-  </component>
-  <component name="FrameworkDetectionExcludesConfiguration">
-    <file type="web" url="file://$PROJECT_DIR$" />
-  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
