@@ -46,9 +46,11 @@ public class SearchLogPager implements Serializable {
 
     public static final String LOG_TYPE_CLICK = "click";
 
-    public static final String LOG_TYPE_CLICK_TOP = "click_top_agg";
+    public static final String LOG_TYPE_CLICK_COUNT = "click_count_agg";
 
     public static final String LOG_TYPE_FAVORITE = "favorite";
+
+    public static final String LOG_TYPE_FAVORITE_COUNT = "favorite_count_agg";
 
     public static final int DEFAULT_PAGE_SIZE = 20;
 

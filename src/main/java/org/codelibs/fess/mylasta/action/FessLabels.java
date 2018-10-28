@@ -2862,6 +2862,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Request Time Avg. by Day */
     public static final String LABELS_searchlog_log_type_search_reqtimeavg_day = "{labels.searchlog_log_type_search_reqtimeavg_day}";
 
+    /** The key of the message: Click Count */
+    public static final String LABELS_searchlog_log_type_click_count = "{labels.searchlog_log_type_click_count}";
+
+    /** The key of the message: Favorite Count */
+    public static final String LABELS_searchlog_log_type_favorite_count = "{labels.searchlog_log_type_favorite_count}";
+
     /** The key of the message: Message */
     public static final String LABELS_searchlog_log_message = "{labels.searchlog_log_message}";
 
@@ -2888,6 +2894,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Delete */
     public static final String LABELS_searchlog_configuration_button_delete = "{labels.searchlog_configuration_button_delete}";
+
+    /** The key of the message: Size */
+    public static final String LABELS_searchlog_size = "{labels.searchlog_size}";
 
     /** The key of the message: Query ID */
     public static final String LABELS_searchlog_queryid = "{labels.searchlog_queryid}";
