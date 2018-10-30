@@ -19,10 +19,14 @@ import javax.annotation.PostConstruct;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jcifs.SID;
 
 public class SambaHelper {
+
+    private static final Logger logger = LoggerFactory.getLogger(SambaHelper.class);
 
     public static final int SID_TYPE_ALIAS = 4;
 
@@ -50,8 +54,11 @@ public class SambaHelper {
     }
 
     public String getAccountId(final SID sid) {
-        if (fessConfig.isAvailableSmbSidType(sid.getType())) {
-            return createSearchRole(sid.getType(), sid.getAccountName());
+        final Integer sidType = fessConfig.getAvailableSmbSidType(sid.getType());
+        if (sidType != null) {
+            return createSearchRole(sidType, sid.getAccountName());
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Ignore SID: {}", sid);
         }
         return null;
     }

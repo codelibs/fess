@@ -167,6 +167,23 @@ public class FessPropTest extends UnitFessTestCase {
         assertFalse(matchesTag(tags[4], "<div x-y=\"a 0\"></div>"));
     }
 
+    public void test_getAvailableSmbSidType() throws Exception {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSmbAvailableSidTypes() {
+                return "1,2,5:2";
+            }
+        };
+
+        assertNull(fessConfig.getAvailableSmbSidType(0));
+        assertEquals(1, fessConfig.getAvailableSmbSidType(1));
+        assertEquals(2, fessConfig.getAvailableSmbSidType(2));
+        assertNull(fessConfig.getAvailableSmbSidType(3));
+        assertNull(fessConfig.getAvailableSmbSidType(4));
+        assertEquals(2, fessConfig.getAvailableSmbSidType(5));
+    }
+
     private boolean matchesTag(final PrunedTag tag, final String text) throws Exception {
         final DOMParser parser = new DOMParser();
         final String html = "<html><body>" + text + "</body></html>";

@@ -69,6 +69,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    String SMB_AVAILABLE_SID_TYPES = "smbAvailableSidTypes";
+
     String LOGGING_SEARCH_DOCS_FIELDS = "loggingSearchDocsFields";
 
     String API_SEARCH_ACCEPT_REFERERS = "apiSearchAcceptReferers";
@@ -775,12 +777,25 @@ public interface FessProp {
 
     String getSmbAvailableSidTypes();
 
-    default boolean isAvailableSmbSidType(final int sidType) {
-        if (StringUtil.isBlank(getSmbAvailableSidTypes())) {
-            return false;
+    default Integer getAvailableSmbSidType(final int sidType) {
+        @SuppressWarnings("unchecked")
+        Map<Integer, Integer> params = (Map<Integer, Integer>) propMap.get(SMB_AVAILABLE_SID_TYPES);
+        if (params == null) {
+            params = split(getSmbAvailableSidTypes(), ",").get(stream -> stream.map(s -> {
+                final String[] v = s.split(":");
+                if (v.length == 1) {
+                    final int x = Integer.parseInt(v[0].trim());
+                    return new Pair<>(x, x);
+                } else if (v.length == 2) {
+                    final int x = Integer.parseInt(v[0].trim());
+                    final int y = Integer.parseInt(v[1].trim());
+                    return new Pair<>(x, y);
+                }
+                return null;
+            }).filter(v -> v != null).collect(Collectors.toMap(e -> e.getFirst(), e -> e.getSecond())));
+            propMap.put(SMB_AVAILABLE_SID_TYPES, params);
         }
-        final String value = Integer.toString(sidType);
-        return split(getSmbAvailableSidTypes(), ",").get(stream -> stream.anyMatch(s -> s.equals(value)));
+        return params.get(sidType);
     }
 
     String getSupportedLanguages();
