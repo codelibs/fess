@@ -54,11 +54,19 @@ public class SambaHelper {
     }
 
     public String getAccountId(final SID sid) {
-        final Integer sidType = fessConfig.getAvailableSmbSidType(sid.getType());
-        if (sidType != null) {
-            return createSearchRole(sidType, sid.getAccountName());
+        final int type = sid.getType();
+        if (logger.isDebugEnabled()) {
+            try {
+                logger.debug("Processing SID: {} {} {}", type, sid, sid.toDisplayString());
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        final Integer id = fessConfig.getAvailableSmbSidType(type);
+        if (id != null) {
+            return createSearchRole(id, sid.getAccountName());
         } else if (logger.isDebugEnabled()) {
-            logger.debug("Ignore SID: {}", sid);
+            logger.debug("Ignored SID: {} {}", type, sid);
         }
         return null;
     }
