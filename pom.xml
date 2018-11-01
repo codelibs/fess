@@ -196,6 +196,7 @@
 						<include>${test.include.path}</include>
 					</includes>
 					<argLine>${test.command.args}</argLine>
+					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
 				<dependencies>
 					<dependency>
