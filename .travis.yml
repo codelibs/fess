@@ -2,10 +2,17 @@ sudo: required
 
 language: java
 
-jdk:
-  - oraclejdk10
-  - oraclejdk9
-  - oraclejdk8
+matrix:
+  include:
+    - jdk: openjdk8
+    - jdk: openjdk9
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+    - jdk: openjdk10
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
 
 cache:
   directories:
