@@ -55,11 +55,13 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.EsUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -381,8 +383,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected String toGeoRequestString(final GeoInfo geoInfo) {
-        try (OutputStream out =
-                geoInfo.toQueryBuilder().toXContent(XContentFactory.jsonBuilder(), ToXContent.EMPTY_PARAMS).getOutputStream()) {
+        try (OutputStream out = EsUtil.getXContentOutputStream(geoInfo.toQueryBuilder(), XContentType.JSON)) {
             return ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
         } catch (final Exception e) {
             return "{\"error\":\"" + detailedMessage(e) + "\"}";
