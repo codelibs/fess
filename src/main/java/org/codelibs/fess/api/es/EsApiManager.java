@@ -71,16 +71,18 @@ public class EsApiManager extends BaseApiManager {
     @Override
     public boolean matches(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
-        if (servletPath.startsWith(pathPrefix)) {
-            final RequestManager requestManager = ComponentUtil.getRequestManager();
-            return requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE);
-        }
-        return false;
+        return servletPath.startsWith(pathPrefix);
     }
 
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
+        final RequestManager requestManager = ComponentUtil.getRequestManager();
+        if (!requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access: " + request.getServletPath());
+            return;
+        }
+
         try {
             getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
                 final String servletPath = request.getServletPath();
