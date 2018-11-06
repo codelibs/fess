@@ -168,6 +168,10 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
         ComponentUtil.getSystemHelper().refreshDesignJspFiles();
+
+        if (StringUtil.isNotBlank(form.logLevel)) {
+            ComponentUtil.getSystemHelper().setLogLevel(form.logLevel);
+        }
     }
 
     public static void updateForm(final FessConfig fessConfig, final EditForm form) {
@@ -209,6 +213,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ldapMemberofAttribute = fessConfig.getLdapMemberofAttribute();
         form.notificationLogin = fessConfig.getNotificationLogin();
         form.notificationSearchTop = fessConfig.getNotificationSearchTop();
+        form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
     }
 
     private void updateProperty(final String key, final String value) {

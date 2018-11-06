@@ -242,6 +242,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Purge By Bots */
     public static final String LABELS_PURGE_BY_BOTS = "{labels.purgeByBots}";
 
+    /** The key of the message: Log Level */
+    public static final String LABELS_LOG_LEVEL = "{labels.logLevel}";
+
     /** The key of the message: Purge Search Log */
     public static final String LABELS_PURGE_SEARCH_LOG_DAY = "{labels.purgeSearchLogDay}";
 
@@ -1207,6 +1210,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Bots Name For Purge */
     public static final String LABELS_purge_by_bots = "{labels.purge_by_bots}";
+
+    /** The key of the message: Log Level */
+    public static final String LABELS_log_level = "{labels.log_level}";
 
     /** The key of the message: Encoding for CSV */
     public static final String LABELS_csv_file_encoding = "{labels.csv_file_encoding}";

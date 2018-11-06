@@ -156,4 +156,7 @@ public class EditForm {
 
     @Size(max = 3000)
     public String notificationSearchTop;
+
+    @Size(max = 10)
+    public String logLevel;
 }
