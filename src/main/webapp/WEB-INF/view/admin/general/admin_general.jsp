@@ -303,6 +303,23 @@
 											<la:text styleId="purgeByBots" property="purgeByBots" styleClass="form-control" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="logLevel" class="col-sm-3 control-label"><la:message
+												key="labels.log_level" /></label>
+										<div class="form-inline col-sm-9">
+											<la:errors property="logLevel" />
+											<la:select styleId="logLevel" property="logLevel" styleClass="form-control">
+												<la:option value="OFF">OFF</la:option>
+												<la:option value="FATAL">FATAL</la:option>
+												<la:option value="ERROR">ERROR</la:option>
+												<la:option value="WARN">WARN</la:option>
+												<la:option value="INFO">INFO</la:option>
+												<la:option value="DEBUG">DEBUG</la:option>
+												<la:option value="TRACE">TRACE</la:option>
+												<la:option value="ALL">ALL</la:option>
+											</la:select>
+										</div>
+									</div>
 									<%-- Suggest --%>
 									<h4><la:message key="labels.general_menu_suggest" /></h4>
 									<div class="form-group">

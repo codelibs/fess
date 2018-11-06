@@ -48,6 +48,8 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
@@ -453,6 +455,18 @@ public class SystemHelper {
 
     public HtmlResponse getRedirectResponseToRoot(final HtmlResponse response) {
         return response;
+    }
+
+    public void setLogLevel(final String level) {
+        final Level logLevel = Level.toLevel(level, Level.WARN);
+        System.setProperty(Constants.FESS_LOG_LEVEL, logLevel.toString());
+        Configurator.setLevel("org.codelibs.fess", logLevel);
+        Configurator.setLevel("org.dbflute", logLevel);
+        Configurator.setLevel("org.lastaflute", logLevel);
+    }
+
+    public String getLogLevel() {
+        return System.getProperty(Constants.FESS_LOG_LEVEL, Level.WARN.toString());
     }
 
     public String getVersion() {

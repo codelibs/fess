@@ -427,4 +427,6 @@ public class Constants extends CoreLibConstants {
     public static final String FESS_THUMBNAIL_PATH = "fess.thumbnail.path";
 
     public static final String FESS_VAR_PATH = "fess.var.path";
+
+    public static final String FESS_LOG_LEVEL = "fess.log.level";
 }
