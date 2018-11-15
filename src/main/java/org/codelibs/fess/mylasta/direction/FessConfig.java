@@ -166,7 +166,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. license.properties */
     String SUPPORTED_UPLOADED_FILES = "supported.uploaded.files";
 
-    /** The key of the configuration. e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en,en_IE,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt,pt_BR,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh */
+    /** The key of the configuration. e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh */
     String SUPPORTED_LANGUAGES = "supported.languages";
 
     /** The key of the configuration. e.g. 60 */
@@ -752,7 +752,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String SMB_ROLE_FROM_FILE = "smb.role.from.file";
 
-    /** The key of the configuration. e.g. 1,2 */
+    /** The key of the configuration. e.g. 1,2,4:2 */
     String SMB_AVAILABLE_SID_TYPES = "smb.available.sid.types";
 
     /** The key of the configuration. e.g. true */
@@ -1681,7 +1681,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'supported.languages'. <br>
-     * The value is, e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en,en_IE,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt,pt_BR,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh <br>
+     * The value is, e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedLanguages();
@@ -3633,18 +3633,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'smb.available.sid.types'. <br>
-     * The value is, e.g. 1,2 <br>
+     * The value is, e.g. 1,2,4:2 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSmbAvailableSidTypes();
-
-    /**
-     * Get the value for the key 'smb.available.sid.types' as {@link Integer}. <br>
-     * The value is, e.g. 1,2 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getSmbAvailableSidTypesAsInteger();
 
     /**
      * Get the value for the key 'file.role.from.file'. <br>
@@ -7048,10 +7040,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.SMB_AVAILABLE_SID_TYPES);
         }
 
-        public Integer getSmbAvailableSidTypesAsInteger() {
-            return getAsInteger(FessConfig.SMB_AVAILABLE_SID_TYPES);
-        }
-
         public String getFileRoleFromFile() {
             return get(FessConfig.FILE_ROLE_FROM_FILE);
         }
@@ -8322,7 +8310,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_FILES, "license.properties");
             defaultMap
                     .put(FessConfig.SUPPORTED_LANGUAGES,
-                            "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en,en_IE,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt,pt_BR,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
+                            "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_LENGTH, "60");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUIRED, "false");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER, "");
@@ -8501,7 +8489,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.005");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.5");
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
-            defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2");
+            defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2,4:2");
             defaultMap.put(FessConfig.FILE_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS, ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties");
