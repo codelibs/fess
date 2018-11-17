@@ -63,11 +63,11 @@
 		<crawler.version>3.0.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.4.3-SNAPSHOT</suggest.version>
+		<suggest.version>6.5.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>6.4.3</elasticsearch.version>
-		<elasticsearch.httpclient.version>6.4.0-SNAPSHOT</elasticsearch.httpclient.version>
+		<elasticsearch.version>6.5.0</elasticsearch.version>
+		<elasticsearch.httpclient.version>6.5.0-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->

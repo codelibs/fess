@@ -23,15 +23,13 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -72,7 +70,7 @@ public final class UpgradeUtil {
             final File aliasConfigFile = org.codelibs.core.io.ResourceUtil.getResourceAsFile(aliasConfigPath);
             if (aliasConfigFile.exists()) {
                 final String source = FileUtil.readUTF8(aliasConfigFile);
-                final IndicesAliasesResponse response =
+                final AcknowledgedResponse response =
                         indicesClient.prepareAliases().addAlias(indexName, aliasName, source).execute()
                                 .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (response.isAcknowledged()) {
@@ -105,7 +103,7 @@ public final class UpgradeUtil {
                 logger.warn(mappingFile + " is not found.", e);
             }
             try {
-                final PutMappingResponse putMappingResponse =
+                final AcknowledgedResponse putMappingResponse =
                         indicesClient.preparePutMapping(index).setType(type).setSource(source, XContentType.JSON).execute()
                                 .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
@@ -129,7 +127,7 @@ public final class UpgradeUtil {
         final FieldMappingMetaData fieldMappings = gfmResponse.fieldMappings(index, type, field);
         if (fieldMappings == null || fieldMappings.isNull()) {
             try {
-                final PutMappingResponse pmResponse =
+                final AcknowledgedResponse pmResponse =
                         indicesClient.preparePutMapping(index).setType(type).setSource(source, XContentType.JSON).execute().actionGet();
                 if (!pmResponse.isAcknowledged()) {
                     logger.warn("Failed to add " + field + " to " + index + "/" + type);
@@ -153,7 +151,7 @@ public final class UpgradeUtil {
             if (type != null) {
                 builder.setType(type);
             }
-            final PutMappingResponse pmResponse = builder.execute().actionGet();
+            final AcknowledgedResponse pmResponse = builder.execute().actionGet();
             if (!pmResponse.isAcknowledged()) {
                 logger.warn("Failed to update " + index + " settings.");
             } else {
@@ -191,11 +189,11 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static void deleteIndex(final IndicesAdminClient indicesClient, final String index, final Consumer<DeleteIndexResponse> comsumer) {
-        indicesClient.prepareDelete(index).execute(new ActionListener<DeleteIndexResponse>() {
+    public static void deleteIndex(final IndicesAdminClient indicesClient, final String index, final Consumer<AcknowledgedResponse> comsumer) {
+        indicesClient.prepareDelete(index).execute(new ActionListener<AcknowledgedResponse>() {
 
             @Override
-            public void onResponse(final DeleteIndexResponse response) {
+            public void onResponse(final AcknowledgedResponse response) {
                 logger.info("Deleted " + index + " index.");
                 comsumer.accept(response);
             }
