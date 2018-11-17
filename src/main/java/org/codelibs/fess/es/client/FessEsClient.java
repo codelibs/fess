@@ -75,13 +75,11 @@ import org.elasticsearch.action.DocWriteRequest.OpType;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.get.GetIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse.Failure;
@@ -119,6 +117,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.search.SearchScrollRequestBuilder;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.termvectors.MultiTermVectorsRequest;
 import org.elasticsearch.action.termvectors.MultiTermVectorsRequestBuilder;
 import org.elasticsearch.action.termvectors.MultiTermVectorsResponse;
@@ -451,7 +450,7 @@ public class FessEsClient implements Client {
                 logger.warn(mappingFile + " is not found.", e);
             }
             try {
-                final PutMappingResponse putMappingResponse =
+                final AcknowledgedResponse putMappingResponse =
                         client.admin().indices().preparePutMapping(indexName).setType(docType).setSource(source, XContentType.JSON)
                                 .execute().actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
@@ -491,7 +490,7 @@ public class FessEsClient implements Client {
         for (final String index : searchIndices) {
             builder.removeAlias(index, searchAlias);
         }
-        final IndicesAliasesResponse response = builder.execute().actionGet(fessConfig.getIndexIndicesTimeout());
+        final AcknowledgedResponse response = builder.execute().actionGet(fessConfig.getIndexIndicesTimeout());
         return response.isAcknowledged();
     }
 
@@ -509,7 +508,7 @@ public class FessEsClient implements Client {
                             if (source.trim().equals("{}")) {
                                 source = null;
                             }
-                            final IndicesAliasesResponse response =
+                            final AcknowledgedResponse response =
                                     client.admin().indices().prepareAliases().addAlias(createdIndexName, aliasName, source).execute()
                                             .actionGet(fessConfig.getIndexIndicesTimeout());
                             if (response.isAcknowledged()) {
@@ -959,7 +958,7 @@ public class FessEsClient implements Client {
         if (response.hasFailures()) {
             if (logger.isDebugEnabled()) {
                 @SuppressWarnings("rawtypes")
-                final List<DocWriteRequest> requests = bulkRequestBuilder.request().requests();
+                final List<DocWriteRequest<?>> requests = bulkRequestBuilder.request().requests();
                 final BulkItemResponse[] items = response.getItems();
                 if (requests.size() == items.length) {
                     for (int i = 0; i < requests.size(); i++) {
