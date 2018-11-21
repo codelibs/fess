@@ -53,16 +53,16 @@
 												<la:option value="search"><la:message key="labels.searchlog_log_type_search" /></la:option>
 												<la:option value="click"><la:message key="labels.searchlog_log_type_click" /></la:option>
 												<la:option value="favorite"><la:message key="labels.searchlog_log_type_favorite" /></la:option>
+												<la:option value="search_keyword_agg"><la:message key="labels.searchlog_log_type_search_keyword" /></la:option>
+												<la:option value="search_zerohit_agg"><la:message key="labels.searchlog_log_type_search_zerohit" /></la:option>
+												<la:option value="click_count_agg"><la:message key="labels.searchlog_log_type_click_count" /></la:option>
+												<la:option value="favorite_count_agg"><la:message key="labels.searchlog_log_type_favorite_count" /></la:option>
 												<la:option value="search_count_hour_agg"><la:message key="labels.searchlog_log_type_search_count_hour" /></la:option>
 												<la:option value="search_count_day_agg"><la:message key="labels.searchlog_log_type_search_count_day" /></la:option>
 												<la:option value="search_user_hour_agg"><la:message key="labels.searchlog_log_type_search_user_hour" /></la:option>
 												<la:option value="search_user_day_agg"><la:message key="labels.searchlog_log_type_search_user_day" /></la:option>
 												<la:option value="search_reqtimeavg_hour_agg"><la:message key="labels.searchlog_log_type_search_reqtimeavg_hour" /></la:option>
 												<la:option value="search_reqtimeavg_day_agg"><la:message key="labels.searchlog_log_type_search_reqtimeavg_day" /></la:option>
-												<la:option value="search_keyword_agg"><la:message key="labels.searchlog_log_type_search_keyword" /></la:option>
-												<la:option value="search_zerohit_agg"><la:message key="labels.searchlog_log_type_search_zerohit" /></la:option>
-												<la:option value="click_count_agg"><la:message key="labels.searchlog_log_type_click_count" /></la:option>
-												<la:option value="favorite_count_agg"><la:message key="labels.searchlog_log_type_favorite_count" /></la:option>
 											</la:select>
 										</div>
 									</div>
@@ -189,7 +189,19 @@
 									</div>
 									<c:set var="pager" value="${searchLogPager}"
 										scope="request" />
+									<c:if test="${!logType.endsWith('_agg')}">
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									</c:if>
+									<c:if test="${logType.endsWith('_agg')}">
+									<div class="row">
+										<div class="col-sm-2">
+											<la:message key="labels.pagination_page_guide_msg"
+												arg0="${f:h(pager.currentPageNumber)}"
+												arg1="${f:h(pager.allPageCount)}"
+												arg2="${f:h(pager.allRecordCount)}" />
+										</div>
+									</div>
+									</c:if>
 								</c:if>
 							</div>
 							<!-- /.box-body -->
