@@ -611,8 +611,8 @@ public class ViewHelper {
                 contentDispositionType = "attachment";
             }
 
-            response.header(CONTENT_DISPOSITION,
-                    contentDispositionType + "; filename=\"" + name + "\"; filename*=utf-8''" + URLEncoder.encode(name, Constants.UTF_8));
+            final String encodedName = URLEncoder.encode(name, Constants.UTF_8).replace("+", "%20");
+            response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + name + "\"; filename*=utf-8''" + encodedName);
         } catch (final Exception e) {
             logger.warn("Failed to write a filename: " + responseData, e);
         }
