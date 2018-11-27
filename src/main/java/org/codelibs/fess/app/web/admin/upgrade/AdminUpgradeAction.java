@@ -208,7 +208,9 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFromAll() {
-        // nothing
+        webConfigToRoleBhv.queryDelete(cb -> {});
+        fileConfigToRoleBhv.queryDelete(cb -> {});
+        dataConfigToRoleBhv.queryDelete(cb -> {});
     }
 
 }
