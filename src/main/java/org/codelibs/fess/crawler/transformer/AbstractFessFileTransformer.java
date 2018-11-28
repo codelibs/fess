@@ -22,10 +22,8 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -281,13 +279,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         //  boost
         putResultDataBody(dataMap, fessConfig.getIndexFieldBoost(), crawlingConfig.getDocumentBoost());
         // label: labelType
-        final Set<String> labelTypeSet = new HashSet<>();
-        for (final String labelType : crawlingConfig.getLabelTypeValues()) {
-            labelTypeSet.add(labelType);
-        }
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
-        labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
-        putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeHelper.getMatchedLabelValueSet(url));
         // role: roleType
         final List<String> roleTypeList = getRoleTypes(responseData);
         stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));

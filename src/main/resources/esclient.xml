@@ -457,12 +457,6 @@
 			<arg>".fess_config.data_config/data_config"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.data_config_to_label/data_config_to_label"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.data_config_to_role/data_config_to_role"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
 			<arg>".fess_config.duplicate_host/duplicate_host"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
@@ -481,19 +475,10 @@
 			<arg>".fess_config.file_config/file_config"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.file_config_to_label/file_config_to_label"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.file_config_to_role/file_config_to_role"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
 			<arg>".fess_config.job_log/job_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config.key_match/key_match"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.label_to_role/label_to_role"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config.label_type/label_type"</arg>
@@ -524,12 +509,6 @@
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config.web_config/web_config"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.web_config_to_label/web_config_to_label"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.web_config_to_role/web_config_to_role"</arg>
 		</postConstruct>
 		<!-- .fess_user index -->
 		<postConstruct name="addIndexConfig">

@@ -85,11 +85,6 @@ public abstract class AbstractDataStore implements DataStore {
         // boost
         defaultDataMap.put(fessConfig.getIndexFieldBoost(), config.getBoost().toString());
         // label: labelType
-        final List<String> labelTypeList = new ArrayList<>();
-        for (final String labelType : config.getLabelTypeValues()) {
-            labelTypeList.add(labelType);
-        }
-        defaultDataMap.put(fessConfig.getIndexFieldLabel(), labelTypeList);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<>();
         stream(config.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));

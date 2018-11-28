@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -26,17 +25,12 @@ import org.codelibs.fess.app.pager.FileConfigPager;
 import org.codelibs.fess.es.config.cbean.FileConfigCB;
 import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
-import org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv;
 import org.codelibs.fess.es.config.exentity.FileConfig;
-import org.codelibs.fess.es.config.exentity.FileConfigToLabel;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
 public class FileConfigService {
-
-    @Resource
-    protected FileConfigToLabelBhv fileConfigToLabelBhv;
 
     @Resource
     protected FileConfigBhv fileConfigBhv;
@@ -71,90 +65,19 @@ public class FileConfigService {
             op.setRefreshPolicy(Constants.TRUE);
         });
 
-        fileConfigToLabelBhv.queryDelete(cb -> {
-            cb.query().setFileConfigId_Equal(fileConfigId);
-        });
-
         fileAuthenticationBhv.queryDelete(cb -> {
             cb.query().setFileConfigId_Equal(fileConfigId);
         });
     }
 
     public OptionalEntity<FileConfig> getFileConfig(final String id) {
-        return fileConfigBhv.selectByPK(id).map(entity -> {
-
-            final List<FileConfigToLabel> fctltmList = fileConfigToLabelBhv.selectList(fctltmCb -> {
-                fctltmCb.query().setFileConfigId_Equal(entity.getId());
-                fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-            });
-            if (!fctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<>(fctltmList.size());
-                for (final FileConfigToLabel mapping : fctltmList) {
-                    labelTypeIds.add(mapping.getLabelTypeId());
-                }
-                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
-            }
-            return entity;
-        });
+        return fileConfigBhv.selectByPK(id);
     }
 
     public void store(final FileConfig fileConfig) {
-        final boolean isNew = fileConfig.getId() == null;
-        final String[] labelTypeIds = fileConfig.getLabelTypeIds();
-
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
-        final String fileConfigId = fileConfig.getId();
-        if (isNew) {
-            // Insert
-            if (labelTypeIds != null) {
-                final List<FileConfigToLabel> fctltmList = new ArrayList<>();
-                for (final String labelTypeId : labelTypeIds) {
-                    final FileConfigToLabel mapping = new FileConfigToLabel();
-                    mapping.setFileConfigId(fileConfigId);
-                    mapping.setLabelTypeId(labelTypeId);
-                    fctltmList.add(mapping);
-                }
-                fileConfigToLabelBhv.batchInsert(fctltmList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-            }
-        } else {
-            // Update
-            if (labelTypeIds != null) {
-                final List<FileConfigToLabel> fctltmList = fileConfigToLabelBhv.selectList(fctltmCb -> {
-                    fctltmCb.query().setFileConfigId_Equal(fileConfigId);
-                    fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                });
-                final List<FileConfigToLabel> newList = new ArrayList<>();
-                final List<FileConfigToLabel> matchedList = new ArrayList<>();
-                for (final String id : labelTypeIds) {
-                    boolean exist = false;
-                    for (final FileConfigToLabel mapping : fctltmList) {
-                        if (mapping.getLabelTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final FileConfigToLabel mapping = new FileConfigToLabel();
-                        mapping.setFileConfigId(fileConfigId);
-                        mapping.setLabelTypeId(id);
-                        newList.add(mapping);
-                    }
-                }
-                fctltmList.removeAll(matchedList);
-                fileConfigToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-                fileConfigToLabelBhv.batchDelete(fctltmList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-            }
-        }
     }
 
     protected void setupListCondition(final FileConfigCB cb, final FileConfigPager fileConfigPager) {

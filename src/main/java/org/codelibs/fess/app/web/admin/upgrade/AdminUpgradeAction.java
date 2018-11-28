@@ -21,15 +21,11 @@ import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
-import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
-import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
-import org.codelibs.fess.es.config.exbhv.LabelToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.UpgradeUtil;
@@ -65,25 +61,13 @@ public class AdminUpgradeAction extends FessAdminAction {
     protected RoleTypeBhv roleTypeBhv;
 
     @Resource
-    protected LabelToRoleBhv labelToRoleBhv;
-
-    @Resource
     protected LabelTypeBhv labelTypeBhv;
-
-    @Resource
-    protected WebConfigToRoleBhv webConfigToRoleBhv;
 
     @Resource
     protected WebConfigBhv webConfigBhv;
 
     @Resource
-    protected FileConfigToRoleBhv fileConfigToRoleBhv;
-
-    @Resource
     protected FileConfigBhv fileConfigBhv;
-
-    @Resource
-    protected DataConfigToRoleBhv dataConfigToRoleBhv;
 
     @Resource
     protected DataConfigBhv dataConfigBhv;

@@ -47,12 +47,7 @@ import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsDataConfig;
-import org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.dbflute.cbean.result.ListResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +72,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private static final Object CRAWLER_FILE_AUTH = "crawler.file.auth";
 
-    private String[] labelTypeIds;
-
     protected Pattern[] includedDocPathPatterns;
 
     protected Pattern[] excludedDocPathPatterns;
@@ -87,59 +80,9 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private Map<String, String> handlerScriptMap;
 
-    private volatile List<LabelType> labelTypeList;
-
     public DataConfig() {
         super();
         setBoost(1.0f);
-    }
-
-    public String[] getLabelTypeIds() {
-        if (labelTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return labelTypeIds;
-    }
-
-    public void setLabelTypeIds(final String[] labelTypeIds) {
-        this.labelTypeIds = labelTypeIds;
-    }
-
-    public List<LabelType> getLabelTypeList() {
-        if (labelTypeList == null) {
-            synchronized (this) {
-                if (labelTypeList == null) {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final DataConfigToLabelBhv dataConfigToLabelBhv = ComponentUtil.getComponent(DataConfigToLabelBhv.class);
-                    final ListResultBean<DataConfigToLabel> mappingList = dataConfigToLabelBhv.selectList(cb -> {
-                        cb.query().setDataConfigId_Equal(getId());
-                        cb.specify().columnLabelTypeId();
-                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
-                    });
-                    final List<String> labelIdList = new ArrayList<>();
-                    for (final DataConfigToLabel mapping : mappingList) {
-                        labelIdList.add(mapping.getLabelTypeId());
-                    }
-                    final LabelTypeBhv labelTypeBhv = ComponentUtil.getComponent(LabelTypeBhv.class);
-                    labelTypeList = labelIdList.isEmpty() ? Collections.emptyList() : labelTypeBhv.selectList(cb -> {
-                        cb.query().setId_InScope(labelIdList);
-                        cb.query().addOrderBy_SortOrder_Asc();
-                        cb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                    });
-                }
-            }
-        }
-        return labelTypeList;
-    }
-
-    @Override
-    public String[] getLabelTypeValues() {
-        final List<LabelType> list = getLabelTypeList();
-        final List<String> labelValueList = new ArrayList<>(list.size());
-        for (final LabelType labelType : list) {
-            labelValueList.add(labelType.getValue());
-        }
-        return labelValueList.toArray(new String[labelValueList.size()]);
     }
 
     @Override

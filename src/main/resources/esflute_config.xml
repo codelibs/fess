@@ -14,21 +14,16 @@
 	<component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv"/>
 	<component name="crawlingInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv"/>
 	<component name="crawlingInfoParamBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv"/>
-	<component name="dataConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv"/>
-	<component name="dataConfigToRoleBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv"/>
 	<component name="dataConfigBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigBhv"/>
 	<component name="duplicateHostBhv" class="org.codelibs.fess.es.config.exbhv.DuplicateHostBhv"/>
 	<component name="elevateWordToLabelBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv"/>
 	<component name="elevateWordBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordBhv"/>
 	<component name="failureUrlBhv" class="org.codelibs.fess.es.config.exbhv.FailureUrlBhv"/>
 	<component name="fileAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv"/>
-	<component name="fileConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv"/>
-	<component name="fileConfigToRoleBhv" class="org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv"/>
 	<component name="fileConfigBhv" class="org.codelibs.fess.es.config.exbhv.FileConfigBhv"/>
 	<component name="jobLogBhv" class="org.codelibs.fess.es.config.exbhv.JobLogBhv"/>
 	<component name="keyMatchBhv" class="org.codelibs.fess.es.config.exbhv.KeyMatchBhv"/>
 	<component name="labelTypeBhv" class="org.codelibs.fess.es.config.exbhv.LabelTypeBhv"/>
-	<component name="labelToRoleBhv" class="org.codelibs.fess.es.config.exbhv.LabelToRoleBhv"/>
 	<component name="pathMappingBhv" class="org.codelibs.fess.es.config.exbhv.PathMappingBhv"/>
 	<component name="relatedContentBhv" class="org.codelibs.fess.es.config.exbhv.RelatedContentBhv"/>
 	<component name="relatedQueryBhv" class="org.codelibs.fess.es.config.exbhv.RelatedQueryBhv"/>
@@ -37,8 +32,6 @@
 	<component name="scheduledJobBhv" class="org.codelibs.fess.es.config.exbhv.ScheduledJobBhv"/>
 	<component name="thumbnailQueueBhv" class="org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv"/>
 	<component name="webAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv"/>
-	<component name="webConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv"/>
-	<component name="webConfigToRoleBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv"/>
 	<component name="webConfigBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigBhv"/>
 
 </components>

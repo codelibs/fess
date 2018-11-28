@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -25,17 +24,12 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.es.config.cbean.DataConfigCB;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
-import org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv;
 import org.codelibs.fess.es.config.exentity.DataConfig;
-import org.codelibs.fess.es.config.exentity.DataConfigToLabel;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
 public class DataConfigService {
-
-    @Resource
-    protected DataConfigToLabelBhv dataConfigToLabelBhv;
 
     @Resource
     protected DataConfigBhv dataConfigBhv;
@@ -61,95 +55,21 @@ public class DataConfigService {
     }
 
     public void delete(final DataConfig dataConfig) {
-
-        final String dataConfigId = dataConfig.getId();
-
         dataConfigBhv.delete(dataConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
-
-        dataConfigToLabelBhv.queryDelete(cb -> {
-            cb.query().setDataConfigId_Equal(dataConfigId);
-        });
-
     }
 
     public OptionalEntity<DataConfig> getDataConfig(final String id) {
-        return dataConfigBhv.selectByPK(id).map(entity -> {
-
-            final List<DataConfigToLabel> fctltmList = dataConfigToLabelBhv.selectList(fctltmCb -> {
-                fctltmCb.query().setDataConfigId_Equal(entity.getId());
-                fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-            });
-            if (!fctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<>(fctltmList.size());
-                for (final DataConfigToLabel mapping : fctltmList) {
-                    labelTypeIds.add(mapping.getLabelTypeId());
-                }
-                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
-            }
-
-            return entity;
-        });
+        return dataConfigBhv.selectByPK(id);
     }
 
     public void store(final DataConfig dataConfig) {
-        final boolean isNew = dataConfig.getId() == null;
-        final String[] labelTypeIds = dataConfig.getLabelTypeIds();
 
         dataConfigBhv.insertOrUpdate(dataConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
-        final String dataConfigId = dataConfig.getId();
-        if (isNew) {
-            // Insert
-            if (labelTypeIds != null) {
-                final List<DataConfigToLabel> fctltmList = new ArrayList<>();
-                for (final String labelTypeId : labelTypeIds) {
-                    final DataConfigToLabel mapping = new DataConfigToLabel();
-                    mapping.setDataConfigId(dataConfigId);
-                    mapping.setLabelTypeId(labelTypeId);
-                    fctltmList.add(mapping);
-                }
-                dataConfigToLabelBhv.batchInsert(fctltmList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-            }
-        } else {
-            // Update
-            if (labelTypeIds != null) {
-                final List<DataConfigToLabel> fctltmList = dataConfigToLabelBhv.selectList(fctltmCb -> {
-                    fctltmCb.query().setDataConfigId_Equal(dataConfigId);
-                    fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                });
-                final List<DataConfigToLabel> newList = new ArrayList<>();
-                final List<DataConfigToLabel> matchedList = new ArrayList<>();
-                for (final String id : labelTypeIds) {
-                    boolean exist = false;
-                    for (final DataConfigToLabel mapping : fctltmList) {
-                        if (mapping.getLabelTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final DataConfigToLabel mapping = new DataConfigToLabel();
-                        mapping.setDataConfigId(dataConfigId);
-                        mapping.setLabelTypeId(id);
-                        newList.add(mapping);
-                    }
-                }
-                fctltmList.removeAll(matchedList);
-                dataConfigToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-                dataConfigToLabelBhv.batchDelete(fctltmList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-            }
-        }
+
     }
 
     protected void setupListCondition(final DataConfigCB cb, final DataConfigPager dataConfigPager) {

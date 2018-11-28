@@ -41,7 +41,6 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
-import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -81,7 +80,6 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         SingletonLaContainerFactory.getContainer().register(LabelTypeHelper.class, "labelTypeHelper");
 
         WebConfig webConfig = new WebConfig();
-        setValueToObject(webConfig, "labelTypeList", new ArrayList<LabelType>());
         ComponentUtil.getCrawlingConfigHelper().store("test", webConfig);
         setValueToObject(ComponentUtil.getLabelTypeHelper(), "labelTypePatternList", new ArrayList<LabelTypePattern>());
 

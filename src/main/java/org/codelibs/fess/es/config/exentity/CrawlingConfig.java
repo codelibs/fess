@@ -34,8 +34,6 @@ public interface CrawlingConfig {
 
     String[] getVirtualHosts();
 
-    String[] getLabelTypeValues();
-
     String getDocumentBoost();
 
     String getIndexingTarget(String input);

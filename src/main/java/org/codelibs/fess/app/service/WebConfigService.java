@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -27,17 +26,12 @@ import org.codelibs.fess.es.config.cbean.WebConfigCB;
 import org.codelibs.fess.es.config.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
 import org.codelibs.fess.es.config.exentity.WebConfig;
-import org.codelibs.fess.es.config.exentity.WebConfigToLabel;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
 public class WebConfigService {
-
-    @Resource
-    protected WebConfigToLabelBhv webConfigToLabelBhv;
 
     @Resource
     protected WebConfigBhv webConfigBhv;
@@ -75,10 +69,6 @@ public class WebConfigService {
             op.setRefreshPolicy(Constants.TRUE);
         });
 
-        webConfigToLabelBhv.queryDelete(cb -> {
-            cb.query().setWebConfigId_Equal(webConfigId);
-        });
-
         webAuthenticationBhv.queryDelete(cb -> {
             cb.query().setWebConfigId_Equal(webConfigId);
         });
@@ -89,80 +79,13 @@ public class WebConfigService {
     }
 
     public OptionalEntity<WebConfig> getWebConfig(final String id) {
-        return webConfigBhv.selectByPK(id).map(entity -> {
-
-            final List<WebConfigToLabel> wctltmList = webConfigToLabelBhv.selectList(wctltmCb -> {
-                wctltmCb.query().setWebConfigId_Equal(entity.getId());
-                wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-            });
-            if (!wctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<>(wctltmList.size());
-                for (final WebConfigToLabel mapping : wctltmList) {
-                    labelTypeIds.add(mapping.getLabelTypeId());
-                }
-                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
-            }
-            return entity;
-        });
+        return webConfigBhv.selectByPK(id);
     }
 
     public void store(final WebConfig webConfig) {
-        final boolean isNew = webConfig.getId() == null;
-        final String[] labelTypeIds = webConfig.getLabelTypeIds();
-
         webConfigBhv.insertOrUpdate(webConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
-        final String webConfigId = webConfig.getId();
-        if (isNew) {
-            // Insert
-            if (labelTypeIds != null) {
-                final List<WebConfigToLabel> wctltmList = new ArrayList<>();
-                for (final String id : labelTypeIds) {
-                    final WebConfigToLabel mapping = new WebConfigToLabel();
-                    mapping.setWebConfigId(webConfigId);
-                    mapping.setLabelTypeId(id);
-                    wctltmList.add(mapping);
-                }
-                webConfigToLabelBhv.batchInsert(wctltmList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-            }
-        } else {
-            // Update
-            if (labelTypeIds != null) {
-                final List<WebConfigToLabel> list = webConfigToLabelBhv.selectList(wctltmCb -> {
-                    wctltmCb.query().setWebConfigId_Equal(webConfigId);
-                    wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                });
-                final List<WebConfigToLabel> newList = new ArrayList<>();
-                final List<WebConfigToLabel> matchedList = new ArrayList<>();
-                for (final String id : labelTypeIds) {
-                    boolean exist = false;
-                    for (final WebConfigToLabel mapping : list) {
-                        if (mapping.getLabelTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final WebConfigToLabel mapping = new WebConfigToLabel();
-                        mapping.setWebConfigId(webConfigId);
-                        mapping.setLabelTypeId(id);
-                        newList.add(mapping);
-                    }
-                }
-                list.removeAll(matchedList);
-                webConfigToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-                webConfigToLabelBhv.batchDelete(list, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-            }
-        }
     }
 
     protected void setupListCondition(final WebConfigCB cb, final WebConfigPager webConfigPager) {

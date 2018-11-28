@@ -54,16 +54,6 @@ map:{
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.data_config_to_label = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
-        ; .fess_config.data_config_to_role = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
         ; .fess_config.duplicate_host = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
@@ -94,27 +84,12 @@ map:{
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.file_config_to_label = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
-        ; .fess_config.file_config_to_role = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
         ; .fess_config.job_log = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
         ; .fess_config.key_match = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
-        ; .fess_config.label_to_role = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
@@ -165,16 +140,6 @@ map:{
             ; esfluteDiFile = esflute_config.xml
         }
         ; .fess_config.web_config = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
-        ; .fess_config.web_config_to_label = map:{
-            ; package = config
-            ; esclientDiFile = esclient.xml
-            ; esfluteDiFile = esflute_config.xml
-        }
-        ; .fess_config.web_config_to_role = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml

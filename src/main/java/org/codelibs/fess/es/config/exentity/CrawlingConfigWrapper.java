@@ -48,11 +48,6 @@ public class CrawlingConfigWrapper implements CrawlingConfig {
     }
 
     @Override
-    public String[] getLabelTypeValues() {
-        return crawlingConfig.getLabelTypeValues();
-    }
-
-    @Override
     public String getDocumentBoost() {
         return crawlingConfig.getDocumentBoost();
     }
