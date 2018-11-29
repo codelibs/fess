@@ -52,6 +52,7 @@
 												styleClass="form-control">
 												<la:option value="search"><la:message key="labels.searchlog_log_type_search" /></la:option>
 												<la:option value="click"><la:message key="labels.searchlog_log_type_click" /></la:option>
+												<la:option value="user_info"><la:message key="labels.searchlog_log_type_user_info" /></la:option>
 												<la:option value="favorite"><la:message key="labels.searchlog_log_type_favorite" /></la:option>
 												<la:option value="search_keyword_agg"><la:message key="labels.searchlog_log_type_search_keyword" /></la:option>
 												<la:option value="search_zerohit_agg"><la:message key="labels.searchlog_log_type_search_zerohit" /></la:option>

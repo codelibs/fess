@@ -48,6 +48,14 @@ public class UserInfo extends BsUserInfo {
         asDocMeta().version(version);
     }
 
+    public String getLogMessage() {
+        return getId();
+    }
+
+    public LocalDateTime getRequestedAt() {
+        return getUpdatedAt();
+    }
+
     public void addField(final String key, final Object value) {
         fields.put(key, value);
     }

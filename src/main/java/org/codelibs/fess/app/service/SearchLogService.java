@@ -37,12 +37,15 @@ import org.codelibs.fess.es.log.allcommon.EsPagingResultBean;
 import org.codelibs.fess.es.log.cbean.ClickLogCB;
 import org.codelibs.fess.es.log.cbean.FavoriteLogCB;
 import org.codelibs.fess.es.log.cbean.SearchLogCB;
+import org.codelibs.fess.es.log.cbean.UserInfoCB;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
+import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.es.log.exentity.ClickLog;
 import org.codelibs.fess.es.log.exentity.FavoriteLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
+import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -82,6 +85,9 @@ public class SearchLogService {
     private FavoriteLogBhv favoriteLogBhv;
 
     @Resource
+    private UserInfoBhv userInfoBhv;
+
+    @Resource
     private SystemHelper systemHelper;
 
     @Resource
@@ -95,7 +101,13 @@ public class SearchLogService {
 
     public List<?> getSearchLogList(final SearchLogPager pager) {
         final EsPagingResultBean<?> list;
-        if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(pager.logType)) {
+        if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(pager.logType)) {
+            list = (EsPagingResultBean<?>) userInfoBhv.selectPage(cb -> {
+                cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
+                cb.query().addOrderBy_UpdatedAt_Desc();
+                createUserInfoCondition(pager, cb);
+            });
+        } else if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) clickLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_RequestedAt_Desc();
@@ -393,6 +405,28 @@ public class SearchLogService {
         }
     }
 
+    private void createUserInfoCondition(final SearchLogPager pager, final UserInfoCB cb) {
+        if (StringUtil.isNotBlank(pager.userSessionId)) {
+            cb.query().setId_Equal(pager.userSessionId);
+        }
+        if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
+            final String[] values = pager.requestedTimeRange.split(" - ");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            try {
+                if (values.length > 0) {
+                    cb.query().setUpdatedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
+                }
+                if (values.length > 1) {
+                    cb.query().setUpdatedAt_LessEqual(LocalDateTime.parse(values[1], formatter));
+                }
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                }
+            }
+        }
+    }
+
     private void createClickLogCondition(final SearchLogPager pager, final ClickLogCB cb) {
         if (StringUtil.isNotBlank(pager.queryId)) {
             cb.query().setQueryId_Term(pager.queryId);
@@ -427,13 +461,23 @@ public class SearchLogService {
             return clickLogBhv.selectByPK(id);
         } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
             return favoriteLogBhv.selectByPK(id);
+        } else if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
+            return userInfoBhv.selectByPK(id);
         } else {
             return searchLogBhv.selectByPK(id);
         }
     }
 
     public Map<String, String> getSearchLogMap(final String logType, final String id) {
-        if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
+        if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
+            return userInfoBhv.selectByPK(id).map(e -> {
+                final Map<String, String> params = new LinkedHashMap<>();
+                params.put("User Info ID", e.getId());
+                params.put("Created Time", FessFunctions.formatDate(e.getCreatedAt()));
+                params.put("Updated Time", FessFunctions.formatDate(e.getUpdatedAt()));
+                return params;
+            }).get();
+        } else if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
             return clickLogBhv.selectByPK(id).map(e -> {
                 final Map<String, String> params = new LinkedHashMap<>();
                 params.put("ID", e.getId());
@@ -497,6 +541,8 @@ public class SearchLogService {
             clickLogBhv.delete((ClickLog) e);
         } else if (e instanceof FavoriteLog) {
             favoriteLogBhv.delete((FavoriteLog) e);
+        } else if (e instanceof UserInfo) {
+            userInfoBhv.delete((UserInfo) e);
         } else if (e instanceof SearchLog) {
             searchLogBhv.delete((SearchLog) e);
         } else {
