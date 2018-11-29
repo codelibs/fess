@@ -18,7 +18,8 @@ package org.codelibs.fess.exec;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 
@@ -195,10 +196,14 @@ public class ThumbnailGenerator {
 
         int totalCount = 0;
         int count = 1;
-        final ForkJoinPool pool = new ForkJoinPool(options.numOfThreads);
-        while (count != 0) {
-            count = ComponentUtil.getThumbnailManager().generate(pool, options.cleanup);
-            totalCount += count;
+        final ExecutorService executorService = Executors.newFixedThreadPool(options.numOfThreads);
+        try {
+            while (count != 0) {
+                count = ComponentUtil.getThumbnailManager().generate(executorService, options.cleanup);
+                totalCount += count;
+            }
+        } finally {
+            executorService.shutdown();
         }
         return totalCount;
     }
