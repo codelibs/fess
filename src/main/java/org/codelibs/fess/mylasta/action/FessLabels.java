@@ -2841,6 +2841,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Favorite Log */
     public static final String LABELS_searchlog_log_type_favorite = "{labels.searchlog_log_type_favorite}";
 
+    /** The key of the message: User Information */
+    public static final String LABELS_searchlog_log_type_user_info = "{labels.searchlog_log_type_user_info}";
+
     /** The key of the message: Keywords */
     public static final String LABELS_searchlog_log_type_search_keyword = "{labels.searchlog_log_type_search_keyword}";
 
