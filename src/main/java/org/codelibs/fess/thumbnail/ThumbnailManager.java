@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -191,11 +191,11 @@ public class ThumbnailManager {
         thumbnailQueueBhv.batchInsert(list);
     }
 
-    public int generate(final ForkJoinPool pool, final boolean cleanup) {
+    public int generate(final ExecutorService executorService, final boolean cleanup) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> idList = new ArrayList<>();
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
-        pool.submit(() -> thumbnailQueueBhv.selectList(cb -> {
+        thumbnailQueueBhv.selectList(cb -> {
             if (StringUtil.isBlank(fessConfig.getSchedulerTargetName())) {
                 cb.query().setTarget_Equal(Constants.DEFAULT_JOB_TARGET);
             } else {
@@ -203,16 +203,24 @@ public class ThumbnailManager {
             }
             cb.query().addOrderBy_CreatedTime_Asc();
             cb.fetchFirst(fessConfig.getPageThumbnailQueueMaxFetchSizeAsInteger());
-        }).parallelStream().forEach(entity -> {
+        }).stream().map(entity -> {
             idList.add(entity.getId());
             if (cleanup) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Removing thumbnail queue: " + entity);
                 }
+                return null;
             } else {
-                process(fessConfig, entity);
+                return executorService.submit(() -> process(fessConfig, entity));
             }
-        })).join();
+        }).filter(f -> f != null).forEach(f -> {
+            try {
+                f.get();
+            } catch (Exception e) {
+                logger.warn("Failed to process a thumbnail generation.", e);
+            }
+        });
+
         if (!idList.isEmpty()) {
             thumbnailQueueBhv.queryDelete(cb -> {
                 cb.query().setId_InScope(idList);
