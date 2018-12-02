@@ -20,7 +20,6 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +28,6 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
@@ -46,14 +44,9 @@ import org.codelibs.fess.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CrawlJob {
-    private static final String REMOTE_DEBUG_OPTIONS = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=localhost:8000";
+public class CrawlJob extends ExecJob {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlJob.class);
-
-    protected JobExecutor jobExecutor;
-
-    protected String sessionId;
 
     protected String namespace = Constants.CRAWLING_INFO_SYSTEM_NAME;
 
@@ -63,40 +56,10 @@ public class CrawlJob {
 
     protected String[] dataConfigIds;
 
-    protected String logFilePath;
-
-    protected String logLevel;
-
     protected int documentExpires = -2;
-
-    protected boolean useLocalElasticsearch = true;
-
-    protected String jvmOptions;
-
-    protected String lastaEnv;
-
-    public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
-        this.jobExecutor = jobExecutor;
-        return this;
-    }
-
-    public CrawlJob sessionId(final String sessionId) {
-        this.sessionId = sessionId;
-        return this;
-    }
 
     public CrawlJob namespace(final String namespace) {
         this.namespace = namespace;
-        return this;
-    }
-
-    public CrawlJob logFilePath(final String logFilePath) {
-        this.logFilePath = logFilePath;
-        return this;
-    }
-
-    public CrawlJob logLevel(final String logLevel) {
-        this.logLevel = logLevel;
         return this;
     }
 
@@ -120,30 +83,13 @@ public class CrawlJob {
         return this;
     }
 
-    public CrawlJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
-        this.useLocalElasticsearch = useLocaleElasticsearch;
-        return this;
-    }
-
-    public CrawlJob remoteDebug() {
-        return jvmOptions(REMOTE_DEBUG_OPTIONS);
-    }
-
-    public CrawlJob jvmOptions(final String option) {
-        this.jvmOptions = option;
-        return this;
-    }
-
-    public CrawlJob lastaEnv(final String env) {
-        this.lastaEnv = env;
-        return this;
-    }
-
+    @Deprecated
     public String execute(final JobExecutor jobExecutor) {
         jobExecutor(jobExecutor);
         return execute();
     }
 
+    @Override
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
@@ -395,37 +341,4 @@ public class CrawlJob {
         }
     }
 
-    private void addSystemProperty(final List<String> crawlerCmdList, final String name, final String defaultValue, final String appendValue) {
-        final String value = System.getProperty(name);
-        if (value != null) {
-            final StringBuilder buf = new StringBuilder();
-            buf.append("-D").append(name).append("=").append(value);
-            if (appendValue != null) {
-                buf.append(appendValue);
-            }
-            crawlerCmdList.add(buf.toString());
-        } else if (defaultValue != null) {
-            crawlerCmdList.add("-D" + name + "=" + defaultValue);
-        }
-    }
-
-    protected void deleteTempDir(final File ownTmpDir) {
-        if (ownTmpDir == null) {
-            return;
-        }
-        if (!FileUtils.deleteQuietly(ownTmpDir)) {
-            logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
-        }
-    }
-
-    protected void appendJarFile(final String cpSeparator, final StringBuilder buf, final File libDir, final String basePath) {
-        final File[] jarFiles = libDir.listFiles((FilenameFilter) (dir, name) -> name.toLowerCase().endsWith(".jar"));
-        if (jarFiles != null) {
-            for (final File file : jarFiles) {
-                buf.append(cpSeparator);
-                buf.append(basePath);
-                buf.append(file.getName());
-            }
-        }
-    }
 }
