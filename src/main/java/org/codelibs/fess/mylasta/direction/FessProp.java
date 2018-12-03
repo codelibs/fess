@@ -681,6 +681,12 @@ public interface FessProp {
         return getJvmSuggestOptions().split("\n");
     }
 
+    String getJvmThumbnailOptions();
+
+    default String[] getJvmThumbnailOptionsAsArray() {
+        return getJvmThumbnailOptions().split("\n");
+    }
+
     String getCrawlerDocumentHtmlPrunedTags();
 
     default PrunedTag[] getCrawlerDocumentHtmlPrunedTagsAsArray() {
