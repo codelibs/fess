@@ -179,8 +179,8 @@ public class GenerateThumbnailJob extends ExecJob {
         if (logLevel != null) {
             cmdList.add("-Dfess.log.level=" + logLevel);
         }
-        stream(fessConfig.getJvmThumbnailOptions())
-                .of(stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
+        stream(fessConfig.getJvmThumbnailOptionsAsArray()).of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
 
         File ownTmpDir = null;
         final String tmpDir = System.getProperty("java.io.tmpdir");
