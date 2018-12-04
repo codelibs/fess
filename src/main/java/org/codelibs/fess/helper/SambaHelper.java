@@ -58,7 +58,7 @@ public class SambaHelper {
         if (logger.isDebugEnabled()) {
             try {
                 logger.debug("Processing SID: {} {} {}", type, sid, sid.toDisplayString());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
             }
         }

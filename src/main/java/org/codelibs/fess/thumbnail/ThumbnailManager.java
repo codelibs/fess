@@ -216,7 +216,7 @@ public class ThumbnailManager {
         }).filter(f -> f != null).forEach(f -> {
             try {
                 f.get();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to process a thumbnail generation.", e);
             }
         });
