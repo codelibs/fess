@@ -41,6 +41,14 @@
 			</patternset>
 			<cutdirsmapper dirs="2" />
 		</unzip>
+		<!-- fess-ds-atlassian -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-atlassian" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
+		</antcall>
 		<!-- fess-ds-csv -->
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
@@ -73,11 +81,27 @@
 			<param name="jar.version" value="12.2.0" />
 			<param name="file.version" value="12.2.0" />
 		</antcall>
+		<!-- fess-ds-gsuite -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-gsuite" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
+		</antcall>
 		<!-- fess-ds-json -->
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-json" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
+		</antcall>
+		<!-- fess-ds-slack -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-slack" />
 			<param name="jar.version" value="12.2.0" />
 			<param name="file.version" value="12.2.0" />
 		</antcall>
