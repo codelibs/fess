@@ -63,7 +63,7 @@
 		<crawler.version>3.0.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.5.0-SNAPSHOT</suggest.version>
+		<suggest.version>6.5.1</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>6.5.2</elasticsearch.version>
