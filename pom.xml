@@ -60,10 +60,10 @@
 		<utflute.version>0.8.8</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>2.4.1-SNAPSHOT</crawler.version>
+		<crawler.version>2.4.1</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.5.1-SNAPSHOT</suggest.version>
+		<suggest.version>6.5.1</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>6.5.2</elasticsearch.version>
