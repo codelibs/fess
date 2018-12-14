@@ -32,7 +32,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
-import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
@@ -45,14 +44,12 @@ import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.IndexingHelper;
-import org.codelibs.fess.helper.SambaHelper;
+import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jcifs.SID;
 
 public class FessCrawlerThread extends CrawlerThread {
     private static final Logger logger = LoggerFactory.getLogger(FessCrawlerThread.class);
@@ -66,7 +63,6 @@ public class FessCrawlerThread extends CrawlerThread {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
-            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
 
@@ -78,30 +74,22 @@ public class FessCrawlerThread extends CrawlerThread {
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<>();
                 stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
-                if (url.startsWith("smb://")) {
+                if (url.startsWith("smb:") || url.startsWith("file:") || url.startsWith("ftp:")) {
                     if (url.endsWith("/")) {
                         // directory
                         return true;
                     }
-                    if (fessConfig.isSmbRoleFromFile()) {
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    if (fessConfig.isSmbRoleFromFile() || fessConfig.isFileRoleFromFile() || fessConfig.isFtpRoleFromFile()) {
                         // head method
                         responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                         if (responseData == null) {
                             return true;
                         }
 
-                        final SID[] sids = (SID[]) responseData.getMetaDataMap().get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
-                        if (sids != null) {
-                            for (final SID sid : sids) {
-                                final String accountId = sambaHelper.getAccountId(sid);
-                                if (accountId != null) {
-                                    roleTypeList.add(accountId);
-                                }
-                            }
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
-                            }
-                        }
+                        roleTypeList.addAll(permissionHelper.getSmbRoleTypeList(responseData));
+                        roleTypeList.addAll(permissionHelper.getFileRoleTypeList(responseData));
+                        roleTypeList.addAll(permissionHelper.getFtpRoleTypeList(responseData));
                     }
                 }
                 dataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
