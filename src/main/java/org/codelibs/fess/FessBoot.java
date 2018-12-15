@@ -19,6 +19,9 @@ package org.codelibs.fess;
 
 import java.io.File;
 
+import org.apache.catalina.Host;
+import org.apache.catalina.core.StandardHost;
+import org.apache.catalina.valves.ErrorReportValve;
 import org.codelibs.core.lang.StringUtil;
 import org.dbflute.tomcat.TomcatBoot;
 
@@ -117,5 +120,22 @@ public class FessBoot extends TomcatBoot {
 
     protected static String getTomcatConfigPath() {
         return System.getProperty(TOMCAT_CONFIG_PATH);
+    }
+
+    @Override
+    protected void adjustServer() {
+        super.adjustServer();
+        final Host host = server.getHost();
+        if (host instanceof StandardHost) {
+            ((StandardHost) host).setErrorReportValveClass(CustomErrorReportValve.class.getName());
+        }
+    }
+
+    public static class CustomErrorReportValve extends ErrorReportValve {
+        public CustomErrorReportValve() {
+            super();
+            setShowReport(false);
+            setShowServerInfo(false);
+        }
     }
 }
