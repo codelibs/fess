@@ -21,8 +21,8 @@ import java.io.File;
 
 import org.apache.catalina.Host;
 import org.apache.catalina.core.StandardHost;
-import org.apache.catalina.valves.ErrorReportValve;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
 import org.dbflute.tomcat.TomcatBoot;
 
 public class FessBoot extends TomcatBoot {
@@ -127,15 +127,7 @@ public class FessBoot extends TomcatBoot {
         super.adjustServer();
         final Host host = server.getHost();
         if (host instanceof StandardHost) {
-            ((StandardHost) host).setErrorReportValveClass(CustomErrorReportValve.class.getName());
-        }
-    }
-
-    public static class CustomErrorReportValve extends ErrorReportValve {
-        public CustomErrorReportValve() {
-            super();
-            setShowReport(false);
-            setShowServerInfo(false);
+            ((StandardHost) host).setErrorReportValveClass(SuppressErrorReportValve.class.getName());
         }
     }
 }
