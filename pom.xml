@@ -496,11 +496,13 @@
 							</mapper>
 						</data>
 						<data>
-							<type>file</type>
-							<src>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/FessBoot.class</src>
-							<dst>${packaging.fess.lib.dir}/classes/org/codelibs/fess/FessBoot.class</dst>
+							<type>directory</type>
+							<src>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess</src>
+							<dst>${packaging.fess.lib.dir}/classes/org/codelibs/fess</dst>
+							<includes>FessBoot*.class</includes>
 							<mapper>
 								<type>perm</type>
+								<prefix>${packaging.fess.lib.dir}/classes/org/codelibs/fess</prefix>
 								<user>${packaging.fess.user}</user>
 								<group>${packaging.fess.group}</group>
 							</mapper>
