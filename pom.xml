@@ -504,6 +504,16 @@
 								<group>${packaging.fess.group}</group>
 							</mapper>
 						</data>
+						<data>
+							<type>directory</type>
+							<src>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/tomcat</src>
+							<mapper>
+								<type>perm</type>
+								<prefix>${packaging.fess.lib.dir}/classes/org/codelibs/fess/tomcat</prefix>
+								<user>${packaging.fess.user}</user>
+								<group>${packaging.fess.group}</group>
+							</mapper>
+						</data>
 						<!-- Add configuration files -->
 						<data>
 							<type>files</type>
@@ -758,6 +768,7 @@
 									<location>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess</location>
 									<includes>
 										<include>FessBoot**</include>
+										<include>tomcat/**</include>
 									</includes>
 								</source>
 							</sources>
