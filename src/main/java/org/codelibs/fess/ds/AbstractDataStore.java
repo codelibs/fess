@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -104,7 +105,7 @@ public abstract class AbstractDataStore implements DataStore {
         // id
         // virtual_host
         defaultDataMap.put(fessConfig.getIndexFieldVirtualHost(),
-                stream(config.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n])));
+                stream(config.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.toList())));
 
         storeData(config, callback, paramMap, configScriptMap, defaultDataMap);
 

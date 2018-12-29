@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.xml.transform.TransformerException;
@@ -462,7 +463,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // virtualHosts
         putResultDataBody(dataMap, fessConfig.getIndexFieldVirtualHost(),
-                stream(crawlingConfig.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n])));
+                stream(crawlingConfig.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.toList())));
         // id
         putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
         // parentId
