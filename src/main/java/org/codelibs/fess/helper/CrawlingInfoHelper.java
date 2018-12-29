@@ -57,8 +57,6 @@ public class CrawlingInfoHelper {
 
     protected int maxSessionIdsInList;
 
-    protected int urlIdPrefixLength = 445;
-
     protected CrawlingInfoService getCrawlingInfoService() {
         return ComponentUtil.getComponent(CrawlingInfoService.class);
     }
@@ -158,9 +156,22 @@ public class CrawlingInfoHelper {
     public String generateId(final Map<String, Object> dataMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = (String) dataMap.get(fessConfig.getIndexFieldUrl());
+        final StringBuilder buf = new StringBuilder(1000);
+
         @SuppressWarnings("unchecked")
         final List<String> roleTypeList = (List<String>) dataMap.get(fessConfig.getIndexFieldRole());
-        return generateId(url, roleTypeList);
+        buf.append(url);
+        if (roleTypeList != null && !roleTypeList.isEmpty()) {
+            Collections.sort(roleTypeList);
+            buf.append(";role=");
+            buf.append(String.join(",", roleTypeList));
+        }
+
+        final String urlId = buf.toString().trim();
+        if (logger.isDebugEnabled()) {
+            logger.debug("urlId;{}", urlId);
+        }
+        return generateId(urlId);
     }
 
     public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
@@ -191,15 +202,7 @@ public class CrawlingInfoHelper {
                 });
     }
 
-    protected String generateId(final String url, final List<String> roleTypeList) {
-        final StringBuilder buf = new StringBuilder(1000);
-        buf.append(url);
-        if (roleTypeList != null && !roleTypeList.isEmpty()) {
-            Collections.sort(roleTypeList);
-            buf.append(";role=");
-            buf.append(String.join(",", roleTypeList));
-        }
-        final String urlId = buf.toString().trim();
+    protected String generateId(final String urlId) {
         final StringBuilder encodedBuf = new StringBuilder(urlId.length() + 100);
         for (int i = 0; i < urlId.length(); i++) {
             final char c = urlId.charAt(i);
@@ -246,22 +249,10 @@ public class CrawlingInfoHelper {
         }
 
         final String id = encodedBuf.toString();
-        if (id.getBytes(Constants.CHARSET_UTF_8).length <= urlIdPrefixLength) {
-            return id;
-        }
-        final String longId = id.substring(0, urlIdPrefixLength) + MessageDigestUtil.digest("SHA-256", id.substring(urlIdPrefixLength));
-        if (longId.getBytes(Constants.CHARSET_UTF_8).length <= urlIdPrefixLength + 64) {
-            return longId;
-        }
-        return longId.substring(0, urlIdPrefixLength + 64);
+        return MessageDigestUtil.digest(ComponentUtil.getFessConfig().getIndexIdDigestAlgorithm(), id);
     }
 
     public void setMaxSessionIdsInList(final int maxSessionIdsInList) {
         this.maxSessionIdsInList = maxSessionIdsInList;
     }
-
-    public void setUrlIdPrefixLength(final int urlIdPrefixLength) {
-        this.urlIdPrefixLength = urlIdPrefixLength;
-    }
-
 }

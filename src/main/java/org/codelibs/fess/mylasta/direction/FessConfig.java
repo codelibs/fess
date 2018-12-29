@@ -363,6 +363,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0-1 */
     String INDEX_auto_expand_replicas = "index.auto_expand_replicas";
 
+    /** The key of the configuration. e.g. SHA-512 */
+    String INDEX_ID_DIGEST_ALGORITHM = "index.id.digest.algorithm";
+
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
 
@@ -2483,6 +2486,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAutoExpandReplicas();
+
+    /**
+     * Get the value for the key 'index.id.digest.algorithm'. <br>
+     * The value is, e.g. SHA-512 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexIdDigestAlgorithm();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -6440,6 +6450,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_auto_expand_replicas);
         }
 
+        public String getIndexIdDigestAlgorithm() {
+            return get(FessConfig.INDEX_ID_DIGEST_ALGORITHM);
+        }
+
         public String getIndexFieldFavoriteCount() {
             return get(FessConfig.INDEX_FIELD_favorite_count);
         }
@@ -8377,6 +8391,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_CODEC, "default");
             defaultMap.put(FessConfig.INDEX_number_of_shards, "5");
             defaultMap.put(FessConfig.INDEX_auto_expand_replicas, "0-1");
+            defaultMap.put(FessConfig.INDEX_ID_DIGEST_ALGORITHM, "SHA-512");
             defaultMap.put(FessConfig.INDEX_FIELD_favorite_count, "favorite_count");
             defaultMap.put(FessConfig.INDEX_FIELD_click_count, "click_count");
             defaultMap.put(FessConfig.INDEX_FIELD_config_id, "config_id");
