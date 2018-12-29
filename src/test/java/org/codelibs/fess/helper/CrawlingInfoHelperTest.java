@@ -36,14 +36,18 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://example.com/");
 
-        assertEquals("http:%2F%2Fexample.com%2F", crawlingInfoHelper.generateId(dataMap));
+        assertEquals(
+                "6b2d3770573e53f9f2d743e0598fad397c34968566001329c436f041871fd8af950b32ce77da6cc4a5561a6ccf4d2d7741269209ac254c234a972029ec92110e",
+                crawlingInfoHelper.generateId(dataMap));
 
         final List<String> browserTypeList = new ArrayList<String>();
         dataMap.put("type", browserTypeList);
         final List<String> roleTypeList = new ArrayList<String>();
         dataMap.put("role", roleTypeList);
 
-        assertEquals("http:%2F%2Fexample.com%2F", crawlingInfoHelper.generateId(dataMap));
+        assertEquals(
+                "6b2d3770573e53f9f2d743e0598fad397c34968566001329c436f041871fd8af950b32ce77da6cc4a5561a6ccf4d2d7741269209ac254c234a972029ec92110e",
+                crawlingInfoHelper.generateId(dataMap));
     }
 
     public void test_generateId_roleType() {
@@ -53,54 +57,63 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         roleTypeList.add("admin");
         dataMap.put("role", roleTypeList);
 
-        assertEquals("http:%2F%2Fexample.com%2F;role=admin", crawlingInfoHelper.generateId(dataMap));
+        assertEquals(
+                "6b02bcff48a4e3935efece48eaed0ec4048ab8ccad720ee44bb7f0b66bc68acec40c1dce53737a3f3d800d4316f2ba3d3449b55cb97f090f034ace4ba8a39ef9",
+                crawlingInfoHelper.generateId(dataMap));
 
         roleTypeList.add("guest");
 
-        assertEquals("http:%2F%2Fexample.com%2F;role=admin,guest", crawlingInfoHelper.generateId(dataMap));
+        assertEquals(
+                "cce703dfb6988fe8e3be6439673d8154e67811f1653551026f72ac41b9acb6e37510e2a557742e058a18cb1745d11badf651f8d2c568a8c67e20a9d5392618e8",
+                crawlingInfoHelper.generateId(dataMap));
 
         final List<String> browserTypeList = new ArrayList<String>();
         dataMap.put("type", browserTypeList);
 
-        assertEquals("http:%2F%2Fexample.com%2F;role=admin,guest", crawlingInfoHelper.generateId(dataMap));
+        assertEquals(
+                "cce703dfb6988fe8e3be6439673d8154e67811f1653551026f72ac41b9acb6e37510e2a557742e058a18cb1745d11badf651f8d2c568a8c67e20a9d5392618e8",
+                crawlingInfoHelper.generateId(dataMap));
     }
 
     public void test_generateId_long() {
         for (int i = 0; i < 1000; i++) {
             final String value = RandomStringUtils.randomAlphabetic(550);
-            assertEquals(440, crawlingInfoHelper.generateId(value.substring(0, 440), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 450), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 460), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 470), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 480), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 490), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 500), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 510), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 520), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.toString(), null).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 440)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 450)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 460)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 470)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 480)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 490)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 500)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 510)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 520)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.toString()).length());
         }
         for (int i = 0; i < 1000; i++) {
             final String value = RandomStringUtils.randomAscii(550);
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 450), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 460), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 470), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 480), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 490), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 500), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 510), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.substring(0, 520), null).length());
-            assertEquals(509, crawlingInfoHelper.generateId(value.toString(), null).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 450)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 460)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 470)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 480)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 490)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 500)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 510)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.substring(0, 520)).length());
+            assertEquals(128, crawlingInfoHelper.generateId(value.toString()).length());
         }
 
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < 550; i++) {
             buf.append('a');
         }
-        assertEquals("aaaaaaaaaaaaaaa9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318",
-                crawlingInfoHelper.generateId(buf.substring(0, 500), null).substring(430));
-        assertEquals("aaaaaaaaaaaaaaa635361c48bb9eab14198e76ea8ab7f1a41685d6ad62aa9146d301d4f17eb0ae0",
-                crawlingInfoHelper.generateId(buf.substring(0, 510), null).substring(430));
-        assertEquals("aaaaaaaaaaaaaaa8af881bc88895bd9d8cea975a7d06dc0275d9db9d57f138216936b65e8b06489",
-                crawlingInfoHelper.generateId(buf.substring(0, 520), null).substring(430));
+        assertEquals(
+                "c11e9ec4fa5ccd0c37c78e7e43555c7061a4dfe8d250a66cad3abaf190e4519cae5b0dce520fb94667cb37e5bbd29b226638cc6172169706a8ae36b000a6900c",
+                crawlingInfoHelper.generateId(buf.substring(0, 500)));
+        assertEquals(
+                "9f11520b58e7d703c02e7987ed2f44c89b4d5f6aea56c034208837d701824dcd0e1ddbb757e6f86dab0cdbbf3871989dfd4a86c153089a7e872ad081b6862a2e",
+                crawlingInfoHelper.generateId(buf.substring(0, 510)));
+        assertEquals(
+                "6be41c30a9e5e7724f87134cecc6e5aa6fe771773b8845867ce41b1a6d46d50b25f504259c8e9a6657f6ada8865d06ab3bcee5abd306cdd1f43d60c451b34eb6",
+                crawlingInfoHelper.generateId(buf.substring(0, 520)));
     }
 }
