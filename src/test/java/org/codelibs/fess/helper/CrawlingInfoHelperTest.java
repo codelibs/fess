@@ -37,7 +37,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         dataMap.put("url", "http://example.com/");
 
         assertEquals(
-                "6b2d3770573e53f9f2d743e0598fad397c34968566001329c436f041871fd8af950b32ce77da6cc4a5561a6ccf4d2d7741269209ac254c234a972029ec92110e",
+                "c1f123e7545bf787a40d75141d965910d75df78f2fa170b26ebdbf2285e39ce77de503e4ef769fcfe3d6dbec1cc488818c66416ed647472bd252b564a38c6aef",
                 crawlingInfoHelper.generateId(dataMap));
 
         final List<String> browserTypeList = new ArrayList<String>();
@@ -46,7 +46,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         dataMap.put("role", roleTypeList);
 
         assertEquals(
-                "6b2d3770573e53f9f2d743e0598fad397c34968566001329c436f041871fd8af950b32ce77da6cc4a5561a6ccf4d2d7741269209ac254c234a972029ec92110e",
+                "c1f123e7545bf787a40d75141d965910d75df78f2fa170b26ebdbf2285e39ce77de503e4ef769fcfe3d6dbec1cc488818c66416ed647472bd252b564a38c6aef",
                 crawlingInfoHelper.generateId(dataMap));
     }
 
@@ -58,20 +58,48 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         dataMap.put("role", roleTypeList);
 
         assertEquals(
-                "6b02bcff48a4e3935efece48eaed0ec4048ab8ccad720ee44bb7f0b66bc68acec40c1dce53737a3f3d800d4316f2ba3d3449b55cb97f090f034ace4ba8a39ef9",
+                "4d9303e238ab15c4fde19b1e5ae09b272f418bd0a33694f8c57eaff1e8a999e2123751040e023b1cb085cc5d2bfe8311113e48e84c41bbf01b009011640269be",
                 crawlingInfoHelper.generateId(dataMap));
 
         roleTypeList.add("guest");
 
         assertEquals(
-                "cce703dfb6988fe8e3be6439673d8154e67811f1653551026f72ac41b9acb6e37510e2a557742e058a18cb1745d11badf651f8d2c568a8c67e20a9d5392618e8",
+                "ad6cdfb1257db74e8e12df16cf8672ca11e8ac8a2b172a529dd2470252b43dbf136f5a55658c141b8bd5eb47586c9affa30a7ff3db104dace5fe12f03e1d35c7",
                 crawlingInfoHelper.generateId(dataMap));
 
         final List<String> browserTypeList = new ArrayList<String>();
         dataMap.put("type", browserTypeList);
 
         assertEquals(
-                "cce703dfb6988fe8e3be6439673d8154e67811f1653551026f72ac41b9acb6e37510e2a557742e058a18cb1745d11badf651f8d2c568a8c67e20a9d5392618e8",
+                "ad6cdfb1257db74e8e12df16cf8672ca11e8ac8a2b172a529dd2470252b43dbf136f5a55658c141b8bd5eb47586c9affa30a7ff3db104dace5fe12f03e1d35c7",
+                crawlingInfoHelper.generateId(dataMap));
+    }
+
+    public void test_generateId_virtualHost() {
+        final Map<String, Object> dataMap = new HashMap<String, Object>();
+        dataMap.put("url", "http://example.com/");
+        final List<String> roleTypeList = new ArrayList<String>();
+        roleTypeList.add("admin");
+        dataMap.put("role", roleTypeList);
+        final List<String> virtualHostList = new ArrayList<String>();
+        virtualHostList.add("site1");
+        dataMap.put("virtual_host", virtualHostList);
+
+        assertEquals(
+                "6823bba6ee0f41db9f69063af4d0e074b9515b32a493d248e8dce830926e11344eb79f841deac0758d46a071e453246c1a758508f1e5e5a3bcea2e47d1979f02",
+                crawlingInfoHelper.generateId(dataMap));
+
+        virtualHostList.add("site2");
+
+        assertEquals(
+                "18189fc1f83634e5201affc8c4f1971cfa1f1ea22c1c9d7eb239c31badcdb679fd15348eb6538c9b344e4a4c299f2eb5779591f44d4e29e17f9ef40fdbe1749b",
+                crawlingInfoHelper.generateId(dataMap));
+
+        final List<String> browserTypeList = new ArrayList<String>();
+        dataMap.put("type", browserTypeList);
+
+        assertEquals(
+                "18189fc1f83634e5201affc8c4f1971cfa1f1ea22c1c9d7eb239c31badcdb679fd15348eb6538c9b344e4a4c299f2eb5779591f44d4e29e17f9ef40fdbe1749b",
                 crawlingInfoHelper.generateId(dataMap));
     }
 

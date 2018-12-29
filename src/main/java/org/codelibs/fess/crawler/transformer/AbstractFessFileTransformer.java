@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
@@ -288,7 +288,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // virtualHosts
         putResultDataBody(dataMap, fessConfig.getIndexFieldVirtualHost(),
-                stream(crawlingConfig.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n])));
+                stream(crawlingConfig.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.toList())));
         // TODO date
         // lang
         if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentFileDefaultLang())) {

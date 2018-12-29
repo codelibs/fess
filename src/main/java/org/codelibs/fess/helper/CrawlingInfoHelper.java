@@ -163,8 +163,17 @@ public class CrawlingInfoHelper {
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
             Collections.sort(roleTypeList);
-            buf.append(";role=");
+            buf.append(";r=");
             buf.append(String.join(",", roleTypeList));
+        }
+
+        @SuppressWarnings("unchecked")
+        final List<String> virtualHostList = (List<String>) dataMap.get(fessConfig.getIndexFieldVirtualHost());
+        buf.append(url);
+        if (virtualHostList != null && !virtualHostList.isEmpty()) {
+            Collections.sort(virtualHostList);
+            buf.append(";v=");
+            buf.append(String.join(",", virtualHostList));
         }
 
         final String urlId = buf.toString().trim();
