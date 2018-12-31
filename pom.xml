@@ -459,7 +459,7 @@
 			<plugin>
 				<groupId>org.vafer</groupId>
 				<artifactId>jdeb</artifactId>
-				<version>1.6</version>
+				<version>1.7</version>
 				<configuration>
 					<deb>${project.build.directory}/releases/${project.artifactId}-${project.version}.deb</deb>
 					<controlDir>${project.build.directory}/generated-packaging/deb/scripts</controlDir>
@@ -1260,7 +1260,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
-			<version>1.25.0</version>
+			<version>1.27.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1275,7 +1275,7 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-jackson2</artifactId>
-			<version>1.25.0</version>
+			<version>1.27.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
@@ -1310,12 +1310,12 @@
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-			<version>62.1</version>
+			<version>63.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.apis</groupId>
 			<artifactId>google-api-services-analyticsreporting</artifactId>
-			<version>v4-rev127-1.25.0</version>
+			<version>v4-rev128-1.25.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -1410,14 +1410,14 @@
 		<dependency>
 			<groupId>com.github.jknack</groupId>
 			<artifactId>handlebars</artifactId>
-			<version>4.1.0</version>
+			<version>4.1.2</version>
 		</dependency>
 
 		<!-- groovy -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy</artifactId>
-			<version>2.5.2</version>
+			<version>2.5.5</version>
 		</dependency>
 
 		<!-- Tomcat -->
@@ -1476,7 +1476,7 @@
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
-			<version>3.1.1</version>
+			<version>3.2.0</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
