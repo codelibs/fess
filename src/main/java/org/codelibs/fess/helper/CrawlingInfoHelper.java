@@ -169,7 +169,6 @@ public class CrawlingInfoHelper {
 
         @SuppressWarnings("unchecked")
         final List<String> virtualHostList = (List<String>) dataMap.get(fessConfig.getIndexFieldVirtualHost());
-        buf.append(url);
         if (virtualHostList != null && !virtualHostList.isEmpty()) {
             Collections.sort(virtualHostList);
             buf.append(";v=");
@@ -177,9 +176,6 @@ public class CrawlingInfoHelper {
         }
 
         final String urlId = buf.toString().trim();
-        if (logger.isDebugEnabled()) {
-            logger.debug("urlId;{}", urlId);
-        }
         return generateId(urlId);
     }
 
