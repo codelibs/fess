@@ -107,6 +107,7 @@
 				<include name="learning-to-rank/antlr4-runtime-*" />
 				<include name="learning-to-rank/compiler-*" />
 				<include name="learning-to-rank/asm-*" />
+				<include name="learning-to-rank/commons-math3-*" />
 			</fileset>
 		</delete>
 	</target>
