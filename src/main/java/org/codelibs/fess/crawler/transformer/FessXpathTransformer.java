@@ -106,6 +106,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected boolean useGoogleOffOn = true;
 
+    protected Map<String, Boolean> fieldPrunedRuleMap = new HashMap<>();
+
     @PostConstruct
     public void init() {
         fessConfig = ComponentUtil.getFessConfig();
@@ -170,7 +172,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 case XObject.CLASS_RTREEFRAG:
                 case XObject.CLASS_UNRESOLVEDVARIABLE:
                 default:
-                    final Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
+                    final Boolean isPruned = fieldPrunedRuleMap.get(entry.getKey());
+                    Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
+                    if (isPruned != null && isPruned.booleanValue()) {
+                        value = pruneNode(value);
+                    }
                     putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
                     break;
                 }
@@ -917,5 +923,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             return new URL(url);
         }
         return null;
+    }
+
+    public void addFieldRule(final String name, final String xpath, final boolean isPruned) {
+        addFieldRule(name, xpath);
+        fieldPrunedRuleMap.put(name, isPruned);
     }
 }
