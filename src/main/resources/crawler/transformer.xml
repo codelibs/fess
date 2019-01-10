@@ -19,10 +19,12 @@
 		<postConstruct name="addFieldRule">
 			<arg>"title"</arg>
 			<arg>"//TITLE"</arg>
+			<arg>true</arg>
 		</postConstruct>
 		<postConstruct name="addFieldRule">
 			<arg>"important_content"</arg>
 			<arg>"//*[self::H1 or self::H2 or self::H3]"</arg>
+			<arg>true</arg>
 		</postConstruct>
 	</component>
 
