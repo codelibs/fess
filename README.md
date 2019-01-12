@@ -1,5 +1,8 @@
-Enterprise Search Server: Fess [![Build Status](https://travis-ci.org/codelibs/fess.svg?branch=master)](https://travis-ci.org/codelibs/fess)
+Enterprise Search Server: Fess [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Fess+is+very+powerful+and+easily+deployable+Enterprise+Search+Server.&url=https://github.com/codelibs/fess)
 ====
+[![Build Status](https://travis-ci.org/codelibs/fess.svg?branch=master)](https://travis-ci.org/codelibs/fess) 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gitbucket/gitbucket/blob/master/LICENSE)
 
 ## Overview
 
