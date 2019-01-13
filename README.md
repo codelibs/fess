@@ -40,7 +40,7 @@ The release page is [HERE](https://github.com/codelibs/fess/releases "download")
 
 For the details, see [Installation Guide](http://fess.codelibs.org/12.4/install/index.html).
 
-### Access Fess
+### Browser UI
 
 - Search UI: http://localhost:8080/
 
@@ -76,6 +76,7 @@ Fess crawls the following Storage or API:
  - [Gitbucket](https://github.com/codelibs/fess-ds-gitbucket)
  - [G Suite](https://github.com/codelibs/fess-ds-gsuite)
  - [JSON](https://github.com/codelibs/fess-ds-json)
+ - [Office 365](https://github.com/codelibs/fess-ds-office365)
  - [Slack](https://github.com/codelibs/fess-ds-slack)
 
 ## Localization
