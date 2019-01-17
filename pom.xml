@@ -243,7 +243,7 @@
 				<configuration>
 					<header>https://www.codelibs.org/assets/license/header.txt</header>
 					<properties>
-						<year>2018</year>
+						<year>2019</year>
 					</properties>
 					<includes>
 						<include>src/**/*.java</include>
