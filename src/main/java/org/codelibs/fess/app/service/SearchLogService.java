@@ -119,6 +119,9 @@ public class SearchLogService {
                 createClickLogCondition(pager, cb);
                 cb.aggregation().setUrl_Terms(SearchLogPager.LOG_TYPE_CLICK_COUNT, op -> {
                     op.size(pager.getPageSize());
+                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
+                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
+                    }
                 }, null);
             });
             final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_CLICK_COUNT);
@@ -143,6 +146,9 @@ public class SearchLogService {
                 createFavoriteLogCondition(pager, cb);
                 cb.aggregation().setUrl_Terms(SearchLogPager.LOG_TYPE_FAVORITE_COUNT, op -> {
                     op.size(pager.getPageSize());
+                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
+                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
+                    }
                 }, null);
             });
             final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_FAVORITE_COUNT);
@@ -289,6 +295,9 @@ public class SearchLogService {
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setSearchWord_Terms(SearchLogPager.LOG_TYPE_SEARCH_KEYWORD, op -> {
                     op.size(pager.getPageSize());
+                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
+                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
+                    }
                 }, null);
             });
             final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_KEYWORD);
@@ -308,6 +317,9 @@ public class SearchLogService {
                 cb.query().setHitCount_Equal(0L);
                 cb.aggregation().setSearchWord_Terms(SearchLogPager.LOG_TYPE_SEARCH_ZEROHIT, op -> {
                     op.size(pager.getPageSize());
+                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
+                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
+                    }
                 }, null);
             });
             final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_ZEROHIT);
