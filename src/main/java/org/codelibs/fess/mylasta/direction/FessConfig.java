@@ -926,6 +926,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGING_SEARCH_PAGE_MAX_SIZE = "paging.search.page.max.size";
 
+    /** The key of the configuration. e.g. -1 */
+    String SEARCHLOG_AGG_SHARD_SIZE = "searchlog.agg.shard.size";
+
     /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_MIN_WIDTH = "thumbnail.html.image.min.width";
 
@@ -4424,6 +4427,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPagingSearchPageMaxSizeAsInteger();
 
     /**
+     * Get the value for the key 'searchlog.agg.shard.size'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSearchlogAggShardSize();
+
+    /**
+     * Get the value for the key 'searchlog.agg.shard.size' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSearchlogAggShardSizeAsInteger();
+
+    /**
      * Get the value for the key 'thumbnail.html.image.min.width'. <br>
      * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7462,6 +7480,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE);
         }
 
+        public String getSearchlogAggShardSize() {
+            return get(FessConfig.SEARCHLOG_AGG_SHARD_SIZE);
+        }
+
+        public Integer getSearchlogAggShardSizeAsInteger() {
+            return getAsInteger(FessConfig.SEARCHLOG_AGG_SHARD_SIZE);
+        }
+
         public String getThumbnailHtmlImageMinWidth() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH);
         }
@@ -8563,6 +8589,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");
+            defaultMap.put(FessConfig.SEARCHLOG_AGG_SHARD_SIZE, "-1");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO, "3.0");
