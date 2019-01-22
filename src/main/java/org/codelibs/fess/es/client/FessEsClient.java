@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -947,12 +948,15 @@ public class FessEsClient implements Client {
         }
     }
 
-    public void addAll(final String index, final String type, final List<Map<String, Object>> docList) {
+    public void addAll(final String index, final String type, final List<Map<String, Object>> docList,
+            final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
             final Object id = doc.remove(fessConfig.getIndexFieldId());
-            bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(new DocMap(doc)));
+            final IndexRequestBuilder builder = client.prepareIndex(index, type, id.toString()).setSource(new DocMap(doc));
+            options.accept(doc, builder);
+            bulkRequestBuilder.add(builder);
         }
         final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
         if (response.hasFailures()) {
