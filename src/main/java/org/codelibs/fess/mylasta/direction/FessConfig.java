@@ -153,6 +153,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); */
     String JOB_TEMPLATE_SCRIPT = "job.template.script";
 
+    /** The key of the configuration. e.g. 0 */
+    String JOB_MAX_CRAWLER_PROCESSES = "job.max.crawler.processes";
+
     /** The key of the configuration. e.g. java */
     String JAVA_COMMAND_PATH = "java.command.path";
 
@@ -1655,6 +1658,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateScript();
+
+    /**
+     * Get the value for the key 'job.max.crawler.processes'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobMaxCrawlerProcesses();
+
+    /**
+     * Get the value for the key 'job.max.crawler.processes' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getJobMaxCrawlerProcessesAsInteger();
 
     /**
      * Get the value for the key 'java.command.path'. <br>
@@ -6047,6 +6065,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.JOB_TEMPLATE_SCRIPT);
         }
 
+        public String getJobMaxCrawlerProcesses() {
+            return get(FessConfig.JOB_MAX_CRAWLER_PROCESSES);
+        }
+
+        public Integer getJobMaxCrawlerProcessesAsInteger() {
+            return getAsInteger(FessConfig.JOB_MAX_CRAWLER_PROCESSES);
+        }
+
         public String getJavaCommandPath() {
             return get(FessConfig.JAVA_COMMAND_PATH);
         }
@@ -8395,6 +8421,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap
                     .put(FessConfig.JOB_TEMPLATE_SCRIPT,
                             "return container.getComponent(\"crawlJob\").logLevel(\"info\").sessionId(\"{3}\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
+            defaultMap.put(FessConfig.JOB_MAX_CRAWLER_PROCESSES, "0");
             defaultMap.put(FessConfig.JAVA_COMMAND_PATH, "java");
             defaultMap.put(FessConfig.PATH_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.USE_OWN_TMP_DIR, "true");

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletContext;
 
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.Crawler;
 import org.codelibs.fess.helper.ProcessHelper;
@@ -91,6 +93,16 @@ public class CrawlJob extends ExecJob {
 
     @Override
     public String execute() {
+        //   check # of crawler processes
+        final int maxCrawlerProcesses = ComponentUtil.getFessConfig().getJobMaxCrawlerProcessesAsInteger();
+        if (maxCrawlerProcesses > 0) {
+            final int runningJobCount = getRunningJobCount();
+            if (runningJobCount > maxCrawlerProcesses) {
+                throw new FessSystemException(runningJobCount + " crawler processes are running. Max processes are " + maxCrawlerProcesses
+                        + ".");
+            }
+        }
+
         final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
 
@@ -154,6 +166,27 @@ public class CrawlJob extends ExecJob {
 
         return resultBuf.toString();
 
+    }
+
+    protected int getRunningJobCount() {
+        final AtomicInteger counter = new AtomicInteger(0);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        ComponentUtil.getComponent(ScheduledJobBhv.class).selectCursor(cb -> {
+            cb.query().setAvailable_Equal(Constants.T);
+            cb.query().setCrawler_Equal(Constants.T);
+        }, scheduledJob -> {
+            if (fessConfig.isSchedulerTarget(scheduledJob.getTarget())) {
+                if (scheduledJob.isRunning()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(scheduledJob.getId() + " is running.");
+                    }
+                    counter.incrementAndGet();
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug(scheduledJob.getId() + " is not running.");
+                }
+            }
+        });
+        return counter.get();
     }
 
     protected void executeCrawler() {
