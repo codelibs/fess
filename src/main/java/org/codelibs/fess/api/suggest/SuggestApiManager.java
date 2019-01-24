@@ -35,6 +35,7 @@ import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
@@ -163,7 +164,7 @@ public class SuggestApiManager extends BaseJsonApiManager {
         writeJsonResponse(status, buf.toString(), errMsg);
     }
 
-    protected static class RequestParameter implements SearchRequestParams {
+    protected static class RequestParameter extends SearchRequestParams {
         private final String query;
 
         private final String[] fields;
@@ -292,6 +293,11 @@ public class SuggestApiManager extends BaseJsonApiManager {
         @Override
         public String getSimilarDocHash() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public HighlightInfo getHighlightInfo() {
+            return new HighlightInfo();
         }
     }
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
@@ -148,6 +149,11 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
             @Override
             public String getSimilarDocHash() {
                 return null;
+            }
+
+            @Override
+            public HighlightInfo getHighlightInfo() {
+                return new HighlightInfo();
             }
 
         }).build();

@@ -51,6 +51,7 @@ import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -942,6 +943,7 @@ public class FessEsClient implements Client {
         private int size = Constants.DEFAULT_PAGE_SIZE;
         private GeoInfo geoInfo;
         private FacetInfo facetInfo;
+        private HighlightInfo highlightInfo;
         private String similarDocHash;
         private SearchRequestType searchRequestType = SearchRequestType.SEARCH;
         private boolean isScroll = false;
@@ -960,8 +962,9 @@ public class FessEsClient implements Client {
             params.put("responseFields", responseFields);
             params.put("offset", offset);
             params.put("size", size);
-            //            params.put("geoInfo", geoInfo);
-            //            params.put("facetInfo", facetInfo);
+            // TODO support rescorer(convert to map)
+            // params.put("geoInfo", geoInfo);
+            // params.put("facetInfo", facetInfo);
             params.put("similarDocHash", similarDocHash);
             return params;
         }
@@ -993,6 +996,11 @@ public class FessEsClient implements Client {
 
         public SearchConditionBuilder geoInfo(final GeoInfo geoInfo) {
             this.geoInfo = geoInfo;
+            return this;
+        }
+
+        public SearchConditionBuilder highlightInfo(final HighlightInfo highlightInfo) {
+            this.highlightInfo = highlightInfo;
             return this;
         }
 
@@ -1059,8 +1067,8 @@ public class FessEsClient implements Client {
             // highlighting
             final HighlightBuilder highlightBuilder = new HighlightBuilder();
             queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf)
-                    .highlighterType(fessConfig.getQueryHighlightType()).fragmentSize(fessConfig.getQueryHighlightFragmentSizeAsInteger())
-                    .numOfFragments(fessConfig.getQueryHighlightNumberOfFragmentsAsInteger()))));
+                    .highlighterType(highlightInfo.getType()).fragmentSize(highlightInfo.getFragmentSize())
+                    .numOfFragments(highlightInfo.getNumOfFragments()))));
             searchRequestBuilder.highlighter(highlightBuilder);
 
             // facets

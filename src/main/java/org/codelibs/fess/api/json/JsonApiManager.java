@@ -40,6 +40,7 @@ import org.codelibs.fess.app.service.FavoriteLogService;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -674,7 +675,7 @@ public class JsonApiManager extends BaseJsonApiManager {
 
     }
 
-    protected static class JsonRequestParams implements SearchRequestParams {
+    protected static class JsonRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -806,5 +807,9 @@ public class JsonApiManager extends BaseJsonApiManager {
             return request.getParameter("sdh");
         }
 
+        @Override
+        public HighlightInfo getHighlightInfo() {
+            return ComponentUtil.getViewHelper().createHighlightInfo();
+        }
     }
 }
