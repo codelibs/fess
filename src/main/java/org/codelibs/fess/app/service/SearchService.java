@@ -111,13 +111,11 @@ public class SearchService {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
         final List<Map<String, Object>> documentItems =
-                fessEsClient.search(
-                        fessConfig.getIndexDocumentSearchIndex(),
-                        fessConfig.getIndexDocumentType(),
+                fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
-                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
+                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
                                     .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
                                     .searchRequestType(params.getType()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {

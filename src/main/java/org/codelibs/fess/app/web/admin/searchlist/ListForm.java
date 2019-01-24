@@ -26,6 +26,7 @@ import javax.validation.constraints.Size;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -36,7 +37,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class ListForm implements SearchRequestParams {
+public class ListForm extends SearchRequestParams {
 
     @Size(max = 1000)
     public String q;
@@ -115,6 +116,11 @@ public class ListForm implements SearchRequestParams {
     @Override
     public FacetInfo getFacetInfo() {
         return null;
+    }
+
+    @Override
+    public HighlightInfo getHighlightInfo() {
+        return new HighlightInfo();
     }
 
     @Override

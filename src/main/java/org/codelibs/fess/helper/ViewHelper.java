@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,7 @@ import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
@@ -81,6 +83,10 @@ import com.ibm.icu.text.SimpleDateFormat;
 public class ViewHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
+
+    protected static final String SCREEN_WIDTH = "screen_width";
+
+    protected static final int TABLET_WIDTH = 768;
 
     protected static final String CONTENT_DISPOSITION = "Content-Disposition";
 
@@ -208,6 +214,40 @@ public class ViewHelper {
 
     protected String removeHighlightTag(final String str) {
         return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
+    }
+
+    public HighlightInfo createHighlightInfo() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            final HighlightInfo highlightInfo = new HighlightInfo();
+            final String widthStr = req.getParameter(SCREEN_WIDTH);
+            if (StringUtil.isNotBlank(widthStr)) {
+                final int width = Integer.parseInt(widthStr);
+                updateHighlisthInfo(highlightInfo, width);
+                final HttpSession session = req.getSession(false);
+                if (session != null) {
+                    session.setAttribute(SCREEN_WIDTH, width);
+                }
+            } else {
+                final HttpSession session = req.getSession(false);
+                if (session != null) {
+                    final Integer width = (Integer) session.getAttribute(SCREEN_WIDTH);
+                    if (width != null) {
+                        updateHighlisthInfo(highlightInfo, width);
+                    }
+                }
+            }
+            return highlightInfo;
+        }).orElse(new HighlightInfo());
+    }
+
+    protected void updateHighlisthInfo(final HighlightInfo highlightInfo, final int width) {
+        if (width < TABLET_WIDTH) {
+            float ratio = ((float) width) / ((float) TABLET_WIDTH);
+            if (ratio < 0.5) {
+                ratio = 0.5f;
+            }
+            highlightInfo.fragmentSize((int) (highlightInfo.getFragmentSize() * ratio));
+        }
     }
 
     public String getUrlLink(final Map<String, Object> document) {

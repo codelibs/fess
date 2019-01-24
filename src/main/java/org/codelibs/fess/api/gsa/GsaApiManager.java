@@ -49,6 +49,7 @@ import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
@@ -433,7 +434,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected static class GsaRequestParams implements SearchRequestParams {
+    protected static class GsaRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -622,6 +623,10 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return request.getParameter("sdh");
         }
 
+        @Override
+        public HighlightInfo getHighlightInfo() {
+            return ComponentUtil.getViewHelper().createHighlightInfo();
+        }
     }
 
     public void setGsaPathPrefix(final String gsaPathPrefix) {
