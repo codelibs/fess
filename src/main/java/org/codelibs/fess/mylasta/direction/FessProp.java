@@ -1889,4 +1889,23 @@ public interface FessProp {
         }
         return fields;
     }
+
+    String getSchedulerTargetName();
+
+    default boolean isSchedulerTarget(final String target) {
+        if (StringUtil.isBlank(target)) {
+            return true;
+        }
+
+        final String myName = getSchedulerTargetName();
+
+        final String[] targets = target.split(",");
+        for (String name : targets) {
+            name = name.trim();
+            if (Constants.DEFAULT_JOB_TARGET.equalsIgnoreCase(name) || StringUtil.isNotBlank(myName) && myName.equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
