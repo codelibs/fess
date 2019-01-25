@@ -75,7 +75,7 @@ public class SearchApiTests extends CrawlTestBase {
 
             waitJob(NAME_PREFIX);
             refresh();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             assertTrue(false);
         }
