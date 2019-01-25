@@ -125,8 +125,11 @@ public class CrawlingConfigHelper {
         if (config == null) {
             return OptionalThing.empty();
         }
-        final Map<String, String> paramMap = config.getConfigParameterMap(ConfigName.CONFIG);
-        return OptionalThing.of(paramMap.get("pipeline"));
+        final String pipeline = config.getConfigParameterMap(ConfigName.CONFIG).get("pipeline");
+        if (StringUtil.isBlank(pipeline)) {
+            return OptionalThing.empty();
+        }
+        return OptionalThing.of(pipeline);
     }
 
     public void refresh() {
