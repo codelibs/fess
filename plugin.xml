@@ -13,66 +13,66 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-extension -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="6.5.1" />
-			<param name="plugin.zip.version" value="6.5.1" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190131.003325-1" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="6.5.0" />
-			<param name="plugin.zip.version" value="6.5.0" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190130.222646-1" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="6.5.0" />
-			<param name="plugin.zip.version" value="6.5.0" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190130.235321-1" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="6.5.0" />
-			<param name="plugin.zip.version" value="6.5.0" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190131.004229-1" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="6.5.0" />
-			<param name="plugin.zip.version" value="6.5.0" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190131.002703-1" />
 		</antcall>
 		<!-- learning-to-rank -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="learning-to-rank" />
-			<param name="plugin.version" value="6.5.0" />
-			<param name="plugin.zip.version" value="6.5.0" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190131.002835-1" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="6.5.0" />
-			<param name="plugin.zip.version" value="6.5.0" />
+			<param name="plugin.version" value="6.6.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="6.6.0-20190131.003017-1" />
 		</antcall>
 
 		<antcall target="remove.jars" />
@@ -96,6 +96,8 @@
 				<include name="configsync/commons-codec-*" />
 				<include name="dataformat/commons-codec-*" />
 				<include name="dataformat/commons-collections4-*" />
+				<include name="dataformat/commons-compress-*" />
+				<include name="dataformat/commons-math3-*" />
 				<include name="dataformat/curvesapi-*" />
 				<include name="dataformat/orangesignal-csv-*" />
 				<include name="dataformat/poi-*" />
