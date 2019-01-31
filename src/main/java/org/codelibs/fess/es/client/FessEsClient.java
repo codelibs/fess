@@ -1557,4 +1557,8 @@ public class FessEsClient implements Client {
         client.fieldCaps(request, listener);
     }
 
+    @Override
+    public BulkRequestBuilder prepareBulk(String globalIndex, String globalType) {
+        return client.prepareBulk(globalIndex, globalType);
+    }
 }
