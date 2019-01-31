@@ -57,7 +57,7 @@
 		<junit.jupiter.version>5.0.2</junit.jupiter.version>
 		<junit.vintage.version>${junit.version}.0</junit.vintage.version>
 		<junit.platform.version>1.0.0</junit.platform.version>
-		<utflute.version>0.8.8</utflute.version>
+		<utflute.version>0.8.9</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>2.5.0-SNAPSHOT</crawler.version>
