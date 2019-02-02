@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Pair;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.entity.AccessResultData;
 import org.codelibs.fess.crawler.entity.ExtractData;
@@ -57,6 +58,7 @@ import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.common.joda.Joda;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,8 +109,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 getLogger().debug("ExtractData: " + extractData);
             }
             // meta
-            extractData.getKeySet().stream()//
-                    .filter(k -> extractData.getValues(k) != null)//
+            extractData
+                    .getKeySet()
+                    .stream()
+                    .filter(k -> extractData.getValues(k) != null)
                     .forEach(key -> {
                         final String[] values = extractData.getValues(key);
                         metaDataMap.put(key, values);
@@ -124,23 +128,28 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                 }
                             }
 
-                            final Pair<String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
+                            final Tuple3<String, String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
                             if (mapping != null) {
-                                if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getSecond())) {
-                                    dataMap.put(mapping.getFirst(), values);
-                                } else if (Constants.MAPPING_TYPE_STRING.equalsIgnoreCase(mapping.getSecond())) {
+                                if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getValue2())) {
+                                    dataMap.put(mapping.getValue1(), values);
+                                } else if (Constants.MAPPING_TYPE_STRING.equalsIgnoreCase(mapping.getValue2())) {
                                     final String joinedValue = StringUtils.join(values, ' ');
-                                    dataMap.put(mapping.getFirst(), joinedValue.trim());
+                                    dataMap.put(mapping.getValue1(), joinedValue.trim());
                                 } else if (values.length == 1) {
                                     try {
-                                        if (Constants.MAPPING_TYPE_LONG.equalsIgnoreCase(mapping.getSecond())) {
-                                            dataMap.put(mapping.getFirst(), Long.parseLong(values[0]));
-                                        } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getSecond())) {
-                                            dataMap.put(mapping.getFirst(), Double.parseDouble(values[0]));
+                                        if (Constants.MAPPING_TYPE_LONG.equalsIgnoreCase(mapping.getValue2())) {
+                                            dataMap.put(mapping.getValue1(), Long.parseLong(values[0]));
+                                        } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getValue2())) {
+                                            dataMap.put(mapping.getValue1(), Double.parseDouble(values[0]));
+                                        } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())) {
+                                            final String format =
+                                                    StringUtil.isNotBlank(mapping.getValue3()) ? mapping.getValue3() : "date_optional_time";
+                                            final TemporalAccessor dt = Joda.forPattern(format).parse(mapping.getValue2());
+                                            dataMap.put(mapping.getValue1(), Joda.forPattern("date_optional_time").format(dt));
                                         } else {
                                             logger.warn("Unknown mapping type: {}={}", key, mapping);
                                         }
-                                    } catch (final NumberFormatException e) {
+                                    } catch (final Exception e) {
                                         logger.warn("Failed to parse " + values[0], e);
                                     }
                                 }

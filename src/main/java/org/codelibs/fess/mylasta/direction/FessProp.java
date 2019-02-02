@@ -48,6 +48,7 @@ import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
+import org.codelibs.core.misc.Tuple4;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -890,22 +891,25 @@ public interface FessProp {
 
     String getCrawlerMetadataNameMapping();
 
-    default Pair<String, String> getCrawlerMetadataNameMapping(final String name) {
+    default Tuple3<String, String, String> getCrawlerMetadataNameMapping(final String name) {
         @SuppressWarnings("unchecked")
-        Map<String, Pair<String, String>> params = (Map<String, Pair<String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
+        Map<String, Tuple3<String, String, String>> params =
+                (Map<String, Tuple3<String, String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
         if (params == null) {
             params = split(getCrawlerMetadataNameMapping(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
                 final String[] values = v.split("=");
                 if (values.length == 2) {
-                    final String[] subValues = values[1].split(":");
-                    if (subValues.length == 2) {
-                        return new Tuple3<>(values[0], subValues[0], subValues[1]);
+                    final String[] subValues = values[1].split(":", 3);
+                    if (subValues.length == 3) {
+                        return new Tuple4<>(values[0], subValues[0], subValues[1], subValues[2]);
+                    } else if (subValues.length == 2) {
+                        return new Tuple4<>(values[0], subValues[0], subValues[1], StringUtil.EMPTY);
                     } else {
-                        return new Tuple3<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY);
+                        return new Tuple4<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY, StringUtil.EMPTY);
                     }
                 }
                 return null;
-            }).collect(Collectors.toMap(Tuple3::getValue1, d -> new Pair<>(d.getValue2(), d.getValue3()))));
+            }).collect(Collectors.toMap(Tuple4::getValue1, d -> new Tuple3<>(d.getValue2(), d.getValue3(), d.getValue4()))));
             propMap.put(CRAWLER_METADATA_NAME_MAPPING, params);
         }
         return params.get(name);
