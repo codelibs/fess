@@ -226,7 +226,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 documentHelper.getDigest(responseData, bodyBase, dataMap, fessConfig.getCrawlerDocumentFileMaxDigestLengthAsInteger()));
         // title
         final String fileName = getFileName(url, urlEncoding);
-        if (!dataMap.containsKey(fessConfig.getIndexFieldTitle())) {
+        if (!hasTitle(dataMap)) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
                     putResultDataBody(
@@ -327,6 +327,18 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
 
         return dataMap;
+    }
+
+    protected boolean hasTitle(final Map<String, Object> dataMap) {
+        final Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
+        if (titleObj != null) {
+            if (titleObj instanceof String[]) {
+                return stream((String[]) titleObj).get(stream -> stream.anyMatch(StringUtil::isNotBlank));
+            } else {
+                return StringUtil.isNotBlank(titleObj.toString());
+            }
+        }
+        return false;
     }
 
     protected Map<String, String> createExtractParams(final ResponseData responseData, final CrawlingConfig crawlingConfig) {
