@@ -1110,11 +1110,13 @@ public class FessEsClient implements Client {
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
 
             // highlighting
-            final HighlightBuilder highlightBuilder = new HighlightBuilder();
-            queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf)
-                    .highlighterType(highlightInfo.getType()).fragmentSize(highlightInfo.getFragmentSize())
-                    .numOfFragments(highlightInfo.getNumOfFragments()))));
-            searchRequestBuilder.highlighter(highlightBuilder);
+            if (highlightInfo != null) {
+                final HighlightBuilder highlightBuilder = new HighlightBuilder();
+                queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf)
+                        .highlighterType(highlightInfo.getType()).fragmentSize(highlightInfo.getFragmentSize())
+                        .numOfFragments(highlightInfo.getNumOfFragments()))));
+                searchRequestBuilder.highlighter(highlightBuilder);
+            }
 
             // facets
             if (facetInfo != null) {
