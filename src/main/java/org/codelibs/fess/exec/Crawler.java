@@ -385,7 +385,11 @@ public class Crawler {
                 dataMap.put(StringUtil.decapitalize(entry.getKey()), entry.getValue());
             }
 
-            dataMap.put("hostname", ComponentUtil.getSystemHelper().getHostname());
+            String hostname = fessConfig.getMailHostname();
+            if (StringUtil.isBlank(hostname)) {
+                hostname = ComponentUtil.getSystemHelper().getHostname();
+            }
+            dataMap.put("hostname", hostname);
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
 
