@@ -227,21 +227,23 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         // title
         final String fileName = getFileName(url, urlEncoding);
         if (!hasTitle(dataMap)) {
+            final String titleField = fessConfig.getIndexFieldTitle();
+            dataMap.remove(titleField);
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
                     putResultDataBody(
                             dataMap,
-                            fessConfig.getIndexFieldTitle(),
+                            titleField,
                             documentHelper.getDigest(responseData, body, dataMap,
                                     fessConfig.getCrawlerDocumentFileMaxTitleLengthAsInteger()));
                 } else {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), fessConfig.getCrawlerDocumentFileNoTitleLabel());
+                    putResultDataBody(dataMap, titleField, fessConfig.getCrawlerDocumentFileNoTitleLabel());
                 }
             } else {
                 if (StringUtil.isBlank(fileName)) {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), decodeUrlAsName(url, url.startsWith("file:")));
+                    putResultDataBody(dataMap, titleField, decodeUrlAsName(url, url.startsWith("file:")));
                 } else {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), fileName);
+                    putResultDataBody(dataMap, titleField, fileName);
                 }
             }
         }
