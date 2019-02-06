@@ -990,6 +990,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String MAIL_FROM_ADDRESS = "mail.from.address";
 
     /** The key of the configuration. e.g.  */
+    String MAIL_HOSTNAME = "mail.hostname";
+
+    /** The key of the configuration. e.g.  */
     String SCHEDULER_TARGET_NAME = "scheduler.target.name";
 
     /** The key of the configuration. e.g. org.codelibs.fess.app.job.ScriptExecutorJob */
@@ -4682,6 +4685,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getMailFromAddress();
 
     /**
+     * Get the value for the key 'mail.hostname'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getMailHostname();
+
+    /**
+     * Get the value for the key 'mail.hostname' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getMailHostnameAsInteger();
+
+    /**
      * Get the value for the key 'scheduler.target.name'. <br>
      * The value is, e.g.  <br>
      * comment: ------
@@ -7634,6 +7652,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.MAIL_FROM_ADDRESS);
         }
 
+        public String getMailHostname() {
+            return get(FessConfig.MAIL_HOSTNAME);
+        }
+
+        public Integer getMailHostnameAsInteger() {
+            return getAsInteger(FessConfig.MAIL_HOSTNAME);
+        }
+
         public String getSchedulerTargetName() {
             return get(FessConfig.SCHEDULER_TARGET_NAME);
         }
@@ -8636,6 +8662,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.USER_CODE_PATTERN, "[a-zA-Z0-9_]+");
             defaultMap.put(FessConfig.MAIL_FROM_NAME, "Administrator");
             defaultMap.put(FessConfig.MAIL_FROM_ADDRESS, "root@localhost");
+            defaultMap.put(FessConfig.MAIL_HOSTNAME, "");
             defaultMap.put(FessConfig.SCHEDULER_TARGET_NAME, "");
             defaultMap.put(FessConfig.SCHEDULER_JOB_CLASS, "org.codelibs.fess.app.job.ScriptExecutorJob");
             defaultMap.put(FessConfig.SCHEDULER_CONCURRENT_EXEC_MODE, "QUIT");
