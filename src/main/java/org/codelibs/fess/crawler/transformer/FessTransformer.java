@@ -114,7 +114,7 @@ public interface FessTransformer {
         } else if (dataMap.containsKey(key)) {
             if (getFessConfig().isCrawlerDocumentAppendData()) {
                 final Object oldValue = dataMap.get(key);
-                final Object[] oldValues = (Object[]) oldValue;
+                final Object[] oldValues = oldValue instanceof Object[] ? (Object[]) oldValue : new Object[] { oldValue };
                 if (value.getClass().isArray()) {
                     final Object[] newValues = (Object[]) value;
                     final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
