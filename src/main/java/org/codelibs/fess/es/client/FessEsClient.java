@@ -1519,7 +1519,7 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public BulkRequestBuilder prepareBulk(String globalIndex, String globalType) {
+    public BulkRequestBuilder prepareBulk(final String globalIndex, final String globalType) {
         return client.prepareBulk(globalIndex, globalType);
     }
 }

@@ -87,7 +87,7 @@ public class FessBoot extends TomcatBoot {
             }
             op.replace("fess.log.path", fessLogPath.replace("\\", "/"));
         }).asYouLikeIt(resource -> {
-            Host host = resource.getHost();
+            final Host host = resource.getHost();
             if (host instanceof StandardHost) {
                 ((StandardHost) host).setErrorReportValveClass(SuppressErrorReportValve.class.getName());
             }

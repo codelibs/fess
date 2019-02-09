@@ -166,7 +166,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
                 } else {
                     return "/error/system.jsp";
                 }
-            };
+            }
         });
     }
 
