@@ -1042,7 +1042,7 @@
 		<pluginRepository>
 			<id>codelibs.org</id>
 			<name>CodeLibs Repository</name>
-			<url>http://maven.codelibs.org/</url>
+			<url>https://maven.codelibs.org/</url>
 		</pluginRepository>
 		<pluginRepository>
 			<id>oss.sonatype.org</id>
@@ -1054,7 +1054,7 @@
 		<repository>
 			<id>codelibs.org</id>
 			<name>CodeLibs Repository</name>
-			<url>http://maven.codelibs.org/</url>
+			<url>https://maven.codelibs.org/</url>
 		</repository>
 		<repository>
 			<id>oss.sonatype.org</id>
