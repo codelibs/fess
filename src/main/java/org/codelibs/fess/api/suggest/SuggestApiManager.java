@@ -294,4 +294,9 @@ public class SuggestApiManager extends BaseJsonApiManager {
             throw new UnsupportedOperationException();
         }
     }
+
+    @Override
+    protected void writeHeaders(HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+    }
 }

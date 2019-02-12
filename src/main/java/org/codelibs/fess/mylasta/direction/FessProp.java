@@ -69,6 +69,12 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    String API_DASHBOARD_RESPONSE_HEADER_LIST = "apiDashboardResponseHeaderList";
+
+    String API_JSON_RESPONSE_HEADER_LIST = "apiJsonResponseHeaderList";
+
+    String API_GSA_RESPONSE_HEADER_LIST = "apiGsaResponseHeaderList";
+
     String SMB_AVAILABLE_SID_TYPES = "smbAvailableSidTypes";
 
     String LOGGING_SEARCH_DOCS_FIELDS = "loggingSearchDocsFields";
@@ -1907,5 +1913,56 @@ public interface FessProp {
             }
         }
         return false;
+    }
+
+    String getApiGsaResponseHeaders();
+
+    default List<Pair<String, String>> getApiGsaResponseHeaderList() {
+        List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_GSA_RESPONSE_HEADER_LIST);
+        if (list == null) {
+            list = split(getApiGsaResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+                String[] values = s.split(":", 2);
+                if (values.length == 2) {
+                    return new Pair<>(values[0], values[1]);
+                }
+                return new Pair<>(values[0], StringUtil.EMPTY);
+            }).collect(Collectors.toList()));
+            propMap.put(API_GSA_RESPONSE_HEADER_LIST, list);
+        }
+        return list;
+    }
+
+    String getApiJsonResponseHeaders();
+
+    default List<Pair<String, String>> getApiJsonResponseHeaderList() {
+        List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_JSON_RESPONSE_HEADER_LIST);
+        if (list == null) {
+            list = split(getApiJsonResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+                String[] values = s.split(":", 2);
+                if (values.length == 2) {
+                    return new Pair<>(values[0], values[1]);
+                }
+                return new Pair<>(values[0], StringUtil.EMPTY);
+            }).collect(Collectors.toList()));
+            propMap.put(API_JSON_RESPONSE_HEADER_LIST, list);
+        }
+        return list;
+    }
+
+    String getApiDashboardResponseHeaders();
+
+    default List<Pair<String, String>> getApiDashboardResponseHeaderList() {
+        List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_DASHBOARD_RESPONSE_HEADER_LIST);
+        if (list == null) {
+            list = split(getApiDashboardResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+                String[] values = s.split(":", 2);
+                if (values.length == 2) {
+                    return new Pair<>(values[0], values[1]);
+                }
+                return new Pair<>(values[0], StringUtil.EMPTY);
+            }).collect(Collectors.toList()));
+            propMap.put(API_DASHBOARD_RESPONSE_HEADER_LIST, list);
+        }
+        return list;
     }
 }

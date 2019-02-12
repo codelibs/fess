@@ -202,6 +202,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String API_SEARCH_SCROLL = "api.search.scroll";
 
     /** The key of the configuration. e.g.  */
+    String API_JSON_RESPONSE_HEADERS = "api.json.response.headers";
+
+    /** The key of the configuration. e.g.  */
+    String API_GSA_RESPONSE_HEADERS = "api.gsa.response.headers";
+
+    /** The key of the configuration. e.g.  */
+    String API_DASHBOARD_RESPONSE_HEADERS = "api.dashboard.response.headers";
+
+    /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
 
     /** The key of the configuration. e.g.  */
@@ -1831,6 +1840,51 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiSearchScroll();
+
+    /**
+     * Get the value for the key 'api.json.response.headers'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiJsonResponseHeaders();
+
+    /**
+     * Get the value for the key 'api.json.response.headers' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiJsonResponseHeadersAsInteger();
+
+    /**
+     * Get the value for the key 'api.gsa.response.headers'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiGsaResponseHeaders();
+
+    /**
+     * Get the value for the key 'api.gsa.response.headers' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiGsaResponseHeadersAsInteger();
+
+    /**
+     * Get the value for the key 'api.dashboard.response.headers'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiDashboardResponseHeaders();
+
+    /**
+     * Get the value for the key 'api.dashboard.response.headers' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiDashboardResponseHeadersAsInteger();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -6161,6 +6215,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_SEARCH_SCROLL);
         }
 
+        public String getApiJsonResponseHeaders() {
+            return get(FessConfig.API_JSON_RESPONSE_HEADERS);
+        }
+
+        public Integer getApiJsonResponseHeadersAsInteger() {
+            return getAsInteger(FessConfig.API_JSON_RESPONSE_HEADERS);
+        }
+
+        public String getApiGsaResponseHeaders() {
+            return get(FessConfig.API_GSA_RESPONSE_HEADERS);
+        }
+
+        public Integer getApiGsaResponseHeadersAsInteger() {
+            return getAsInteger(FessConfig.API_GSA_RESPONSE_HEADERS);
+        }
+
+        public String getApiDashboardResponseHeaders() {
+            return get(FessConfig.API_DASHBOARD_RESPONSE_HEADERS);
+        }
+
+        public Integer getApiDashboardResponseHeadersAsInteger() {
+            return getAsInteger(FessConfig.API_DASHBOARD_RESPONSE_HEADERS);
+        }
+
         public String getVirtualHostHeaders() {
             return get(FessConfig.VIRTUAL_HOST_HEADERS);
         }
@@ -8439,6 +8517,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_ADMIN_ACCESS_PERMISSIONS, "Radmin-api");
             defaultMap.put(FessConfig.API_SEARCH_ACCEPT_REFERERS, "");
             defaultMap.put(FessConfig.API_SEARCH_SCROLL, "false");
+            defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");
