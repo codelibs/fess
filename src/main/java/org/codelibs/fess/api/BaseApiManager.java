@@ -86,7 +86,7 @@ public abstract class BaseApiManager implements WebApiManager {
         return formatType;
     }
 
-    public static void write(final String text, final String contentType, final String encoding) {
+    protected void write(final String text, final String contentType, final String encoding) {
         final StringBuilder buf = new StringBuilder(50);
         if (contentType == null) {
             buf.append("text/plain");
@@ -107,10 +107,13 @@ public abstract class BaseApiManager implements WebApiManager {
         buf.append(enc);
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType(buf.toString());
+        writeHeaders(response);
         try (PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), enc))) {
             out.print(text);
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
     }
+
+    protected abstract void writeHeaders(final HttpServletResponse response);
 }

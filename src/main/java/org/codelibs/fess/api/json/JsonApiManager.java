@@ -812,4 +812,9 @@ public class JsonApiManager extends BaseJsonApiManager {
             return ComponentUtil.getViewHelper().createHighlightInfo();
         }
     }
+
+    @Override
+    protected void writeHeaders(HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+    }
 }

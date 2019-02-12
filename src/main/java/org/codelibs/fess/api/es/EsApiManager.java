@@ -152,6 +152,7 @@ public class EsApiManager extends BaseApiManager {
 
             try (ServletOutputStream out = response.getOutputStream(); InputStream in = curlResponse.getContentAsStream()) {
                 response.setStatus(curlResponse.getHttpStatusCode());
+                writeHeaders(response);
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
@@ -173,6 +174,7 @@ public class EsApiManager extends BaseApiManager {
         if (Files.exists(filePath)) {
             try (InputStream in = Files.newInputStream(filePath); ServletOutputStream out = response.getOutputStream()) {
                 response.setStatus(HttpServletResponse.SC_OK);
+                writeHeaders(response);
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
@@ -182,6 +184,7 @@ public class EsApiManager extends BaseApiManager {
             }
         } else {
             try {
+                writeHeaders(response);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, path + " is not found.");
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
@@ -207,5 +210,10 @@ public class EsApiManager extends BaseApiManager {
 
     private SessionManager getSessionManager() {
         return ComponentUtil.getComponent(SessionManager.class);
+    }
+
+    @Override
+    protected void writeHeaders(HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiDashboardResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }
