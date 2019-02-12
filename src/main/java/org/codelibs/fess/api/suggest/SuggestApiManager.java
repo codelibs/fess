@@ -300,4 +300,9 @@ public class SuggestApiManager extends BaseJsonApiManager {
             return new HighlightInfo();
         }
     }
+
+    @Override
+    protected void writeHeaders(HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+    }
 }

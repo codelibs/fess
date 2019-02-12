@@ -644,4 +644,9 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     public void setContentTypeField(final String contentTypeField) {
         this.contentTypeField = contentTypeField;
     }
+
+    @Override
+    protected void writeHeaders(HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiGsaResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+    }
 }
