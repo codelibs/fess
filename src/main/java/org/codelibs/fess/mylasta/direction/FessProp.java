@@ -70,6 +70,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    String CORS_ALLOW_ORIGIN = "CorsAllowOrigin";
+
     String API_DASHBOARD_RESPONSE_HEADER_LIST = "apiDashboardResponseHeaderList";
 
     String API_JSON_RESPONSE_HEADER_LIST = "apiJsonResponseHeaderList";
@@ -1966,6 +1968,19 @@ public interface FessProp {
                 return new Pair<>(values[0], StringUtil.EMPTY);
             }).collect(Collectors.toList()));
             propMap.put(API_DASHBOARD_RESPONSE_HEADER_LIST, list);
+        }
+        return list;
+    }
+
+    String getApiCorsAllowOrigin();
+
+    default List<String> getApiCorsAllowOriginList() {
+        List<String> list = (List<String>) propMap.get(CORS_ALLOW_ORIGIN);
+        if (list == null) {
+            list =
+                    split(getApiCorsAllowOrigin(), "\n").get(
+                            stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toList()));
+            propMap.put(CORS_ALLOW_ORIGIN, list);
         }
         return list;
     }
