@@ -36,6 +36,11 @@
   </filter>
 
   <filter>
+    <filter-name>corsFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.CorsFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>webApiFilter</filter-name>
     <filter-class>org.codelibs.fess.filter.WebApiFilter</filter-class>
   </filter>
@@ -75,6 +80,12 @@
     <dispatcher>REQUEST</dispatcher>
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>INCLUDE</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>corsFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
 
   <filter-mapping>
