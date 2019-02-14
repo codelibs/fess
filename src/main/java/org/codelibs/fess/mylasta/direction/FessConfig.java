@@ -288,6 +288,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. title=title:string
     Title=title:string
+    last_modified=Last-Save-Date:date
+    last_modified=Last-Modified:date
     */
     String CRAWLER_METADATA_NAME_MAPPING = "crawler.metadata.name.mapping";
 
@@ -2208,6 +2210,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Get the value for the key 'crawler.metadata.name.mapping'. <br>
      * The value is, e.g. title=title:string
     Title=title:string
+    last_modified=Last-Save-Date:date
+    last_modified=Last-Modified:date
     <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -8615,7 +8619,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404");
             defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");
             defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES, "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*");
-            defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING, "title=title:string\nTitle=title:string\n");
+            defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING,
+                    "title=title:string\nTitle=title:string\nlast_modified=Last-Save-Date:date\nlast_modified=Last-Modified:date\n");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH, "//BODY");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH, "//HTML/@lang");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH, "//META[@name='description']/@content");

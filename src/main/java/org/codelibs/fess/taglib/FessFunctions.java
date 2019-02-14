@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,6 +45,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.common.joda.Joda;
 import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -113,7 +113,7 @@ public class FessFunctions {
     }
 
     public static Date parseDate(final String value) {
-        return parseDate(value, Constants.ISO_DATETIME_FORMAT);
+        return parseDate(value, Constants.DATE_OPTIONAL_TIME);
     }
 
     public static Date parseDate(final String value, final String format) {
@@ -121,10 +121,9 @@ public class FessFunctions {
             return null;
         }
         try {
-            final SimpleDateFormat sdf = new SimpleDateFormat(format);
-            sdf.setTimeZone(Constants.TIMEZONE_UTC);
-            return sdf.parse(value);
-        } catch (final ParseException e) {
+            final long time = Joda.forPattern(format).parseMillis(value);
+            return new Date(time);
+        } catch (final Exception e) {
             return null;
         }
     }

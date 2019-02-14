@@ -158,6 +158,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
+    public static final String DATE_OPTIONAL_TIME = "date_optional_time";
+
     public static final int DONE_STATUS = 9999;
 
     public static final String DEFAULT_IGNORE_FAILURE_TYPE = StringUtil.EMPTY;
