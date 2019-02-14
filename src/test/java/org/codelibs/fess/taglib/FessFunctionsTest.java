@@ -41,5 +41,7 @@ public class FessFunctionsTest extends UnitFessTestCase {
         date = FessFunctions.parseDate("2004-04-01T12:34:56.123+09:00");
         assertEquals("2004-04-01T03:34:56.123Z", FessFunctions.formatDate(date));
 
+        date = FessFunctions.parseDate("D:20040401033456-05'00'", "pdf_date");
+        assertEquals("2004-04-01T08:34:56.000Z", FessFunctions.formatDate(date));
     }
 }

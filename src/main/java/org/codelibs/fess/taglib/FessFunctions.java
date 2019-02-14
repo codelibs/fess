@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.pdfbox.util.DateConverter;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -63,6 +65,8 @@ public class FessFunctions {
     private static final String GEO_PREFIX = "geo.";
 
     private static final String FACET_PREFIX = "facet.";
+
+    private static final String PDF_DATE = "pdf_date";
 
     private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
@@ -120,7 +124,13 @@ public class FessFunctions {
         if (value == null) {
             return null;
         }
+
         try {
+            if (PDF_DATE.equals(format)) {
+                final Calendar cal = DateConverter.toCalendar(value);
+                return cal != null ? cal.getTime() : null;
+            }
+
             final long time = Joda.forPattern(format).parseMillis(value);
             return new Date(time);
         } catch (final Exception e) {
