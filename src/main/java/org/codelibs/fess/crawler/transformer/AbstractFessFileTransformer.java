@@ -19,7 +19,6 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.InputStream;
 import java.net.URLDecoder;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,8 +56,8 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.common.joda.Joda;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,10 +141,15 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                         } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getValue2())) {
                                             dataMap.put(mapping.getValue1(), Double.parseDouble(values[0]));
                                         } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())) {
-                                            final String format =
-                                                    StringUtil.isNotBlank(mapping.getValue3()) ? mapping.getValue3() : "date_optional_time";
-                                            final TemporalAccessor dt = Joda.forPattern(format).parse(mapping.getValue2());
-                                            dataMap.put(mapping.getValue1(), Joda.forPattern("date_optional_time").format(dt));
+                                            final Date dt =
+                                                    FessFunctions.parseDate(values[0],
+                                                            StringUtil.isNotBlank(mapping.getValue3()) ? mapping.getValue3()
+                                                                    : Constants.DATE_OPTIONAL_TIME);
+                                            if (dt != null) {
+                                                dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
+                                            } else {
+                                                logger.warn("Failed to parse " + mapping.toString());
+                                            }
                                         } else {
                                             logger.warn("Unknown mapping type: {}={}", key, mapping);
                                         }
@@ -273,9 +277,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         // content_length
         putResultDataBody(dataMap, fessConfig.getIndexFieldContentLength(), Long.toString(responseData.getContentLength()));
         // last_modified
-        final Date lastModified = responseData.getLastModified();
+        final Date lastModified = getLastModified(dataMap, responseData);
         if (lastModified != null) {
-            putResultDataBody(dataMap, fessConfig.getIndexFieldLastModified(), lastModified);
+            dataMap.put(fessConfig.getIndexFieldLastModified(), lastModified); // overwrite
             // timestamp
             putResultDataBody(dataMap, fessConfig.getIndexFieldTimestamp(), lastModified);
         } else {
@@ -338,6 +342,28 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return dataMap;
     }
 
+    protected Date getLastModified(final Map<String, Object> dataMap, final ResponseData responseData) {
+        final Object lastModifiedObj = dataMap.get(fessConfig.getIndexFieldLastModified());
+        if (lastModifiedObj instanceof Date) {
+            return (Date) lastModifiedObj;
+        } else if (lastModifiedObj instanceof String) {
+            final Date lastModified = FessFunctions.parseDate(lastModifiedObj.toString());
+            if (lastModified != null) {
+                return lastModified;
+            }
+        } else if (lastModifiedObj instanceof String[]) {
+            final String[] lastModifieds = (String[]) lastModifiedObj;
+            if (lastModifieds.length > 0) {
+                final Date lastModified = FessFunctions.parseDate(lastModifieds[0]);
+                if (lastModified != null) {
+                    return lastModified;
+                }
+            }
+        }
+
+        return responseData.getLastModified();
+    }
+
     protected boolean hasTitle(final Map<String, Object> dataMap) {
         final Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
         if (titleObj != null) {
@@ -373,7 +399,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return new ExtractData();
     }
 
-    private String getResourceName(final ResponseData responseData) {
+    protected String getResourceName(final ResponseData responseData) {
         String name = responseData.getUrl();
         final String enc = responseData.getCharSet();
 
