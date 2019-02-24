@@ -71,11 +71,10 @@ public class IndexingHelper {
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             synchronized (fessEsClient) {
                 deleteOldDocuments(fessEsClient, docList);
-                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList,
-                        (doc, builder) -> {
-                            final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
-                            crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
-                        });
+                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
+                    final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
+                    crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
+                });
             }
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {
@@ -129,38 +128,38 @@ public class IndexingHelper {
             }
         }
         if (!docIdList.isEmpty()) {
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
-                    QueryBuilders.idsQuery(fessConfig.getIndexDocumentType()).addIds(docIdList.stream().toArray(n -> new String[n])));
+            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+                    QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
 
         }
     }
 
     public boolean updateDocument(final FessEsClient fessEsClient, final String id, final String field, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, field, value);
+        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), id, field, value);
     }
 
     public boolean deleteDocument(final FessEsClient fessEsClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, 0);
+        return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), id, 0);
     }
 
     public long deleteDocumentByUrl(final FessEsClient fessEsClient, final String url) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
+        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
                 QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url));
     }
 
     public long deleteDocumentsByDocId(final FessEsClient fessEsClient, final List<String> docIdList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), QueryBuilders
-                .idsQuery(fessConfig.getIndexDocumentType()).addIds(docIdList.stream().toArray(n -> new String[n])));
+        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+                QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
     }
 
     public Map<String, Object> getDocument(final FessEsClient fessEsClient, final String id, final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
-            builder.setQuery(QueryBuilders.idsQuery(fessConfig.getIndexDocumentType()).addIds(id));
+        return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
+            builder.setQuery(QueryBuilders.idsQuery().addIds(id));
             builder.setFetchSource(fields, null);
             return true;
         }).orElse(null);
@@ -174,7 +173,7 @@ public class IndexingHelper {
 
     public void deleteChildDocument(final FessEsClient fessEsClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
+        fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
                 QueryBuilders.termQuery(fessConfig.getIndexFieldParentId(), id));
     }
 
@@ -189,19 +188,18 @@ public class IndexingHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final SearchResponse countResponse =
-                fessEsClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex()).setTypes(fessConfig.getIndexDocumentType())
-                        .setQuery(queryBuilder).setSize(0).execute().actionGet(fessConfig.getIndexSearchTimeout());
-        final long numFound = countResponse.getHits().getTotalHits();
+                fessEsClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex()).setQuery(queryBuilder).setSize(0).execute()
+                        .actionGet(fessConfig.getIndexSearchTimeout());
+        final long numFound = countResponse.getHits().getTotalHits().value;
         // TODO max threshold
 
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
-                requestBuilder -> {
-                    requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
-                    if (fields != null) {
-                        requestBuilder.setFetchSource(fields, null);
-                    }
-                    return true;
-                });
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+            requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
+            if (fields != null) {
+                requestBuilder.setFetchSource(fields, null);
+            }
+            return true;
+        });
 
     }
 

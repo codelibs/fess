@@ -71,7 +71,6 @@ import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.DocWriteRequest.OpType;
@@ -399,7 +398,7 @@ public class FessEsClient implements Client {
         final GetMappingsResponse getMappingsResponse =
                 client.admin().indices().prepareGetMappings(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
         final ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.mappings().get(indexName);
-        if (indexMappings == null || !indexMappings.containsKey(docType)) {
+        if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
             final String mappingFile = indexConfigPath + "/" + index + "/" + docType + ".json";
             try {
@@ -409,8 +408,8 @@ public class FessEsClient implements Client {
             }
             try {
                 final AcknowledgedResponse putMappingResponse =
-                        client.admin().indices().preparePutMapping(indexName).setType(docType).setSource(source, XContentType.JSON)
-                                .execute().actionGet(fessConfig.getIndexIndicesTimeout());
+                        client.admin().indices().preparePutMapping(indexName).setSource(source, XContentType.JSON).execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created " + indexName + "/" + docType + " mapping.");
                 } else {
@@ -545,7 +544,7 @@ public class FessEsClient implements Client {
                                         });
                                 if (result.keySet().contains("index")) {
                                     final IndexRequestBuilder requestBuilder =
-                                            client.prepareIndex(configIndex, configType, result.get("index").get("_id")).setSource(line,
+                                            client.prepareIndex(configIndex, result.get("index").get("_id")).setSource(line,
                                                     XContentType.JSON);
                                     builder.add(requestBuilder);
                                 }
@@ -644,11 +643,11 @@ public class FessEsClient implements Client {
         }
     }
 
-    public long deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
+    public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         SearchResponse response =
-                client.prepareSearch(index).setTypes(type).setScroll(scrollForDelete).setSize(sizeForDelete)
+                client.prepareSearch(index).setScroll(scrollForDelete).setSize(sizeForDelete)
                         .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null).setQuery(queryBuilder)
                         .setPreference(Constants.SEARCH_PREFERENCE_LOCAL).execute().actionGet(fessConfig.getIndexScrollSearchTimeout());
 
@@ -664,7 +663,7 @@ public class FessEsClient implements Client {
 
             final BulkRequestBuilder bulkRequest = client.prepareBulk();
             for (final SearchHit hit : hits) {
-                bulkRequest.add(client.prepareDelete(index, type, hit.getId()));
+                bulkRequest.add(client.prepareDelete().setIndex(index).setId(hit.getId()));
                 count++;
             }
             final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
@@ -693,12 +692,12 @@ public class FessEsClient implements Client {
         return searchResult.build(requestBuilder, execTime, OptionalEntity.ofNullable(response, () -> {}));
     }
 
-    public <T> T search(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
+    public <T> T search(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final SearchResult<T, SearchRequestBuilder, SearchResponse> searchResult) {
         final long startTime = System.currentTimeMillis();
 
         SearchResponse searchResponse = null;
-        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type);
+        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index);
         if (condition.build(searchRequestBuilder)) {
 
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -722,11 +721,11 @@ public class FessEsClient implements Client {
         return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
     }
 
-    public <T> long scrollSearch(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
+    public <T> long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator, final Function<T, Boolean> cursor) {
         long count = 0;
 
-        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type).setScroll(scrollForSearch);
+        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setScroll(scrollForSearch);
         if (condition.build(searchRequestBuilder)) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -767,11 +766,9 @@ public class FessEsClient implements Client {
         return count;
     }
 
-    public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type,
-            final SearchCondition<SearchRequestBuilder> condition) {
+    public OptionalEntity<Map<String, Object>> getDocument(final String index, final SearchCondition<SearchRequestBuilder> condition) {
         return getDocument(
                 index,
-                type,
                 condition,
                 (response, hit) -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -795,9 +792,9 @@ public class FessEsClient implements Client {
                 });
     }
 
-    protected <T> OptionalEntity<T> getDocument(final String index, final String type,
-            final SearchCondition<SearchRequestBuilder> condition, final EntityCreator<T, SearchResponse, SearchHit> creator) {
-        return search(index, type, searchRequestBuilder -> {
+    protected <T> OptionalEntity<T> getDocument(final String index, final SearchCondition<SearchRequestBuilder> condition,
+            final EntityCreator<T, SearchResponse, SearchHit> creator) {
+        return search(index, searchRequestBuilder -> {
             searchRequestBuilder.setVersion(true);
             return condition.build(searchRequestBuilder);
         }, (queryBuilder, execTime, searchResponse) -> {
@@ -811,11 +808,9 @@ public class FessEsClient implements Client {
         });
     }
 
-    public List<Map<String, Object>> getDocumentList(final String index, final String type,
-            final SearchCondition<SearchRequestBuilder> condition) {
+    public List<Map<String, Object>> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition) {
         return getDocumentList(
                 index,
-                type,
                 condition,
                 (response, hit) -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -837,9 +832,9 @@ public class FessEsClient implements Client {
                 });
     }
 
-    protected <T> List<T> getDocumentList(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
+    protected <T> List<T> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator) {
-        return search(index, type, condition, (searchRequestBuilder, execTime, searchResponse) -> {
+        return search(index, condition, (searchRequestBuilder, execTime, searchResponse) -> {
             final List<T> list = new ArrayList<>();
             searchResponse.ifPresent(response -> {
                 response.getHits().forEach(hit -> {
@@ -850,10 +845,10 @@ public class FessEsClient implements Client {
         });
     }
 
-    public boolean update(final String index, final String type, final String id, final String field, final Object value) {
+    public boolean update(final String index, final String id, final String field, final Object value) {
         try {
             final Result result =
-                    client.prepareUpdate(index, type, id).setDoc(field, value).execute()
+                    client.prepareUpdate().setIndex(index).setId(id).setDoc(field, value).execute()
                             .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout()).getResult();
             return result == Result.CREATED || result == Result.UPDATED;
         } catch (final ElasticsearchException e) {
@@ -906,13 +901,13 @@ public class FessEsClient implements Client {
         }
     }
 
-    public void addAll(final String index, final String type, final List<Map<String, Object>> docList,
+    public void addAll(final String index, final List<Map<String, Object>> docList,
             final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
             final Object id = doc.remove(fessConfig.getIndexFieldId());
-            final IndexRequestBuilder builder = client.prepareIndex(index, type, id.toString()).setSource(new DocMap(doc));
+            final IndexRequestBuilder builder = client.prepareIndex().setIndex(index).setId(id.toString()).setSource(new DocMap(doc));
             options.accept(doc, builder);
             bulkRequestBuilder.add(builder);
         }
@@ -1130,7 +1125,7 @@ public class FessEsClient implements Client {
         }
     }
 
-    public boolean store(final String index, final String type, final Object obj) {
+    public boolean store(final String index, final Object obj) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         @SuppressWarnings("unchecked")
         final Map<String, Object> source = obj instanceof Map ? (Map<String, Object>) obj : BeanUtil.copyBeanToNewMap(obj);
@@ -1142,13 +1137,13 @@ public class FessEsClient implements Client {
                 // TODO throw Exception in next release
                 // create
                 response =
-                        client.prepareIndex(index, type).setSource(new DocMap(source)).setRefreshPolicy(RefreshPolicy.IMMEDIATE)
+                        client.prepareIndex().setIndex(index).setSource(new DocMap(source)).setRefreshPolicy(RefreshPolicy.IMMEDIATE)
                                 .setOpType(OpType.CREATE).execute().actionGet(fessConfig.getIndexIndexTimeout());
             } else {
                 // create or update
                 final IndexRequestBuilder builder =
-                        client.prepareIndex(index, type, id).setSource(new DocMap(source)).setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                                .setOpType(OpType.INDEX);
+                        client.prepareIndex().setIndex(index).setId(id).setSource(new DocMap(source))
+                                .setRefreshPolicy(RefreshPolicy.IMMEDIATE).setOpType(OpType.INDEX);
                 if (version != null && version.longValue() > 0) {
                     builder.setVersion(version.longValue());
                 }
@@ -1161,16 +1156,16 @@ public class FessEsClient implements Client {
         }
     }
 
-    public boolean delete(final String index, final String type, final String id, final long version) {
+    public boolean delete(final String index, final String id, final long version) {
         try {
-            final DeleteRequestBuilder builder = client.prepareDelete(index, type, id).setRefreshPolicy(RefreshPolicy.IMMEDIATE);
+            final DeleteRequestBuilder builder = client.prepareDelete().setIndex(index).setId(id).setRefreshPolicy(RefreshPolicy.IMMEDIATE);
             if (version > 0) {
                 builder.setVersion(version);
             }
             final DeleteResponse response = builder.execute().actionGet(ComponentUtil.getFessConfig().getIndexDeleteTimeout());
             return response.getResult() == Result.DELETED;
         } catch (final ElasticsearchException e) {
-            throw new FessEsClientException("Failed to delete: " + index + "/" + type + "/" + id + "/" + version, e);
+            throw new FessEsClientException("Failed to delete: " + index + "/" + id + "/" + version, e);
         }
     }
 
@@ -1424,30 +1419,6 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    @Deprecated
-    public ActionFuture<TermVectorsResponse> termVector(final TermVectorsRequest request) {
-        return client.termVector(request);
-    }
-
-    @Override
-    @Deprecated
-    public void termVector(final TermVectorsRequest request, final ActionListener<TermVectorsResponse> listener) {
-        client.termVector(request, listener);
-    }
-
-    @Override
-    @Deprecated
-    public TermVectorsRequestBuilder prepareTermVector() {
-        return client.prepareTermVector();
-    }
-
-    @Override
-    @Deprecated
-    public TermVectorsRequestBuilder prepareTermVector(final String index, final String type, final String id) {
-        return client.prepareTermVector(index, type, id);
-    }
-
-    @Override
     public ActionFuture<MultiTermVectorsResponse> multiTermVectors(final MultiTermVectorsRequest request) {
         return client.multiTermVectors(request);
     }
@@ -1488,21 +1459,15 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> ActionFuture<Response> execute(
-            final Action<Request, Response, RequestBuilder> action, final Request request) {
+    public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(Action<Response> action,
+            Request request) {
         return client.execute(action, request);
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(
-            final Action<Request, Response, RequestBuilder> action, final Request request, final ActionListener<Response> listener) {
+    public <Request extends ActionRequest, Response extends ActionResponse> void execute(Action<Response> action, Request request,
+            ActionListener<Response> listener) {
         client.execute(action, request, listener);
-    }
-
-    @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
-            final Action<Request, Response, RequestBuilder> action) {
-        return client.prepareExecute(action);
     }
 
     @Override

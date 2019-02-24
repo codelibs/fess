@@ -1,8 +1,4 @@
 {
-  "related_content": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "term": {
         "type": "keyword"
@@ -29,5 +25,4 @@
         "type": "long"
       }
     }
-  }
 }

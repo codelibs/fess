@@ -198,7 +198,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         final String docId = form.docId;
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), query);
+            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), () -> asListHtml());
@@ -262,8 +262,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                         entity.put(fessConfig.getIndexFieldId(), newId);
 
                         final String index = fessConfig.getIndexDocumentUpdateIndex();
-                        final String type = fessConfig.getIndexDocumentType();
-                        fessEsClient.store(index, type, entity);
+                        fessEsClient.store(index, entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         logger.error("Failed to add " + entity, e);
@@ -285,7 +284,6 @@ public class AdminSearchlistAction extends FessAdminAction {
         getDoc(form).ifPresent(
                 entity -> {
                     final String index = fessConfig.getIndexDocumentUpdateIndex();
-                    final String type = fessConfig.getIndexDocumentType();
                     try {
                         entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
@@ -295,11 +293,11 @@ public class AdminSearchlistAction extends FessAdminAction {
                             entity.put(fessConfig.getIndexFieldId(), newId);
                             final Long version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
                             if (version != null && oldId != null) {
-                                fessEsClient.delete(index, type, oldId, version);
+                                fessEsClient.delete(index, oldId, version);
                             }
                         }
 
-                        fessEsClient.store(index, type, entity);
+                        fessEsClient.store(index, entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         logger.error("Failed to update " + entity, e);
@@ -381,7 +379,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 docId = null;
             }
             if (StringUtil.isNotBlank(docId)) {
-                return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
+                return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
                     builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
                     return true;
                 });

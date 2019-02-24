@@ -525,9 +525,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. fess.update */
     String INDEX_DOCUMENT_UPDATE_INDEX = "index.document.update.index";
 
-    /** The key of the configuration. e.g. doc */
-    String INDEX_DOCUMENT_TYPE = "index.document.type";
-
     /** The key of the configuration. e.g. fess */
     String INDEX_DOCUMENT_SUGGEST_INDEX = "index.document.suggest.index";
 
@@ -2968,13 +2965,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentUpdateIndex();
-
-    /**
-     * Get the value for the key 'index.document.type'. <br>
-     * The value is, e.g. doc <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getIndexDocumentType();
 
     /**
      * Get the value for the key 'index.document.suggest.index'. <br>
@@ -6877,10 +6867,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX);
         }
 
-        public String getIndexDocumentType() {
-            return get(FessConfig.INDEX_DOCUMENT_TYPE);
-        }
-
         public String getIndexDocumentSuggestIndex() {
             return get(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX);
         }
@@ -8701,7 +8687,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED, "true");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");
-            defaultMap.put(FessConfig.INDEX_DOCUMENT_TYPE, "doc");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX, "fess");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_INDEX, ".crawler");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_shards, "10");

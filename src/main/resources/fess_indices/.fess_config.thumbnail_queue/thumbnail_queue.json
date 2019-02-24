@@ -1,8 +1,4 @@
 {
-  "thumbnail_queue": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "thumbnail_id": {
         "type": "keyword"
@@ -23,5 +19,4 @@
         "type": "keyword"
       }
     }
-  }
 }

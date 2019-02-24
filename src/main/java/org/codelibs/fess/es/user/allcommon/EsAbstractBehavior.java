@@ -104,7 +104,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
         }
-        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits();
+        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits().value;
     }
 
     @Override
@@ -154,13 +154,14 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         });
 
         list.setPageSize(size);
-        list.setAllRecordCount((int) searchHits.getTotalHits());
+        list.setAllRecordCount((int) searchHits.getTotalHits().value);
         list.setCurrentPageNumber(cb.getFetchPageNumber());
 
         list.setTook(response.getTook().getMillis());
         list.setTotalShards(response.getTotalShards());
         list.setSuccessfulShards(response.getSuccessfulShards());
         list.setFailedShards(response.getFailedShards());
+        list.setTotalHits(searchHits.getTotalHits());
 
         list.setAggregation(response.getAggregations());
 

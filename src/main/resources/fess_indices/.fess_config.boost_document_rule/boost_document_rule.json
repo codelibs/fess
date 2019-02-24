@@ -1,8 +1,4 @@
 {
-  "boost_document_rule": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "urlExpr": {
         "type": "keyword"
@@ -26,5 +22,4 @@
         "type": "long"
       }
     }
-  }
 }

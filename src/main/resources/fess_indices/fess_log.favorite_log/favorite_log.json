@@ -1,8 +1,4 @@
 {
-  "favorite_log": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "userInfoId": {
         "type": "keyword"
@@ -21,5 +17,4 @@
         "format": "date_optional_time"
       }
     }
-  }
 }

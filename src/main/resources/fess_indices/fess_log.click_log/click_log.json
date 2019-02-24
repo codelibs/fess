@@ -1,8 +1,4 @@
 {
-  "click_log": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "urlId": {
         "type": "keyword"
@@ -31,5 +27,4 @@
         "format": "date_optional_time"
       }
     }
-  }
 }

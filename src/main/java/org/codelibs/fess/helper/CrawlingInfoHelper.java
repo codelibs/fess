@@ -183,7 +183,6 @@ public class CrawlingInfoHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.search(
                 fessConfig.getIndexDocumentSearchIndex(),
-                fessConfig.getIndexDocumentType(),
                 queryRequestBuilder -> {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
                     final TermsAggregationBuilder termsBuilder =

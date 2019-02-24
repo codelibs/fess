@@ -1,8 +1,4 @@
 {
-  "failure_url": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "url": {
         "type": "keyword"
@@ -26,5 +22,4 @@
         "type": "keyword"
       }
     }
-  }
 }

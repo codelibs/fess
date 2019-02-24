@@ -1,8 +1,4 @@
 {
-  "data_config": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "name": {
         "type": "keyword"
@@ -47,5 +43,4 @@
         "type": "text"
       }
     }
-  }
 }

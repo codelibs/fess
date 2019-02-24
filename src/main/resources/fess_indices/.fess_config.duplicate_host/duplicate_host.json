@@ -1,8 +1,4 @@
 {
-  "duplicate_host": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "regularName": {
         "type": "keyword"
@@ -26,5 +22,4 @@
         "type": "long"
       }
     }
-  }
 }

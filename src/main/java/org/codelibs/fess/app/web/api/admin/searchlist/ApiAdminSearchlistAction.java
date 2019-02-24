@@ -104,14 +104,13 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     // GET /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> get$doc(final String id) {
-        return asJson(new ApiDocResponse()
-                .doc(fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
-                    builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id));
-                    return true;
-                }).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(Status.OK).result());
+        return asJson(new ApiDocResponse().doc(fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
+            builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id));
+            return true;
+        }).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(Status.OK).result());
     }
 
     // PUT /api/admin/searchlist/doc
@@ -131,8 +130,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 entity.put(fessConfig.getIndexFieldId(), newId);
 
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
-                final String type = fessConfig.getIndexDocumentType();
-                fessEsClient.store(index, type, entity);
+                fessEsClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to add " + entity, e);
@@ -158,7 +156,6 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         body.crudMode = CrudMode.EDIT;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             final String index = fessConfig.getIndexDocumentUpdateIndex();
-            final String type = fessConfig.getIndexDocumentType();
             try {
                 entity.putAll(fessConfig.convertToStorableDoc(body.doc));
 
@@ -168,11 +165,11 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                     entity.put(fessConfig.getIndexFieldId(), newId);
                     final Number version = (Number) entity.remove(fessConfig.getIndexFieldVersion());
                     if (version != null && oldId != null) {
-                        fessEsClient.delete(index, type, oldId, version.longValue());
+                        fessEsClient.delete(index, oldId, version.longValue());
                     }
                 }
 
-                fessEsClient.store(index, type, entity);
+                fessEsClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to update " + entity, e);
@@ -192,7 +189,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> delete$doc(final String id) {
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id);
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), query);
+            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL));

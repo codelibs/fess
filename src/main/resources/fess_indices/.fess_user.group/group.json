@@ -1,8 +1,4 @@
 {
-  "group": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "name": {
         "type": "keyword"
@@ -11,5 +7,4 @@
         "type" : "long"
       }
     }
-  }
 }

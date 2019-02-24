@@ -92,7 +92,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
         searchResponseOpt.ifPresent(searchResponse -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final SearchHits searchHits = searchResponse.getHits();
-            allRecordCount = searchHits.getTotalHits();
+            allRecordCount = searchHits.getTotalHits().value;
             queryTime = searchResponse.getTook().millis();
 
             if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
@@ -110,7 +110,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
                         if (innerHits != null) {
                             final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
                             if (innerSearchHits != null) {
-                                final long totalHits = innerSearchHits.getTotalHits();
+                                final long totalHits = innerSearchHits.getTotalHits().value;
                                 if (totalHits > 1) {
                                     docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
                                     final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());

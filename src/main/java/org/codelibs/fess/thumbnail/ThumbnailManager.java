@@ -380,7 +380,6 @@ public class ThumbnailManager {
                 final String docIdField = fessConfig.getIndexFieldDocId();
                 fessEsClient.getDocumentList(
                         fessConfig.getIndexDocumentSearchIndex(),
-                        fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             searchRequestBuilder.setQuery(QueryBuilders.termsQuery(docIdField,
                                     deleteFileMap.keySet().toArray(new String[deleteFileMap.size()])));

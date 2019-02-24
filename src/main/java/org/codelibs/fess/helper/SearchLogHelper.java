@@ -357,8 +357,8 @@ public class SearchLogHelper {
                                             new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
                                     final Map<String, Object> upsertMap = new HashMap<>();
                                     upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
-                                    builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), fessConfig
-                                            .getIndexDocumentType(), id).script(script).upsert(upsertMap));
+                                    builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script).upsert(
+                                            upsertMap));
                                 }
                             });
                 });

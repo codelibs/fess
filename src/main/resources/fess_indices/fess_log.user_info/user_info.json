@@ -1,8 +1,4 @@
 {
-  "user_info": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "createdAt": {
         "type": "date",
@@ -13,5 +9,4 @@
         "format": "date_optional_time"
       }
     }
-  }
 }

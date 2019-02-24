@@ -1,8 +1,4 @@
 {
-  "web_authentication": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "hostname": {
         "type": "keyword"
@@ -41,5 +37,4 @@
         "type": "long"
       }
     }
-  }
 }

@@ -1,12 +1,7 @@
 {
-  "role": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "name": {
         "type": "keyword"
       }
     }
-  }
 }

@@ -1,8 +1,4 @@
 {
-  "job_log": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "jobName": {
         "type": "keyword"
@@ -32,5 +28,4 @@
         "type": "long"
       }
     }
-  }
 }

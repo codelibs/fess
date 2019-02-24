@@ -257,7 +257,7 @@ public class DataIndexHelper {
                 final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
                 fessEsClient.admin().indices().prepareRefresh(index).execute().actionGet();
-                final long numOfDeleted = fessEsClient.deleteByQuery(index, fessConfig.getIndexDocumentType(), queryBuilder);
+                final long numOfDeleted = fessEsClient.deleteByQuery(index, queryBuilder);
                 logger.info("Deleted {} old docs.", numOfDeleted);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at " + dataConfig, e);

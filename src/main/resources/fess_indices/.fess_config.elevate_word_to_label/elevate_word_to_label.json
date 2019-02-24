@@ -1,8 +1,4 @@
 {
-  "elevate_word_to_label": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "elevateWordId": {
         "type": "keyword"
@@ -11,5 +7,4 @@
         "type": "keyword"
       }
     }
-  }
 }

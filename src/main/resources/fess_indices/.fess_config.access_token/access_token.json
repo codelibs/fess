@@ -1,8 +1,4 @@
 {
-  "access_token": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "name": {
         "type": "keyword"
@@ -32,5 +28,4 @@
         "type": "long"
       }
     }
-  }
 }

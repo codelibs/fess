@@ -1,8 +1,4 @@
 {
-  "elevate_word": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "suggestWord": {
         "type": "keyword"
@@ -35,5 +31,4 @@
         "type": "long"
       }
     }
-  }
 }

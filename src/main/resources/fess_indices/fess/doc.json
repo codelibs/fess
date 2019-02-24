@@ -1,8 +1,4 @@
 {
-  "doc": {
-    "_source": {
-      "enabled": true
-    },
     "dynamic_templates": [
       {
         "lang_ar": {
@@ -496,14 +492,11 @@
         "type": "keyword"
       },
       "important_content": {
-        "type": "langstring",
-        "lang_field": "lang",
-        "lang_base_name": "title",
+        "type": "text",
         "index": false
       },
       "content": {
-        "type": "langstring",
-        "lang_field": "lang",
+        "type": "text",
         "analyzer": "standard_analyzer",
         "term_vector": "with_positions_offsets"
       },
@@ -581,8 +574,7 @@
         "type": "keyword"
       },
       "title": {
-        "type": "langstring",
-        "lang_field": "lang",
+        "type": "text",
         "analyzer": "standard_analyzer",
         "term_vector": "with_positions_offsets"
       },
@@ -593,5 +585,4 @@
         "type": "keyword"
       }
     }
-  }
 }

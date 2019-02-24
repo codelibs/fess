@@ -111,7 +111,7 @@ public class SearchService {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
         final List<Map<String, Object>> documentItems =
-                fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+                fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(),
                         searchRequestBuilder -> {
                             queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
@@ -208,7 +208,6 @@ public class SearchService {
         }
         return fessEsClient.<Map<String, Object>> scrollSearch(
                 fessConfig.getIndexDocumentSearchIndex(),
-                fessConfig.getIndexDocumentType(),
                 searchRequestBuilder -> {
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                     return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
@@ -251,8 +250,7 @@ public class SearchService {
         final QueryContext queryContext = queryHelper.build(params.getType(), query, context -> {
             context.skipRoleQuery();
         });
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
-                queryContext.getQueryBuilder());
+        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryContext.getQueryBuilder());
     }
 
     public String[] getLanguages(final HttpServletRequest request, final SearchRequestParams params) {
@@ -299,7 +297,6 @@ public class SearchService {
             final OptionalThing<FessUserBean> userBean) {
         return fessEsClient.getDocument(
                 fessConfig.getIndexDocumentSearchIndex(),
-                fessConfig.getIndexDocumentType(),
                 builder -> {
                     final BoolQueryBuilder boolQuery =
                             QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
@@ -323,7 +320,6 @@ public class SearchService {
             final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
         return fessEsClient.getDocumentList(
                 fessConfig.getIndexDocumentSearchIndex(),
-                fessConfig.getIndexDocumentType(),
                 builder -> {
                     final BoolQueryBuilder boolQuery =
                             QueryBuilders.boolQuery().must(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
@@ -346,13 +342,12 @@ public class SearchService {
     }
 
     public boolean update(final String id, final String field, final Object value) {
-        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, field, value);
+        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), id, field, value);
     }
 
     public boolean update(final String id, final Consumer<UpdateRequestBuilder> builderLambda) {
         try {
-            final UpdateRequestBuilder builder =
-                    fessEsClient.prepareUpdate(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id);
+            final UpdateRequestBuilder builder = fessEsClient.prepareUpdate().setIndex(fessConfig.getIndexDocumentUpdateIndex()).setId(id);
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;

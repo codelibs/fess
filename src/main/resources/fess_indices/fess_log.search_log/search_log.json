@@ -1,8 +1,4 @@
 {
-  "search_log": {
-    "_source": {
-      "enabled": true
-    },
     "dynamic_templates": [
       {
         "search_fields": {
@@ -78,5 +74,4 @@
         "type" : "keyword"
       }
     }
-  }
 }

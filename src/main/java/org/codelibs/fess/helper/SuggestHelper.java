@@ -206,7 +206,7 @@ public class SuggestHelper {
                         () -> {
                             final ESSourceReader reader =
                                     new ESSourceReader(ComponentUtil.getFessEsClient(), suggester.settings(),
-                                            fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType());
+                                            fessConfig.getIndexDocumentSearchIndex(), "_doc"); // TODO remove type
                             reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
                             reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
                             reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());

@@ -120,7 +120,7 @@ public class KeyMatchHelper {
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> {
                     return SearchConditionBuilder.builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL))
                             .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
@@ -161,11 +161,10 @@ public class KeyMatchHelper {
             return Collections.emptyList();
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
-                searchRequestBuilder -> {
-                    searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getFirst()).setSize(size);
-                    return true;
-                });
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+            searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getFirst()).setSize(size);
+            return true;
+        });
     }
 
     private String toLowerCase(final String term) {

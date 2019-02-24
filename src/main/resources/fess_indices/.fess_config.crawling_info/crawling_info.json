@@ -1,8 +1,4 @@
 {
-  "crawling_info": {
-    "_source": {
-      "enabled": true
-    },
     "properties": {
       "sessionId": {
         "type": "keyword"
@@ -17,5 +13,4 @@
         "type": "long"
       }
     }
-  }
 }

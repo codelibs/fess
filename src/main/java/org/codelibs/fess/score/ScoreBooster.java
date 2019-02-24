@@ -73,10 +73,9 @@ public abstract class ScoreBooster {
             bulkRequestBuilder = client.prepareBulk();
         }
         final String index = fessConfig.getIndexDocumentUpdateIndex();
-        final String type = fessConfig.getIndexDocumentType();
         for (final String id : ids) {
-            bulkRequestBuilder.add(client.prepareUpdate(index, type, id).setScript(
-                    new Script(ScriptType.INLINE, scriptLang, scriptCode, params)));
+            bulkRequestBuilder.add(client.prepareUpdate().setIndex(index).setId(id)
+                    .setScript(new Script(ScriptType.INLINE, scriptLang, scriptCode, params)));
         }
         if (bulkRequestBuilder.numberOfActions() > requestCacheSize) {
             flush();
