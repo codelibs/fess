@@ -210,7 +210,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String API_DASHBOARD_RESPONSE_HEADERS = "api.dashboard.response.headers";
 
-    /** The key of the configuration. e.g. * */
+    /** The key of the configuration. e.g.  */
     String API_CORS_ALLOW_ORIGIN = "api.cors.allow.origin";
 
     /** The key of the configuration. e.g. GET, POST, OPTIONS, DELETE, PUT */
@@ -1912,10 +1912,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.cors.allow.origin'. <br>
-     * The value is, e.g. * <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowOrigin();
+
+    /**
+     * Get the value for the key 'api.cors.allow.origin' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiCorsAllowOriginAsInteger();
 
     /**
      * Get the value for the key 'api.cors.allow.methods'. <br>
@@ -6342,6 +6350,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.API_CORS_ALLOW_ORIGIN);
         }
 
+        public Integer getApiCorsAllowOriginAsInteger() {
+            return getAsInteger(FessConfig.API_CORS_ALLOW_ORIGIN);
+        }
+
         public String getApiCorsAllowMethods() {
             return get(FessConfig.API_CORS_ALLOW_METHODS);
         }
@@ -8659,7 +8671,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
-            defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
+            defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization");
