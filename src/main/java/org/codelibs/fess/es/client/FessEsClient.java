@@ -544,8 +544,8 @@ public class FessEsClient implements Client {
                                         });
                                 if (result.keySet().contains("index")) {
                                     final IndexRequestBuilder requestBuilder =
-                                            client.prepareIndex(configIndex, result.get("index").get("_id")).setSource(line,
-                                                    XContentType.JSON);
+                                            client.prepareIndex().setIndex(configIndex).setId(result.get("index").get("_id"))
+                                                    .setSource(line, XContentType.JSON);
                                     builder.add(requestBuilder);
                                 }
                             }

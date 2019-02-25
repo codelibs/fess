@@ -99,7 +99,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     @Override
     protected int delegateSelectCountUniquely(final ConditionBean cb) {
         // #pending check response and cast problem
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsSearchType());
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex());
         final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
@@ -123,7 +123,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     @Override
     protected <RESULT extends ENTITY> List<RESULT> delegateSelectList(final ConditionBean cb, final Class<? extends RESULT> entityType) {
         // #pending check response
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsSearchType());
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex());
         final int from;
         final int size;
         if (cb.isFetchScopeEffective()) {
@@ -222,8 +222,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         SearchResponse response = null;
         while (true) {
             if (response == null) {
-                final SearchRequestBuilder builder =
-                        client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForCursor).setSize(sizeForCursor);
+                final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForCursor).setSize(sizeForCursor);
                 final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
                 if (esCb.getPreference() != null) {
                     builder.setPreference(esCb.getPreference());
@@ -274,7 +273,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected IndexRequestBuilder createInsertRequest(final EsAbstractEntity esEntity) {
-        final IndexRequestBuilder builder = client.prepareIndex(asEsIndex(), asEsIndexType()).setSource(toSource(esEntity));
+        final IndexRequestBuilder builder = client.prepareIndex().setIndex(asEsIndex()).setSource(toSource(esEntity));
         final String id = esEntity.asDocMeta().id();
         if (id != null) {
             builder.setId(id);
@@ -301,7 +300,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     protected IndexRequestBuilder createUpdateRequest(final EsAbstractEntity esEntity) {
         final IndexRequestBuilder builder =
-                client.prepareIndex(asEsIndex(), asEsIndexType(), esEntity.asDocMeta().id()).setSource(toSource(esEntity));
+                client.prepareIndex().setIndex(asEsIndex()).setId(esEntity.asDocMeta().id()).setSource(toSource(esEntity));
         final RequestOptionCall<IndexRequestBuilder> indexOption = esEntity.asDocMeta().indexOption();
         if (indexOption != null) {
             indexOption.callback(builder);
@@ -327,7 +326,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected DeleteRequestBuilder createDeleteRequest(final EsAbstractEntity esEntity) {
-        final DeleteRequestBuilder builder = client.prepareDelete(asEsIndex(), asEsIndexType(), esEntity.asDocMeta().id());
+        final DeleteRequestBuilder builder = client.prepareDelete().setIndex(asEsIndex()).setId(esEntity.asDocMeta().id());
         final RequestOptionCall<DeleteRequestBuilder> deleteOption = esEntity.asDocMeta().deleteOption();
         if (deleteOption != null) {
             deleteOption.callback(builder);
@@ -341,8 +340,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         int count = 0;
         while (true) {
             if (response == null) {
-                final SearchRequestBuilder builder =
-                        client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForDelete).setSize(sizeForDelete);
+                final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForDelete).setSize(sizeForDelete);
                 final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
                 if (esCb.getPreference() != null) {
                     esCb.setPreference(esCb.getPreference());
@@ -361,7 +359,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
             final BulkRequestBuilder bulkRequest = client.prepareBulk();
             for (final SearchHit hit : hits) {
-                bulkRequest.add(client.prepareDelete(asEsIndex(), asEsIndexType(), hit.getId()));
+                bulkRequest.add(client.prepareDelete().setIndex(asEsIndex()).setId(hit.getId()));
             }
             count += hits.length;
             final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
