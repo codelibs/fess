@@ -174,7 +174,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 default:
                     final Boolean isPruned = fieldPrunedRuleMap.get(entry.getKey());
                     Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
-                    if (isPruned != null && isPruned.booleanValue()) {
+                    if (value != null && isPruned != null && isPruned.booleanValue()) {
                         value = pruneNode(value);
                     }
                     putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
