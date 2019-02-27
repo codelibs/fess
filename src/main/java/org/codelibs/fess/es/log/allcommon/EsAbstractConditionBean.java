@@ -655,6 +655,8 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
 
         private Boolean version;
 
+        private Boolean seqNoAndPrimaryTerm = Boolean.TRUE;
+
         private int terminateAfter = 0;
 
         public void build(SearchRequestBuilder builder) {
@@ -678,6 +680,9 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
             }
             if (version != null) {
                 builder.setVersion(version);
+            }
+            if (seqNoAndPrimaryTerm != null) {
+                builder.seqNoAndPrimaryTerm(seqNoAndPrimaryTerm);
             }
             if (terminateAfter > 0) {
                 builder.setTerminateAfter(terminateAfter);

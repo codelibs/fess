@@ -54,6 +54,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.seqno.SequenceNumbers;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
@@ -150,6 +151,8 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
             final DocMeta docMeta = ((EsAbstractEntity) entity).asDocMeta();
             docMeta.id(hit.getId());
             docMeta.version(hit.getVersion());
+            docMeta.seqNo(hit.getSeqNo());
+            docMeta.primaryTerm(hit.getPrimaryTerm());
             list.add(entity);
         });
 
@@ -189,6 +192,8 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
                 final DocMeta docMeta = ((EsAbstractEntity) entity).asDocMeta();
                 docMeta.id(hit.getId());
                 docMeta.version(hit.getVersion());
+                docMeta.seqNo(hit.getSeqNo());
+                docMeta.primaryTerm(hit.getPrimaryTerm());
                 handler.handle(entity);
             });
 
@@ -210,6 +215,8 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
                 final DocMeta docMeta = ((EsAbstractEntity) entity).asDocMeta();
                 docMeta.id(hit.getId());
                 docMeta.version(hit.getVersion());
+                docMeta.seqNo(hit.getSeqNo());
+                docMeta.primaryTerm(hit.getPrimaryTerm());
                 list.add(entity);
             });
 
@@ -291,10 +298,15 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final IndexRequestBuilder builder = createUpdateRequest(esEntity);
 
         final IndexResponse response = builder.execute().actionGet(indexTimeout);
-        long version = response.getVersion();
-        if (version != -1) {
-            esEntity.asDocMeta().version(version);
+        final long seqNo = response.getSeqNo();
+        if (seqNo != SequenceNumbers.UNASSIGNED_SEQ_NO) {
+            esEntity.asDocMeta().seqNo(seqNo);
         }
+        final long primaryTerm = response.getPrimaryTerm();
+        if (primaryTerm != SequenceNumbers.UNASSIGNED_PRIMARY_TERM) {
+            esEntity.asDocMeta().primaryTerm(primaryTerm);
+        }
+
         return 1;
     }
 
@@ -305,9 +317,13 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         if (indexOption != null) {
             indexOption.callback(builder);
         }
-        final Long version = esEntity.asDocMeta().version();
-        if (version != null && version.longValue() != -1) {
-            builder.setVersion(version);
+        final Long seqNo = esEntity.asDocMeta().seqNo();
+        if (seqNo != null && seqNo.longValue() != SequenceNumbers.UNASSIGNED_SEQ_NO) {
+            esEntity.asDocMeta().seqNo(seqNo);
+        }
+        final Long primaryTerm = esEntity.asDocMeta().primaryTerm();
+        if (primaryTerm != null && primaryTerm.longValue() != SequenceNumbers.UNASSIGNED_PRIMARY_TERM) {
+            esEntity.asDocMeta().primaryTerm(primaryTerm);
         }
         return builder;
     }

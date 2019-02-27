@@ -236,6 +236,10 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
 
         protected Long version;
 
+        protected Long seqNo;
+
+        protected Long primaryTerm;
+
         private transient RequestOptionCall<IndexRequestBuilder> indexOption;
 
         private transient RequestOptionCall<DeleteRequestBuilder> deleteOption;
@@ -257,6 +261,24 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
 
         public Long version() {
             return version;
+        }
+
+        public DocMeta seqNo(Long seqNo) {
+            this.seqNo = seqNo;
+            return this;
+        }
+
+        public Long seqNo() {
+            return seqNo;
+        }
+
+        public DocMeta primaryTerm(Long primaryTerm) {
+            this.primaryTerm = primaryTerm;
+            return this;
+        }
+
+        public Long primaryTerm() {
+            return primaryTerm;
         }
 
         public DocMeta indexOption(RequestOptionCall<IndexRequestBuilder> builder) {
