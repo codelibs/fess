@@ -166,7 +166,7 @@ public class BsBadWordCB extends EsAbstractConditionBean {
     }
 
     public static class HpSpecification {
-        private List<String> columnList = new ArrayList<>();
+        protected List<String> columnList = new ArrayList<>();
 
         private void doColumn(String name) {
             columnList.add(name);
