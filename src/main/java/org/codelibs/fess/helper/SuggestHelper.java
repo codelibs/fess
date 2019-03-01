@@ -236,8 +236,7 @@ public class SuggestHelper {
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
-        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), suggester.getType(),
-                boolQueryBuilder);
+        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
     }
 
     public void purgeSearchlogSuggest(final LocalDateTime time) {
@@ -249,8 +248,7 @@ public class SuggestHelper {
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
-        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), suggester.getType(),
-                boolQueryBuilder);
+        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
     }
 
     public long getAllWordsNum() {
