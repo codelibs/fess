@@ -106,7 +106,6 @@ public class IndexUpdater extends Thread {
         // nothing
     }
 
-    @Override
     @PreDestroy
     public void destroy() {
         if (!finishCrawling) {
