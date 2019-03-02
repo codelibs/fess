@@ -34,10 +34,6 @@
 		<version>9</version>
 	</parent>
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-
 		<!-- Main Framework -->
 		<dbflute.version>1.1.8</dbflute.version>
 		<lastaflute.version>1.1.0</lastaflute.version>
@@ -101,16 +97,7 @@
 			</activation>
 			<properties>
 				<test.include.path>**/*Test.java</test.include.path>
-			</properties>
-		</profile>
-		<profile>
-			<id>build-jdk9</id>
-			<activation>
-				<jdk>9</jdk>
-			</activation>
-			<properties>
-				<test.include.path>**/*Test.java</test.include.path>
-				<test.command.args>--add-modules java.xml.bind</test.command.args>
+				<test.command.args>--illegal-access=permit</test.command.args>
 			</properties>
 		</profile>
 		<profile>
@@ -139,8 +126,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
+					<release>11</release>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
