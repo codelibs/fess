@@ -4,7 +4,6 @@ language: java
 
 matrix:
   include:
-    - jdk: openjdk8
     - jdk: openjdk11
       before_install:
         - rm "${JAVA_HOME}/lib/security/cacerts"
