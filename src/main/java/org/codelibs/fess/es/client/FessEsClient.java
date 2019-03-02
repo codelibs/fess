@@ -653,29 +653,43 @@ public class FessEsClient implements Client {
 
         int count = 0;
         String scrollId = response.getScrollId();
-        while (scrollId != null) {
-            final SearchHits searchHits = response.getHits();
-            final SearchHit[] hits = searchHits.getHits();
-            if (hits.length == 0) {
-                scrollId = null;
-                break;
-            }
+        try {
+            while (scrollId != null) {
+                final SearchHits searchHits = response.getHits();
+                final SearchHit[] hits = searchHits.getHits();
+                if (hits.length == 0) {
+                    break;
+                }
 
-            final BulkRequestBuilder bulkRequest = client.prepareBulk();
-            for (final SearchHit hit : hits) {
-                bulkRequest.add(client.prepareDelete().setIndex(index).setId(hit.getId()));
-                count++;
-            }
-            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
-            if (bulkResponse.hasFailures()) {
-                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
-            }
+                final BulkRequestBuilder bulkRequest = client.prepareBulk();
+                for (final SearchHit hit : hits) {
+                    bulkRequest.add(client.prepareDelete().setIndex(index).setId(hit.getId()));
+                    count++;
+                }
+                final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
+                if (bulkResponse.hasFailures()) {
+                    throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+                }
 
-            response =
-                    client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(fessConfig.getIndexBulkTimeout());
-            scrollId = response.getScrollId();
+                response =
+                        client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute()
+                                .actionGet(fessConfig.getIndexBulkTimeout());
+                if (!scrollId.equals(response.getScrollId())) {
+                    deleteScrollContext(scrollId);
+                }
+                scrollId = response.getScrollId();
+            }
+        } finally {
+            deleteScrollContext(scrollId);
         }
         return count;
+    }
+
+    protected void deleteScrollContext(final String scrollId) {
+        if (scrollId != null) {
+            client.prepareClearScroll().addScrollId(scrollId)
+                    .execute(ActionListener.wrap(res -> {}, e -> logger.warn("Failed to clear the scroll context.", e)));
+        }
     }
 
     protected <T> T get(final String index, final String type, final String id, final SearchCondition<GetRequestBuilder> condition,
