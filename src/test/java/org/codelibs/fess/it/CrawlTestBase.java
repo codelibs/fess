@@ -36,7 +36,7 @@ public class CrawlTestBase extends ITBase {
 
     private static final String DOC_INDEX_NAME = "fess.search";
 
-    private static final String DOC_TYPE_NAME = "doc";
+    private static final String DOC_TYPE_NAME = "_doc";
 
     protected static void createJob(final Map<String, Object> requestBody) {
         checkMethodBase(requestBody).put("/api/admin/scheduler/setting").then().body("response.created", equalTo(true))

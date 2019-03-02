@@ -19,40 +19,47 @@ import static io.restassured.RestAssured.given;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
 
 public class ITBase {
+    private static final Logger logger = LoggerFactory.getLogger(ITBase.class);
     public static final String DEFAULT_FESS_URL = "http://localhost:8080";
     public static final String DEFAULT_ES_URL = "http://localhost:9200";
     public static final String DEFAULT_TEST_TOKEN = "E44TjYrJQadtGBFFuECA0SBqqVtqj7lRGmhYep53ixNdvlRxnkhwqCVCpRoO";
     public static final String DEFAULT_TEST_TOKEN_ID = "testToken";
+    private static final String TEST_TOKEN = "test.token";
 
     public static String getTestToken() {
-        return System.getProperty("test.token", DEFAULT_TEST_TOKEN);
+        return System.getProperty(TEST_TOKEN, DEFAULT_TEST_TOKEN);
     }
 
     public static String settingTestToken() {
-        final String testToken = System.getProperty("test.token");
+        final String testToken = System.getProperty(TEST_TOKEN);
         if (testToken != null) {
+            logger.info("Token: " + testToken);
             return testToken;
         }
 
         given().contentType("application/json")
-                .body("{\"index\":{\"_index\":\".fess_config.access_token\",\"_type\":\"access_token\",\"_id\":\""
+                .body("{\"index\":{\"_index\":\".fess_config.access_token\",\"_id\":\""
                         + DEFAULT_TEST_TOKEN_ID
                         + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\",\"Rguest\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
                         + DEFAULT_TEST_TOKEN + "\"}\n").when().post(getEsUrl() + "/_bulk");
         given().contentType("application/json").when().post(getEsUrl() + "/_refresh");
+        logger.info("Created Token: " + testToken);
         return DEFAULT_TEST_TOKEN;
     }
 
     public static void deleteTestToken() {
-        final String testToken = System.getProperty("test.token");
+        final String testToken = System.getProperty(TEST_TOKEN);
         if (testToken != null) {
             return;
         }
-        given().contentType("application/json").delete(getEsUrl() + "/.fess_config.access_token/access_token/" + DEFAULT_TEST_TOKEN_ID);
+        given().contentType("application/json").delete(getEsUrl() + "/.fess_config.access_token/_doc/" + DEFAULT_TEST_TOKEN_ID);
     }
 
     public static void refresh() {
