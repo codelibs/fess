@@ -41,6 +41,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -247,6 +248,9 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
             }
 
             if (!handler.apply(searchHits)) {
+                if (response.getScrollId() != null) {
+                    client.prepareClearScroll().addScrollId(response.getScrollId()).execute(ActionListener.wrap(() -> {}));
+                }
                 break;
             }
         }
@@ -380,6 +384,9 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
             count += hits.length;
             final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
             if (bulkResponse.hasFailures()) {
+                if (response.getScrollId() != null) {
+                    client.prepareClearScroll().addScrollId(response.getScrollId()).execute(ActionListener.wrap(() -> {}));
+                }
                 throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
             }
         }

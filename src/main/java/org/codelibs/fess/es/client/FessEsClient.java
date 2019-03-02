@@ -729,25 +729,28 @@ public class FessEsClient implements Client {
         if (condition.build(searchRequestBuilder)) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
+            String scrollId = null;
             try {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Query DSL:\n" + searchRequestBuilder.toString());
                 }
                 SearchResponse response = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
 
-                String scrollId = response.getScrollId();
+                scrollId = response.getScrollId();
                 while (scrollId != null) {
                     final SearchHits searchHits = response.getHits();
                     final SearchHit[] hits = searchHits.getHits();
                     if (hits.length == 0) {
-                        scrollId = null;
                         break;
                     }
 
                     for (final SearchHit hit : hits) {
                         count++;
                         if (!cursor.apply(creator.build(response, hit))) {
-                            scrollId = null;
+                            if (scrollId != null) {
+                                client.prepareClearScroll().addScrollId(scrollId)
+                                        .execute(ActionListener.wrap(res -> {}, e1 -> logger.warn("Failed to clear scrollId.", e1)));
+                            }
                             break;
                         }
                     }
@@ -758,6 +761,10 @@ public class FessEsClient implements Client {
                     scrollId = response.getScrollId();
                 }
             } catch (final SearchPhaseExecutionException e) {
+                if (scrollId != null) {
+                    client.prepareClearScroll().addScrollId(scrollId)
+                            .execute(ActionListener.wrap(res -> {}, e1 -> logger.warn("Failed to clear scrollId.", e1)));
+                }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query: " + searchRequestBuilder, e);
             }
