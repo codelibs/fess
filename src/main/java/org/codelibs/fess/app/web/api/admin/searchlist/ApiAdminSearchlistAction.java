@@ -163,9 +163,11 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 final String oldId = (String) entity.get(fessConfig.getIndexFieldId());
                 if (!newId.equals(oldId)) {
                     entity.put(fessConfig.getIndexFieldId(), newId);
-                    final Number version = (Number) entity.remove(fessConfig.getIndexFieldVersion());
-                    if (version != null && oldId != null) {
-                        fessEsClient.delete(index, oldId, version.longValue());
+                    entity.remove(fessConfig.getIndexFieldVersion());
+                    final Number seqNo = (Number) entity.remove(fessConfig.getIndexFieldSeqNo());
+                    final Number primaryTerm = (Number) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
+                    if (seqNo != null && primaryTerm != null && oldId != null) {
+                        fessEsClient.delete(index, oldId, seqNo, primaryTerm);
                     }
                 }
 

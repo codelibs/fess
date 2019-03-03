@@ -25,6 +25,8 @@ public class EditForm extends CreateForm {
     public String id;
 
     @ValidateTypeFailure
-    public Long version;
+    public Long seqNo;
 
+    @ValidateTypeFailure
+    public Long primaryTerm;
 }

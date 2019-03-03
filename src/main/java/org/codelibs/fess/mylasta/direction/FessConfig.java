@@ -420,6 +420,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. _version */
     String INDEX_FIELD_VERSION = "index.field.version";
 
+    /** The key of the configuration. e.g. _seq_no */
+    String INDEX_FIELD_seq_no = "index.field.seq_no";
+
+    /** The key of the configuration. e.g. _primary_term */
+    String INDEX_FIELD_primary_term = "index.field.primary_term";
+
     /** The key of the configuration. e.g. lang */
     String INDEX_FIELD_LANG = "index.field.lang";
 
@@ -2696,6 +2702,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldVersion();
+
+    /**
+     * Get the value for the key 'index.field.seq_no'. <br>
+     * The value is, e.g. _seq_no <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldSeqNo();
+
+    /**
+     * Get the value for the key 'index.field.primary_term'. <br>
+     * The value is, e.g. _primary_term <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldPrimaryTerm();
 
     /**
      * Get the value for the key 'index.field.lang'. <br>
@@ -6715,6 +6735,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_VERSION);
         }
 
+        public String getIndexFieldSeqNo() {
+            return get(FessConfig.INDEX_FIELD_seq_no);
+        }
+
+        public String getIndexFieldPrimaryTerm() {
+            return get(FessConfig.INDEX_FIELD_primary_term);
+        }
+
         public String getIndexFieldLang() {
             return get(FessConfig.INDEX_FIELD_LANG);
         }
@@ -8652,6 +8680,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_doc_id, "doc_id");
             defaultMap.put(FessConfig.INDEX_FIELD_ID, "_id");
             defaultMap.put(FessConfig.INDEX_FIELD_VERSION, "_version");
+            defaultMap.put(FessConfig.INDEX_FIELD_seq_no, "_seq_no");
+            defaultMap.put(FessConfig.INDEX_FIELD_primary_term, "_primary_term");
             defaultMap.put(FessConfig.INDEX_FIELD_LANG, "lang");
             defaultMap.put(FessConfig.INDEX_FIELD_has_cache, "has_cache");
             defaultMap.put(FessConfig.INDEX_FIELD_last_modified, "last_modified");

@@ -141,7 +141,7 @@ public class IndexingHelper {
 
     public boolean deleteDocument(final FessEsClient fessEsClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), id, 0);
+        return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), id);
     }
 
     public long deleteDocumentByUrl(final FessEsClient fessEsClient, final String url) {

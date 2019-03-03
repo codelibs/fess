@@ -239,7 +239,8 @@ public class AdminSearchlistAction extends FessAdminAction {
         getDoc(form).ifPresent(entity -> {
             form.doc = fessConfig.convertToEditableDoc(entity);
             form.id = (String) entity.remove(fessConfig.getIndexFieldId());
-            form.version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
+            form.seqNo = (Long) entity.remove(fessConfig.getIndexFieldSeqNo());
+            form.primaryTerm = (Long) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asListHtml());
         });
@@ -291,9 +292,11 @@ public class AdminSearchlistAction extends FessAdminAction {
                         final String oldId = (String) entity.get(fessConfig.getIndexFieldId());
                         if (!newId.equals(oldId)) {
                             entity.put(fessConfig.getIndexFieldId(), newId);
-                            final Long version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
-                            if (version != null && oldId != null) {
-                                fessEsClient.delete(index, oldId, version);
+                            entity.remove(fessConfig.getIndexFieldVersion());
+                            final Long seqNo = (Long) entity.remove(fessConfig.getIndexFieldSeqNo());
+                            final Long primaryTerm = (Long) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
+                            if (seqNo != null && primaryTerm != null && oldId != null) {
+                                fessEsClient.delete(index, oldId, seqNo, primaryTerm);
                             }
                         }
 

@@ -239,6 +239,8 @@ public class SearchService {
 
                     docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                     docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
+                    docMap.put(fessConfig.getIndexFieldSeqNo(), hit.getSeqNo());
+                    docMap.put(fessConfig.getIndexFieldPrimaryTerm(), hit.getPrimaryTerm());
                     return docMap;
                 }, cursor);
     }

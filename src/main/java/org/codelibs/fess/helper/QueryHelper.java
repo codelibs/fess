@@ -305,8 +305,10 @@ public class QueryHelper {
                     fessConfig.getIndexFieldLastModified(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldParentId(), //
+                    fessConfig.getIndexFieldPrimaryTerm(), //
                     fessConfig.getIndexFieldRole(), //
                     fessConfig.getIndexFieldSegment(), //
+                    fessConfig.getIndexFieldSeqNo(), //
                     fessConfig.getIndexFieldSite(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldUrl(), //

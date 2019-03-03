@@ -29,7 +29,8 @@
 					<la:hidden property="q" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
-						<la:hidden property="version" />
+						<la:hidden property="seqNo" />
+						<la:hidden property="primaryTerm" />
 					</c:if>
 					<div class="row">
 						<div class="col-md-12">

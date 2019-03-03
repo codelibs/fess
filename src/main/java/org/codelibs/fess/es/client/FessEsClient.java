@@ -798,6 +798,8 @@ public class FessEsClient implements Client {
                         final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
+                        docMap.put(fessConfig.getIndexFieldSeqNo(), hit.getSeqNo());
+                        docMap.put(fessConfig.getIndexFieldPrimaryTerm(), hit.getPrimaryTerm());
                         return docMap;
                     }
                     final Map<String, DocumentField> fields = hit.getFields();
@@ -807,6 +809,8 @@ public class FessEsClient implements Client {
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
+                        docMap.put(fessConfig.getIndexFieldSeqNo(), hit.getSeqNo());
+                        docMap.put(fessConfig.getIndexFieldPrimaryTerm(), hit.getPrimaryTerm());
                         return docMap;
                     }
                     return null;
@@ -1151,7 +1155,9 @@ public class FessEsClient implements Client {
         @SuppressWarnings("unchecked")
         final Map<String, Object> source = obj instanceof Map ? (Map<String, Object>) obj : BeanUtil.copyBeanToNewMap(obj);
         final String id = (String) source.remove(fessConfig.getIndexFieldId());
-        final Number version = (Number) source.remove(fessConfig.getIndexFieldVersion());
+        source.remove(fessConfig.getIndexFieldVersion());
+        final Number seqNo = (Number) source.remove(fessConfig.getIndexFieldSeqNo());
+        final Number primaryTerm = (Number) source.remove(fessConfig.getIndexFieldPrimaryTerm());
         IndexResponse response;
         try {
             if (id == null) {
@@ -1165,8 +1171,11 @@ public class FessEsClient implements Client {
                 final IndexRequestBuilder builder =
                         client.prepareIndex().setIndex(index).setId(id).setSource(new DocMap(source))
                                 .setRefreshPolicy(RefreshPolicy.IMMEDIATE).setOpType(OpType.INDEX);
-                if (version != null && version.longValue() > 0) {
-                    builder.setVersion(version.longValue());
+                if (seqNo != null) {
+                    builder.setIfSeqNo(seqNo.longValue());
+                }
+                if (primaryTerm != null) {
+                    builder.setIfPrimaryTerm(primaryTerm.longValue());
                 }
                 response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             }
@@ -1177,16 +1186,23 @@ public class FessEsClient implements Client {
         }
     }
 
-    public boolean delete(final String index, final String id, final long version) {
+    public boolean delete(final String index, final String id) {
+        return delete(index, id, null, null);
+    }
+
+    public boolean delete(final String index, final String id, final Number seqNo, final Number primaryTerm) {
         try {
             final DeleteRequestBuilder builder = client.prepareDelete().setIndex(index).setId(id).setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            if (version > 0) {
-                builder.setVersion(version);
+            if (seqNo != null) {
+                builder.setIfSeqNo(seqNo.longValue());
+            }
+            if (primaryTerm != null) {
+                builder.setIfPrimaryTerm(primaryTerm.longValue());
             }
             final DeleteResponse response = builder.execute().actionGet(ComponentUtil.getFessConfig().getIndexDeleteTimeout());
             return response.getResult() == Result.DELETED;
         } catch (final ElasticsearchException e) {
-            throw new FessEsClientException("Failed to delete: " + index + "/" + id + "/" + version, e);
+            throw new FessEsClientException("Failed to delete: " + index + "/" + id + "@" + seqNo + ":" + primaryTerm, e);
         }
     }
 
