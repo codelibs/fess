@@ -384,6 +384,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10485760 */
     String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
 
+    /** The key of the configuration. e.g. content,important_content,title */
+    String INDEXER_LANGUAGE_FIELDS = "indexer.language.fields";
+
     /** The key of the configuration. e.g. default */
     String INDEX_CODEC = "index.codec";
 
@@ -2608,6 +2611,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerDataMaxDocumentRequestSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.language.fields'. <br>
+     * The value is, e.g. content,important_content,title <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerLanguageFields();
 
     /**
      * Get the value for the key 'index.codec'. <br>
@@ -6683,6 +6693,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
         }
 
+        public String getIndexerLanguageFields() {
+            return get(FessConfig.INDEXER_LANGUAGE_FIELDS);
+        }
+
         public String getIndexCodec() {
             return get(FessConfig.INDEX_CODEC);
         }
@@ -8668,6 +8682,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
+            defaultMap.put(FessConfig.INDEXER_LANGUAGE_FIELDS, "content,important_content,title");
             defaultMap.put(FessConfig.INDEX_CODEC, "default");
             defaultMap.put(FessConfig.INDEX_number_of_shards, "5");
             defaultMap.put(FessConfig.INDEX_auto_expand_replicas, "0-1");

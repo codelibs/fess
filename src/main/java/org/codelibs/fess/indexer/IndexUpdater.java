@@ -419,6 +419,8 @@ public class IndexUpdater extends Thread {
         if (!map.containsKey(fessConfig.getIndexFieldDocId())) {
             map.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(map));
         }
+
+        ComponentUtil.getLanguageHelper().updateDocument(map);
     }
 
     protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {

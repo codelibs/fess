@@ -1984,4 +1984,12 @@ public interface FessProp {
         }
         return list;
     }
+
+    String getIndexerLanguageFields();
+
+    default String[] getIndexerLanguageFieldsAsArray() {
+        return split(getIndexerLanguageFields(), ",").get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
+
+    }
+
 }

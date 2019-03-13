@@ -1168,5 +1168,16 @@
         }
       }
     }
+  },
+  "mappings": {
+    "_doc": {
+      "_source": {
+        "excludes": [
+          "content_*",
+          "important_content_*",
+          "title_*"
+        ]
+      }
+    }
   }
 }

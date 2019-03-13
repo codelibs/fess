@@ -47,6 +47,7 @@ import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
@@ -87,6 +88,8 @@ public final class ComponentUtil {
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
     private static Map<String, Object> componentMap = new HashMap<>();
+
+    private static final String LANGUAGE_HELPER = "languageHelper";
 
     private static final String CURL_HELPER = "curlHelper";
 
@@ -432,6 +435,11 @@ public final class ComponentUtil {
 
     public static CurlHelper getCurlHelper() {
         return getComponent(CURL_HELPER);
+    }
+
+    public static LanguageHelper getLanguageHelper() {
+        return getComponent(LANGUAGE_HELPER);
+
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

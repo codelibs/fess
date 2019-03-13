@@ -87,6 +87,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             dataMap.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(dataMap));
         }
 
+        ComponentUtil.getLanguageHelper().updateDocument(dataMap);
+
         synchronized (docList) {
             docList.add(dataMap);
             if (logger.isDebugEnabled()) {
