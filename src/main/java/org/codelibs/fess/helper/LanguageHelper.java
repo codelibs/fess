@@ -19,15 +19,23 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.tika.language.detect.LanguageDetector;
+import org.apache.tika.language.detect.LanguageResult;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LanguageHelper {
+    private static final Logger logger = LoggerFactory.getLogger(LanguageHelper.class);
 
     protected String[] langFields;
 
     protected String[] supportedLanguages;
+
+    protected LanguageDetector detector;
 
     @PostConstruct
     public void init() {
@@ -37,27 +45,62 @@ public class LanguageHelper {
     }
 
     public void updateDocument(final Map<String, Object> doc) {
-        final String language =
-                getSupportedLanguage(DocumentUtil.getValue(doc, ComponentUtil.getFessConfig().getIndexFieldLang(), String.class));
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        String language = getSupportedLanguage(DocumentUtil.getValue(doc, fessConfig.getIndexFieldLang(), String.class));
         if (language == null) {
-            return;
+            for (final String f : langFields) {
+                if (doc.containsKey(f)) {
+                    language = detectLanguage(DocumentUtil.getValue(doc, f, String.class));
+                    if (language != null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("set {} to lang field", language);
+                        }
+                        doc.put(fessConfig.getIndexFieldLang(), language);
+                        break;
+                    }
+                }
+            }
+            if (language == null) {
+                return;
+            }
         }
 
         for (final String f : langFields) {
             final String lf = f + "_" + language;
             if (doc.containsKey(f) && !doc.containsKey(lf)) {
                 doc.put(lf, doc.get(f));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("add {} field", lf);
+                }
             }
         }
     }
 
+    protected String detectLanguage(final String text) {
+        if (StringUtil.isBlank(text)) {
+            return null;
+        }
+        final LanguageResult result = detector.detect(text);
+        if (logger.isDebugEnabled()) {
+            logger.debug("detected lang:{}({}) from {}", result, result.getRawScore(), text);
+        }
+        return getSupportedLanguage(result.getLanguage());
+    }
+
     protected String getSupportedLanguage(final String lang) {
+        if (StringUtil.isBlank(lang)) {
+            return null;
+        }
         for (final String l : supportedLanguages) {
             if (l.equals(lang)) {
                 return l;
             }
         }
         return null;
+    }
+
+    public void setDetector(LanguageDetector detector) {
+        this.detector = detector;
     }
 
 }
