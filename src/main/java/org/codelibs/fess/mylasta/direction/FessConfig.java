@@ -859,6 +859,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. FES */
     String COOKIE_REMEMBER_ME_HARBOR_KEY = "cookie.remember.me.harbor.key";
 
+    /** The key of the configuration. e.g. cookie */
+    String SESSION_TRACKING_MODES = "session.tracking.modes";
+
     /** The key of the configuration. e.g. 25 */
     String PAGING_PAGE_SIZE = "paging.page.size";
 
@@ -4075,6 +4078,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCookieRememberMeHarborKey();
+
+    /**
+     * Get the value for the key 'session.tracking.modes'. <br>
+     * The value is, e.g. cookie <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSessionTrackingModes();
 
     /**
      * Get the value for the key 'paging.page.size'. <br>
@@ -7490,6 +7500,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.COOKIE_REMEMBER_ME_HARBOR_KEY);
         }
 
+        public String getSessionTrackingModes() {
+            return get(FessConfig.SESSION_TRACKING_MODES);
+        }
+
         public String getPagingPageSize() {
             return get(FessConfig.PAGING_PAGE_SIZE);
         }
@@ -8874,6 +8888,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
             defaultMap.put(FessConfig.COOKIE_ETERNAL_EXPIRE, "86400");
             defaultMap.put(FessConfig.COOKIE_REMEMBER_ME_HARBOR_KEY, "FES");
+            defaultMap.put(FessConfig.SESSION_TRACKING_MODES, "cookie");
             defaultMap.put(FessConfig.PAGING_PAGE_SIZE, "25");
             defaultMap.put(FessConfig.PAGING_PAGE_RANGE_SIZE, "5");
             defaultMap.put(FessConfig.PAGING_PAGE_RANGE_FILL_LIMIT, "true");
