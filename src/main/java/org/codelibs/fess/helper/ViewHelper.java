@@ -38,6 +38,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -145,6 +147,9 @@ public class ViewHelper {
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
         fessConfig.getQueryHighlightTerminalChars().codePoints().forEach(hihglightTerminalCharSet::add);
+        final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
+        servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(s -> SessionTrackingMode.valueOf(s))
+                .collect(Collectors.toSet()));
     }
 
     public String getContentTitle(final Map<String, Object> document) {
