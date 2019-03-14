@@ -147,9 +147,13 @@ public class ViewHelper {
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
         fessConfig.getQueryHighlightTerminalChars().codePoints().forEach(hihglightTerminalCharSet::add);
-        final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
-        servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(s -> SessionTrackingMode.valueOf(s))
-                .collect(Collectors.toSet()));
+        try {
+            final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
+            servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf)
+                    .collect(Collectors.toSet()));
+        } catch (final Throwable e) {
+            logger.warn("Failed to set SessionTrackingMode.", e);
+        }
     }
 
     public String getContentTitle(final Map<String, Object> document) {

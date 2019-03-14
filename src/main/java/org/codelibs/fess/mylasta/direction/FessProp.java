@@ -1988,7 +1988,7 @@ public interface FessProp {
     String getSessionTrackingModes();
 
     default Set<String> getSessionTrackingModesAsSet() {
-        return split(getSessionTrackingModes(), ",")
-                .get(stream -> stream.map(s -> s.trim().toUpperCase(Locale.ENGLISH)).collect(Collectors.toSet()));
+        return split(getSessionTrackingModes(), ",").get(
+                stream -> stream.map(s -> s.trim().toUpperCase(Locale.ENGLISH)).collect(Collectors.toSet()));
     }
 }
