@@ -2432,6 +2432,34 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'success.upload_protwords_file' with parameters.
+     * <pre>
+     * message: Uploaded Protwords file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUploadProtwordsFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_upload_protwords_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.upload_stopwords_file' with parameters.
+     * <pre>
+     * message: Uploaded Stopwords file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUploadStopwordsFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_upload_stopwords_file));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'success.upload_stemmeroverride_file' with parameters.
      * <pre>
      * message: Uploaded Stemmer Override file.
