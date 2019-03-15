@@ -431,6 +431,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Uploaded Synonym file. */
     public static final String SUCCESS_upload_synonym_file = "{success.upload_synonym_file}";
 
+    /** The key of the message: Uploaded Protwords file. */
+    public static final String SUCCESS_upload_protwords_file = "{success.upload_protwords_file}";
+
+    /** The key of the message: Uploaded Stopwords file. */
+    public static final String SUCCESS_upload_stopwords_file = "{success.upload_stopwords_file}";
+
     /** The key of the message: Uploaded Stemmer Override file. */
     public static final String SUCCESS_upload_stemmeroverride_file = "{success.upload_stemmeroverride_file}";
 
