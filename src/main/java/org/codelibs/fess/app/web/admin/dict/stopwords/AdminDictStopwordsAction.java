@@ -249,7 +249,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
                     return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
                 });
             }
-            saveInfo(messages -> messages.addSuccessUploadSynonymFile(GLOBAL));
+            saveInfo(messages -> messages.addSuccessUploadStopwordsFile(GLOBAL));
             return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL), () -> uploadpage(form.dictId));
