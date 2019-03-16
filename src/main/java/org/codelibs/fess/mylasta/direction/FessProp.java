@@ -1203,16 +1203,15 @@ public interface FessProp {
         return list;
     }
 
-    String getOicDefaultGroups();
-
     default String[] getOicDefaultGroupsAsArray() {
         String[] array = (String[]) propMap.get(OIC_DEFAULT_GROUPS);
         if (array == null) {
-            if (StringUtil.isBlank(getOicDefaultGroups())) {
+            final String oicDefaultGroups = getSystemProperty("oic.default.groups");
+            if (StringUtil.isBlank(oicDefaultGroups)) {
                 array = StringUtil.EMPTY_STRINGS;
             } else {
                 array =
-                        split(getOicDefaultGroups(), ",").get(
+                        split(oicDefaultGroups, ",").get(
                                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
             }
             propMap.put(OIC_DEFAULT_GROUPS, array);
@@ -1220,16 +1219,15 @@ public interface FessProp {
         return array;
     }
 
-    String getOicDefaultRoles();
-
     default String[] getOicDefaultRolesAsArray() {
         String[] array = (String[]) propMap.get(OIC_DEFAULT_ROLES);
         if (array == null) {
-            if (StringUtil.isBlank(getOicDefaultRoles())) {
+            final String oicDefaultRoles = getSystemProperty("oic.default.roles");
+            if (StringUtil.isBlank(oicDefaultRoles)) {
                 array = StringUtil.EMPTY_STRINGS;
             } else {
                 array =
-                        split(getOicDefaultRoles(), ",").get(
+                        split(oicDefaultRoles, ",").get(
                                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
             }
             propMap.put(OIC_DEFAULT_ROLES, array);
@@ -1927,7 +1925,7 @@ public interface FessProp {
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_GSA_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiGsaResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                String[] values = s.split(":", 2);
+                final String[] values = s.split(":", 2);
                 if (values.length == 2) {
                     return new Pair<>(values[0], values[1]);
                 }
@@ -1944,7 +1942,7 @@ public interface FessProp {
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_JSON_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiJsonResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                String[] values = s.split(":", 2);
+                final String[] values = s.split(":", 2);
                 if (values.length == 2) {
                     return new Pair<>(values[0], values[1]);
                 }
@@ -1961,7 +1959,7 @@ public interface FessProp {
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_DASHBOARD_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiDashboardResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                String[] values = s.split(":", 2);
+                final String[] values = s.split(":", 2);
                 if (values.length == 2) {
                     return new Pair<>(values[0], values[1]);
                 }

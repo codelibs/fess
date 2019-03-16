@@ -13,15 +13,17 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.sso;
+package org.codelibs.fess.app.web.base.login;
 
-import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
-import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.credential.UserPasswordCredential;
 
-public interface SsoAuthenticator {
+public class LocalUserCredential extends UserPasswordCredential implements FessCredential {
+    public LocalUserCredential(String user, String password) {
+        super(user, password);
+    }
 
-    LoginCredential getLoginCredential();
-
-    void resolveCredential(LoginCredentialResolver resolver);
-
+    @Override
+    public String getUserId() {
+        return getUser();
+    }
 }
