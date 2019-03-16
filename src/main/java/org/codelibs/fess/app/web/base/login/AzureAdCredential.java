@@ -18,40 +18,38 @@ package org.codelibs.fess.app.web.base.login;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
-public class OpenIdConnectCredential implements LoginCredential, FessCredential {
+import com.microsoft.aad.adal4j.AuthenticationResult;
 
-    private final Map<String, Object> attributes;
+public class AzureAdCredential implements LoginCredential, FessCredential {
 
-    public OpenIdConnectCredential(final Map<String, Object> attributes) {
-        this.attributes = attributes;
-    }
+    private final AuthenticationResult authResult;
 
-    @Override
-    public String toString() {
-        return "{" + getUserId() + "}";
+    public AzureAdCredential(final AuthenticationResult authResult) {
+        this.authResult = authResult;
     }
 
     @Override
     public String getUserId() {
-        return (String) attributes.get("email");
+        return authResult.getUserInfo().getDisplayableId();
+    }
+
+    @Override
+    public String toString() {
+        return "{" + authResult.getUserInfo().getDisplayableId() + "}";
     }
 
     public User getUser() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return new User(getUserId(), fessConfig.getOicDefaultGroupsAsArray(), fessConfig.getOicDefaultRolesAsArray());
+        return new User(authResult.getUserInfo().getDisplayableId(), new String[0], new String[0]);
     }
 
     public static class User implements FessUser {
-
         private static final long serialVersionUID = 1L;
 
         protected final String name;

@@ -17,13 +17,16 @@ package org.codelibs.fess.app.web.base.login;
 
 import org.lastaflute.web.login.credential.LoginCredential;
 
-public class SpnegoCredential implements LoginCredential {
+public class SpnegoCredential implements LoginCredential, FessCredential {
     private final String username;
-
-    // private Principal principal;
 
     public SpnegoCredential(final String username) {
         this.username = username;
+    }
+
+    @Override
+    public String getUserId() {
+        return username;
     }
 
     @Override
@@ -31,7 +34,4 @@ public class SpnegoCredential implements LoginCredential {
         return "{" + username + "}";
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

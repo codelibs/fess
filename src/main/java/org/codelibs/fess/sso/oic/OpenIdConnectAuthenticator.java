@@ -20,17 +20,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.crawler.Constants;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -53,11 +55,28 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenIdConnectAuthenticator.class);
 
-    private static final String OIC_STATE = "OIC_STATE";
+    protected static final String OIC_AUTH_SERVER_URL = "oic.auth.server.url";
 
-    private final HttpTransport httpTransport = new NetHttpTransport();
+    protected static final String OIC_CLIENT_ID = "oic.client.id";
 
-    private final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    protected static final String OIC_SCOPE = "oic.scope";
+
+    protected static final String OIC_REDIRECT_URL = "oic.redirect.url";
+
+    protected static final String OIC_TOKEN_SERVER_URL = "oic.token.server.url";
+
+    protected static final String OIC_CLIENT_SECRET = "oic.client.secret";
+
+    protected static final String OIC_STATE = "OIC_STATE";
+
+    protected final HttpTransport httpTransport = new NetHttpTransport();
+
+    protected final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
+    @PostConstruct
+    public void init() {
+        ComponentUtil.getSsoManager().register(this);
+    }
 
     @Override
     public LoginCredential getLoginCredential() {
@@ -84,13 +103,12 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     }
 
     protected String getAuthUrl(final HttpServletRequest request) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String state = UuidUtil.create();
         request.getSession().setAttribute(OIC_STATE, state);
-        return new AuthorizationCodeRequestUrl(fessConfig.getOicAuthServerUrl(), fessConfig.getOicClientId())//
-                .setScopes(Arrays.asList(fessConfig.getOicScope()))//
+        return new AuthorizationCodeRequestUrl(getOicAuthServerUrl(), getOicClientId())//
+                .setScopes(Arrays.asList(getOicScope()))//
                 .setResponseTypes(Arrays.asList("code"))//
-                .setRedirectUri(fessConfig.getOicRedirectUrl())//
+                .setRedirectUri(getOicRedirectUrl())//
                 .setState(state)//
                 .build();
     }
@@ -174,12 +192,42 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     }
 
     protected TokenResponse getTokenUrl(final String code) throws IOException {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(fessConfig.getOicTokenServerUrl()), code)//
+        return new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(getOicTokenServerUrl()), code)//
                 .setGrantType("authorization_code")//
-                .setRedirectUri(fessConfig.getOicRedirectUrl())//
-                .set("client_id", fessConfig.getOicClientId())//
-                .set("client_secret", fessConfig.getOicClientSecret())//
+                .setRedirectUri(getOicRedirectUrl())//
+                .set("client_id", getOicClientId())//
+                .set("client_secret", getOicClientSecret())//
                 .execute();
+    }
+
+    protected String getOicClientSecret() {
+        return ComponentUtil.getSystemProperties().getProperty(OIC_CLIENT_SECRET, StringUtil.EMPTY);
+    }
+
+    protected String getOicTokenServerUrl() {
+        return ComponentUtil.getSystemProperties().getProperty(OIC_TOKEN_SERVER_URL, "https://accounts.google.com/o/oauth2/token");
+    }
+
+    protected String getOicRedirectUrl() {
+        return ComponentUtil.getSystemProperties().getProperty(OIC_REDIRECT_URL, "http://localhost:8080/sso/");
+    }
+
+    protected String getOicScope() {
+        return ComponentUtil.getSystemProperties().getProperty(OIC_SCOPE, StringUtil.EMPTY);
+    }
+
+    protected String getOicClientId() {
+        return ComponentUtil.getSystemProperties().getProperty(OIC_CLIENT_ID, StringUtil.EMPTY);
+    }
+
+    protected String getOicAuthServerUrl() {
+        return ComponentUtil.getSystemProperties().getProperty(OIC_AUTH_SERVER_URL, "https://accounts.google.com/o/oauth2/auth");
+    }
+
+    @Override
+    public void resolveCredential(final LoginCredentialResolver resolver) {
+        resolver.resolve(OpenIdConnectCredential.class, credential -> {
+            return OptionalEntity.of(credential.getUser());
+        });
     }
 }

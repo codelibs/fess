@@ -24,13 +24,11 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
-import org.codelibs.fess.app.web.base.login.SpnegoCredential;
+import org.codelibs.fess.app.web.base.login.FessCredential;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,18 +72,10 @@ public class ActivityHelper {
             buffer.append('\t');
             buffer.append("class:");
             buffer.append(c.getClass().getSimpleName());
-            if (c instanceof OpenIdConnectCredential) {
+            if (c instanceof FessCredential) {
                 buffer.append('\t');
                 buffer.append("user:");
-                buffer.append(((OpenIdConnectCredential) c).getEmail());
-            } else if (c instanceof SpnegoCredential) {
-                buffer.append('\t');
-                buffer.append("user:");
-                buffer.append(((SpnegoCredential) c).getUsername());
-            } else if (c instanceof UserPasswordCredential) {
-                buffer.append('\t');
-                buffer.append("user:");
-                buffer.append(((UserPasswordCredential) c).getUser());
+                buffer.append(((FessCredential) c).getUserId());
             }
             return buffer.toString();
         }).ifPresent(buf::append);
