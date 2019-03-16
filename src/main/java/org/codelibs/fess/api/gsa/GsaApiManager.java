@@ -646,7 +646,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     }
 
     @Override
-    protected void writeHeaders(HttpServletResponse response) {
+    protected void writeHeaders(final HttpServletResponse response) {
         ComponentUtil.getFessConfig().getApiGsaResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }

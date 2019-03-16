@@ -1496,14 +1496,14 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(Action<Response> action,
-            Request request) {
+    public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(final Action<Response> action,
+            final Request request) {
         return client.execute(action, request);
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse> void execute(Action<Response> action, Request request,
-            ActionListener<Response> listener) {
+    public <Request extends ActionRequest, Response extends ActionResponse> void execute(final Action<Response> action,
+            final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
 

@@ -99,7 +99,7 @@ public class LanguageHelper {
         return null;
     }
 
-    public void setDetector(LanguageDetector detector) {
+    public void setDetector(final LanguageDetector detector) {
         this.detector = detector;
     }
 
