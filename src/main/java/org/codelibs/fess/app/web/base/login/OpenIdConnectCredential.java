@@ -15,15 +15,16 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
@@ -46,8 +47,25 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
     }
 
     public User getUser() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return new User(getUserId(), fessConfig.getOicDefaultGroupsAsArray(), fessConfig.getOicDefaultRolesAsArray());
+        return new User(getUserId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
+    }
+
+    protected static String[] getDefaultGroupsAsArray() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.groups");
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        }
+    }
+
+    protected static String[] getDefaultRolesAsArray() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.roles");
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        }
     }
 
     public static class User implements FessUser {

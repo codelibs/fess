@@ -29,6 +29,7 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoFilterConfig;
@@ -45,8 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SpnegoAuthenticator implements SsoAuthenticator {
+
     private static final Logger logger = LoggerFactory.getLogger(SpnegoAuthenticator.class);
 
+    protected static final String SPNEGO_INITIALIZED = "spnego.initialized";
     protected static final String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";
     protected static final String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
     protected static final String SPNEGO_ALLOW_LOCALHOST = "spnego.allow.localhost";
@@ -65,6 +68,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     @PostConstruct
     public void init() {
+        ComponentUtil.getSsoManager().register(this);
+    }
+
+    protected synchronized org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (authenticator != null && fessConfig.getSystemPropertyAsBoolean(SPNEGO_INITIALIZED, false)) {
+            return authenticator;
+        }
         try {
             // set some System properties
             final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpengoConfig());
@@ -72,13 +83,11 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             // pre-authenticate
             authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
 
-            ComponentUtil.getSsoManager().register(this);
+            fessConfig.setSystemPropertyAsBoolean(SPNEGO_INITIALIZED, true);
+            fessConfig.storeSystemProperties();
+            return authenticator;
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.warn("Failed to initialize SPNEGO.", e);
-            } else {
-                logger.warn("Failed to initialize SPNEGO.");
-            }
+            throw new SsoLoginException("Failed to initialize SPNEGO.", e);
         }
     }
 
@@ -96,7 +105,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     // client/caller principal
                     final SpnegoPrincipal principal;
                     try {
-                        principal = authenticator.authenticate(request, spnegoResponse);
+                        principal = getAuthenticator().authenticate(request, spnegoResponse);
                     } catch (final Exception e) {
                         final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
                         if (logger.isDebugEnabled()) {
