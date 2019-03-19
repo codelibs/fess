@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -84,6 +85,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected static final String CODE = "code";
 
+    protected long acquisitionTimeout = 30 * 1000L;
+
     @PostConstruct
     public void init() {
         ComponentUtil.getSsoManager().register(this);
@@ -104,10 +107,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 return null;
             }
 
-            // TODO refresh
-
-                return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
-            }).orElse(null);
+            return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
+        }).orElse(null);
     }
 
     protected String getAuthUrl(final HttpServletRequest request) {
@@ -214,6 +215,31 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
     }
 
+    public AuthenticationResult getAccessToken(String refreshToken) {
+        final String authority = getAuthority() + getTenant() + "/";
+        if (logger.isDebugEnabled()) {
+            logger.debug("refreshToken: {}, authority: {}", refreshToken, authority);
+        }
+        ExecutorService service = null;
+        try {
+            service = Executors.newFixedThreadPool(1);
+            AuthenticationContext context = new AuthenticationContext(authority, true, service);
+            Future<AuthenticationResult> future =
+                    context.acquireTokenByRefreshToken(refreshToken, new ClientCredential(getClientId(), getClientSecret()), null, null);
+            final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
+            if (result == null) {
+                throw new SsoLoginException("authentication result was null");
+            }
+            return result;
+        } catch (Exception e) {
+            throw new SsoLoginException("Failed to get a token.", e);
+        } finally {
+            if (service != null) {
+                service.shutdown();
+            }
+        }
+    }
+
     protected AuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
         final String authority = getAuthority() + getTenant() + "/";
         final String authCode = authorizationCode.getValue();
@@ -223,11 +249,11 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final ClientCredential credential = new ClientCredential(getClientId(), getClientSecret());
         ExecutorService service = null;
         try {
-            service = Executors.newFixedThreadPool(1);// TODO replace with something...
+            service = Executors.newFixedThreadPool(1);
             final AuthenticationContext context = new AuthenticationContext(authority, true, service);
             final Future<AuthenticationResult> future =
                     context.acquireTokenByAuthorizationCode(authCode, new URI(currentUri), credential, null);
-            final AuthenticationResult result = future.get();
+            final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
                 throw new SsoLoginException("authentication result was null");
             }
@@ -337,5 +363,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         resolver.resolve(AzureAdCredential.class, credential -> {
             return OptionalEntity.of(credential.getUser());
         });
+    }
+
+    public void setAcquisitionTimeout(long acquisitionTimeout) {
+        this.acquisitionTimeout = acquisitionTimeout;
     }
 }

@@ -27,5 +27,11 @@ public interface FessUser extends Serializable {
 
     String[] getPermissions();
 
-    boolean isEditable();
+    default boolean isEditable() {
+        return false;
+    }
+
+    default boolean refresh() {
+        return false;
+    }
 }

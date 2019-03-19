@@ -46,6 +46,8 @@ import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
 import org.lastaflute.web.validation.VaMessenger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jflute
@@ -56,6 +58,8 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     // ===================================================================================
     //                                                                          Definition
     //                                                                          ==========
+    private static final Logger logger = LoggerFactory.getLogger(FessBaseAction.class);
+
     /** The application type for FESs, e.g. used by access context. */
     protected static final String APP_TYPE = "FES"; // #change_it_first
 
@@ -105,6 +109,12 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     // you should remove the 'final' if you need to override this
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
+        fessLoginAssist.getSavedUserBean().ifPresent(u -> {
+            boolean result = u.getFessUser().refresh();
+            if (logger.isDebugEnabled()) {
+                logger.debug("refresh user info: {}", result);
+            }
+        });
         return viewHelper.getActionHook().godHandPrologue(runtime, r -> super.godHandPrologue(r));
     }
 
