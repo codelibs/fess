@@ -34,7 +34,6 @@ import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.AzureAdCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
-import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.sso.SsoAuthenticator;
@@ -73,7 +72,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected static final String STATES = "aadStates";
 
-    protected static final String STATE = "aadState";
+    protected static final String STATE = "state";
 
     protected static final String ERROR = "error";
 
@@ -115,10 +114,15 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String state = UuidUtil.create();
         final String nonce = UuidUtil.create();
         storeStateInSession(request.getSession(), state, nonce);
-        return getAuthority() + getTenant()
-                + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                + URLEncoder.encode(request.getRequestURL().toString(), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
-                + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+        final String authUrl =
+                getAuthority() + getTenant()
+                        + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
+                        + URLEncoder.encode(request.getRequestURL().toString(), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
+                        + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+        if (logger.isDebugEnabled()) {
+            logger.debug("redirect to: {}", authUrl);
+        }
+        return authUrl;
 
     }
 
@@ -129,7 +133,11 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             stateMap = new HashMap<>();
             session.setAttribute(STATES, stateMap);
         }
-        stateMap.put(state, new StateData(nonce, System.currentTimeMillis()));
+        final StateData stateData = new StateData(nonce, System.currentTimeMillis());
+        if (logger.isDebugEnabled()) {
+            logger.debug("store {} in session", stateData);
+        }
+        stateMap.put(state, stateData);
     }
 
     protected LoginCredential processAuthenticationData(final HttpServletRequest request) {
@@ -145,19 +153,21 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 params.put(e.getKey(), e.getValue()[0]);
             }
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("process authentication: url: {}, params: {}", urlBuf, params);
+        }
 
         // validate that state in response equals to state in request
         final StateData stateData = validateState(request.getSession(), params.get(STATE));
+        if (logger.isDebugEnabled()) {
+            logger.debug("load {}", stateData);
+        }
 
         final AuthenticationResponse authResponse = parseAuthenticationResponse(urlBuf.toString(), params);
         if (authResponse instanceof AuthenticationSuccessResponse) {
             final AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse) authResponse;
-            // validate that OIDC Auth Response matches Code Flow (contains only requested artifacts)
             validateAuthRespMatchesCodeFlow(oidcResponse);
-
             final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), request.getRequestURL().toString());
-            // validate nonce to prevent reply attacks (code maybe substituted to one with broader access)
-
             validateNonce(stateData, authData);
 
             return new AzureAdCredential(authData);
@@ -169,6 +179,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     protected AuthenticationResponse parseAuthenticationResponse(final String url, final Map<String, String> params) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Parse: {} : {}", url, params);
+        }
         try {
             return AuthenticationResponseParser.parse(new URI(url), params);
         } catch (final Exception e) {
@@ -178,6 +191,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected void validateNonce(final StateData stateData, final AuthenticationResult authData) {
         final String idToken = authData.getIdToken();
+        if (logger.isDebugEnabled()) {
+            logger.debug("idToken: {}", idToken);
+        }
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
             if (claimsSet == null) {
@@ -185,6 +201,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             }
 
             final String nonce = (String) claimsSet.getClaim("nonce");
+            if (logger.isDebugEnabled()) {
+                logger.debug("nonce: {}", nonce);
+            }
             if (StringUtils.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
                 throw new SsoLoginException("could not validate nonce");
             }
@@ -196,12 +215,16 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     protected AuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
+        final String authority = getAuthority() + getTenant() + "/";
         final String authCode = authorizationCode.getValue();
+        if (logger.isDebugEnabled()) {
+            logger.debug("authCode: {}, authority: {}, uri: {}", authCode, authority, currentUri);
+        }
         final ClientCredential credential = new ClientCredential(getClientId(), getClientSecret());
         ExecutorService service = null;
         try {
             service = Executors.newFixedThreadPool(1);// TODO replace with something...
-            final AuthenticationContext context = new AuthenticationContext(getAuthority() + getTenant() + "/", true, service);
+            final AuthenticationContext context = new AuthenticationContext(authority, true, service);
             final Future<AuthenticationResult> future =
                     context.acquireTokenByAuthorizationCode(authCode, new URI(currentUri), credential, null);
             final AuthenticationResult result = future.get();
@@ -240,9 +263,17 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (states != null) {
             final long now = System.currentTimeMillis();
             states.entrySet().stream().filter(e -> (now - e.getValue().getExpiration()) / 1000L > getStateTtl()).map(Map.Entry::getKey)
-                    .collect(Collectors.toList()).forEach(s -> states.remove(s));
+                    .collect(Collectors.toList()).forEach(s -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("remove old state: {}", s);
+                        }
+                        states.remove(s);
+                    });
             final StateData stateData = states.get(state);
             if (stateData != null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("restore {} from session", stateData);
+                }
                 states.remove(state);
                 return stateData;
             }
@@ -274,6 +305,11 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         public long getExpiration() {
             return expiration;
         }
+
+        @Override
+        public String toString() {
+            return "StateData [nonce=" + nonce + ", expiration=" + expiration + "]";
+        }
     }
 
     protected String getClientId() {
@@ -289,7 +325,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     protected String getAuthority() {
-        return ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_AUTHORITY, StringUtil.EMPTY);
+        return ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_AUTHORITY, "https://login.microsoftonline.com/");
     }
 
     protected long getStateTtl() {
@@ -298,7 +334,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
-        resolver.resolve(OpenIdConnectCredential.class, credential -> {
+        resolver.resolve(AzureAdCredential.class, credential -> {
             return OptionalEntity.of(credential.getUser());
         });
     }

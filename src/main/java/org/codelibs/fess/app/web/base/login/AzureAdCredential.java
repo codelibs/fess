@@ -15,11 +15,13 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -46,7 +48,25 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
     }
 
     public User getUser() {
-        return new User(authResult.getUserInfo().getDisplayableId(), new String[0], new String[0]);
+        return new User(authResult.getUserInfo().getDisplayableId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
+    }
+
+    protected static String[] getDefaultGroupsAsArray() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("azuread.default.groups");
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        }
+    }
+
+    protected static String[] getDefaultRolesAsArray() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("azuread.default.roles");
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        }
     }
 
     public static class User implements FessUser {

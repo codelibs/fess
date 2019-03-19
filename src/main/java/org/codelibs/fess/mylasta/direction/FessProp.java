@@ -120,10 +120,6 @@ public interface FessProp {
 
     String INDEX_ADMIN_DOUBLE_FIELD_SET = "indexAdminDoubleFieldSet";
 
-    String OIC_DEFAULT_ROLES = "oicDefaultRoles";
-
-    String OIC_DEFAULT_GROUPS = "oicDefaultGroups";
-
     String AUTHENTICATION_ADMIN_ROLES = "authenticationAdminRoles";
 
     String SEARCH_GUEST_PERMISSION_LIST = "searchGuestPermissionList";
@@ -1201,38 +1197,6 @@ public interface FessProp {
             propMap.put(SEARCH_GUEST_PERMISSION_LIST, list);
         }
         return list;
-    }
-
-    default String[] getOicDefaultGroupsAsArray() {
-        String[] array = (String[]) propMap.get(OIC_DEFAULT_GROUPS);
-        if (array == null) {
-            final String oicDefaultGroups = getSystemProperty("oic.default.groups");
-            if (StringUtil.isBlank(oicDefaultGroups)) {
-                array = StringUtil.EMPTY_STRINGS;
-            } else {
-                array =
-                        split(oicDefaultGroups, ",").get(
-                                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
-            }
-            propMap.put(OIC_DEFAULT_GROUPS, array);
-        }
-        return array;
-    }
-
-    default String[] getOicDefaultRolesAsArray() {
-        String[] array = (String[]) propMap.get(OIC_DEFAULT_ROLES);
-        if (array == null) {
-            final String oicDefaultRoles = getSystemProperty("oic.default.roles");
-            if (StringUtil.isBlank(oicDefaultRoles)) {
-                array = StringUtil.EMPTY_STRINGS;
-            } else {
-                array =
-                        split(oicDefaultRoles, ",").get(
-                                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
-            }
-            propMap.put(OIC_DEFAULT_ROLES, array);
-        }
-        return array;
     }
 
     String getIndexAdminArrayFields();
