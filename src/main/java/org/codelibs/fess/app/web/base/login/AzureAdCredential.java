@@ -24,6 +24,7 @@ import java.util.Set;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.sso.aad.AzureAdAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
@@ -47,8 +48,8 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         return "{" + authResult.getUserInfo().getDisplayableId() + "}";
     }
 
-    public User getUser() {
-        return new User(authResult.getUserInfo().getDisplayableId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
+    public AzureAdUser getUser() {
+        return new AzureAdUser(authResult, getDefaultGroupsAsArray(), getDefaultRolesAsArray());
     }
 
     protected static String[] getDefaultGroupsAsArray() {
@@ -69,10 +70,8 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         }
     }
 
-    public static class User implements FessUser {
+    public static class AzureAdUser implements FessUser {
         private static final long serialVersionUID = 1L;
-
-        protected final String name;
 
         protected String[] groups;
 
@@ -80,15 +79,17 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         protected String[] permissions;
 
-        protected User(final String name, final String[] groups, final String[] roles) {
-            this.name = name;
+        protected AuthenticationResult authResult;
+
+        public AzureAdUser(final AuthenticationResult authResult, final String[] groups, final String[] roles) {
+            this.authResult = authResult;
             this.groups = groups;
             this.roles = roles;
         }
 
         @Override
         public String getName() {
-            return name;
+            return authResult.getUserInfo().getDisplayableId();
         }
 
         @Override
@@ -106,7 +107,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
-                permissionSet.add(systemHelper.getSearchRoleByUser(name));
+                permissionSet.add(systemHelper.getSearchRoleByUser(getName()));
                 stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
                 stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
                 permissions = permissionSet.toArray(new String[permissionSet.size()]);
@@ -115,9 +116,14 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         }
 
         @Override
-        public boolean isEditable() {
+        public boolean refresh() {
+            if (authResult.getExpiresAfter() < System.currentTimeMillis()) {
+                return false;
+            }
+            final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
+            final String refreshToken = authResult.getRefreshToken();
+            authResult = authenticator.getAccessToken(refreshToken);
             return false;
         }
-
     }
 }

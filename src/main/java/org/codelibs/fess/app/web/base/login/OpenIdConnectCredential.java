@@ -46,8 +46,8 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         return (String) attributes.get("email");
     }
 
-    public User getUser() {
-        return new User(getUserId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
+    public OpenIdUser getUser() {
+        return new OpenIdUser(getUserId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
     }
 
     protected static String[] getDefaultGroupsAsArray() {
@@ -68,7 +68,7 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         }
     }
 
-    public static class User implements FessUser {
+    public static class OpenIdUser implements FessUser {
 
         private static final long serialVersionUID = 1L;
 
@@ -80,7 +80,7 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
 
         protected String[] permissions;
 
-        protected User(final String name, final String[] groups, final String[] roles) {
+        protected OpenIdUser(final String name, final String[] groups, final String[] roles) {
             this.name = name;
             this.groups = groups;
             this.roles = roles;
@@ -112,11 +112,6 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
                 permissions = permissionSet.toArray(new String[permissionSet.size()]);
             }
             return permissions;
-        }
-
-        @Override
-        public boolean isEditable() {
-            return false;
         }
 
     }
