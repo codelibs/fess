@@ -15,13 +15,11 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
-import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.sso.aad.AzureAdAuthenticator;
@@ -49,25 +47,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
     }
 
     public AzureAdUser getUser() {
-        return new AzureAdUser(authResult, getDefaultGroupsAsArray(), getDefaultRolesAsArray());
-    }
-
-    protected static String[] getDefaultGroupsAsArray() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty("azuread.default.groups");
-        if (StringUtil.isBlank(value)) {
-            return StringUtil.EMPTY_STRINGS;
-        } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
-        }
-    }
-
-    protected static String[] getDefaultRolesAsArray() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty("azuread.default.roles");
-        if (StringUtil.isBlank(value)) {
-            return StringUtil.EMPTY_STRINGS;
-        } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
-        }
+        return new AzureAdUser(authResult);
     }
 
     public static class AzureAdUser implements FessUser {
@@ -81,10 +61,10 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         protected AuthenticationResult authResult;
 
-        public AzureAdUser(final AuthenticationResult authResult, final String[] groups, final String[] roles) {
+        public AzureAdUser(final AuthenticationResult authResult) {
             this.authResult = authResult;
-            this.groups = groups;
-            this.roles = roles;
+            final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
+            authenticator.updateMemberOf(this);
         }
 
         @Override
@@ -123,7 +103,21 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
             final String refreshToken = authResult.getRefreshToken();
             authResult = authenticator.getAccessToken(refreshToken);
-            return false;
+            authenticator.updateMemberOf(this);
+            permissions = null;
+            return true;
+        }
+
+        public AuthenticationResult getAuthenticationResult() {
+            return authResult;
+        }
+
+        public void setGroups(final String[] groups) {
+            this.groups = groups;
+        }
+
+        public void setRoles(final String[] roles) {
+            this.roles = roles;
         }
     }
 }

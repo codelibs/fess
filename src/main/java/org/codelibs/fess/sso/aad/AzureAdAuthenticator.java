@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.sso.aad;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,8 +39,12 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.UuidUtil;
+import org.codelibs.curl.Curl;
+import org.codelibs.curl.CurlResponse;
+import org.codelibs.elasticsearch.runner.net.EcrCurl;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.AzureAdCredential;
+import org.codelibs.fess.app.web.base.login.AzureAdCredential.AzureAdUser;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
@@ -61,15 +72,15 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(AzureAdAuthenticator.class);
 
-    protected static final String AZUREAD_STATE_TTL = "azuread.state.ttl";
+    protected static final String AZUREAD_STATE_TTL = "aad.state.ttl";
 
-    protected static final String AZUREAD_AUTHORITY = "azuread.authority";
+    protected static final String AZUREAD_AUTHORITY = "aad.authority";
 
-    protected static final String AZUREAD_TENANT = "azuread.tenant";
+    protected static final String AZUREAD_TENANT = "aad.tenant";
 
-    protected static final String AZUREAD_CLIENT_SECRET = "azuread.client.secret";
+    protected static final String AZUREAD_CLIENT_SECRET = "aad.client.secret";
 
-    protected static final String AZUREAD_CLIENT_ID = "azuread.client.id";
+    protected static final String AZUREAD_CLIENT_ID = "aad.client.id";
 
     protected static final String STATES = "aadStates";
 
@@ -215,7 +226,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
     }
 
-    public AuthenticationResult getAccessToken(String refreshToken) {
+    public AuthenticationResult getAccessToken(final String refreshToken) {
         final String authority = getAuthority() + getTenant() + "/";
         if (logger.isDebugEnabled()) {
             logger.debug("refreshToken: {}, authority: {}", refreshToken, authority);
@@ -223,15 +234,15 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         ExecutorService service = null;
         try {
             service = Executors.newFixedThreadPool(1);
-            AuthenticationContext context = new AuthenticationContext(authority, true, service);
-            Future<AuthenticationResult> future =
+            final AuthenticationContext context = new AuthenticationContext(authority, true, service);
+            final Future<AuthenticationResult> future =
                     context.acquireTokenByRefreshToken(refreshToken, new ClientCredential(getClientId(), getClientSecret()), null, null);
             final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
                 throw new SsoLoginException("authentication result was null");
             }
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
         } finally {
             if (service != null) {
@@ -315,6 +326,74 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         return params.containsKey(ERROR) || params.containsKey(ID_TOKEN) || params.containsKey(CODE);
     }
 
+    public void updateMemberOf(final AzureAdUser user) {
+        final List<String> groupList = new ArrayList<>();
+        final List<String> roleList = new ArrayList<>();
+        groupList.addAll(getDefaultGroupList());
+        roleList.addAll(getDefaultRoleList());
+        try (CurlResponse response =
+                Curl.get("https://graph.microsoft.com/v1.0/me/memberOf")
+                        .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                        .header("Accept", "application/json").execute()) {
+            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
+            if (contentMap.containsKey("value")) {
+                @SuppressWarnings("unchecked")
+                final List<Map<String, Object>> memberOfList = (List<Map<String, Object>>) contentMap.get("value");
+                for (final Map<String, Object> memberOf : memberOfList) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("member: {}", memberOf);
+                    }
+                    final String id = (String) memberOf.get("id");
+                    if (StringUtil.isBlank(id)) {
+                        logger.warn("id is empty: {}", memberOf);
+                        continue;
+                    }
+                    String memberType = (String) memberOf.get("@odata.type");
+                    if (memberType == null) {
+                        logger.warn("@odata.type is null: {}", memberOf);
+                        continue;
+                    }
+                    memberType = memberType.toLowerCase(Locale.ENGLISH);
+                    if (memberType.contains("group")) {
+                        groupList.add(id);
+                    } else if (memberType.contains("role")) {
+                        roleList.add(id);
+                    } else {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("unknown @odata.type: {}", memberOf);
+                        }
+                        groupList.add(id);
+                    }
+                }
+            } else if (contentMap.containsKey("error")) {
+                logger.warn("Failed to access groups/roles: {}", contentMap);
+            }
+        } catch (final IOException e) {
+            logger.warn("Failed to access groups/roles in AzureAD.", e);
+        }
+
+        user.setGroups(groupList.toArray(n -> new String[n]));
+        user.setRoles(roleList.toArray(n -> new String[n]));
+    }
+
+    protected List<String> getDefaultGroupList() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("aad.default.groups");
+        if (StringUtil.isBlank(value)) {
+            return Collections.emptyList();
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toList()));
+        }
+    }
+
+    protected List<String> getDefaultRoleList() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("aad.default.roles");
+        if (StringUtil.isBlank(value)) {
+            return Collections.emptyList();
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toList()));
+        }
+    }
+
     protected class StateData {
         private final String nonce;
         private final long expiration;
@@ -365,7 +444,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         });
     }
 
-    public void setAcquisitionTimeout(long acquisitionTimeout) {
+    public void setAcquisitionTimeout(final long acquisitionTimeout) {
         this.acquisitionTimeout = acquisitionTimeout;
     }
 }
