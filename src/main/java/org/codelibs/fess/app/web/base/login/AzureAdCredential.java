@@ -87,7 +87,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
-                permissionSet.add(systemHelper.getSearchRoleByUser(getName()));
+                permissionSet.add(systemHelper.getSearchRoleByUser(authResult.getUserInfo().getUniqueId()));
                 stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
                 stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
                 permissions = permissionSet.toArray(new String[permissionSet.size()]);
