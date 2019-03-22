@@ -15,11 +15,14 @@
  */
 package org.codelibs.fess.ds.callback;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -80,6 +83,15 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         if (fessConfig.getIndexerFavoriteCountEnabledAsBoolean()) {
             addFavoriteCountField(dataMap, url, fessConfig.getIndexFieldFavoriteCount());
+        }
+
+        final Set<String> matchedLabelSet = ComponentUtil.getLabelTypeHelper().getMatchedLabelValueSet(url);
+        if (!matchedLabelSet.isEmpty()) {
+            final Set<String> newLabelSet = new HashSet<>();
+            final String[] oldLabels = DocumentUtil.getValue(dataMap, fessConfig.getIndexFieldLabel(), String[].class);
+            StreamUtil.stream(oldLabels).of(stream -> stream.forEach(newLabelSet::add));
+            matchedLabelSet.stream().forEach(newLabelSet::add);
+            dataMap.put(fessConfig.getIndexFieldLabel(), newLabelSet.toArray(new String[newLabelSet.size()]));
         }
 
         if (!dataMap.containsKey(fessConfig.getIndexFieldDocId())) {

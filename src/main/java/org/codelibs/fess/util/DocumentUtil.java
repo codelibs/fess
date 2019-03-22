@@ -17,6 +17,7 @@ package org.codelibs.fess.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,8 @@ public final class DocumentUtil {
         if (value instanceof List) {
             if (clazz.isAssignableFrom(List.class)) {
                 return (T) value;
+            } else if (clazz.isAssignableFrom(String[].class)) {
+                return (T) ((List<?>) value).stream().filter(s -> s != null).map(s -> s.toString()).toArray(n -> new String[n]);
             }
 
             if (((List<?>) value).isEmpty()) {
@@ -60,6 +63,22 @@ public final class DocumentUtil {
             }
 
             return convertObj(((List<?>) value).get(0), clazz);
+        } else if (value instanceof String[]) {
+            if (clazz.isAssignableFrom(String[].class)) {
+                return (T) value;
+            } else if (clazz.isAssignableFrom(List.class)) {
+                final List<String> list = new ArrayList<>();
+                for (final String s : (String[]) value) {
+                    list.add(s);
+                }
+                return (T) list;
+            }
+
+            if (((String[]) value).length == 0) {
+                return null;
+            }
+
+            return convertObj(((String[]) value)[0], clazz);
         }
 
         return convertObj(value, clazz);
