@@ -203,6 +203,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         if (StringUtil.isNotBlank(fileAuthStr)) {
             final String[] fileAuthNames = fileAuthStr.split(",");
             final List<SmbAuthentication> smbAuthList = new ArrayList<>();
+            final List<org.codelibs.fess.crawler.client.smb1.SmbAuthentication> smb1AuthList = new ArrayList<>();
             final List<FtpAuthentication> ftpAuthList = new ArrayList<>();
             for (final String fileAuthName : fileAuthNames) {
                 final String scheme = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".scheme");
@@ -231,6 +232,21 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     smbAuth.setUsername(username);
                     smbAuth.setPassword(password == null ? StringUtil.EMPTY : password);
                     smbAuthList.add(smbAuth);
+
+                    final org.codelibs.fess.crawler.client.smb1.SmbAuthentication smb1Auth =
+                            new org.codelibs.fess.crawler.client.smb1.SmbAuthentication();
+                    smb1Auth.setDomain(domain == null ? StringUtil.EMPTY : domain);
+                    smb1Auth.setServer(hostname);
+                    if (StringUtil.isNotBlank(port)) {
+                        try {
+                            smb1Auth.setPort(Integer.parseInt(port));
+                        } catch (final NumberFormatException e) {
+                            logger.warn("Failed to parse " + port, e);
+                        }
+                    }
+                    smb1Auth.setUsername(username);
+                    smb1Auth.setPassword(password == null ? StringUtil.EMPTY : password);
+                    smb1AuthList.add(smb1Auth);
                 } else if (Constants.FTP.equals(scheme)) {
                     final String hostname = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".host");
                     final String port = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".port");
@@ -258,6 +274,10 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             }
             if (!smbAuthList.isEmpty()) {
                 factoryParamMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+            }
+            if (!smb1AuthList.isEmpty()) {
+                factoryParamMap.put(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
+                        smb1AuthList.toArray(new org.codelibs.fess.crawler.client.smb1.SmbAuthentication[smb1AuthList.size()]));
             }
             if (!ftpAuthList.isEmpty()) {
                 factoryParamMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));

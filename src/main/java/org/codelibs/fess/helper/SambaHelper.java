@@ -71,6 +71,24 @@ public class SambaHelper {
         return null;
     }
 
+    public String getAccountId(final jcifs.smb1.smb1.SID sid) {
+        final int type = sid.getType();
+        if (logger.isDebugEnabled()) {
+            try {
+                logger.debug("Processing SID: {} {} {}", type, sid, sid.toDisplayString());
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        final Integer id = fessConfig.getAvailableSmbSidType(type);
+        if (id != null) {
+            return createSearchRole(id, sid.getAccountName());
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Ignored SID: {} {}", type, sid);
+        }
+        return null;
+    }
+
     protected String createSearchRole(final int type, final String name) {
         return type + fessConfig.getCanonicalLdapName(name);
     }

@@ -159,6 +159,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
         // auth params
         final List<FileAuthentication> fileAuthList = fileAuthenticationService.getFileAuthenticationList(getId());
         final List<SmbAuthentication> smbAuthList = new ArrayList<>();
+        final List<org.codelibs.fess.crawler.client.smb1.SmbAuthentication> smb1AuthList = new ArrayList<>();
         final List<FtpAuthentication> ftpAuthList = new ArrayList<>();
         for (final FileAuthentication fileAuth : fileAuthList) {
             if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
@@ -171,6 +172,15 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 smbAuth.setUsername(fileAuth.getUsername());
                 smbAuth.setPassword(fileAuth.getPassword());
                 smbAuthList.add(smbAuth);
+
+                final org.codelibs.fess.crawler.client.smb1.SmbAuthentication smb1Auth =
+                        new org.codelibs.fess.crawler.client.smb1.SmbAuthentication();
+                smb1Auth.setDomain(domain == null ? StringUtil.EMPTY : domain);
+                smb1Auth.setServer(fileAuth.getHostname());
+                smb1Auth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort().intValue());
+                smb1Auth.setUsername(fileAuth.getUsername());
+                smb1Auth.setPassword(fileAuth.getPassword());
+                smb1AuthList.add(smb1Auth);
             } else if (Constants.FTP.equals(fileAuth.getProtocolScheme())) {
                 final FtpAuthentication ftpAuth = new FtpAuthentication();
                 ftpAuth.setServer(fileAuth.getHostname());
@@ -181,6 +191,8 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
             }
         }
         paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+        paramMap.put(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
+                smb1AuthList.toArray(new org.codelibs.fess.crawler.client.smb1.SmbAuthentication[smb1AuthList.size()]));
         paramMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
 
         return paramMap;

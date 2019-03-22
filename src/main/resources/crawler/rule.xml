@@ -97,7 +97,7 @@
 		<property name="allRequired">true</property>
 		<postConstruct name="addRule">
 			<arg>"url"</arg>
-			<arg>"(file|smb|ftp):.*"</arg>
+			<arg>"(file|smb|smb1|ftp):.*"</arg>
 		</postConstruct>
 		<postConstruct name="addRule">
 			<arg>"mimeType"</arg>
