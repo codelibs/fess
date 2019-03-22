@@ -267,7 +267,7 @@ public class ViewHelper {
             return "#not-found-" + DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class);
         }
 
-        final boolean isSmbUrl = url.startsWith("smb:");
+        final boolean isSmbUrl = url.startsWith("smb:") || url.startsWith("smb1:");
         final boolean isFtpUrl = url.startsWith("ftp:");
         final boolean isSmbOrFtpUrl = isSmbUrl || isFtpUrl;
 
@@ -278,6 +278,7 @@ public class ViewHelper {
 
         if (isSmbUrl) {
             url = url.replace("smb:", "file:");
+            url = url.replace("smb1:", "file:");
         }
 
         if (isHttpUrl && isSmbOrFtpUrl) {
