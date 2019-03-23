@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.sso;
 
+import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
@@ -40,6 +41,9 @@ public class SsoAction extends FessLoginAction {
 
     @Execute
     public ActionResponse index() {
+        if (fessLoginAssist.getSavedUserBean().isPresent()) {
+            return redirect(RootAction.class);
+        }
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
         final LoginCredential loginCredential = ssoManager.getLoginCredential();
         if (loginCredential == null) {
