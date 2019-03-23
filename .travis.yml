@@ -5,9 +5,6 @@ language: java
 matrix:
   include:
     - jdk: openjdk8
-      before_install:
-        - rm "${JAVA_HOME}/lib/security/cacerts"
-        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
     - jdk: openjdk10
       before_install:
         - rm "${JAVA_HOME}/lib/security/cacerts"
