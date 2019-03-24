@@ -231,6 +231,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String API_CORS_ALLOW_CREDENTIALS = "api.cors.allow.credentials";
 
+    /** The key of the configuration. e.g. true */
+    String API_JSONP_ENABLED = "api.jsonp.enabled";
+
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
 
@@ -1916,6 +1919,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiCorsAllowCredentials();
+
+    /**
+     * Get the value for the key 'api.jsonp.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiJsonpEnabled();
+
+    /**
+     * Is the property for the key 'api.jsonp.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isApiJsonpEnabled();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -6120,6 +6137,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_CORS_ALLOW_CREDENTIALS);
         }
 
+        public String getApiJsonpEnabled() {
+            return get(FessConfig.API_JSONP_ENABLED);
+        }
+
+        public boolean isApiJsonpEnabled() {
+            return is(FessConfig.API_JSONP_ENABLED);
+        }
+
         public String getVirtualHostHeaders() {
             return get(FessConfig.VIRTUAL_HOST_HEADERS);
         }
@@ -8302,6 +8327,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
+            defaultMap.put(FessConfig.API_JSONP_ENABLED, "true");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");
