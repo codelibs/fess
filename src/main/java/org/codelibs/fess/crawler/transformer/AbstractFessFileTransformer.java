@@ -138,11 +138,17 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                             dataMap.put(mapping.getValue1(), Long.parseLong(values[0]));
                                         } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getValue2())) {
                                             dataMap.put(mapping.getValue1(), Double.parseDouble(values[0]));
-                                        } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())) {
-                                            final Date dt =
-                                                    FessFunctions.parseDate(values[0],
-                                                            StringUtil.isNotBlank(mapping.getValue3()) ? mapping.getValue3()
-                                                                    : Constants.DATE_OPTIONAL_TIME);
+                                        } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())
+                                                || Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
+                                            final String dateFormate;
+                                            if (StringUtil.isNotBlank(mapping.getValue3())) {
+                                                dateFormate = mapping.getValue3();
+                                            } else if (Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
+                                                dateFormate = mapping.getValue2();
+                                            } else {
+                                                dateFormate = Constants.DATE_OPTIONAL_TIME;
+                                            }
+                                            final Date dt = FessFunctions.parseDate(values[0], dateFormate);
                                             if (dt != null) {
                                                 dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
                                             } else {
