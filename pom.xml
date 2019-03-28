@@ -63,12 +63,12 @@
 		<suggest.version>7.0.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.0.0-beta1</elasticsearch.version>
+		<elasticsearch.version>7.0.0-rc1</elasticsearch.version>
 		<elasticsearch.httpclient.version>7.0.0-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.16</tomcat.version>
+		<tomcat.version>9.0.17</tomcat.version>
 		<tomcat.boot.version>0.7.1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
@@ -1053,17 +1053,6 @@
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>elastic-lucene-snapshots</id>
-			<name>Elastic Lucene Snapshots</name>
-			<url>http://s3.amazonaws.com/download.elasticsearch.org/lucenesnapshots/83f9835</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
 			</snapshots>
 		</repository>
 	</repositories>
