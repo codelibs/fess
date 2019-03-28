@@ -60,17 +60,17 @@
 		<utflute.version>0.9.0</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>2.5.2-SNAPSHOT</crawler.version>
+		<crawler.version>2.6.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.6.0</suggest.version>
+		<suggest.version>6.7.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>6.6.2</elasticsearch.version>
+		<elasticsearch.version>6.7.0</elasticsearch.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.14</tomcat.version>
+		<tomcat.version>9.0.17</tomcat.version>
 		<tomcat.boot.version>0.7.1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
