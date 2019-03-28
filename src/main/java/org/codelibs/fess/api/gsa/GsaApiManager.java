@@ -66,6 +66,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final String OUTPUT_XML = "xml"; // or xml_no_dtd
     // http://www.google.com/google.dtd.
 
+    @Deprecated
     private static final String GSA_META_SUFFIX = "_s";
 
     protected String gsaPathPrefix = "/gsa";
@@ -112,8 +113,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         appendParam(buf, name, value, URLEncoder.encode(value, Constants.UTF_8));
     }
 
-    protected void appendParam(final StringBuilder buf, final String name, final String value, final String original)
-            throws UnsupportedEncodingException {
+    protected void appendParam(final StringBuilder buf, final String name, final String value, final String original) {
         buf.append("<PARAM name=\"");
         buf.append(escapeXml(name));
         buf.append("\" value=\"");
@@ -434,7 +434,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected static class GsaRequestParams extends SearchRequestParams {
+    protected class GsaRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -462,7 +462,15 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public String[] getExtraQueries() {
-            return getParamValueArray(request, "ex_q");
+            final List<String> queryList = new ArrayList<>();
+            for (final String s : getParamValueArray(request, "ex_q")) {
+                queryList.add(s.trim());
+            }
+            final String requiredFields = request.getParameter("requiredfields");
+            if (StringUtil.isNotBlank(requiredFields)) {
+                queryList.add(gsaMetaPrefix + requiredFields.replace(".", " AND " + gsaMetaPrefix).replace("|", " OR " + gsaMetaPrefix));
+            }
+            return queryList.toArray(new String[queryList.size()]);
         }
 
         @Override
