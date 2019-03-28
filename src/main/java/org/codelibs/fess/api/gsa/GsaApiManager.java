@@ -66,16 +66,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final String OUTPUT_XML = "xml"; // or xml_no_dtd
     // http://www.google.com/google.dtd.
 
-    @Deprecated
-    private static final String GSA_META_SUFFIX = "_s";
-
     protected String gsaPathPrefix = "/gsa";
-
-    protected String gsaMetaPrefix = "MT_";
-
-    protected String charsetField = "charset";
-
-    protected String contentTypeField = "content_type";
 
     @PostConstruct
     public void register() {
@@ -254,13 +245,12 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                         document.put("LANG", lang);
                         document.remove(fessConfig.getIndexFieldLang());
                     }
+                    final String gsaMetaPrefix = fessConfig.getQueryGsaMetaPrefix();
                     for (final Map.Entry<String, Object> entry : document.entrySet()) {
                         final String name = entry.getKey();
                         if (StringUtil.isNotBlank(name) && entry.getValue() != null && fessConfig.isGsaResponseFields(name)) {
                             if (name.startsWith(gsaMetaPrefix)) {
-                                final String tagName =
-                                        name.replaceFirst("^" + gsaMetaPrefix, StringUtil.EMPTY).replaceAll(GSA_META_SUFFIX + "\\z",
-                                                StringUtil.EMPTY);
+                                final String tagName = name.replaceFirst("^" + gsaMetaPrefix, StringUtil.EMPTY);
                                 if (getFields.contains(tagName)) {
                                     buf.append("<MT N=\"");
                                     buf.append(tagName);
@@ -298,9 +288,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class));
                     document.remove(fessConfig.getIndexFieldDocId());
                     buf.append("\" ENC=\"");
+                    final String charsetField = fessConfig.getQueryGsaIndexFieldCharset();
                     String charset = DocumentUtil.getValue(document, charsetField, String.class);
                     document.remove(charsetField);
                     if (StringUtil.isBlank(charset)) {
+                        final String contentTypeField = fessConfig.getQueryGsaIndexFieldContentType();
                         charset = DocumentUtil.getValue(document, contentTypeField, String.class);
                         document.remove(contentTypeField);
                         if (StringUtil.isNotBlank(charset)) {
@@ -434,7 +426,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected class GsaRequestParams extends SearchRequestParams {
+    protected static class GsaRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -466,6 +458,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             for (final String s : getParamValueArray(request, "ex_q")) {
                 queryList.add(s.trim());
             }
+            final String gsaMetaPrefix = fessConfig.getQueryGsaMetaPrefix();
             final String requiredFields = request.getParameter("requiredfields");
             if (StringUtil.isNotBlank(requiredFields)) {
                 queryList.add(gsaMetaPrefix + requiredFields.replace(".", " AND " + gsaMetaPrefix).replace("|", " OR " + gsaMetaPrefix));
@@ -639,18 +632,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     public void setGsaPathPrefix(final String gsaPathPrefix) {
         this.gsaPathPrefix = gsaPathPrefix;
-    }
-
-    public void setGsaMetaPrefix(final String gsaMetaPrefix) {
-        this.gsaMetaPrefix = gsaMetaPrefix;
-    }
-
-    public void setCharsetField(final String charsetField) {
-        this.charsetField = charsetField;
-    }
-
-    public void setContentTypeField(final String contentTypeField) {
-        this.contentTypeField = contentTypeField;
     }
 
     @Override

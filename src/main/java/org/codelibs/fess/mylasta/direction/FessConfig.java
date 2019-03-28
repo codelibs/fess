@@ -699,6 +699,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String QUERY_GSA_DEFAULT_SORT = "query.gsa.default.sort";
 
+    /** The key of the configuration. e.g. MT_ */
+    String QUERY_GSA_META_PREFIX = "query.gsa.meta.prefix";
+
+    /** The key of the configuration. e.g. charset */
+    String QUERY_GSA_INDEX_FIELD_CHARSET = "query.gsa.index.field.charset";
+
+    /** The key of the configuration. e.g. content_type */
+    String QUERY_GSA_INDEX_FIELD_content_type_ = "query.gsa.index.field.content_type.";
+
     /** The key of the configuration. e.g. 4 */
     String QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS = "query.collapse.max.concurrent.group.results";
 
@@ -3544,6 +3553,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryGsaDefaultSortAsInteger();
+
+    /**
+     * Get the value for the key 'query.gsa.meta.prefix'. <br>
+     * The value is, e.g. MT_ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaMetaPrefix();
+
+    /**
+     * Get the value for the key 'query.gsa.index.field.charset'. <br>
+     * The value is, e.g. charset <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaIndexFieldCharset();
+
+    /**
+     * Get the value for the key 'query.gsa.index.field.content_type.'. <br>
+     * The value is, e.g. content_type <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGsaIndexFieldContentType();
 
     /**
      * Get the value for the key 'query.collapse.max.concurrent.group.results'. <br>
@@ -6990,6 +7020,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_GSA_DEFAULT_SORT);
         }
 
+        public String getQueryGsaMetaPrefix() {
+            return get(FessConfig.QUERY_GSA_META_PREFIX);
+        }
+
+        public String getQueryGsaIndexFieldCharset() {
+            return get(FessConfig.QUERY_GSA_INDEX_FIELD_CHARSET);
+        }
+
+        public String getQueryGsaIndexFieldContentType() {
+            return get(FessConfig.QUERY_GSA_INDEX_FIELD_content_type_);
+        }
+
         public String getQueryCollapseMaxConcurrentGroupResults() {
             return get(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS);
         }
@@ -8429,6 +8471,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GSA_RESPONSE_FIELDS, "UE,U,T,RK,S,LANG");
             defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_LANG, "en");
             defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_SORT, "");
+            defaultMap.put(FessConfig.QUERY_GSA_META_PREFIX, "MT_");
+            defaultMap.put(FessConfig.QUERY_GSA_INDEX_FIELD_CHARSET, "charset");
+            defaultMap.put(FessConfig.QUERY_GSA_INDEX_FIELD_content_type_, "content_type");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_MAX_CONCURRENT_GROUP_RESULTS, "4");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_NAME, "similar_docs");
             defaultMap.put(FessConfig.QUERY_COLLAPSE_INNER_HITS_SIZE, "0");
