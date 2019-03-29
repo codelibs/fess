@@ -35,17 +35,17 @@
 	</parent>
 	<properties>
 		<!-- Main Framework -->
-		<dbflute.version>1.1.8</dbflute.version>
-		<lastaflute.version>1.1.0</lastaflute.version>
+		<dbflute.version>1.1.9</dbflute.version>
+		<lastaflute.version>1.1.1</lastaflute.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.3</lasta.job.version>
 		<mailflute.version>0.6.0</mailflute.version>
 
 		<!-- Partner Library -->
-		<slf4j.version>1.7.25</slf4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 		<log4j.version>2.11.1</log4j.version>
 		<jackson.version>2.8.11</jackson.version>
-		<commons.fileupload.version>1.3.3</commons.fileupload.version>
+		<commons.fileupload.version>1.4</commons.fileupload.version>
 		<asm.version>5.1</asm.version>
 		<tika.version>1.20</tika.version>
 
