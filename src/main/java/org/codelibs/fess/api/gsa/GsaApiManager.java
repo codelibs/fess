@@ -546,7 +546,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     return buf.toString();
                 } else if ("meta".equals(values[0]) && values.length > 1) {
                     final StringBuilder buf = new StringBuilder();
-                    buf.append(values[1]);
+                    buf.append(fessConfig.getQueryGsaMetaPrefix() + values[1]);
                     if (values.length > 2) {
                         if ("A".equals(values[2])) {
                             buf.append(".asc");
