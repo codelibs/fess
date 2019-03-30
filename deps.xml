@@ -97,6 +97,14 @@
 			<param name="jar.version" value="12.2.0" />
 			<param name="file.version" value="12.2.0" />
 		</antcall>
+		<!-- fess-ds-office365 -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-office365" />
+			<param name="jar.version" value="12.2.0" />
+			<param name="file.version" value="12.2.0" />
+		</antcall>
 		<!-- fess-ds-slack -->
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
