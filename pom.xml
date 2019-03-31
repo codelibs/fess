@@ -222,6 +222,7 @@
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
 					<charset>UTF-8</charset>
+					<source>8</source>
 					<locale>en_US</locale>
 					<windowtitle>Open Source Enterprise Search: Fess API</windowtitle>
 					<header>&lt;a href="https://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
