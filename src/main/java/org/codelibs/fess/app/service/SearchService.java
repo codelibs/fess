@@ -111,7 +111,7 @@ public class SearchService {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
         final List<Map<String, Object>> documentItems =
-                fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(),
+                fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)

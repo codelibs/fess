@@ -814,11 +814,6 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     @Override
-    protected void writeHeaders(final HttpServletResponse response) {
-        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
-    }
-
-    @Override
     protected void writeHeaders(HttpServletResponse response) {
         ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }

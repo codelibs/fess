@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
@@ -339,6 +340,28 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
 
         return dataMap;
+    }
+
+    protected Date getLastModified(final Map<String, Object> dataMap, final ResponseData responseData) {
+        final Object lastModifiedObj = dataMap.get(fessConfig.getIndexFieldLastModified());
+        if (lastModifiedObj instanceof Date) {
+            return (Date) lastModifiedObj;
+        } else if (lastModifiedObj instanceof String) {
+            final Date lastModified = FessFunctions.parseDate(lastModifiedObj.toString());
+            if (lastModified != null) {
+                return lastModified;
+            }
+        } else if (lastModifiedObj instanceof String[]) {
+            final String[] lastModifieds = (String[]) lastModifiedObj;
+            if (lastModifieds.length > 0) {
+                final Date lastModified = FessFunctions.parseDate(lastModifieds[0]);
+                if (lastModified != null) {
+                    return lastModified;
+                }
+            }
+        }
+
+        return responseData.getLastModified();
     }
 
     protected boolean hasTitle(final Map<String, Object> dataMap) {

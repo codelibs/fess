@@ -205,7 +205,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String API_DASHBOARD_RESPONSE_HEADERS = "api.dashboard.response.headers";
 
-    /** The key of the configuration. e.g. * */
+    /** The key of the configuration. e.g.  */
     String API_CORS_ALLOW_ORIGIN = "api.cors.allow.origin";
 
     /** The key of the configuration. e.g. GET, POST, OPTIONS, DELETE, PUT */
@@ -219,6 +219,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. true */
     String API_CORS_ALLOW_CREDENTIALS = "api.cors.allow.credentials";
+
+    /** The key of the configuration. e.g. true */
+    String API_JSONP_ENABLED = "api.jsonp.enabled";
 
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
@@ -1828,10 +1831,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.cors.allow.origin'. <br>
-     * The value is, e.g. * <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowOrigin();
+
+    /**
+     * Get the value for the key 'api.cors.allow.origin' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiCorsAllowOriginAsInteger();
 
     /**
      * Get the value for the key 'api.cors.allow.methods'. <br>
@@ -1875,6 +1886,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiCorsAllowCredentials();
+
+    /**
+     * Get the value for the key 'api.jsonp.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiJsonpEnabled();
+
+    /**
+     * Is the property for the key 'api.jsonp.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isApiJsonpEnabled();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -6063,6 +6088,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.API_CORS_ALLOW_ORIGIN);
         }
 
+        public Integer getApiCorsAllowOriginAsInteger() {
+            return getAsInteger(FessConfig.API_CORS_ALLOW_ORIGIN);
+        }
+
         public String getApiCorsAllowMethods() {
             return get(FessConfig.API_CORS_ALLOW_METHODS);
         }
@@ -6085,6 +6114,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isApiCorsAllowCredentials() {
             return is(FessConfig.API_CORS_ALLOW_CREDENTIALS);
+        }
+
+        public String getApiJsonpEnabled() {
+            return get(FessConfig.API_JSONP_ENABLED);
+        }
+
+        public boolean isApiJsonpEnabled() {
+            return is(FessConfig.API_JSONP_ENABLED);
         }
 
         public String getVirtualHostHeaders() {
@@ -8245,7 +8282,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
                             "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
@@ -8280,11 +8317,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
-            defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
+            defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
+            defaultMap.put(FessConfig.API_JSONP_ENABLED, "true");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");

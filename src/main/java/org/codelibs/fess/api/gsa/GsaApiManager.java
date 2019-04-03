@@ -66,6 +66,9 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final String OUTPUT_XML = "xml"; // or xml_no_dtd
     // http://www.google.com/google.dtd.
 
+    @Deprecated
+    private static final String GSA_META_SUFFIX = "_s";
+
     protected String gsaPathPrefix = "/gsa";
 
     @PostConstruct
@@ -426,7 +429,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected static class GsaRequestParams extends SearchRequestParams {
+    protected class GsaRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -458,7 +461,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             for (final String s : getParamValueArray(request, "ex_q")) {
                 queryList.add(s.trim());
             }
-            final String gsaMetaPrefix = fessConfig.getQueryGsaMetaPrefix();
             final String requiredFields = request.getParameter("requiredfields");
             if (StringUtil.isNotBlank(requiredFields)) {
                 queryList.add(gsaMetaPrefix + requiredFields.replace(".", " AND " + gsaMetaPrefix).replace("|", " OR " + gsaMetaPrefix));
@@ -546,7 +548,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     return buf.toString();
                 } else if ("meta".equals(values[0]) && values.length > 1) {
                     final StringBuilder buf = new StringBuilder();
-                    buf.append(fessConfig.getQueryGsaMetaPrefix() + values[1]);
+                    buf.append(gsaMetaPrefix + values[1]);
                     if (values.length > 2) {
                         if ("A".equals(values[2])) {
                             buf.append(".asc");
@@ -636,6 +638,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     @Override
     protected void writeHeaders(final HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiGsaResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+    }
+
+    @Override
+    protected void writeHeaders(HttpServletResponse response) {
         ComponentUtil.getFessConfig().getApiGsaResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 

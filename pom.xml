@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>12.4.5-SNAPSHOT</version>
+	<version>12.5.3-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -42,7 +42,7 @@
 		<mailflute.version>0.6.0</mailflute.version>
 
 		<!-- Partner Library -->
-		<slf4j.version>1.7.26</slf4j.version>
+		<slf4j.version>1.7.25</slf4j.version>
 		<log4j.version>2.11.1</log4j.version>
 		<jackson.version>2.8.11</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
@@ -54,21 +54,21 @@
 		<junit.jupiter.version>5.0.2</junit.jupiter.version>
 		<junit.vintage.version>${junit.version}.0</junit.vintage.version>
 		<junit.platform.version>1.0.0</junit.platform.version>
-		<utflute.version>0.8.8</utflute.version>
+		<utflute.version>0.9.0</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>2.4.5</crawler.version>
+		<crawler.version>2.5.2</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.5.3</suggest.version>
+		<suggest.version>6.6.1</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>6.5.4</elasticsearch.version>
+		<elasticsearch.version>6.6.2</elasticsearch.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.13</tomcat.version>
-		<tomcat.boot.version>0.7.0</tomcat.boot.version>
+		<tomcat.version>9.0.14</tomcat.version>
+		<tomcat.boot.version>0.7.1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
@@ -209,6 +209,7 @@
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
 					<charset>UTF-8</charset>
+					<source>8</source>
 					<locale>en_US</locale>
 					<windowtitle>Open Source Enterprise Search: Fess API</windowtitle>
 					<header>&lt;a href="https://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
