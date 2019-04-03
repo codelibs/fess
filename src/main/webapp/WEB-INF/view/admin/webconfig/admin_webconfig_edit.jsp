@@ -50,7 +50,7 @@
 												key="labels.name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -58,7 +58,7 @@
 												key="labels.urls" /></label>
 										<div class="col-sm-9">
 											<la:errors property="urls" />
-											<la:textarea property="urls" styleClass="form-control"
+											<la:textarea styleId="urls" property="urls" styleClass="form-control"
 												rows="5" />
 										</div>
 									</div>
@@ -67,7 +67,7 @@
 												key="labels.included_urls" /></label>
 										<div class="col-sm-9">
 											<la:errors property="includedUrls" />
-											<la:textarea property="includedUrls"
+											<la:textarea styleId="includedUrls" property="includedUrls"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -76,7 +76,7 @@
 												key="labels.excluded_urls" /></label>
 										<div class="col-sm-9">
 											<la:errors property="excludedUrls" />
-											<la:textarea property="excludedUrls"
+											<la:textarea styleId="excludedUrls" property="excludedUrls"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -85,7 +85,7 @@
 												key="labels.included_doc_urls" /></label>
 										<div class="col-sm-9">
 											<la:errors property="includedDocUrls" />
-											<la:textarea property="includedDocUrls"
+											<la:textarea styleId="includedDocUrls" property="includedDocUrls"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -94,7 +94,7 @@
 												key="labels.excluded_doc_urls" /></label>
 										<div class="col-sm-9">
 											<la:errors property="excludedDocUrls" />
-											<la:textarea property="excludedDocUrls"
+											<la:textarea styleId="excludedDocUrls" property="excludedDocUrls"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -103,7 +103,7 @@
 												key="labels.config_parameter" /></label>
 										<div class="col-sm-9">
 											<la:errors property="configParameter" />
-											<la:textarea property="configParameter"
+											<la:textarea styleId="configParameter" property="configParameter"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -112,7 +112,7 @@
 												key="labels.depth" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="depth" />
-											<input type="number" name="depth"
+											<input type="number" name="depth" id="depth"
 												value="${f:h(depth)}" class="form-control"
 												min="0" max="10000">
 										</div>
@@ -122,7 +122,7 @@
 												key="labels.max_access_count" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="maxAccessCount" />
-											<input type="number" name="maxAccessCount"
+											<input type="number" name="maxAccessCount" id="maxAccessCount"
 												value="${f:h(maxAccessCount)}" class="form-control"
 												min="0" max="1000000000">
 										</div>
@@ -132,7 +132,7 @@
 												key="labels.user_agent" /></label>
 										<div class="col-sm-9">
 											<la:errors property="userAgent" />
-											<la:text property="userAgent" styleClass="form-control" />
+											<la:text styleId="userAgent" property="userAgent" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -140,7 +140,7 @@
 												key="labels.number_of_thread" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="numOfThread" />
-											<input type="number" name="numOfThread"
+											<input type="number" name="numOfThread" id="numOfThread"
 												value="${f:h(numOfThread)}" class="form-control"
 												min="1" max="1000">
 										</div>
@@ -150,7 +150,7 @@
 												key="labels.interval_time" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="intervalTime" />
-											<input type="number" name="intervalTime"
+											<input type="number" name="intervalTime" id="intervalTime"
 												value="${f:h(intervalTime)}" class="form-control"
 												min="0">
 											<la:message key="labels.millisec" />
@@ -161,7 +161,7 @@
 												key="labels.boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text styleId="boost" property="boost" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -169,16 +169,25 @@
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control"
+											<la:textarea styleId="permissions" property="permissions" styleClass="form-control"
 												rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="virtualHosts" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_hosts" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHosts" />
+											<la:textarea styleId="virtualHosts" property="virtualHosts" styleClass="form-control"
+												rows="5" />
+										</div>
+									</div>
+									<div class="form-group"<c:if test="${!labelSettingEnabled}"> style="display:none"</c:if>>
 										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">
 											<la:errors property="labelTypeIds" />
-											<la:select property="labelTypeIds" multiple="true"
+											<la:select styleId="labelTypeIds" property="labelTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
@@ -191,7 +200,7 @@
 												key="labels.available" /></label>
 										<div class="col-sm-9">
 											<la:errors property="available" />
-											<la:select property="available" styleClass="form-control">
+											<la:select styleId="available" property="available" styleClass="form-control">
 												<la:option value="true">
 													<la:message key="labels.enabled" />
 												</la:option>
@@ -206,7 +215,7 @@
 												key="labels.description" /></label>
 										<div class="col-sm-9">
 											<la:errors property="description" />
-											<la:textarea property="description" styleClass="form-control"
+											<la:textarea styleId="description" property="description" styleClass="form-control"
 												rows="5" />
 										</div>
 									</div>

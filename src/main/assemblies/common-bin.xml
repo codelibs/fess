@@ -63,6 +63,7 @@
 			<directory>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/</directory>
 			<includes>
 				<include>FessBoot**</include>
+				<include>tomcat/**</include>
 			</includes>
 			<outputDirectory>fess-${project.version}/lib/classes/org/codelibs/fess</outputDirectory>
 		</fileSet>

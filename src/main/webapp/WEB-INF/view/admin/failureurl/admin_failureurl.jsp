@@ -44,7 +44,7 @@
 										<label for="url" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_url" /></label>
 										<div class="col-sm-10">
-											<la:text property="url" styleClass="form-control"></la:text>
+											<la:text styleId="url" property="url" styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group row">
@@ -52,14 +52,14 @@
 												key="labels.failure_url_search_error_count" /></label>
 										<div class="col-xs-2">
 											<la:errors property="errorCountMin" />
-											<input type="number" name="errorCountMin"
+											<input type="number" name="errorCountMin" id="errorCountMin"
 												value="${f:h(errorCountMin)}" class="form-control"
 												min="0" max="100000">
 										</div>
 										<div class="pull-left">-</div>
 										<div class="col-xs-2">
 											<la:errors property="errorCountMax" />
-											<input type="number" name="errorCountMax"
+											<input type="number" name="errorCountMax" id="errorCountMax"
 												value="${f:h(errorCountMax)}" class="form-control"
 												min="0" max="100000">
 										</div>
@@ -68,7 +68,7 @@
 										<label for="errorName" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_name" /></label>
 										<div class="col-sm-10">
-											<la:text property="errorName" styleClass="form-control"></la:text>
+											<la:text styleId="errorName" property="errorName" styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group">
@@ -79,7 +79,7 @@
 												<i class="fa fa-search"></i>
 												<la:message key="labels.crud_button_search" />
 											</button>
-											<button type="submit" class="btn btn-secondary" name="reset"
+											<button type="submit" class="btn btn-default" name="reset"
 												value="<la:message key="labels.crud_button_reset" />">
 												<la:message key="labels.crud_button_reset" />
 											</button>
@@ -126,6 +126,9 @@
 										</div>
 										<c:set var="pager" value="${failureUrlPager}" scope="request" />
 										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+										<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+											<script>location.href = "${contextPath}/admin/failureurl/list/${pager.allPageCount}";</script>
+										</c:if>
 										<div class="row">
 											<la:form action="/admin/failureurl/">
 												<div class="col-sm-12 center">

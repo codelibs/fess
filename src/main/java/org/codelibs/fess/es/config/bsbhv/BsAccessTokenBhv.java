@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsAccessTokenBhv extends EsAbstractBehavior<AccessToken, A
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.access_token";
     }
 
     @Override
@@ -73,13 +73,13 @@ public abstract class BsAccessTokenBhv extends EsAbstractBehavior<AccessToken, A
     protected <RESULT extends AccessToken> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setName(DfTypeUtil.toString(source.get("name")));
-            result.setToken(DfTypeUtil.toString(source.get("token")));
-            result.setPermissions(toStringArray(source.get("permissions")));
-            result.setParameterName(DfTypeUtil.toString(source.get("parameter_name")));
-            result.setExpiredTime(DfTypeUtil.toLong(source.get("expiredTime")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setExpiredTime(DfTypeUtil.toLong(source.get("expiredTime")));
+            result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setParameterName(DfTypeUtil.toString(source.get("parameter_name")));
+            result.setPermissions(toStringArray(source.get("permissions")));
+            result.setToken(DfTypeUtil.toString(source.get("token")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return updateEntity(source, result);

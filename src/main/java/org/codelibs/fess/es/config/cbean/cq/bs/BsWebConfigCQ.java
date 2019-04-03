@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,12 +176,12 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
     }
 
     public BsWebConfigCQ addOrderBy_Id_Asc() {
-        regOBA("_uid");
+        regOBA("_id");
         return this;
     }
 
     public BsWebConfigCQ addOrderBy_Id_Desc() {
-        regOBD("_uid");
+        regOBD("_id");
         return this;
     }
 
@@ -2619,184 +2619,6 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setTimeToLive_Equal(Integer timeToLive) {
-        setTimeToLive_Term(timeToLive, null);
-    }
-
-    public void setTimeToLive_Equal(Integer timeToLive, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setTimeToLive_Term(timeToLive, opLambda);
-    }
-
-    public void setTimeToLive_Term(Integer timeToLive) {
-        setTimeToLive_Term(timeToLive, null);
-    }
-
-    public void setTimeToLive_Term(Integer timeToLive, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("timeToLive", timeToLive);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_NotEqual(Integer timeToLive) {
-        setTimeToLive_NotTerm(timeToLive, null);
-    }
-
-    public void setTimeToLive_NotTerm(Integer timeToLive) {
-        setTimeToLive_NotTerm(timeToLive, null);
-    }
-
-    public void setTimeToLive_NotEqual(Integer timeToLive, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        setTimeToLive_NotTerm(timeToLive, opLambda);
-    }
-
-    public void setTimeToLive_NotTerm(Integer timeToLive, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        not(not -> not.setTimeToLive_Term(timeToLive), opLambda);
-    }
-
-    public void setTimeToLive_Terms(Collection<Integer> timeToLiveList) {
-        setTimeToLive_Terms(timeToLiveList, null);
-    }
-
-    public void setTimeToLive_Terms(Collection<Integer> timeToLiveList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("timeToLive", timeToLiveList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_InScope(Collection<Integer> timeToLiveList) {
-        setTimeToLive_Terms(timeToLiveList, null);
-    }
-
-    public void setTimeToLive_InScope(Collection<Integer> timeToLiveList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setTimeToLive_Terms(timeToLiveList, opLambda);
-    }
-
-    public void setTimeToLive_Match(Integer timeToLive) {
-        setTimeToLive_Match(timeToLive, null);
-    }
-
-    public void setTimeToLive_Match(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("timeToLive", timeToLive);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_MatchPhrase(Integer timeToLive) {
-        setTimeToLive_MatchPhrase(timeToLive, null);
-    }
-
-    public void setTimeToLive_MatchPhrase(Integer timeToLive, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
-        MatchPhraseQueryBuilder builder = regMatchPhraseQ("timeToLive", timeToLive);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_MatchPhrasePrefix(Integer timeToLive) {
-        setTimeToLive_MatchPhrasePrefix(timeToLive, null);
-    }
-
-    public void setTimeToLive_MatchPhrasePrefix(Integer timeToLive, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
-        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("timeToLive", timeToLive);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Fuzzy(Integer timeToLive) {
-        setTimeToLive_Fuzzy(timeToLive, null);
-    }
-
-    public void setTimeToLive_Fuzzy(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regFuzzyQ("timeToLive", timeToLive);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_GreaterThan(Integer timeToLive) {
-        setTimeToLive_GreaterThan(timeToLive, null);
-    }
-
-    public void setTimeToLive_GreaterThan(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = timeToLive;
-        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_GREATER_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_LessThan(Integer timeToLive) {
-        setTimeToLive_LessThan(timeToLive, null);
-    }
-
-    public void setTimeToLive_LessThan(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = timeToLive;
-        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_THAN, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_GreaterEqual(Integer timeToLive) {
-        setTimeToLive_GreaterEqual(timeToLive, null);
-    }
-
-    public void setTimeToLive_GreaterEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = timeToLive;
-        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_GREATER_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_LessEqual(Integer timeToLive) {
-        setTimeToLive_LessEqual(timeToLive, null);
-    }
-
-    public void setTimeToLive_LessEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        final Object _value = timeToLive;
-        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_EQUAL, _value);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Exists() {
-        setTimeToLive_Exists(null);
-    }
-
-    public void setTimeToLive_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_CommonTerms(Integer timeToLive) {
-        setTimeToLive_CommonTerms(timeToLive, null);
-    }
-
-    public void setTimeToLive_CommonTerms(Integer timeToLive, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("timeToLive", timeToLive);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsWebConfigCQ addOrderBy_TimeToLive_Asc() {
-        regOBA("timeToLive");
-        return this;
-    }
-
-    public BsWebConfigCQ addOrderBy_TimeToLive_Desc() {
-        regOBD("timeToLive");
-        return this;
-    }
-
     public void setMaxAccessCount_Equal(Long maxAccessCount) {
         setMaxAccessCount_Term(maxAccessCount, null);
     }
@@ -3775,6 +3597,184 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setTimeToLive_Equal(Integer timeToLive) {
+        setTimeToLive_Term(timeToLive, null);
+    }
+
+    public void setTimeToLive_Equal(Integer timeToLive, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTimeToLive_Term(timeToLive, opLambda);
+    }
+
+    public void setTimeToLive_Term(Integer timeToLive) {
+        setTimeToLive_Term(timeToLive, null);
+    }
+
+    public void setTimeToLive_Term(Integer timeToLive, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_NotEqual(Integer timeToLive) {
+        setTimeToLive_NotTerm(timeToLive, null);
+    }
+
+    public void setTimeToLive_NotTerm(Integer timeToLive) {
+        setTimeToLive_NotTerm(timeToLive, null);
+    }
+
+    public void setTimeToLive_NotEqual(Integer timeToLive, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTimeToLive_NotTerm(timeToLive, opLambda);
+    }
+
+    public void setTimeToLive_NotTerm(Integer timeToLive, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTimeToLive_Term(timeToLive), opLambda);
+    }
+
+    public void setTimeToLive_Terms(Collection<Integer> timeToLiveList) {
+        setTimeToLive_Terms(timeToLiveList, null);
+    }
+
+    public void setTimeToLive_Terms(Collection<Integer> timeToLiveList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("timeToLive", timeToLiveList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_InScope(Collection<Integer> timeToLiveList) {
+        setTimeToLive_Terms(timeToLiveList, null);
+    }
+
+    public void setTimeToLive_InScope(Collection<Integer> timeToLiveList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setTimeToLive_Terms(timeToLiveList, opLambda);
+    }
+
+    public void setTimeToLive_Match(Integer timeToLive) {
+        setTimeToLive_Match(timeToLive, null);
+    }
+
+    public void setTimeToLive_Match(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_MatchPhrase(Integer timeToLive) {
+        setTimeToLive_MatchPhrase(timeToLive, null);
+    }
+
+    public void setTimeToLive_MatchPhrase(Integer timeToLive, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_MatchPhrasePrefix(Integer timeToLive) {
+        setTimeToLive_MatchPhrasePrefix(timeToLive, null);
+    }
+
+    public void setTimeToLive_MatchPhrasePrefix(Integer timeToLive, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Fuzzy(Integer timeToLive) {
+        setTimeToLive_Fuzzy(timeToLive, null);
+    }
+
+    public void setTimeToLive_Fuzzy(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_GreaterThan(Integer timeToLive) {
+        setTimeToLive_GreaterThan(timeToLive, null);
+    }
+
+    public void setTimeToLive_GreaterThan(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = timeToLive;
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_LessThan(Integer timeToLive) {
+        setTimeToLive_LessThan(timeToLive, null);
+    }
+
+    public void setTimeToLive_LessThan(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = timeToLive;
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_GreaterEqual(Integer timeToLive) {
+        setTimeToLive_GreaterEqual(timeToLive, null);
+    }
+
+    public void setTimeToLive_GreaterEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = timeToLive;
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_LessEqual(Integer timeToLive) {
+        setTimeToLive_LessEqual(timeToLive, null);
+    }
+
+    public void setTimeToLive_LessEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = timeToLive;
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Exists() {
+        setTimeToLive_Exists(null);
+    }
+
+    public void setTimeToLive_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_CommonTerms(Integer timeToLive) {
+        setTimeToLive_CommonTerms(timeToLive, null);
+    }
+
+    public void setTimeToLive_CommonTerms(Integer timeToLive, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsWebConfigCQ addOrderBy_TimeToLive_Asc() {
+        regOBA("timeToLive");
+        return this;
+    }
+
+    public BsWebConfigCQ addOrderBy_TimeToLive_Desc() {
+        regOBD("timeToLive");
+        return this;
+    }
+
     public void setUpdatedBy_Equal(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -4616,6 +4616,228 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public BsWebConfigCQ addOrderBy_UserAgent_Desc() {
         regOBD("userAgent");
+        return this;
+    }
+
+    public void setVirtualHosts_Equal(String virtualHosts) {
+        setVirtualHosts_Term(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Equal(String virtualHosts, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setVirtualHosts_Term(virtualHosts, opLambda);
+    }
+
+    public void setVirtualHosts_Term(String virtualHosts) {
+        setVirtualHosts_Term(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Term(String virtualHosts, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_NotEqual(String virtualHosts) {
+        setVirtualHosts_NotTerm(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_NotTerm(String virtualHosts) {
+        setVirtualHosts_NotTerm(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_NotEqual(String virtualHosts, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setVirtualHosts_NotTerm(virtualHosts, opLambda);
+    }
+
+    public void setVirtualHosts_NotTerm(String virtualHosts, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setVirtualHosts_Term(virtualHosts), opLambda);
+    }
+
+    public void setVirtualHosts_Terms(Collection<String> virtualHostsList) {
+        setVirtualHosts_Terms(virtualHostsList, null);
+    }
+
+    public void setVirtualHosts_Terms(Collection<String> virtualHostsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("virtualHosts", virtualHostsList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_InScope(Collection<String> virtualHostsList) {
+        setVirtualHosts_Terms(virtualHostsList, null);
+    }
+
+    public void setVirtualHosts_InScope(Collection<String> virtualHostsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setVirtualHosts_Terms(virtualHostsList, opLambda);
+    }
+
+    public void setVirtualHosts_Match(String virtualHosts) {
+        setVirtualHosts_Match(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Match(String virtualHosts, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_MatchPhrase(String virtualHosts) {
+        setVirtualHosts_MatchPhrase(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_MatchPhrase(String virtualHosts, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_MatchPhrasePrefix(String virtualHosts) {
+        setVirtualHosts_MatchPhrasePrefix(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_MatchPhrasePrefix(String virtualHosts, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Fuzzy(String virtualHosts) {
+        setVirtualHosts_Fuzzy(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Fuzzy(String virtualHosts, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Prefix(String virtualHosts) {
+        setVirtualHosts_Prefix(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Prefix(String virtualHosts, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Wildcard(String virtualHosts) {
+        setVirtualHosts_Wildcard(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Wildcard(String virtualHosts, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Regexp(String virtualHosts) {
+        setVirtualHosts_Regexp(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_Regexp(String virtualHosts, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_SpanTerm(String virtualHosts) {
+        setVirtualHosts_SpanTerm("virtualHosts", null);
+    }
+
+    public void setVirtualHosts_SpanTerm(String virtualHosts, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_GreaterThan(String virtualHosts) {
+        setVirtualHosts_GreaterThan(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_GreaterThan(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_LessThan(String virtualHosts) {
+        setVirtualHosts_LessThan(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_LessThan(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_GreaterEqual(String virtualHosts) {
+        setVirtualHosts_GreaterEqual(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_GreaterEqual(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_LessEqual(String virtualHosts) {
+        setVirtualHosts_LessEqual(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_LessEqual(String virtualHosts, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = virtualHosts;
+        RangeQueryBuilder builder = regRangeQ("virtualHosts", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Exists() {
+        setVirtualHosts_Exists(null);
+    }
+
+    public void setVirtualHosts_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_CommonTerms(String virtualHosts) {
+        setVirtualHosts_CommonTerms(virtualHosts, null);
+    }
+
+    public void setVirtualHosts_CommonTerms(String virtualHosts, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("virtualHosts", virtualHosts);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsWebConfigCQ addOrderBy_VirtualHosts_Asc() {
+        regOBA("virtualHosts");
+        return this;
+    }
+
+    public BsWebConfigCQ addOrderBy_VirtualHosts_Desc() {
+        regOBD("virtualHosts");
         return this;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,10 @@ import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.client.http.Authentication;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.codelibs.fess.es.config.bsentity.BsWebConfig;
-import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.dbflute.cbean.result.ListResultBean;
 
 /**
  * @author FreeGen
@@ -46,70 +44,15 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     private static final long serialVersionUID = 1L;
 
-    private String[] labelTypeIds;
-
     protected volatile Pattern[] includedDocUrlPatterns;
 
     protected volatile Pattern[] excludedDocUrlPatterns;
 
     protected transient volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
-    private volatile List<LabelType> labelTypeList;
-
     public WebConfig() {
         super();
         setBoost(1.0f);
-    }
-
-    /* (non-Javadoc)
-     * @see org.codelibs.fess.db.exentity.CrawlingConfig#getLabelTypeIds()
-     */
-    public String[] getLabelTypeIds() {
-        if (labelTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return labelTypeIds;
-    }
-
-    public void setLabelTypeIds(final String[] labelTypeIds) {
-        this.labelTypeIds = labelTypeIds;
-    }
-
-    public List<LabelType> getLabelTypeList() {
-        if (labelTypeList == null) {
-            synchronized (this) {
-                if (labelTypeList == null) {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final WebConfigToLabelBhv webConfigToLabelBhv = ComponentUtil.getComponent(WebConfigToLabelBhv.class);
-                    final ListResultBean<WebConfigToLabel> mappingList = webConfigToLabelBhv.selectList(cb -> {
-                        cb.query().setWebConfigId_Equal(getId());
-                        cb.specify().columnLabelTypeId();
-                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
-                    });
-                    final List<String> labelIdList = new ArrayList<>();
-                    for (final WebConfigToLabel mapping : mappingList) {
-                        labelIdList.add(mapping.getLabelTypeId());
-                    }
-                    final LabelTypeBhv labelTypeBhv = ComponentUtil.getComponent(LabelTypeBhv.class);
-                    labelTypeList = labelIdList.isEmpty() ? Collections.emptyList() : labelTypeBhv.selectList(cb -> {
-                        cb.query().setId_InScope(labelIdList);
-                        cb.query().addOrderBy_SortOrder_Asc();
-                        cb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                    });
-                }
-            }
-        }
-        return labelTypeList;
-    }
-
-    @Override
-    public String[] getLabelTypeValues() {
-        final List<LabelType> list = getLabelTypeList();
-        final List<String> labelValueList = new ArrayList<>(list.size());
-        for (final LabelType labelType : list) {
-            labelValueList.add(labelType.getValue());
-        }
-        return labelValueList.toArray(new String[labelValueList.size()]);
     }
 
     @Override
@@ -144,13 +87,15 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     protected synchronized void initDocUrlPattern() {
 
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         if (includedDocUrlPatterns == null) {
             if (StringUtil.isNotBlank(getIncludedDocUrls())) {
                 final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getIncludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
-                    if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        urlPatterList.add(Pattern.compile(u.trim()));
+                    final String v = systemHelper.normalizeConfigPath(u);
+                    if (StringUtil.isNotBlank(v)) {
+                        urlPatterList.add(Pattern.compile(v));
                     }
                 }
                 includedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
@@ -164,8 +109,9 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
                 final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getExcludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
-                    if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        urlPatterList.add(Pattern.compile(u.trim()));
+                    final String v = systemHelper.normalizeConfigPath(u);
+                    if (StringUtil.isNotBlank(v)) {
+                        urlPatterList.add(Pattern.compile(v));
                     }
                 }
                 excludedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
@@ -238,10 +184,16 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
                 rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
 
-        // proxy credentials
-        if (paramMap.get("proxyUsername") != null && paramMap.get("proxyPassword") != null) {
-            paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(paramMap.remove("proxyUsername")
-                    .toString(), paramMap.remove("proxyPassword").toString()));
+        final String proxyHost = (String) paramMap.get("proxyHost");
+        final String proxyPort = (String) paramMap.get("proxyPort");
+        if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
+            // proxy credentials
+            if (paramMap.get("proxyUsername") != null && paramMap.get("proxyPassword") != null) {
+                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(paramMap.remove("proxyUsername")
+                        .toString(), paramMap.remove("proxyPassword").toString()));
+            }
+        } else {
+            initializeDefaultHttpProxy(paramMap);
         }
 
         return paramMap;

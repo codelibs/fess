@@ -1,0 +1,31 @@
+{
+  "fess_log.user_info" : {
+    "aliases" : { },
+    "mappings" : {
+      "user_info" : {
+        "properties" : {
+          "createdAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
+          },
+          "updatedAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021060613",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "AMHq21z_Rw-8aumu04y_wA",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : "fess_log.user_info"
+      }
+    }
+  }
+}

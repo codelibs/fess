@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,8 @@ public class ElevateWordDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getCreatedTime(), (et, vl) -> ((ElevateWord) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
+        setupEpg(_epgMap, et -> ((ElevateWord) et).getPermissions(), (et, vl) -> ((ElevateWord) et).setPermissions((String[]) vl),
+                "permissions");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getReading(), (et, vl) -> ((ElevateWord) et).setReading(DfTypeUtil.toString(vl)),
                 "reading");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getSuggestWord(),
@@ -92,8 +94,6 @@ public class ElevateWordDbm extends AbstractDBMeta {
                 (et, vl) -> ((ElevateWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getTargetRole(), (et, vl) -> ((ElevateWord) et).setTargetRole(DfTypeUtil.toString(vl)),
                 "targetRole");
-        setupEpg(_epgMap, et -> ((ElevateWord) et).getPermissions(), (et, vl) -> ((ElevateWord) et).setPermissions((String[]) vl),
-                "permissions");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getUpdatedBy(), (et, vl) -> ((ElevateWord) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getUpdatedTime(), (et, vl) -> ((ElevateWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
@@ -135,25 +135,25 @@ public class ElevateWordDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float",
-            0, 0, null, false, null, null, null, null, null, false);
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnReading = cci("reading", "reading", null, null, String.class, "reading", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
-            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnReading = cci("reading", "reading", null, null, String.class, "reading", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnBoost() {
         return _columnBoost;
@@ -165,6 +165,10 @@ public class ElevateWordDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
     }
 
     public ColumnInfo columnReading() {
@@ -183,10 +187,6 @@ public class ElevateWordDbm extends AbstractDBMeta {
         return _columnTargetRole;
     }
 
-    public ColumnInfo columnPermissions() {
-        return _columnPermissions;
-    }
-
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
@@ -200,11 +200,11 @@ public class ElevateWordDbm extends AbstractDBMeta {
         ls.add(columnBoost());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnPermissions());
         ls.add(columnReading());
         ls.add(columnSuggestWord());
         ls.add(columnTargetLabel());
         ls.add(columnTargetRole());
-        ls.add(columnPermissions());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
         return ls;

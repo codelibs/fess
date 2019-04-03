@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class SystemHelperTest extends UnitFessTestCase {
 
@@ -24,7 +26,11 @@ public class SystemHelperTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        systemHelper = new SystemHelper();
+        systemHelper = new SystemHelper() {
+            @Override
+            protected void parseProjectProperties() {
+            }
+        };
         systemHelper.init();
     }
 
@@ -83,4 +89,29 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("zh_TW", systemHelper.normalizeLang(value));
     }
 
+    public void test_createSearchRole() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+        });
+
+        assertEquals("", systemHelper.createSearchRole("", ""));
+        assertEquals("aaa", systemHelper.createSearchRole("", "aaa"));
+        assertEquals("bbb", systemHelper.createSearchRole("", "aaa\\bbb"));
+        assertEquals("bbb\\ccc", systemHelper.createSearchRole("", "aaa\\bbb\\ccc"));
+    }
+
+    public void test_normalizeConfigPath() {
+        assertEquals("", systemHelper.normalizeConfigPath(""));
+        assertEquals(".*\\Qwww.domain.com/test\\E.*", systemHelper.normalizeConfigPath("contains:www.domain.com/test"));
+        assertEquals(".*\\Q/test/\\E.*", systemHelper.normalizeConfigPath("contains:/test/"));
+        assertEquals("www.domain.com/test", systemHelper.normalizeConfigPath("www.domain.com/test"));
+        assertEquals(".*domain.com/.*", systemHelper.normalizeConfigPath(".*domain.com/.*"));
+        assertEquals("aaa", systemHelper.normalizeConfigPath("regexp:aaa"));
+        assertEquals("aaa", systemHelper.normalizeConfigPath("regexpCase:aaa"));
+        assertEquals("(?i)aaa", systemHelper.normalizeConfigPath("regexpIgnoreCase:aaa"));
+    }
 }

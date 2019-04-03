@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ public class BsFavoriteLog extends EsAbstractEntity {
     /** createdAt */
     protected LocalDateTime createdAt;
 
-    /** url */
-    protected String url;
-
     /** docId */
     protected String docId;
 
     /** queryId */
     protected String queryId;
+
+    /** url */
+    protected String url;
 
     /** userInfoId */
     protected String userInfoId;
@@ -76,14 +76,14 @@ public class BsFavoriteLog extends EsAbstractEntity {
         if (createdAt != null) {
             addFieldToSource(sourceMap, "createdAt", createdAt);
         }
-        if (url != null) {
-            addFieldToSource(sourceMap, "url", url);
-        }
         if (docId != null) {
             addFieldToSource(sourceMap, "docId", docId);
         }
         if (queryId != null) {
             addFieldToSource(sourceMap, "queryId", queryId);
+        }
+        if (url != null) {
+            addFieldToSource(sourceMap, "url", url);
         }
         if (userInfoId != null) {
             addFieldToSource(sourceMap, "userInfoId", userInfoId);
@@ -102,9 +102,9 @@ public class BsFavoriteLog extends EsAbstractEntity {
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(createdAt);
-        sb.append(dm).append(url);
         sb.append(dm).append(docId);
         sb.append(dm).append(queryId);
+        sb.append(dm).append(url);
         sb.append(dm).append(userInfoId);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -126,16 +126,6 @@ public class BsFavoriteLog extends EsAbstractEntity {
         this.createdAt = value;
     }
 
-    public String getUrl() {
-        checkSpecifiedProperty("url");
-        return convertEmptyToNull(url);
-    }
-
-    public void setUrl(String value) {
-        registerModifiedProperty("url");
-        this.url = value;
-    }
-
     public String getDocId() {
         checkSpecifiedProperty("docId");
         return convertEmptyToNull(docId);
@@ -154,6 +144,16 @@ public class BsFavoriteLog extends EsAbstractEntity {
     public void setQueryId(String value) {
         registerModifiedProperty("queryId");
         this.queryId = value;
+    }
+
+    public String getUrl() {
+        checkSpecifiedProperty("url");
+        return convertEmptyToNull(url);
+    }
+
+    public void setUrl(String value) {
+        registerModifiedProperty("url");
+        this.url = value;
     }
 
     public String getUserInfoId() {

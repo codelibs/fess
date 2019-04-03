@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
-public class CustomSizeValidator implements ConstraintValidator<CustomSize, String> {
+public class CustomSizeValidator implements ConstraintValidator<CustomSize, CharSequence> {
     private int min = 0;
     private int max = Integer.MAX_VALUE;
     private String message;
@@ -44,14 +44,14 @@ public class CustomSizeValidator implements ConstraintValidator<CustomSize, Stri
     }
 
     @Override
-    public boolean isValid(final String value, final ConstraintValidatorContext context) {
+    public boolean isValid(final CharSequence value, final ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
 
         final HibernateConstraintValidatorContext hibernateContext = context.unwrap(HibernateConstraintValidatorContext.class);
         hibernateContext.disableDefaultConstraintViolation();
-        hibernateContext.addExpressionVariable("min", min).addExpressionVariable("max", max).buildConstraintViolationWithTemplate(message)
+        hibernateContext.addMessageParameter("min", min).addMessageParameter("max", max).buildConstraintViolationWithTemplate(message)
                 .addConstraintViolation();
         final int length = value.length();
         return length >= min && length <= max;

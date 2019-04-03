@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ public class CrawlingConfigWrapper implements CrawlingConfig {
     }
 
     @Override
-    public String[] getLabelTypeValues() {
-        return crawlingConfig.getLabelTypeValues();
+    public String[] getVirtualHosts() {
+        return crawlingConfig.getVirtualHosts();
     }
 
     @Override

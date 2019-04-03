@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ public class AdminWizardAction extends FessAdminAction {
                 wConfig.setUpdatedBy(username);
                 wConfig.setUpdatedTime(now);
                 wConfig.setUrls(configPath);
-                wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", ComponentUtil.getUserAgentName()));
+                wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", fessConfig.getUserAgentName()));
                 wConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultDisplayEncodedPermissions());
 
                 webConfigService.store(wConfig);
@@ -252,7 +252,8 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     protected String convertCrawlingPath(final String path) {
-        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("ftp:")) {
+        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
+                || path.startsWith("ftp:")) {
             return path;
         }
 

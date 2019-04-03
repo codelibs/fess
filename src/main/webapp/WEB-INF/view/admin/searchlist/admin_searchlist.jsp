@@ -86,21 +86,23 @@
 												<c:forEach var="doc" varStatus="s" items="${documentItems}">
 													<li class="col-sm-12">
 														<h3 class="title">
-															<a href="${doc.url_link}">${f:h(doc.content_title)}</a>
+															<a href="${doc.url_link}">${doc.content_title}</a>
 														</h3>
 														<div class="body col-sm-10">
-															${doc.content_description}</div>
+															${doc.content_description}
+														</div>
 														<div class="body col-sm-2 text-right">
-															<la:link href="/admin/searchlist/edit?crudMode=2&amp;docId=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
+															<la:message key="labels.doc_score" />${f:h(doc.score)}<br>
+															<la:link href="/admin/searchlist/edit?crudMode=2&amp;doc.doc_id=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
 																styleClass="btn btn-xs btn-warning">
-																<i class="fa fa-pencil"></i>
+																<i class="fa fa-pencil-alt"></i>
 																<la:message key="labels.crud_button_update" />
 															</la:link>
 															<button type="button"
 																class="btn btn-xs btn-danger"
 																data-toggle="modal" data-target="#confirmToDelete"
 																data-docid="${f:u(doc.doc_id)}"
-																data-title="${f:h(doc.content_title)}"
+																data-title="${fe:replace(doc.content_title, '<[^>]+>', '')}"
 																data-url="${f:h(doc.url_link)}">
 																<i class="fa fa-trash"></i>
 																<la:message key="labels.search_list_button_delete" />
@@ -113,13 +115,13 @@
 										<div class="row">
 											<div class="col-sm-12 text-center">
 												<ul class="pagination pagination-sm">
-													<c:if test="${existPrePage}">
+													<c:if test="${existPrevPage}">
 														<li class="prev"><la:link
 																href="prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
 																<la:message key="labels.prev_page" />
 															</la:link></li>
 													</c:if>
-													<c:if test="${!existPrePage}">
+													<c:if test="${!existPrevPage}">
 														<li class="prev disabled"><a href="#"><la:message
 																	key="labels.prev_page" /></a></li>
 													</c:if>

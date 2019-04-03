@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,17 @@
  */
 package org.codelibs.fess.entity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.EsUtil;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 
 public class PingResponse {
     private final int status;
@@ -37,14 +40,13 @@ public class PingResponse {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
         clusterName = response.getClusterName();
         clusterStatus = response.getStatus().toString();
-        try {
-            final XContentBuilder builder = XContentFactory.jsonBuilder();
-            builder.startObject();
-            response.toXContent(builder, ToXContent.EMPTY_PARAMS);
-            builder.endObject();
-            message = builder.string();
+        try (OutputStream out = EsUtil.getXContentOutputStream(response, XContentType.JSON)) {
+            message = ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
+            if (StringUtil.isBlank(message)) {
+                message = "{}";
+            }
         } catch (final IOException e) {
-            message = "{ \"error\" : \"" + e.getMessage() + "\"}";
+            message = "{ \"error\" : \"" + StringEscapeUtils.escapeJson(e.getMessage()) + "\"}";
         }
     }
 

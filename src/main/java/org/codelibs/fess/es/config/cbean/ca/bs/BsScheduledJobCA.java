@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -211,16 +211,16 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setAvailable_PercentileRanks() {
-        setAvailable_PercentileRanks(null);
+    public void setAvailable_PercentileRanks(double[] values) {
+        setAvailable_PercentileRanks(values, null);
     }
 
-    public void setAvailable_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setAvailable_PercentileRanks("available", opLambda);
+    public void setAvailable_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setAvailable_PercentileRanks("available", values, opLambda);
     }
 
-    public void setAvailable_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available");
+    public void setAvailable_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -436,16 +436,16 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setCrawler_PercentileRanks() {
-        setCrawler_PercentileRanks(null);
+    public void setCrawler_PercentileRanks(double[] values) {
+        setCrawler_PercentileRanks(values, null);
     }
 
-    public void setCrawler_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCrawler_PercentileRanks("crawler", opLambda);
+    public void setCrawler_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCrawler_PercentileRanks("crawler", values, opLambda);
     }
 
-    public void setCrawler_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "crawler");
+    public void setCrawler_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "crawler", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -792,16 +792,16 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setCreatedTime_PercentileRanks() {
-        setCreatedTime_PercentileRanks(null);
+    public void setCreatedTime_PercentileRanks(double[] values) {
+        setCreatedTime_PercentileRanks(values, null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCreatedTime_PercentileRanks("createdTime", opLambda);
+    public void setCreatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1149,16 +1149,16 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setJobLogging_PercentileRanks() {
-        setJobLogging_PercentileRanks(null);
+    public void setJobLogging_PercentileRanks(double[] values) {
+        setJobLogging_PercentileRanks(values, null);
     }
 
-    public void setJobLogging_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setJobLogging_PercentileRanks("jobLogging", opLambda);
+    public void setJobLogging_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setJobLogging_PercentileRanks("jobLogging", values, opLambda);
     }
 
-    public void setJobLogging_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "jobLogging");
+    public void setJobLogging_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "jobLogging", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1766,16 +1766,16 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setSortOrder_PercentileRanks() {
-        setSortOrder_PercentileRanks(null);
+    public void setSortOrder_PercentileRanks(double[] values) {
+        setSortOrder_PercentileRanks(values, null);
     }
 
-    public void setSortOrder_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setSortOrder_PercentileRanks("sortOrder", opLambda);
+    public void setSortOrder_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder");
+    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2253,16 +2253,16 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setUpdatedTime_PercentileRanks() {
-        setUpdatedTime_PercentileRanks(null);
+    public void setUpdatedTime_PercentileRanks(double[] values) {
+        setUpdatedTime_PercentileRanks(values, null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setUpdatedTime_PercentileRanks("updatedTime", opLambda);
+    public void setUpdatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

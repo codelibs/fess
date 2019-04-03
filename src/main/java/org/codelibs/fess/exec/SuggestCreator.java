@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,18 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.monitor.jvm.JvmInfo;
+import org.elasticsearch.monitor.os.OsProbe;
+import org.elasticsearch.monitor.process.ProcessProbe;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -43,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 public class SuggestCreator {
 
-    private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SuggestCreator.class);
 
     @Resource
     public FessEsClient fessEsClient;
@@ -59,13 +65,20 @@ public class SuggestCreator {
         protected String propertiesPath;
 
         protected Options() {
-            // noghing
+            // nothing
         }
 
         @Override
         public String toString() {
             return "Options [sessionId=" + sessionId + ", name=" + name + ", propertiesPath=" + propertiesPath + "]";
         }
+    }
+
+    static void initializeProbes() {
+        // Force probes to be loaded
+        ProcessProbe.getInstance();
+        OsProbe.getInstance();
+        JvmInfo.jvmInfo();
     }
 
     public static void main(final String[] args) {
@@ -76,7 +89,7 @@ public class SuggestCreator {
             parser.parseArgument(args);
         } catch (final CmdLineException e) {
             System.err.println(e.getMessage());
-            System.err.println("java " + Crawler.class.getCanonicalName() + " [options...] arguments...");
+            System.err.println("java " + SuggestCreator.class.getCanonicalName() + " [options...] arguments...");
             parser.printUsage(System.err);
             return;
         }
@@ -92,15 +105,12 @@ public class SuggestCreator {
             }
         }
 
-        final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-        if (StringUtil.isNotBlank(transportAddresses)) {
-            System.setProperty(EsClient.TRANSPORT_ADDRESSES, transportAddresses);
-        }
-        final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
-        if (StringUtil.isNotBlank(clusterName)) {
-            System.setProperty(EsClient.CLUSTER_NAME, clusterName);
+        final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        if (StringUtil.isNotBlank(httpAddress)) {
+            System.setProperty(EsClient.HTTP_ADDRESS, httpAddress);
         }
 
+        TimeoutTask systemMonitorTask = null;
         int exitCode;
         try {
             SingletonLaContainerFactory.setConfigPath("app.xml");
@@ -118,22 +128,30 @@ public class SuggestCreator {
                 }
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
+
+            systemMonitorTask =
+                    TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
+                            ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(), true);
+
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Crawler is stopped.", e);
+                logger.debug("SuggestCreator is stopped.", e);
             } else if (logger.isInfoEnabled()) {
-                logger.info("Crawler is stopped.");
+                logger.info("SuggestCreator is stopped.");
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
             logger.error("Suggest creator does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
+            if (systemMonitorTask != null) {
+                systemMonitorTask.cancel();
+            }
             destroyContainer();
         }
 
-        logger.info("Finished suggestCreator.");
+        logger.info("Finished SuggestCreator.");
         System.exit(exitCode);
     }
 
@@ -183,6 +201,16 @@ public class SuggestCreator {
 
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
 
+        logger.info("Create update index.");
+        suggestHelper.suggester().createNextIndex();
+
+        logger.info("Store all bad words.");
+        suggestHelper.storeAllBadWords(true);
+
+        logger.info("Store all elevate words.");
+        suggestHelper.storeAllElevateWords(true);
+
+        logger.info("Parse words from indexed documents.");
         suggestHelper.indexFromDocuments(ret -> {
             logger.info("Success index from documents.");
             result.set(0);
@@ -199,6 +227,15 @@ public class SuggestCreator {
                 logger.debug("Interrupted.", ignore);
             }
         }
+
+        logger.info("Store search logs.");
+        suggestHelper.storeSearchLog();
+
+        logger.info("Switch indices.");
+        suggestHelper.suggester().switchIndex();
+
+        logger.info("Remove old indices.");
+        suggestHelper.suggester().removeDisableIndices();
 
         return result.get();
     }

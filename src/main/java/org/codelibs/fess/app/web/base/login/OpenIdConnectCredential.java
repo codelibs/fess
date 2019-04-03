@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
-public class OpenIdConnectCredential implements LoginCredential {
+public class OpenIdConnectCredential implements LoginCredential, FessCredential {
 
     private final Map<String, Object> attributes;
 
@@ -37,19 +38,37 @@ public class OpenIdConnectCredential implements LoginCredential {
 
     @Override
     public String toString() {
-        return "{" + getEmail() + "}";
+        return "{" + getUserId() + "}";
     }
 
-    public String getEmail() {
+    @Override
+    public String getUserId() {
         return (String) attributes.get("email");
     }
 
-    public User getUser() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return new User(getEmail(), fessConfig.getOicDefaultGroupsAsArray(), fessConfig.getOicDefaultRolesAsArray());
+    public OpenIdUser getUser() {
+        return new OpenIdUser(getUserId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
     }
 
-    public static class User implements FessUser {
+    protected static String[] getDefaultGroupsAsArray() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.groups");
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        }
+    }
+
+    protected static String[] getDefaultRolesAsArray() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.roles");
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        } else {
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        }
+    }
+
+    public static class OpenIdUser implements FessUser {
 
         private static final long serialVersionUID = 1L;
 
@@ -61,7 +80,7 @@ public class OpenIdConnectCredential implements LoginCredential {
 
         protected String[] permissions;
 
-        protected User(final String name, final String[] groups, final String[] roles) {
+        protected OpenIdUser(final String name, final String[] groups, final String[] roles) {
             this.name = name;
             this.groups = groups;
             this.roles = roles;
@@ -93,11 +112,6 @@ public class OpenIdConnectCredential implements LoginCredential {
                 permissions = permissionSet.toArray(new String[permissionSet.size()]);
             }
             return permissions;
-        }
-
-        @Override
-        public boolean isEditable() {
-            return false;
         }
 
     }

@@ -1,0 +1,37 @@
+{
+    "properties": {
+      "hostname": {
+        "type": "keyword"
+      },
+      "port": {
+        "type": "integer"
+      },
+      "protocolScheme": {
+        "type": "keyword"
+      },
+      "username": {
+        "type": "keyword"
+      },
+      "password": {
+        "type": "keyword"
+      },
+      "parameters": {
+        "type": "keyword"
+      },
+      "fileConfigId": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

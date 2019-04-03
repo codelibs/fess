@@ -34,7 +34,7 @@ case "$1" in
         STOP_REQUIRED=true
     ;;
     1)
-        # Dont do anything on upgrade, because the preun script in redhat gets executed after the postinst (madness!)
+        # Don't do anything on upgrade, because the preun script in redhat gets executed after the postinst (madness!)
     ;;
 
     *)

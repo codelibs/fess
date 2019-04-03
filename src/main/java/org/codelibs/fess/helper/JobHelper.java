@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
-import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.job.ScheduledJobException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -42,7 +41,8 @@ import org.slf4j.LoggerFactory;
 
 public class JobHelper {
     private static final Logger logger = LoggerFactory.getLogger(JobHelper.class);
-    private int monitorInterval = 60 * 60;// 1hour
+
+    protected int monitorInterval = 60 * 60;// 1hour
 
     public void register(final ScheduledJob scheduledJob) {
         final JobManager jobManager = ComponentUtil.getJobManager();
@@ -71,8 +71,10 @@ public class JobHelper {
         final CronParamsSupplier paramsOp =
                 () -> {
                     final Map<String, Object> params = new HashMap<>();
-                    params.put(Constants.SCHEDULED_JOB, ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(scheduledJob.getId())
-                            .orElseThrow(() -> new JobNotFoundException(scheduledJob)));
+                    ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(scheduledJob.getId())
+                            .ifPresent(e -> params.put(Constants.SCHEDULED_JOB, e)).orElse(() -> {
+                                logger.warn("Job " + scheduledJob.getId() + " is not found.");
+                            });
                     return params;
                 };
         findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
@@ -121,6 +123,19 @@ public class JobHelper {
             if (jobManager.isSchedulingDone()) {
                 jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
                     job.unschedule();
+                }).orElse(() -> logger.debug("Job {} is not scheduled.", scheduledJob.getId()));
+            }
+        } catch (final Exception e) {
+            throw new ScheduledJobException("Failed to delete Job: " + scheduledJob, e);
+        }
+    }
+
+    public void remove(final ScheduledJob scheduledJob) {
+        try {
+            final JobManager jobManager = ComponentUtil.getJobManager();
+            if (jobManager.isSchedulingDone()) {
+                jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
+                    job.disappear();
                 }).orElse(() -> logger.debug("Job {} is not scheduled.", scheduledJob.getId()));
             }
         } catch (final Exception e) {

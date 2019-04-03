@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import org.slf4j.LoggerFactory;
 public class PurgeThumbnailJob {
     private static final Logger logger = LoggerFactory.getLogger(PurgeThumbnailJob.class);
 
-    private long expiry;
+    private long expiry = 30 * 24 * 60 * 60 * 1000L;
 
     public String execute() {
         try {
             final long count = ComponentUtil.getThumbnailManager().purge(getExpiry());
             return "Deleted " + count + " thumbnail files.";
         } catch (final Exception e) {
-            logger.error("Failed to purge user info.", e);
+            logger.error("Failed to purge thumbnails.", e);
             return e.getMessage();
         }
     }
@@ -39,7 +39,9 @@ public class PurgeThumbnailJob {
     }
 
     public PurgeThumbnailJob expiry(final long expiry) {
-        this.expiry = expiry;
+        if (expiry > 0) {
+            this.expiry = expiry;
+        }
         return this;
     }
 }

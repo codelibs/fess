@@ -3,15 +3,47 @@
 CMD_TYPE=$1
 URL=$2
 OUTPUT_FILE=$3
+IMAGE_SIZE=100x100!
+
+check_command() {
+  CMD=$1
+  CMD_PATH=`which $CMD`
+  if [ ! -e "$CMD_PATH" ] ; then
+    echo "$CMD does not exist."
+    exit 1
+  fi
+}
 
 if [ x"$CMD_TYPE" = "xmsoffice" ] ; then
+  check_command convert
+  check_command unoconv
   TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
   TMP_FILE=/tmp/thumbnail.$$.pdf
-  unoconv -o $TMP_FILE -f pdf $TARGET_FILE
-  convert -thumbnail 160x120! $TMP_FILE $OUTPUT_FILE
+  unoconv -e PageRange=1-1 -o $TMP_FILE -f pdf $TARGET_FILE
+  if [ ! -f $TMP_FILE ] ; then
+    echo "unoconv does not work."
+    exit 1
+  fi
+  convert -thumbnail $IMAGE_SIZE ${TMP_FILE}[0] $OUTPUT_FILE
   rm $TMP_FILE
+elif [ x"$CMD_TYPE" = "xpdf" ] ; then
+  check_command convert
+  TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
+  convert -thumbnail $IMAGE_SIZE ${TARGET_FILE}[0] $OUTPUT_FILE
+elif [ x"$CMD_TYPE" = "xps" ] ; then
+  check_command convert
+  TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
+  convert -thumbnail $IMAGE_SIZE ${TARGET_FILE}[0] $OUTPUT_FILE
+elif [ x"$CMD_TYPE" = "ximage" ] ; then
+  check_command convert
+  TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
+  convert -thumbnail $IMAGE_SIZE ${TARGET_FILE}[0] $OUTPUT_FILE
 else
   echo "Unsupported type: $CMD_TYPE"
   exit 1
 fi
 
+if [ ! -f $OUTPUT_FILE ] ; then
+  echo "Thumbnail is not created."
+  exit 1
+fi

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
-import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
@@ -39,18 +39,17 @@ import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
+import org.codelibs.fess.exception.ContentNotFoundException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.IndexingHelper;
-import org.codelibs.fess.helper.SambaHelper;
+import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jcifs.smb.ACE;
-import jcifs.smb.SID;
 
 public class FessCrawlerThread extends CrawlerThread {
     private static final Logger logger = LoggerFactory.getLogger(FessCrawlerThread.class);
@@ -64,7 +63,6 @@ public class FessCrawlerThread extends CrawlerThread {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
-            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
 
@@ -76,31 +74,22 @@ public class FessCrawlerThread extends CrawlerThread {
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<>();
                 stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
-                if (url.startsWith("smb://")) {
+                if (url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("file:") || url.startsWith("ftp:")) {
                     if (url.endsWith("/")) {
                         // directory
                         return true;
                     }
-                    if (fessConfig.isSmbRoleFromFile()) {
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    if (fessConfig.isSmbRoleFromFile() || fessConfig.isFileRoleFromFile() || fessConfig.isFtpRoleFromFile()) {
                         // head method
                         responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                         if (responseData == null) {
                             return true;
                         }
 
-                        final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-                        if (aces != null) {
-                            for (final ACE item : aces) {
-                                final SID sid = item.getSID();
-                                final String accountId = sambaHelper.getAccountId(sid);
-                                if (accountId != null) {
-                                    roleTypeList.add(accountId);
-                                }
-                            }
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
-                            }
-                        }
+                        roleTypeList.addAll(permissionHelper.getSmbRoleTypeList(responseData));
+                        roleTypeList.addAll(permissionHelper.getFileRoleTypeList(responseData));
+                        roleTypeList.addAll(permissionHelper.getFtpRoleTypeList(responseData));
                     }
                 }
                 dataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
@@ -125,8 +114,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Date expires = DocumentUtil.getValue(document, fessConfig.getIndexFieldExpires(), Date.class);
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
-                    if (idValue != null) {
-                        indexingHelper.deleteDocument(fessEsClient, idValue.toString());
+                    if (idValue != null && !indexingHelper.deleteDocument(fessEsClient, idValue.toString())) {
+                        logger.debug("Failed to delete expired document: " + url);
                     }
                     return true;
                 }
@@ -152,7 +141,9 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
-                    indexingHelper.deleteDocument(fessEsClient, id);
+                    if (!indexingHelper.deleteDocument(fessEsClient, id)) {
+                        logger.debug("Failed to delete 404 document: " + url);
+                    }
                     return false;
                 } else if (responseData.getLastModified() == null) {
                     return true;
@@ -168,11 +159,17 @@ public class FessCrawlerThread extends CrawlerThread {
 
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
 
+                    final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
+                    if (documentExpires != null
+                            && !indexingHelper.updateDocument(fessEsClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
+                        logger.debug("Failed to update " + fessConfig.getIndexFieldExpires() + " at " + url);
+                    }
+
                     return false;
                 }
             } finally {
                 if (responseData != null) {
-                    IOUtils.closeQuietly(responseData);
+                    CloseableUtil.closeQuietly(responseData);
                 }
             }
         }
@@ -236,5 +233,30 @@ public class FessCrawlerThread extends CrawlerThread {
             }
         }
         return urlSet;
+    }
+
+    @Override
+    protected void processResponse(final UrlQueue<?> urlQueue, final ResponseData responseData) {
+        super.processResponse(urlQueue, responseData);
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isCrawlerFailureUrlStatusCodes(responseData.getHttpStatusCode())) {
+            final String sessionId = crawlerContext.getSessionId();
+            final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().get(sessionId);
+            final String url = urlQueue.getUrl();
+
+            final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
+            failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url, new ContentNotFoundException(
+                    urlQueue.getParentUrl(), url));
+        }
+    }
+
+    @Override
+    protected void storeChildUrl(final String childUrl, final String parentUrl, final String metaData, final int depth) {
+        if (StringUtil.isNotBlank(childUrl)) {
+            final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
+            final String url = duplicateHostHelper.convert(childUrl);
+            super.storeChildUrl(url, parentUrl, metaData, depth);
+        }
     }
 }

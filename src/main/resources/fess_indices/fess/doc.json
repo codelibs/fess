@@ -1,11 +1,4 @@
 {
-  "doc": {
-    "_all": {
-      "enabled": false
-    },
-    "_source": {
-      "enabled": true
-    },
     "dynamic_templates": [
       {
         "lang_ar": {
@@ -40,6 +33,15 @@
           "mapping": {
             "type": "text",
             "analyzer": "catalan_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ca": {
+          "match": "*_ckb-iq",
+          "mapping": {
+            "type": "text",
+            "analyzer": "sorani_analyzer"
           }
         }
       },
@@ -89,6 +91,15 @@
         }
       },
       {
+        "lang_en": {
+          "match": "*_en-ie",
+          "mapping": {
+            "type": "text",
+            "analyzer": "irish_analyzer"
+          }
+        }
+      },
+      {
         "lang_es": {
           "match": "*_es",
           "mapping": {
@@ -103,6 +114,15 @@
           "mapping": {
             "type": "text",
             "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_et": {
+          "match": "*_eu",
+          "mapping": {
+            "type": "text",
+            "analyzer": "basque_analyzer"
           }
         }
       },
@@ -130,6 +150,15 @@
           "mapping": {
             "type": "text",
             "analyzer": "french_analyzer"
+          }
+        }
+      },
+      {
+        "lang_gl": {
+          "match": "*_gl",
+          "mapping": {
+            "type": "text",
+            "analyzer": "galician_analyzer"
           }
         }
       },
@@ -175,6 +204,15 @@
           "mapping": {
             "type": "text",
             "analyzer": "hungarian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_hu": {
+          "match": "*_hy",
+          "mapping": {
+            "type": "text",
+            "analyzer": "armenian_analyzer"
           }
         }
       },
@@ -296,6 +334,15 @@
         }
       },
       {
+        "lang_pt-br": {
+          "match": "*_pt-br",
+          "mapping": {
+            "type": "text",
+            "analyzer": "brazilian_analyzer"
+          }
+        }
+      },
+      {
         "lang_ro": {
           "match": "*_ro",
           "mapping": {
@@ -408,7 +455,7 @@
           "match": "*_vi",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "vietnamese_analyzer"
           }
         }
       },
@@ -417,7 +464,7 @@
           "match": "*_zh-cn",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "simplified_chinese_analyzer"
           }
         }
       },
@@ -426,7 +473,7 @@
           "match": "*_zh-tw",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "traditional_chinese_analyzer"
           }
         }
       }
@@ -445,16 +492,21 @@
         "type": "keyword"
       },
       "important_content": {
-        "type": "langstring",
-        "lang_field": "lang",
-        "lang_base_name": "title",
+        "type": "text",
         "index": false
       },
       "content": {
-        "type": "langstring",
-        "lang_field": "lang",
+        "type": "text",
         "analyzer": "standard_analyzer",
         "term_vector": "with_positions_offsets"
+      },
+      "content_minhash": {
+        "type": "minhash",
+        "minhash_analyzer": "minhash_analyzer",
+        "copy_bits_to": "content_minhash_bits"
+      },
+      "content_minhash_bits": {
+        "type": "keyword"
       },
       "content_length": {
         "type": "long"
@@ -512,6 +564,9 @@
       "label": {
         "type": "keyword"
       },
+      "virtual_host": {
+        "type": "keyword"
+      },
       "segment": {
         "type": "keyword"
       },
@@ -519,14 +574,15 @@
         "type": "keyword"
       },
       "title": {
-        "type": "langstring",
-        "lang_field": "lang",
+        "type": "text",
         "analyzer": "standard_analyzer",
         "term_vector": "with_positions_offsets"
+      },
+      "thumbnail": {
+        "type": "keyword"
       },
       "url": {
         "type": "keyword"
       }
     }
-  }
 }

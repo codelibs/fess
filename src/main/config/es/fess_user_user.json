@@ -1,0 +1,155 @@
+{
+  ".fess_user.user" : {
+    "aliases" : { },
+    "mappings" : {
+      "user" : {
+        "properties" : {
+          "businessCategory" : {
+            "type" : "keyword"
+          },
+          "carLicense" : {
+            "type" : "keyword"
+          },
+          "city" : {
+            "type" : "keyword"
+          },
+          "departmentNumber" : {
+            "type" : "keyword"
+          },
+          "description" : {
+            "type" : "keyword"
+          },
+          "destinationIndicator" : {
+            "type" : "keyword"
+          },
+          "displayName" : {
+            "type" : "keyword"
+          },
+          "employeeNumber" : {
+            "type" : "keyword"
+          },
+          "employeeType" : {
+            "type" : "keyword"
+          },
+          "facsimileTelephoneNumber" : {
+            "type" : "keyword"
+          },
+          "gidNumber" : {
+            "type" : "long"
+          },
+          "givenName" : {
+            "type" : "keyword"
+          },
+          "groups" : {
+            "type" : "keyword"
+          },
+          "homeDirectory" : {
+            "type" : "keyword"
+          },
+          "homePhone" : {
+            "type" : "keyword"
+          },
+          "homePostalAddress" : {
+            "type" : "keyword"
+          },
+          "initials" : {
+            "type" : "keyword"
+          },
+          "internationaliSDNNumber" : {
+            "type" : "keyword"
+          },
+          "labeledURI" : {
+            "type" : "keyword"
+          },
+          "mail" : {
+            "type" : "keyword"
+          },
+          "mobile" : {
+            "type" : "keyword"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "pager" : {
+            "type" : "keyword"
+          },
+          "password" : {
+            "type" : "keyword"
+          },
+          "physicalDeliveryOfficeName" : {
+            "type" : "keyword"
+          },
+          "postOfficeBox" : {
+            "type" : "keyword"
+          },
+          "postalAddress" : {
+            "type" : "keyword"
+          },
+          "postalCode" : {
+            "type" : "keyword"
+          },
+          "preferredLanguage" : {
+            "type" : "keyword"
+          },
+          "registeredAddress" : {
+            "type" : "keyword"
+          },
+          "roles" : {
+            "type" : "keyword"
+          },
+          "roomNumber" : {
+            "type" : "keyword"
+          },
+          "state" : {
+            "type" : "keyword"
+          },
+          "street" : {
+            "type" : "keyword"
+          },
+          "surname" : {
+            "type" : "keyword"
+          },
+          "telephoneNumber" : {
+            "type" : "keyword"
+          },
+          "teletexTerminalIdentifier" : {
+            "type" : "keyword"
+          },
+          "title" : {
+            "type" : "keyword"
+          },
+          "uidNumber" : {
+            "type" : "long"
+          },
+          "x121Address" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "user" : {
+            "properties" : {
+              "groups" : {
+                "array" : "true"
+              },
+              "roles" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021059384",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "-80Q6PZITfaVdBAm23e91Q",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_user.user"
+      }
+    }
+  }
+}

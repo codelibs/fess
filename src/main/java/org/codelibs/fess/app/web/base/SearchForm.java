@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,18 @@ import javax.validation.constraints.Size;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
-public class SearchForm implements SearchRequestParams {
+public class SearchForm extends SearchRequestParams {
 
     public Map<String, String[]> fields = new HashMap<>();
+
+    public Map<String, String[]> as = new HashMap<>();
 
     @Size(max = 1000)
     public String q;
@@ -54,6 +57,9 @@ public class SearchForm implements SearchRequestParams {
 
     @ValidateTypeFailure
     public Integer pn;
+
+    @Size(max = 1000)
+    public String sdh;
 
     // advance
 
@@ -118,6 +124,11 @@ public class SearchForm implements SearchRequestParams {
     }
 
     @Override
+    public HighlightInfo getHighlightInfo() {
+        return ComponentUtil.getViewHelper().createHighlightInfo();
+    }
+
+    @Override
     public String getSort() {
         return sort;
     }
@@ -135,5 +146,15 @@ public class SearchForm implements SearchRequestParams {
     @Override
     public SearchRequestType getType() {
         return SearchRequestType.SEARCH;
+    }
+
+    @Override
+    public String getSimilarDocHash() {
+        return sdh;
+    }
+
+    @Override
+    public Map<String, String[]> getConditions() {
+        return as;
     }
 }

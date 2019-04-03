@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.ProcessHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -321,7 +323,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         form.available = entity.isEnabled() ? Constants.ON : null;
     }
 
-    private OptionalEntity<ScheduledJob> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<ScheduledJob> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new ScheduledJob()).map(entity -> {
@@ -331,7 +333,7 @@ public class AdminSchedulerAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return scheduledJobService.getScheduledJob(((EditForm) form).id);
+                return ComponentUtil.getComponent(ScheduledJobService.class).getScheduledJob(((EditForm) form).id);
             }
             break;
         default:
@@ -340,16 +342,17 @@ public class AdminSchedulerAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ScheduledJob> getScheduledJob(final CreateForm form) {
+    public static OptionalEntity<ScheduledJob> getScheduledJob(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
             entity.setUpdatedBy(username);
             entity.setUpdatedTime(currentTime);
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            entity.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
-            entity.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
-            entity.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
+            entity.setJobLogging(isCheckboxEnabled(form.jobLogging) ? Constants.T : Constants.F);
+            entity.setCrawler(isCheckboxEnabled(form.crawler) ? Constants.T : Constants.F);
+            entity.setAvailable(isCheckboxEnabled(form.available) ? Constants.T : Constants.F);
             return entity;
         });
     }

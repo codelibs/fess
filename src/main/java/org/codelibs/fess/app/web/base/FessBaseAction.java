@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import java.util.Map;
+import java.util.function.Consumer;
+
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ViewHelper;
@@ -39,6 +46,8 @@ import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
 import org.lastaflute.web.validation.VaMessenger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jflute
@@ -49,6 +58,8 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     // ===================================================================================
     //                                                                          Definition
     //                                                                          ==========
+    private static final Logger logger = LoggerFactory.getLogger(FessBaseAction.class);
+
     /** The application type for FESs, e.g. used by access context. */
     protected static final String APP_TYPE = "FES"; // #change_it_first
 
@@ -80,6 +91,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     protected SystemHelper systemHelper;
 
     @Resource
+    protected AccessTokenHelper accessTokenHelper;
+
+    @Resource
     protected ViewHelper viewHelper;
 
     @Resource
@@ -95,6 +109,12 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     // you should remove the 'final' if you need to override this
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
+        fessLoginAssist.getSavedUserBean().ifPresent(u -> {
+            boolean result = u.getFessUser().refresh();
+            if (logger.isDebugEnabled()) {
+                logger.debug("refresh user info: {}", result);
+            }
+        });
         return viewHelper.getActionHook().godHandPrologue(runtime, r -> super.godHandPrologue(r));
     }
 
@@ -157,11 +177,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @SuppressWarnings("unchecked")
     @Override
     public ActionValidator<FessMessages> createValidator() {
-        return systemHelper.createValidator(messageManager // to get validation message
-                , () -> requestManager.getUserLocale() // used with messageManager
-                , () -> createMessages() // for new user messages
-                , () -> handleApiValidationError() // apiFailureHook
-                , myValidationGroups());
+        return systemHelper.createValidator(requestManager, () -> createMessages(), myValidationGroups());
     }
 
     @Override
@@ -183,5 +199,34 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         final FessMessages messages = createMessages();
         validationMessagesLambda.message(messages);
         sessionManager.errors().saveMessages(messages);
+    }
+
+    protected static void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
+        BeanUtil.copyBeanToBean(src, dest, option);
+    }
+
+    protected static void copyMapToBean(final Map<String, ? extends Object> src, final Object dest, final Consumer<CopyOptions> option) {
+        BeanUtil.copyMapToBean(src, dest, option);
+    }
+
+    protected static <T> T copyBeanToNewBean(final Object src, final Class<T> destClass) {
+        return BeanUtil.copyBeanToNewBean(src, destClass);
+    }
+
+    protected String buildThrowableMessage(final Throwable t) {
+        final StringBuilder buf = new StringBuilder(100);
+        Throwable current = t;
+        while (current != null) {
+            buf.append(current.getLocalizedMessage()).append(' ');
+            current = current.getCause();
+        }
+        return buf.toString();
+    }
+
+    public static boolean isCheckboxEnabled(final String value) {
+        if (value == null) {
+            return false;
+        }
+        return Constants.ON.equalsIgnoreCase(value) || Constants.TRUE.equalsIgnoreCase(value);
     }
 }

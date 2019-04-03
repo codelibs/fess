@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN" 
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="fessCrawler">
+	<component name="crawlerConfig" class="org.codelibs.fess.crawler.util.FessCrawlerConfig">
+		<property name="queueIndex">".crawler.queue"</property>
+		<property name="queueShards">5</property>
+		<property name="queueReplicas">1</property>
+		<property name="dataIndex">".crawler.data"</property>
+		<property name="dataShards">5</property>
+		<property name="dataReplicas">1</property>
+		<property name="filterIndex">".crawler.filter"</property>
+		<property name="filterShards">5</property>
+		<property name="filterReplicas">1</property>
+	</component>
+</components>

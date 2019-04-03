@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public interface FessEnv {
     /**
      * Get the value for the key 'environment.title'. <br>
      * The value is, e.g. Local Development <br>
-     * comment: The title of environment (e.g. local or integartion or production)
+     * comment: The title of environment (e.g. local or integration or production)
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getEnvironmentTitle();
@@ -230,6 +230,21 @@ public interface FessEnv {
 
         public String getMailReturnPath() {
             return get(FessEnv.MAIL_RETURN_PATH);
+        }
+
+        @Override
+        protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
+            java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
+            defaultMap.put(FessEnv.lasta_di_SMART_DEPLOY_MODE, "hot");
+            defaultMap.put(FessEnv.DEVELOPMENT_HERE, "true");
+            defaultMap.put(FessEnv.ENVIRONMENT_TITLE, "Local Development");
+            defaultMap.put(FessEnv.FRAMEWORK_DEBUG, "false");
+            defaultMap.put(FessEnv.TIME_ADJUST_TIME_MILLIS, "0");
+            defaultMap.put(FessEnv.MAIL_SEND_MOCK, "true");
+            defaultMap.put(FessEnv.MAIL_SMTP_SERVER_MAIN_HOST_AND_PORT, "localhost:25");
+            defaultMap.put(FessEnv.MAIL_SUBJECT_TEST_PREFIX, "[Test]");
+            defaultMap.put(FessEnv.MAIL_RETURN_PATH, "root@localhost");
+            return defaultMap;
         }
     }
 }

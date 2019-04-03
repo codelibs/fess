@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +31,8 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -47,23 +50,28 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.BytesRef;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.score.QueryRescorer;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.rescore.RescorerBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -72,7 +80,9 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper {
 
-    private static final String ES_SCORE_FIELD = "_score";
+    protected static final String PREFERENCE_QUERY = "_query";
+
+    protected static final String ES_SCORE_FIELD = "_score";
 
     protected static final String SCORE_SORT_VALUE = "score";
 
@@ -80,17 +90,7 @@ public class QueryHelper {
 
     protected static final String INURL_FIELD = "inurl";
 
-    @Resource
-    protected FessConfig fessConfig;
-
-    @Resource
-    protected RoleQueryHelper roleQueryHelper;
-
-    @Resource
-    protected SystemHelper systemHelper;
-
-    @Resource
-    protected KeyMatchHelper keyMatchHelper;
+    protected static final String SITE_FIELD = "site";
 
     protected Set<String> apiResponseFieldSet;
 
@@ -99,6 +99,8 @@ public class QueryHelper {
     protected Set<String> notAnalyzedFieldSet;
 
     protected String[] responseFields;
+
+    protected String[] scrollResponseFields;
 
     protected String[] cacheResponseFields;
 
@@ -116,9 +118,7 @@ public class QueryHelper {
 
     protected boolean lowercaseWildcard = true;
 
-    protected long timeAllowed = -1;
-
-    protected SortBuilder[] defaultSortBuilders;
+    protected SortBuilder<?>[] defaultSortBuilders;
 
     protected String highlightPrefix = "hl_";
 
@@ -128,8 +128,15 @@ public class QueryHelper {
 
     protected Map<String, String> fieldBoostMap = new HashMap<>();
 
+    protected List<FilterFunctionBuilder> boostFunctionList = new ArrayList<>();
+
+    protected List<QueryRescorer> queryRescorerList = new ArrayList<>();
+
+    protected List<Pair<String, Float>> additionalDefaultList = new ArrayList<>();
+
     @PostConstruct
     public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (responseFields == null) {
             responseFields = fessConfig.getQueryAdditionalResponseFields(//
                     SCORE_FIELD, //
@@ -148,6 +155,32 @@ public class QueryHelper {
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
                     fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldThumbnail(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldConfigId(), //
+                    fessConfig.getIndexFieldLang(), //
+                    fessConfig.getIndexFieldHasCache());
+        }
+        if (scrollResponseFields == null) {
+            scrollResponseFields = fessConfig.getQueryAdditionalScrollResponseFields(//
+                    SCORE_FIELD, //
+                    fessConfig.getIndexFieldId(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldBoost(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldDigest(), //
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldThumbnail(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldConfigId(), //
@@ -179,7 +212,8 @@ public class QueryHelper {
                     fessConfig.getIndexFieldCache());
         }
         if (highlightedFields == null) {
-            highlightedFields = fessConfig.getQueryAdditionalHighlightedFields(fessConfig.getIndexFieldContent());
+            highlightedFields = fessConfig.getQueryAdditionalHighlightedFields( //
+                    fessConfig.getIndexFieldContent());
         }
         if (searchFields == null) {
             searchFields = fessConfig.getQueryAdditionalSearchFields(//
@@ -187,6 +221,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldDocId(), //
                     fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldContent(), //
                     fessConfig.getIndexFieldContentLength(), //
@@ -197,6 +232,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldSegment(), //
+                    fessConfig.getIndexFieldAnchor(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldLang());
@@ -269,13 +305,31 @@ public class QueryHelper {
                     fessConfig.getIndexFieldLastModified(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldParentId(), //
+                    fessConfig.getIndexFieldPrimaryTerm(), //
                     fessConfig.getIndexFieldRole(), //
                     fessConfig.getIndexFieldSegment(), //
+                    fessConfig.getIndexFieldSeqNo(), //
                     fessConfig.getIndexFieldSite(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldVersion()));
         }
+        split(fessConfig.getQueryAdditionalAnalyzedFields(), ",").of(
+                stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
+        split(fessConfig.getQueryAdditionalDefaultFields(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+            final Pair<String, Float> pair = new Pair<>();
+            final String[] values = s.split(":");
+            if (values.length == 1) {
+                pair.setFirst(values[0].trim());
+                pair.setSecond(1.0f);
+            } else if (values.length > 1) {
+                pair.setFirst(values[0]);
+                pair.setSecond(Float.parseFloat(values[1]));
+            } else {
+                return null;
+            }
+            return pair;
+        }).forEach(additionalDefaultList::add));
     }
 
     public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {
@@ -290,6 +344,7 @@ public class QueryHelper {
         buildBaseQuery(queryContext, context);
         buildBoostQuery(queryContext);
         buildRoleQuery(queryContext, searchRequestType);
+        buildVirtualHostQuery(queryContext, searchRequestType);
 
         if (!queryContext.hasSorts() && defaultSortBuilders != null) {
             queryContext.addSorts(defaultSortBuilders);
@@ -297,14 +352,30 @@ public class QueryHelper {
         return queryContext;
     }
 
+    protected void buildVirtualHostQuery(final QueryContext queryContext, final SearchRequestType searchRequestType) {
+        switch (searchRequestType) {
+        case ADMIN_SEARCH:
+            // nothing to do
+            break;
+        default:
+            final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+            if (StringUtil.isNotBlank(key)) {
+                queryContext.addQuery(boolQuery -> {
+                    boolQuery.filter(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), key));
+                });
+            }
+            break;
+        }
+    }
+
     protected void buildRoleQuery(final QueryContext queryContext, final SearchRequestType searchRequestType) {
-        if (roleQueryHelper != null && queryContext.roleQueryEnabled()) {
-            final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
+        if (queryContext.roleQueryEnabled()) {
+            final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
             if (!roleSet.isEmpty()) {
                 queryContext.addQuery(boolQuery -> {
                     final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
                     roleSet.stream().forEach(name -> {
-                        roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
+                        roleQuery.should(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldRole(), name));
                     });
                     boolQuery.filter(roleQuery);
                 });
@@ -314,10 +385,10 @@ public class QueryHelper {
 
     protected void buildBoostQuery(final QueryContext queryContext) {
         queryContext.addFunctionScore(list -> {
-            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(fessConfig.getIndexFieldBoost())));
-            if (keyMatchHelper != null) {
-                keyMatchHelper.buildQuery(queryContext.getDefaultKeyword(), list);
-            }
+            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(ComponentUtil.getFessConfig()
+                    .getIndexFieldBoost())));
+            ComponentUtil.getKeyMatchHelper().buildQuery(queryContext.getDefaultKeyword(), list);
+            list.addAll(boostFunctionList);
         });
     }
 
@@ -388,7 +459,10 @@ public class QueryHelper {
                 }
             }
         }
-        return boolQuery;
+        if (boolQuery.hasClauses()) {
+            return boolQuery;
+        }
+        return null;
     }
 
     protected String toLowercaseWildcard(final String value) {
@@ -398,8 +472,15 @@ public class QueryHelper {
         return value;
     }
 
+    protected String getSearchField(final QueryContext context, final String field) {
+        if (Constants.DEFAULT_FIELD.equals(field) && context.getDefaultField() != null) {
+            return context.getDefaultField();
+        }
+        return field;
+    }
+
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
-        final String field = wildcardQuery.getField();
+        final String field = getSearchField(context, wildcardQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text()))
@@ -417,7 +498,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
-        final String field = prefixQuery.getField();
+        final String field = getSearchField(context, prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text()))
@@ -436,7 +517,7 @@ public class QueryHelper {
 
     protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
         final Term term = fuzzyQuery.getTerm();
-        final String field = term.field();
+        final String field = getSearchField(context, term.field());
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
@@ -455,7 +536,7 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
-        final String field = termRangeQuery.getField();
+        final String field = getSearchField(context, termRangeQuery.getField());
         if (isSearchField(field)) {
             context.addFieldLog(field, termRangeQuery.toString(field));
             final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);
@@ -485,58 +566,87 @@ public class QueryHelper {
         }
     }
 
+    protected QueryBuilder buildMatchPhraseQuery(final String f, final String text) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (text == null || text.length() != 1
+                || (!fessConfig.getIndexFieldTitle().equals(f) && !fessConfig.getIndexFieldContent().equals(f))) {
+            return QueryBuilders.matchPhraseQuery(f, text);
+        }
+
+        final UnicodeBlock block = UnicodeBlock.of(text.codePointAt(0));
+        if (block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS //
+                || block == UnicodeBlock.HIRAGANA //
+                || block == UnicodeBlock.KATAKANA //
+                || block == UnicodeBlock.HANGUL_SYLLABLES //
+        ) {
+            return QueryBuilders.prefixQuery(f, text);
+        }
+        return QueryBuilders.matchPhraseQuery(f, text);
+    }
+
     protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery, final float boost) {
-        final String field = termQuery.getTerm().field();
+        final String field = getSearchField(context, termQuery.getTerm().field());
         final String text = termQuery.getTerm().text();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))), boost);
         } else if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         } else if ("sort".equals(field)) {
-            final String[] values = text.split("\\.");
-            if (values.length > 2) {
-                throw new InvalidQueryException(
-                        messages -> messages.addErrorsInvalidQuerySortValue(UserMessages.GLOBAL_PROPERTY_KEY, text), "Invalid sort field: "
-                                + termQuery);
-            }
-            final String sortField = values[0];
-            if (!isSortField(sortField)) {
-                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
-                        UserMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
-            }
-            SortOrder sortOrder;
-            if (values.length == 2) {
-                sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
-                if (sortOrder == null) {
-                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
-                            UserMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
-                }
-            } else {
-                sortOrder = SortOrder.ASC;
-            }
-            context.addSorts(createFieldSortBuilder(sortField, sortOrder));
+            split(text, ",").of(
+                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                            t -> {
+                                final String[] values = t.split("\\.");
+                                if (values.length > 2) {
+                                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySortValue(
+                                            UserMessages.GLOBAL_PROPERTY_KEY, text), "Invalid sort field: " + termQuery);
+                                }
+                                final String sortField = values[0];
+                                if (!isSortField(sortField)) {
+                                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
+                                            UserMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
+                                }
+                                SortOrder sortOrder;
+                                if (values.length == 2) {
+                                    sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
+                                    if (sortOrder == null) {
+                                        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
+                                                UserMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
+                                    }
+                                } else {
+                                    sortOrder = SortOrder.ASC;
+                                }
+                                context.addSorts(createFieldSortBuilder(sortField, sortOrder));
+                            }));
             return null;
-        } else if (INURL_FIELD.equals(field)) {
+        } else if (INURL_FIELD.equals(field)
+                || (StringUtil.equals(field, context.getDefaultField()) && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
+        } else if (SITE_FIELD.equals(field)) {
+            return convertSiteQuery(context, text, boost);
         } else if (isSearchField(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
             if (notAnalyzedFieldSet.contains(field)) {
                 return QueryBuilders.termQuery(field, text).boost(boost);
             } else {
-                return QueryBuilders.matchPhraseQuery(field, text).boost(boost);
+                return buildMatchPhraseQuery(field, text).boost(boost);
             }
         } else {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, origQuery).boost(b * boost));
         }
     }
 
-    private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {
+    protected QueryBuilder convertSiteQuery(final QueryContext context, final String text, final float boost) {
+        return QueryBuilders.prefixQuery(ComponentUtil.getFessConfig().getIndexFieldSite(), text).boost(boost);
+    }
+
+    protected QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {
         final Term[] terms = query.getTerms();
         if (terms.length == 0) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -547,10 +657,10 @@ public class QueryHelper {
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
         stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
-        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
+        return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
     }
 
-    private boolean isSearchField(final String field) {
+    protected boolean isSearchField(final String field) {
         for (final String searchField : searchFields) {
             if (searchField.equals(field)) {
                 return true;
@@ -559,8 +669,9 @@ public class QueryHelper {
         return false;
     }
 
-    private QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
+    protected QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryBuilder titleQuery =
                 builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue());
         boolQuery.should(titleQuery);
@@ -568,19 +679,21 @@ public class QueryHelper {
                 builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
         getQueryLanguages().ifPresent(
-                langs -> {
-                    stream(langs).of(
-                            stream -> stream.forEach(lang -> {
-                                final QueryBuilder titleLangQuery =
-                                        builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
-                                                .getQueryBoostTitleLangAsDecimal().floatValue());
-                                boolQuery.should(titleLangQuery);
-                                final QueryBuilder contentLangQuery =
-                                        builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
-                                                .getQueryBoostContentLangAsDecimal().floatValue());
-                                boolQuery.should(contentLangQuery);
-                            }));
-                });
+                langs -> stream(langs).of(
+                        stream -> stream.forEach(lang -> {
+                            final QueryBuilder titleLangQuery =
+                                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
+                                            .getQueryBoostTitleLangAsDecimal().floatValue());
+                            boolQuery.should(titleLangQuery);
+                            final QueryBuilder contentLangQuery =
+                                    builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
+                                            .getQueryBoostContentLangAsDecimal().floatValue());
+                            boolQuery.should(contentLangQuery);
+                        })));
+        additionalDefaultList.stream().forEach(f -> {
+            final QueryBuilder query = builder.apply(f.getFirst(), f.getSecond());
+            boolQuery.should(query);
+        });
         return boolQuery;
     }
 
@@ -589,12 +702,12 @@ public class QueryHelper {
     }
 
     protected OptionalThing<String[]> getQueryLanguages() {
-        return LaRequestUtil.getOptionalRequest()
-                .map(request -> fessConfig.getQueryLanguages(request.getLocales(),
+        return LaRequestUtil.getOptionalRequest().map(
+                request -> ComponentUtil.getFessConfig().getQueryLanguages(request.getLocales(),
                         (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
-    private boolean isSortField(final String field) {
+    protected boolean isSortField(final String field) {
         for (final String f : sortFields) {
             if (f.equals(field)) {
                 return true;
@@ -638,6 +751,52 @@ public class QueryHelper {
         return apiResponseFieldSet.contains(field);
     }
 
+    public void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean,
+            final String query) {
+        userBean.map(user -> {
+            if (user.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray())) {
+                return Constants.SEARCH_PREFERENCE_LOCAL;
+            }
+            return user.getUserId();
+        }).ifPresent(p -> searchRequestBuilder.setPreference(p)).orElse(() -> LaRequestUtil.getOptionalRequest().map(r -> {
+            final HttpSession session = r.getSession(false);
+            if (session != null) {
+                return session.getId();
+            }
+            final String preference = r.getParameter("preference");
+            if (preference != null) {
+                return Integer.toString(preference.hashCode());
+            }
+            final Object accessType = r.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
+            if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
+                return processJsonSearchPreference(r, query);
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+                return processGsaSearchPreference(r, query);
+            }
+            return null;
+        }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
+    }
+
+    protected String processJsonSearchPreference(final HttpServletRequest req, final String query) {
+        final String pref = ComponentUtil.getFessConfig().getQueryJsonDefaultPreference();
+        if (PREFERENCE_QUERY.equals(pref)) {
+            return Integer.toString(query.hashCode());
+        } else if (StringUtil.isNotBlank(pref)) {
+            return pref;
+        }
+        return null;
+    }
+
+    protected String processGsaSearchPreference(final HttpServletRequest req, final String query) {
+        final String pref = ComponentUtil.getFessConfig().getQueryGsaDefaultPreference();
+        if (PREFERENCE_QUERY.equals(pref)) {
+            return Integer.toString(query.hashCode());
+        } else if (StringUtil.isNotBlank(pref)) {
+            return pref;
+        }
+        return null;
+    }
+
     /**
      * @return the responseFields
      */
@@ -650,6 +809,14 @@ public class QueryHelper {
      */
     public void setResponseFields(final String[] responseFields) {
         this.responseFields = responseFields;
+    }
+
+    public String[] getScrollResponseFields() {
+        return scrollResponseFields;
+    }
+
+    public void setScrollResponseFields(final String[] scrollResponseFields) {
+        this.scrollResponseFields = scrollResponseFields;
     }
 
     public String[] getCacheResponseFields() {
@@ -752,22 +919,8 @@ public class QueryHelper {
         this.additionalQuery = additionalQuery;
     }
 
-    /**
-     * @return the timeAllowed
-     */
-    public long getTimeAllowed() {
-        return timeAllowed;
-    }
-
-    /**
-     * @param timeAllowed the timeAllowed to set
-     */
-    public void setTimeAllowed(final long timeAllowed) {
-        this.timeAllowed = timeAllowed;
-    }
-
     public void addDefaultSort(final String fieldName, final String order) {
-        final List<SortBuilder> list = new ArrayList<>();
+        final List<SortBuilder<?>> list = new ArrayList<>();
         if (defaultSortBuilders != null) {
             stream(defaultSortBuilders).of(stream -> stream.forEach(builder -> list.add(builder)));
         }
@@ -775,13 +928,12 @@ public class QueryHelper {
         defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);
     }
 
-    protected FieldSortBuilder createFieldSortBuilder(final String field, final SortOrder order) {
-        final String fieldName = SCORE_FIELD.equals(field) ? ES_SCORE_FIELD : field;
-        FieldSortBuilder builder = SortBuilders.fieldSort(fieldName);
-        if (ES_SCORE_FIELD.equals(fieldName)) {
-            builder.unmappedType("float");
+    protected SortBuilder<?> createFieldSortBuilder(final String field, final SortOrder order) {
+        if (SCORE_FIELD.equals(field) || ES_SCORE_FIELD.equals(field)) {
+            return SortBuilders.scoreSort().order(order);
+        } else {
+            return SortBuilders.fieldSort(field).order(order);
         }
-        return builder.order(order);
     }
 
     public void setHighlightPrefix(final String highlightPrefix) {
@@ -816,4 +968,19 @@ public class QueryHelper {
         this.lowercaseWildcard = lowercaseWildcard;
     }
 
+    public void addBoostFunction(final ScoreFunctionBuilder<?> scoreFunction) {
+        boostFunctionList.add(new FilterFunctionBuilder(scoreFunction));
+    }
+
+    public void addBoostFunction(final QueryBuilder filter, final ScoreFunctionBuilder<?> scoreFunction) {
+        boostFunctionList.add(new FilterFunctionBuilder(filter, scoreFunction));
+    }
+
+    public RescorerBuilder<?>[] getRescorers(final Map<String, Object> params) {
+        return queryRescorerList.stream().map(r -> r.evaluate(params)).filter(b -> b != null).toArray(n -> new RescorerBuilder<?>[n]);
+    }
+
+    public void addQueryRescorer(final QueryRescorer rescorer) {
+        queryRescorerList.add(rescorer);
+    }
 }

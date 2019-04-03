@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.dict.protwords;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -31,8 +30,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
@@ -60,7 +60,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     @Override
     public synchronized OptionalEntity<ProtwordsItem> get(final long id) {
         if (protwordsItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         for (final ProtwordsItem ProtwordsItem : protwordsItemList) {
@@ -74,7 +74,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     @Override
     public synchronized PagingList<ProtwordsItem> selectList(final int offset, final int size) {
         if (protwordsItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         if (offset >= protwordsItemList.size() || offset < 0) {
@@ -91,15 +91,15 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
     @Override
     public synchronized void insert(final ProtwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater, null);
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
+            reload(updater);
         }
     }
 
     @Override
     public synchronized void update(final ProtwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater, null);
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
+            reload(updater);
         }
     }
 
@@ -107,15 +107,22 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     public synchronized void delete(final ProtwordsItem item) {
         final ProtwordsItem ProtwordsItem = item;
         ProtwordsItem.setNewInput(StringUtil.EMPTY);
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater, null);
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(item)) {
+            reload(updater);
         }
     }
 
-    protected void reload(final SynonymUpdater updater, final InputStream in) {
+    protected void reload(final ProtwordsUpdater updater) {
+        try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
+            reload(updater, curlResponse.getContentAsStream());
+        } catch (final IOException e) {
+            throw new DictionaryException("Failed to parse " + path, e);
+        }
+    }
+
+    protected void reload(final ProtwordsUpdater updater, final InputStream in) {
         final List<ProtwordsItem> itemList = new ArrayList<>();
-        try (BufferedReader reader =
-                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -127,10 +134,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                 }
 
                 final String inputStrings = line;
-                String input = null;
-                if (inputStrings != null) {
-                    input = unescape(inputStrings);
-                }
+                final String input = unescape(inputStrings);
 
                 if (input.length() > 0) {
                     id++;
@@ -179,22 +183,18 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
         return new File(path).getName();
     }
 
-    public InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
-    }
-
     public synchronized void update(final InputStream in) throws IOException {
-        try (SynonymUpdater updater = new SynonymUpdater(null)) {
+        try (ProtwordsUpdater updater = new ProtwordsUpdater(null)) {
             reload(updater, in);
         }
     }
 
     @Override
     public String toString() {
-        return "SynonymFile [path=" + path + ", srotwordsItemList=" + protwordsItemList + ", id=" + id + "]";
+        return "ProtwordsFile [path=" + path + ", protwordsItemList=" + protwordsItemList + ", id=" + id + "]";
     }
 
-    protected class SynonymUpdater implements Closeable {
+    protected class ProtwordsUpdater implements Closeable {
 
         protected boolean isCommit = false;
 
@@ -204,7 +204,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
         protected ProtwordsItem item;
 
-        protected SynonymUpdater(final ProtwordsItem newItem) {
+        protected ProtwordsUpdater(final ProtwordsItem newItem) {
             try {
                 newFile = File.createTempFile(PROTWORDS, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
@@ -276,7 +276,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             } catch (final IOException e) {
                 // ignore
             }
-            IOUtils.closeQuietly(writer);
+            CloseableUtil.closeQuietly(writer);
 
             if (isCommit) {
                 try {

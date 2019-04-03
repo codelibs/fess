@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         bar.setRegularName("www.bar.com");
         bar.setDuplicateHostName("mail.bar.com");
         duplicateHostHelper.duplicateHostList.add(bar);
+        DuplicateHost hoge = new DuplicateHost();
+        hoge.setRegularName("www.foo.com");
+        hoge.setDuplicateHostName("www.foo.com:99");
+        duplicateHostHelper.duplicateHostList.add(hoge);
     }
 
     public void test_convert() {
@@ -57,6 +61,10 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
 
         url = "http://mail.bar.com/";
         result = "http://www.bar.com/";
+        assertEquals(result, duplicateHostHelper.convert(url));
+
+        url = "http://www.foo.com:99/";
+        result = "http://www.foo.com/";
         assertEquals(result, duplicateHostHelper.convert(url));
 
     }

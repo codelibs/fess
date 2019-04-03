@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,31 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         url = "file://C .doc";
         exp = "file://C .doc";
         assertEquals(exp, transformer.decodeUrlAsName(url, true));
+
+        url = "http://example.com/foo/" + encodeUrl("#") + "/@@bar/index.html#fragment?foo=bar";
+        exp = "http://example.com/foo/#/@@bar/index.html#fragment?foo=bar";
+        assertEquals(exp, transformer.decodeUrlAsName(url, false));
+    }
+
+    public void test_getFileName_ok() throws Exception {
+        String url, exp;
+        final FessFileTransformer transformer = createInstance();
+
+        url = "http://example.com/" + encodeUrl("#") + "/@@bar/index.html#fragment?foo=bar";
+        exp = "index.html";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "http://example.com/" + encodeUrl("#") + "/@@folder/test.txt";
+        exp = "test.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "http://example.com/test%20+%2B.txt";
+        exp = "test  +.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "file://example.com/test%20+%2B.txt";
+        exp = "test ++.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
     }
 
     public void test_decodeUrl_null() throws Exception {

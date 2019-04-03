@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,33 +23,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
+import org.codelibs.core.io.CopyUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CommandGenerator.class);
 
-    @Resource
-    protected ServletContext application;
+    protected List<String> commandList;
 
-    public List<String> commandList;
+    protected long commandTimeout = 30 * 1000L;// 30sec
 
-    public long commandTimeout = 10 * 1000L;// 10sec
+    protected long commandDestroyTimeout = 5 * 1000L;// 5sec
 
-    public File baseDir;
+    protected File baseDir;
 
     private volatile Timer destoryTimer;
 
     @PostConstruct
     public void init() {
         if (baseDir == null) {
-            baseDir = new File(application.getRealPath("/"));
+            baseDir = new File(System.getProperty("java.io.tmpdir"));
         }
         destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
     }
@@ -61,9 +61,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public boolean generate(final String url, final File outputFile) {
+    public boolean generate(final String thumbnailId, final File outputFile) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Generate Thumbnail: " + url);
+            logger.debug("Generate Thumbnail: " + thumbnailId);
         }
 
         if (outputFile.exists()) {
@@ -82,12 +82,48 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             return false;
         }
 
-        final String outputPath = outputFile.getAbsolutePath();
-        final List<String> cmdList = new ArrayList<>();
-        for (final String value : commandList) {
-            cmdList.add(expandPath(value.replace("${url}", url).replace("${outputFile}", outputPath)));
-        }
+        return process(thumbnailId, responseData -> {
+            File tempFile = null;
+            try {
+                tempFile = File.createTempFile("thumbnail_", "");
+                CopyUtil.copy(responseData.getResponseBody(), tempFile);
 
+                final String tempPath = tempFile.getAbsolutePath();
+                final String outputPath = outputFile.getAbsolutePath();
+                final List<String> cmdList = new ArrayList<>();
+                for (final String value : commandList) {
+                    cmdList.add(expandPath(value.replace("${url}", tempPath).replace("${outputFile}", outputPath)));
+                }
+
+                executeCommand(thumbnailId, cmdList);
+
+                if (outputFile.isFile() && outputFile.length() == 0) {
+                    logger.warn("Thumbnail File is empty. ID is " + thumbnailId);
+                    if (outputFile.delete()) {
+                        logger.info("Deleted: " + outputFile.getAbsolutePath());
+                    }
+                    updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                    return false;
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Thumbnail File: " + outputPath);
+                }
+                return true;
+            } catch (final Exception e) {
+                logger.warn("Failed to process ", e);
+                updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                return false;
+            } finally {
+                if (tempFile != null && !tempFile.delete()) {
+                    logger.debug("Failed to delete " + tempFile.getAbsolutePath());
+                }
+            }
+        });
+
+    }
+
+    protected void executeCommand(final String thumbnailId, final List<String> cmdList) {
         ProcessBuilder pb = null;
         Process p = null;
 
@@ -103,7 +139,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
             p = pb.start();
 
-            task = new ProcessDestroyer(p, cmdList);
+            task = new ProcessDestroyer(p, cmdList, commandTimeout);
             try {
                 destoryTimer.schedule(task, commandTimeout);
 
@@ -117,7 +153,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                         }
                     }
                 } finally {
-                    IOUtils.closeQuietly(br);
+                    CloseableUtil.closeQuietly(br);
                 }
 
                 p.waitFor();
@@ -125,25 +161,12 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 p.destroy();
             }
         } catch (final Exception e) {
-            logger.warn("Failed to generate a thumbnail of " + url, e);
+            logger.warn("Failed to generate a thumbnail of " + thumbnailId, e);
         }
         if (task != null) {
             task.cancel();
             task = null;
         }
-
-        if (outputFile.isFile() && outputFile.length() == 0) {
-            logger.warn("Thumbnail File is empty. URL is " + url);
-            if (outputFile.delete()) {
-                logger.info("Deleted: " + outputFile.getAbsolutePath());
-            }
-            return false;
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail File: " + outputPath);
-        }
-        return true;
     }
 
     protected static class ProcessDestroyer extends TimerTask {
@@ -152,20 +175,39 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
         private final List<String> commandList;
 
-        protected ProcessDestroyer(final Process p, final List<String> commandList) {
+        private final long timeout;
+
+        protected ProcessDestroyer(final Process p, final List<String> commandList, final long timeout) {
             this.p = p;
             this.commandList = commandList;
+            this.timeout = timeout;
         }
 
         @Override
         public void run() {
             logger.warn("CommandGenerator is timed out: " + commandList);
             try {
-                p.destroy();
+                p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS);
             } catch (final Exception e) {
                 logger.warn("Failed to stop destroyer.", e);
             }
         }
+    }
+
+    public void setCommandList(final List<String> commandList) {
+        this.commandList = commandList;
+    }
+
+    public void setCommandTimeout(final long commandTimeout) {
+        this.commandTimeout = commandTimeout;
+    }
+
+    public void setBaseDir(final File baseDir) {
+        this.baseDir = baseDir;
+    }
+
+    public void setCommandDestroyTimeout(final long commandDestroyTimeout) {
+        this.commandDestroyTimeout = commandDestroyTimeout;
     }
 
 }

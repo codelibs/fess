@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
     }
 
     public static class HpSpecification {
-        private List<String> columnList = new ArrayList<>();
+        protected List<String> columnList = new ArrayList<>();
 
         private void doColumn(String name) {
             columnList.add(name);
@@ -180,18 +180,6 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("accessType");
         }
 
-        public void columnUser() {
-            doColumn("user");
-        }
-
-        public void columnRoles() {
-            doColumn("roles");
-        }
-
-        public void columnQueryId() {
-            doColumn("queryId");
-        }
-
         public void columnClientIp() {
             doColumn("clientIp");
         }
@@ -200,12 +188,24 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("hitCount");
         }
 
+        public void columnLanguages() {
+            doColumn("languages");
+        }
+
+        public void columnQueryId() {
+            doColumn("queryId");
+        }
+
         public void columnQueryOffset() {
             doColumn("queryOffset");
         }
 
         public void columnQueryPageSize() {
             doColumn("queryPageSize");
+        }
+
+        public void columnQueryTime() {
+            doColumn("queryTime");
         }
 
         public void columnReferer() {
@@ -220,12 +220,16 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("responseTime");
         }
 
-        public void columnQueryTime() {
-            doColumn("queryTime");
+        public void columnRoles() {
+            doColumn("roles");
         }
 
         public void columnSearchWord() {
             doColumn("searchWord");
+        }
+
+        public void columnUser() {
+            doColumn("user");
         }
 
         public void columnUserAgent() {
@@ -240,8 +244,8 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("userSessionId");
         }
 
-        public void columnLanguages() {
-            doColumn("languages");
+        public void columnVirtualHost() {
+            doColumn("virtualHost");
         }
     }
 }

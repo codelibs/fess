@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,44 +25,47 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import javax.servlet.ServletContext;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.catalina.connector.ClientAbortException;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.DataConfigService;
-import org.codelibs.fess.app.service.FileConfigService;
-import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
-import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
@@ -81,71 +84,79 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper {
 
-    private static final String HL_CACHE = "hl_cache";
-
-    private static final String QUERIES = "queries";
-
-    private static final String CACHE_MSG = "cache_msg";
-
-    private static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
-
-    private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
-
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
 
-    @Resource
-    protected DynamicProperties systemProperties;
+    protected static final String SCREEN_WIDTH = "screen_width";
 
-    @Resource
-    protected PathMappingHelper pathMappingHelper;
+    protected static final int TABLET_WIDTH = 768;
 
-    @Resource
-    protected UserAgentHelper userAgentHelper;
+    protected static final String CONTENT_DISPOSITION = "Content-Disposition";
 
-    public int titleLength = 50;
+    protected static final String HL_CACHE = "hl_cache";
 
-    public int sitePathLength = 50;
+    protected static final String QUERIES = "queries";
 
-    public boolean encodeUrlLink = false;
+    protected static final String CACHE_MSG = "cache_msg";
 
-    public String urlLinkEncoding = Constants.UTF_8;
+    protected static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
 
-    public String[] highlightedFields = new String[] { "hl_content", "digest" };
+    protected static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
 
-    public String originalHighlightTagPre = "<em>";
+    protected boolean encodeUrlLink = false;
 
-    public String originalHighlightTagPost = "</em>";
+    protected String urlLinkEncoding = Constants.UTF_8;
 
-    public String highlightTagPre = "<strong>";
+    protected String[] highlightedFields;
 
-    public String highlightTagPost = "</strong>";
+    protected String originalHighlightTagPre = "<em>";
+
+    protected String originalHighlightTagPost = "</em>";
+
+    protected String highlightTagPre;
+
+    protected String highlightTagPost;
 
     protected boolean useSession = true;
 
-    private final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
+    protected final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
 
-    private final Map<String, String> initFacetParamMap = new HashMap<>();
+    protected final Map<String, String> initFacetParamMap = new HashMap<>();
 
-    private final Map<String, String> initGeoParamMap = new HashMap<>();
+    protected final Map<String, String> initGeoParamMap = new HashMap<>();
 
-    private final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
+    protected final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
 
-    public String cacheTemplateName = "cache";
+    protected String cacheTemplateName = "cache";
 
-    private String escapedHighlightPre = null;
+    protected String escapedHighlightPre = null;
 
-    private String escapedHighlightPost = null;
+    protected String escapedHighlightPost = null;
+
+    protected Set<Integer> hihglightTerminalCharSet = new HashSet<>();
 
     protected ActionHook actionHook = new ActionHook();
 
+    protected final Set<String> inlineMimeTypeSet = new HashSet<>();
+
     @PostConstruct
     public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
         escapedHighlightPost = LaFunctions.h(originalHighlightTagPost);
+        highlightTagPre = fessConfig.getQueryHighlightTagPre();
+        highlightTagPost = fessConfig.getQueryHighlightTagPost();
+        highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
+        fessConfig.getQueryHighlightTerminalChars().codePoints().forEach(hihglightTerminalCharSet::add);
+        try {
+            final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
+            servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf)
+                    .collect(Collectors.toSet()));
+        } catch (final Throwable t) {
+            logger.warn("Failed to set SessionTrackingMode.", t);
+        }
     }
 
     public String getContentTitle(final Map<String, Object> document) {
-        final int size = titleLength;
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
         if (StringUtil.isBlank(title)) {
@@ -154,7 +165,34 @@ public class ViewHelper {
                 title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
             }
         }
-        return StringUtils.abbreviate(title, size);
+        final int size = fessConfig.getResponseMaxTitleLengthAsInteger();
+        if (size > -1) {
+            title = StringUtils.abbreviate(title, size);
+        }
+        final String value = LaFunctions.h(title);
+        if (!fessConfig.isResponseHighlightContentTitleEnabled()) {
+            return value;
+        }
+        return getQuerySet().map(
+                querySet -> {
+                    final Matcher matcher =
+                            Pattern.compile(querySet.stream().map(LaFunctions::h).map(Pattern::quote).collect(Collectors.joining("|")),
+                                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(value);
+                    final StringBuffer buf = new StringBuffer(value.length() + 100);
+                    while (matcher.find()) {
+                        matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
+                    }
+                    matcher.appendTail(buf);
+                    return buf.toString();
+                }).orElse(value);
+    }
+
+    protected OptionalThing<Set<String>> getQuerySet() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            @SuppressWarnings("unchecked")
+            final Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
+            return querySet;
+        }).filter(s -> s != null);
     }
 
     public String getContentDescription(final Map<String, Object> document) {
@@ -169,34 +207,83 @@ public class ViewHelper {
     }
 
     protected String escapeHighlight(final String text) {
-        return LaFunctions.h(text).replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
+        final String escaped = LaFunctions.h(text);
+        int pos = escaped.indexOf(escapedHighlightPre);
+        while (pos >= 0) {
+            final int c = escaped.codePointAt(pos);
+            if (Character.isISOControl(c) || hihglightTerminalCharSet.contains(c)) {
+                break;
+            }
+            pos--;
+        }
+
+        final String value = escaped.substring(pos + 1);
+        return value.replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
     }
 
     protected String removeHighlightTag(final String str) {
         return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
     }
 
-    public String getUrlLink(final Map<String, Object> document) {
-        // file protocol
-        String url = DocumentUtil.getValue(document, "url", String.class);
+    public HighlightInfo createHighlightInfo() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            final HighlightInfo highlightInfo = new HighlightInfo();
+            final String widthStr = req.getParameter(SCREEN_WIDTH);
+            if (StringUtil.isNotBlank(widthStr)) {
+                final int width = Integer.parseInt(widthStr);
+                updateHighlisthInfo(highlightInfo, width);
+                final HttpSession session = req.getSession(false);
+                if (session != null) {
+                    session.setAttribute(SCREEN_WIDTH, width);
+                }
+            } else {
+                final HttpSession session = req.getSession(false);
+                if (session != null) {
+                    final Integer width = (Integer) session.getAttribute(SCREEN_WIDTH);
+                    if (width != null) {
+                        updateHighlisthInfo(highlightInfo, width);
+                    }
+                }
+            }
+            return highlightInfo;
+        }).orElse(new HighlightInfo());
+    }
 
-        if (url == null) {
-            // TODO should redirect to a invalid page?
-            return "#";
+    protected void updateHighlisthInfo(final HighlightInfo highlightInfo, final int width) {
+        if (width < TABLET_WIDTH) {
+            float ratio = ((float) width) / ((float) TABLET_WIDTH);
+            if (ratio < 0.5) {
+                ratio = 0.5f;
+            }
+            highlightInfo.fragmentSize((int) (highlightInfo.getFragmentSize() * ratio));
+        }
+    }
+
+    public String getUrlLink(final Map<String, Object> document) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        String url = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
+
+        if (StringUtil.isBlank(url)) {
+            return "#not-found-" + DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class);
         }
 
-        final boolean isFileUrl = url.startsWith("smb:") || url.startsWith("ftp:");
+        final boolean isSmbUrl = url.startsWith("smb:") || url.startsWith("smb1:");
+        final boolean isFtpUrl = url.startsWith("ftp:");
+        final boolean isSmbOrFtpUrl = isSmbUrl || isFtpUrl;
 
         // replacing url with mapping data
-        url = pathMappingHelper.replaceUrl(url);
+        url = ComponentUtil.getPathMappingHelper().replaceUrl(url);
 
-        if (url.startsWith("smb:")) {
+        final boolean isHttpUrl = url.startsWith("http:") || url.startsWith("https:");
+
+        if (isSmbUrl) {
             url = url.replace("smb:", "file:");
-        } else if (url.startsWith("ftp:")) {
-            url = url.replace("ftp:", "file:");
+            url = url.replace("smb1:", "file:");
         }
 
-        if (url.startsWith("http:") && isFileUrl) {
+        if (isHttpUrl && isSmbOrFtpUrl) {
+            //  smb/ftp->http
+            // encode
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             for (final char c : url.toCharArray()) {
                 if (CharUtil.isUrlChar(c)) {
@@ -205,89 +292,97 @@ public class ViewHelper {
                     try {
                         buf.append(URLEncoder.encode(String.valueOf(c), urlLinkEncoding));
                     } catch (final UnsupportedEncodingException e) {
-                        // NOP
+                        buf.append(c);
                     }
                 }
             }
             url = buf.toString();
         } else if (url.startsWith("file:")) {
-
-            final int pos = url.indexOf(':', 5);
-            final boolean isLocalFile = pos > 0 && pos < 12;
-
-            final UserAgentType ua = userAgentHelper.getUserAgentType();
-            switch (ua) {
-            case IE:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.ie", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.ie", "file://"));
-                }
-                break;
-            case FIREFOX:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.firefox", "file://///"));
-                }
-                break;
-            case CHROME:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.chrome", "file://"));
-                }
-                break;
-            case SAFARI:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.safari", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.safari", "file:////"));
-                }
-                break;
-            case OPERA:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.opera", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.opera", "file://"));
-                }
-                break;
-            default:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.other", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.other", "file://"));
-                }
-                break;
-            }
+            // file, smb/ftp->http
+            url = updateFileProtocol(url);
 
             if (encodeUrlLink) {
                 return appendQueryParameter(document, url);
-            } else {
-                final String urlLink = appendQueryParameter(document, url).replace("+", "%2B");
-                final String[] values = urlLink.split("#");
-                final StringBuilder buf = new StringBuilder(urlLink.length());
+            }
+
+            // decode
+            if (!isSmbOrFtpUrl) {
+                // file
                 try {
-                    buf.append(URLDecoder.decode(values[0], urlLinkEncoding));
-                    for (int i = 1; i < values.length - 1; i++) {
-                        buf.append('#').append(URLDecoder.decode(values[i], urlLinkEncoding));
-                    }
+                    url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
                 } catch (final Exception e) {
-                    throw new FessSystemException("Unsupported encoding: " + urlLinkEncoding, e);
+                    if (logger.isDebugEnabled()) {
+                        logger.warn("Failed to decode " + url, e);
+                    }
                 }
-                if (values.length > 1) {
-                    buf.append('#').append(values[values.length - 1]);
-                }
-                return buf.toString();
             }
         }
+        // http, ftp
+        // nothing
 
         return appendQueryParameter(document, url);
+    }
+
+    protected String updateFileProtocol(String url) {
+        final int pos = url.indexOf(':', 5);
+        final boolean isLocalFile = pos > 0 && pos < 12;
+
+        final UserAgentType ua = ComponentUtil.getUserAgentHelper().getUserAgentType();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        switch (ua) {
+        case IE:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.ie", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.ie", "file://"));
+            }
+            break;
+        case FIREFOX:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.firefox", "file://///"));
+            }
+            break;
+        case CHROME:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.chrome", "file://"));
+            }
+            break;
+        case SAFARI:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.safari", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.safari", "file:////"));
+            }
+            break;
+        case OPERA:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.opera", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.opera", "file://"));
+            }
+            break;
+        default:
+            if (isLocalFile) {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.other", "file://"));
+            } else {
+                url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.other", "file://"));
+            }
+            break;
+        }
+        return url;
     }
 
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isAppendQueryParameter()) {
+            if (url.indexOf('#') >= 0) {
+                return url;
+            }
+
             final String mimetype = DocumentUtil.getValue(document, fessConfig.getIndexFieldMimetype(), String.class);
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
@@ -407,7 +502,7 @@ public class ViewHelper {
             if (!ComponentUtil.getFessConfig().isHtmlMimetypeForCache(mimetype)) {
                 cache = StringEscapeUtils.escapeHtml4(cache);
             }
-            cache = pathMappingHelper.replaceUrls(cache);
+            cache = ComponentUtil.getPathMappingHelper().replaceUrls(cache);
             if (queries != null && queries.length > 0) {
                 doc.put(HL_CACHE, replaceHighlightQueries(cache, queries));
             } else {
@@ -473,7 +568,12 @@ public class ViewHelper {
             } else {
                 returnUrl = url.replaceFirst("^[a-zA-Z0-9]*:/+", "");
             }
-            return StringUtils.abbreviate(returnUrl, sitePathLength);
+            final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
+            if (size > -1) {
+                return StringUtils.abbreviate(returnUrl, size);
+            } else {
+                return returnUrl;
+            }
         }
         return null;
     }
@@ -491,21 +591,7 @@ public class ViewHelper {
         if (configId.length() < 2) {
             throw new FessSystemException("Invalid configId: " + configId);
         }
-        final ConfigType configType = crawlingConfigHelper.getConfigType(configId);
-        CrawlingConfig config = null;
-        if (logger.isDebugEnabled()) {
-            logger.debug("configType: " + configType + ", configId: " + configId);
-        }
-        if (ConfigType.WEB == configType) {
-            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId)).get();
-        } else if (ConfigType.FILE == configType) {
-            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-            config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId)).get();
-        } else if (ConfigType.DATA == configType) {
-            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
-            config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId)).get();
-        }
+        final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configId);
         }
@@ -520,15 +606,16 @@ public class ViewHelper {
     }
 
     protected StreamResponse writeContent(final String configId, final String url, final CrawlerClient client) {
-        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
+        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
+        if (responseData.getHttpStatusCode() == 404) {
+            response.httpStatus(responseData.getHttpStatusCode());
+            CloseableUtil.closeQuietly(responseData);
+            return response;
+        }
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
-        if (responseData.getHttpStatusCode() == 404) {
-            response.httpStatus(responseData.getHttpStatusCode());
-            return response;
-        }
         response.stream(out -> {
             try (final InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                 out.write(is);
@@ -537,7 +624,7 @@ public class ViewHelper {
                     throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
             } finally {
-                responseData.close();
+                CloseableUtil.closeQuietly(responseData);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished to write " + url);
@@ -553,8 +640,6 @@ public class ViewHelper {
     }
 
     protected void writeFileName(final StreamResponse response, final ResponseData responseData) {
-        final UserAgentHelper userAgentHelper = ComponentUtil.getUserAgentHelper();
-        final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
         String charset = responseData.getCharSet();
         if (charset == null) {
             charset = Constants.UTF_8;
@@ -569,28 +654,15 @@ public class ViewHelper {
                 name = URLDecoder.decode(url, charset);
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("userAgentType: " + userAgentType + ", charset: " + charset + ", name: " + name);
+            final String contentDispositionType;
+            if (inlineMimeTypeSet.contains(responseData.getMimeType())) {
+                contentDispositionType = "inline";
+            } else {
+                contentDispositionType = "attachment";
             }
 
-            switch (userAgentType) {
-            case IE:
-                response.header("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
-                break;
-            case OPERA:
-                response.header("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
-                break;
-            case SAFARI:
-                response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
-                break;
-            case CHROME:
-            case FIREFOX:
-            case OTHER:
-            default:
-                response.header("Content-Disposition",
-                        "attachment; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
-                break;
-            }
+            final String encodedName = URLEncoder.encode(name, Constants.UTF_8).replace("+", "%20");
+            response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + name + "\"; filename*=utf-8''" + encodedName);
         } catch (final Exception e) {
             logger.warn("Failed to write a filename: " + responseData, e);
         }
@@ -656,34 +728,58 @@ public class ViewHelper {
         return facetQueryViewList;
     }
 
+    public void addInlineMimeType(final String mimeType) {
+        inlineMimeTypeSet.add(mimeType);
+    }
+
     public ActionHook getActionHook() {
         return actionHook;
     }
 
-    public void setActionHook(ActionHook actionHook) {
+    public void setActionHook(final ActionHook actionHook) {
         this.actionHook = actionHook;
     }
 
     public static class ActionHook {
 
-        public ActionResponse godHandPrologue(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+        public ActionResponse godHandPrologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
-        public ActionResponse godHandMonologue(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+        public ActionResponse godHandMonologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
-        public void godHandEpilogue(ActionRuntime runtime, Consumer<ActionRuntime> consumer) {
+        public void godHandEpilogue(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
 
-        public ActionResponse hookBefore(ActionRuntime runtime, Function<ActionRuntime, ActionResponse> func) {
+        public ActionResponse hookBefore(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
-        public void hookFinally(ActionRuntime runtime, Consumer<ActionRuntime> consumer) {
+        public void hookFinally(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
+    }
+
+    public void setEncodeUrlLink(final boolean encodeUrlLink) {
+        this.encodeUrlLink = encodeUrlLink;
+    }
+
+    public void setUrlLinkEncoding(final String urlLinkEncoding) {
+        this.urlLinkEncoding = urlLinkEncoding;
+    }
+
+    public void setOriginalHighlightTagPre(final String originalHighlightTagPre) {
+        this.originalHighlightTagPre = originalHighlightTagPre;
+    }
+
+    public void setOriginalHighlightTagPost(final String originalHighlightTagPost) {
+        this.originalHighlightTagPost = originalHighlightTagPost;
+    }
+
+    public void setCacheTemplateName(final String cacheTemplateName) {
+        this.cacheTemplateName = cacheTemplateName;
     }
 }

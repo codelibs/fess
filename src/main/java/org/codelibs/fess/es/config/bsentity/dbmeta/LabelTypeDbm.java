@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,8 @@ public class LabelTypeDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((LabelType) et).getUpdatedTime(), (et, vl) -> ((LabelType) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
         setupEpg(_epgMap, et -> ((LabelType) et).getValue(), (et, vl) -> ((LabelType) et).setValue(DfTypeUtil.toString(vl)), "value");
+        setupEpg(_epgMap, et -> ((LabelType) et).getVirtualHost(), (et, vl) -> ((LabelType) et).setVirtualHost(DfTypeUtil.toString(vl)),
+                "virtualHost");
     }
 
     @Override
@@ -134,25 +136,27 @@ public class LabelTypeDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedPaths = cci("excludedPaths", "excludedPaths", null, null, String.class, "excludedPaths",
-            null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths",
-            null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
-            0, null, false, null, null, null, null, null, false);
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
-            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
-            false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+            false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -194,6 +198,10 @@ public class LabelTypeDbm extends AbstractDBMeta {
         return _columnValue;
     }
 
+    public ColumnInfo columnVirtualHost() {
+        return _columnVirtualHost;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
@@ -206,6 +214,7 @@ public class LabelTypeDbm extends AbstractDBMeta {
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
         ls.add(columnValue());
+        ls.add(columnVirtualHost());
         return ls;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,12 +83,13 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getCreatedTime(),
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getTarget(), (et, vl) -> ((ThumbnailQueue) et).setTarget(DfTypeUtil.toString(vl)),
-                "target");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getGenerator(),
                 (et, vl) -> ((ThumbnailQueue) et).setGenerator(DfTypeUtil.toString(vl)), "generator");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)), "path");
-        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getUrl(), (et, vl) -> ((ThumbnailQueue) et).setUrl(DfTypeUtil.toString(vl)), "url");
+        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getTarget(), (et, vl) -> ((ThumbnailQueue) et).setTarget(DfTypeUtil.toString(vl)),
+                "target");
+        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getThumbnailId(),
+                (et, vl) -> ((ThumbnailQueue) et).setThumbnailId(DfTypeUtil.toString(vl)), "thumbnailId");
     }
 
     @Override
@@ -126,17 +127,17 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGenerator = cci("generator", "generator", null, null, String.class, "generator", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "keyword", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
-            null, false, null, null, null, null, null, false);
+            0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnThumbnailId = cci("thumbnail_id", "thumbnail_id", null, null, String.class, "thumbnailId", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -144,10 +145,6 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnTarget() {
-        return _columnTarget;
     }
 
     public ColumnInfo columnGenerator() {
@@ -158,18 +155,22 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
         return _columnPath;
     }
 
-    public ColumnInfo columnUrl() {
-        return _columnUrl;
+    public ColumnInfo columnTarget() {
+        return _columnTarget;
+    }
+
+    public ColumnInfo columnThumbnailId() {
+        return _columnThumbnailId;
     }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnTarget());
         ls.add(columnGenerator());
         ls.add(columnPath());
-        ls.add(columnUrl());
+        ls.add(columnTarget());
+        ls.add(columnThumbnailId());
         return ls;
     }
 

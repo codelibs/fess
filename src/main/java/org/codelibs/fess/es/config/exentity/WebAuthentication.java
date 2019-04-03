@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
@@ -34,6 +35,7 @@ import org.codelibs.fess.crawler.client.http.impl.AuthenticationImpl;
 import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsWebAuthentication;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.slf4j.Logger;
@@ -61,7 +63,12 @@ public class WebAuthentication extends BsWebAuthentication {
         } else if (Constants.DIGEST.equals(scheme)) {
             return new DigestScheme();
         } else if (Constants.NTLM.equals(scheme)) {
-            return new NTLMScheme(new JcifsEngine());
+            final Properties props = new Properties();
+            getWebConfig().getConfigParameterMap(ConfigName.CONFIG).entrySet().stream().filter(e -> e.getKey().startsWith("jcifs."))
+                    .forEach(e -> {
+                        props.setProperty(e.getKey(), e.getValue());
+                    });
+            return new NTLMScheme(new JcifsEngine(props));
         } else if (Constants.FORM.equals(scheme)) {
             final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
             return new FormScheme(parameterMap);

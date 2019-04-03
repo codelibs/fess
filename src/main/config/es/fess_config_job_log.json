@@ -1,0 +1,50 @@
+{
+  ".fess_config.job_log" : {
+    "aliases" : { },
+    "mappings" : {
+      "job_log" : {
+        "properties" : {
+          "endTime" : {
+            "type" : "long"
+          },
+          "jobName" : {
+            "type" : "keyword"
+          },
+          "jobStatus" : {
+            "type" : "keyword"
+          },
+          "lastUpdated" : {
+            "type" : "long"
+          },
+          "scriptData" : {
+            "type" : "keyword"
+          },
+          "scriptResult" : {
+            "type" : "keyword"
+          },
+          "scriptType" : {
+            "type" : "keyword"
+          },
+          "startTime" : {
+            "type" : "long"
+          },
+          "target" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021054334",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "vIZ3R-jCRzGKaZvpZHRFPw",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.job_log"
+      }
+    }
+  }
+}

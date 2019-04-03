@@ -26,14 +26,14 @@
 		AND operator is the default conjunction operator. You can omit it from
 		a query. AND operator matches documents where both terms exist
 		anywhere in the text of a single document.
-		<pre>Fess AND Solr</pre>
+		<pre>Fess AND CodeLibs</pre>
 	</dd>
 	</dd>
 	<dt>OR</dt>
 	<dd>
 		OR operator matches documents where any terms exist anywhere in the
 		text of a single document.
-		<pre>Fess OR Solr</pre>
+		<pre>Fess OR CodeLibs</pre>
 	</dd>
 	<dt>Wildcard</dt>
 	<dd>
@@ -68,12 +68,3 @@
 		<pre>Fess~0.5</pre>
 	</dd>
 </dl>
-<h2>Others</h2>
-<dl>
-	<dt>Add To Browser Search Engines</dt>
-	<dd>
-		Click <a href="#" onclick='window.external.AddSearchProvider("/osdd/");return false;'>here</a>
-		 to add a search engine list for your browser.
-	</dd>
-</dl>
-

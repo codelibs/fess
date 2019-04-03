@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
 import org.codelibs.fess.es.config.exentity.WebConfig;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -102,7 +104,7 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
-        RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null).isEmpty());
 
         // restore from pager
         copyBeanToBean(reqHeaderPager, form, op -> op.include("id"));
@@ -154,7 +156,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asHtml(path_AdminReqheader_AdminReqheaderDetailsJsp).useForm(EditForm.class, op -> {
+        return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
                 requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -238,7 +240,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<RequestHeader> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<RequestHeader> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new RequestHeader()).map(entity -> {
@@ -248,7 +250,7 @@ public class AdminReqheaderAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return requestHeaderService.getRequestHeader(((EditForm) form).id);
+                return ComponentUtil.getComponent(RequestHeaderService.class).getRequestHeader(((EditForm) form).id);
             }
             break;
         default:
@@ -257,7 +259,8 @@ public class AdminReqheaderAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<RequestHeader> getRequestHeader(final CreateForm form) {
+    public static OptionalEntity<RequestHeader> getRequestHeader(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -270,7 +273,7 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
+        final List<WebConfig> webConfigList = crawlingConfigHelper.getAllWebConfigList(false, false, false, null);
         for (final WebConfig webConfig : webConfigList) {
             itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
         }
@@ -302,7 +305,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminReqheader_AdminReqheaderJsp).renderWith(data -> {
             RenderDataUtil.register(data, "requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
-                RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null)
+                RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null)
                         .isEmpty());
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {

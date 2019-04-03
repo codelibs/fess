@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,20 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.Crawler;
 import org.codelibs.fess.helper.ProcessHelper;
@@ -42,17 +42,13 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
+import org.codelibs.fess.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CrawlJob {
-    private static final String REMOTE_DEBUG_OPTIONS = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=localhost:8000";
+public class CrawlJob extends ExecJob {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlJob.class);
-
-    protected JobExecutor jobExecutor;
-
-    protected String sessionId;
 
     protected String namespace = Constants.CRAWLING_INFO_SYSTEM_NAME;
 
@@ -62,40 +58,10 @@ public class CrawlJob {
 
     protected String[] dataConfigIds;
 
-    protected String logFilePath;
-
-    protected String logLevel;
-
     protected int documentExpires = -2;
-
-    protected boolean useLocalElasticsearch = true;
-
-    protected String jvmOptions;
-
-    protected String lastaEnv;
-
-    public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
-        this.jobExecutor = jobExecutor;
-        return this;
-    }
-
-    public CrawlJob sessionId(final String sessionId) {
-        this.sessionId = sessionId;
-        return this;
-    }
 
     public CrawlJob namespace(final String namespace) {
         this.namespace = namespace;
-        return this;
-    }
-
-    public CrawlJob logFilePath(final String logFilePath) {
-        this.logFilePath = logFilePath;
-        return this;
-    }
-
-    public CrawlJob logLevel(final String logLevel) {
-        this.logLevel = logLevel;
         return this;
     }
 
@@ -119,54 +85,24 @@ public class CrawlJob {
         return this;
     }
 
-    public CrawlJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
-        this.useLocalElasticsearch = useLocaleElasticsearch;
-        return this;
-    }
-
-    public CrawlJob remoteDebug() {
-        return jvmOptions(REMOTE_DEBUG_OPTIONS);
-    }
-
-    public CrawlJob jvmOptions(final String option) {
-        this.jvmOptions = option;
-        return this;
-    }
-
-    public CrawlJob lastaEnv(final String env) {
-        this.lastaEnv = env;
-        return this;
-    }
-
     @Deprecated
     public String execute(final JobExecutor jobExecutor) {
         jobExecutor(jobExecutor);
         return execute();
     }
 
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor, final String[] webConfigIds, final String[] fileConfigIds,
-            final String[] dataConfigIds, final String operation) {
-        jobExecutor(jobExecutor);
-        webConfigIds(webConfigIds);
-        fileConfigIds(fileConfigIds);
-        dataConfigIds(dataConfigIds);
-        return execute();
-
-    }
-
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor, final String sessionId, final String[] webConfigIds, final String[] fileConfigIds,
-            final String[] dataConfigIds, final String operation) {
-        jobExecutor(jobExecutor);
-        webConfigIds(webConfigIds);
-        fileConfigIds(fileConfigIds);
-        dataConfigIds(dataConfigIds);
-        sessionId(sessionId);
-        return execute();
-    }
-
+    @Override
     public String execute() {
+        //   check # of crawler processes
+        final int maxCrawlerProcesses = ComponentUtil.getFessConfig().getJobMaxCrawlerProcessesAsInteger();
+        if (maxCrawlerProcesses > 0) {
+            final int runningJobCount = getRunningJobCount();
+            if (runningJobCount > maxCrawlerProcesses) {
+                throw new FessSystemException(runningJobCount + " crawler processes are running. Max processes are " + maxCrawlerProcesses
+                        + ".");
+            }
+        }
+
         final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
 
@@ -232,6 +168,27 @@ public class CrawlJob {
 
     }
 
+    protected int getRunningJobCount() {
+        final AtomicInteger counter = new AtomicInteger(0);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        ComponentUtil.getComponent(ScheduledJobBhv.class).selectCursor(cb -> {
+            cb.query().setAvailable_Equal(Constants.T);
+            cb.query().setCrawler_Equal(Constants.T);
+        }, scheduledJob -> {
+            if (fessConfig.isSchedulerTarget(scheduledJob.getTarget())) {
+                if (scheduledJob.isRunning()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(scheduledJob.getId() + " is running.");
+                    }
+                    counter.incrementAndGet();
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug(scheduledJob.getId() + " is not running.");
+                }
+            }
+        });
+        return counter.get();
+    }
+
     protected void executeCrawler() {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
@@ -245,13 +202,19 @@ public class CrawlJob {
         // -cp
         cmdList.add("-cp");
         final StringBuilder buf = new StringBuilder(100);
+        ResourceUtil.getOverrideConfPath().ifPresent(p -> {
+            buf.append(p);
+            buf.append(cpSeparator);
+        });
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             buf.append(confPath);
             buf.append(cpSeparator);
         }
-        // WEB-INF/crawler/resources
+        // WEB-INF/env/crawler/resources
         buf.append("WEB-INF");
+        buf.append(File.separator);
+        buf.append("env");
         buf.append(File.separator);
         buf.append("crawler");
         buf.append(File.separator);
@@ -270,10 +233,11 @@ public class CrawlJob {
             buf.append(targetClassesDir.getAbsolutePath());
         }
         // WEB-INF/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF/lib" + File.separator);
-        // WEB-INF/crawler/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/crawler/lib")), "WEB-INF/crawler" + File.separator
-                + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
+                + File.separator);
+        // WEB-INF/env/crawler/lib
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/crawler/lib")), "WEB-INF" + File.separator
+                + "env" + File.separator + "crawler" + File.separator + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -281,13 +245,9 @@ public class CrawlJob {
         cmdList.add(buf.toString());
 
         if (useLocalElasticsearch) {
-            final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-            if (StringUtil.isNotBlank(transportAddresses)) {
-                cmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
-            }
-            final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
-            if (StringUtil.isNotBlank(clusterName)) {
-                cmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
+            final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+            if (StringUtil.isNotBlank(httpAddress)) {
+                cmdList.add("-D" + Constants.FESS_ES_HTTP_ADDRESS + "=" + httpAddress);
             }
         }
 
@@ -302,6 +262,7 @@ public class CrawlJob {
             cmdList.add("-Dlasta.env=" + lastaEnv);
         }
 
+        addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
         cmdList.add("-Dfess.crawler.process=true");
         cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
         addSystemProperty(cmdList, "fess.log.name", "fess-crawler", "-crawler");
@@ -309,6 +270,9 @@ public class CrawlJob {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {
             cmdList.add("-Dfess.log.level=" + logLevel);
+            if (logLevel.equalsIgnoreCase("debug")) {
+                cmdList.add("-Dorg.apache.tika.service.error.warn=true");
+            }
         }
         stream(fessConfig.getJvmCrawlerOptionsAsArray()).of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
@@ -410,37 +374,4 @@ public class CrawlJob {
         }
     }
 
-    private void addSystemProperty(final List<String> crawlerCmdList, final String name, final String defaultValue, final String appendValue) {
-        final String value = System.getProperty(name);
-        if (value != null) {
-            final StringBuilder buf = new StringBuilder();
-            buf.append("-D").append(name).append("=").append(value);
-            if (appendValue != null) {
-                buf.append(appendValue);
-            }
-            crawlerCmdList.add(buf.toString());
-        } else if (defaultValue != null) {
-            crawlerCmdList.add("-D" + name + "=" + defaultValue);
-        }
-    }
-
-    protected void deleteTempDir(final File ownTmpDir) {
-        if (ownTmpDir == null) {
-            return;
-        }
-        if (!FileUtils.deleteQuietly(ownTmpDir)) {
-            logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
-        }
-    }
-
-    protected void appendJarFile(final String cpSeparator, final StringBuilder buf, final File libDir, final String basePath) {
-        final File[] jarFiles = libDir.listFiles((FilenameFilter) (dir, name) -> name.toLowerCase().endsWith(".jar"));
-        if (jarFiles != null) {
-            for (final File file : jarFiles) {
-                buf.append(cpSeparator);
-                buf.append(basePath);
-                buf.append(file.getName());
-            }
-        }
-    }
 }

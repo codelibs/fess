@@ -60,7 +60,7 @@
 													<i class="fa fa-search"></i>
 													<la:message key="labels.crawling_info_search" />
 												</button>
-												<button type="submit" class="btn btn-secondary" name="reset"
+												<button type="submit" class="btn btn-default" name="reset"
 													value="<la:message key="labels.crawling_info_reset" />">
 													<la:message key="labels.crawling_info_reset" />
 												</button>
@@ -107,6 +107,9 @@
 									<c:set var="pager" value="${crawlingInfoPager}"
 										scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/crawlinginfo/list/${pager.allPageCount}";</script>
+									</c:if>
 									<div class="row">
 										<la:form action="/admin/crawlinginfo/">
 											<div class="col-sm-12 center">

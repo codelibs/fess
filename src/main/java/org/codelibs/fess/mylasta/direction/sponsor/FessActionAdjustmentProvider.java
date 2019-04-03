@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.path.ActionAdjustmentProvider;
 import org.lastaflute.web.path.FormMappingOption;
@@ -32,8 +34,24 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
     @Override
     public FormMappingOption adjustFormMapping() {
         return new FormMappingOption().filterSimpleTextParameter((parameter, meta) -> {
-            return parameter.trim();
+            return parameter.trim().replace("\r\n", "\n").replace('\r', '\n');
         });
+    }
+
+    @Override
+    public String customizeActionMappingRequestPath(final String requestPath) {
+        if (StringUtil.isBlank(requestPath)) {
+            return null;
+        }
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        if (StringUtil.isBlank(virtualHostKey)) {
+            return null;
+        }
+        final String prefix = "/" + virtualHostKey;
+        if (requestPath.startsWith(prefix)) {
+            return requestPath.substring(prefix.length());
+        }
+        return null;
     }
 
     @Override

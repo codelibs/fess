@@ -1,0 +1,20 @@
+{
+    "properties": {
+      "userInfoId": {
+        "type": "keyword"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "docId": {
+        "type": "keyword"
+      },
+      "queryId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      }
+    }
+}

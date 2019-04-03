@@ -1,0 +1,40 @@
+{
+    "properties": {
+      "hostname": {
+        "type": "keyword"
+      },
+      "port": {
+        "type": "integer"
+      },
+      "authRealm": {
+        "type": "keyword"
+      },
+      "protocolScheme": {
+        "type": "keyword"
+      },
+      "username": {
+        "type": "keyword"
+      },
+      "password": {
+        "type": "keyword"
+      },
+      "parameters": {
+        "type": "keyword"
+      },
+      "webConfigId": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

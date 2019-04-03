@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.codelibs.fess.dict;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,11 +26,10 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.elasticsearch.runner.net.Curl;
-import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.curl.CurlResponse;
+import org.codelibs.elasticsearch.runner.net.EcrCurl;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +48,9 @@ public class DictionaryManager {
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         try (CurlResponse response =
-                Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("fields", "path,@timestamp")
+                ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
                         .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
-            final Map<String, Object> contentMap = response.getContentAsMap();
+            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
             return fileList
@@ -96,9 +94,9 @@ public class DictionaryManager {
 
             // TODO use stream
                 try (CurlResponse response =
-                        Curl.post(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", dictFile.getPath())
+                        ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
                                 .body(FileUtil.readUTF8(file)).execute()) {
-                    final Map<String, Object> contentMap = response.getContentAsMap();
+                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
                     if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                         throw new DictionaryException("Failed to update " + dictFile.getPath());
                     }
@@ -111,13 +109,8 @@ public class DictionaryManager {
         });
     }
 
-    public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
-        try {
-            return Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute()
-                    .getContentAsStream();
-        } catch (final IOException e) {
-            throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
-        }
+    public CurlResponse getContentResponse(final DictionaryFile<? extends DictionaryItem> dictFile) {
+        return ComponentUtil.getCurlHelper().get("/_configsync/file").param("path", dictFile.getPath()).execute();
     }
 
     public void addCreator(final DictionaryCreator creator) {

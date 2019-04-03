@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,16 @@ package org.codelibs.fess.app.web.base.login;
 
 import org.lastaflute.web.login.credential.LoginCredential;
 
-public class SpnegoCredential implements LoginCredential {
+public class SpnegoCredential implements LoginCredential, FessCredential {
     private final String username;
-
-    // private Principal principal;
 
     public SpnegoCredential(final String username) {
         this.username = username;
+    }
+
+    @Override
+    public String getUserId() {
+        return username;
     }
 
     @Override
@@ -31,7 +34,4 @@ public class SpnegoCredential implements LoginCredential {
         return "{" + username + "}";
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

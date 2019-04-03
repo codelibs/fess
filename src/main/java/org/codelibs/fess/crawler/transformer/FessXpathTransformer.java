@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.xml.transform.TransformerException;
@@ -68,20 +69,32 @@ import org.cyberneko.html.parsers.DOMParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
+
     private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformer.class);
+
+    private static final String X_ROBOTS_TAG = "X-Robots-Tag";
+
+    private static final String HTML_CANONICAL_XPATH = "html.canonical.xpath";
+
+    private static final String IGNORE_ROBOTS_TAGS = "ignore.robots.tags";
+
+    private static final String META_NAME_THUMBNAIL_CONTENT = "//META[@name=\"thumbnail\" or @name=\"THUMBNAIL\"]/@content";
+
+    private static final String META_PROPERTY_OGIMAGE_CONTENT = "//META[@property=\"og:image\"]/@content";
 
     private static final String META_NAME_ROBOTS_CONTENT = "//META[@name=\"robots\" or @name=\"ROBOTS\"]/@content";
 
-    private static final String META_ROBOTS_NONE = "none";
+    private static final String ROBOTS_TAG_NONE = "none";
 
-    private static final String META_ROBOTS_NOINDEX = "noindex";
+    private static final String ROBOTS_TAG_NOINDEX = "noindex";
 
-    private static final String META_ROBOTS_NOFOLLOW = "nofollow";
+    private static final String ROBOTS_TAG_NOFOLLOW = "nofollow";
 
     private static final int UTF8_BOM_SIZE = 3;
 
@@ -92,6 +105,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected FessConfig fessConfig;
 
     protected boolean useGoogleOffOn = true;
+
+    protected Map<String, Boolean> fieldPrunedRuleMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -129,9 +144,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
         final Document document = parser.getDocument();
 
-        if (!fessConfig.isCrawlerIgnoreMetaRobots()) {
-            processMetaRobots(responseData, resultData, document);
-        }
+        processMetaRobots(responseData, resultData, document);
+        processXRobotsTag(responseData, resultData);
 
         final Map<String, Object> dataMap = new LinkedHashMap<>();
         for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
@@ -158,16 +172,21 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 case XObject.CLASS_RTREEFRAG:
                 case XObject.CLASS_UNRESOLVEDVARIABLE:
                 default:
-                    final Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
+                    final Boolean isPruned = fieldPrunedRuleMap.get(entry.getKey());
+                    Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
+                    if (value != null && isPruned != null && isPruned.booleanValue()) {
+                        value = pruneNode(value);
+                    }
                     putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
                     break;
                 }
             } catch (final TransformerException e) {
-                logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue());
+                logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue(), e);
             }
         }
 
         putAdditionalData(dataMap, responseData, document);
+        normalizeData(responseData, dataMap);
 
         try {
             resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
@@ -177,53 +196,156 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         resultData.setEncoding(charsetName);
     }
 
+    protected void normalizeData(final ResponseData responseData, final Map<String, Object> dataMap) {
+        final Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
+        if (titleObj != null) {
+            dataMap.put(fessConfig.getIndexFieldTitle(),
+                    ComponentUtil.getDocumentHelper().getTitle(responseData, titleObj.toString(), dataMap));
+        }
+    }
+
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
+        final String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
+        if (ignore == null) {
+            if (fessConfig.isCrawlerIgnoreRobotsTags()) {
+                return;
+            }
+        } else if (Boolean.parseBoolean(ignore)) {
+            return;
+        }
+
+        // meta tag
         try {
             final Node value = getXPathAPI().selectSingleNode(document, META_NAME_ROBOTS_CONTENT);
             if (value != null) {
-                final String content = value.getTextContent().toLowerCase(Locale.ROOT);
                 boolean noindex = false;
                 boolean nofollow = false;
-                if (content.contains(META_ROBOTS_NONE)) {
+                final String content = value.getTextContent().toLowerCase(Locale.ROOT);
+                if (content.contains(ROBOTS_TAG_NONE)) {
                     noindex = true;
                     nofollow = true;
                 } else {
-                    if (content.contains(META_ROBOTS_NOINDEX)) {
+                    if (content.contains(ROBOTS_TAG_NOINDEX)) {
                         noindex = true;
                     }
-                    if (content.contains(META_ROBOTS_NOFOLLOW)) {
+                    if (content.contains(ROBOTS_TAG_NOFOLLOW)) {
                         nofollow = true;
                     }
                 }
-
                 if (noindex && nofollow) {
                     logger.info("META(robots=noindex,nofollow): " + responseData.getUrl());
-                    throw new ChildUrlsException(Collections.emptySet(), "#processMetaRobots(Document)");
+                    throw new ChildUrlsException(Collections.emptySet(), "#processMetaRobots");
                 } else if (noindex) {
                     logger.info("META(robots=noindex): " + responseData.getUrl());
                     storeChildUrls(responseData, resultData);
-                    throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots(Document)");
+                    throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots");
                 } else if (nofollow) {
                     logger.info("META(robots=nofollow): " + responseData.getUrl());
                     responseData.setNoFollow(true);
                 }
             }
         } catch (final TransformerException e) {
-            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT);
+            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT, e);
         }
 
     }
 
+    protected void processXRobotsTag(final ResponseData responseData, final ResultData resultData) {
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
+        final String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
+        if (ignore == null) {
+            if (fessConfig.isCrawlerIgnoreRobotsTags()) {
+                return;
+            }
+        } else if (Boolean.parseBoolean(ignore)) {
+            return;
+        }
+
+        // X-Robots-Tag
+        responseData.getMetaDataMap().entrySet().stream().filter(e -> e.getKey().equalsIgnoreCase(X_ROBOTS_TAG) && e.getValue() != null)
+                .forEach(e -> {
+                    boolean noindex = false;
+                    boolean nofollow = false;
+                    final String value = e.getValue().toString().toLowerCase(Locale.ROOT);
+                    if (value.contains(ROBOTS_TAG_NONE)) {
+                        noindex = true;
+                        nofollow = true;
+                    } else {
+                        if (value.contains(ROBOTS_TAG_NOINDEX)) {
+                            noindex = true;
+                        }
+                        if (value.contains(ROBOTS_TAG_NOFOLLOW)) {
+                            nofollow = true;
+                        }
+                    }
+                    if (noindex && nofollow) {
+                        logger.info("HEADER(robots=noindex,nofollow): " + responseData.getUrl());
+                        throw new ChildUrlsException(Collections.emptySet(), "#processXRobotsTag");
+                    } else if (noindex) {
+                        logger.info("HEADER(robots=noindex): " + responseData.getUrl());
+                        storeChildUrls(responseData, resultData);
+                        throw new ChildUrlsException(resultData.getChildUrlSet(), "#processXRobotsTag");
+                    } else if (nofollow) {
+                        logger.info("HEADER(robots=nofollow): " + responseData.getUrl());
+                        responseData.setNoFollow(true);
+                    }
+                });
+    }
+
+    protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(config);
+        return configMap;
+    }
+
+    protected boolean isValidUrl(final String urlStr) {
+        if (StringUtil.isBlank(urlStr)) {
+            return false;
+        }
+        final String value;
+        if (urlStr.startsWith("://")) {
+            value = "http" + urlStr;
+        } else if (urlStr.startsWith("//")) {
+            value = "http:" + urlStr;
+        } else {
+            value = urlStr;
+        }
+        try {
+            final URL url = new java.net.URL(value);
+            final String host = url.getHost();
+            if (StringUtil.isBlank(host)) {
+                return false;
+            }
+            if ("http".equalsIgnoreCase(host) || "https".equalsIgnoreCase(host)) {
+                return false;
+            }
+        } catch (final MalformedURLException e) {
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean isValidCanonicalUrl(final String url, final String canonicalUrl) {
+        if (url.startsWith("https:") && canonicalUrl.startsWith("http:")) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Invalid Canonical Url(https->http): " + url + " -> " + canonicalUrl);
+            }
+            return false;
+        }
+        return true;
+    }
+
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
         // canonical
-        if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCannonicalXpath())) {
-            final String canonicalUrl = getCanonicalUrl(responseData, document);
-            if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl())) {
-                final Set<RequestData> childUrlSet = new HashSet<>();
-                childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
-                throw new ChildUrlsException(childUrlSet, this.getClass().getName()
-                        + "#putAdditionalData(Map<String, Object>, ResponseData, Document)");
-            }
+        final String canonicalUrl = getCanonicalUrl(responseData, document);
+        if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)
+                && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
+            final Set<RequestData> childUrlSet = new HashSet<>();
+            childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
+            logger.info("CANONICAL: " + responseData.getUrl() + " -> " + canonicalUrl);
+            throw new ChildUrlsException(childUrlSet, this.getClass().getName() + "#putAdditionalData");
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -263,7 +385,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // lang
-        final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), true));
+        final String lang = systemHelper.normalizeHtmlLang(getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), true));
         if (lang != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), lang);
         }
@@ -340,16 +462,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         //  boost
         putResultDataBody(dataMap, fessConfig.getIndexFieldBoost(), crawlingConfig.getDocumentBoost());
         // label: labelType
-        final Set<String> labelTypeSet = new HashSet<>();
-        for (final String labelType : crawlingConfig.getLabelTypeValues()) {
-            labelTypeSet.add(labelType);
-        }
-        labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
-        putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeHelper.getMatchedLabelValueSet(url));
         // role: roleType
         final List<String> roleTypeList = new ArrayList<>();
         stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
+        // virtualHosts
+        putResultDataBody(dataMap, fessConfig.getIndexFieldVirtualHost(),
+                stream(crawlingConfig.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.toList())));
         // id
         putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
         // parentId
@@ -359,6 +479,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), parentUrl);
             putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingInfoHelper.generateId(dataMap));
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url); // set again
+        }
+        // thumbnail
+        final String thumbnailUrl = getThumbnailUrl(responseData, document);
+        if (StringUtil.isNotBlank(thumbnailUrl)) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldThumbnail(), thumbnailUrl);
         }
 
         // from config
@@ -400,19 +525,25 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
-        final String canonicalUrl = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlCannonicalXpath(), false);
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
+        String xpath = configMap.get(HTML_CANONICAL_XPATH);
+        if (xpath == null) {
+            xpath = fessConfig.getCrawlerDocumentHtmlCanonicalXpath();
+        }
+        if (StringUtil.isBlank(xpath)) {
+            return null;
+        }
+        final String canonicalUrl = getSingleNodeValue(document, xpath, false);
         if (StringUtil.isBlank(canonicalUrl)) {
             return null;
         }
-        if (canonicalUrl.startsWith("/")) {
-            return normalizeCanonicalUrl(responseData.getUrl(), canonicalUrl);
-        }
-        return canonicalUrl;
+        return normalizeCanonicalUrl(responseData.getUrl(), canonicalUrl);
     }
 
     protected String normalizeCanonicalUrl(final String baseUrl, final String canonicalUrl) {
         try {
-            return new URL(new URL(baseUrl), canonicalUrl).toString();
+            final URL u = new URL(baseUrl);
+            return new URL(u, canonicalUrl.startsWith(":") ? u.getProtocol() + canonicalUrl : canonicalUrl).toString();
         } catch (final MalformedURLException e) {
             logger.warn("Invalid canonical url: " + baseUrl + " : " + canonicalUrl, e);
         }
@@ -561,7 +692,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 buf.append("\n");
             }
         } catch (final Exception e) {
-            logger.warn("Could not parse a value of " + xpath);
+            logger.warn("Could not parse a value of " + xpath, e);
         }
         return buf.toString().trim();
     }
@@ -580,7 +711,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
         try {
-            final URL url = new URL(baseHref != null ? baseHref : responseData.getUrl());
+            final URL url = getBaseUrl(responseData.getUrl(), baseHref);
             for (final Map.Entry<String, String> entry : childUrlRuleMap.entrySet()) {
                 for (final String u : getUrlFromTagAttribute(url, document, entry.getKey(), entry.getValue(), responseData.getCharSet())) {
                     anchorList.add(RequestDataBuilder.newRequestData().get().url(u).build());
@@ -589,8 +720,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             anchorList = convertChildUrlList(anchorList);
         } catch (final Exception e) {
             logger.warn("Could not parse anchor tags.", e);
-            //        } finally {
-            //            xpathAPI.remove();
         }
 
         final List<String> urlList = new ArrayList<>(anchorList.size());
@@ -598,6 +727,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             urlList.add(requestData.getUrl());
         }
         return urlList;
+    }
+
+    protected URL getBaseUrl(final String currentUrl, final String baseHref) throws MalformedURLException {
+        if (baseHref != null) {
+            return getURL(currentUrl, baseHref);
+        }
+        return new URL(currentUrl);
     }
 
     @Override
@@ -628,17 +764,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     @Override
-    protected boolean isValidPath(final String path) {
-        return super.isValidPath(path);
-    }
-
-    @Override
     protected void addChildUrlFromTagAttribute(final List<String> urlList, final URL url, final String attrValue, final String encoding) {
         final String urlValue = attrValue.trim();
         URL childUrl;
         String u = null;
         try {
-            childUrl = new URL(url, urlValue);
+            childUrl = new URL(url, urlValue.startsWith(":") ? url.getProtocol() + urlValue : urlValue);
             u = encodeUrl(normalizeUrl(childUrl.toExternalForm()), encoding);
         } catch (final MalformedURLException e) {
             final int pos = urlValue.indexOf(':');
@@ -675,4 +806,122 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         this.useGoogleOffOn = useGoogleOffOn;
     }
 
+    protected String getThumbnailUrl(final ResponseData responseData, final Document document) {
+        // TODO PageMap
+        try {
+            // meta thumbnail
+            final Node thumbnailNode = getXPathAPI().selectSingleNode(document, META_NAME_THUMBNAIL_CONTENT);
+            if (thumbnailNode != null) {
+                final String content = thumbnailNode.getTextContent();
+                if (StringUtil.isNotBlank(content)) {
+                    final URL thumbnailUrl = getURL(responseData.getUrl(), content);
+                    if (thumbnailUrl != null) {
+                        return thumbnailUrl.toExternalForm();
+                    }
+                }
+            }
+
+            // meta og:image
+            final Node ogImageNode = getXPathAPI().selectSingleNode(document, META_PROPERTY_OGIMAGE_CONTENT);
+            if (ogImageNode != null) {
+                final String content = ogImageNode.getTextContent();
+                if (StringUtil.isNotBlank(content)) {
+                    final URL thumbnailUrl = getURL(responseData.getUrl(), content);
+                    if (thumbnailUrl != null) {
+                        return thumbnailUrl.toExternalForm();
+                    }
+                }
+            }
+
+            final NodeList imgNodeList = getXPathAPI().selectNodeList(document, fessConfig.getThumbnailHtmlImageXpath());
+            String firstThumbnailUrl = null;
+            for (int i = 0; i < imgNodeList.getLength(); i++) {
+                final Node imgNode = imgNodeList.item(i);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("img tag: " + imgNode);
+                }
+                final NamedNodeMap attributes = imgNode.getAttributes();
+                final String thumbnailUrl = getThumbnailSrc(responseData.getUrl(), attributes);
+                final Integer height = getAttributeAsInteger(attributes, "height");
+                final Integer width = getAttributeAsInteger(attributes, "width");
+                if (!fessConfig.isThumbnailHtmlImageUrl(thumbnailUrl)) {
+                    continue;
+                } else if (height != null && width != null) {
+                    try {
+                        if (fessConfig.validateThumbnailSize(width, height)) {
+                            return thumbnailUrl;
+                        }
+                    } catch (final Exception e) {
+                        logger.debug("Failed to parse " + imgNode + " at " + responseData.getUrl(), e);
+                    }
+                } else if (firstThumbnailUrl == null) {
+                    firstThumbnailUrl = thumbnailUrl;
+                }
+            }
+
+            if (firstThumbnailUrl != null) {
+                return firstThumbnailUrl;
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to retrieve thumbnail url from " + responseData.getUrl(), e);
+        }
+        return null;
+    }
+
+    protected String getThumbnailSrc(final String url, final NamedNodeMap attributes) {
+        final Node srcNode = attributes.getNamedItem("src");
+        if (srcNode != null) {
+            try {
+                final URL thumbnailUrl = getURL(url, srcNode.getTextContent());
+                if (thumbnailUrl != null) {
+                    return thumbnailUrl.toExternalForm();
+                }
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to parse thumbnail url for " + url + " : " + attributes, e);
+                }
+            }
+        }
+        return null;
+    }
+
+    protected Integer getAttributeAsInteger(final NamedNodeMap attributes, final String name) {
+        final Node namedItem = attributes.getNamedItem(name);
+        if (namedItem == null) {
+            return null;
+        }
+        final String value = namedItem.getTextContent();
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            if (value.endsWith("%") || value.endsWith("px")) {
+                return null;
+            }
+            return 0;
+        }
+    }
+
+    protected URL getURL(final String currentUrl, final String url) throws MalformedURLException {
+        if (url != null) {
+            if (url.startsWith("://")) {
+                final String protocol = currentUrl.split(":")[0];
+                return new URL(protocol + url);
+            } else if (url.startsWith("//")) {
+                final String protocol = currentUrl.split(":")[0];
+                return new URL(protocol + ":" + url);
+            } else if (url.startsWith("/") || url.indexOf(':') == -1) {
+                return new URL(new URL(currentUrl), url);
+            }
+            return new URL(url);
+        }
+        return null;
+    }
+
+    public void addFieldRule(final String name, final String xpath, final boolean isPruned) {
+        addFieldRule(name, xpath);
+        fieldPrunedRuleMap.put(name, isPruned);
+    }
 }

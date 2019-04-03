@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,150 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 public class ViewHelperTest extends UnitFessTestCase {
     public ViewHelper viewHelper;
 
+    private UserAgentHelper userAgentHelper;
+
+    private PathMappingHelper pathMappingHelper;
+
+    private File propertiesFile;
+
+    @Override
     public void setUp() throws Exception {
         super.setUp();
+        propertiesFile = File.createTempFile("test", ".properties");
+        FileUtil.writeBytes(propertiesFile.getAbsolutePath(), new byte[0]);
+        propertiesFile.deleteOnExit();
+        DynamicProperties systemProps = new DynamicProperties(propertiesFile);
+        ComponentUtil.register(systemProps, "systemProperties");
+        userAgentHelper = new UserAgentHelper();
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+        pathMappingHelper = new PathMappingHelper();
+        pathMappingHelper.init();
+        ComponentUtil.register(pathMappingHelper, "pathMappingHelper");
         viewHelper = new ViewHelper();
         viewHelper.init();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        propertiesFile.delete();
+        super.tearDown();
+    }
+
+    public void test_getUrlLink() throws IOException {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isAppendQueryParameter() {
+                return false;
+            }
+
+            public String getIndexFieldUrl() {
+                return "url";
+            }
+
+            public String getIndexFieldDocId() {
+                return "doc_id";
+            }
+        });
+
+        // http
+        assertUrlLink("http://www.codelibs.org/", //
+                "http://www.codelibs.org/");
+        assertUrlLink("http://www.codelibs.org/あ", //
+                "http://www.codelibs.org/あ");
+        assertUrlLink("http://www.codelibs.org/%E3%81%82", //
+                "http://www.codelibs.org/%E3%81%82");
+        assertUrlLink("http://www.codelibs.org/%z", //
+                "http://www.codelibs.org/%z");
+        assertUrlLink("http://www.codelibs.org/?a=1&b=2", //
+                "http://www.codelibs.org/?a=1&b=2");
+
+        // https
+        assertUrlLink("https://www.codelibs.org/", //
+                "https://www.codelibs.org/");
+        assertUrlLink("https://www.codelibs.org/あ", //
+                "https://www.codelibs.org/あ");
+        assertUrlLink("https://www.codelibs.org/%E3%81%82", //
+                "https://www.codelibs.org/%E3%81%82");
+        assertUrlLink("https://www.codelibs.org/%z", //
+                "https://www.codelibs.org/%z");
+        assertUrlLink("https://www.codelibs.org/?a=1&b=2", //
+                "https://www.codelibs.org/?a=1&b=2");
+
+        // ftp
+        assertUrlLink("ftp://www.codelibs.org/", //
+                "ftp://www.codelibs.org/");
+        assertUrlLink("ftp://www.codelibs.org/あ", //
+                "ftp://www.codelibs.org/あ");
+        assertUrlLink("ftp://www.codelibs.org/%E3%81%82", //
+                "ftp://www.codelibs.org/%E3%81%82");
+        assertUrlLink("ftp://www.codelibs.org/%z", //
+                "ftp://www.codelibs.org/%z");
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.IE;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+        FileUtil.writeBytes(propertiesFile.getAbsolutePath(), new byte[0]);
+
+        // file
+        assertUrlLink("file:/home/taro/test.txt", //
+                "file://home/taro/test.txt");
+        assertUrlLink("file:/home/taro/あ.txt", //
+                "file://home/taro/あ.txt");
+        assertUrlLink("file:/home/taro/%E3%81%82.txt", //
+                "file://home/taro/あ.txt");
+
+        // smb->file
+        assertUrlLink("smb:/home/taro/test.txt", //
+                "file://home/taro/test.txt");
+        assertUrlLink("smb:/home/taro/あ.txt", //
+                "file://home/taro/あ.txt");
+        assertUrlLink("smb:/home/taro/%E3%81%82.txt", //
+                "file://home/taro/%E3%81%82.txt");
+
+        PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("ftp:");
+        pathMapping.setReplacement("file:");
+        ComponentUtil.getPathMappingHelper().cachedPathMappingList.add(pathMapping);
+        // ftp->file
+        assertUrlLink("ftp:/home/taro/test.txt", //
+                "file://home/taro/test.txt");
+        assertUrlLink("ftp:/home/taro/あ.txt", //
+                "file://home/taro/あ.txt");
+        assertUrlLink("ftp:/home/taro/%E3%81%82.txt", //
+                "file://home/taro/%E3%81%82.txt");
+
+        assertUrlLink(null, "#not-found-docId");
+        assertUrlLink("", "#not-found-docId");
+        assertUrlLink(" ", "#not-found-docId");
+    }
+
+    private void assertUrlLink(String url, String expected) {
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "docId");
+        doc.put("url", url);
+        assertEquals(expected, viewHelper.getUrlLink(doc));
     }
 
     public void test_replaceHighlightQueries() {
@@ -79,13 +209,30 @@ public class ViewHelperTest extends UnitFessTestCase {
         text = "1ABC2";
         queries = new String[] { "abc" };
         assertEquals("1<strong>abc</strong>2", viewHelper.replaceHighlightQueries(text, queries));
+
+        text = "abc on exy";
+        queries = new String[] { "on" };
+        assertEquals("abc <strong>on</strong> exy", viewHelper.replaceHighlightQueries(text, queries));
     }
 
     public void test_escapeHighlight() {
-        viewHelper = new ViewHelper();
+        ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
+        String text;
 
-        String text = "";
+        text = "111 222" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals("111 222" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
+
+        text = "111.222" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals("222" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
+
+        text = "111\n222" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals("222" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
+
+        text = "あああ。いいい" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals("いいい" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
+
+        text = "";
         assertEquals("", viewHelper.escapeHighlight(text));
 
         text = "aaa";
@@ -98,6 +245,8 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals(viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost + "&lt;b&gt;bbb&lt;/b&gt;",
                 viewHelper.escapeHighlight(text));
 
+        text = "111" + viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals("111" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
     }
 
     public void test_getSitePath() {
@@ -157,5 +306,47 @@ public class ViewHelperTest extends UnitFessTestCase {
         sitePath = "1.2.3.4/user/";
         docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
+    }
+
+    public void test_getContentTitle() {
+        final Set<String> querySet = new HashSet<>();
+        ViewHelper viewHelper = new ViewHelper() {
+            @Override
+            protected OptionalThing<Set<String>> getQuerySet() {
+                return OptionalThing.of(querySet);
+            }
+        };
+        viewHelper.init();
+
+        querySet.add("aaa");
+
+        final Map<String, Object> document = new HashMap<>();
+        document.put("title", "");
+        assertEquals("", viewHelper.getContentTitle(document));
+
+        document.put("title", "111");
+        assertEquals("111", viewHelper.getContentTitle(document));
+
+        document.put("title", "aaa");
+        assertEquals("<strong>aaa</strong>", viewHelper.getContentTitle(document));
+
+        document.put("title", "AAA");
+        assertEquals("<strong>AAA</strong>", viewHelper.getContentTitle(document));
+
+        document.put("title", "111AaA222bbb");
+        assertEquals("111<strong>AaA</strong>222bbb", viewHelper.getContentTitle(document));
+
+        document.put("title", "aaaAAA");
+        assertEquals("<strong>aaa</strong><strong>AAA</strong>", viewHelper.getContentTitle(document));
+
+        querySet.add("BBB");
+
+        document.put("title", "111AaA222bbb");
+        assertEquals("111<strong>AaA</strong>222<strong>bbb</strong>", viewHelper.getContentTitle(document));
+
+        querySet.add("on");
+        document.put("title", "on 111 strong on aaaa");
+        assertEquals("<strong>on</strong> 111 str<strong>on</strong>g <strong>on</strong> <strong>aaa</strong>a",
+                viewHelper.getContentTitle(document));
     }
 }

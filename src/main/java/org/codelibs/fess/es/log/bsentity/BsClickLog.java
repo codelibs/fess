@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,26 +37,29 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** urlId */
+    protected String urlId;
+
+    /** docId */
+    protected String docId;
+
+    /** order */
+    protected Integer order;
+
+    /** queryId */
+    protected String queryId;
+
     /** queryRequestedAt */
     protected LocalDateTime queryRequestedAt;
 
     /** requestedAt */
     protected LocalDateTime requestedAt;
 
-    /** queryId */
-    protected String queryId;
-
-    /** docId */
-    protected String docId;
-
-    /** userSessionId */
-    protected String userSessionId;
-
     /** url */
     protected String url;
 
-    /** order */
-    protected Integer order;
+    /** userSessionId */
+    protected String userSessionId;
 
     // [Referrers] *comment only
 
@@ -79,26 +82,29 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
+        if (urlId != null) {
+            addFieldToSource(sourceMap, "urlId", urlId);
+        }
+        if (docId != null) {
+            addFieldToSource(sourceMap, "docId", docId);
+        }
+        if (order != null) {
+            addFieldToSource(sourceMap, "order", order);
+        }
+        if (queryId != null) {
+            addFieldToSource(sourceMap, "queryId", queryId);
+        }
         if (queryRequestedAt != null) {
             addFieldToSource(sourceMap, "queryRequestedAt", queryRequestedAt);
         }
         if (requestedAt != null) {
             addFieldToSource(sourceMap, "requestedAt", requestedAt);
         }
-        if (queryId != null) {
-            addFieldToSource(sourceMap, "queryId", queryId);
-        }
-        if (docId != null) {
-            addFieldToSource(sourceMap, "docId", docId);
-        }
-        if (userSessionId != null) {
-            addFieldToSource(sourceMap, "userSessionId", userSessionId);
-        }
         if (url != null) {
             addFieldToSource(sourceMap, "url", url);
         }
-        if (order != null) {
-            addFieldToSource(sourceMap, "order", order);
+        if (userSessionId != null) {
+            addFieldToSource(sourceMap, "userSessionId", userSessionId);
         }
         return sourceMap;
     }
@@ -113,13 +119,14 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(urlId);
+        sb.append(dm).append(docId);
+        sb.append(dm).append(order);
+        sb.append(dm).append(queryId);
         sb.append(dm).append(queryRequestedAt);
         sb.append(dm).append(requestedAt);
-        sb.append(dm).append(queryId);
-        sb.append(dm).append(docId);
-        sb.append(dm).append(userSessionId);
         sb.append(dm).append(url);
-        sb.append(dm).append(order);
+        sb.append(dm).append(userSessionId);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -130,6 +137,46 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public String getUrlId() {
+        checkSpecifiedProperty("urlId");
+        return convertEmptyToNull(urlId);
+    }
+
+    public void setUrlId(String value) {
+        registerModifiedProperty("urlId");
+        this.urlId = value;
+    }
+
+    public String getDocId() {
+        checkSpecifiedProperty("docId");
+        return convertEmptyToNull(docId);
+    }
+
+    public void setDocId(String value) {
+        registerModifiedProperty("docId");
+        this.docId = value;
+    }
+
+    public Integer getOrder() {
+        checkSpecifiedProperty("order");
+        return order;
+    }
+
+    public void setOrder(Integer value) {
+        registerModifiedProperty("order");
+        this.order = value;
+    }
+
+    public String getQueryId() {
+        checkSpecifiedProperty("queryId");
+        return convertEmptyToNull(queryId);
+    }
+
+    public void setQueryId(String value) {
+        registerModifiedProperty("queryId");
+        this.queryId = value;
+    }
+
     public LocalDateTime getQueryRequestedAt() {
         checkSpecifiedProperty("queryRequestedAt");
         return queryRequestedAt;
@@ -150,36 +197,6 @@ public class BsClickLog extends EsAbstractEntity {
         this.requestedAt = value;
     }
 
-    public String getQueryId() {
-        checkSpecifiedProperty("queryId");
-        return convertEmptyToNull(queryId);
-    }
-
-    public void setQueryId(String value) {
-        registerModifiedProperty("queryId");
-        this.queryId = value;
-    }
-
-    public String getDocId() {
-        checkSpecifiedProperty("docId");
-        return convertEmptyToNull(docId);
-    }
-
-    public void setDocId(String value) {
-        registerModifiedProperty("docId");
-        this.docId = value;
-    }
-
-    public String getUserSessionId() {
-        checkSpecifiedProperty("userSessionId");
-        return convertEmptyToNull(userSessionId);
-    }
-
-    public void setUserSessionId(String value) {
-        registerModifiedProperty("userSessionId");
-        this.userSessionId = value;
-    }
-
     public String getUrl() {
         checkSpecifiedProperty("url");
         return convertEmptyToNull(url);
@@ -190,13 +207,13 @@ public class BsClickLog extends EsAbstractEntity {
         this.url = value;
     }
 
-    public Integer getOrder() {
-        checkSpecifiedProperty("order");
-        return order;
+    public String getUserSessionId() {
+        checkSpecifiedProperty("userSessionId");
+        return convertEmptyToNull(userSessionId);
     }
 
-    public void setOrder(Integer value) {
-        registerModifiedProperty("order");
-        this.order = value;
+    public void setUserSessionId(String value) {
+        registerModifiedProperty("userSessionId");
+        this.userSessionId = value;
     }
 }

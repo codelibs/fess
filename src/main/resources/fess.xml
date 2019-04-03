@@ -8,6 +8,15 @@
 	<include path="esflute_user.xml"/>
 	<include path="esflute_log.xml"/>
 
+	<component name="curlHelper" class="org.codelibs.fess.helper.CurlHelper">
+	</component>
+	<component name="languageHelper" class="org.codelibs.fess.helper.LanguageHelper">
+		<property name="detector">
+			<component class="org.apache.tika.langdetect.OptimaizeLangDetector">
+				<postConstruct name="loadModels"></postConstruct>
+			</component>
+		</property>
+	</component>
 	<component name="searchLogHelper" class="org.codelibs.fess.helper.SearchLogHelper">
 		<!-- 
 		<property name="userCheckInterval">5 * 60 * 1000</property>
@@ -18,6 +27,8 @@
 	</component>
 	<component name="documentHelper" class="org.codelibs.fess.helper.DocumentHelper">
 	</component>
+	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
+	</component>
 	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
 	</component>
 	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
@@ -25,6 +36,8 @@
 	<component name="permissionHelper" class="org.codelibs.fess.helper.PermissionHelper">
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
+	</component>
+	<component name="virtualHostHelper" class="org.codelibs.fess.helper.VirtualHostHelper">
 	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
 		<postConstruct name="addDesignJspFileName">
@@ -56,20 +69,16 @@
 			<arg>"searchOptions.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
+			<arg>"advance"</arg>
+			<arg>"advance.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
 			<arg>"help"</arg>
 			<arg>"help.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
 			<arg>"error"</arg>
 			<arg>"error/error.jsp"</arg>
-		</postConstruct>
-		<postConstruct name="addDesignJspFileName">
-			<arg>"errorHeader"</arg>
-			<arg>"error/header.jsp"</arg>
-		</postConstruct>
-		<postConstruct name="addDesignJspFileName">
-			<arg>"errorFooter"</arg>
-			<arg>"error/footer.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
 			<arg>"errorNotFound"</arg>
@@ -119,7 +128,5 @@
 		<property name="valueSeparator">"\\n"</property>
 		<property name="roleSeparator">","</property>
 		 -->
-	</component>
-	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
 	</component>
 </components>

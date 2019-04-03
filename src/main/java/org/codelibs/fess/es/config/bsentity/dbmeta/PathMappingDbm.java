@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,12 +90,12 @@ public class PathMappingDbm extends AbstractDBMeta {
                 (et, vl) -> ((PathMapping) et).setReplacement(DfTypeUtil.toString(vl)), "replacement");
         setupEpg(_epgMap, et -> ((PathMapping) et).getSortOrder(), (et, vl) -> ((PathMapping) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
-        setupEpg(_epgMap, et -> ((PathMapping) et).getUserAgent(), (et, vl) -> ((PathMapping) et).setUserAgent(DfTypeUtil.toString(vl)),
-                "userAgent");
         setupEpg(_epgMap, et -> ((PathMapping) et).getUpdatedBy(), (et, vl) -> ((PathMapping) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((PathMapping) et).getUpdatedTime(), (et, vl) -> ((PathMapping) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getUserAgent(), (et, vl) -> ((PathMapping) et).setUserAgent(DfTypeUtil.toString(vl)),
+                "userAgent");
     }
 
     @Override
@@ -133,23 +133,23 @@ public class PathMappingDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnProcessType = cci("processType", "processType", null, null, String.class, "processType", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRegex = cci("regex", "regex", null, null, String.class, "regex", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnReplacement = cci("replacement", "replacement", null, null, String.class, "replacement", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
-            false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false,
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
@@ -175,16 +175,16 @@ public class PathMappingDbm extends AbstractDBMeta {
         return _columnSortOrder;
     }
 
-    public ColumnInfo columnUserAgent() {
-        return _columnUserAgent;
-    }
-
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
+    }
+
+    public ColumnInfo columnUserAgent() {
+        return _columnUserAgent;
     }
 
     protected List<ColumnInfo> ccil() {
@@ -195,9 +195,9 @@ public class PathMappingDbm extends AbstractDBMeta {
         ls.add(columnRegex());
         ls.add(columnReplacement());
         ls.add(columnSortOrder());
-        ls.add(columnUserAgent());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
+        ls.add(columnUserAgent());
         return ls;
     }
 

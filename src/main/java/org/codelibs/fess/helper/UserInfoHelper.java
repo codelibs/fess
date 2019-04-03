@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -30,40 +29,50 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.core.security.PrimaryCipher;
+import org.lastaflute.web.login.TypicalUserBean;
+import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public class UserInfoHelper {
-    @Resource
-    protected SearchLogHelper searchLogHelper;
+    protected static final String USER_BEAN = "lastaflute.action.USER_BEAN.FessUserBean";
 
-    public int resultDocIdsCacheSize = 20;
+    protected int resultDocIdsCacheSize = 20;
 
-    public String cookieName = "fsid";
+    protected String cookieName = "fsid";
 
-    public String cookieDomain;
+    protected String cookieDomain;
 
-    public int cookieMaxAge = 30 * 24 * 60 * 60;// 1 month
+    protected int cookieMaxAge = 30 * 24 * 60 * 60;// 1 month
 
-    public String cookiePath;
+    protected String cookiePath = "/";
 
-    public Boolean cookieSecure;
+    protected Boolean cookieSecure;
 
     public String getUserCode() {
         final HttpServletRequest request = LaRequestUtil.getRequest();
 
         String userCode = (String) request.getAttribute(Constants.USER_CODE);
+        if (StringUtil.isNotBlank(userCode)) {
+            return userCode;
+        }
 
-        if (StringUtil.isBlank(userCode)) {
-            userCode = getUserCodeFromCookie(request);
+        userCode = getUserCodeFromRequest(request);
+        if (StringUtil.isNotBlank(userCode)) {
+            return userCode;
         }
 
         if (!request.isRequestedSessionIdValid()) {
             return null;
         }
 
+        userCode = getUserCodeFromCookie(request);
         if (StringUtil.isBlank(userCode)) {
-            userCode = getId();
+            userCode = getUserCodeFromUserBean(request);
+            if (StringUtil.isBlank(userCode)) {
+                userCode = getId();
+            }
         }
 
         if (StringUtil.isNotBlank(userCode)) {
@@ -72,18 +81,65 @@ public class UserInfoHelper {
         return userCode;
     }
 
+    protected String getUserCodeFromUserBean(final HttpServletRequest request) {
+        final SessionManager sessionManager = ComponentUtil.getComponent(SessionManager.class);
+        String userCode =
+                sessionManager.getAttribute(USER_BEAN, TypicalUserBean.class).filter(u -> !Constants.EMPTY_USER_ID.equals(u.getUserId()))
+                        .map(u -> u.getUserId().toString()).orElse(StringUtil.EMPTY);
+        if (StringUtil.isBlank(userCode)) {
+            return null;
+        }
+
+        final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
+        userCode = cipher.encrypt(userCode);
+        request.setAttribute(Constants.USER_CODE, userCode);
+        deleteUserCodeFromCookie(request);
+        return userCode;
+    }
+
+    public void deleteUserCodeFromCookie(final HttpServletRequest request) {
+        final String cookieValue = getUserCodeFromCookie(request);
+        if (cookieValue != null) {
+            updateCookie(cookieValue, 0);
+        }
+    }
+
+    protected String getUserCodeFromRequest(final HttpServletRequest request) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String userCode = request.getParameter(fessConfig.getUserCodeRequestParameter());
+        if (StringUtil.isBlank(userCode)) {
+            return null;
+        }
+
+        final int length = userCode.length();
+        if (fessConfig.getUserCodeMinLengthAsInteger().intValue() > length
+                || fessConfig.getUserCodeMaxLengthAsInteger().intValue() < length) {
+            return null;
+        }
+
+        if (fessConfig.isValidUserCode(userCode)) {
+            request.setAttribute(Constants.USER_CODE, userCode);
+            return userCode;
+        }
+        return null;
+    }
+
     protected String getId() {
         return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY);
     }
 
     protected void updateUserSessionId(final String userCode) {
-        searchLogHelper.updateUserInfo(userCode);
+        ComponentUtil.getSearchLogHelper().getUserInfo(userCode);
 
         final HttpServletRequest request = LaRequestUtil.getRequest();
         request.setAttribute(Constants.USER_CODE, userCode);
 
+        updateCookie(userCode, cookieMaxAge);
+    }
+
+    protected void updateCookie(final String userCode, final int age) {
         final Cookie cookie = new Cookie(cookieName, userCode);
-        cookie.setMaxAge(cookieMaxAge);
+        cookie.setMaxAge(age);
         if (StringUtil.isNotBlank(cookieDomain)) {
             cookie.setDomain(cookieDomain);
         }
@@ -148,5 +204,29 @@ public class UserInfoHelper {
             session.setAttribute(Constants.RESULT_DOC_ID_CACHE, resultDocIdsCache);
         }
         return resultDocIdsCache;
+    }
+
+    public void setResultDocIdsCacheSize(final int resultDocIdsCacheSize) {
+        this.resultDocIdsCacheSize = resultDocIdsCacheSize;
+    }
+
+    public void setCookieName(final String cookieName) {
+        this.cookieName = cookieName;
+    }
+
+    public void setCookieDomain(final String cookieDomain) {
+        this.cookieDomain = cookieDomain;
+    }
+
+    public void setCookieMaxAge(final int cookieMaxAge) {
+        this.cookieMaxAge = cookieMaxAge;
+    }
+
+    public void setCookiePath(final String cookiePath) {
+        this.cookiePath = cookiePath;
+    }
+
+    public void setCookieSecure(final Boolean cookieSecure) {
+        this.cookieSecure = cookieSecure;
     }
 }

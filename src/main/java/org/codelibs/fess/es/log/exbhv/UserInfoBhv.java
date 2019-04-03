@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.regex.Pattern;
 
 import org.codelibs.fess.es.log.bsbhv.BsUserInfoBhv;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +32,25 @@ import org.slf4j.LoggerFactory;
  * @author FreeGen
  */
 public class UserInfoBhv extends BsUserInfoBhv {
-
     private static final Logger logger = LoggerFactory.getLogger(UserInfoBhv.class);
 
+    private String indexName = null;
+
     @Override
-    protected LocalDateTime toLocalDateTime(Object value) {
+    protected String asEsIndex() {
+        if (indexName == null) {
+            final String name = ComponentUtil.getFessConfig().getIndexLogIndex();
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote("fess_log"), name);
+        }
+        return indexName;
+    }
+
+    @Override
+    protected LocalDateTime toLocalDateTime(final Object value) {
         if (value != null) {
             try {
-                Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
-                LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                final Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
+                final LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 return date;
             } catch (final DateTimeParseException e) {
                 logger.debug("Invalid date format: " + value, e);

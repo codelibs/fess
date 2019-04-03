@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -32,10 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.codelibs.core.io.CopyUtil;
-import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.elasticsearch.runner.net.Curl.Method;
-import org.codelibs.elasticsearch.runner.net.CurlRequest;
+import org.codelibs.curl.Curl.Method;
+import org.codelibs.curl.CurlRequest;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.exception.FessSystemException;
@@ -59,19 +60,29 @@ public class EsApiManager extends BaseApiManager {
         setPathPrefix(ADMIN_SERVER);
     }
 
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        ComponentUtil.getWebApiManagerFactory().add(this);
+    }
+
     @Override
     public boolean matches(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
-        if (servletPath.startsWith(pathPrefix)) {
-            final RequestManager requestManager = ComponentUtil.getRequestManager();
-            return requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE);
-        }
-        return false;
+        return servletPath.startsWith(pathPrefix);
     }
 
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
+        final RequestManager requestManager = ComponentUtil.getRequestManager();
+        if (!requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access: " + request.getServletPath());
+            return;
+        }
+
         try {
             getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
                 final String servletPath = request.getServletPath();
@@ -108,13 +119,18 @@ public class EsApiManager extends BaseApiManager {
             }
         }
 
-        if (path.startsWith("/_plugin/") || path.equals("/_plugin")) {
+        if (path.equals("/_plugin") || path.startsWith("/_plugin/")) {
             processPluginRequest(request, response, path.replaceFirst("^/_plugin", StringUtil.EMPTY));
             return;
         }
 
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
-        final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
+        final CurlRequest curlRequest = ComponentUtil.getCurlHelper().request(httpMethod, path);
+
+        final String contentType = request.getHeader("Content-Type");
+        if (StringUtil.isNotEmpty(contentType)) {
+            curlRequest.header("Content-Type", contentType);
+        }
 
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
@@ -123,7 +139,7 @@ public class EsApiManager extends BaseApiManager {
                 curlRequest.param(entry.getKey(), entry.getValue()[0]);
             }
         });
-        curlRequest.onConnect((req, con) -> {
+        try (final CurlResponse curlResponse = curlRequest.onConnect((req, con) -> {
             con.setDoOutput(true);
             if (httpMethod != Method.GET) {
                 try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
@@ -132,28 +148,25 @@ public class EsApiManager extends BaseApiManager {
                     throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, e);
                 }
             }
-        }).execute(con -> {
-            try (InputStream in = con.getInputStream(); ServletOutputStream out = response.getOutputStream()) {
-                response.setStatus(con.getResponseCode());
+        }).execute()) {
+
+            try (ServletOutputStream out = response.getOutputStream(); InputStream in = curlResponse.getContentAsStream()) {
+                response.setStatus(curlResponse.getHttpStatusCode());
+                writeHeaders(response);
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
-            } catch (final Exception e) {
-                if (e.getCause() instanceof ClientAbortException) {
-                    logger.debug("Client aborts this request.", e);
-                } else {
-                    try (InputStream err = con.getErrorStream()) {
-                        logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
-                    } catch (final IOException e1) {
-                        // ignore
             }
-            throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+        } catch (final Exception e) {
+            if (e.getCause() instanceof ClientAbortException) {
+                logger.debug("Client aborts this request.", e);
+            } else {
+                throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+            }
         }
     }
-}       );
-    }
 
-    private void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
+    protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         Path filePath = ResourceUtil.getSitePath(path.replaceAll("\\.\\.+", StringUtil.EMPTY).replaceAll("/+", "/").split("/"));
         if (Files.isDirectory(filePath)) {
             filePath = filePath.resolve("index.html");
@@ -161,6 +174,7 @@ public class EsApiManager extends BaseApiManager {
         if (Files.exists(filePath)) {
             try (InputStream in = Files.newInputStream(filePath); ServletOutputStream out = response.getOutputStream()) {
                 response.setStatus(HttpServletResponse.SC_OK);
+                writeHeaders(response);
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
@@ -170,6 +184,7 @@ public class EsApiManager extends BaseApiManager {
             }
         } else {
             try {
+                writeHeaders(response);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, path + " is not found.");
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
@@ -195,5 +210,10 @@ public class EsApiManager extends BaseApiManager {
 
     private SessionManager getSessionManager() {
         return ComponentUtil.getComponent(SessionManager.class);
+    }
+
+    @Override
+    protected void writeHeaders(final HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiDashboardResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }

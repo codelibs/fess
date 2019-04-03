@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.file_config";
     }
 
     @Override
@@ -85,15 +85,16 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
             result.setIncludedDocPaths(DfTypeUtil.toString(source.get("includedDocPaths")));
             result.setIncludedPaths(DfTypeUtil.toString(source.get("includedPaths")));
             result.setIntervalTime(DfTypeUtil.toInteger(source.get("intervalTime")));
-            result.setTimeToLive(DfTypeUtil.toInteger(source.get("timeToLive")));
             result.setMaxAccessCount(DfTypeUtil.toLong(source.get("maxAccessCount")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setNumOfThread(DfTypeUtil.toInteger(source.get("numOfThread")));
             result.setPaths(DfTypeUtil.toString(source.get("paths")));
             result.setPermissions(toStringArray(source.get("permissions")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setTimeToLive(DfTypeUtil.toInteger(source.get("timeToLive")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setVirtualHosts(toStringArray(source.get("virtualHosts")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,20 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codelibs.core.collection.LruHashMap;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
@@ -37,11 +40,9 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.es.log.exentity.ClickLog;
-import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -49,6 +50,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
@@ -56,22 +58,34 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 public class SearchLogHelper {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogHelper.class);
 
-    public long userCheckInterval = 5 * 60 * 1000L;// 5 min
+    protected long userCheckInterval = 10 * 60 * 1000L;// 10 min
 
-    public int userInfoCacheSize = 1000;
+    protected int userInfoCacheSize = 10000;
 
     protected volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<>();
 
     protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<>();
 
-    protected Map<String, Long> userInfoCache;
+    protected LoadingCache<String, UserInfo> userInfoCache;
 
     @PostConstruct
     public void init() {
-        userInfoCache = new LruHashMap<>(userInfoCacheSize);
+        userInfoCache = CacheBuilder.newBuilder()//
+                .maximumSize(userInfoCacheSize)//
+                .expireAfterWrite(userCheckInterval, TimeUnit.MILLISECONDS)//
+                .build(new CacheLoader<String, UserInfo>() {
+                    @Override
+                    public UserInfo load(final String key) throws Exception {
+                        return storeUserInfo(key);
+                    }
+                });
     }
 
     public void addSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId, final String query,
@@ -85,6 +99,7 @@ public class SearchLogHelper {
             final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
+                searchLog.setUserInfo(getUserInfo(userCode));
             }
         }
 
@@ -94,8 +109,8 @@ public class SearchLogHelper {
         searchLog.setResponseTime(queryResponseList.getExecTime());
         searchLog.setQueryTime(queryResponseList.getQueryTime());
         searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
-        searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
         searchLog.setRequestedAt(requestedTime);
+        searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
         ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).ifPresent(user -> {
@@ -109,10 +124,12 @@ public class SearchLogHelper {
         final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
         if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_XML.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_XML);
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
         } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(accessType)) {
+            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
         } else {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
         }
@@ -120,20 +137,39 @@ public class SearchLogHelper {
         if (languages != null) {
             searchLog.setLanguages(StringUtils.join((String[]) languages, ","));
         } else {
-            searchLog.setLanguages("");
+            searchLog.setLanguages(StringUtil.EMPTY);
+        }
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        if (StringUtil.isNotBlank(virtualHostKey)) {
+            searchLog.setVirtualHost(virtualHostKey);
+        } else {
+            searchLog.setVirtualHost(StringUtil.EMPTY);
         }
 
         @SuppressWarnings("unchecked")
         final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
         if (fieldLogMap != null) {
+            final int queryMaxLength = ComponentUtil.getFessConfig().getQueryMaxLengthAsInteger();
             for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
                 for (final String value : logEntry.getValue()) {
-                    searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, 1000));
+                    searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
                 }
             }
         }
 
+        addDocumentsInResponse(queryResponseList, searchLog);
+
         searchLogQueue.add(searchLog);
+    }
+
+    protected void addDocumentsInResponse(final QueryResponseList queryResponseList, final SearchLog searchLog) {
+        if (ComponentUtil.getFessConfig().isLoggingSearchDocsEnabled()) {
+            queryResponseList.stream().forEach(res -> {
+                final Map<String, Object> map = new HashMap<>();
+                Arrays.stream(ComponentUtil.getFessConfig().getLoggingSearchDocsFieldsAsArray()).forEach(s -> map.put(s, res.get(s)));
+                searchLog.addDocument(map);
+            });
+        }
     }
 
     public void addClickLog(final ClickLog clickLog) {
@@ -168,28 +204,35 @@ public class SearchLogHelper {
         });
     }
 
-    public void updateUserInfo(final String userCode) {
-        final long current = System.currentTimeMillis();
-        final Long time = userInfoCache.get(userCode);
-        if (time == null || current - time.longValue() > userCheckInterval) {
+    protected UserInfo storeUserInfo(final String userCode) {
+        final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
 
-            final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTimeAsLocalDateTime();
+        final UserInfo userInfo = userInfoBhv.selectByPK(userCode).map(e -> {
+            e.setUpdatedAt(now);
+            return e;
+        }).orElseGet(() -> {
+            final UserInfo e = new UserInfo();
+            e.setId(userCode);
+            e.setCreatedAt(now);
+            e.setUpdatedAt(now);
+            return e;
+        });
+        CommonPoolUtil.execute(() -> userInfoBhv.insertOrUpdate(userInfo));
+        return userInfo;
+    }
 
-            final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTimeAsLocalDateTime();
-            userInfoBhv.selectByPK(userCode).ifPresent(userInfo -> {
-                userInfo.setUpdatedAt(now);
-                new Thread(() -> {
-                    userInfoBhv.insertOrUpdate(userInfo);
-                }).start();
-            }).orElse(() -> {
-                final UserInfo userInfo = new UserInfo();
-                userInfo.setId(userCode);
-                userInfo.setCreatedAt(now);
-                userInfo.setUpdatedAt(now);
-                userInfoBhv.insert(userInfo);
-            });
-            userInfoCache.put(userCode, current);
+    public OptionalEntity<UserInfo> getUserInfo(final String userCode) {
+        if (StringUtil.isNotBlank(userCode)) {
+            try {
+                return OptionalEntity.of(userInfoCache.get(userCode));
+            } catch (final ExecutionException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to access UserInfo cache.", e);
+                }
+            }
         }
+        return OptionalEntity.empty();
     }
 
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
@@ -256,19 +299,10 @@ public class SearchLogHelper {
         }
     }
 
-    private void storeSearchLogList(final List<SearchLog> searchLogList) {
+    protected void storeSearchLogList(final List<SearchLog> searchLogList) {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
-        final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
         searchLogBhv.batchUpdate(searchLogList, op -> {
             op.setRefreshPolicy(Constants.TRUE);
-        });
-        searchLogList.stream().forEach(searchLog -> {
-            final List<SearchFieldLog> fieldLogList = new ArrayList<>();
-            searchLog.getSearchFieldLogList().stream().forEach(fieldLog -> {
-                fieldLog.setSearchLogId(searchLog.getId());
-                fieldLogList.add(fieldLog);
-            });
-            searchFieldLogBhv.batchInsert(fieldLogList);
         });
     }
 
@@ -323,8 +357,8 @@ public class SearchLogHelper {
                                             new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
                                     final Map<String, Object> upsertMap = new HashMap<>();
                                     upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
-                                    builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), fessConfig
-                                            .getIndexDocumentType(), id).script(script).upsert(upsertMap));
+                                    builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script).upsert(
+                                            upsertMap));
                                 }
                             });
                 });
@@ -332,5 +366,13 @@ public class SearchLogHelper {
                 logger.warn("Failed to update clickCounts", e);
             }
         }
+    }
+
+    public void setUserCheckInterval(final long userCheckInterval) {
+        this.userCheckInterval = userCheckInterval;
+    }
+
+    public void setUserInfoCacheSize(final int userInfoCacheSize) {
+        this.userInfoCacheSize = userInfoCacheSize;
     }
 }

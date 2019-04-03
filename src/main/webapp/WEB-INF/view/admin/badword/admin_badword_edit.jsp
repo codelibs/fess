@@ -94,7 +94,7 @@
 												key="labels.bad_word_suggest_word" /></label>
 										<div class="col-sm-9">
 											<la:errors property="suggestWord" />
-											<la:text property="suggestWord" styleClass="form-control" />
+											<la:text styleId="suggestWord" property="suggestWord" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

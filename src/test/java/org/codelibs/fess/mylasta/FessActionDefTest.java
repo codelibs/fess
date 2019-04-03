@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * governing permissions and limitations under the License.
  */
 package org.codelibs.fess.mylasta;
+
+import java.io.File;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.lastaflute.police.NonActionExtendsActionPolice;
@@ -40,6 +42,16 @@ public class FessActionDefTest extends UnitFessTestCase {
     }
 
     public void test_webPackageNinjaReferencePolice() throws Exception {
-        policeStoryOfJavaClassChase(new WebPackageNinjaReferencePolice());
+        policeStoryOfJavaClassChase(new WebPackageNinjaReferencePolice() {
+            public void handle(File srcFile, Class<?> clazz) {
+                final String webPackageKeyword = getWebPackageKeyword();
+                if (!clazz.getName().contains(webPackageKeyword) ||
+                // exclude app.web.api.admin packages
+                        clazz.getName().contains(".app.web.api.admin.")) {
+                    return;
+                }
+                check(srcFile, clazz, webPackageKeyword);
+            }
+        });
     }
 }

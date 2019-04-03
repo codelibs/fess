@@ -1,0 +1,12 @@
+{
+    "properties": {
+      "createdAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "updatedAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      }
+    }
+}

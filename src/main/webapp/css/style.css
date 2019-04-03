@@ -1,29 +1,27 @@
 /* Override some defaults */
+
 html {
 	min-height: 100%;
 	position: relative;
 }
 
 body {
-	padding-top: 70px;
-	margin-bottom: 4em;
+	padding: 1em 0;
+	margin: 56px 0 4em;
 }
 
 footer {
 	width: 100%;
 	bottom: 0;
-	left: 0; height : 4em;
+	height: 4em;
 	position: absolute;
 	border-top: 1px solid;
 	padding-top: 1em;
-	height: 4em;
 }
 
-.content {
-	min-height: 100%;
-}
-
-h1, h2, h3 {
+h1,
+h2,
+h3 {
 	line-height: 32px;
 }
 
@@ -39,176 +37,25 @@ h3 {
 	font-size: 18px;
 }
 
-.btn-ghost {
-	background: transparent;
+.form-control {
+	border-radius: 0px;
 }
 
-.btn-ghost.btn-default {
-	color: #777;
-}
-
-.btn-ghost.btn-primary {
-	color: #337ab7;
-}
-
-.btn-ghost.btn-success {
-	color: #5cb85c;
-}
-
-.btn-ghost.btn-info {
-	color: #5bc0de;
-}
-
-.btn-ghost.btn-warning {
-	color: #f0ad4e;
-}
-
-.btn-ghost.btn-danger {
-	color: #d9534f;
-}
-
-.btn-ghost.btn-primary:hover, .btn-ghost.btn-success:hover, .btn-ghost.btn-info:hover,
-	.btn-ghost.btn-warning:hover, .btn-ghost.btn-danger:hover {
-	color: #fff;
-}
-
-.btn-ghost.btn-white {
-	color: #fff;
-	border: 1px solid #fff;
-}
-
-.btn-ghost.btn-white:hover {
-	color: #333;
-	background: #fff;
-}
-
-.navbar .search-box {
-	padding: 0;
-}
-
-.nav-list li.reset {
-	margin-top: 10px;
-}
-
-.center {
-	text-align: center;
-}
-
-.modal-open {
-	overflow: auto;
-}
-
-h1.mainLogo {
-	margin-bottom: 1em;
-}
-
-#result ol {
-	list-style: none;
-	padding-left: 0;
-}
-
-#result ol li {
-	margin-bottom: 20px;
-}
-
-#result .title a:visited {
-	color: #014c8c;
-}
-
-#result .body cite {
-	color: #093;
-	font-style: normal;
-}
-
-#result .body a.cache {
-	color: #093;
-	margin-left: 10px;
-}
-
-#result .favorited {
-	display: none;
-}
-
-.searchFormBox {
-	text-align: center;
-	margin-top: 160px;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.form-stacked {
-	margin-top: 10px;
-}
-
-#contentOptionButton {
-	margin-left: 10px;
-}
-
-.searchButtonBox {
-	margin-top: 15px;
-}
-
-#searchOptions {
-	text-align: left;
-}
-
-.move-to-top {
-	margin-bottom: 10px;
-}
-
-.ellipsis {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-webkit-text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
-}
-
-.searchResultForm {
-	margin: 0;
-}
-
-.username {
-	margin-left: 2.0rem;
-	margin-right: 1.0rem;
-}
-
-button>i, a>i {
-	margin-right: 0.2em;
-}
-
-nav.navbar .form-inline {
-	margin-left: 20px;
-}
-
-#searchOptionsButton {
-	padding-left: 1.0rem;
-	padding-right: 0.8rem;
-	color: #000;
-}
-
-ul.searchOptionLabels {
-	list-style-type: none;
-	padding: 0;
-}
-
-ul.searchOptionLabels li {
-	display: inline-block;
-	margin-right: 10px;
-	vertical-align: middle;
-}
+/* header */
 
 #searchOptions {
 	position: fixed;
-	top: 0;
 	z-index: 10;
 }
 
 #searchOptions .container {
 	width: 500px;
-	overflow: hidden;
+	max-width: 100%;
+	height: 100%;
+	overflow: auto;
 	position: fixed;
 	top: 0;
+	bottom: 0;
 	right: -500px;
 	padding-top: 72px;
 	padding-bottom: 20px;
@@ -218,29 +65,30 @@ ul.searchOptionLabels li {
 }
 
 #searchOptions.active .container {
-	height: auto;
-	overflow-y: auto;
-	top: 0;
 	right: 0;
-	bottom: 0;
 }
 
-.centered {
-	float: none;
-	display: inline-block;
+/* index */
+
+.mainLogo {
+	margin-bottom: 1em;
 }
 
-#contentQuery {
-	display: inline-block;
+.searchFormBox {
+	margin-top: 8em;
+	margin-bottom: 4em;
 }
 
-.navbar-brand img {
-	padding-top: 4px;
+.notification {
+	font-size: 1.2em;
+	margin: 0.2em;
 }
 
-.form-control {
-	border-radius: 0px;
+.searchButtonBox {
+	margin-top: 1em;
 }
+
+/* search */
 
 :first-child.list-group-item {
 	border-radius: 0px;
@@ -250,140 +98,61 @@ ul.searchOptionLabels li {
 	border-radius: 0px;
 }
 
-.thumbnail {
-	width: 160px;
-	height: 160px;
+#result ol li {
+	margin: 1em 0;
+}
+
+#result ol li:first-child {
+	margin-top: 0;
+}
+
+#result .title a:visited {
+	color: #014c8c;
+}
+
+#result .body {
+	display: flex;
+	align-items: flex-start;
+}
+
+#result .site cite {
+	color: #093;
+	font-style: normal;
+}
+
+#result .more {
+	display: none;
+}
+
+#result .favorited {
+	display: none;
+}
+
+#result .thumbnail {
+	width: 100px;
+	min-height: 30px;
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
 }
 
-/* Large desktop */
-@media ( min-width : 74.9em) {
-	.visible-xs {
-		display: none !important;
-	}
-}
+/* Extra small devices (less than 576px) */
 
-/* Large devices (desktops, less than 75em) */
-@media ( max-width : 74.9em) {
-	.visible-xs {
-		display: none !important;
-	}
-}
-
-/* Medium devices (tablets, less than 62em) */
-@media ( max-width : 61.9em) {
-	.visible-xs {
-		display: none !important;
-	}
-}
-
-/* Small devices (landscape phones, less than 48em) */
-@media ( max-width : 47.9em) {
-	.br-xs {
-		display: block;
-	}
-	.hidden-xs {
-		display: none !important;
-	}
+@media (max-width: 575.98px) {
 	.mainLogo img {
 		width: 200px;
 	}
-	.navbar-brand img {
-		width: 80px;
-		padding-top: 6.5px;
-	}
 	.searchFormBox {
-		margin-top: 20px;
-	}
-	#result ol {
-		margin-left: 0;
+		margin-top: 4em;
 	}
 	#result .info {
 		display: none;
 	}
-	#searchOptions .container {
-		width: 100%;
-		right: -100%;
-	}
-	#searchOptions.active {
-		right: 0;
-	}
-	.description {
-		-moz-box-orient: vertical;
-		-ms-box-orient: vertical;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 3;
-		display: -webkit-box;
-		overflow: hidden !important;
-	}
-}
-
-/* Extra small devices (portrait phones, less than 34em) */
-@media ( max-width : 360px) {
-	.br-xs {
+	#result .more {
 		display: block;
 	}
-	.hidden-xs {
-		display: none !important;
-	}
-	.mainLogo img {
-		width: 200px;
-	}
-	.navbar-brand img {
-		width: 80px;
-		padding-top: 6.5px;
-	}
-	.searchFormBox {
-		margin-top: 80px;
-	}
-	#result .info {
-		display: none;
-	}
-	#subheader {
-		font-size: 90%;
-	}
-	#searchButton {
-		padding-left: 0.8rem;
-		padding-right: 0.8rem;
-	}
-	#searchOptionsButton {
-		padding-left: 0.7rem;
-		padding-right: 0.6rem;
-	}
-	#footer {
-		font-size: 65%;
-	}
-	.description {
-		-moz-box-orient: vertical;
-		-ms-box-orient: vertical;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 3;
-		display: -webkit-box;
-		overflow: hidden !important;
-	}
-}
-
-@media ( max-width : 767px) and (min-width: 481px) {
-}
-
-@media ( max-height : 480px) {
-	#searchOptions .container {
-		max-height: 450px;
-		overflow-y: scroll;
-	}
-}
-
-@media ( max-height : 390px) {
-	#searchOptions .container {
-		max-height: 300px;
-		overflow-y: scroll;
-	}
-}
-
-/***workaround for IE browser***/
-@media screen and (min-width:0\0) {
-	input#query.form-control {
-		padding-bottom: 0.75rem;
+	#result .description {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 }

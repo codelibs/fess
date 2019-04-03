@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -52,31 +51,31 @@ import org.slf4j.LoggerFactory;
  */
 public class RoleQueryHelper {
 
-    private static final String USER_ROLES = "userRoles";
-
     private static final Logger logger = LoggerFactory.getLogger(RoleQueryHelper.class);
 
-    public CachedCipher cipher;
+    protected static final String USER_ROLES = "userRoles";
 
-    public String valueSeparator = "\n";
+    protected CachedCipher cipher;
 
-    public String roleSeparator = ",";
+    protected String valueSeparator = "\n";
 
-    public String parameterKey;
+    protected String roleSeparator = ",";
 
-    public boolean encryptedParameterValue = true;
+    protected String parameterKey;
 
-    public String headerKey;
+    protected boolean encryptedParameterValue = true;
 
-    public boolean encryptedHeaderValue = true;
+    protected String headerKey;
 
-    public String cookieKey;
+    protected boolean encryptedHeaderValue = true;
 
-    public boolean encryptedCookieValue = true;
+    protected String cookieKey;
+
+    protected boolean encryptedCookieValue = true;
 
     protected Map<String, String> cookieNameMap;
 
-    private final List<String> defaultRoleList = new ArrayList<>();
+    protected final List<String> defaultRoleList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -119,9 +118,7 @@ public class RoleQueryHelper {
                 buildByCookieNameMapping(request, roleSet);
             }
 
-            if (isApiRequest) {
-                processAccessToken(request, roleSet);
-            }
+            final boolean hasAccessToken = processAccessToken(request, roleSet, isApiRequest);
 
             final RequestManager requestManager = ComponentUtil.getRequestManager();
             try {
@@ -131,7 +128,9 @@ public class RoleQueryHelper {
                             if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
                                 throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
                             }
-                            roleSet.addAll(fessConfig.getSearchGuestPermissionList());
+                            if (!hasAccessToken || roleSet.isEmpty()) {
+                                roleSet.addAll(fessConfig.getSearchGuestPermissionList());
+                            }
                         });
             } catch (final RuntimeException e) {
                 try {
@@ -157,41 +156,14 @@ public class RoleQueryHelper {
         return roleSet;
     }
 
-    protected void processAccessToken(final HttpServletRequest request, final Set<String> roleSet) {
-        final String token = request.getHeader("Authorization");
-        if (StringUtil.isNotBlank(token)) {
-            final AccessTokenService accessTokenService = ComponentUtil.getComponent(AccessTokenService.class);
-            accessTokenService
-                    .getAccessTokenByToken(token)
-                    .ifPresent(
-                            accessToken -> {
-                                final Long expiredTime = accessToken.getExpiredTime();
-                                if (expiredTime != null && expiredTime.longValue() > 0
-                                        && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
-                                    throw new InvalidAccessTokenException("invalid_token", "The token is expired("
-                                            + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
-                                }
-                                stream(accessToken.getPermissions()).of(stream -> stream.forEach(roleSet::add));
-                                final String name = accessToken.getParameterName();
-                                stream(request.getParameterValues(name)).of(
-                                        stream -> stream.filter(StringUtil::isNotBlank).forEach(roleSet::add));
-                            }).orElse(() -> {
-                        throw new InvalidAccessTokenException("invalid_token", "Invalid token: " + token);
-                    });
+    protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+        if (isApiRequest) {
+            return ComponentUtil.getComponent(AccessTokenService.class).getPermissions(request).map(p -> {
+                p.forEach(roleSet::add);
+                return true;
+            }).orElse(false);
         }
-
-    }
-
-    protected String getAccessToken(final HttpServletRequest request) {
-        final String token = request.getHeader("Authorization");
-        if (token != null) {
-            final String[] values = token.trim().split(" ");
-            if (values.length == 2 && "Bearer".equals(values[0])) {
-                return values[1];
-            }
-            throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);
-        }
-        return request.getParameter("access_token");
+        return false;
     }
 
     protected void processParameter(final HttpServletRequest request, final Set<String> roleSet) {
@@ -284,6 +256,42 @@ public class RoleQueryHelper {
             cookieNameMap = new HashMap<>();
         }
         cookieNameMap.put(cookieName, roleName);
+    }
+
+    public void setCipher(final CachedCipher cipher) {
+        this.cipher = cipher;
+    }
+
+    public void setValueSeparator(final String valueSeparator) {
+        this.valueSeparator = valueSeparator;
+    }
+
+    public void setRoleSeparator(final String roleSeparator) {
+        this.roleSeparator = roleSeparator;
+    }
+
+    public void setParameterKey(final String parameterKey) {
+        this.parameterKey = parameterKey;
+    }
+
+    public void setEncryptedParameterValue(final boolean encryptedParameterValue) {
+        this.encryptedParameterValue = encryptedParameterValue;
+    }
+
+    public void setHeaderKey(final String headerKey) {
+        this.headerKey = headerKey;
+    }
+
+    public void setEncryptedHeaderValue(final boolean encryptedHeaderValue) {
+        this.encryptedHeaderValue = encryptedHeaderValue;
+    }
+
+    public void setCookieKey(final String cookieKey) {
+        this.cookieKey = cookieKey;
+    }
+
+    public void setEncryptedCookieValue(final boolean encryptedCookieValue) {
+        this.encryptedCookieValue = encryptedCookieValue;
     }
 
 }

@@ -77,8 +77,10 @@
 												</tbody>
 											</table>
 											<c:set var="pager" value="${fileConfigPager}" scope="request" />
-											<c:import
-												url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+											<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+											<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+												<script>location.href = "${contextPath}/admin/fileconfig/list/${pager.allPageCount}";</script>
+											</c:if>
 										</div>
 									</div>
 								</c:if>

@@ -1,0 +1,104 @@
+{
+  ".fess_config.web_config" : {
+    "aliases" : { },
+    "mappings" : {
+      "web_config" : {
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "boost" : {
+            "type" : "float"
+          },
+          "configParameter" : {
+            "type" : "keyword"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "depth" : {
+            "type" : "integer"
+          },
+          "description" : {
+            "type" : "text"
+          },
+          "excludedDocUrls" : {
+            "type" : "keyword"
+          },
+          "excludedUrls" : {
+            "type" : "keyword"
+          },
+          "includedDocUrls" : {
+            "type" : "keyword"
+          },
+          "includedUrls" : {
+            "type" : "keyword"
+          },
+          "intervalTime" : {
+            "type" : "integer"
+          },
+          "maxAccessCount" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "numOfThread" : {
+            "type" : "integer"
+          },
+          "permissions" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "timeToLive" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "urls" : {
+            "type" : "keyword"
+          },
+          "userAgent" : {
+            "type" : "keyword"
+          },
+          "virtualHosts" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "web_config" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              },
+              "virtualHosts" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021057900",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "OYkqmnvbTJami5vnLYfYNg",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.web_config"
+      }
+    }
+  }
+}

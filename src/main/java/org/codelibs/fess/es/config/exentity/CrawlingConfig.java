@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,12 @@ package org.codelibs.fess.es.config.exentity;
 
 import java.util.Map;
 
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.client.http.HcHttpClient;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
 public interface CrawlingConfig {
 
@@ -27,7 +32,7 @@ public interface CrawlingConfig {
 
     String[] getPermissions();
 
-    String[] getLabelTypeValues();
+    String[] getVirtualHosts();
 
     String getDocumentBoost();
 
@@ -40,6 +45,22 @@ public interface CrawlingConfig {
     Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
 
     Map<String, String> getConfigParameterMap(ConfigName name);
+
+    default void initializeDefaultHttpProxy(final Map<String, Object> paramMap) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String proxyHost = fessConfig.getHttpProxyHost();
+        final String proxyPort = fessConfig.getHttpProxyPort();
+        if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
+            paramMap.put(HcHttpClient.PROXY_HOST_PROPERTY, proxyHost);
+            paramMap.put(HcHttpClient.PROXY_PORT_PROPERTY, proxyPort);
+            final String proxyUsername = fessConfig.getHttpProxyUsername();
+            final String proxyPassword = fessConfig.getHttpProxyPassword();
+            if (proxyUsername != null && proxyPassword != null) {
+                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+            }
+
+        }
+    }
 
     public enum ConfigType {
         WEB("W"), FILE("F"), DATA("D");
@@ -54,7 +75,7 @@ public interface CrawlingConfig {
             return typePrefix;
         }
 
-        public String getConfigId(final String id) {
+        String getConfigId(final String id) {
             if (id == null) {
                 return null;
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.dict;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -22,7 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.codelibs.curl.CurlResponse;
 import org.dbflute.optional.OptionalEntity;
+import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
 public abstract class DictionaryFile<T extends DictionaryItem> {
     protected DictionaryManager dictionaryManager;
@@ -54,6 +59,13 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
     public DictionaryFile<T> manager(final DictionaryManager dictionaryManager) {
         this.dictionaryManager = dictionaryManager;
         return this;
+    }
+
+    public void writeOut(final WrittenStreamOut out) throws IOException {
+        try (final CurlResponse curlResponse = dictionaryManager.getContentResponse(this);
+                final InputStream inputStream = new BufferedInputStream(curlResponse.getContentAsStream())) {
+            out.write(inputStream);
+        }
     }
 
     public abstract String getType();

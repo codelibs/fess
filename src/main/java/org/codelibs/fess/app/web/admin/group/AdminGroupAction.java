@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -234,7 +235,7 @@ public class AdminGroupAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<Group> getEntity(final CreateForm form) {
+    private static OptionalEntity<Group> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new Group()).map(entity -> {
@@ -243,7 +244,7 @@ public class AdminGroupAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return groupService.getGroup(((EditForm) form).id);
+                return ComponentUtil.getComponent(GroupService.class).getGroup(((EditForm) form).id);
             }
             break;
         default:
@@ -252,8 +253,9 @@ public class AdminGroupAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<Group> getGroup(final CreateForm form) {
+    public static OptionalEntity<Group> getGroup(final CreateForm form) {
         return getEntity(form).map(entity -> {
+            copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;
         });

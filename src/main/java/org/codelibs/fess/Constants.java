@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,10 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 
 public class Constants extends CoreLibConstants {
-    public static final int MAJOR_VERSION = 11;
-
-    public static final int MINOR_VERSION = 1;
-
-    public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION) + "." + String.valueOf(MINOR_VERSION);
 
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public static final int DEFAULT_ADMIN_PAGE_NUMBER = 1;
-
-    public static final String WEB_API_VERSION = FESS_VERSION;
 
     public static final String TRUE = "true";
 
@@ -41,6 +34,8 @@ public class Constants extends CoreLibConstants {
     public static final Boolean T = true;
 
     public static final Boolean F = false;
+
+    public static final String SCORE = "score";
 
     public static final String ON = "on";
 
@@ -74,11 +69,11 @@ public class Constants extends CoreLibConstants {
 
     public static final int DEFAULT_INTERVAL_TIME_FOR_FS = 1000;
 
-    public static final int DEFAULT_INTERVAL_TIME_FOR_WEB = 30000;
+    public static final int DEFAULT_INTERVAL_TIME_FOR_WEB = 10000;
 
     public static final int DEFAULT_NUM_OF_THREAD_FOR_FS = 5;
 
-    public static final int DEFAULT_NUM_OF_THREAD_FOR_WEB = 3;
+    public static final int DEFAULT_NUM_OF_THREAD_FOR_WEB = 1;
 
     public static final long DEFAULT_CRAWLING_EXECUTION_INTERVAL = 5000L;
 
@@ -94,6 +89,8 @@ public class Constants extends CoreLibConstants {
     public static final String INCREMENTAL_CRAWLING_PROPERTY = "crawling.incremental";
 
     public static final String CRAWLING_THREAD_COUNT_PROPERTY = "crawling.thread.count";
+
+    public static final String CRAWLING_USER_AGENT_PROPERTY = "crawling.user.agent";
 
     public static final String DAY_FOR_CLEANUP_PROPERTY = "day.for.cleanup";
 
@@ -111,7 +108,11 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_SORT_VALUE_PROPERTY = "sort.value";
 
+    public static final String VIRTUAL_HOST_VALUE_PROPERTY = "virtual.host.value";
+
     public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
+
+    public static final String RESULT_COLLAPSED_PROPERTY = "result.collapsed";
 
     public static final String LOGIN_LINK_ENALBED_PROPERTY = "login.link.enabled";
 
@@ -143,6 +144,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY = "purge.suggest.searchlog.day";
 
+    public static final String LTR_MODEL_NAME_PROPERTY = "ltr.model.name";
+
+    public static final String LTR_WINDOW_SIZE_PROPERTY = "ltr.window.size";
+
     public static final String REQUEST_QUERIES = "fess.Queries";
 
     public static final String HIGHLIGHT_QUERIES = "fess.HighlightQueries";
@@ -152,6 +157,8 @@ public class Constants extends CoreLibConstants {
     public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    public static final String DATE_OPTIONAL_TIME = "date_optional_time";
 
     public static final int DONE_STATUS = 9999;
 
@@ -182,13 +189,16 @@ public class Constants extends CoreLibConstants {
             + ",YandexBot"//
             + ",Chilkat"//
             + ",CloudFront"//
-            + ",Mediapartners";
+            + ",Mediapartners"//
+            + ",MSIE 6";
 
     public static final String DEFAULT_FROM_EMAIL = "Administrator <root@localhost>";
 
     // info map
 
     public static final String CRAWLER_STATUS = "CrawlerStatus";
+
+    public static final String CRAWLER_ERRORS = "CrawlerErrors";
 
     public static final String CRAWLER_START_TIME = "CrawlerStartTime";
 
@@ -247,9 +257,11 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_LOG_ACCESS_TYPE_JSON = "json";
 
-    public static final String SEARCH_LOG_ACCESS_TYPE_XML = "xml";
+    public static final String SEARCH_LOG_ACCESS_TYPE_GSA = "gsa";
 
     public static final String SEARCH_LOG_ACCESS_TYPE_WEB = "web";
+
+    public static final String SEARCH_LOG_ACCESS_TYPE_ADMIN = "admin";
 
     public static final String SEARCH_LOG_ACCESS_TYPE_OTHER = "other";
 
@@ -262,8 +274,6 @@ public class Constants extends CoreLibConstants {
     public static final String STATS_REPORT_TYPE = "reportType";
 
     public static final String RESULT_DOC_ID_CACHE = "resultDocIds";
-
-    public static final String SCREEN_SHOT_PATH_CACHE = "thumbnailPaths";
 
     public static final String CRAWLING_INFO_SYSTEM_NAME = "system";
 
@@ -311,9 +321,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String MATCHES_ALL_QUERY = "*:*";
 
-    public static final String FESS_ES_TRANSPORT_ADDRESSES = "fess.es.transport_addresses";
-
-    public static final String FESS_ES_CLUSTER_NAME = "fess.es.cluster_name";
+    public static final String FESS_ES_HTTP_ADDRESS = "fess.es.http_address";
 
     public static final int DEFAULT_PAGE_SIZE = 20;
 
@@ -339,9 +347,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String DATA_CRAWLER_TYPE = "data_crawling";
 
-    // TODO remove searchParams
-    public static final String[] COMMON_CONVERSION_RULE = new String[] { "searchParams", "crudMode", "createdBy", "createdTime",
-            "updatedBy", "updatedTime" };
+    public static final String[] COMMON_CONVERSION_RULE =
+            new String[] { "crudMode", "createdBy", "createdTime", "updatedBy", "updatedTime" };
+
+    public static final String[] COMMON_API_CONVERSION_RULE = new String[] { "crudMode" };
 
     public static final String USER_INFO = "LoginInfo";
 
@@ -373,11 +382,15 @@ public class Constants extends CoreLibConstants {
 
     public static final String LDAP_ACCOUNT_FILTER = "ldap.account.filter";
 
+    public static final String LDAP_GROUP_FILTER = "ldap.group.filter";
+
     public static final String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
 
     public static final String NOTIFICATION_LOGIN = "notification.login";
 
     public static final String NOTIFICATION_SEARCH_TOP = "notification.search.top";
+
+    public static final String NOTIFICATION_ADVANCE_SEARCH = "notification.advance.search";
 
     public static final String MAPPING_TYPE_ARRAY = "array";
 
@@ -387,11 +400,15 @@ public class Constants extends CoreLibConstants {
 
     public static final String MAPPING_TYPE_DOUBLE = "double";
 
+    public static final String MAPPING_TYPE_DATE = "date";
+
+    public static final String MAPPING_TYPE_PDF_DATE = "pdf_date";
+
     public static final String PAGING_QUERY_LIST = "pagingQueryList";
 
     public static final String REQUEST_LANGUAGES = "requestLanguages";
 
-    public static final String SEARCH_PREFERENCE_PRIMARY = "_primary";
+    public static final String SEARCH_PREFERENCE_LOCAL = "_local";
 
     public static final String CONFIG_CLEANUP_FILTERS = "cleanup.urlFilters";
 
@@ -401,7 +418,21 @@ public class Constants extends CoreLibConstants {
 
     public static final String PERMISSIONS = "permissions";
 
+    public static final String QUERIES = "queries";
+
+    public static final String VIRTUAL_HOSTS = "virtualHosts";
+
     public static final String CIPHER_PREFIX = "{cipher}";
 
     public static final String SYSTEM_USER = "system";
+
+    public static final String EMPTY_USER_ID = "<empty>";
+
+    public static final String CRAWLER_PROCESS_COMMAND_THREAD_DUMP = "thread_dump";
+
+    public static final String FESS_THUMBNAIL_PATH = "fess.thumbnail.path";
+
+    public static final String FESS_VAR_PATH = "fess.var.path";
+
+    public static final String FESS_LOG_LEVEL = "fess.log.level";
 }

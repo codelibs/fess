@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainBeforeHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainFinallyHook;
+import org.codelibs.fess.mylasta.direction.sponsor.FessJsonResourceProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessListedClassificationProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMailDeliveryDepartmentCreator;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMultipartRequestHandler;
@@ -85,6 +86,11 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directSecurity(createSecurityResourceProvider());
         direction.directTime(createTimeResourceProvider());
         direction.directMail(createFessMailDeliveryDepartmentCreator().create());
+        direction.directJson(createJsonResourceProvider());
+    }
+
+    protected FessJsonResourceProvider createJsonResourceProvider() {
+        return new FessJsonResourceProvider();
     }
 
     protected FessCurtainBeforeHook createCurtainBeforeHook() {
@@ -160,7 +166,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
                 } else {
                     return "/error/system.jsp";
                 }
-            };
+            }
         });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,17 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -63,6 +66,13 @@ public class LdapManager {
 
     protected volatile boolean isBind = false;
 
+    protected FessConfig fessConfig;
+
+    @PostConstruct
+    public void init() {
+        fessConfig = ComponentUtil.getFessConfig();
+    }
+
     protected Hashtable<String, String> createEnvironment(final String initialContextFactory, final String securityAuthentication,
             final String providerUrl, final String principal, final String credntials) {
         final Hashtable<String, String> env = new Hashtable<>();
@@ -71,11 +81,13 @@ public class LdapManager {
         env.put(Context.PROVIDER_URL, providerUrl);
         env.put(Context.SECURITY_PRINCIPAL, principal);
         env.put(Context.SECURITY_CREDENTIALS, credntials);
+        if (providerUrl != null && providerUrl.startsWith("ldaps://")) {
+            env.put(Context.SECURITY_PROTOCOL, "ssl");
+        }
         return env;
     }
 
     protected Hashtable<String, String> createAdminEnv() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return createEnvironment(//
                 fessConfig.getLdapInitialContextFactory(), //
                 fessConfig.getLdapSecurityAuthentication(), fessConfig.getLdapProviderUrl(), //
@@ -84,7 +96,6 @@ public class LdapManager {
     }
 
     protected Hashtable<String, String> createSearchEnv(final String username, final String password) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return createEnvironment(//
                 fessConfig.getLdapInitialContextFactory(), //
                 fessConfig.getLdapSecurityAuthentication(), //
@@ -93,7 +104,6 @@ public class LdapManager {
     }
 
     protected Hashtable<String, String> createSearchEnv() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return createEnvironment(//
                 fessConfig.getLdapInitialContextFactory(), //
                 fessConfig.getLdapSecurityAuthentication(), fessConfig.getLdapProviderUrl(), //
@@ -122,8 +132,6 @@ public class LdapManager {
     }
 
     public OptionalEntity<FessUser> login(final String username, final String password) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-
         if (StringUtil.isBlank(fessConfig.getLdapProviderUrl())) {
             return OptionalEntity.empty();
         }
@@ -163,36 +171,81 @@ public class LdapManager {
         return new LdapUser(env, username);
     }
 
-    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter) {
+    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter, final String groupFilter) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final List<String> roleList = new ArrayList<>();
+        final Set<String> roleSet = new HashSet<>();
 
         if (fessConfig.isLdapRoleSearchUserEnabled()) {
-            roleList.add(systemHelper.getSearchRoleByUser(ldapUser.getName()));
+            roleSet.add(systemHelper.getSearchRoleByUser(ldapUser.getName()));
         }
 
         // LDAP: cn=%s
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, ldapUser.getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Account Filter: " + filter);
+        }
         search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
-            processSearchRoles(result, (entryDn, name) -> {
-                final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
-                if (isRole) {
-                    if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                        roleList.add(systemHelper.getSearchRoleByRole(name));
-                    }
-                } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-                    roleList.add(systemHelper.getSearchRoleByGroup(name));
+            processSearchRoles(result, entryDn -> {
+                updateSearchRoles(roleSet, entryDn);
+
+                if (StringUtil.isNotBlank(groupFilter)) {
+                    processSubRoles(ldapUser, bindDn, entryDn, groupFilter, roleSet);
                 }
             });
         });
 
-        return roleList.toArray(new String[roleList.size()]);
+        if (logger.isDebugEnabled()) {
+            logger.debug("role: " + roleSet);
+        }
+        return roleSet.toArray(new String[roleSet.size()]);
+    }
+
+    protected void processSubRoles(final LdapUser ldapUser, final String bindDn, final String dn, final String groupFilter,
+            final Set<String> roleSet) {
+        // (member:1.2.840.113556.1.4.1941:=%s)
+        final String filter = String.format(groupFilter, dn);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Group Filter: " + filter);
+        }
+        search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
+            for (final SearchResult srcrslt : result) {
+                final String groupDn = srcrslt.getNameInNamespace();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("groupDn: " + groupDn);
+                }
+                updateSearchRoles(roleSet, groupDn);
+            }
+        });
+    }
+
+    protected void updateSearchRoles(final Set<String> roleSet, final String entryDn) {
+        final String name = getSearchRoleName(entryDn);
+        if (StringUtil.isBlank(name)) {
+            return;
+        }
+
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+        if (isRole) {
+            if (fessConfig.isLdapRoleSearchRoleEnabled()) {
+                roleSet.add(systemHelper.getSearchRoleByRole(name));
+            }
+        } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
+            roleSet.add(systemHelper.getSearchRoleByGroup(name));
+        }
     }
 
     protected void processSearchRoles(final List<SearchResult> result, final BiConsumer<String, String> consumer) throws NamingException {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        processSearchRoles(result, entryDn -> {
+            final String name = getSearchRoleName(entryDn);
+            if (name != null) {
+                consumer.accept(entryDn, name);
+            }
+        });
+    }
+
+    protected void processSearchRoles(final List<SearchResult> result, final Consumer<String> consumer) throws NamingException {
         for (final SearchResult srcrslt : result) {
             final Attributes attrs = srcrslt.getAttributes();
 
@@ -207,29 +260,30 @@ public class LdapManager {
                 if (attrValue != null) {
                     final String entryDn = attrValue.toString();
 
-                    int start = 0;
-                    int end = 0;
-
-                    start = entryDn.indexOf("CN=");
-                    if (start < 0) {
-                        start = entryDn.indexOf("cn=");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("entryDn: " + entryDn);
                     }
-                    if (start == -1) {
-                        continue;
-                    }
-                    start += 3;
-                    end = entryDn.indexOf(',');
-
-                    String name;
-                    if (end == -1) {
-                        name = entryDn.substring(start);
-                    } else {
-                        name = entryDn.substring(start, end);
-                    }
-
-                    consumer.accept(entryDn, name);
+                    consumer.accept(entryDn);
                 }
             }
+        }
+    }
+
+    protected String getSearchRoleName(final String entryDn) {
+        if (entryDn == null) {
+            return null;
+        }
+        int start = entryDn.toLowerCase(Locale.ROOT).indexOf("cn=");
+        if (start == -1) {
+            return null;
+        }
+        start += 3;
+
+        final int end = entryDn.indexOf(',', start);
+        if (end == -1) {
+            return entryDn.substring(start);
+        } else {
+            return entryDn.substring(start, end);
         }
     }
 
@@ -266,7 +320,6 @@ public class LdapManager {
     }
 
     public void apply(final User user) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled(user.getName())) {
             return;
         }
@@ -346,7 +399,6 @@ public class LdapManager {
     }
 
     public void insert(final User user) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled(user.getName())) {
             return;
         }
@@ -356,10 +408,10 @@ public class LdapManager {
         // attributes
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
-                modifyUserAttributes(user, adminEnv, userDN, result, fessConfig);
+                modifyUserAttributes(user, adminEnv, userDN, result);
             } else {
                 final BasicAttributes entry = new BasicAttributes();
-                addUserAttributes(entry, user, fessConfig);
+                addUserAttributes(entry, user);
                 final Attribute oc = fessConfig.getLdapAdminUserObjectClassAttribute();
                 entry.put(oc);
                 insert(userDN, entry, adminEnv);
@@ -486,7 +538,7 @@ public class LdapManager {
     }
 
     protected void modifyUserAttributes(final User user, final Supplier<Hashtable<String, String>> adminEnv, final String userDN,
-            final List<SearchResult> result, final FessConfig fessConfig) {
+            final List<SearchResult> result) {
         final List<ModificationItem> modifyList = new ArrayList<>();
         if (user.getOriginalPassword() != null) {
             modifyReplaceEntry(modifyList, "userPassword", user.getOriginalPassword());
@@ -729,7 +781,7 @@ public class LdapManager {
         modify(userDN, modifyList, adminEnv);
     }
 
-    protected void addUserAttributes(final BasicAttributes entry, final User user, final FessConfig fessConfig) {
+    protected void addUserAttributes(final BasicAttributes entry, final User user) {
         entry.put(new BasicAttribute("cn", user.getName()));
         entry.put(new BasicAttribute("userPassword", user.getOriginalPassword()));
 
@@ -808,7 +860,6 @@ public class LdapManager {
     }
 
     public void delete(final User user) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled(user.getName())) {
             return;
         }
@@ -852,7 +903,6 @@ public class LdapManager {
     }
 
     public void insert(final Role role) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
@@ -864,7 +914,7 @@ public class LdapManager {
             } else {
                 final String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
                 final BasicAttributes entry = new BasicAttributes();
-                addRoleAttributes(entry, role, fessConfig);
+                addRoleAttributes(entry, role);
                 final Attribute oc = fessConfig.getLdapAdminRoleObjectClassAttribute();
                 entry.put(oc);
                 insert(entryDN, entry, adminEnv);
@@ -873,12 +923,11 @@ public class LdapManager {
 
     }
 
-    protected void addRoleAttributes(final BasicAttributes entry, final Role user, final FessConfig fessConfig) {
+    protected void addRoleAttributes(final BasicAttributes entry, final Role user) {
         // nothing
     }
 
     public void delete(final Role role) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
@@ -896,7 +945,6 @@ public class LdapManager {
     }
 
     public void apply(final Group group) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
@@ -910,7 +958,6 @@ public class LdapManager {
     }
 
     public void insert(final Group group) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
@@ -920,10 +967,10 @@ public class LdapManager {
         search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
                 logger.info("{} exists in LDAP server.", group.getName());
-                modifyGroupAttributes(group, adminEnv, entryDN, result, fessConfig);
+                modifyGroupAttributes(group, adminEnv, entryDN, result);
             } else {
                 final BasicAttributes entry = new BasicAttributes();
-                addGroupAttributes(entry, group, fessConfig);
+                addGroupAttributes(entry, group);
                 final Attribute oc = fessConfig.getLdapAdminGroupObjectClassAttribute();
                 entry.put(oc);
                 insert(entryDN, entry, adminEnv);
@@ -932,7 +979,7 @@ public class LdapManager {
     }
 
     protected void modifyGroupAttributes(final Group group, final Supplier<Hashtable<String, String>> adminEnv, final String entryDN,
-            final List<SearchResult> result, final FessConfig fessConfig) {
+            final List<SearchResult> result) {
         final List<ModificationItem> modifyList = new ArrayList<>();
 
         final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
@@ -946,13 +993,12 @@ public class LdapManager {
         modify(entryDN, modifyList, adminEnv);
     }
 
-    protected void addGroupAttributes(final BasicAttributes entry, final Group group, final FessConfig fessConfig) {
+    protected void addGroupAttributes(final BasicAttributes entry, final Group group) {
         OptionalUtil.ofNullable(group.getGidNumber()).filter(s -> StringUtil.isNotBlank(s.toString()))
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrGidNumber(), s)));
     }
 
     public void delete(final Group group) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
@@ -969,7 +1015,6 @@ public class LdapManager {
     }
 
     public boolean changePassword(final String username, final String password) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled(username)) {
             return false;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import java.util.Locale;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.ReaderUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.elasticsearch.runner.net.Curl;
-import org.codelibs.elasticsearch.runner.net.CurlRequest;
-import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.curl.CurlRequest;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.fess.helper.CurlHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -121,22 +121,23 @@ public class AdminEsreqAction extends FessAdminAction {
             return null;
         }
 
-        final String url;
+        final String path;
         if (values[1].startsWith("/")) {
-            url = ResourceUtil.getElasticsearchHttpUrl() + values[1];
+            path = values[1];
         } else {
-            url = ResourceUtil.getElasticsearchHttpUrl() + "/" + values[1];
+            path = "/" + values[1];
         }
 
+        final CurlHelper curlHelper = ComponentUtil.getCurlHelper();
         switch (values[0].toUpperCase(Locale.ROOT)) {
         case "GET":
-            return Curl.get(url);
+            return curlHelper.get(path);
         case "POST":
-            return Curl.post(url);
+            return curlHelper.post(path);
         case "PUT":
-            return Curl.put(url);
+            return curlHelper.put(path);
         case "DELETE":
-            return Curl.delete(url);
+            return curlHelper.delete(path);
         default:
             break;
         }

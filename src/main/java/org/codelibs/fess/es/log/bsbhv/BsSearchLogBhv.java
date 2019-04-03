@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
 
     @Override
     protected String asEsIndex() {
-        return "fess_log";
+        return "fess_log.search_log";
     }
 
     @Override
@@ -74,22 +74,23 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
         try {
             final RESULT result = entityType.newInstance();
             result.setAccessType(DfTypeUtil.toString(source.get("accessType")));
-            result.setUser(DfTypeUtil.toString(source.get("user")));
-            result.setRoles(toStringArray(source.get("roles")));
-            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
             result.setClientIp(DfTypeUtil.toString(source.get("clientIp")));
             result.setHitCount(DfTypeUtil.toLong(source.get("hitCount")));
+            result.setLanguages(DfTypeUtil.toString(source.get("languages")));
+            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
             result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
             result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
+            result.setQueryTime(DfTypeUtil.toLong(source.get("queryTime")));
             result.setReferer(DfTypeUtil.toString(source.get("referer")));
             result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
             result.setResponseTime(DfTypeUtil.toLong(source.get("responseTime")));
-            result.setQueryTime(DfTypeUtil.toLong(source.get("queryTime")));
+            result.setRoles(toStringArray(source.get("roles")));
             result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));
+            result.setUser(DfTypeUtil.toString(source.get("user")));
             result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
-            result.setLanguages(DfTypeUtil.toString(source.get("languages")));
+            result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

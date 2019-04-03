@@ -1,0 +1,44 @@
+{
+  ".fess_config.bad_word" : {
+    "aliases" : { },
+    "mappings" : {
+      "bad_word" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "suggestWord" : {
+            "type" : "keyword"
+          },
+          "targetLabel" : {
+            "type" : "keyword"
+          },
+          "targetRole" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021049746",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "0xToIxg0R1KjZqA0ynv9PQ",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.bad_word"
+      }
+    }
+  }
+}

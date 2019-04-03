@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,12 @@ public class JobNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public JobNotFoundException(ScheduledJob scheduledJob) {
+    public JobNotFoundException(final ScheduledJob scheduledJob) {
         super(scheduledJob.toString());
+    }
+
+    public JobNotFoundException(final String message) {
+        super(message);
     }
 
 }

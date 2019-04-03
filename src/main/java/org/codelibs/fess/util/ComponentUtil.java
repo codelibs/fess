@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 package org.codelibs.fess.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.EsAccessResult;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
@@ -31,9 +34,11 @@ import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
+import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.CurlHelper;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
@@ -42,11 +47,14 @@ import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.RelatedContentHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -55,6 +63,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
+import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
@@ -65,6 +74,7 @@ import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.security.PrimaryCipher;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.JobManager;
@@ -76,6 +86,18 @@ import org.slf4j.LoggerFactory;
 public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static Map<String, Object> componentMap = new HashMap<>();
+
+    private static final String LANGUAGE_HELPER = "languageHelper";
+
+    private static final String CURL_HELPER = "curlHelper";
+
+    private static final String QUERY_STRING_BUILDER = "queryStringBuilder";
+
+    private static final String ACCESS_TOKEN_HELPER = "accessTokenHelper";
+
+    private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
     private static final String THUMBNAIL_MANAGER = "thumbnailManager";
 
@@ -102,8 +124,6 @@ public final class ComponentUtil {
     private static final String DATA_SERVICE = "dataService";
 
     private static final String MESSAGE_MANAGER = "messageManager";
-
-    private static final String USER_AGENT_NAME = "userAgentName";
 
     private static final String INDEX_UPDATER = "indexUpdater";
 
@@ -156,6 +176,12 @@ public final class ComponentUtil {
     private static final String KEY_MATCH_HELPER = "keyMatchHelper";
 
     private static final String INDEXING_HELPER = "indexingHelper";
+
+    private static final String VIRTUAL_HOST_HELPER = "virtualHostHelper";
+
+    private static final String RELATED_CONTENT_HELPER = "relatedContentHelper";
+
+    private static final String RELATED_QUERY_HELPER = "relatedQueryHelper";
 
     private static IndexingHelper indexingHelper;
 
@@ -288,10 +314,6 @@ public final class ComponentUtil {
         return getComponent(INDEX_UPDATER);
     }
 
-    public static String getUserAgentName() {
-        return getComponent(USER_AGENT_NAME);
-    }
-
     public static KeyMatchHelper getKeyMatchHelper() {
         return getComponent(KEY_MATCH_HELPER);
     }
@@ -327,7 +349,8 @@ public final class ComponentUtil {
         if (fessConfig != null) {
             return fessConfig;
         }
-        return getComponent(FessConfig.class);
+        fessConfig = getComponent(FessConfig.class);
+        return fessConfig;
     }
 
     public static SuggestHelper getSuggestHelper() {
@@ -378,12 +401,45 @@ public final class ComponentUtil {
         return getComponent(THUMBNAIL_MANAGER);
     }
 
+    public static AuthenticationManager getAuthenticationManager() {
+        return getComponent(AUTHENTICATION_MANAGER);
+    }
+
     public static PrimaryCipher getPrimaryCipher() {
         return getComponent(PrimaryCipher.class);
     }
 
     public static CrawlerClientFactory getCrawlerClientFactory() {
         return getComponent(CrawlerClientFactory.class);
+    }
+
+    public static RelatedQueryHelper getRelatedQueryHelper() {
+        return getComponent(RELATED_QUERY_HELPER);
+    }
+
+    public static RelatedContentHelper getRelatedContentHelper() {
+        return getComponent(RELATED_CONTENT_HELPER);
+    }
+
+    public static VirtualHostHelper getVirtualHostHelper() {
+        return getComponent(VIRTUAL_HOST_HELPER);
+    }
+
+    public static AccessTokenHelper getAccessTokenHelper() {
+        return getComponent(ACCESS_TOKEN_HELPER);
+    }
+
+    public static QueryStringBuilder getQueryStringBuilder() {
+        return getComponent(QUERY_STRING_BUILDER);
+    }
+
+    public static CurlHelper getCurlHelper() {
+        return getComponent(CURL_HELPER);
+    }
+
+    public static LanguageHelper getLanguageHelper() {
+        return getComponent(LANGUAGE_HELPER);
+
     }
 
     public static <T> T getComponent(final Class<T> clazz) {
@@ -407,11 +463,30 @@ public final class ComponentUtil {
             } else {
                 throw new ContainerNotAvailableException(componentName);
             }
+        } catch (final ComponentNotFoundException e) {
+            if (componentMap.containsKey(componentName)) {
+                @SuppressWarnings("unchecked")
+                final T c = (T) componentMap.get(componentName);
+                return c;
+            }
+            throw e;
         }
+    }
+
+    public static boolean hasViewHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(VIEW_HELPER);
     }
 
     public static boolean hasQueryHelper() {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
+    }
+
+    public static boolean hasPopularWordHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(POPULAR_WORD_HELPER);
+    }
+
+    public static boolean hasRelatedQueryHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(RELATED_QUERY_HELPER);
     }
 
     public static boolean available() {
@@ -425,14 +500,18 @@ public final class ComponentUtil {
 
     /**
      * For test purpose only.
-     * 
+     *
      * @param fessConfig fessConfig instance
      */
     public static void setFessConfig(final FessConfig fessConfig) {
         ComponentUtil.fessConfig = fessConfig;
         if (fessConfig == null) {
             FessProp.propMap.clear();
+            componentMap.clear();
         }
     }
 
+    public static void register(final Object instance, final String name) {
+        componentMap.put(name, instance);
+    }
 }

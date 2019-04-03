@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
 import org.codelibs.fess.es.config.exentity.FileConfig;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -105,7 +106,7 @@ public class AdminFileauthAction extends FessAdminAction {
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "fileAuthenticationItems",
                 fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-        RenderDataUtil.register(data, "displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllFileConfigList(false, false, false, null).isEmpty());
         // restore from pager
         copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));
     }
@@ -241,7 +242,7 @@ public class AdminFileauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new FileAuthentication()).map(entity -> {
@@ -251,7 +252,7 @@ public class AdminFileauthAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return fileAuthenticationService.getFileAuthentication(((EditForm) form).id);
+                return ComponentUtil.getComponent(FileAuthenticationService.class).getFileAuthentication(((EditForm) form).id);
             }
             break;
         default:
@@ -260,7 +261,8 @@ public class AdminFileauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
+    public static OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -281,7 +283,7 @@ public class AdminFileauthAction extends FessAdminAction {
 
     protected void registerFileConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final List<FileConfig> fileConfigList = fileConfigService.getAllFileConfigList(false, false, false, null);
+        final List<FileConfig> fileConfigList = crawlingConfigHelper.getAllFileConfigList(false, false, false, null);
         for (final FileConfig fileConfig : fileConfigList) {
             itemList.add(createItem(fileConfig.getName(), fileConfig.getId().toString()));
         }
@@ -315,8 +317,8 @@ public class AdminFileauthAction extends FessAdminAction {
                 data -> {
                     RenderDataUtil.register(data, "fileAuthenticationItems",
                             fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-                    RenderDataUtil.register(data, "displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null)
-                            .isEmpty());
+                    RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper
+                            .getAllFileConfigList(false, false, false, null).isEmpty());
                 }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));

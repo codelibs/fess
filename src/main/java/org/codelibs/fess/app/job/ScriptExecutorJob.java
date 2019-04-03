@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.job;
 
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exentity.JobLog;
@@ -41,13 +40,14 @@ public class ScriptExecutorJob implements LaJob {
             logger.warn(Constants.SCHEDULED_JOB + " is empty.");
             return;
         }
+        runtime.stopIfNeeds();
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobManager jobManager = ComponentUtil.getJobManager();
         final ScheduledJob scheduledJob = (ScheduledJob) runtime.getParameterMap().get(Constants.SCHEDULED_JOB);
         final String id = scheduledJob.getId();
         final String target = scheduledJob.getTarget();
-        if (!isTarget(target)) {
+        if (!ComponentUtil.getFessConfig().isSchedulerTarget(target)) {
             logger.info("Ignore Job " + id + ":" + scheduledJob.getName() + " because of not target: " + scheduledJob.getTarget());
             return;
         }
@@ -120,25 +120,6 @@ public class ScriptExecutorJob implements LaJob {
                 jobHelper.store(jobLog);
             }
         }
-    }
-
-    protected boolean isTarget(final String target) {
-        if (StringUtil.isBlank(target)) {
-            return true;
-        }
-
-        final String myName = ComponentUtil.getFessConfig().getSchedulerTargetName();
-
-        final String[] targets = target.split(",");
-        for (String name : targets) {
-            name = name.trim();
-            if (Constants.DEFAULT_JOB_TARGET.equalsIgnoreCase(name)) {
-                return true;
-            } else if (StringUtil.isNotBlank(myName) && myName.equalsIgnoreCase(name)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

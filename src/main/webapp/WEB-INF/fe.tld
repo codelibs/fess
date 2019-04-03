@@ -203,11 +203,38 @@
     </example>
   </function>
 
-	<function>
-		<description>Calculates URL.</description>
-		<name>url</name>
-		<function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-		<function-signature>java.lang.String url(java.lang.String)</function-signature>
-		<example>&lt;a href="${f:url(param:info)}" ...</example>
-	</function>
+  <function>
+    <description>Calculates URL.</description>
+    <name>url</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String url(java.lang.String)</function-signature>
+    <example>&lt;a href="${fe:url(param:info)}" ...</example>
+  </function>
+
+  <function>
+    <description>Encode Similar Document Hash.</description>
+    <name>sdh</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String sdh(java.lang.String)</function-signature>
+    <example>${fe:sdh(doc.similar_docs_hash)}</example>
+  </function>
+
+  <function>
+    <description>Concatenate strings.</description>
+    <name>join</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String join(java.lang.Object)</function-signature>
+    <example>${fe:join(values)}</example>
+  </function>
+
+  <function>
+    <description>
+      Returns a string resulting from replacing in an input string all occurrences
+      of a "before" string into an "after" substring.
+    </description>
+    <name>replace</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String replace(java.lang.Object, java.lang.String, java.lang.String)</function-signature>
+    <example>${fe:replace(input, regex, replacement)}</example>
+  </function>
 </taglib>

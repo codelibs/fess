@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.key_match";
     }
 
     @Override
@@ -81,6 +81,7 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
             result.setTerm(DfTypeUtil.toString(source.get("term")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setVirtualHost(DfTypeUtil.toString(source.get("virtualHost")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

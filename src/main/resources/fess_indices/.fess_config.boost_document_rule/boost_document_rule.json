@@ -1,0 +1,25 @@
+{
+    "properties": {
+      "urlExpr": {
+        "type": "keyword"
+      },
+      "boostExpr": {
+        "type": "keyword"
+      },
+      "sortOrder": {
+        "type": "integer"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

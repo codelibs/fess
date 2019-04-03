@@ -49,7 +49,7 @@
 												key="labels.boost_document_rule_url_expr" /></label>
 										<div class="col-sm-9">
 											<la:errors property="urlExpr" />
-											<la:textarea property="urlExpr" styleClass="form-control" rows="5"/>
+											<la:textarea styleId="urlExpr" property="urlExpr" styleClass="form-control" rows="5"/>
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.boost_document_rule_boost_expr" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boostExpr" />
-											<la:textarea property="boostExpr" styleClass="form-control" rows="5"/>
+											<la:textarea styleId="boostExpr" property="boostExpr" styleClass="form-control" rows="5"/>
 										</div>
 									</div>
 									<div class="form-group">
@@ -65,7 +65,7 @@
 												key="labels.boost_document_rule_sort_order" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="sortOrder" />
-											<input type="number" name="sortOrder"
+											<input type="number" name="sortOrder" id="sortOrder"
 												value="${f:h(sortOrder)}" class="form-control"
 												min="0" max="100000">
 										</div>

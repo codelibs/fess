@@ -1,0 +1,44 @@
+{
+  ".fess_config.boost_document_rule" : {
+    "aliases" : { },
+    "mappings" : {
+      "boost_document_rule" : {
+        "properties" : {
+          "boostExpr" : {
+            "type" : "keyword"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "urlExpr" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021050077",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "AHy84s2vSoamP32r62Jy4Q",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.boost_document_rule"
+      }
+    }
+  }
+}

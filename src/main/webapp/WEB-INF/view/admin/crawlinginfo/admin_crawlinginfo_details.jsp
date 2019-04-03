@@ -135,6 +135,13 @@
 												</div>
 											</div>
 										</div>
+										<c:if test="${running}">
+										<button type="submit" class="btn btn-warning" name="threaddump"
+											value="<la:message key="labels.crawling_info_thread_dump" />">
+											<i class="fa fa-bolt"></i>
+											<la:message key="labels.crawling_info_thread_dump" />
+										</button>
+										</c:if>
 									</c:if>
 								</div>
 								<!-- /.box-footer -->

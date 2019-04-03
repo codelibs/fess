@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.codelibs.fess.helper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,9 +39,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,6 @@ public class CrawlingInfoHelper {
     protected Long documentExpires;
 
     protected int maxSessionIdsInList;
-
-    protected int urlIdPrefixLength = 445;
 
     protected CrawlingInfoService getCrawlingInfoService() {
         return ComponentUtil.getComponent(CrawlingInfoService.class);
@@ -157,23 +156,40 @@ public class CrawlingInfoHelper {
     public String generateId(final Map<String, Object> dataMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = (String) dataMap.get(fessConfig.getIndexFieldUrl());
+        final StringBuilder buf = new StringBuilder(1000);
+
         @SuppressWarnings("unchecked")
         final List<String> roleTypeList = (List<String>) dataMap.get(fessConfig.getIndexFieldRole());
-        return generateId(url, roleTypeList);
+        buf.append(url);
+        if (roleTypeList != null && !roleTypeList.isEmpty()) {
+            Collections.sort(roleTypeList);
+            buf.append(";r=");
+            buf.append(String.join(",", roleTypeList));
+        }
+
+        @SuppressWarnings("unchecked")
+        final List<String> virtualHostList = (List<String>) dataMap.get(fessConfig.getIndexFieldVirtualHost());
+        if (virtualHostList != null && !virtualHostList.isEmpty()) {
+            Collections.sort(virtualHostList);
+            buf.append(";v=");
+            buf.append(String.join(",", virtualHostList));
+        }
+
+        final String urlId = buf.toString().trim();
+        return generateId(urlId);
     }
 
     public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.search(
                 fessConfig.getIndexDocumentSearchIndex(),
-                fessConfig.getIndexDocumentType(),
                 queryRequestBuilder -> {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
                     final TermsAggregationBuilder termsBuilder =
                             AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
-                                    .size(maxSessionIdsInList).order(Order.term(false));
+                                    .size(maxSessionIdsInList).order(BucketOrder.key(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
-                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY);
+                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL);
                     return true;
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
                     final List<Map<String, String>> sessionIdList = new ArrayList<>();
@@ -190,15 +206,7 @@ public class CrawlingInfoHelper {
                 });
     }
 
-    protected String generateId(final String url, final List<String> roleTypeList) {
-        final StringBuilder buf = new StringBuilder(1000);
-        buf.append(url);
-        if (roleTypeList != null && !roleTypeList.isEmpty()) {
-            Collections.sort(roleTypeList);
-            buf.append(";role=");
-            buf.append(String.join(",", roleTypeList));
-        }
-        final String urlId = buf.toString().trim();
+    protected String generateId(final String urlId) {
         final StringBuilder encodedBuf = new StringBuilder(urlId.length() + 100);
         for (int i = 0; i < urlId.length(); i++) {
             final char c = urlId.charAt(i);
@@ -231,7 +239,13 @@ public class CrawlingInfoHelper {
                 encodedBuf.append(c);
             } else {
                 try {
-                    encodedBuf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                    final String target = String.valueOf(c);
+                    final String converted = URLEncoder.encode(target, Constants.UTF_8);
+                    if (target.equals(converted)) {
+                        encodedBuf.append(Base64.getUrlEncoder().encodeToString(target.getBytes(Constants.CHARSET_UTF_8)));
+                    } else {
+                        encodedBuf.append(converted);
+                    }
                 } catch (final UnsupportedEncodingException e) {
                     // NOP
                 }
@@ -239,18 +253,10 @@ public class CrawlingInfoHelper {
         }
 
         final String id = encodedBuf.toString();
-        if (id.length() <= urlIdPrefixLength) {
-            return id;
-        }
-        return id.substring(0, urlIdPrefixLength) + MessageDigestUtil.digest("SHA-256", id.substring(urlIdPrefixLength));
+        return MessageDigestUtil.digest(ComponentUtil.getFessConfig().getIndexIdDigestAlgorithm(), id);
     }
 
     public void setMaxSessionIdsInList(final int maxSessionIdsInList) {
         this.maxSessionIdsInList = maxSessionIdsInList;
     }
-
-    public void setUrlIdPrefixLength(final int urlIdPrefixLength) {
-        this.urlIdPrefixLength = urlIdPrefixLength;
-    }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,24 +29,24 @@ import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -58,7 +58,7 @@ public abstract class EsAbstractConditionAggregation {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected List<AbstractAggregationBuilder> aggregationAggregationBuilderList;
+    protected List<AbstractAggregationBuilder<?>> aggregationAggregationBuilderList;
 
     // ===================================================================================
     //                                                                             Control
@@ -68,14 +68,14 @@ public abstract class EsAbstractConditionAggregation {
         return aggregationAggregationBuilderList != null && !aggregationAggregationBuilderList.isEmpty();
     }
 
-    public List<AbstractAggregationBuilder> getAggregationBuilderList() {
+    public List<AbstractAggregationBuilder<?>> getAggregationBuilderList() {
         return aggregationAggregationBuilderList != null ? aggregationAggregationBuilderList : Collections.emptyList();
     }
 
     // ===================================================================================
     //                                                                         Aggregation
-    //                                                                               =====
-    public void addAggregation(AbstractAggregationBuilder aggregationAggregationBuilder) {
+    //                                                                         ===========
+    public void addAggregation(AbstractAggregationBuilder<?> aggregationAggregationBuilder) {
         assertObjectNotNull("aggregationAggregationBuilder", aggregationAggregationBuilder);
         regA(aggregationAggregationBuilder);
     }
@@ -126,8 +126,8 @@ public abstract class EsAbstractConditionAggregation {
         return builder;
     }
 
-    protected PercentileRanksAggregationBuilder regPercentileRanksA(String name, String field) {
-        PercentileRanksAggregationBuilder builder = AggregationBuilders.percentileRanks(name).field(field);
+    protected PercentileRanksAggregationBuilder regPercentileRanksA(String name, String field, double[] values) {
+        PercentileRanksAggregationBuilder builder = AggregationBuilders.percentileRanks(name, values).field(field);
         regA(builder);
         return builder;
     }
@@ -222,7 +222,7 @@ public abstract class EsAbstractConditionAggregation {
         return builder;
     }
 
-    protected void regA(AbstractAggregationBuilder builder) {
+    protected void regA(AbstractAggregationBuilder<?> builder) {
         assertObjectNotNull("builder", builder);
         if (aggregationAggregationBuilderList == null) {
             aggregationAggregationBuilderList = new ArrayList<>();
@@ -266,7 +266,7 @@ public abstract class EsAbstractConditionAggregation {
     //                                                                        ============
 
     @FunctionalInterface
-    public interface ConditionOptionCall<OP extends AbstractAggregationBuilder> {
+    public interface ConditionOptionCall<OP extends AbstractAggregationBuilder<?>> {
 
         /**
          * @param op The option of condition to be set up. (NotNull)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.nio.file.Path;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -35,6 +37,8 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -220,7 +224,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 entity -> {
                     try {
                         badWordService.store(entity);
-                        suggestHelper.addBadWord(entity.getSuggestWord());
+                        suggestHelper.addBadWord(entity.getSuggestWord(), false);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -241,7 +245,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 entity -> {
                     try {
                         badWordService.store(entity);
-                        suggestHelper.storeAllBadWords();
+                        suggestHelper.storeAllBadWords(false);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -282,14 +286,14 @@ public class AdminBadwordAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
-        new Thread(() -> {
+        CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
-                suggestHelper.storeAllBadWords();
+                suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
-        }).start();
+        });
         saveInfo(messages -> messages.addSuccessUploadBadWord(GLOBAL));
         return redirect(getClass());
     }
@@ -297,7 +301,7 @@ public class AdminBadwordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<BadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<BadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new BadWord()).map(entity -> {
@@ -307,7 +311,7 @@ public class AdminBadwordAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return badWordService.getBadWord(((EditForm) form).id);
+                return ComponentUtil.getComponent(BadWordService.class).getBadWord(((EditForm) form).id);
             }
             break;
         default:
@@ -316,13 +320,14 @@ public class AdminBadwordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<BadWord> getBadWord(final CreateForm form) {
+    public static OptionalEntity<BadWord> getBadWord(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
             entity.setUpdatedBy(username);
             entity.setUpdatedTime(currentTime);
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;
         });
     }

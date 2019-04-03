@@ -15,8 +15,11 @@ fi
 
 # External elasticsearch cluster
 #ES_HTTP_URL=http://localhost:9200
-#ES_TRANSPORT_URL=localhost:9300
 #FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
+
+# SSL truststore for certificate validation over https
+#JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks"
+#JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStorePassword=changeit"
 
 # min and max heap sizes should be set to the same value to avoid
 # stop-the-world GC pauses during resize, and so that we can lock the
@@ -33,17 +36,24 @@ fi
 # set to headless, just in case
 JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true"
 
+# maximum # keep-alive connections to maintain at once
+JAVA_OPTS="$JAVA_OPTS -Dhttp.maxConnections=20"
+
 # Force the JVM to use IPv4 stack
 if [ "x$FESS_USE_IPV4" != "x" ]; then
   JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
 fi
 
-JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC"
+JAVA_OPTS="$JAVA_OPTS -Djna.nosys=true"
+JAVA_OPTS="$JAVA_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
+
 JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"
 
 JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
 JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
 
+JAVA_OPTS="$JAVA_OPTS -Dio.netty.noUnsafe=true"
+JAVA_OPTS="$JAVA_OPTS -Dio.netty.noKeySetOptimization=true"
 JAVA_OPTS="$JAVA_OPTS -Dio.netty.recycler.maxCapacityPerThread=0"
 
 JAVA_OPTS="$JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
@@ -107,9 +117,6 @@ if [ "x$FESS_VAR_PATH" != "x" ]; then
 fi
 if [ "x$ES_HTTP_URL" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.http_address=$ES_HTTP_URL"
-fi
-if [ "x$ES_TRANSPORT_URL" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.transport_addresses=$ES_TRANSPORT_URL"
 fi
 if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.dictionary.path=$FESS_DICTIONARY_PATH"

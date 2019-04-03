@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -342,16 +342,16 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         }
     }
 
-    public void setCreatedTime_PercentileRanks() {
-        setCreatedTime_PercentileRanks(null);
+    public void setCreatedTime_PercentileRanks(double[] values) {
+        setCreatedTime_PercentileRanks(values, null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCreatedTime_PercentileRanks("createdTime", opLambda);
+    public void setCreatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -453,137 +453,6 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
     public void setCreatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsThumbnailQueueCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "createdTime");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ThumbnailQueueCA ca = new ThumbnailQueueCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTarget_Terms() {
-        setTarget_Terms(null);
-    }
-
-    public void setTarget_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setTarget_Terms("target", opLambda, null);
-    }
-
-    public void setTarget_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setTarget_Terms("target", opLambda, aggsLambda);
-    }
-
-    public void setTarget_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
-            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "target");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ThumbnailQueueCA ca = new ThumbnailQueueCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTarget_SignificantTerms() {
-        setTarget_SignificantTerms(null);
-    }
-
-    public void setTarget_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setTarget_SignificantTerms("target", opLambda, null);
-    }
-
-    public void setTarget_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setTarget_SignificantTerms("target", opLambda, aggsLambda);
-    }
-
-    public void setTarget_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "target");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ThumbnailQueueCA ca = new ThumbnailQueueCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTarget_IpRange() {
-        setTarget_IpRange(null);
-    }
-
-    public void setTarget_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setTarget_IpRange("target", opLambda, null);
-    }
-
-    public void setTarget_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setTarget_IpRange("target", opLambda, aggsLambda);
-    }
-
-    public void setTarget_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
-            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "target");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ThumbnailQueueCA ca = new ThumbnailQueueCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTarget_Count() {
-        setTarget_Count(null);
-    }
-
-    public void setTarget_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setTarget_Count("target", opLambda);
-    }
-
-    public void setTarget_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "target");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTarget_Cardinality() {
-        setTarget_Cardinality(null);
-    }
-
-    public void setTarget_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setTarget_Cardinality("target", opLambda);
-    }
-
-    public void setTarget_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "target");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTarget_Missing() {
-        setTarget_Missing(null);
-    }
-
-    public void setTarget_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setTarget_Missing("target", opLambda, null);
-    }
-
-    public void setTarget_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setTarget_Missing("target", opLambda, aggsLambda);
-    }
-
-    public void setTarget_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -856,20 +725,21 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         }
     }
 
-    public void setUrl_Terms() {
-        setUrl_Terms(null);
+    public void setTarget_Terms() {
+        setTarget_Terms(null);
     }
 
-    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setUrl_Terms("url", opLambda, null);
+    public void setTarget_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setTarget_Terms("target", opLambda, null);
     }
 
-    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setUrl_Terms("url", opLambda, aggsLambda);
+    public void setTarget_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setTarget_Terms("target", opLambda, aggsLambda);
     }
 
-    public void setUrl_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "url");
+    public void setTarget_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -880,22 +750,22 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         }
     }
 
-    public void setUrl_SignificantTerms() {
-        setUrl_SignificantTerms(null);
+    public void setTarget_SignificantTerms() {
+        setTarget_SignificantTerms(null);
     }
 
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setUrl_SignificantTerms("url", opLambda, null);
+    public void setTarget_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setTarget_SignificantTerms("target", opLambda, null);
     }
 
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+    public void setTarget_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setUrl_SignificantTerms("url", opLambda, aggsLambda);
+        setTarget_SignificantTerms("target", opLambda, aggsLambda);
     }
 
-    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+    public void setTarget_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "url");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -906,21 +776,21 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         }
     }
 
-    public void setUrl_IpRange() {
-        setUrl_IpRange(null);
+    public void setTarget_IpRange() {
+        setTarget_IpRange(null);
     }
 
-    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setUrl_IpRange("url", opLambda, null);
+    public void setTarget_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setTarget_IpRange("target", opLambda, null);
     }
 
-    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setUrl_IpRange("url", opLambda, aggsLambda);
+    public void setTarget_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setTarget_IpRange("target", opLambda, aggsLambda);
     }
 
-    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+    public void setTarget_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -931,51 +801,182 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         }
     }
 
-    public void setUrl_Count() {
-        setUrl_Count(null);
+    public void setTarget_Count() {
+        setTarget_Count(null);
     }
 
-    public void setUrl_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setUrl_Count("url", opLambda);
+    public void setTarget_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setTarget_Count("target", opLambda);
     }
 
-    public void setUrl_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "url");
+    public void setTarget_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUrl_Cardinality() {
-        setUrl_Cardinality(null);
+    public void setTarget_Cardinality() {
+        setTarget_Cardinality(null);
     }
 
-    public void setUrl_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setUrl_Cardinality("url", opLambda);
+    public void setTarget_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setTarget_Cardinality("target", opLambda);
     }
 
-    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "url");
+    public void setTarget_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUrl_Missing() {
-        setUrl_Missing(null);
+    public void setTarget_Missing() {
+        setTarget_Missing(null);
     }
 
-    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setUrl_Missing("url", opLambda, null);
+    public void setTarget_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setTarget_Missing("target", opLambda, null);
     }
 
-    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        setUrl_Missing("url", opLambda, aggsLambda);
+    public void setTarget_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setTarget_Missing("target", opLambda, aggsLambda);
     }
 
-    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+    public void setTarget_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsThumbnailQueueCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "url");
+        MissingAggregationBuilder builder = regMissingA(name, "target");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_Terms() {
+        setThumbnailId_Terms(null);
+    }
+
+    public void setThumbnailId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setThumbnailId_Terms("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_Terms("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_SignificantTerms() {
+        setThumbnailId_SignificantTerms(null);
+    }
+
+    public void setThumbnailId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setThumbnailId_SignificantTerms("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_SignificantTerms("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_IpRange() {
+        setThumbnailId_IpRange(null);
+    }
+
+    public void setThumbnailId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setThumbnailId_IpRange("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_IpRange("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ThumbnailQueueCA ca = new ThumbnailQueueCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setThumbnailId_Count() {
+        setThumbnailId_Count(null);
+    }
+
+    public void setThumbnailId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setThumbnailId_Count("thumbnail_id", opLambda);
+    }
+
+    public void setThumbnailId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Cardinality() {
+        setThumbnailId_Cardinality(null);
+    }
+
+    public void setThumbnailId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setThumbnailId_Cardinality("thumbnail_id", opLambda);
+    }
+
+    public void setThumbnailId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "thumbnail_id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThumbnailId_Missing() {
+        setThumbnailId_Missing(null);
+    }
+
+    public void setThumbnailId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setThumbnailId_Missing("thumbnail_id", opLambda, null);
+    }
+
+    public void setThumbnailId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        setThumbnailId_Missing("thumbnail_id", opLambda, aggsLambda);
+    }
+
+    public void setThumbnailId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "thumbnail_id");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

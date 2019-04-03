@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -211,16 +211,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setBoost_PercentileRanks() {
-        setBoost_PercentileRanks(null);
+    public void setBoost_PercentileRanks(double[] values) {
+        setBoost_PercentileRanks(values, null);
     }
 
-    public void setBoost_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setBoost_PercentileRanks("boost", opLambda);
+    public void setBoost_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setBoost_PercentileRanks("boost", values, opLambda);
     }
 
-    public void setBoost_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost");
+    public void setBoost_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -564,16 +564,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setCreatedTime_PercentileRanks() {
-        setCreatedTime_PercentileRanks(null);
+    public void setCreatedTime_PercentileRanks(double[] values) {
+        setCreatedTime_PercentileRanks(values, null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCreatedTime_PercentileRanks("createdTime", opLambda);
+    public void setCreatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -789,16 +789,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setMaxSize_PercentileRanks() {
-        setMaxSize_PercentileRanks(null);
+    public void setMaxSize_PercentileRanks(double[] values) {
+        setMaxSize_PercentileRanks(values, null);
     }
 
-    public void setMaxSize_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setMaxSize_PercentileRanks("maxSize", opLambda);
+    public void setMaxSize_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setMaxSize_PercentileRanks("maxSize", values, opLambda);
     }
 
-    public void setMaxSize_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "maxSize");
+    public void setMaxSize_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "maxSize", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1399,16 +1399,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setUpdatedTime_PercentileRanks() {
-        setUpdatedTime_PercentileRanks(null);
+    public void setUpdatedTime_PercentileRanks(double[] values) {
+        setUpdatedTime_PercentileRanks(values, null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setUpdatedTime_PercentileRanks("updatedTime", opLambda);
+    public void setUpdatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1509,6 +1509,137 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
     public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsKeyMatchCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            KeyMatchCA ca = new KeyMatchCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_Terms() {
+        setVirtualHost_Terms(null);
+    }
+
+    public void setVirtualHost_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setVirtualHost_Terms("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        setVirtualHost_Terms("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            KeyMatchCA ca = new KeyMatchCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_SignificantTerms() {
+        setVirtualHost_SignificantTerms(null);
+    }
+
+    public void setVirtualHost_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setVirtualHost_SignificantTerms("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        setVirtualHost_SignificantTerms("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            KeyMatchCA ca = new KeyMatchCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_IpRange() {
+        setVirtualHost_IpRange(null);
+    }
+
+    public void setVirtualHost_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setVirtualHost_IpRange("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        setVirtualHost_IpRange("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            KeyMatchCA ca = new KeyMatchCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHost_Count() {
+        setVirtualHost_Count(null);
+    }
+
+    public void setVirtualHost_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setVirtualHost_Count("virtualHost", opLambda);
+    }
+
+    public void setVirtualHost_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHost_Cardinality() {
+        setVirtualHost_Cardinality(null);
+    }
+
+    public void setVirtualHost_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setVirtualHost_Cardinality("virtualHost", opLambda);
+    }
+
+    public void setVirtualHost_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "virtualHost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHost_Missing() {
+        setVirtualHost_Missing(null);
+    }
+
+    public void setVirtualHost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setVirtualHost_Missing("virtualHost", opLambda, null);
+    }
+
+    public void setVirtualHost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        setVirtualHost_Missing("virtualHost", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHost_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "virtualHost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

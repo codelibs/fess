@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,48 +15,60 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.security.SecureRandom;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.LocaleUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.GsaConfigParser;
+import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
-import org.lastaflute.core.message.MessageManager;
-import org.lastaflute.core.message.supplier.MessageLocaleProvider;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.ActionValidator;
-import org.lastaflute.web.validation.VaErrorHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +78,10 @@ import com.google.common.cache.LoadingCache;
 import com.ibm.icu.util.ULocale;
 
 public class SystemHelper {
+
     private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
 
-    protected final Map<String, String> designJspFileNameMap = new HashMap<>();
+    protected final Map<String, String> designJspFileNameMap = new LinkedHashMap<>();
 
     protected final AtomicBoolean forceStop = new AtomicBoolean(false);
 
@@ -80,9 +93,15 @@ public class SystemHelper {
 
     protected List<Runnable> shutdownHookList = new ArrayList<>();
 
-    protected Random random = new SecureRandom();
-
     protected AtomicInteger previousClusterState = new AtomicInteger(0);
+
+    protected String version;
+
+    protected int majorVersion;
+
+    protected int minorVersion;
+
+    protected String productVersion;
 
     @PostConstruct
     public void init() {
@@ -116,6 +135,25 @@ public class SystemHelper {
                         });
 
         ComponentUtil.doInitProcesses(p -> p.run());
+
+        parseProjectProperties();
+    }
+
+    protected void parseProjectProperties() {
+        final Path propPath = ResourceUtil.getProjectPropertiesFile();
+        try (final InputStream in = Files.newInputStream(propPath)) {
+            final Properties prop = new Properties();
+            prop.load(in);
+            version = prop.getProperty("fess.version", "0.0.0");
+            final String[] values = version.split("\\.");
+            majorVersion = Integer.parseInt(values[0]);
+            minorVersion = Integer.parseInt(values[1]);
+            productVersion = majorVersion + "." + minorVersion;
+            System.setProperty("fess.version", version);
+            System.setProperty("fess.product.version", productVersion);
+        } catch (final Exception e) {
+            throw new FessSystemException("Failed to parse project.properties.", e);
+        }
     }
 
     @PreDestroy
@@ -180,21 +218,54 @@ public class SystemHelper {
         }
     }
 
+    public String normalizeConfigPath(final String path) {
+
+        if (StringUtil.isBlank(path)) {
+            return StringUtils.EMPTY;
+        }
+
+        final String p = path.trim();
+        if (p.startsWith("#")) {
+            return StringUtils.EMPTY;
+        }
+
+        if (p.startsWith(GsaConfigParser.CONTAINS)) {
+            return ".*" + Pattern.quote(p.substring(GsaConfigParser.CONTAINS.length())) + ".*";
+        }
+
+        if (p.startsWith(GsaConfigParser.REGEXP)) {
+            return p.substring(GsaConfigParser.REGEXP.length());
+        }
+
+        if (p.startsWith(GsaConfigParser.REGEXP_CASE)) {
+            return p.substring(GsaConfigParser.REGEXP_CASE.length());
+        }
+
+        if (p.startsWith(GsaConfigParser.REGEXP_IGNORE_CASE)) {
+            return "(?i)" + p.substring(GsaConfigParser.REGEXP_IGNORE_CASE.length());
+        }
+
+        return p;
+    }
+
     public String getHelpLink(final String name) {
         final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
+        return getHelpUrl(url);
+    }
+
+    protected String getHelpUrl(final String url) {
         final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         if (locale != null) {
             final String lang = locale.getLanguage();
             if (ComponentUtil.getFessConfig().isOnlineHelpSupportedLang(lang)) {
-                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
-                        Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
+                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}", majorVersion + "." + minorVersion);
             }
         }
         return getDefaultHelpLink(url);
     }
 
     protected String getDefaultHelpLink(final String url) {
-        return url.replaceFirst("/\\{lang\\}/", "/").replaceFirst("\\{version\\}", Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
+        return url.replaceFirst("/\\{lang\\}/", "/").replaceFirst("\\{version\\}", majorVersion + "." + minorVersion);
     }
 
     public void addDesignJspFileName(final String key, final String value) {
@@ -203,6 +274,38 @@ public class SystemHelper {
 
     public String getDesignJspFileName(final String fileName) {
         return designJspFileNameMap.get(fileName);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Pair<String, String>[] getDesignJspFileNames() {
+        return designJspFileNameMap.entrySet().stream().map(e -> new Pair<>(e.getKey(), e.getValue())).toArray(n -> new Pair[n]);
+    }
+
+    public void refreshDesignJspFiles() {
+        final ServletContext servletContext = LaServletContextUtil.getServletContext();
+        stream(ComponentUtil.getVirtualHostHelper().getVirtualHostPaths()).of(
+                stream -> stream.filter(s -> s != null && !s.equals("/")).forEach(
+                        key -> {
+                            designJspFileNameMap
+                                    .entrySet()
+                                    .stream()
+                                    .forEach(
+                                            e -> {
+                                                final File jspFile =
+                                                        new File(servletContext.getRealPath("/WEB-INF/view" + key + "/" + e.getValue()));
+                                                if (!jspFile.exists()) {
+                                                    jspFile.getParentFile().mkdirs();
+                                                    final File baseJspFile =
+                                                            new File(servletContext.getRealPath("/WEB-INF/view/" + e.getValue()));
+                                                    try {
+                                                        Files.copy(baseJspFile.toPath(), jspFile.toPath());
+                                                    } catch (final IOException ex) {
+                                                        logger.warn("Could not copy from " + baseJspFile.getAbsolutePath() + " to "
+                                                                + jspFile.getAbsolutePath(), ex);
+                                                    }
+                                                }
+                                            });
+                        }));
     }
 
     public boolean isForceStop() {
@@ -219,6 +322,15 @@ public class SystemHelper {
 
     public String abbreviateLongText(final String str) {
         return StringUtils.abbreviate(str, ComponentUtil.getFessConfig().getMaxLogOutputLengthAsInteger().intValue());
+    }
+
+    public String normalizeHtmlLang(final String value) {
+        final String defaultLang = ComponentUtil.getFessConfig().getCrawlerDocumentHtmlDefaultLang();
+        if (StringUtil.isNotBlank(defaultLang)) {
+            return defaultLang;
+        }
+
+        return normalizeLang(value);
     }
 
     public String normalizeLang(final String value) {
@@ -281,7 +393,9 @@ public class SystemHelper {
     }
 
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        // nothing
+        runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
+        final String url = ComponentUtil.getFessConfig().getOnlineHelpInstallation();
+        runtime.registerData("installationLink", getHelpUrl(url));
     }
 
     public String getSearchRoleByUser(final String name) {
@@ -297,7 +411,11 @@ public class SystemHelper {
     }
 
     protected String createSearchRole(final String type, final String name) {
-        return type + name;
+        final String value = type + ComponentUtil.getFessConfig().getCanonicalLdapName(name);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Role: " + type + ":" + name + "=" + value);
+        }
+        return value;
     }
 
     public void reloadConfiguration() {
@@ -308,25 +426,63 @@ public class SystemHelper {
         ComponentUtil.getPopularWordHelper().init();
         ComponentUtil.getJobManager().reboot();
         ComponentUtil.getLdapManager().updateConfig();
+        ComponentUtil.getRelatedContentHelper().update();
+        ComponentUtil.getRelatedQueryHelper().update();
+        ComponentUtil.getKeyMatchHelper().update();
     }
 
-    public String generateAccessToken() {
-        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger().intValue(), 0, 0, true, true,
-                null, random);
-    }
-
-    public void setRandom(final Random random) {
-        this.random = random;
+    public String updateConfiguration() {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("Label: ").append(ComponentUtil.getLabelTypeHelper().update()).append("\n");
+        buf.append("PathMapping: ").append(ComponentUtil.getPathMappingHelper().update()).append("\n");
+        buf.append("RelatedContent: ").append(ComponentUtil.getRelatedContentHelper().update()).append("\n");
+        buf.append("RelatedQuery: ").append(ComponentUtil.getRelatedQueryHelper().update()).append("\n");
+        return buf.toString();
     }
 
     public boolean isChangedClusterState(final int status) {
         return previousClusterState.getAndSet(status) != status;
     }
 
-    public ActionValidator<FessMessages> createValidator(MessageManager messageManager, MessageLocaleProvider messageLocaleProvider,
-            UserMessagesCreator<FessMessages> userMessagesCreator, VaErrorHook apiFailureHook, Class<?>... runtimeGroups) {
-        return new FessActionValidator<FessMessages>(messageManager, messageLocaleProvider, userMessagesCreator, apiFailureHook,
-                runtimeGroups);
+    public ActionValidator<FessMessages> createValidator(final RequestManager requestManager,
+            final UserMessagesCreator<FessMessages> messagesCreator, final Class<?>[] runtimeGroups) {
+        return new FessActionValidator<>(requestManager, messagesCreator, runtimeGroups);
+    }
+
+    public HtmlResponse getRedirectResponseToLogin(final HtmlResponse response) {
+        return response;
+    }
+
+    public HtmlResponse getRedirectResponseToRoot(final HtmlResponse response) {
+        return response;
+    }
+
+    public void setLogLevel(final String level) {
+        final Level logLevel = Level.toLevel(level, Level.WARN);
+        System.setProperty(Constants.FESS_LOG_LEVEL, logLevel.toString());
+        Configurator.setLevel("org.codelibs.fess", logLevel);
+        Configurator.setLevel("org.dbflute", logLevel);
+        Configurator.setLevel("org.lastaflute", logLevel);
+    }
+
+    public String getLogLevel() {
+        return System.getProperty(Constants.FESS_LOG_LEVEL, Level.WARN.toString());
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public int getMajorVersion() {
+        return majorVersion;
+    }
+
+    public int getMinorVersion() {
+        return minorVersion;
+    }
+
+    public String getProductVersion() {
+        return productVersion;
     }
 
 }

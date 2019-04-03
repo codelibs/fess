@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.Execute;
@@ -60,7 +62,7 @@ public class AdminLogAction extends FessAdminAction {
     public ActionResponse download(final String id) {
         final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
-        if (StringUtil.isNotBlank(logFilePath)) {
+        if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
             return asStream(filename).contentTypeOctetStream().stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
@@ -74,13 +76,14 @@ public class AdminLogAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    private List<Map<String, Object>> getLogFileItems() {
+    public static List<Map<String, Object>> getLogFileItems() {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final List<Map<String, Object>> logFileItems = new ArrayList<>();
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             final Path logDirPath = Paths.get(logFilePath);
             try (Stream<Path> stream = Files.list(logDirPath)) {
-                stream.filter(entry -> entry.getFileName().toString().endsWith(".log")).forEach(filePath -> {
+                stream.filter(entry -> isLogFilename(entry.getFileName().toString())).sorted().forEach(filePath -> {
                     final Map<String, Object> map = new HashMap<>();
                     final String name = filePath.getFileName().toString();
                     map.put("id", Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
@@ -97,6 +100,10 @@ public class AdminLogAction extends FessAdminAction {
             }
         }
         return logFileItems;
+    }
+
+    public static boolean isLogFilename(final String name) {
+        return name.endsWith(".log") || name.endsWith(".log.gz");
     }
 
     private HtmlResponse asIndexHtml() {

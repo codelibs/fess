@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.io.ResourceUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
@@ -36,6 +37,7 @@ import org.codelibs.spnego.SpnegoHttpFilter;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.codelibs.spnego.SpnegoHttpServletResponse;
 import org.codelibs.spnego.SpnegoPrincipal;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -44,22 +46,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SpnegoAuthenticator implements SsoAuthenticator {
+
     private static final Logger logger = LoggerFactory.getLogger(SpnegoAuthenticator.class);
+
+    protected static final String SPNEGO_INITIALIZED = "spnego.initialized";
+    protected static final String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";
+    protected static final String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
+    protected static final String SPNEGO_ALLOW_LOCALHOST = "spnego.allow.localhost";
+    protected static final String SPNEGO_PROMPT_NTLM = "spnego.prompt.ntlm";
+    protected static final String SPNEGO_ALLOW_UNSECURE_BASIC = "spnego.allow.unsecure.basic";
+    protected static final String SPNEGO_ALLOW_BASIC = "spnego.allow.basic";
+    protected static final String SPNEGO_PREAUTH_PASSWORD = "spnego.preauth.password";
+    protected static final String SPNEGO_PREAUTH_USERNAME = "spnego.preauth.username";
+    protected static final String SPNEGO_LOGIN_SERVER_MODULE = "spnego.login.server.module";
+    protected static final String SPNEGO_LOGIN_CLIENT_MODULE = "spnego.login.client.module";
+    protected static final String SPNEGO_KRB5_CONF = "spnego.krb5.conf";
+    protected static final String SPNEGO_LOGIN_CONF = "spnego.login.conf";
+    protected static final String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
 
     protected org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
 
     @PostConstruct
     public void init() {
-        if ("spnego".equals(ComponentUtil.getFessConfig().getSsoType())) {
-            try {
-                // set some System properties
-                final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpengoConfig());
+        ComponentUtil.getSsoManager().register(this);
+    }
 
-                // pre-authenticate
-                authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
-            } catch (final Exception e) {
-                throw new FessSystemException("Failed to initialize SPNEGO.", e);
-            }
+    protected synchronized org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (authenticator != null && fessConfig.getSystemPropertyAsBoolean(SPNEGO_INITIALIZED, false)) {
+            return authenticator;
+        }
+        try {
+            // set some System properties
+            final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpengoConfig());
+
+            // pre-authenticate
+            authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
+
+            fessConfig.setSystemPropertyAsBoolean(SPNEGO_INITIALIZED, true);
+            fessConfig.storeSystemProperties();
+            return authenticator;
+        } catch (final Exception e) {
+            throw new SsoLoginException("Failed to initialize SPNEGO.", e);
         }
     }
 
@@ -77,10 +105,12 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     // client/caller principal
                     final SpnegoPrincipal principal;
                     try {
-                        principal = authenticator.authenticate(request, spnegoResponse);
+                        principal = getAuthenticator().authenticate(request, spnegoResponse);
                     } catch (final Exception e) {
                         final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
-                        logger.error(msg);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(msg);
+                        }
                         throw new SsoLoginException(msg, e);
                     }
 
@@ -95,7 +125,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     // assert
                     if (null == principal) {
                         final String msg = "Principal was null.";
-                        logger.error(msg);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(msg);
+                        }
                         throw new SsoLoginException(msg);
                     }
 
@@ -111,8 +143,6 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     protected class SpengoConfig implements FilterConfig {
 
-        protected FessConfig fessConfig = ComponentUtil.getFessConfig();
-
         @Override
         public String getFilterName() {
             return SpnegoAuthenticator.class.getName();
@@ -126,31 +156,50 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         @Override
         public String getInitParameter(final String name) {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
-                return fessConfig.getSpnegoLoggerLevel();
+                final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
+                if (StringUtil.isNotBlank(logLevel)) {
+                    return logLevel;
+                } else if (logger.isDebugEnabled()) {
+                    return "3";
+                } else if (logger.isInfoEnabled()) {
+                    return "5";
+                } else if (logger.isWarnEnabled()) {
+                    return "6";
+                } else if (logger.isErrorEnabled()) {
+                    return "7";
+                } else {
+                    return "0";
+                }
             } else if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
-                return getResourcePath(fessConfig.getSpnegoLoginConf());
+                return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
             } else if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
-                return getResourcePath(fessConfig.getSpnegoKrb5Conf());
+                return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));
             } else if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
-                return fessConfig.getSpnegoLoginClientModule();
+                return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");
             } else if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
-                return fessConfig.getSpnegoLoginServerModule();
+                return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");
             } else if (SpnegoHttpFilter.Constants.PREAUTH_USERNAME.equals(name)) {
-                return fessConfig.getSpnegoPreauthUsername();
+                return getProperty(SPNEGO_PREAUTH_USERNAME, "username");
             } else if (SpnegoHttpFilter.Constants.PREAUTH_PASSWORD.equals(name)) {
-                return fessConfig.getSpnegoPreauthPassword();
+                return getProperty(SPNEGO_PREAUTH_PASSWORD, "password");
             } else if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
-                return fessConfig.getSpnegoAllowBasic();
+                return getProperty(SPNEGO_ALLOW_BASIC, "true");
             } else if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
-                return fessConfig.getSpnegoAllowUnsecureBasic();
+                return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "true");
             } else if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
-                return fessConfig.getSpnegoPromptNtlm();
+                return getProperty(SPNEGO_PROMPT_NTLM, "true");
             } else if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
-                return fessConfig.getSpnegoAllowLocalhost();
+                return getProperty(SPNEGO_ALLOW_LOCALHOST, "true");
             } else if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
-                return fessConfig.getSpnegoAllowDelegation();
+                return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
+            } else if (SpnegoHttpFilter.Constants.EXCLUDE_DIRS.equals(name)) {
+                return getProperty(SPNEGO_EXCLUDE_DIRS, StringUtil.EMPTY);
             }
             return null;
+        }
+
+        protected String getProperty(final String key, final String defaultValue) {
+            return ComponentUtil.getSystemProperties().getProperty(key, defaultValue);
         }
 
         protected String getResourcePath(final String path) {
@@ -166,5 +215,16 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             throw new UnsupportedOperationException();
         }
 
+    }
+
+    @Override
+    public void resolveCredential(final LoginCredentialResolver resolver) {
+        resolver.resolve(SpnegoCredential.class, credential -> {
+            final String username = credential.getUserId();
+            if (!ComponentUtil.getFessConfig().isAdminUser(username)) {
+                return ComponentUtil.getLdapManager().login(username);
+            }
+            return OptionalEntity.empty();
+        });
     }
 }

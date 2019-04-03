@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -342,16 +342,16 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setCreatedTime_PercentileRanks() {
-        setCreatedTime_PercentileRanks(null);
+    public void setCreatedTime_PercentileRanks(double[] values) {
+        setCreatedTime_PercentileRanks(values, null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCreatedTime_PercentileRanks("createdTime", opLambda);
+    public void setCreatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -959,16 +959,16 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setSortOrder_PercentileRanks() {
-        setSortOrder_PercentileRanks(null);
+    public void setSortOrder_PercentileRanks(double[] values) {
+        setSortOrder_PercentileRanks(values, null);
     }
 
-    public void setSortOrder_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setSortOrder_PercentileRanks("sortOrder", opLambda);
+    public void setSortOrder_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder");
+    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1069,137 +1069,6 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
     public void setSortOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsPathMappingCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "sortOrder");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            PathMappingCA ca = new PathMappingCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUserAgent_Terms() {
-        setUserAgent_Terms(null);
-    }
-
-    public void setUserAgent_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setUserAgent_Terms("userAgent", opLambda, null);
-    }
-
-    public void setUserAgent_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
-        setUserAgent_Terms("userAgent", opLambda, aggsLambda);
-    }
-
-    public void setUserAgent_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
-            OperatorCall<BsPathMappingCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "userAgent");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            PathMappingCA ca = new PathMappingCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUserAgent_SignificantTerms() {
-        setUserAgent_SignificantTerms(null);
-    }
-
-    public void setUserAgent_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setUserAgent_SignificantTerms("userAgent", opLambda, null);
-    }
-
-    public void setUserAgent_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsPathMappingCA> aggsLambda) {
-        setUserAgent_SignificantTerms("userAgent", opLambda, aggsLambda);
-    }
-
-    public void setUserAgent_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsPathMappingCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "userAgent");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            PathMappingCA ca = new PathMappingCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUserAgent_IpRange() {
-        setUserAgent_IpRange(null);
-    }
-
-    public void setUserAgent_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setUserAgent_IpRange("userAgent", opLambda, null);
-    }
-
-    public void setUserAgent_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
-        setUserAgent_IpRange("userAgent", opLambda, aggsLambda);
-    }
-
-    public void setUserAgent_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
-            OperatorCall<BsPathMappingCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "userAgent");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            PathMappingCA ca = new PathMappingCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUserAgent_Count() {
-        setUserAgent_Count(null);
-    }
-
-    public void setUserAgent_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setUserAgent_Count("userAgent", opLambda);
-    }
-
-    public void setUserAgent_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "userAgent");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Cardinality() {
-        setUserAgent_Cardinality(null);
-    }
-
-    public void setUserAgent_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setUserAgent_Cardinality("userAgent", opLambda);
-    }
-
-    public void setUserAgent_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "userAgent");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUserAgent_Missing() {
-        setUserAgent_Missing(null);
-    }
-
-    public void setUserAgent_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setUserAgent_Missing("userAgent", opLambda, null);
-    }
-
-    public void setUserAgent_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
-        setUserAgent_Missing("userAgent", opLambda, aggsLambda);
-    }
-
-    public void setUserAgent_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsPathMappingCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "userAgent");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1446,16 +1315,16 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setUpdatedTime_PercentileRanks() {
-        setUpdatedTime_PercentileRanks(null);
+    public void setUpdatedTime_PercentileRanks(double[] values) {
+        setUpdatedTime_PercentileRanks(values, null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setUpdatedTime_PercentileRanks("updatedTime", opLambda);
+    public void setUpdatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1556,6 +1425,137 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
     public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsPathMappingCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            PathMappingCA ca = new PathMappingCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUserAgent_Terms() {
+        setUserAgent_Terms(null);
+    }
+
+    public void setUserAgent_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setUserAgent_Terms("userAgent", opLambda, null);
+    }
+
+    public void setUserAgent_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+        setUserAgent_Terms("userAgent", opLambda, aggsLambda);
+    }
+
+    public void setUserAgent_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            PathMappingCA ca = new PathMappingCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUserAgent_SignificantTerms() {
+        setUserAgent_SignificantTerms(null);
+    }
+
+    public void setUserAgent_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setUserAgent_SignificantTerms("userAgent", opLambda, null);
+    }
+
+    public void setUserAgent_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
+        setUserAgent_SignificantTerms("userAgent", opLambda, aggsLambda);
+    }
+
+    public void setUserAgent_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            PathMappingCA ca = new PathMappingCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUserAgent_IpRange() {
+        setUserAgent_IpRange(null);
+    }
+
+    public void setUserAgent_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setUserAgent_IpRange("userAgent", opLambda, null);
+    }
+
+    public void setUserAgent_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+        setUserAgent_IpRange("userAgent", opLambda, aggsLambda);
+    }
+
+    public void setUserAgent_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            PathMappingCA ca = new PathMappingCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUserAgent_Count() {
+        setUserAgent_Count(null);
+    }
+
+    public void setUserAgent_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setUserAgent_Count("userAgent", opLambda);
+    }
+
+    public void setUserAgent_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Cardinality() {
+        setUserAgent_Cardinality(null);
+    }
+
+    public void setUserAgent_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setUserAgent_Cardinality("userAgent", opLambda);
+    }
+
+    public void setUserAgent_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Missing() {
+        setUserAgent_Missing(null);
+    }
+
+    public void setUserAgent_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setUserAgent_Missing("userAgent", opLambda, null);
+    }
+
+    public void setUserAgent_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+        setUserAgent_Missing("userAgent", opLambda, aggsLambda);
+    }
+
+    public void setUserAgent_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "userAgent");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

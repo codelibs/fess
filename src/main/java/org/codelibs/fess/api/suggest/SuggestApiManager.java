@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,30 @@ package org.codelibs.fess.api.suggest;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
@@ -52,6 +56,14 @@ public class SuggestApiManager extends BaseJsonApiManager {
         setPathPrefix("/suggest");
     }
 
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        ComponentUtil.getWebApiManagerFactory().add(this);
+    }
+
     @Override
     public boolean matches(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
@@ -61,6 +73,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
+            writeJsonResponse(99, StringUtil.EMPTY, "Referer is invalid.");
+            return;
+        }
+
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
@@ -78,6 +96,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
             roleQueryHelper.build(SearchRequestType.SUGGEST).stream().forEach(builder::addRole);
             builder.setSize(parameter.getNum());
             stream(langs).of(stream -> stream.forEach(builder::addLang));
+
+            stream(parameter.getTags()).of(stream -> stream.forEach(builder::addTag));
+            final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+            if (StringUtil.isNotBlank(key)) {
+                builder.addTag(key);
+            }
 
             builder.addKind(SuggestItem.Kind.USER.toString());
             if (ComponentUtil.getFessConfig().isSuggestSearchLog()) {
@@ -115,25 +139,6 @@ public class SuggestApiManager extends BaseJsonApiManager {
                         buf.append('\"').append(StringEscapeUtils.escapeJson(item.getTags()[i])).append('\"');
                     }
                     buf.append(']');
-
-                    buf.append(",\"roles\":[");
-                    for (int i = 0; i < item.getRoles().length; i++) {
-                        if (i > 0) {
-                            buf.append(',');
-                        }
-                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getRoles()[i])).append('\"');
-                    }
-                    buf.append(']');
-
-                    buf.append(",\"fields\":[");
-                    for (int i = 0; i < item.getFields().length; i++) {
-                        if (i > 0) {
-                            buf.append(',');
-                        }
-                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getFields()[i])).append('\"');
-                    }
-                    buf.append(']');
-
                     buf.append('}');
                 }
                 buf.append(']');
@@ -159,7 +164,7 @@ public class SuggestApiManager extends BaseJsonApiManager {
         writeJsonResponse(status, buf.toString(), errMsg);
     }
 
-    protected static class RequestParameter implements SearchRequestParams {
+    protected static class RequestParameter extends SearchRequestParams {
         private final String query;
 
         private final String[] fields;
@@ -168,8 +173,12 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
         private final HttpServletRequest request;
 
-        protected RequestParameter(final HttpServletRequest request, final String query, final String[] fields, final int num) {
+        private final String[] tags;
+
+        protected RequestParameter(final HttpServletRequest request, final String query, final String[] tags, final String[] fields,
+                final int num) {
             this.query = query;
+            this.tags = tags;
             this.fields = fields;
             this.num = num;
             this.request = request;
@@ -193,7 +202,15 @@ public class SuggestApiManager extends BaseJsonApiManager {
                 num = 10;
             }
 
-            return new RequestParameter(request, query, fields, num);
+            final String tagsStr = request.getParameter("tags");
+            final String[] tags;
+            if (StringUtil.isNotBlank(tagsStr)) {
+                tags = tagsStr.split(",");
+            } else {
+                tags = new String[0];
+            }
+
+            return new RequestParameter(request, query, tags, fields, num);
         }
 
         @Override
@@ -211,7 +228,16 @@ public class SuggestApiManager extends BaseJsonApiManager {
 
         @Override
         public Map<String, String[]> getFields() {
-            throw new UnsupportedOperationException();
+            return Collections.emptyMap();
+        }
+
+        @Override
+        public Map<String, String[]> getConditions() {
+            return Collections.emptyMap();
+        }
+
+        public String[] getTags() {
+            return tags;
         }
 
         @Override
@@ -263,5 +289,20 @@ public class SuggestApiManager extends BaseJsonApiManager {
         public SearchRequestType getType() {
             return SearchRequestType.SUGGEST;
         }
+
+        @Override
+        public String getSimilarDocHash() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public HighlightInfo getHighlightInfo() {
+            return new HighlightInfo();
+        }
+    }
+
+    @Override
+    protected void writeHeaders(final HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }

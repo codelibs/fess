@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +29,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.GroovyUtil;
+import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -37,12 +41,20 @@ public class PathMappingHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(PathMappingHelper.class);
 
-    private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
+    protected static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
 
-    volatile List<PathMapping> cachedPathMappingList = null;
+    protected static final String GROOVY_MATCHER = "groovy:";
+
+    protected final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
+
+    protected volatile List<PathMapping> cachedPathMappingList = null;
 
     @PostConstruct
     public void init() {
+        update();
+    }
+
+    public int update() {
         final List<String> ptList = new ArrayList<>();
         ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
         ptList.add(Constants.PROCESS_TYPE_BOTH);
@@ -54,9 +66,16 @@ public class PathMappingHelper {
                 cb.query().setProcessType_InScope(ptList);
                 cb.fetchFirst(ComponentUtil.getFessConfig().getPagePathMappingMaxFetchSizeAsInteger());
             });
+            return cachedPathMappingList.size();
+        } catch (final ComponentNotFoundException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to load path mappings.", e);
+            }
+            cachedPathMappingList = new ArrayList<>();
         } catch (final Exception e) {
             logger.warn("Failed to load path mappings.", e);
         }
+        return 0;
     }
 
     public void setPathMappingList(final String sessionId, final List<PathMapping> pathMappingList) {
@@ -99,8 +118,11 @@ public class PathMappingHelper {
         String result = text;
         for (final PathMapping pathMapping : cachedPathMappingList) {
             if (matchUserAgent(pathMapping)) {
-                result =
-                        result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
+                String replacement = pathMapping.getReplacement();
+                if (replacement == null) {
+                    replacement = StringUtil.EMPTY;
+                }
+                result = result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + replacement + "$2");
             }
         }
         return result;
@@ -117,14 +139,31 @@ public class PathMappingHelper {
         return replaceUrl(cachedPathMappingList, url);
     }
 
+    public BiFunction<String, Matcher, String> createPathMatcher(final Matcher matcher, final String replacement) {
+        if (replacement.equals(FUNCTION_ENCODEURL_MATCHER)) {
+            return (u, m) -> DocumentUtil.encodeUrl(u);
+        } else if (replacement.startsWith(GROOVY_MATCHER)) {
+            final String template = replacement.substring(GROOVY_MATCHER.length());
+            return (u, m) -> {
+                final Map<String, Object> paramMap = new HashMap<>();
+                paramMap.put("url", u);
+                paramMap.put("matcher", m);
+                final Object value = GroovyUtil.evaluate(template, paramMap);
+                if (value == null) {
+                    return u;
+                }
+                return value.toString();
+            };
+        } else {
+            return (u, m) -> m.replaceAll(replacement);
+        }
+    }
+
     private String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
             if (matchUserAgent(pathMapping)) {
-                final Matcher matcher = pathMapping.getMatcher(newUrl);
-                if (matcher.find()) {
-                    newUrl = matcher.replaceAll(pathMapping.getReplacement());
-                }
+                newUrl = pathMapping.process(this, newUrl);
             }
         }
         return newUrl;

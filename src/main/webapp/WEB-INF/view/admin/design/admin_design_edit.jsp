@@ -38,10 +38,10 @@
 									</div>
 									<!-- /.box-header -->
 									<div class="box-body">
-										<h4>${f:h(fileName)}</h4>
+										<h4>${f:h(displayFileName)}</h4>
 										<div>
 											<la:errors property="content" />
-											<la:textarea property="content" rows="20"
+											<la:textarea styleId="content" property="content" rows="20"
 												styleClass="form-control"></la:textarea>
 										</div>
 									</div>
@@ -54,7 +54,7 @@
 										</button>
 										<button type="submit" class="btn btn-warning" name="update"
 											value="<la:message key="labels.design_button_update" />">
-											<i class="fa fa-pencil"></i>
+											<i class="fa fa-pencil-alt"></i>
 											<la:message key="labels.design_button_update" />
 										</button>
 									</div>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,20 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.base.login.FessCredential;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +38,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ActivityHelper {
-    private Logger logger = null;
+    protected Logger logger = null;
 
     protected String loggerName = "fess.log.audit";
+
+    protected String permissionSeparator = "|";
 
     @PostConstruct
     public void init() {
@@ -48,6 +56,29 @@ public class ActivityHelper {
         buf.append('\t');
         buf.append("user:");
         buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append('\t');
+        buf.append("permissions:");
+        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                .filter(StringUtil::isNotBlank).orElse("-"));
+        log(buf);
+    }
+
+    public void loginFailure(final OptionalThing<LoginCredential> credential) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(Action.LOGIN_FAILURE);
+        credential.map(c -> {
+            final StringBuilder buffer = new StringBuilder(100);
+            buffer.append('\t');
+            buffer.append("class:");
+            buffer.append(c.getClass().getSimpleName());
+            if (c instanceof FessCredential) {
+                buffer.append('\t');
+                buffer.append("user:");
+                buffer.append(((FessCredential) c).getUserId());
+            }
+            return buffer.toString();
+        }).ifPresent(buf::append);
         log(buf);
     }
 
@@ -58,6 +89,10 @@ public class ActivityHelper {
         buf.append('\t');
         buf.append("user:");
         buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append('\t');
+        buf.append("permissions:");
+        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                .filter(StringUtil::isNotBlank).orElse("-"));
         log(buf);
     }
 
@@ -92,10 +127,14 @@ public class ActivityHelper {
     }
 
     protected enum Action {
-        LOGIN, LOGOUT, ACCESS;
+        LOGIN, LOGOUT, ACCESS, LOGIN_FAILURE;
     }
 
     public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
+    }
+
+    public void setPermissionSeparator(final String permissionSeparator) {
+        this.permissionSeparator = permissionSeparator;
     }
 }

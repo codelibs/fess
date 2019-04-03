@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
 
     protected IdsQueryBuilder regIdsQ(Collection<String> values) {
         checkEsInvalidQueryCollection("_id", values);
-        IdsQueryBuilder idsQuery = QueryBuilders.idsQuery(asTableDbName()).addIds(values.toArray(new String[values.size()]));
+        IdsQueryBuilder idsQuery = QueryBuilders.idsQuery().addIds(values.toArray(new String[values.size()]));
         regQ(idsQuery);
         return idsQuery;
     }
@@ -534,7 +534,7 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
     public class DocMetaCQ {
 
         public void setId_Equal(String id) {
-            regQ(QueryBuilders.idsQuery(asTableDbName()).addIds(id));
+            regQ(QueryBuilders.idsQuery().addIds(id));
         }
     }
 
@@ -573,6 +573,6 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
 
     @FunctionalInterface
     public interface ScoreFunctionCreator<T extends EsAbstractConditionQuery> {
-        void filter(final OperatorCall<T> cqLambda, final ScoreFunctionBuilder scoreFunctionBuilder);
+        void filter(final OperatorCall<T> cqLambda, final ScoreFunctionBuilder<?> scoreFunctionBuilder);
     }
 }

@@ -1,0 +1,29 @@
+{
+  ".fess_user.group" : {
+    "aliases" : { },
+    "mappings" : {
+      "group" : {
+        "properties" : {
+          "gidNumber" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021058796",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "5EWS2-qMT2WwHG0yPrhP3Q",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_user.group"
+      }
+    }
+  }
+}

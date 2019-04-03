@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,8 @@ public class JobLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((JobLog) et).getEndTime(), (et, vl) -> ((JobLog) et).setEndTime(DfTypeUtil.toLong(vl)), "endTime");
         setupEpg(_epgMap, et -> ((JobLog) et).getJobName(), (et, vl) -> ((JobLog) et).setJobName(DfTypeUtil.toString(vl)), "jobName");
         setupEpg(_epgMap, et -> ((JobLog) et).getJobStatus(), (et, vl) -> ((JobLog) et).setJobStatus(DfTypeUtil.toString(vl)), "jobStatus");
+        setupEpg(_epgMap, et -> ((JobLog) et).getLastUpdated(), (et, vl) -> ((JobLog) et).setLastUpdated(DfTypeUtil.toLong(vl)),
+                "lastUpdated");
         setupEpg(_epgMap, et -> ((JobLog) et).getScriptData(), (et, vl) -> ((JobLog) et).setScriptData(DfTypeUtil.toString(vl)),
                 "scriptData");
         setupEpg(_epgMap, et -> ((JobLog) et).getScriptResult(), (et, vl) -> ((JobLog) et).setScriptResult(DfTypeUtil.toString(vl)),
@@ -90,8 +92,6 @@ public class JobLogDbm extends AbstractDBMeta {
                 "scriptType");
         setupEpg(_epgMap, et -> ((JobLog) et).getStartTime(), (et, vl) -> ((JobLog) et).setStartTime(DfTypeUtil.toLong(vl)), "startTime");
         setupEpg(_epgMap, et -> ((JobLog) et).getTarget(), (et, vl) -> ((JobLog) et).setTarget(DfTypeUtil.toString(vl)), "target");
-        setupEpg(_epgMap, et -> ((JobLog) et).getLastUpdated(), (et, vl) -> ((JobLog) et).setLastUpdated(DfTypeUtil.toLong(vl)),
-                "lastUpdated");
     }
 
     @Override
@@ -129,23 +129,23 @@ public class JobLogDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnEndTime = cci("endTime", "endTime", null, null, Long.class, "endTime", null, false, false, false,
-            "Long", 0, 0, null, false, null, null, null, null, null, false);
+            "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnJobName = cci("jobName", "jobName", null, null, String.class, "jobName", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnJobStatus = cci("jobStatus", "jobStatus", null, null, String.class, "jobStatus", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnScriptData = cci("scriptData", "scriptData", null, null, String.class, "scriptData", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnScriptResult = cci("scriptResult", "scriptResult", null, null, String.class, "scriptResult", null,
-            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnScriptType = cci("scriptType", "scriptType", null, null, String.class, "scriptType", null, false,
-            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnStartTime = cci("startTime", "startTime", null, null, Long.class, "startTime", null, false, false,
-            false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLastUpdated = cci("lastUpdated", "lastUpdated", null, null, Long.class, "lastUpdated", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptData = cci("scriptData", "scriptData", null, null, String.class, "scriptData", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptResult = cci("scriptResult", "scriptResult", null, null, String.class, "scriptResult", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptType = cci("scriptType", "scriptType", null, null, String.class, "scriptType", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnStartTime = cci("startTime", "startTime", null, null, Long.class, "startTime", null, false, false,
+            false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnEndTime() {
         return _columnEndTime;
@@ -157,6 +157,10 @@ public class JobLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnJobStatus() {
         return _columnJobStatus;
+    }
+
+    public ColumnInfo columnLastUpdated() {
+        return _columnLastUpdated;
     }
 
     public ColumnInfo columnScriptData() {
@@ -179,21 +183,17 @@ public class JobLogDbm extends AbstractDBMeta {
         return _columnTarget;
     }
 
-    public ColumnInfo columnLastUpdated() {
-        return _columnLastUpdated;
-    }
-
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnEndTime());
         ls.add(columnJobName());
         ls.add(columnJobStatus());
+        ls.add(columnLastUpdated());
         ls.add(columnScriptData());
         ls.add(columnScriptResult());
         ls.add(columnScriptType());
         ls.add(columnStartTime());
         ls.add(columnTarget());
-        ls.add(columnLastUpdated());
         return ls;
     }
 

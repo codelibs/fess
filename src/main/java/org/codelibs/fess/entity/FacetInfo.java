@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.codelibs.fess.entity;
 
 import java.util.Arrays;
 
+import org.codelibs.core.lang.StringUtil;
+import org.elasticsearch.search.aggregations.BucketOrder;
+
 public class FacetInfo {
     public String[] field;
 
@@ -29,6 +32,26 @@ public class FacetInfo {
     public String sort;
 
     public String missing;
+
+    public BucketOrder getBucketOrder() {
+        if (StringUtil.isNotBlank(sort)) {
+            final String[] values = sort.split("\\.");
+            final boolean asc;
+            if (values.length > 1) {
+                asc = !values[1].equalsIgnoreCase("desc");
+            } else {
+                asc = true;
+            }
+            if (values.length > 0) {
+                if ("term".equals(values[0]) || "key".equals(values[0])) {
+                    return BucketOrder.key(asc);
+                } else if ("count".equals(values[0])) {
+                    return BucketOrder.count(asc);
+                }
+            }
+        }
+        return BucketOrder.count(false);
+    }
 
     @Override
     public String toString() {

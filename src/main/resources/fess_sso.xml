@@ -4,10 +4,4 @@
 <components>
 	<component name="ssoManager" class="org.codelibs.fess.sso.SsoManager">
 	</component>
-
-	<component name="spnegoAuthenticator" class="org.codelibs.fess.sso.spnego.SpnegoAuthenticator">
-	</component>
-	<component name="oicAuthenticator" class="org.codelibs.fess.sso.oic.OpenIdConnectAuthenticator">
-	</component>
-
 </components>

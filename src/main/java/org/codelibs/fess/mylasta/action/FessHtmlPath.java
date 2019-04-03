@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,20 +132,41 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_upload.jsp */
     HtmlNext path_AdminDictProtwords_AdminDictProtwordsUploadJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_upload.jsp");
 
-    /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon.jsp */
-    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon.jsp");
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride.jsp");
 
-    /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon_details.jsp */
-    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonDetailsJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_details.jsp");
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_details.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideDetailsJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_details.jsp");
 
-    /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon_download.jsp */
-    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonDownloadJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_download.jsp");
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_download.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideDownloadJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_download.jsp");
 
-    /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon_edit.jsp */
-    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonEditJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_edit.jsp");
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_edit.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideEditJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_edit.jsp");
 
-    /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon_upload.jsp */
-    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonUploadJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_upload.jsp");
+    /** The path of the HTML: /admin/dict/stemmeroverride/admin_dict_stemmeroverride_upload.jsp */
+    HtmlNext path_AdminDictStemmeroverride_AdminDictStemmeroverrideUploadJsp = new HtmlNext(
+            "/admin/dict/stemmeroverride/admin_dict_stemmeroverride_upload.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_details.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsDetailsJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_details.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_download.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsDownloadJsp =
+            new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_download.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_edit.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsEditJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_edit.jsp");
+
+    /** The path of the HTML: /admin/dict/stopwords/admin_dict_stopwords_upload.jsp */
+    HtmlNext path_AdminDictStopwords_AdminDictStopwordsUploadJsp = new HtmlNext("/admin/dict/stopwords/admin_dict_stopwords_upload.jsp");
 
     /** The path of the HTML: /admin/dict/synonym/admin_dict_synonym.jsp */
     HtmlNext path_AdminDictSynonym_AdminDictSynonymJsp = new HtmlNext("/admin/dict/synonym/admin_dict_synonym.jsp");
@@ -255,6 +276,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/log/admin_log.jsp */
     HtmlNext path_AdminLog_AdminLogJsp = new HtmlNext("/admin/log/admin_log.jsp");
 
+    /** The path of the HTML: /admin/maintenance/admin_maintenance.jsp */
+    HtmlNext path_AdminMaintenance_AdminMaintenanceJsp = new HtmlNext("/admin/maintenance/admin_maintenance.jsp");
+
     /** The path of the HTML: /admin/pathmap/admin_pathmap.jsp */
     HtmlNext path_AdminPathmap_AdminPathmapJsp = new HtmlNext("/admin/pathmap/admin_pathmap.jsp");
 
@@ -263,6 +287,25 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/pathmap/admin_pathmap_edit.jsp */
     HtmlNext path_AdminPathmap_AdminPathmapEditJsp = new HtmlNext("/admin/pathmap/admin_pathmap_edit.jsp");
+
+    /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent.jsp */
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent.jsp");
+
+    /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_details.jsp */
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentDetailsJsp =
+            new HtmlNext("/admin/relatedcontent/admin_relatedcontent_details.jsp");
+
+    /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent_edit.jsp */
+    HtmlNext path_AdminRelatedcontent_AdminRelatedcontentEditJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent_edit.jsp");
+
+    /** The path of the HTML: /admin/relatedquery/admin_relatedquery.jsp */
+    HtmlNext path_AdminRelatedquery_AdminRelatedqueryJsp = new HtmlNext("/admin/relatedquery/admin_relatedquery.jsp");
+
+    /** The path of the HTML: /admin/relatedquery/admin_relatedquery_details.jsp */
+    HtmlNext path_AdminRelatedquery_AdminRelatedqueryDetailsJsp = new HtmlNext("/admin/relatedquery/admin_relatedquery_details.jsp");
+
+    /** The path of the HTML: /admin/relatedquery/admin_relatedquery_edit.jsp */
+    HtmlNext path_AdminRelatedquery_AdminRelatedqueryEditJsp = new HtmlNext("/admin/relatedquery/admin_relatedquery_edit.jsp");
 
     /** The path of the HTML: /admin/reqheader/admin_reqheader.jsp */
     HtmlNext path_AdminReqheader_AdminReqheaderJsp = new HtmlNext("/admin/reqheader/admin_reqheader.jsp");
@@ -296,6 +339,12 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/searchlist/admin_searchlist_edit.jsp */
     HtmlNext path_AdminSearchlist_AdminSearchlistEditJsp = new HtmlNext("/admin/searchlist/admin_searchlist_edit.jsp");
+
+    /** The path of the HTML: /admin/searchlog/admin_searchlog.jsp */
+    HtmlNext path_AdminSearchlog_AdminSearchlogJsp = new HtmlNext("/admin/searchlog/admin_searchlog.jsp");
+
+    /** The path of the HTML: /admin/searchlog/admin_searchlog_details.jsp */
+    HtmlNext path_AdminSearchlog_AdminSearchlogDetailsJsp = new HtmlNext("/admin/searchlog/admin_searchlog_details.jsp");
 
     /** The path of the HTML: /admin/suggest/admin_suggest.jsp */
     HtmlNext path_AdminSuggest_AdminSuggestJsp = new HtmlNext("/admin/suggest/admin_suggest.jsp");
@@ -342,17 +391,14 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/wizard/admin_wizard_start.jsp */
     HtmlNext path_AdminWizard_AdminWizardStartJsp = new HtmlNext("/admin/wizard/admin_wizard_start.jsp");
 
+    /** The path of the HTML: /advance.jsp */
+    HtmlNext path_AdvanceJsp = new HtmlNext("/advance.jsp");
+
     /** The path of the HTML: /error/badRequest.jsp */
     HtmlNext path_Error_BadRequestJsp = new HtmlNext("/error/badRequest.jsp");
 
     /** The path of the HTML: /error/error.jsp */
     HtmlNext path_Error_ErrorJsp = new HtmlNext("/error/error.jsp");
-
-    /** The path of the HTML: /error/footer.jsp */
-    HtmlNext path_Error_FooterJsp = new HtmlNext("/error/footer.jsp");
-
-    /** The path of the HTML: /error/header.jsp */
-    HtmlNext path_Error_HeaderJsp = new HtmlNext("/error/header.jsp");
 
     /** The path of the HTML: /error/notFound.jsp */
     HtmlNext path_Error_NotFoundJsp = new HtmlNext("/error/notFound.jsp");
@@ -386,6 +432,9 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /searchNoResult.jsp */
     HtmlNext path_SearchNoResultJsp = new HtmlNext("/searchNoResult.jsp");
+
+    /** The path of the HTML: /searchOptions.jsp */
+    HtmlNext path_SearchOptionsJsp = new HtmlNext("/searchOptions.jsp");
 
     /** The path of the HTML: /searchResults.jsp */
     HtmlNext path_SearchResultsJsp = new HtmlNext("/searchResults.jsp");

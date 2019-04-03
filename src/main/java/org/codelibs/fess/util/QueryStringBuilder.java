@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,48 @@
  */
 package org.codelibs.fess.util;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 
 public class QueryStringBuilder {
-    private String query;
 
-    private String[] extraQueries;
+    private static final String OR_ALT = "||";
 
-    private Map<String, String[]> fieldMap;
+    private static final String OR = " OR ";
+
+    private SearchRequestParams params;
+
+    protected String quote(final String value) {
+        if (value.split("\\s").length > 1) {
+            return new StringBuilder().append('"').append(value.replace('"', ' ')).append('"').toString();
+        }
+        return value;
+    }
 
     public String build() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
         final StringBuilder queryBuf = new StringBuilder(255);
+
+        final String query = buildBaseQuery();
         if (StringUtil.isNotBlank(query)) {
-            queryBuf.append('(').append(query).append(')');
+            queryBuf.append(query);
         }
-        stream(extraQueries).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= fessConfig.getQueryMaxLengthAsInteger().intValue())
-                        .forEach(q -> queryBuf.append(' ').append(q)));
-        stream(fieldMap).of(stream -> stream.forEach(entry -> {
+
+        stream(params.getExtraQueries()).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(q -> {
+                    appendQuery(queryBuf, q);
+                }));
+
+        stream(params.getFields()).of(stream -> stream.forEach(entry -> {
             final String key = entry.getKey();
             final String[] values = entry.getValue();
             if (values == null) {
@@ -52,29 +70,114 @@ public class QueryStringBuilder {
                     if (first) {
                         first = false;
                     } else {
-                        queryBuf.append(" OR ");
+                        queryBuf.append(OR);
                     }
                     queryBuf.append(key).append(":\"").append(value).append('\"');
                 }
                 queryBuf.append(')');
             }
         }));
-        return queryBuf.toString();
+
+        return queryBuf.toString().trim();
     }
 
-    public static QueryStringBuilder query(final String query) {
-        final QueryStringBuilder builder = new QueryStringBuilder();
-        builder.query = query;
-        return builder;
+    protected void appendQuery(final StringBuilder queryBuf, final String q) {
+        final boolean exists = q.indexOf(OR) != -1 || q.indexOf(OR_ALT) != -1;
+        queryBuf.append(' ');
+        if (exists) {
+            queryBuf.append('(');
+        }
+        queryBuf.append(q);
+        if (exists) {
+            queryBuf.append(')');
+        }
     }
 
-    public QueryStringBuilder extraQueries(final String[] extraQueries) {
-        this.extraQueries = extraQueries;
-        return this;
+    protected String buildBaseQuery() {
+        final StringBuilder queryBuf = new StringBuilder(255);
+        if (params.hasConditionQuery()) {
+            appendConditions(queryBuf, params.getConditions());
+        } else {
+            final String query = params.getQuery();
+            if (StringUtil.isNotBlank(query)) {
+                if (ComponentUtil.hasRelatedQueryHelper()) {
+                    final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
+                    final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
+                    if (relatedQueries.length == 0) {
+                        appendQuery(queryBuf, query);
+                    } else {
+                        queryBuf.append('(');
+                        queryBuf.append(quote(query));
+                        for (final String s : relatedQueries) {
+                            queryBuf.append(OR);
+                            queryBuf.append(quote(s));
+                        }
+                        queryBuf.append(')');
+                    }
+                } else {
+                    appendQuery(queryBuf, query);
+                }
+            }
+        }
+        return queryBuf.toString().trim();
     }
 
-    public QueryStringBuilder fields(final Map<String, String[]> fieldMap) {
-        this.fieldMap = fieldMap;
+    protected void appendConditions(final StringBuilder queryBuf, final Map<String, String[]> conditions) {
+        if (conditions == null) {
+            return;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
+
+        stream(conditions.get(SearchRequestParams.AS_OCCURRENCE)).of(
+                stream -> stream.filter(q -> isOccurrence(q)).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
+
+        stream(conditions.get(SearchRequestParams.AS_Q)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(' ').append(q)));
+        stream(conditions.get(SearchRequestParams.AS_EPQ)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" \"").append(escape(q, "\"")).append('"')));
+        stream(conditions.get(SearchRequestParams.AS_OQ)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        oq -> split(oq, " ").get(
+                                s -> s.filter(StringUtil::isNotBlank).reduce((q1, q2) -> escape(q1, "(", ")") + OR + escape(q2, "(", ")")))
+                                .ifPresent(q -> {
+                                    appendQuery(queryBuf, q);
+                                })));
+        stream(conditions.get(SearchRequestParams.AS_NQ)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        eq -> {
+                            final String nq =
+                                    split(eq, " ").get(
+                                            s -> s.filter(StringUtil::isNotBlank).map(q -> "NOT " + q).collect(Collectors.joining(" ")));
+                            queryBuf.append(' ').append(nq);
+                        }));
+        stream(conditions.get(SearchRequestParams.AS_FILETYPE)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" filetype:\"").append(q.trim()).append('"')));
+        stream(conditions.get(SearchRequestParams.AS_SITESEARCH)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" site:").append(q.trim())));
+        stream(conditions.get(SearchRequestParams.AS_TIMESTAMP)).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
+                        q -> queryBuf.append(" timestamp:").append(q.trim())));
+    }
+
+    protected boolean isOccurrence(final String value) {
+        return "allintitle".equals(value) || "allinurl".equals(value);
+    }
+
+    protected String escape(final String q, final String... values) {
+        String value = q;
+        for (final String s : values) {
+            value = value.replace(s, "\\" + s);
+        }
+        return value;
+    }
+
+    public QueryStringBuilder params(final SearchRequestParams params) {
+        this.params = params;
         return this;
     }
 }

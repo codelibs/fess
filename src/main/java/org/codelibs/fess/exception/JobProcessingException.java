@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,18 @@
  */
 package org.codelibs.fess.exception;
 
+import java.io.IOException;
+
 public class JobProcessingException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
     public JobProcessingException(final Throwable e) {
         super(e);
+    }
+
+    public JobProcessingException(final String message, final IOException e) {
+        super(message, e);
     }
 
 }

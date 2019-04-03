@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,24 @@ import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -105,6 +105,615 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Terms() {
+        setUrlId_Terms(null);
+    }
+
+    public void setUrlId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setUrlId_Terms("urlId", opLambda, null);
+    }
+
+    public void setUrlId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_Terms("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrlId_SignificantTerms() {
+        setUrlId_SignificantTerms(null);
+    }
+
+    public void setUrlId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setUrlId_SignificantTerms("urlId", opLambda, null);
+    }
+
+    public void setUrlId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_SignificantTerms("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrlId_IpRange() {
+        setUrlId_IpRange(null);
+    }
+
+    public void setUrlId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setUrlId_IpRange("urlId", opLambda, null);
+    }
+
+    public void setUrlId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_IpRange("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setUrlId_Count() {
+        setUrlId_Count(null);
+    }
+
+    public void setUrlId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setUrlId_Count("urlId", opLambda);
+    }
+
+    public void setUrlId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Cardinality() {
+        setUrlId_Cardinality(null);
+    }
+
+    public void setUrlId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setUrlId_Cardinality("urlId", opLambda);
+    }
+
+    public void setUrlId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrlId_Missing() {
+        setUrlId_Missing(null);
+    }
+
+    public void setUrlId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setUrlId_Missing("urlId", opLambda, null);
+    }
+
+    public void setUrlId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrlId_Missing("urlId", opLambda, aggsLambda);
+    }
+
+    public void setUrlId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "urlId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDocId_Terms() {
+        setDocId_Terms(null);
+    }
+
+    public void setDocId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setDocId_Terms("docId", opLambda, null);
+    }
+
+    public void setDocId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setDocId_Terms("docId", opLambda, aggsLambda);
+    }
+
+    public void setDocId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "docId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDocId_SignificantTerms() {
+        setDocId_SignificantTerms(null);
+    }
+
+    public void setDocId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setDocId_SignificantTerms("docId", opLambda, null);
+    }
+
+    public void setDocId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        setDocId_SignificantTerms("docId", opLambda, aggsLambda);
+    }
+
+    public void setDocId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "docId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDocId_IpRange() {
+        setDocId_IpRange(null);
+    }
+
+    public void setDocId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setDocId_IpRange("docId", opLambda, null);
+    }
+
+    public void setDocId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setDocId_IpRange("docId", opLambda, aggsLambda);
+    }
+
+    public void setDocId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "docId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDocId_Count() {
+        setDocId_Count(null);
+    }
+
+    public void setDocId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setDocId_Count("docId", opLambda);
+    }
+
+    public void setDocId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "docId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_Cardinality() {
+        setDocId_Cardinality(null);
+    }
+
+    public void setDocId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setDocId_Cardinality("docId", opLambda);
+    }
+
+    public void setDocId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "docId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_Missing() {
+        setDocId_Missing(null);
+    }
+
+    public void setDocId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setDocId_Missing("docId", opLambda, null);
+    }
+
+    public void setDocId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setDocId_Missing("docId", opLambda, aggsLambda);
+    }
+
+    public void setDocId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "docId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setOrder_Avg() {
+        setOrder_Avg(null);
+    }
+
+    public void setOrder_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setOrder_Avg("order", opLambda);
+    }
+
+    public void setOrder_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Max() {
+        setOrder_Max(null);
+    }
+
+    public void setOrder_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setOrder_Max("order", opLambda);
+    }
+
+    public void setOrder_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Min() {
+        setOrder_Min(null);
+    }
+
+    public void setOrder_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setOrder_Min("order", opLambda);
+    }
+
+    public void setOrder_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Sum() {
+        setOrder_Sum(null);
+    }
+
+    public void setOrder_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setOrder_Sum("order", opLambda);
+    }
+
+    public void setOrder_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_ExtendedStats() {
+        setOrder_ExtendedStats(null);
+    }
+
+    public void setOrder_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setOrder_ExtendedStats("order", opLambda);
+    }
+
+    public void setOrder_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Stats() {
+        setOrder_Stats(null);
+    }
+
+    public void setOrder_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setOrder_Stats("order", opLambda);
+    }
+
+    public void setOrder_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Percentiles() {
+        setOrder_Percentiles(null);
+    }
+
+    public void setOrder_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setOrder_Percentiles("order", opLambda);
+    }
+
+    public void setOrder_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_PercentileRanks(double[] values) {
+        setOrder_PercentileRanks(values, null);
+    }
+
+    public void setOrder_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setOrder_PercentileRanks("order", values, opLambda);
+    }
+
+    public void setOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "order", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Histogram() {
+        setOrder_Histogram(null);
+    }
+
+    public void setOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setOrder_Histogram("order", opLambda, null);
+    }
+
+    public void setOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setOrder_Histogram("order", opLambda, aggsLambda);
+    }
+
+    public void setOrder_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setOrder_Range() {
+        setOrder_Range(null);
+    }
+
+    public void setOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setOrder_Range("order", opLambda, null);
+    }
+
+    public void setOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setOrder_Range("order", opLambda, aggsLambda);
+    }
+
+    public void setOrder_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setOrder_Count() {
+        setOrder_Count(null);
+    }
+
+    public void setOrder_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setOrder_Count("order", opLambda);
+    }
+
+    public void setOrder_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Cardinality() {
+        setOrder_Cardinality(null);
+    }
+
+    public void setOrder_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setOrder_Cardinality("order", opLambda);
+    }
+
+    public void setOrder_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Missing() {
+        setOrder_Missing(null);
+    }
+
+    public void setOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setOrder_Missing("order", opLambda, null);
+    }
+
+    public void setOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setOrder_Missing("order", opLambda, aggsLambda);
+    }
+
+    public void setOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "order");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setQueryId_Terms() {
+        setQueryId_Terms(null);
+    }
+
+    public void setQueryId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setQueryId_Terms("queryId", opLambda, null);
+    }
+
+    public void setQueryId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setQueryId_Terms("queryId", opLambda, aggsLambda);
+    }
+
+    public void setQueryId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setQueryId_SignificantTerms() {
+        setQueryId_SignificantTerms(null);
+    }
+
+    public void setQueryId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setQueryId_SignificantTerms("queryId", opLambda, null);
+    }
+
+    public void setQueryId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        setQueryId_SignificantTerms("queryId", opLambda, aggsLambda);
+    }
+
+    public void setQueryId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setQueryId_IpRange() {
+        setQueryId_IpRange(null);
+    }
+
+    public void setQueryId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setQueryId_IpRange("queryId", opLambda, null);
+    }
+
+    public void setQueryId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setQueryId_IpRange("queryId", opLambda, aggsLambda);
+    }
+
+    public void setQueryId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setQueryId_Count() {
+        setQueryId_Count(null);
+    }
+
+    public void setQueryId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setQueryId_Count("queryId", opLambda);
+    }
+
+    public void setQueryId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_Cardinality() {
+        setQueryId_Cardinality(null);
+    }
+
+    public void setQueryId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setQueryId_Cardinality("queryId", opLambda);
+    }
+
+    public void setQueryId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_Missing() {
+        setQueryId_Missing(null);
+    }
+
+    public void setQueryId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setQueryId_Missing("queryId", opLambda, null);
+    }
+
+    public void setQueryId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setQueryId_Missing("queryId", opLambda, aggsLambda);
+    }
+
+    public void setQueryId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "queryId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ClickLogCA ca = new ClickLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
         }
     }
 
@@ -321,20 +930,20 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setQueryId_Terms() {
-        setQueryId_Terms(null);
+    public void setUrl_Terms() {
+        setUrl_Terms(null);
     }
 
-    public void setQueryId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setQueryId_Terms("queryId", opLambda, null);
+    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setUrl_Terms("url", opLambda, null);
     }
 
-    public void setQueryId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setQueryId_Terms("queryId", opLambda, aggsLambda);
+    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrl_Terms("url", opLambda, aggsLambda);
     }
 
-    public void setQueryId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "queryId");
+    public void setUrl_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -345,22 +954,22 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setQueryId_SignificantTerms() {
-        setQueryId_SignificantTerms(null);
+    public void setUrl_SignificantTerms() {
+        setUrl_SignificantTerms(null);
     }
 
-    public void setQueryId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setQueryId_SignificantTerms("queryId", opLambda, null);
+    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setUrl_SignificantTerms("url", opLambda, null);
     }
 
-    public void setQueryId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsClickLogCA> aggsLambda) {
-        setQueryId_SignificantTerms("queryId", opLambda, aggsLambda);
+        setUrl_SignificantTerms("url", opLambda, aggsLambda);
     }
 
-    public void setQueryId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsClickLogCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "queryId");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -371,21 +980,20 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setQueryId_IpRange() {
-        setQueryId_IpRange(null);
+    public void setUrl_IpRange() {
+        setUrl_IpRange(null);
     }
 
-    public void setQueryId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setQueryId_IpRange("queryId", opLambda, null);
+    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setUrl_IpRange("url", opLambda, null);
     }
 
-    public void setQueryId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setQueryId_IpRange("queryId", opLambda, aggsLambda);
+    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrl_IpRange("url", opLambda, aggsLambda);
     }
 
-    public void setQueryId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "queryId");
+    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -396,179 +1004,50 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setQueryId_Count() {
-        setQueryId_Count(null);
+    public void setUrl_Count() {
+        setUrl_Count(null);
     }
 
-    public void setQueryId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setQueryId_Count("queryId", opLambda);
+    public void setUrl_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setUrl_Count("url", opLambda);
     }
 
-    public void setQueryId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "queryId");
+    public void setUrl_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setQueryId_Cardinality() {
-        setQueryId_Cardinality(null);
+    public void setUrl_Cardinality() {
+        setUrl_Cardinality(null);
     }
 
-    public void setQueryId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setQueryId_Cardinality("queryId", opLambda);
+    public void setUrl_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setUrl_Cardinality("url", opLambda);
     }
 
-    public void setQueryId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "queryId");
+    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setQueryId_Missing() {
-        setQueryId_Missing(null);
+    public void setUrl_Missing() {
+        setUrl_Missing(null);
     }
 
-    public void setQueryId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setQueryId_Missing("queryId", opLambda, null);
+    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setUrl_Missing("url", opLambda, null);
     }
 
-    public void setQueryId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setQueryId_Missing("queryId", opLambda, aggsLambda);
+    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        setUrl_Missing("url", opLambda, aggsLambda);
     }
 
-    public void setQueryId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "queryId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setDocId_Terms() {
-        setDocId_Terms(null);
-    }
-
-    public void setDocId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setDocId_Terms("docId", opLambda, null);
-    }
-
-    public void setDocId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setDocId_Terms("docId", opLambda, aggsLambda);
-    }
-
-    public void setDocId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "docId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setDocId_SignificantTerms() {
-        setDocId_SignificantTerms(null);
-    }
-
-    public void setDocId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setDocId_SignificantTerms("docId", opLambda, null);
-    }
-
-    public void setDocId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        setDocId_SignificantTerms("docId", opLambda, aggsLambda);
-    }
-
-    public void setDocId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "docId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setDocId_IpRange() {
-        setDocId_IpRange(null);
-    }
-
-    public void setDocId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setDocId_IpRange("docId", opLambda, null);
-    }
-
-    public void setDocId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setDocId_IpRange("docId", opLambda, aggsLambda);
-    }
-
-    public void setDocId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "docId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setDocId_Count() {
-        setDocId_Count(null);
-    }
-
-    public void setDocId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setDocId_Count("docId", opLambda);
-    }
-
-    public void setDocId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "docId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setDocId_Cardinality() {
-        setDocId_Cardinality(null);
-    }
-
-    public void setDocId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setDocId_Cardinality("docId", opLambda);
-    }
-
-    public void setDocId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "docId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setDocId_Missing() {
-        setDocId_Missing(null);
-    }
-
-    public void setDocId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setDocId_Missing("docId", opLambda, null);
-    }
-
-    public void setDocId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setDocId_Missing("docId", opLambda, aggsLambda);
-    }
-
-    public void setDocId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "docId");
+    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -700,357 +1179,6 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
     public void setUserSessionId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsClickLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "userSessionId");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_Terms() {
-        setUrl_Terms(null);
-    }
-
-    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
-        setUrl_Terms("url", opLambda, null);
-    }
-
-    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setUrl_Terms("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        TermsAggregationBuilder builder = regTermsA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_SignificantTerms() {
-        setUrl_SignificantTerms(null);
-    }
-
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
-        setUrl_SignificantTerms("url", opLambda, null);
-    }
-
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        setUrl_SignificantTerms("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_IpRange() {
-        setUrl_IpRange(null);
-    }
-
-    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
-        setUrl_IpRange("url", opLambda, null);
-    }
-
-    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setUrl_IpRange("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setUrl_Count() {
-        setUrl_Count(null);
-    }
-
-    public void setUrl_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setUrl_Count("url", opLambda);
-    }
-
-    public void setUrl_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Cardinality() {
-        setUrl_Cardinality(null);
-    }
-
-    public void setUrl_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setUrl_Cardinality("url", opLambda);
-    }
-
-    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUrl_Missing() {
-        setUrl_Missing(null);
-    }
-
-    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setUrl_Missing("url", opLambda, null);
-    }
-
-    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setUrl_Missing("url", opLambda, aggsLambda);
-    }
-
-    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "url");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setOrder_Avg() {
-        setOrder_Avg(null);
-    }
-
-    public void setOrder_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        setOrder_Avg("order", opLambda);
-    }
-
-    public void setOrder_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        AvgAggregationBuilder builder = regAvgA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Max() {
-        setOrder_Max(null);
-    }
-
-    public void setOrder_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        setOrder_Max("order", opLambda);
-    }
-
-    public void setOrder_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        MaxAggregationBuilder builder = regMaxA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Min() {
-        setOrder_Min(null);
-    }
-
-    public void setOrder_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        setOrder_Min("order", opLambda);
-    }
-
-    public void setOrder_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        MinAggregationBuilder builder = regMinA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Sum() {
-        setOrder_Sum(null);
-    }
-
-    public void setOrder_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        setOrder_Sum("order", opLambda);
-    }
-
-    public void setOrder_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        SumAggregationBuilder builder = regSumA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_ExtendedStats() {
-        setOrder_ExtendedStats(null);
-    }
-
-    public void setOrder_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        setOrder_ExtendedStats("order", opLambda);
-    }
-
-    public void setOrder_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Stats() {
-        setOrder_Stats(null);
-    }
-
-    public void setOrder_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        setOrder_Stats("order", opLambda);
-    }
-
-    public void setOrder_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        StatsAggregationBuilder builder = regStatsA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Percentiles() {
-        setOrder_Percentiles(null);
-    }
-
-    public void setOrder_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        setOrder_Percentiles("order", opLambda);
-    }
-
-    public void setOrder_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        PercentilesAggregationBuilder builder = regPercentilesA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_PercentileRanks() {
-        setOrder_PercentileRanks(null);
-    }
-
-    public void setOrder_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setOrder_PercentileRanks("order", opLambda);
-    }
-
-    public void setOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Histogram() {
-        setOrder_Histogram(null);
-    }
-
-    public void setOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
-        setOrder_Histogram("order", opLambda, null);
-    }
-
-    public void setOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setOrder_Histogram("order", opLambda, aggsLambda);
-    }
-
-    public void setOrder_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
-            OperatorCall<BsClickLogCA> aggsLambda) {
-        HistogramAggregationBuilder builder = regHistogramA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setOrder_Range() {
-        setOrder_Range(null);
-    }
-
-    public void setOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
-        setOrder_Range("order", opLambda, null);
-    }
-
-    public void setOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setOrder_Range("order", opLambda, aggsLambda);
-    }
-
-    public void setOrder_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        RangeAggregationBuilder builder = regRangeA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            ClickLogCA ca = new ClickLogCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setOrder_Count() {
-        setOrder_Count(null);
-    }
-
-    public void setOrder_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setOrder_Count("order", opLambda);
-    }
-
-    public void setOrder_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Cardinality() {
-        setOrder_Cardinality(null);
-    }
-
-    public void setOrder_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setOrder_Cardinality("order", opLambda);
-    }
-
-    public void setOrder_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "order");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setOrder_Missing() {
-        setOrder_Missing(null);
-    }
-
-    public void setOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setOrder_Missing("order", opLambda, null);
-    }
-
-    public void setOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        setOrder_Missing("order", opLambda, aggsLambda);
-    }
-
-    public void setOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "order");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

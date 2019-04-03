@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.es.user.allcommon;
 
+import org.apache.lucene.search.TotalHits;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -31,6 +32,7 @@ public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
     private int totalShards;
     private int successfulShards;
     private int failedShards;
+    private TotalHits totalHits;
     private Aggregations aggregations;
 
     private SearchRequestBuilder builder;
@@ -83,4 +85,11 @@ public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
         this.aggregations = aggregations;
     }
 
+    public TotalHits getTotalHits() {
+        return totalHits;
+    }
+
+    public void setTotalHits(TotalHits totalHits) {
+        this.totalHits = totalHits;
+    }
 }

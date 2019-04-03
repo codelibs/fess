@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_user";
+        return ".fess_user.group";
     }
 
     @Override
@@ -73,8 +73,8 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     protected <RESULT extends Group> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setName(DfTypeUtil.toString(source.get("name")));
             result.setGidNumber(DfTypeUtil.toLong(source.get("gidNumber")));
+            result.setName(DfTypeUtil.toString(source.get("name")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

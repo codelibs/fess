@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,17 @@
  */
 package org.codelibs.fess.util;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Assertions;
 
 public class DocumentUtilTest extends UnitFessTestCase {
 
@@ -37,6 +41,20 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Double.parseDouble(expected), DocumentUtil.getValue(doc, "key1", Double.class).doubleValue());
 
         assertNull(DocumentUtil.getValue(doc, "key2", String.class));
+    }
+
+    public void test_strings() {
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("key1", new String[] { "aaa", "bbb" });
+        assertArrayEquals(new String[] { "aaa", "bbb" }, DocumentUtil.getValue(doc, "key1", String[].class));
+        assertEquals(Arrays.asList("aaa", "bbb"), (List<String>) DocumentUtil.getValue(doc, "key1", List.class));
+    }
+
+    public void test_list() {
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("key1", Arrays.asList("aaa", "bbb"));
+        assertArrayEquals(new String[] { "aaa", "bbb" }, DocumentUtil.getValue(doc, "key1", String[].class));
+        assertEquals(Arrays.asList("aaa", "bbb"), (List<String>) DocumentUtil.getValue(doc, "key1", List.class));
     }
 
     public void test_integer() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,41 +24,81 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
 
-public interface SearchRequestParams {
+public abstract class SearchRequestParams {
 
-    String getQuery();
+    public static final String AS_NQ = "nq";
 
-    Map<String, String[]> getFields();
+    public static final String AS_OQ = "oq";
 
-    String[] getLanguages();
+    public static final String AS_EPQ = "epq";
 
-    GeoInfo getGeoInfo();
+    public static final String AS_Q = "q";
 
-    FacetInfo getFacetInfo();
+    public static final String AS_FILETYPE = "filetype";
 
-    String getSort();
+    public static final String AS_SITESEARCH = "sitesearch";
 
-    int getStartPosition();
+    public static final String AS_OCCURRENCE = "occt";
 
-    int getPageSize();
+    public static final String AS_TIMESTAMP = "timestamp";
 
-    String[] getExtraQueries();
+    public abstract String getQuery();
 
-    Object getAttribute(String name);
+    public abstract Map<String, String[]> getFields();
 
-    Locale getLocale();
+    public abstract Map<String, String[]> getConditions();
 
-    SearchRequestType getType();
+    public abstract String[] getLanguages();
 
-    public default String[] simplifyArray(final String[] values) {
+    public abstract GeoInfo getGeoInfo();
+
+    public abstract FacetInfo getFacetInfo();
+
+    public abstract HighlightInfo getHighlightInfo();
+
+    public abstract String getSort();
+
+    public abstract int getStartPosition();
+
+    public abstract int getPageSize();
+
+    public abstract String[] getExtraQueries();
+
+    public abstract Object getAttribute(String name);
+
+    public abstract Locale getLocale();
+
+    public abstract SearchRequestType getType();
+
+    public abstract String getSimilarDocHash();
+
+    public boolean hasConditionQuery() {
+        final Map<String, String[]> conditions = getConditions();
+        return !isEmptyArray(conditions.get(AS_Q))//
+                || !isEmptyArray(conditions.get(AS_EPQ))//
+                || !isEmptyArray(conditions.get(AS_OQ))//
+                || !isEmptyArray(conditions.get(AS_NQ))//
+                || !isEmptyArray(conditions.get(AS_TIMESTAMP))//
+                || !isEmptyArray(conditions.get(AS_SITESEARCH))//
+                || !isEmptyArray(conditions.get(AS_FILETYPE));
+    }
+
+    protected boolean isEmptyArray(final String[] values) {
+        if (values == null || values.length == 0) {
+            return true;
+        }
+        return stream(values).get(stream -> stream.allMatch(StringUtil::isBlank));
+    }
+
+    protected String[] simplifyArray(final String[] values) {
         return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
-    public default String[] getParamValueArray(final HttpServletRequest request, final String param) {
+    protected String[] getParamValueArray(final HttpServletRequest request, final String param) {
         return simplifyArray(request.getParameterValues(param));
     }
 
-    public default FacetInfo createFacetInfo(final HttpServletRequest request) {
+    protected FacetInfo createFacetInfo(final HttpServletRequest request) {
         final String[] fields = getParamValueArray(request, "facet.field");
         final String[] queries = getParamValueArray(request, "facet.query");
         if (fields.length == 0 && queries.length == 0) {
@@ -86,7 +126,7 @@ public interface SearchRequestParams {
         return facetInfo;
     }
 
-    public default GeoInfo createGeoInfo(final HttpServletRequest request) {
+    protected GeoInfo createGeoInfo(final HttpServletRequest request) {
         return new GeoInfo(request);
     }
 

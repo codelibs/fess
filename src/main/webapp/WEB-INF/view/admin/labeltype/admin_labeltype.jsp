@@ -106,6 +106,9 @@
 											</ul>
 										</div>
 									</div>
+									<c:if test="${labelTypePager.currentPageNumber > labelTypePager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/labeltype/list/${labelTypePager.allPageCount}";</script>
+									</c:if>
 								</c:if>
 							</div>
 							<!-- /.box-body -->

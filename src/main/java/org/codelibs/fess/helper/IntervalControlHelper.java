@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 public class IntervalControlHelper {
     private static final Logger logger = LoggerFactory.getLogger(IntervalControlHelper.class);
 
-    private volatile boolean crawlerRunning = true;
+    protected volatile boolean crawlerRunning = true;
 
-    public long crawlerWaitMillis = 10000;
+    protected long crawlerWaitMillis = 10000;
 
     protected List<IntervalRule> ruleList = new ArrayList<>();
 
@@ -193,6 +193,10 @@ public class IntervalControlHelper {
             throw new FessSystemException("Invalid format: " + time);
         }
         return values;
+    }
+
+    public void setCrawlerWaitMillis(final long crawlerWaitMillis) {
+        this.crawlerWaitMillis = crawlerWaitMillis;
     }
 
 }

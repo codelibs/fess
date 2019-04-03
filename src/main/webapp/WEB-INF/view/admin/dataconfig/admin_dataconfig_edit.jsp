@@ -50,7 +50,7 @@
 												key="labels.name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -58,7 +58,7 @@
 												key="labels.handler_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="handlerName" />
-											<la:select property="handlerName" size="1"
+											<la:select styleId="handlerName" property="handlerName" size="1"
 												styleClass="form-control">
 												<c:forEach var="hn" varStatus="s"
 													items="${handlerNameItems}">
@@ -72,7 +72,7 @@
 												key="labels.handler_parameter" /></label>
 										<div class="col-sm-9">
 											<la:errors property="handlerParameter" />
-											<la:textarea property="handlerParameter"
+											<la:textarea styleId="handlerParameter" property="handlerParameter"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -81,7 +81,7 @@
 												key="labels.handler_script" /></label>
 										<div class="col-sm-9">
 											<la:errors property="handlerScript" />
-											<la:textarea property="handlerScript"
+											<la:textarea styleId="handlerScript" property="handlerScript"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -90,7 +90,7 @@
 												key="labels.boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text styleId="boost" property="boost" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -98,7 +98,16 @@
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control"
+											<la:textarea styleId="permissions" property="permissions" styleClass="form-control"
+												rows="5" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="virtualHosts" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_hosts" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHosts" />
+											<la:textarea styleId="virtualHosts" property="virtualHosts" styleClass="form-control"
 												rows="5" />
 										</div>
 									</div>
@@ -107,7 +116,7 @@
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">
 											<la:errors property="labelTypeIds" />
-											<la:select property="labelTypeIds" multiple="true"
+											<la:select styleId="labelTypeIds" property="labelTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
@@ -120,7 +129,7 @@
 												key="labels.available" /></label>
 										<div class="col-sm-9">
 											<la:errors property="available" />
-											<la:select property="available" styleClass="form-control">
+											<la:select styleId="available" property="available" styleClass="form-control">
 												<la:option value="true">
 													<la:message key="labels.enabled" />
 												</la:option>
@@ -135,7 +144,7 @@
 												key="labels.description" /></label>
 										<div class="col-sm-9">
 											<la:errors property="description" />
-											<la:textarea property="description" styleClass="form-control"
+											<la:textarea styleId="description" property="description" styleClass="form-control"
 												rows="5" />
 										</div>
 									</div>

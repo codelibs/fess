@@ -1,0 +1,31 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "token": {
+        "type": "keyword"
+      },
+      "permissions": {
+        "type": "keyword"
+      },
+      "parameter_name" : {
+        "type": "keyword"
+      },
+      "expiredTime": {
+        "type": "long"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

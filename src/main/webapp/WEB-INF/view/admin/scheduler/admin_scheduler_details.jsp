@@ -112,7 +112,7 @@
 									</button>
 									<button type="submit" class="btn btn-warning" name="edit"
 										value="<la:message key="labels.crud_button_edit" />">
-										<i class="fa fa-pencil"></i>
+										<i class="fa fa-pencil-alt"></i>
 										<la:message key="labels.crud_button_edit" />
 									</button>
 									<c:if test="${!running and !systemJobId}">

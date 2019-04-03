@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,9 @@ public class BsKeyMatch extends EsAbstractEntity {
     /** updatedTime */
     protected Long updatedTime;
 
+    /** virtualHost */
+    protected String virtualHost;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -106,6 +109,9 @@ public class BsKeyMatch extends EsAbstractEntity {
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
+        }
         return sourceMap;
     }
 
@@ -127,6 +133,7 @@ public class BsKeyMatch extends EsAbstractEntity {
         sb.append(dm).append(term);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
+        sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -215,5 +222,15 @@ public class BsKeyMatch extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
@@ -43,6 +45,7 @@ import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -254,7 +257,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                     try {
                         elevateWordService.store(entity);
                         suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
-                                entity.getPermissions(), entity.getBoost());
+                                entity.getPermissions(), entity.getBoost(), false);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -275,8 +278,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                 entity -> {
                     try {
                         elevateWordService.store(entity);
-                        suggestHelper.deleteAllElevateWord();
-                        suggestHelper.storeAllElevateWords();
+                        suggestHelper.deleteAllElevateWord(false);
+                        suggestHelper.storeAllElevateWords(false);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -300,7 +303,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         entity -> {
                             try {
                                 elevateWordService.delete(entity);
-                                suggestHelper.deleteElevateWord(entity.getSuggestWord());
+                                suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                             } catch (final Exception e) {
                                 throwValidationError(
@@ -317,15 +320,15 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
-        new Thread(() -> {
+        CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.elevateWordFile.getInputStream(), getCsvEncoding()))) {
                 elevateWordService.importCsv(reader);
-                suggestHelper.deleteAllElevateWord();
-                suggestHelper.storeAllElevateWords();
+                suggestHelper.deleteAllElevateWord(false);
+                suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
-        }).start();
+        });
         saveInfo(messages -> messages.addSuccessUploadElevateWord(GLOBAL));
         return redirect(getClass());
     }
@@ -333,7 +336,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new ElevateWord()).map(entity -> {
@@ -343,7 +346,7 @@ public class AdminElevatewordAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return elevateWordService.getElevateWord(((EditForm) form).id);
+                return ComponentUtil.getComponent(ElevateWordService.class).getElevateWord(((EditForm) form).id);
             }
             break;
         default:
@@ -352,7 +355,8 @@ public class AdminElevatewordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ElevateWord> getElevateWord(final CreateForm form) {
+    public static OptionalEntity<ElevateWord> getElevateWord(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
 
@@ -360,7 +364,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                    BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
                             Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(split(form.permissions, "\n").get(

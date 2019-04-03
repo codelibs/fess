@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,9 +73,6 @@ public class BsWebConfig extends EsAbstractEntity {
     /** intervalTime */
     protected Integer intervalTime;
 
-    /** timeToLive */
-    protected Integer timeToLive;
-
     /** maxAccessCount */
     protected Long maxAccessCount;
 
@@ -91,6 +88,9 @@ public class BsWebConfig extends EsAbstractEntity {
     /** sortOrder */
     protected Integer sortOrder;
 
+    /** timeToLive */
+    protected Integer timeToLive;
+
     /** updatedBy */
     protected String updatedBy;
 
@@ -102,6 +102,9 @@ public class BsWebConfig extends EsAbstractEntity {
 
     /** userAgent */
     protected String userAgent;
+
+    /** virtualHosts */
+    protected String[] virtualHosts;
 
     // [Referrers] *comment only
 
@@ -160,9 +163,6 @@ public class BsWebConfig extends EsAbstractEntity {
         if (intervalTime != null) {
             addFieldToSource(sourceMap, "intervalTime", intervalTime);
         }
-        if (timeToLive != null) {
-            addFieldToSource(sourceMap, "timeToLive", timeToLive);
-        }
         if (maxAccessCount != null) {
             addFieldToSource(sourceMap, "maxAccessCount", maxAccessCount);
         }
@@ -178,6 +178,9 @@ public class BsWebConfig extends EsAbstractEntity {
         if (sortOrder != null) {
             addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
+        if (timeToLive != null) {
+            addFieldToSource(sourceMap, "timeToLive", timeToLive);
+        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
@@ -189,6 +192,9 @@ public class BsWebConfig extends EsAbstractEntity {
         }
         if (userAgent != null) {
             addFieldToSource(sourceMap, "userAgent", userAgent);
+        }
+        if (virtualHosts != null) {
+            addFieldToSource(sourceMap, "virtualHosts", virtualHosts);
         }
         return sourceMap;
     }
@@ -215,16 +221,17 @@ public class BsWebConfig extends EsAbstractEntity {
         sb.append(dm).append(includedDocUrls);
         sb.append(dm).append(includedUrls);
         sb.append(dm).append(intervalTime);
-        sb.append(dm).append(timeToLive);
         sb.append(dm).append(maxAccessCount);
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
         sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
+        sb.append(dm).append(timeToLive);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         sb.append(dm).append(urls);
         sb.append(dm).append(userAgent);
+        sb.append(dm).append(virtualHosts);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -355,16 +362,6 @@ public class BsWebConfig extends EsAbstractEntity {
         this.intervalTime = value;
     }
 
-    public Integer getTimeToLive() {
-        checkSpecifiedProperty("timeToLive");
-        return timeToLive;
-    }
-
-    public void setTimeToLive(Integer value) {
-        registerModifiedProperty("timeToLive");
-        this.timeToLive = value;
-    }
-
     public Long getMaxAccessCount() {
         checkSpecifiedProperty("maxAccessCount");
         return maxAccessCount;
@@ -415,6 +412,16 @@ public class BsWebConfig extends EsAbstractEntity {
         this.sortOrder = value;
     }
 
+    public Integer getTimeToLive() {
+        checkSpecifiedProperty("timeToLive");
+        return timeToLive;
+    }
+
+    public void setTimeToLive(Integer value) {
+        registerModifiedProperty("timeToLive");
+        this.timeToLive = value;
+    }
+
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
         return convertEmptyToNull(updatedBy);
@@ -453,5 +460,15 @@ public class BsWebConfig extends EsAbstractEntity {
     public void setUserAgent(String value) {
         registerModifiedProperty("userAgent");
         this.userAgent = value;
+    }
+
+    public String[] getVirtualHosts() {
+        checkSpecifiedProperty("virtualHosts");
+        return virtualHosts;
+    }
+
+    public void setVirtualHosts(String[] value) {
+        registerModifiedProperty("virtualHosts");
+        this.virtualHosts = value;
     }
 }

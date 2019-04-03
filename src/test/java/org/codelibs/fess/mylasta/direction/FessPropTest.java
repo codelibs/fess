@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,20 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.PrunedTag;
+import org.cyberneko.html.parsers.DOMParser;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 public class FessPropTest extends UnitFessTestCase {
 
@@ -113,10 +119,105 @@ public class FessPropTest extends UnitFessTestCase {
             }
         };
 
-        int[] spaceChars = fessConfig.getCrawlerDocumentSpaceCharsAsArray();
-        assertEquals(2, spaceChars.length);
-        assertEquals(32, spaceChars[0]);
-        assertEquals(12288, spaceChars[1]);
+        int[] chars = fessConfig.getCrawlerDocumentSpaceCharsAsArray();
+        assertEquals(2, chars.length);
+        assertEquals(32, chars[0]);
+        assertEquals(12288, chars[1]);
     }
 
+    public void test_getCrawlerDocumentFullstopCharsAsArray() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerDocumentFullstopChars() {
+                return "u0020u3000";
+            }
+        };
+
+        int[] chars = fessConfig.getCrawlerDocumentFullstopCharsAsArray();
+        assertEquals(2, chars.length);
+        assertEquals(32, chars[0]);
+        assertEquals(12288, chars[1]);
+    }
+
+    public void test_getCrawlerDocumentHtmlPrunedTagsAsArray() throws Exception {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerDocumentHtmlPrunedTags() {
+                return "script,div#main,p.image,a[rel=nofollow],div[x-y=a-.:_0]";
+            }
+        };
+
+        PrunedTag[] tags = fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+        assertTrue(matchesTag(tags[0], "<script></script>"));
+        assertTrue(matchesTag(tags[0], "<script id=\\\"main\\\"></script>"));
+        assertFalse(matchesTag(tags[0], "<a></a>"));
+
+        assertTrue(matchesTag(tags[1], "<div id=\"main\"></div>"));
+        assertFalse(matchesTag(tags[1], "<div></div>"));
+
+        assertTrue(matchesTag(tags[2], "<p class=\"image\"></p>"));
+        assertFalse(matchesTag(tags[2], "<p></p>"));
+
+        assertTrue(matchesTag(tags[3], "<a rel=\"nofollow\"></a>"));
+        assertFalse(matchesTag(tags[3], "<a></a>"));
+
+        assertTrue(matchesTag(tags[4], "<div x-y=\"a-.:_0\"></div>"));
+        assertFalse(matchesTag(tags[4], "<div x-y=\"a 0\"></div>"));
+    }
+
+    public void test_getAvailableSmbSidType() throws Exception {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSmbAvailableSidTypes() {
+                return "1,2,5:2";
+            }
+        };
+
+        assertNull(fessConfig.getAvailableSmbSidType(0));
+        assertEquals(1, fessConfig.getAvailableSmbSidType(1));
+        assertEquals(2, fessConfig.getAvailableSmbSidType(2));
+        assertNull(fessConfig.getAvailableSmbSidType(3));
+        assertNull(fessConfig.getAvailableSmbSidType(4));
+        assertEquals(2, fessConfig.getAvailableSmbSidType(5));
+    }
+
+    private boolean matchesTag(final PrunedTag tag, final String text) throws Exception {
+        final DOMParser parser = new DOMParser();
+        final String html = "<html><body>" + text + "</body></html>";
+        final ByteArrayInputStream is = new ByteArrayInputStream(html.getBytes("UTF-8"));
+        parser.parse(new InputSource(is));
+        Node node = parser.getDocument().getFirstChild().getLastChild().getFirstChild();
+        return tag.matches(node);
+    }
+
+    public void test_normalizeQueryLanguages() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getQueryLanguageMapping() {
+                return "ja=ja\nzh_cn=zh-cn\nzh_TW=zh-tw\nzh=zh-cn";
+            }
+        };
+
+        assertArrays(new String[] {}, fessConfig.normalizeQueryLanguages(new String[] {}));
+        assertArrays(new String[] {}, fessConfig.normalizeQueryLanguages(new String[] { "unknown" }));
+        assertArrays(new String[] { "ja" }, fessConfig.normalizeQueryLanguages(new String[] { "ja" }));
+        assertArrays(new String[] { "ja" }, fessConfig.normalizeQueryLanguages(new String[] { "ja", "ja" }));
+        assertArrays(new String[] { "ja" }, fessConfig.normalizeQueryLanguages(new String[] { "ja-jp" }));
+        assertArrays(new String[] { "ja" }, fessConfig.normalizeQueryLanguages(new String[] { "ja_JP" }));
+        assertArrays(new String[] { "ja", "zh-cn" }, fessConfig.normalizeQueryLanguages(new String[] { "ja", "zh" }));
+        assertArrays(new String[] { "ja", "zh-cn" }, fessConfig.normalizeQueryLanguages(new String[] { "ja", "zh_CN" }));
+        assertArrays(new String[] { "ja", "zh-cn" }, fessConfig.normalizeQueryLanguages(new String[] { "ja", "zh-cn" }));
+        assertArrays(new String[] { "zh-cn" }, fessConfig.normalizeQueryLanguages(new String[] { "zh", "zh-cn" }));
+        assertArrays(new String[] { "zh-tw" }, fessConfig.normalizeQueryLanguages(new String[] { "zh_TW" }));
+    }
+
+    private void assertArrays(final String[] expected, final String[] actual) {
+        Arrays.sort(expected);
+        Arrays.sort(actual);
+        assertEquals(String.join(",", expected), String.join(",", actual));
+    }
 }

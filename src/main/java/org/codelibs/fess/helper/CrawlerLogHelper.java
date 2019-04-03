@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
             switch (key) {
             case CRAWLING_ACCESS_EXCEPTION: {
                 final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
-                final UrlQueue urlQueue = (UrlQueue) objs[1];
+                final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
                 Throwable e = (Throwable) objs[2];
                 if (e instanceof MultipleCrawlingAccessException) {
                     final Throwable[] causes = ((MultipleCrawlingAccessException) e).getCauses();
@@ -63,7 +63,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
             }
             case CRAWLING_EXCETPION: {
                 final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
-                final UrlQueue urlQueue = (UrlQueue) objs[1];
+                final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
                 final Throwable e = (Throwable) objs[2];
 
                 storeFailureUrl(crawlerContext, urlQueue, e.getClass().getCanonicalName(), e);
@@ -90,7 +90,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         super.log(key, objs);
     }
 
-    private void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue urlQueue, final String errorName, final Throwable e) {
+    private void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName, final Throwable e) {
 
         final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
         final String url = urlQueue.getUrl();

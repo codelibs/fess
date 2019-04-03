@@ -18,5 +18,4 @@ ES_HOME=/usr/share/elasticsearch/
 
 # Elasticsearch URL
 ES_HTTP_URL=http://localhost:9200
-ES_TRANSPORT_URL=localhost:9300
 

@@ -90,7 +90,7 @@
 												key="labels.elevate_word_suggest_word" /></label>
 										<div class="col-sm-9">
 											<la:errors property="suggestWord" />
-											<la:text property="suggestWord" styleClass="form-control" />
+											<la:text styleId="suggestWord" property="suggestWord" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -98,7 +98,7 @@
 												key="labels.elevate_word_reading" /></label>
 										<div class="col-sm-9">
 											<la:errors property="reading" />
-											<la:text property="reading" styleClass="form-control" />
+											<la:text styleId="reading" property="reading" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -106,7 +106,7 @@
 												key="labels.elevate_word_permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control" rows="5" />
+											<la:textarea styleId="permissions" property="permissions" styleClass="form-control" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -114,7 +114,7 @@
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">
 											<la:errors property="labelTypeIds" />
-											<la:select property="labelTypeIds" multiple="true"
+											<la:select styleId="labelTypeIds" property="labelTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
@@ -127,7 +127,7 @@
 												key="labels.elevate_word_boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text styleId="boost" property="boost" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

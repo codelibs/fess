@@ -1,0 +1,43 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "target": {
+        "type": "keyword"
+      },
+      "cronExpression": {
+        "type": "keyword"
+      },
+      "scriptType": {
+        "type": "keyword"
+      },
+      "scriptData": {
+        "type": "keyword"
+      },
+      "crawler": {
+        "type": "boolean"
+      },
+      "jobLogging": {
+        "type": "boolean"
+      },
+      "available": {
+        "type": "boolean"
+      },
+      "sortOrder": {
+        "type": "integer"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

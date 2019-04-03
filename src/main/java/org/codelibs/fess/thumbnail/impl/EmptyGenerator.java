@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,12 @@ import java.io.File;
 public class EmptyGenerator extends BaseThumbnailGenerator {
 
     @Override
-    public boolean generate(final String url, final File outputFile) {
+    public boolean generate(final String thumbnailId, final File outputFile) {
         return false;
     }
 
     @Override
     public void destroy() {
         // nothing
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return true;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,5 +68,19 @@ public class EsSqlClause extends AbstractSqlClause {
     @Override
     protected String createSqlSuffix() {
         return null;
+    }
+
+    @Override
+    public void fetchFirst(int fetchSize) {
+        _fetchScopeEffective = true;
+        if (fetchSize < 0) {
+            String msg = "Argument[fetchSize] should be plus: " + fetchSize;
+            throw new IllegalArgumentException(msg);
+        }
+        _fetchStartIndex = 0;
+        _fetchSize = fetchSize;
+        _fetchPageNumber = 1;
+        doClearFetchPageClause();
+        doFetchFirst();
     }
 }

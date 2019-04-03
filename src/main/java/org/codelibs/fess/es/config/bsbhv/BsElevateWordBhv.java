@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsElevateWordBhv extends EsAbstractBehavior<ElevateWord, E
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.elevate_word";
     }
 
     @Override
@@ -76,11 +76,11 @@ public abstract class BsElevateWordBhv extends EsAbstractBehavior<ElevateWord, E
             result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setPermissions(toStringArray(source.get("permissions")));
             result.setReading(DfTypeUtil.toString(source.get("reading")));
             result.setSuggestWord(DfTypeUtil.toString(source.get("suggestWord")));
             result.setTargetLabel(DfTypeUtil.toString(source.get("targetLabel")));
             result.setTargetRole(DfTypeUtil.toString(source.get("targetRole")));
-            result.setPermissions(toStringArray(source.get("permissions")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return updateEntity(source, result);

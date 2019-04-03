@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,17 @@ public class EditForm {
     @Size(max = 1000)
     public String defaultSortValue;
 
+    @Size(max = 10000)
+    public String virtualHostValue;
+
     @Size(max = 10)
     public String appendQueryParameter;
 
     @Size(max = 10)
     public String loginRequired;
+
+    @Size(max = 10)
+    public String resultCollapsed;
 
     @Size(max = 10)
     public String loginLink;
@@ -139,6 +145,9 @@ public class EditForm {
     @Size(max = 1000)
     public String ldapAccountFilter;
 
+    @Size(max = 1000)
+    public String ldapGroupFilter;
+
     @Size(max = 100)
     public String ldapMemberofAttribute;
 
@@ -147,4 +156,7 @@ public class EditForm {
 
     @Size(max = 3000)
     public String notificationSearchTop;
+
+    @Size(max = 10)
+    public String logLevel;
 }

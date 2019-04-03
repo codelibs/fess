@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,9 +73,6 @@ public class BsFileConfig extends EsAbstractEntity {
     /** intervalTime */
     protected Integer intervalTime;
 
-    /** timeToLive */
-    protected Integer timeToLive;
-
     /** maxAccessCount */
     protected Long maxAccessCount;
 
@@ -94,11 +91,17 @@ public class BsFileConfig extends EsAbstractEntity {
     /** sortOrder */
     protected Integer sortOrder;
 
+    /** timeToLive */
+    protected Integer timeToLive;
+
     /** updatedBy */
     protected String updatedBy;
 
     /** updatedTime */
     protected Long updatedTime;
+
+    /** virtualHosts */
+    protected String[] virtualHosts;
 
     // [Referrers] *comment only
 
@@ -157,9 +160,6 @@ public class BsFileConfig extends EsAbstractEntity {
         if (intervalTime != null) {
             addFieldToSource(sourceMap, "intervalTime", intervalTime);
         }
-        if (timeToLive != null) {
-            addFieldToSource(sourceMap, "timeToLive", timeToLive);
-        }
         if (maxAccessCount != null) {
             addFieldToSource(sourceMap, "maxAccessCount", maxAccessCount);
         }
@@ -178,11 +178,17 @@ public class BsFileConfig extends EsAbstractEntity {
         if (sortOrder != null) {
             addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
+        if (timeToLive != null) {
+            addFieldToSource(sourceMap, "timeToLive", timeToLive);
+        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
+        }
+        if (virtualHosts != null) {
+            addFieldToSource(sourceMap, "virtualHosts", virtualHosts);
         }
         return sourceMap;
     }
@@ -209,15 +215,16 @@ public class BsFileConfig extends EsAbstractEntity {
         sb.append(dm).append(includedDocPaths);
         sb.append(dm).append(includedPaths);
         sb.append(dm).append(intervalTime);
-        sb.append(dm).append(timeToLive);
         sb.append(dm).append(maxAccessCount);
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
         sb.append(dm).append(paths);
         sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
+        sb.append(dm).append(timeToLive);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
+        sb.append(dm).append(virtualHosts);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -348,16 +355,6 @@ public class BsFileConfig extends EsAbstractEntity {
         this.intervalTime = value;
     }
 
-    public Integer getTimeToLive() {
-        checkSpecifiedProperty("timeToLive");
-        return timeToLive;
-    }
-
-    public void setTimeToLive(Integer value) {
-        registerModifiedProperty("timeToLive");
-        this.timeToLive = value;
-    }
-
     public Long getMaxAccessCount() {
         checkSpecifiedProperty("maxAccessCount");
         return maxAccessCount;
@@ -418,6 +415,16 @@ public class BsFileConfig extends EsAbstractEntity {
         this.sortOrder = value;
     }
 
+    public Integer getTimeToLive() {
+        checkSpecifiedProperty("timeToLive");
+        return timeToLive;
+    }
+
+    public void setTimeToLive(Integer value) {
+        registerModifiedProperty("timeToLive");
+        this.timeToLive = value;
+    }
+
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
         return convertEmptyToNull(updatedBy);
@@ -436,5 +443,15 @@ public class BsFileConfig extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
+    }
+
+    public String[] getVirtualHosts() {
+        checkSpecifiedProperty("virtualHosts");
+        return virtualHosts;
+    }
+
+    public void setVirtualHosts(String[] value) {
+        registerModifiedProperty("virtualHosts");
+        this.virtualHosts = value;
     }
 }

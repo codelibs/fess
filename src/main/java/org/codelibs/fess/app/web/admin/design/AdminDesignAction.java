@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.design;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,9 +27,11 @@ import org.apache.commons.io.FileUtils;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -70,11 +73,28 @@ public class AdminDesignAction extends FessAdminAction {
         super.setupHtmlData(runtime);
         runtime.registerData("editable", editable());
         runtime.registerData("fileNameItems", loadFileNameItems());
+        runtime.registerData("jspFileNameItems", loadJspFileNameItems());
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDesign()));
     }
 
     private boolean editable() {
         return fessConfig.isWebDesignEditorEnabled();
+    }
+
+    private List<Pair<String, String>> loadJspFileNameItems() {
+        final List<Pair<String, String>> jspItems = new ArrayList<>();
+        for (final Pair<String, String> p : systemHelper.getDesignJspFileNames()) {
+            jspItems.add(new Pair<>(":" + p.getFirst(), "/" + p.getSecond()));
+        }
+        for (String key : ComponentUtil.getVirtualHostHelper().getVirtualHostPaths()) {
+            if (StringUtil.isBlank(key)) {
+                key = "/";
+            }
+            for (final Pair<String, String> p : systemHelper.getDesignJspFileNames()) {
+                jspItems.add(new Pair<>(key + ":" + p.getFirst(), key + "/" + p.getSecond()));
+            }
+        }
+        return jspItems;
     }
 
     private List<String> loadFileNameItems() {
@@ -187,7 +207,7 @@ public class AdminDesignAction extends FessAdminAction {
             return null;
         }
         validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
+        verifyTokenKeep(() -> asListHtml());
         return asStream(file.getName()).contentTypeOctetStream().stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
@@ -224,7 +244,7 @@ public class AdminDesignAction extends FessAdminAction {
             throw new FessSystemException("Invalid encoding", e);
         }
         saveToken();
-        return asEditHtml();
+        return asEditHtml(form);
     }
 
     @Execute
@@ -237,7 +257,7 @@ public class AdminDesignAction extends FessAdminAction {
             throw new FessSystemException("Invalid encoding", e);
         }
         saveToken();
-        return asEditHtml();
+        return asEditHtml(form);
     }
 
     @Execute
@@ -249,11 +269,11 @@ public class AdminDesignAction extends FessAdminAction {
             form.content = StringUtil.EMPTY;
         }
 
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml(form));
+        verifyToken(() -> asEditHtml(form));
         try {
             write(jspFile.getAbsolutePath(), form.content.getBytes(Constants.UTF_8));
-            saveInfo(messages -> messages.addSuccessUpdateDesignJspFile(GLOBAL, systemHelper.getDesignJspFileName(form.fileName)));
+            saveInfo(messages -> messages.addSuccessUpdateDesignJspFile(GLOBAL, jspFile.getAbsolutePath()));
         } catch (final Exception e) {
             logger.error("Failed to update {}", form.fileName, e);
             throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), () -> asListHtml());
@@ -285,15 +305,29 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     private File getJspFile(final String fileName, final String jspType) {
-        final String jspFileName = systemHelper.getDesignJspFileName(fileName);
-        if (jspFileName == null) {
-            throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
+        try {
+            final String[] values = URLDecoder.decode(fileName, Constants.UTF_8).split(":");
+            if (values.length != 2) {
+                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
+            }
+            final String jspFileName = systemHelper.getDesignJspFileName(values[1]);
+            if (jspFileName == null) {
+                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
+            }
+            String path;
+            if ("view".equals(jspType)) {
+                path = "/WEB-INF/" + jspType + values[0] + "/" + jspFileName;
+            } else {
+                path = "/WEB-INF/" + jspType + "/" + jspFileName;
+            }
+            final File jspFile = new File(getServletContext().getRealPath(path));
+            if (!jspFile.exists()) {
+                throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), () -> asListHtml());
+            }
+            return jspFile;
+        } catch (final UnsupportedEncodingException e) {
+            throw new FessSystemException("Failed to decode " + fileName, e);
         }
-        final File jspFile = new File(getServletContext().getRealPath("/WEB-INF/" + jspType + "/" + jspFileName));
-        if (!jspFile.exists()) {
-            throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), () -> asListHtml());
-        }
-        return jspFile;
     }
 
     // ===================================================================================
@@ -312,7 +346,9 @@ public class AdminDesignAction extends FessAdminAction {
         });
     }
 
-    private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminDesign_AdminDesignEditJsp);
+    private HtmlResponse asEditHtml(final EditForm form) {
+        return asHtml(path_AdminDesign_AdminDesignEditJsp).renderWith(data -> {
+            data.register("displayFileName", getJspFile(form.fileName, "view").getAbsolutePath());
+        });
     }
 }

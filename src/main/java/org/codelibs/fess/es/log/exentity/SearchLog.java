@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.log.bsentity.BsSearchLog;
-import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -39,11 +40,13 @@ public class SearchLog extends BsSearchLog {
 
     private static final long serialVersionUID = 1L;
 
-    private List<SearchFieldLog> searchFieldLogList;
+    private final List<Pair<String, String>> searchFieldLogList = new ArrayList<>();
 
     private OptionalEntity<UserInfo> userInfo;
 
     private Map<String, Object> fields;
+
+    private final List<Map<String, Object>> documentList = new ArrayList<>();
 
     public String getId() {
         return asDocMeta().id();
@@ -61,20 +64,14 @@ public class SearchLog extends BsSearchLog {
         asDocMeta().version(version);
     }
 
-    public void setClickLogList(final List<ClickLog> clickLogList) {
-
-    }
-
     public void addSearchFieldLogValue(final String name, final String value) {
         if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
-            final SearchFieldLog fieldLog = new SearchFieldLog();
-            fieldLog.setName(name);
-            fieldLog.setValue(value);
-            if (searchFieldLogList == null) {
-                searchFieldLogList = new ArrayList<>();
-            }
-            searchFieldLogList.add(fieldLog);
+            searchFieldLogList.add(new Pair<>(name, value));
         }
+    }
+
+    public void addDocument(final Map<String, Object> doc) {
+        documentList.add(doc);
     }
 
     public void setSearchQuery(final String query) {
@@ -93,16 +90,12 @@ public class SearchLog extends BsSearchLog {
 
     public void setUserInfo(final OptionalEntity<UserInfo> userInfo) {
         this.userInfo = userInfo;
+        userInfo.ifPresent(e -> {
+            super.setUserInfoId(e.getId());
+        });
     }
 
-    public List<SearchFieldLog> getSearchFieldLogList() {
-        if (searchFieldLogList == null) {
-            final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
-            searchFieldLogList = searchFieldLogBhv.selectList(cb -> {
-                cb.query().setSearchLogId_Equal(getId());
-                cb.fetchFirst(ComponentUtil.getFessConfig().getPageSearchFieldLogMaxFetchSizeAsInteger());
-            });
-        }
+    public List<Pair<String, String>> getSearchFieldLogList() {
         return searchFieldLogList;
     }
 
@@ -110,12 +103,21 @@ public class SearchLog extends BsSearchLog {
         fields.put(key, value);
     }
 
+    public String getLogMessage() {
+        return getSearchWord();
+    }
+
     @Override
     public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = super.toSource();
+        final Map<String, Object> sourceMap = super.toSource();
         if (fields != null) {
             sourceMap.putAll(fields);
         }
+        final Map<String, List<String>> searchFieldMap =
+                searchFieldLogList.stream().collect(
+                        Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+        sourceMap.put("searchField", searchFieldMap);
+        sourceMap.put("documents", documentList);
         return sourceMap;
     }
 
@@ -138,11 +140,12 @@ public class SearchLog extends BsSearchLog {
 
     @Override
     public String toString() {
-        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", userInfo=" + userInfo + ", accessType=" + accessType + ", user="
-                + user + ", roles=" + Arrays.toString(roles) + ", queryId=" + queryId + ", clientIp=" + clientIp + ", hitCount=" + hitCount
-                + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", referer=" + referer + ", requestedAt="
-                + requestedAt + ", responseTime=" + responseTime + ", queryTime=" + queryTime + ", searchWord=" + searchWord
-                + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId=" + userSessionId + ", docMeta=" + docMeta
-                + ", languages=" + languages + "]";
+        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", userInfo=" + userInfo + ", fields=" + fields + ", accessType="
+                + accessType + ", clientIp=" + clientIp + ", hitCount=" + hitCount + ", languages=" + languages + ", queryId=" + queryId
+                + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", queryTime=" + queryTime + ", referer=" + referer
+                + ", requestedAt=" + requestedAt + ", responseTime=" + responseTime + ", roles=" + Arrays.toString(roles) + ", searchWord="
+                + searchWord + ", user=" + user + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId="
+                + userSessionId + ", virtualHost=" + virtualHost + ", documents=" + documentList + "]";
     }
+
 }

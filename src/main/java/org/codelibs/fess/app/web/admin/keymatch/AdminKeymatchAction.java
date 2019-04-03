@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.app.web.admin.keymatch;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -23,6 +27,8 @@ import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
+import org.codelibs.fess.helper.KeyMatchHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -41,6 +47,8 @@ public class AdminKeymatchAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    @Resource
+    private KeyMatchHelper keyMatchHelper;
     @Resource
     private KeyMatchService keyMatchService;
     @Resource
@@ -142,6 +150,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
+        final List<Map<String, Object>> docList = new ArrayList<>();
         return asHtml(path_AdminKeymatch_AdminKeymatchDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 keyMatchService.getKeyMatch(id).ifPresent(entity -> {
@@ -149,10 +158,13 @@ public class AdminKeymatchAction extends FessAdminAction {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
+                    docList.addAll(keyMatchHelper.getBoostedDocumentList(entity.getTerm(), entity.getMaxSize()));
                 }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
+        }).renderWith(data -> {
+            data.register("docs", docList);
         });
     }
 
@@ -230,7 +242,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<KeyMatch> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<KeyMatch> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new KeyMatch()).map(entity -> {
@@ -240,7 +252,7 @@ public class AdminKeymatchAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return keyMatchService.getKeyMatch(((EditForm) form).id);
+                return ComponentUtil.getComponent(KeyMatchService.class).getKeyMatch(((EditForm) form).id);
             }
             break;
         default:
@@ -249,7 +261,8 @@ public class AdminKeymatchAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<KeyMatch> getKeyMatch(final CreateForm form) {
+    public static OptionalEntity<KeyMatch> getKeyMatch(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

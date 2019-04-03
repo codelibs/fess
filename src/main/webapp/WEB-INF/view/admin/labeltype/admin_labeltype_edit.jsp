@@ -49,7 +49,7 @@
 												key="labels.labeltype_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
-											<la:text property="name" styleClass="form-control" />
+											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.labeltype_value" /></label>
 										<div class="col-sm-9">
 											<la:errors property="value" />
-											<la:text property="value" styleClass="form-control" />
+											<la:text styleId="value" property="value" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -65,7 +65,7 @@
 												key="labels.labeltype_included_paths" /></label>
 										<div class="col-sm-9">
 											<la:errors property="includedPaths" />
-											<la:textarea property="includedPaths"
+											<la:textarea styleId="includedPaths" property="includedPaths"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -74,7 +74,7 @@
 												key="labels.labeltype_excluded_paths" /></label>
 										<div class="col-sm-9">
 											<la:errors property="excludedPaths" />
-											<la:textarea property="excludedPaths"
+											<la:textarea styleId="excludedPaths" property="excludedPaths"
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
@@ -83,8 +83,16 @@
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:textarea property="permissions" styleClass="form-control"
+											<la:textarea styleId="permissions" property="permissions" styleClass="form-control"
 												rows="5" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="virtualHost" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_host" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHost" />
+											<la:text styleId="virtualHost" property="virtualHost" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -92,7 +100,7 @@
 												key="labels.sortOrder" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="sortOrder" />
-											<input type="number" name="sortOrder"
+											<input type="number" name="sortOrder" id="sortOrder"
 												value="${f:h(sortOrder)}" class="form-control"
 												min="0" max="100000">
 										</div>

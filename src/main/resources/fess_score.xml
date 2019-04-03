@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<!-- https://developers.google.com/analytics/devguides/reporting/core/v4/ -->
+	<!--
+	<component name="metric1"
+		class="com.google.api.services.analyticsreporting.v4.model.Metric">
+		<postConstruct name="setExpression">
+			<arg>"ga:pageviews"</arg>
+		</postConstruct>
+	</component>
+	<component name="dimension1"
+		class="com.google.api.services.analyticsreporting.v4.model.Dimension">
+		<postConstruct name="setName">
+			<arg>"ga:pagePath"</arg>
+		</postConstruct>
+	</component>
+	<component name="dateRange1"
+		class="com.google.api.services.analyticsreporting.v4.model.DateRange">
+		<postConstruct name="setStartDate">
+			<arg>"7DaysAgo"</arg>
+		</postConstruct>
+		<postConstruct name="setEndDate">
+			<arg>"today"</arg>
+		</postConstruct>
+	</component>
+	<component name="orderBy1"
+		class="com.google.api.services.analyticsreporting.v4.model.OrderBy">
+		<postConstruct name="setFieldName">
+			<arg>"ga:pageviews"</arg>
+		</postConstruct>
+		<postConstruct name="setSortOrder">
+			<arg>"DESCENDING"</arg>
+		</postConstruct>
+	</component>
+	<component name="report1"
+		class="com.google.api.services.analyticsreporting.v4.model.ReportRequest">
+		<postConstruct name="setViewId">
+			<arg>"<REPLACE_WITH_VIEW_ID>"</arg>
+		</postConstruct>
+		<postConstruct name="setMetrics">
+			<arg>[metric1]</arg>
+		</postConstruct>
+		<postConstruct name="setDimensions">
+			<arg>[dimension1]</arg>
+		</postConstruct>
+		<postConstruct name="setDateRanges">
+			<arg>[dateRange1]</arg>
+		</postConstruct>
+		<postConstruct name="setOrderBys">
+			<arg>[orderBy1]</arg>
+		</postConstruct>
+		<postConstruct name="setPageSize">
+			<arg>10000</arg>
+		</postConstruct>
+	</component>
+	<component name="googleAnalyticsScoreBooster" class="org.codelibs.fess.score.GoogleAnalyticsScoreBooster">
+		<property name="keyFileLocation">org.codelibs.core.io.ResourceUtil.getResourceAsFile("ga_client_secrets.p12").getAbsolutePath()
+		</property>
+		<property name="serviceAccountEmail">"<REPLACE_WITH_EMAIL>"</property>
+		<property name="scriptCode">"ctx._source.boost = Math.log(params.count.doubleValue() + 1.0)"</property>
+		<postConstruct name="addReportRequest">
+			<arg>"<BASE_URL>"</arg>
+			<arg>report1</arg>
+		</postConstruct>
+	</component>
+	 -->
+
+	<component name="scoreUpdater" class="org.codelibs.fess.score.ScoreUpdater">
+	</component>
+
+</components>

@@ -39,7 +39,7 @@
 								<div class="box-body">
 									<div class="form-group">
 										<la:errors property="fileName" />
-										<la:select property="fileName" styleClass="form-control">
+										<la:select styleId="fileName" property="fileName" styleClass="form-control">
 											<c:forEach var="item" varStatus="s" items="${fileNameItems}">
 												<la:option value="${item}">${f:h(item)}</la:option>
 											</c:forEach>
@@ -108,64 +108,10 @@
 								<div class="box-body">
 									<div class="form-group">
 										<la:errors property="fileName" />
-										<la:select property="fileName" styleClass="form-control">
-											<la:option value="index">
-												<la:message key="labels.design_file_index" />
-											</la:option>
-											<la:option value="header">
-												<la:message key="labels.design_file_header" />
-											</la:option>
-											<la:option value="footer">
-												<la:message key="labels.design_file_footer" />
-											</la:option>
-											<la:option value="search">
-												<la:message key="labels.design_file_search" />
-											</la:option>
-											<la:option value="searchResults">
-												<la:message key="labels.design_file_searchResults" />
-											</la:option>
-											<la:option value="searchNoResult">
-												<la:message key="labels.design_file_searchNoResult" />
-											</la:option>
-											<la:option value="searchOptions">
-												<la:message key="labels.design_file_searchOptions" />
-											</la:option>
-											<la:option value="help">
-												<la:message key="labels.design_file_help" />
-											</la:option>
-											<la:option value="cache">
-												<la:message key="labels.design_file_cache" />
-											</la:option>
-											<%-- Error --%>
-											<la:option value="error">
-												<la:message key="labels.design_file_error" />
-											</la:option>
-											<la:option value="errorHeader">
-												<la:message key="labels.design_file_errorHeader" />
-											</la:option>
-											<la:option value="errorFooter">
-												<la:message key="labels.design_file_errorFooter" />
-											</la:option>
-											<la:option value="errorNotFound">
-												<la:message key="labels.design_file_errorNotFound" />
-											</la:option>
-											<la:option value="errorSystem">
-												<la:message key="labels.design_file_errorSystem" />
-											</la:option>
-											<la:option value="errorRedirect">
-												<la:message key="labels.design_file_errorRedirect" />
-											</la:option>
-											<la:option value="errorBadRequest">
-												<la:message key="labels.design_file_errorBadRequest" />
-											</la:option>
-											<%-- Login --%>
-											<la:option value="login">
-												<la:message key="labels.design_file_login" />
-											</la:option>
-											<%-- Profile --%>
-											<la:option value="profile">
-												<la:message key="labels.design_file_profile" />
-											</la:option>
+										<la:select styleId="fileName" property="fileName" styleClass="form-control">
+											<c:forEach var="item" items="${jspFileNameItems}">
+												<la:option value="${f:u(item.first)}">${f:h(item.second)}</la:option>
+											</c:forEach>
 										</la:select>
 									</div>
 								</div>
@@ -173,7 +119,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-warning" name="edit"
 										value="<la:message key="labels.design_edit_button" />">
-										<i class="fa fa-pencil"></i>
+										<i class="fa fa-pencil-alt"></i>
 										<la:message key="labels.design_edit_button" />
 									</button>
 									<button type="submit" class="btn btn-danger"
@@ -200,8 +146,7 @@
 								<!-- /.box-header -->
 								<div class="box-body">
 									<div class="form-group row">
-										<label for="searchParams.url"
-											class="col-sm-3 form-control-label"><la:message
+										<label class="col-sm-3 form-control-label"><la:message
 												key="labels.design_file" /></label>
 										<div class="col-sm-9">
 											<la:errors property="designFile" />
@@ -209,12 +154,11 @@
 										</div>
 									</div>
 									<div class="form-group row">
-										<label for="searchParams.url"
-											class="col-sm-3 form-control-label"><la:message
+										<label class="col-sm-3 form-control-label"><la:message
 												key="labels.design_file_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="designFileName" />
-											<la:text property="designFileName" styleClass="form-control" />
+											<la:text styleId="designFileName" property="designFileName" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

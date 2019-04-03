@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.RelatedContentHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.Execute;
@@ -57,6 +59,12 @@ public class SearchAction extends FessSearchAction {
     @Resource
     protected SearchService searchService;
 
+    @Resource
+    protected RelatedContentHelper relatedContentHelper;
+
+    @Resource
+    protected RelatedQueryHelper relatedQueryHelper;
+
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
@@ -70,11 +78,33 @@ public class SearchAction extends FessSearchAction {
     }
 
     @Execute
+    public HtmlResponse advance(final SearchForm form) {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
+        validate(form, messages -> {}, () -> asHtml(virtualHost(path_IndexJsp)).renderWith(data -> {
+            buildInitParams();
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationSearchTop());
+        }));
+        if (!form.hasConditionQuery()) {
+            if (StringUtil.isNotBlank(form.q)) {
+                form.as.put("q", new String[] { form.q });
+            } else {
+                // TODO set default?
+            }
+        }
+        return asHtml(virtualHost(path_AdvanceJsp)).renderWith(data -> {
+            buildInitParams();
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationAdvanceSearch());
+        });
+    }
+
+    @Execute
     public HtmlResponse search(final SearchForm form) {
         if (viewHelper.isUseSession()) {
             LaRequestUtil.getOptionalRequest().ifPresent(request -> {
                 final HttpSession session = request.getSession(false);
-                if (session != null) {
+                if (session != null && form.num != null) {
                     session.setAttribute(Constants.RESULTS_PER_PAGE, form.num);
                 }
             });
@@ -98,7 +128,7 @@ public class SearchAction extends FessSearchAction {
     }
 
     protected HtmlResponse doSearch(final SearchForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_SearchJsp));
+        validate(form, messages -> {}, () -> asHtml(virtualHost(path_SearchJsp)));
         if (isLoginRequired()) {
             return redirectToLogin();
         }
@@ -113,7 +143,7 @@ public class SearchAction extends FessSearchAction {
             }
         }
 
-        if (StringUtil.isBlank(form.q) && form.fields.isEmpty()) {
+        if (StringUtil.isBlank(form.q) && form.fields.isEmpty() && !form.hasConditionQuery()) {
             // redirect to index page
             form.q = null;
             return redirectToRoot();
@@ -122,25 +152,24 @@ public class SearchAction extends FessSearchAction {
         try {
             buildFormParams(form);
             form.lang = searchService.getLanguages(request, form);
-            request.setAttribute(Constants.REQUEST_LANGUAGES, form.lang);
-            request.setAttribute(Constants.REQUEST_QUERIES, form.q);
             final WebRenderData renderData = new WebRenderData();
             searchService.search(form, renderData, getUserBean());
-            return asHtml(path_SearchJsp).renderWith(data -> {
-                renderData.register(data);
-                // favorite or thumbnail
-                    if (favoriteSupport || thumbnailSupport) {
-                        final String queryId = renderData.getQueryId();
-                        final List<Map<String, Object>> documentItems = renderData.getDocumentItems();
-                        userInfoHelper.storeQueryId(queryId, documentItems);
-                        if (thumbnailSupport) {
-                            thumbnailManager.storeRequest(queryId, documentItems);
+            return asHtml(virtualHost(path_SearchJsp)).renderWith(
+                    data -> {
+                        if (form.hasConditionQuery()) {
+                            form.q = renderData.getSearchQuery();
                         }
-                    }
-                    RenderDataUtil.register(data, "displayQuery",
-                            getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
-                    createPagingQuery(form);
-                });
+                        renderData.register(data);
+                        RenderDataUtil.register(data, "displayQuery",
+                                getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
+                        createPagingQuery(form);
+                        final String[] relatedContents = relatedContentHelper.getRelatedContents(form.getQuery());
+                        RenderDataUtil.register(data, "relatedContents", relatedContents);
+                        final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
+                        if (relatedQueries.length > 0) {
+                            RenderDataUtil.register(data, "relatedQueries", relatedQueries);
+                        }
+                    });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -229,18 +258,27 @@ public class SearchAction extends FessSearchAction {
                 }
             }
         }
-        if (!form.fields.isEmpty()) {
-            for (final Map.Entry<String, String[]> entry : form.fields.entrySet()) {
-                final String[] values = entry.getValue();
-                if (values != null) {
-                    for (final String v : values) {
-                        if (StringUtil.isNotBlank(v)) {
-                            pagingQueryList.add("fields." + LaFunctions.u(entry.getKey()) + "=" + LaFunctions.u(v));
-                        }
-                    }
-                }
-            }
-        }
+        form.fields
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null)
+                .forEach(
+                        e -> {
+                            final String key = LaFunctions.u(e.getKey());
+                            stream(e.getValue()).of(
+                                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                                            s -> pagingQueryList.add("fields." + key + "=" + LaFunctions.u(s))));
+                        });
+        form.as.entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null)
+                .forEach(
+                        e -> {
+                            final String key = LaFunctions.u(e.getKey());
+                            stream(e.getValue()).of(
+                                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                                            s -> pagingQueryList.add("as." + key + "=" + LaFunctions.u(s))));
+                        });
         request.setAttribute(Constants.PAGING_QUERY_LIST, pagingQueryList);
     }
 

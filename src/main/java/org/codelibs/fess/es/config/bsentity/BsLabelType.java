@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,9 @@ public class BsLabelType extends EsAbstractEntity {
     /** value */
     protected String value;
 
+    /** virtualHost */
+    protected String virtualHost;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -118,6 +121,9 @@ public class BsLabelType extends EsAbstractEntity {
         if (value != null) {
             addFieldToSource(sourceMap, "value", value);
         }
+        if (virtualHost != null) {
+            addFieldToSource(sourceMap, "virtualHost", virtualHost);
+        }
         return sourceMap;
     }
 
@@ -141,6 +147,7 @@ public class BsLabelType extends EsAbstractEntity {
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         sb.append(dm).append(value);
+        sb.append(dm).append(virtualHost);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -249,5 +256,15 @@ public class BsLabelType extends EsAbstractEntity {
     public void setValue(String value) {
         registerModifiedProperty("value");
         this.value = value;
+    }
+
+    public String getVirtualHost() {
+        checkSpecifiedProperty("virtualHost");
+        return convertEmptyToNull(virtualHost);
+    }
+
+    public void setVirtualHost(String value) {
+        registerModifiedProperty("virtualHost");
+        this.virtualHost = value;
     }
 }

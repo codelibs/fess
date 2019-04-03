@@ -1,0 +1,44 @@
+{
+  ".fess_config.failure_url" : {
+    "aliases" : { },
+    "mappings" : {
+      "failure_url" : {
+        "properties" : {
+          "configId" : {
+            "type" : "keyword"
+          },
+          "errorCount" : {
+            "type" : "integer"
+          },
+          "errorLog" : {
+            "type" : "keyword"
+          },
+          "errorName" : {
+            "type" : "keyword"
+          },
+          "lastAccessTime" : {
+            "type" : "long"
+          },
+          "threadName" : {
+            "type" : "keyword"
+          },
+          "url" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021052830",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "WskRnE71Qsas-ki_GN3RSg",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.failure_url"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,8 @@ public class GroupDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((Group) et).getName(), (et, vl) -> ((Group) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((Group) et).getGidNumber(), (et, vl) -> ((Group) et).setGidNumber(DfTypeUtil.toLong(vl)), "gidNumber");
+        setupEpg(_epgMap, et -> ((Group) et).getName(), (et, vl) -> ((Group) et).setName(DfTypeUtil.toString(vl)), "name");
     }
 
     @Override
@@ -117,23 +117,23 @@ public class GroupDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
-            0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGidNumber = cci("gidNumber", "gidNumber", null, null, Long.class, "gidNumber", null, false, false,
-            false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
+            false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
+            0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnGidNumber() {
         return _columnGidNumber;
     }
 
+    public ColumnInfo columnName() {
+        return _columnName;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnName());
         ls.add(columnGidNumber());
+        ls.add(columnName());
         return ls;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,7 @@ public class UserService {
     }
 
     public OptionalEntity<User> getUser(final String id) {
-        return userBhv.selectByPK(id).map(u -> {
-            ComponentUtil.getLdapManager().apply(u);
-            return u;
-        });
+        return userBhv.selectByPK(id).map(u -> ComponentUtil.getAuthenticationManager().load(u));
     }
 
     public OptionalEntity<User> getUserByName(final String username) {
@@ -78,7 +75,7 @@ public class UserService {
             user.setSurname(user.getName());
         }
 
-        ComponentUtil.getLdapManager().insert(user);
+        ComponentUtil.getAuthenticationManager().insert(user);
 
         userBhv.insertOrUpdate(user, op -> {
             op.setRefreshPolicy(Constants.TRUE);
@@ -87,10 +84,8 @@ public class UserService {
     }
 
     public void changePassword(final String username, final String password) {
-        final boolean changed = ComponentUtil.getLdapManager().changePassword(username, password);
-
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (!changed || fessConfig.isLdapAdminSyncPassword()) {
+        final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
+        if (changed) {
             userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
                 final String encodedPassword = fessLoginAssist.encryptPassword(password);
                 entity.setPassword(encodedPassword);
@@ -103,7 +98,7 @@ public class UserService {
     }
 
     public void delete(final User user) {
-        ComponentUtil.getLdapManager().delete(user);
+        ComponentUtil.getAuthenticationManager().delete(user);
 
         userBhv.delete(user, op -> {
             op.setRefreshPolicy(Constants.TRUE);

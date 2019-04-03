@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,16 @@ import javax.servlet.ServletContext;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 public class ResourceUtil {
+    private static final String FESS_OVERRIDE_CONF_PATH = "FESS_OVERRIDE_CONF_PATH";
+
+    private static final String FESS_APP_TYPE = "FESS_APP_TYPE";
+
+    private static final String FESS_APP_DOCKER = "docker";
+
     protected ResourceUtil() {
         // nothing
     }
@@ -44,7 +51,31 @@ public class ResourceUtil {
         return fessConfig.getElasticsearchHttpUrl();
     }
 
+    public static String getAppType() {
+        final String appType = System.getenv(FESS_APP_TYPE);
+        if (StringUtil.isNotBlank(appType)) {
+            return appType;
+        }
+        return StringUtil.EMPTY;
+    }
+
+    public static OptionalEntity<String> getOverrideConfPath() {
+        if (FESS_APP_DOCKER.equalsIgnoreCase(getAppType())) {
+            final String confPath = System.getenv(FESS_OVERRIDE_CONF_PATH);
+            if (StringUtil.isNotBlank(confPath)) {
+                return OptionalEntity.of(confPath);
+            }
+        }
+        return OptionalEntity.empty();
+    }
+
     public static Path getConfPath(final String... names) {
+        if (FESS_APP_DOCKER.equalsIgnoreCase(getAppType())) {
+            final Path confPath = Paths.get("/opt/fess", names);
+            if (Files.exists(confPath)) {
+                return confPath;
+            }
+        }
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             return Paths.get(confPath, names);
@@ -78,6 +109,10 @@ public class ResourceUtil {
 
     public static Path getSitePath(final String... names) {
         return getPath("site", names);
+    }
+
+    public static Path getProjectPropertiesFile() {
+        return getPath("", "project.properties");
     }
 
     protected static Path getPath(final String base, final String... names) {

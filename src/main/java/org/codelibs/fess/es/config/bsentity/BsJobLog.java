@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,9 @@ public class BsJobLog extends EsAbstractEntity {
     /** jobStatus */
     protected String jobStatus;
 
+    /** lastUpdated */
+    protected Long lastUpdated;
+
     /** scriptData */
     protected String scriptData;
 
@@ -60,9 +63,6 @@ public class BsJobLog extends EsAbstractEntity {
 
     /** target */
     protected String target;
-
-    /** lastUpdated */
-    protected Long lastUpdated;
 
     // [Referrers] *comment only
 
@@ -94,6 +94,9 @@ public class BsJobLog extends EsAbstractEntity {
         if (jobStatus != null) {
             addFieldToSource(sourceMap, "jobStatus", jobStatus);
         }
+        if (lastUpdated != null) {
+            addFieldToSource(sourceMap, "lastUpdated", lastUpdated);
+        }
         if (scriptData != null) {
             addFieldToSource(sourceMap, "scriptData", scriptData);
         }
@@ -108,9 +111,6 @@ public class BsJobLog extends EsAbstractEntity {
         }
         if (target != null) {
             addFieldToSource(sourceMap, "target", target);
-        }
-        if (lastUpdated != null) {
-            addFieldToSource(sourceMap, "lastUpdated", lastUpdated);
         }
         return sourceMap;
     }
@@ -128,12 +128,12 @@ public class BsJobLog extends EsAbstractEntity {
         sb.append(dm).append(endTime);
         sb.append(dm).append(jobName);
         sb.append(dm).append(jobStatus);
+        sb.append(dm).append(lastUpdated);
         sb.append(dm).append(scriptData);
         sb.append(dm).append(scriptResult);
         sb.append(dm).append(scriptType);
         sb.append(dm).append(startTime);
         sb.append(dm).append(target);
-        sb.append(dm).append(lastUpdated);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -172,6 +172,16 @@ public class BsJobLog extends EsAbstractEntity {
     public void setJobStatus(String value) {
         registerModifiedProperty("jobStatus");
         this.jobStatus = value;
+    }
+
+    public Long getLastUpdated() {
+        checkSpecifiedProperty("lastUpdated");
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long value) {
+        registerModifiedProperty("lastUpdated");
+        this.lastUpdated = value;
     }
 
     public String getScriptData() {
@@ -222,15 +232,5 @@ public class BsJobLog extends EsAbstractEntity {
     public void setTarget(String value) {
         registerModifiedProperty("target");
         this.target = value;
-    }
-
-    public Long getLastUpdated() {
-        checkSpecifiedProperty("lastUpdated");
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(Long value) {
-        registerModifiedProperty("lastUpdated");
-        this.lastUpdated = value;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
@@ -38,17 +40,14 @@ import org.codelibs.fess.crawler.client.ftp.FtpAuthentication;
 import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.http.Authentication;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
+import org.codelibs.fess.crawler.client.http.form.FormScheme;
 import org.codelibs.fess.crawler.client.http.impl.AuthenticationImpl;
 import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
 import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
+import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsDataConfig;
-import org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.dbflute.cbean.result.ListResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,17 +60,17 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(DataConfig.class);
 
-    private static final String CRAWLER_WEB_HEADER_PREFIX = "crawler.web.header.";
+    private static final String CRAWLER_WEB_PREFIX = "crawler.web.";
 
-    private static final String CRAWLER_WEB_AUTH = "crawler.web.auth";
+    private static final String CRAWLER_WEB_HEADER_PREFIX = CRAWLER_WEB_PREFIX + "header.";
+
+    private static final String CRAWLER_WEB_AUTH = CRAWLER_WEB_PREFIX + "auth";
 
     private static final String CRAWLER_USERAGENT = "crawler.useragent";
 
     private static final String CRAWLER_PARAM_PREFIX = "crawler.param.";
 
     private static final Object CRAWLER_FILE_AUTH = "crawler.file.auth";
-
-    private String[] labelTypeIds;
 
     protected Pattern[] includedDocPathPatterns;
 
@@ -81,59 +80,9 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private Map<String, String> handlerScriptMap;
 
-    private volatile List<LabelType> labelTypeList;
-
     public DataConfig() {
         super();
         setBoost(1.0f);
-    }
-
-    public String[] getLabelTypeIds() {
-        if (labelTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return labelTypeIds;
-    }
-
-    public void setLabelTypeIds(final String[] labelTypeIds) {
-        this.labelTypeIds = labelTypeIds;
-    }
-
-    public List<LabelType> getLabelTypeList() {
-        if (labelTypeList == null) {
-            synchronized (this) {
-                if (labelTypeList == null) {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final DataConfigToLabelBhv dataConfigToLabelBhv = ComponentUtil.getComponent(DataConfigToLabelBhv.class);
-                    final ListResultBean<DataConfigToLabel> mappingList = dataConfigToLabelBhv.selectList(cb -> {
-                        cb.query().setDataConfigId_Equal(getId());
-                        cb.specify().columnLabelTypeId();
-                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
-                    });
-                    final List<String> labelIdList = new ArrayList<>();
-                    for (final DataConfigToLabel mapping : mappingList) {
-                        labelIdList.add(mapping.getLabelTypeId());
-                    }
-                    final LabelTypeBhv labelTypeBhv = ComponentUtil.getComponent(LabelTypeBhv.class);
-                    labelTypeList = labelIdList.isEmpty() ? Collections.emptyList() : labelTypeBhv.selectList(cb -> {
-                        cb.query().setId_InScope(labelIdList);
-                        cb.query().addOrderBy_SortOrder_Asc();
-                        cb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                    });
-                }
-            }
-        }
-        return labelTypeList;
-    }
-
-    @Override
-    public String[] getLabelTypeValues() {
-        final List<LabelType> list = getLabelTypeList();
-        final List<String> labelValueList = new ArrayList<>(list.size());
-        for (final LabelType labelType : list) {
-            labelValueList.add(labelType.getValue());
-        }
-        return labelValueList.toArray(new String[labelValueList.size()]);
     }
 
     @Override
@@ -209,63 +158,10 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             final List<Authentication> basicAuthList = new ArrayList<>();
             for (final String webAuthName : webAuthNames) {
                 final String scheme = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".scheme");
-                final String hostname = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".host");
-                final String port = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".port");
-                final String realm = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".realm");
-                final String username = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".username");
-                final String password = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".password");
 
-                if (StringUtil.isEmpty(username)) {
-                    logger.warn("username is empty. webAuth:" + webAuthName);
-                    continue;
-                }
-
-                AuthScheme authScheme = null;
-                if (Constants.BASIC.equals(scheme)) {
-                    authScheme = new BasicScheme();
-                } else if (Constants.DIGEST.equals(scheme)) {
-                    authScheme = new DigestScheme();
-                } else if (Constants.NTLM.equals(scheme)) {
-                    authScheme = new NTLMScheme(new JcifsEngine());
-                }
-                // TODO FORM
-
-                AuthScope authScope;
-                if (StringUtil.isBlank(hostname)) {
-                    authScope = AuthScope.ANY;
-                } else {
-                    int p = AuthScope.ANY_PORT;
-                    if (StringUtil.isNotBlank(port)) {
-                        try {
-                            p = Integer.parseInt(port);
-                        } catch (final NumberFormatException e) {
-                            logger.warn("Failed to parse " + port, e);
-                        }
-                    }
-
-                    String r = realm;
-                    if (StringUtil.isBlank(realm)) {
-                        r = AuthScope.ANY_REALM;
-                    }
-
-                    String s = scheme;
-                    if (StringUtil.isBlank(scheme) || Constants.NTLM.equals(scheme)) {
-                        s = AuthScope.ANY_SCHEME;
-                    }
-                    authScope = new AuthScope(hostname, p, r, s);
-                }
-
-                Credentials credentials;
-                if (Constants.NTLM.equals(scheme)) {
-                    final String workstation = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".workstation");
-                    final String domain = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".domain");
-                    credentials =
-                            new NTCredentials(username, password == null ? StringUtil.EMPTY : password,
-                                    workstation == null ? StringUtil.EMPTY : workstation, domain == null ? StringUtil.EMPTY : domain);
-                } else {
-                    credentials = new UsernamePasswordCredentials(username, password == null ? StringUtil.EMPTY : password);
-                }
-
+                final AuthScheme authScheme = getAuthScheme(paramMap, webAuthName, scheme);
+                final AuthScope authScope = getAuthScope(webAuthName, scheme, paramMap);
+                final Credentials credentials = getCredentials(webAuthName, scheme, paramMap);
                 basicAuthList.add(new AuthenticationImpl(authScope, credentials, authScheme));
             }
             factoryParamMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY,
@@ -287,11 +183,27 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
         }
 
+        // proxy credentials
+        final String proxyHost = paramMap.get(CRAWLER_WEB_PREFIX + "proxyHost");
+        final String proxyPort = paramMap.get(CRAWLER_WEB_PREFIX + "proxyPort");
+        if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
+            factoryParamMap.put(HcHttpClient.PROXY_HOST_PROPERTY, proxyHost);
+            factoryParamMap.put(HcHttpClient.PROXY_PORT_PROPERTY, proxyPort);
+            final String proxyUsername = paramMap.get(CRAWLER_WEB_PREFIX + "proxyUsername");
+            final String proxyPassword = paramMap.get(CRAWLER_WEB_PREFIX + "proxyPassword");
+            if (proxyUsername != null && proxyPassword != null) {
+                factoryParamMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+            }
+        } else {
+            initializeDefaultHttpProxy(factoryParamMap);
+        }
+
         // file auth
         final String fileAuthStr = paramMap.get(CRAWLER_FILE_AUTH);
         if (StringUtil.isNotBlank(fileAuthStr)) {
             final String[] fileAuthNames = fileAuthStr.split(",");
             final List<SmbAuthentication> smbAuthList = new ArrayList<>();
+            final List<org.codelibs.fess.crawler.client.smb1.SmbAuthentication> smb1AuthList = new ArrayList<>();
             final List<FtpAuthentication> ftpAuthList = new ArrayList<>();
             for (final String fileAuthName : fileAuthNames) {
                 final String scheme = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".scheme");
@@ -320,6 +232,21 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     smbAuth.setUsername(username);
                     smbAuth.setPassword(password == null ? StringUtil.EMPTY : password);
                     smbAuthList.add(smbAuth);
+
+                    final org.codelibs.fess.crawler.client.smb1.SmbAuthentication smb1Auth =
+                            new org.codelibs.fess.crawler.client.smb1.SmbAuthentication();
+                    smb1Auth.setDomain(domain == null ? StringUtil.EMPTY : domain);
+                    smb1Auth.setServer(hostname);
+                    if (StringUtil.isNotBlank(port)) {
+                        try {
+                            smb1Auth.setPort(Integer.parseInt(port));
+                        } catch (final NumberFormatException e) {
+                            logger.warn("Failed to parse " + port, e);
+                        }
+                    }
+                    smb1Auth.setUsername(username);
+                    smb1Auth.setPassword(password == null ? StringUtil.EMPTY : password);
+                    smb1AuthList.add(smb1Auth);
                 } else if (Constants.FTP.equals(scheme)) {
                     final String hostname = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".host");
                     final String port = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".port");
@@ -348,12 +275,88 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             if (!smbAuthList.isEmpty()) {
                 factoryParamMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
             }
+            if (!smb1AuthList.isEmpty()) {
+                factoryParamMap.put(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
+                        smb1AuthList.toArray(new org.codelibs.fess.crawler.client.smb1.SmbAuthentication[smb1AuthList.size()]));
+            }
             if (!ftpAuthList.isEmpty()) {
                 factoryParamMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
             }
         }
 
         return factoryParamMap;
+    }
+
+    private AuthScheme getAuthScheme(final Map<String, String> paramMap, final String webAuthName, final String scheme) {
+        AuthScheme authScheme = null;
+        if (Constants.BASIC.equals(scheme)) {
+            authScheme = new BasicScheme();
+        } else if (Constants.DIGEST.equals(scheme)) {
+            authScheme = new DigestScheme();
+        } else if (Constants.NTLM.equals(scheme)) {
+            final Properties props = new Properties();
+            paramMap.entrySet().stream().filter(e -> e.getKey().startsWith("jcifs.")).forEach(e -> {
+                props.setProperty(e.getKey(), e.getValue());
+            });
+            authScheme = new NTLMScheme(new JcifsEngine(props));
+        } else if (Constants.FORM.equals(scheme)) {
+            final String prefix = CRAWLER_WEB_AUTH + "." + webAuthName + ".";
+            final Map<String, String> parameterMap =
+                    paramMap.entrySet().stream().filter(e -> e.getKey().startsWith(prefix))
+                            .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), e -> e.getValue()));
+            authScheme = new FormScheme(parameterMap);
+        }
+        return authScheme;
+    }
+
+    private Credentials getCredentials(final String webAuthName, final String scheme, final Map<String, String> paramMap) {
+        final String username = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".username");
+        if (StringUtil.isEmpty(username)) {
+            throw new CrawlerSystemException("username is empty. webAuth:" + webAuthName);
+        }
+        final String password = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".password");
+        Credentials credentials;
+        if (Constants.NTLM.equals(scheme)) {
+            final String workstation = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".workstation");
+            final String domain = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".domain");
+            credentials =
+                    new NTCredentials(username, password == null ? StringUtil.EMPTY : password, workstation == null ? StringUtil.EMPTY
+                            : workstation, domain == null ? StringUtil.EMPTY : domain);
+        } else {
+            credentials = new UsernamePasswordCredentials(username, password == null ? StringUtil.EMPTY : password);
+        }
+        return credentials;
+    }
+
+    private AuthScope getAuthScope(final String webAuthName, final String scheme, final Map<String, String> paramMap) {
+        final String hostname = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".host");
+        final String port = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".port");
+        final String realm = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".realm");
+        AuthScope authScope;
+        if (StringUtil.isBlank(hostname)) {
+            authScope = AuthScope.ANY;
+        } else {
+            int p = AuthScope.ANY_PORT;
+            if (StringUtil.isNotBlank(port)) {
+                try {
+                    p = Integer.parseInt(port);
+                } catch (final NumberFormatException e) {
+                    logger.warn("Failed to parse " + port, e);
+                }
+            }
+
+            String r = realm;
+            if (StringUtil.isBlank(realm)) {
+                r = AuthScope.ANY_REALM;
+            }
+
+            String s = scheme;
+            if (StringUtil.isBlank(scheme) || Constants.NTLM.equals(scheme)) {
+                s = AuthScope.ANY_SCHEME;
+            }
+            authScope = new AuthScope(hostname, p, r, s);
+        }
+        return authScope;
     }
 
     @Override

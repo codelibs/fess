@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,23 @@
  */
 package org.codelibs.fess.es.config.exbhv;
 
+import java.util.regex.Pattern;
+
 import org.codelibs.fess.es.config.bsbhv.BsAccessTokenBhv;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
  */
 public class AccessTokenBhv extends BsAccessTokenBhv {
+    private String indexName = null;
 
+    @Override
+    protected String asEsIndex() {
+        if (indexName == null) {
+            final String name = ComponentUtil.getFessConfig().getIndexConfigIndex();
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote(".fess_config"), name);
+        }
+        return indexName;
+    }
 }

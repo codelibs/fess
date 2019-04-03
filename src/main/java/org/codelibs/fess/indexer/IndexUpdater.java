@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
+import org.codelibs.fess.util.ThreadDumpUtil;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -105,7 +106,6 @@ public class IndexUpdater extends Thread {
         // nothing
     }
 
-    @Override
     @PreDestroy
     public void destroy() {
         if (!finishCrawling) {
@@ -270,9 +270,9 @@ public class IndexUpdater extends Thread {
                     finishCrawling = true;
                     forceStop();
                     if (fessConfig.getIndexerThreadDumpEnabledAsBoolean()) {
-                        printThreadDump();
+                        ThreadDumpUtil.printThreadDump();
                     }
-
+                    org.codelibs.fess.exec.Crawler.addError("QueueTimeout");
                 }
 
                 if (!ComponentUtil.available()) {
@@ -297,8 +297,10 @@ public class IndexUpdater extends Thread {
                 logger.error("IndexUpdater is terminated.", t);
             } else if (logger.isDebugEnabled()) {
                 logger.error("IndexUpdater is terminated.", t);
+                org.codelibs.fess.exec.Crawler.addError(t.getClass().getSimpleName());
             } else if (logger.isInfoEnabled()) {
                 logger.info("IndexUpdater is terminated.");
+                org.codelibs.fess.exec.Crawler.addError(t.getClass().getSimpleName());
             }
             forceStop();
         } finally {
@@ -309,16 +311,6 @@ public class IndexUpdater extends Thread {
             logger.info("[EXEC TIME] index update time: " + executeTime + "ms");
         }
 
-    }
-
-    private void printThreadDump() {
-        for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
-            logger.info("Thread: " + entry.getKey());
-            final StackTraceElement[] trace = entry.getValue();
-            for (final StackTraceElement element : trace) {
-                logger.info("\tat " + element);
-            }
-        }
     }
 
     private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList, final List<EsAccessResult> arList) {
@@ -427,6 +419,8 @@ public class IndexUpdater extends Thread {
         if (!map.containsKey(fessConfig.getIndexFieldDocId())) {
             map.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(map));
         }
+
+        ComponentUtil.getLanguageHelper().updateDocument(map);
     }
 
     protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {

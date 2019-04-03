@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,4 @@ import org.codelibs.fess.es.config.bsentity.BsElevateWordToLabel;
 public class ElevateWordToLabel extends BsElevateWordToLabel {
 
     private static final long serialVersionUID = 1L;
-
-    public String getId() {
-        return asDocMeta().id();
-    }
-
-    public void setId(final String id) {
-        asDocMeta().id(id);
-    }
-
-    public Long getVersionNo() {
-        return asDocMeta().version();
-    }
-
-    public void setVersionNo(final Long version) {
-        asDocMeta().version(version);
-    }
-
-    @Override
-    public String toString() {
-        return "ElevateWordToLabel [elevateWordId=" + elevateWordId + ", labelTypeId=" + labelTypeId + ", docMeta=" + docMeta + "]";
-    }
 }

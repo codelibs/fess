@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package org.codelibs.fess;
 
 import java.io.File;
 
+import org.apache.catalina.Host;
+import org.apache.catalina.core.StandardHost;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
 import org.dbflute.tomcat.TomcatBoot;
 
 public class FessBoot extends TomcatBoot {
@@ -83,8 +86,12 @@ public class FessBoot extends TomcatBoot {
                 fessLogPath = "../../logs";
             }
             op.replace("fess.log.path", fessLogPath.replace("\\", "/"));
-        }) // uses jdk14logger
-                .asDevelopment(isNoneEnv()).bootAwait();
+        }).asYouLikeIt(resource -> {
+            final Host host = resource.getHost();
+            if (host instanceof StandardHost) {
+                ((StandardHost) host).setErrorReportValveClass(SuppressErrorReportValve.class.getName());
+            }
+        }).asDevelopment(isNoneEnv()).bootAwait();
     }
 
     public static void shutdown(final String[] args) {

@@ -49,7 +49,7 @@
 												key="labels.key_match_term" /></label>
 										<div class="col-sm-9">
 											<la:errors property="term" />
-											<la:text property="term" styleClass="form-control" />
+											<la:text styleId="term" property="term" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -57,7 +57,7 @@
 												key="labels.key_match_query" /></label>
 										<div class="col-sm-9">
 											<la:errors property="query" />
-											<la:text property="query" styleClass="form-control" />
+											<la:text styleId="query" property="query" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -65,7 +65,7 @@
 												key="labels.key_match_size" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="maxSize" />
-											<input type="number" name="maxSize"
+											<input type="number" name="maxSize" id="maxSize"
 												value="${f:h(maxSize)}" class="form-control"
 												min="0" max="10000000">
 										</div>
@@ -75,7 +75,15 @@
 												key="labels.key_match_boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
-											<la:text property="boost" styleClass="form-control" />
+											<la:text styleId="boost" property="boost" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="virtualHost" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_host" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHost" />
+											<la:text styleId="virtualHost" property="virtualHost" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

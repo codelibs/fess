@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,10 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.core.io.CloseableUtil;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.JobNotFoundException;
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.slf4j.Logger;
@@ -35,9 +39,9 @@ import org.slf4j.LoggerFactory;
 public class ProcessHelper {
     private static final Logger logger = LoggerFactory.getLogger(ProcessHelper.class);
 
-    private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
-    private int processDestroyTimeout = 10;
+    protected int processDestroyTimeout = 10;
 
     @PreDestroy
     public void destroy() {
@@ -63,7 +67,7 @@ public class ProcessHelper {
             destroyProcess(sessionId, runningProcessMap.putIfAbsent(sessionId, jobProcess));
             return jobProcess;
         } catch (final IOException e) {
-            throw new FessSystemException("Crawler Process terminated.", e);
+            throw new JobProcessingException("Crawler Process terminated.", e);
         }
     }
 
@@ -74,6 +78,11 @@ public class ProcessHelper {
 
     public boolean isProcessRunning() {
         return !runningProcessMap.isEmpty();
+    }
+
+    public boolean isProcessRunning(final String sessionId) {
+        final JobProcess jobProcess = runningProcessMap.get(sessionId);
+        return jobProcess != null && jobProcess.getProcess().isAlive();
     }
 
     protected int destroyProcess(final String sessionId, final JobProcess jobProcess) {
@@ -89,7 +98,7 @@ public class ProcessHelper {
             final Process process = jobProcess.getProcess();
             new Thread(() -> {
                 try {
-                    IOUtils.closeQuietly(process.getInputStream());
+                    CloseableUtil.closeQuietly(process.getInputStream());
                 } catch (final Exception e) {
                     logger.warn("Could not close a process input stream.", e);
                 } finally {
@@ -98,7 +107,7 @@ public class ProcessHelper {
             }, "ProcessCloser-input-" + sessionId).start();
             new Thread(() -> {
                 try {
-                    IOUtils.closeQuietly(process.getErrorStream());
+                    CloseableUtil.closeQuietly(process.getErrorStream());
                 } catch (final Exception e) {
                     logger.warn("Could not close a process error stream.", e);
                 } finally {
@@ -107,7 +116,7 @@ public class ProcessHelper {
             }, "ProcessCloser-error-" + sessionId).start();
             new Thread(() -> {
                 try {
-                    IOUtils.closeQuietly(process.getOutputStream());
+                    CloseableUtil.closeQuietly(process.getOutputStream());
                 } catch (final Exception e) {
                     logger.warn("Could not close a process output stream.", e);
                 } finally {
@@ -138,4 +147,18 @@ public class ProcessHelper {
         this.processDestroyTimeout = processDestroyTimeout;
     }
 
+    public void sendCommand(final String sessionId, final String command) {
+        final JobProcess jobProcess = runningProcessMap.get(sessionId);
+        if (jobProcess != null) {
+            try {
+                final OutputStream out = jobProcess.getProcess().getOutputStream();
+                IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
+                out.flush();
+            } catch (final IOException e) {
+                throw new JobProcessingException(e);
+            }
+        } else {
+            throw new JobNotFoundException("Job for " + sessionId + " is not found.");
+        }
+    }
 }

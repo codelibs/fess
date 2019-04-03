@@ -1,8 +1,9 @@
 {
   "index": {
     "refresh_interval": "1s",
-    "number_of_shards": 5,
-    "number_of_replicas": 0
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "auto_expand_replicas": "0-1"
   },
   "analysis" : {
     "tokenizer" : {
@@ -137,12 +138,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "arabic_normalization"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_ar" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_stop", "arabic_normalization", "arabic_keywords"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_stop", "arabic_keywords"]
       },
       "contents_reading_analyzer_ar" : {
         "type" : "custom",
@@ -343,13 +344,13 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "german_normalization"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_de" : {
         "type" : "custom",
         "tokenizer" : "standard",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "german_stop", "german_keywords", "german_normalization"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "german_stop", "german_keywords"]
       },
       "contents_reading_analyzer_de" : {
         "type" : "custom",
@@ -552,13 +553,13 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "arabic_normalization", "persian_normalization"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_fa" : {
         "type" : "custom",
         "tokenizer" : "standard",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_normalization", "persian_normalization", "persian_stop"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "persian_stop"]
       },
       "contents_reading_analyzer_fa" : {
         "type" : "custom",
@@ -1377,7 +1378,7 @@
       },
       "limit_token_count_filter": {
         "type": "limit",
-        "max_token_count": 10000
+        "max_token_count": 2147483647
       },
       "stemmer_en_filter": {
         "type": "stemmer",

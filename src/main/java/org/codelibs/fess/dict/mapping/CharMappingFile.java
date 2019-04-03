@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.dict.mapping;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -33,8 +32,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
@@ -66,7 +66,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
     @Override
     public OptionalEntity<CharMappingItem> get(final long id) {
         if (mappingItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         for (final CharMappingItem mappingItem : mappingItemList) {
@@ -80,7 +80,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
     @Override
     public synchronized PagingList<CharMappingItem> selectList(final int offset, final int size) {
         if (mappingItemList == null) {
-            reload(null, null);
+            reload(null);
         }
 
         if (offset >= mappingItemList.size() || offset < 0) {
@@ -98,14 +98,14 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
     @Override
     public synchronized void insert(final CharMappingItem item) {
         try (MappingUpdater updater = new MappingUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
     @Override
     public synchronized void update(final CharMappingItem item) {
         try (MappingUpdater updater = new MappingUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
         }
     }
 
@@ -115,15 +115,22 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         mappingItem.setNewInputs(StringUtil.EMPTY_STRINGS);
         mappingItem.setNewOutput(StringUtil.EMPTY);
         try (MappingUpdater updater = new MappingUpdater(item)) {
-            reload(updater, null);
+            reload(updater);
+        }
+    }
+
+    protected void reload(final MappingUpdater updater) {
+        try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
+            reload(updater, curlResponse.getContentAsStream());
+        } catch (final IOException e) {
+            throw new DictionaryException("Failed to parse " + path, e);
         }
     }
 
     protected void reload(final MappingUpdater updater, final InputStream in) {
         final Pattern parsePattern = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$");
         final List<CharMappingItem> itemList = new ArrayList<>();
-        try (BufferedReader reader =
-                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -190,10 +197,6 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
 
     public String getSimpleName() {
         return new File(path).getName();
-    }
-
-    public InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
     }
 
     public synchronized void update(final InputStream in) throws IOException {
@@ -290,7 +293,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
             } catch (final IOException e) {
                 // ignore
             }
-            IOUtils.closeQuietly(writer);
+            CloseableUtil.closeQuietly(writer);
 
             if (isCommit) {
                 try {

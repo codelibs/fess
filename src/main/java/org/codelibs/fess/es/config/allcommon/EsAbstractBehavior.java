@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -54,6 +55,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.seqno.SequenceNumbers;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
@@ -99,12 +101,12 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     @Override
     protected int delegateSelectCountUniquely(final ConditionBean cb) {
         // #pending check response and cast problem
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsSearchType());
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex());
         final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
         }
-        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits();
+        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits().value;
     }
 
     @Override
@@ -115,7 +117,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         }
         if (list.size() >= 2) {
             String msg = "The size of selected list is over 1: " + list.size();
-            throw new FetchingOverSafetySizeException(msg, 1); // immediatly catched by caller and tranlated 
+            throw new FetchingOverSafetySizeException(msg, 1); // immediately caught by caller and translated
         }
         return list.get(0);
     }
@@ -123,7 +125,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     @Override
     protected <RESULT extends ENTITY> List<RESULT> delegateSelectList(final ConditionBean cb, final Class<? extends RESULT> entityType) {
         // #pending check response
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsSearchType());
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex());
         final int from;
         final int size;
         if (cb.isFetchScopeEffective()) {
@@ -145,22 +147,25 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final EsPagingResultBean<RESULT> list = new EsPagingResultBean<>(builder);
         final SearchHits searchHits = response.getHits();
         searchHits.forEach(hit -> {
-            final Map<String, Object> source = hit.getSource();
+            final Map<String, Object> source = hit.getSourceAsMap();
             final RESULT entity = createEntity(source, entityType);
             final DocMeta docMeta = ((EsAbstractEntity) entity).asDocMeta();
             docMeta.id(hit.getId());
             docMeta.version(hit.getVersion());
+            docMeta.seqNo(hit.getSeqNo());
+            docMeta.primaryTerm(hit.getPrimaryTerm());
             list.add(entity);
         });
 
         list.setPageSize(size);
-        list.setAllRecordCount((int) searchHits.totalHits());
+        list.setAllRecordCount((int) searchHits.getTotalHits().value);
         list.setCurrentPageNumber(cb.getFetchPageNumber());
 
-        list.setTook(response.getTookInMillis());
+        list.setTook(response.getTook().getMillis());
         list.setTotalShards(response.getTotalShards());
         list.setSuccessfulShards(response.getSuccessfulShards());
         list.setFailedShards(response.getFailedShards());
+        list.setTotalHits(searchHits.getTotalHits());
 
         list.setAggregation(response.getAggregations());
 
@@ -183,11 +188,13 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
                 if (handler.isBreakCursor()) {
                     return;
                 }
-                final Map<String, Object> source = hit.getSource();
+                final Map<String, Object> source = hit.getSourceAsMap();
                 final RESULT entity = createEntity(source, entityType);
                 final DocMeta docMeta = ((EsAbstractEntity) entity).asDocMeta();
                 docMeta.id(hit.getId());
                 docMeta.version(hit.getVersion());
+                docMeta.seqNo(hit.getSeqNo());
+                docMeta.primaryTerm(hit.getPrimaryTerm());
                 handler.handle(entity);
             });
 
@@ -204,11 +211,13 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         delegateBulkRequest(cb, searchHits -> {
             List<RESULT> list = new ArrayList<>();
             searchHits.forEach(hit -> {
-                final Map<String, Object> source = hit.getSource();
+                final Map<String, Object> source = hit.getSourceAsMap();
                 final RESULT entity = createEntity(source, entityType);
                 final DocMeta docMeta = ((EsAbstractEntity) entity).asDocMeta();
                 docMeta.id(hit.getId());
                 docMeta.version(hit.getVersion());
+                docMeta.seqNo(hit.getSeqNo());
+                docMeta.primaryTerm(hit.getPrimaryTerm());
                 list.add(entity);
             });
 
@@ -218,30 +227,40 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected void delegateBulkRequest(final ConditionBean cb, Function<SearchHits, Boolean> handler) {
-        SearchResponse response = null;
-        while (true) {
-            if (response == null) {
-                final SearchRequestBuilder builder =
-                        client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForCursor).setSize(sizeForCursor);
-                final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
-                if (esCb.getPreference() != null) {
-                    builder.setPreference(esCb.getPreference());
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForCursor).setSize(sizeForCursor);
+        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        if (esCb.getPreference() != null) {
+            builder.setPreference(esCb.getPreference());
+        }
+        esCb.request().build(builder);
+        SearchResponse response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
+        String scrollId = response.getScrollId();
+        try {
+            while (scrollId != null) {
+                final SearchHits searchHits = response.getHits();
+                final SearchHit[] hits = searchHits.getHits();
+                if (hits.length == 0) {
+                    break;
                 }
-                esCb.request().build(builder);
-                response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
-            } else {
-                final String scrollId = response.getScrollId();
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
-            }
-            final SearchHits searchHits = response.getHits();
-            final SearchHit[] hits = searchHits.getHits();
-            if (hits.length == 0) {
-                break;
-            }
 
-            if (!handler.apply(searchHits)) {
-                break;
+                if (!handler.apply(searchHits)) {
+                    break;
+                }
+
+                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
+                if (!scrollId.equals(response.getScrollId())) {
+                    deleteScrollContext(scrollId);
+                }
+                scrollId = response.getScrollId();
             }
+        } finally {
+            deleteScrollContext(scrollId);
+        }
+    }
+
+    protected void deleteScrollContext(final String scrollId) {
+        if (scrollId != null) {
+            client.prepareClearScroll().addScrollId(scrollId).execute(ActionListener.wrap(() -> {}));
         }
     }
 
@@ -273,7 +292,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected IndexRequestBuilder createInsertRequest(final EsAbstractEntity esEntity) {
-        final IndexRequestBuilder builder = client.prepareIndex(asEsIndex(), asEsIndexType()).setSource(toSource(esEntity));
+        final IndexRequestBuilder builder = client.prepareIndex().setIndex(asEsIndex()).setSource(toSource(esEntity));
         final String id = esEntity.asDocMeta().id();
         if (id != null) {
             builder.setId(id);
@@ -291,23 +310,32 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final IndexRequestBuilder builder = createUpdateRequest(esEntity);
 
         final IndexResponse response = builder.execute().actionGet(indexTimeout);
-        long version = response.getVersion();
-        if (version != -1) {
-            esEntity.asDocMeta().version(version);
+        final long seqNo = response.getSeqNo();
+        if (seqNo != SequenceNumbers.UNASSIGNED_SEQ_NO) {
+            esEntity.asDocMeta().seqNo(seqNo);
         }
+        final long primaryTerm = response.getPrimaryTerm();
+        if (primaryTerm != SequenceNumbers.UNASSIGNED_PRIMARY_TERM) {
+            esEntity.asDocMeta().primaryTerm(primaryTerm);
+        }
+
         return 1;
     }
 
     protected IndexRequestBuilder createUpdateRequest(final EsAbstractEntity esEntity) {
         final IndexRequestBuilder builder =
-                client.prepareIndex(asEsIndex(), asEsIndexType(), esEntity.asDocMeta().id()).setSource(toSource(esEntity));
+                client.prepareIndex().setIndex(asEsIndex()).setId(esEntity.asDocMeta().id()).setSource(toSource(esEntity));
         final RequestOptionCall<IndexRequestBuilder> indexOption = esEntity.asDocMeta().indexOption();
         if (indexOption != null) {
             indexOption.callback(builder);
         }
-        final Long version = esEntity.asDocMeta().version();
-        if (version != null && version.longValue() != -1) {
-            builder.setVersion(version);
+        final Long seqNo = esEntity.asDocMeta().seqNo();
+        if (seqNo != null && seqNo.longValue() != SequenceNumbers.UNASSIGNED_SEQ_NO) {
+            esEntity.asDocMeta().seqNo(seqNo);
+        }
+        final Long primaryTerm = esEntity.asDocMeta().primaryTerm();
+        if (primaryTerm != null && primaryTerm.longValue() != SequenceNumbers.UNASSIGNED_PRIMARY_TERM) {
+            esEntity.asDocMeta().primaryTerm(primaryTerm);
         }
         return builder;
     }
@@ -326,7 +354,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected DeleteRequestBuilder createDeleteRequest(final EsAbstractEntity esEntity) {
-        final DeleteRequestBuilder builder = client.prepareDelete(asEsIndex(), asEsIndexType(), esEntity.asDocMeta().id());
+        final DeleteRequestBuilder builder = client.prepareDelete().setIndex(asEsIndex()).setId(esEntity.asDocMeta().id());
         final RequestOptionCall<DeleteRequestBuilder> deleteOption = esEntity.asDocMeta().deleteOption();
         if (deleteOption != null) {
             deleteOption.callback(builder);
@@ -336,37 +364,40 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     @Override
     protected int delegateQueryDelete(final ConditionBean cb, final DeleteOption<? extends ConditionBean> option) {
-        SearchResponse response = null;
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForDelete).setSize(sizeForDelete);
+        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        if (esCb.getPreference() != null) {
+            esCb.setPreference(esCb.getPreference());
+        }
+        esCb.request().build(builder);
+        SearchResponse response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
+        String scrollId = response.getScrollId();
         int count = 0;
-        while (true) {
-            if (response == null) {
-                final SearchRequestBuilder builder =
-                        client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForDelete).setSize(sizeForDelete);
-                final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
-                if (esCb.getPreference() != null) {
-                    esCb.setPreference(esCb.getPreference());
+        try {
+            while (scrollId != null) {
+                final SearchHits searchHits = response.getHits();
+                final SearchHit[] hits = searchHits.getHits();
+                if (hits.length == 0) {
+                    break;
                 }
-                esCb.request().build(builder);
-                response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
-            } else {
-                final String scrollId = response.getScrollId();
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
-            }
-            final SearchHits searchHits = response.getHits();
-            final SearchHit[] hits = searchHits.getHits();
-            if (hits.length == 0) {
-                break;
-            }
 
-            final BulkRequestBuilder bulkRequest = client.prepareBulk();
-            for (final SearchHit hit : hits) {
-                bulkRequest.add(client.prepareDelete(asEsIndex(), asEsIndexType(), hit.getId()));
+                final BulkRequestBuilder bulkRequest = client.prepareBulk();
+                for (final SearchHit hit : hits) {
+                    bulkRequest.add(client.prepareDelete().setIndex(asEsIndex()).setId(hit.getId()));
+                }
+                count += hits.length;
+                final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
+                if (bulkResponse.hasFailures()) {
+                    throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+                }
+
+                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
+                if (!scrollId.equals(response.getScrollId())) {
+                    deleteScrollContext(scrollId);
+                }
             }
-            count += hits.length;
-            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
-            if (bulkResponse.hasFailures()) {
-                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
-            }
+        } finally {
+            deleteScrollContext(scrollId);
         }
         return count;
     }

@@ -1,0 +1,101 @@
+{
+  ".fess_config.file_config" : {
+    "aliases" : { },
+    "mappings" : {
+      "file_config" : {
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "boost" : {
+            "type" : "float"
+          },
+          "configParameter" : {
+            "type" : "keyword"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "depth" : {
+            "type" : "integer"
+          },
+          "description" : {
+            "type" : "text"
+          },
+          "excludedDocPaths" : {
+            "type" : "keyword"
+          },
+          "excludedPaths" : {
+            "type" : "keyword"
+          },
+          "includedDocPaths" : {
+            "type" : "keyword"
+          },
+          "includedPaths" : {
+            "type" : "keyword"
+          },
+          "intervalTime" : {
+            "type" : "integer"
+          },
+          "maxAccessCount" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "numOfThread" : {
+            "type" : "integer"
+          },
+          "paths" : {
+            "type" : "keyword"
+          },
+          "permissions" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "timeToLive" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "virtualHosts" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "file_config" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              },
+              "virtualHosts" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021053464",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "5fluDb3PStuKaHkl-5gdNw",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.file_config"
+      }
+    }
+  }
+}

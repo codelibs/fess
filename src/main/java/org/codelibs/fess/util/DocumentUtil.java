@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,29 @@
  */
 package org.codelibs.fess.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.taglib.FessFunctions;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public final class DocumentUtil {
 
     private DocumentUtil() {
+    }
+
+    public static <T> T getValue(final Map<String, Object> doc, final String key, final Class<T> clazz, final T defaultValue) {
+        final T value = getValue(doc, key, clazz);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
     }
 
     @SuppressWarnings("unchecked")
@@ -40,6 +54,8 @@ public final class DocumentUtil {
         if (value instanceof List) {
             if (clazz.isAssignableFrom(List.class)) {
                 return (T) value;
+            } else if (clazz.isAssignableFrom(String[].class)) {
+                return (T) ((List<?>) value).stream().filter(s -> s != null).map(s -> s.toString()).toArray(n -> new String[n]);
             }
 
             if (((List<?>) value).isEmpty()) {
@@ -47,6 +63,22 @@ public final class DocumentUtil {
             }
 
             return convertObj(((List<?>) value).get(0), clazz);
+        } else if (value instanceof String[]) {
+            if (clazz.isAssignableFrom(String[].class)) {
+                return (T) value;
+            } else if (clazz.isAssignableFrom(List.class)) {
+                final List<String> list = new ArrayList<>();
+                for (final String s : (String[]) value) {
+                    list.add(s);
+                }
+                return (T) list;
+            }
+
+            if (((String[]) value).length == 0) {
+                return null;
+            }
+
+            return convertObj(((String[]) value)[0], clazz);
         }
 
         return convertObj(value, clazz);
@@ -98,5 +130,24 @@ public final class DocumentUtil {
             }
         }
         return null;
+    }
+
+    public static String encodeUrl(final String url) {
+        final String enc =
+                LaRequestUtil.getOptionalRequest().filter(req -> req.getCharacterEncoding() != null).map(req -> req.getCharacterEncoding())
+                        .orElse(Constants.UTF_8);
+        final StringBuilder buf = new StringBuilder(url.length() + 100);
+        for (final char c : url.toCharArray()) {
+            if (CharUtil.isUrlChar(c)) {
+                buf.append(c);
+            } else {
+                try {
+                    buf.append(URLEncoder.encode(String.valueOf(c), enc));
+                } catch (final UnsupportedEncodingException e) {
+                    buf.append(c);
+                }
+            }
+        }
+        return buf.toString();
     }
 }

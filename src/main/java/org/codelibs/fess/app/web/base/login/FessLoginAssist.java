@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import java.util.function.Function;
+
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -25,6 +27,7 @@ import org.codelibs.fess.es.user.exbhv.UserBhv;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -34,9 +37,9 @@ import org.lastaflute.web.login.LoginHandlingResource;
 import org.lastaflute.web.login.PrimaryLoginManager;
 import org.lastaflute.web.login.TypicalLoginAssist;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.login.exception.LoginRequiredException;
 import org.lastaflute.web.login.option.LoginSpecifiedOption;
+import org.lastaflute.web.servlet.session.SessionManager;
 
 /**
  * @author jflute
@@ -52,6 +55,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     private TimeManager timeManager;
     @Resource
     private AsyncManager asyncManager;
+    @Resource
+    private SessionManager sessionManager;
     @Resource
     private FessConfig fessConfig;
     @Resource
@@ -132,13 +137,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     }
 
     // ===================================================================================
-    //                                                                     Login Extention
+    //                                                                     Login Extension
     //                                                                      ==============
 
     @Override
     protected void resolveCredential(final CredentialResolver resolver) {
-        resolver.resolve(UserPasswordCredential.class, credential -> {
-            final UserPasswordCredential userCredential = credential;
+        resolver.resolve(LocalUserCredential.class, credential -> {
+            final LocalUserCredential userCredential = credential;
             final String username = userCredential.getUser();
             final String password = userCredential.getPassword();
             if (!fessConfig.isAdminUser(username)) {
@@ -149,16 +154,23 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             }
             return doFindLoginUser(username, encryptPassword(password));
         });
-        resolver.resolve(SpnegoCredential.class, credential -> {
-            final String username = credential.getUsername();
-            if (!fessConfig.isAdminUser(username)) {
-                return ComponentUtil.getLdapManager().login(username);
-            }
-            return OptionalEntity.empty();
-        });
-        resolver.resolve(OpenIdConnectCredential.class, credential -> {
-            return OptionalEntity.of(credential.getUser());
-        });
+        final LoginCredentialResolver loginResolver = new LoginCredentialResolver(resolver);
+        for (final SsoAuthenticator auth : ComponentUtil.getSsoManager().getAuthenticators()) {
+            auth.resolveCredential(loginResolver);
+        }
+    }
+
+    public static class LoginCredentialResolver {
+        private final TypicalLoginAssist<String, FessUserBean, FessUser>.CredentialResolver resolver;
+
+        public LoginCredentialResolver(final CredentialResolver resolver) {
+            this.resolver = resolver;
+        }
+
+        public <CREDENTIAL extends LoginCredential> void resolve(final Class<CREDENTIAL> credentialType,
+                final Function<CREDENTIAL, OptionalEntity<FessUser>> oneArgLambda) {
+            resolver.resolve(credentialType, credential -> oneArgLambda.apply(credential));
+        }
     }
 
     protected OptionalEntity<FessUser> doFindLoginUser(final String username, final String cipheredPassword) {

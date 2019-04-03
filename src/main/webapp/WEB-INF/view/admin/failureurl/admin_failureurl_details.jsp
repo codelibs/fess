@@ -100,16 +100,6 @@
 													<td>${f:h(lastAccessTime)}<la:hidden
 															property="lastAccessTime" /></td>
 												</tr>
-												<tr>
-													<th><la:message
-															key="labels.failure_url_web_config_name" /></th>
-													<td>${f:h(webConfigName)}</td>
-												</tr>
-												<tr>
-													<th><la:message
-															key="labels.failure_url_file_config_name" /></th>
-													<td>${f:h(fileConfigName)}</td>
-												</tr>
 											</tbody>
 										</table>
 									</div>

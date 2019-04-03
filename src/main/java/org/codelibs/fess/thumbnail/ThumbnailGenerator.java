@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@ package org.codelibs.fess.thumbnail;
 import java.io.File;
 import java.util.Map;
 
+import org.codelibs.core.misc.Tuple3;
+
 public interface ThumbnailGenerator {
 
     String getName();
 
-    boolean generate(String url, File outputFile);
+    boolean generate(String thumbnailId, File outputFile);
 
     boolean isTarget(Map<String, Object> docMap);
 
     boolean isAvailable();
 
     void destroy();
+
+    Tuple3<String, String, String> createTask(String path, Map<String, Object> docMap);
 }

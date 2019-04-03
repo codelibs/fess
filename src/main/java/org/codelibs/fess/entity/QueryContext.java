@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -36,11 +38,16 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryContext {
+
+    protected static final String ALLINURL_FIELD_PREFIX = "allinurl:";
+
+    protected static final String ALLINTITLE_FIELD_PREFIX = "allintitle:";
+
     private QueryBuilder queryBuilder;
 
-    private final List<SortBuilder> sortBuilderList = new ArrayList<>();
+    private final List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
 
-    private final String queryString;
+    private String queryString;
 
     private Set<String> highlightedQuerySet = null;
 
@@ -48,9 +55,26 @@ public class QueryContext {
 
     private boolean disableRoleQuery = false;
 
+    private String defaultField = null;
+
     @SuppressWarnings("unchecked")
     public QueryContext(final String queryString, final boolean isQuery) {
-        this.queryString = queryString;
+        if (queryString != null) {
+            if (queryString.startsWith(ALLINURL_FIELD_PREFIX)) {
+                this.defaultField = ComponentUtil.getFessConfig().getIndexFieldUrl();
+                this.queryString = queryString.substring(ALLINURL_FIELD_PREFIX.length());
+            } else if (queryString.startsWith(ALLINTITLE_FIELD_PREFIX)) {
+                this.defaultField = ComponentUtil.getFessConfig().getIndexFieldTitle();
+                this.queryString = queryString.substring(ALLINTITLE_FIELD_PREFIX.length());
+            } else {
+                this.queryString = queryString;
+            }
+        } else {
+            this.queryString = queryString;
+        }
+        if (StringUtil.isBlank(this.queryString)) {
+            this.queryString = "*";
+        }
         if (isQuery) {
             LaRequestUtil.getOptionalRequest().ifPresent(request -> {
                 highlightedQuerySet = new HashSet<>();
@@ -87,7 +111,7 @@ public class QueryContext {
         this.queryBuilder = queryBuilder;
     }
 
-    public void addSorts(final SortBuilder... sortBuilders) {
+    public void addSorts(final SortBuilder<?>... sortBuilders) {
         stream(sortBuilders).of(stream -> stream.forEach(sortBuilder -> sortBuilderList.add(sortBuilder)));
     }
 
@@ -95,7 +119,7 @@ public class QueryContext {
         return !sortBuilderList.isEmpty();
     }
 
-    public List<SortBuilder> sortBuilders() {
+    public List<SortBuilder<?>> sortBuilders() {
         return sortBuilderList;
     }
 
@@ -139,5 +163,13 @@ public class QueryContext {
 
     public void skipRoleQuery() {
         disableRoleQuery = true;
+    }
+
+    public String getDefaultField() {
+        return defaultField;
+    }
+
+    public void setDefaultField(final String defaultField) {
+        this.defaultField = defaultField;
     }
 }

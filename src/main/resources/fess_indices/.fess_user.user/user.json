@@ -1,0 +1,124 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "password": {
+        "type": "keyword"
+      },
+      "surname": {
+        "type": "keyword"
+      },
+      "givenName": {
+        "type": "keyword"
+      },
+      "employeeNumber" : {
+        "type" : "keyword"
+      },
+      "mail" : {
+        "type" : "keyword"
+      },
+      "telephoneNumber" : {
+        "type" : "keyword"
+      },
+      "homePhone" : {
+        "type" : "keyword"
+      },
+      "homePostalAddress" : {
+        "type" : "keyword"
+      },
+      "labeledURI" : {
+        "type" : "keyword"
+      },
+      "roomNumber" : {
+        "type" : "keyword"
+      },
+      "description" : {
+        "type" : "keyword"
+      },
+      "title" : {
+        "type" : "keyword"
+      },
+      "pager" : {
+        "type" : "keyword"
+      },
+      "street" : {
+        "type" : "keyword"
+      },
+      "postalCode" : {
+        "type" : "keyword"
+      },
+      "physicalDeliveryOfficeName" : {
+        "type" : "keyword"
+      },
+      "destinationIndicator" : {
+        "type" : "keyword"
+      },
+      "internationaliSDNNumber" : {
+        "type" : "keyword"
+      },
+      "state" : {
+        "type" : "keyword"
+      },
+      "employeeType" : {
+        "type" : "keyword"
+      },
+      "facsimileTelephoneNumber" : {
+        "type" : "keyword"
+      },
+      "postOfficeBox" : {
+        "type" : "keyword"
+      },
+      "initials" : {
+        "type" : "keyword"
+      },
+      "carLicense" : {
+        "type" : "keyword"
+      },
+      "mobile" : {
+        "type" : "keyword"
+      },
+      "postalAddress" : {
+        "type" : "keyword"
+      },
+      "city" : {
+        "type" : "keyword"
+      },
+      "teletexTerminalIdentifier" : {
+        "type" : "keyword"
+      },
+      "x121Address" : {
+        "type" : "keyword"
+      },
+      "businessCategory" : {
+        "type" : "keyword"
+      },
+      "registeredAddress" : {
+        "type" : "keyword"
+      },
+      "displayName" : {
+        "type" : "keyword"
+      },
+      "preferredLanguage" : {
+        "type" : "keyword"
+      },
+      "departmentNumber" : {
+        "type" : "keyword"
+      },
+      "uidNumber" : {
+        "type" : "long"
+      },
+      "gidNumber" : {
+        "type" : "long"
+      },
+      "homeDirectory" : {
+        "type" : "keyword"
+      },
+      "groups": {
+        "type": "keyword"
+      },
+      "roles": {
+        "type": "keyword"
+      }
+    }
+}

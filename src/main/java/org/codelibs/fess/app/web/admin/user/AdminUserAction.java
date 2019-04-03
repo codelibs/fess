@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,9 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -263,7 +265,7 @@ public class AdminUserAction extends FessAdminAction {
     //===================================================================================
     //                                                                       Assist Logic
     //                                                                       ============
-    private OptionalEntity<User> getEntity(final CreateForm form) {
+    private static OptionalEntity<User> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new User()).map(entity -> {
@@ -272,7 +274,7 @@ public class AdminUserAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return userService.getUser(((EditForm) form).id);
+                return ComponentUtil.getComponent(UserService.class).getUser(((EditForm) form).id);
             }
             break;
         default:
@@ -281,11 +283,12 @@ public class AdminUserAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<User> getUser(final CreateForm form) {
+    public static OptionalEntity<User> getUser(final CreateForm form) {
         return getEntity(form).map(entity -> {
+            copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
             if (form.crudMode.intValue() == CrudMode.CREATE || StringUtil.isNotBlank(form.password)) {
-                final String encodedPassword = fessLoginAssist.encryptPassword(form.password);
+                final String encodedPassword = ComponentUtil.getComponent(FessLoginAssist.class).encryptPassword(form.password);
                 entity.setOriginalPassword(form.password);
                 entity.setPassword(encodedPassword);
             }
@@ -327,7 +330,7 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
-    private void resetPassword(final CreateForm form) {
+    public static void resetPassword(final CreateForm form) {
         form.password = null;
         form.confirmPassword = null;
     }

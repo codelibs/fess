@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.lastaflute.core.direction.ObjectiveConfig;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -36,6 +39,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminSysteminfoAction extends FessAdminAction {
+
+    private static final String MASKED_VALUE = "XXXXXXXX";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -74,56 +79,101 @@ public class AdminSysteminfoAction extends FessAdminAction {
     //                                                                        ============
 
     protected void registerEnvItems(final RenderData data) {
+        RenderDataUtil.register(data, "envItems", getEnvItems());
+    }
+
+    protected void registerPropItems(final RenderData data) {
+        RenderDataUtil.register(data, "propItems", getPropItems());
+    }
+
+    protected void registerFessPropItems(final RenderData data) {
+        RenderDataUtil.register(data, "fessPropItems", getFessPropItems(fessConfig));
+    }
+
+    protected void registerBugReportItems(final RenderData data) {
+        RenderDataUtil.register(data, "bugReportItems", getBugReportItems());
+    }
+
+    public static List<Map<String, String>> getEnvItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<String, String> entry : System.getenv().entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
-        RenderDataUtil.register(data, "envItems", itemList);
+        return itemList;
     }
 
-    protected void registerPropItems(final RenderData data) {
+    public static List<Map<String, String>> getPropItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
-        RenderDataUtil.register(data, "propItems", itemList);
+        return itemList;
     }
 
-    protected void registerFessPropItems(final RenderData data) {
+    public static List<Map<String, String>> getFessPropItems(final FessConfig fessConfig) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
-            itemList.add(createItem(entry.getKey(), entry.getValue()));
+        ComponentUtil.getSystemProperties().entrySet().stream().forEach(e -> {
+            final String k = e.getKey().toString();
+            final String value;
+            if (isMaskedValue(k)) {
+                value = MASKED_VALUE;
+            } else {
+                value = e.getValue().toString();
+            }
+            itemList.add(createItem(k, value));
+        });
+        if (fessConfig instanceof ObjectiveConfig) {
+            final ObjectiveConfig config = (ObjectiveConfig) fessConfig;
+            config.keySet().stream().forEach(k -> {
+                final String value;
+                if (isMaskedValue(k)) {
+                    value = MASKED_VALUE;
+                } else {
+                    value = config.get(k);
+                }
+                itemList.add(createItem(k, value));
+            });
         }
-        RenderDataUtil.register(data, "fessPropItems", itemList);
+        return itemList;
     }
 
-    protected void registerBugReportItems(final RenderData data) {
+    protected static boolean isMaskedValue(final String key) {
+        return "http.proxy.password".equals(key) //
+                || "ldap.admin.security.credentials".equals(key) //
+                || "spnego.preauth.password".equals(key) //
+                || "app.cipher.key".equals(key) //
+                || "oic.client.id".equals(key) //
+                || "oic.client.secret".equals(key);
+    }
+
+    public static List<Map<String, String>> getBugReportItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final String label : bugReportLabels) {
             itemList.add(createPropItem(label));
         }
 
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
             if (isBugReportTarget(entry.getKey())) {
                 itemList.add(createItem(entry.getKey(), entry.getValue()));
             }
         }
 
-        RenderDataUtil.register(data, "bugReportItems", itemList);
+        return itemList;
     }
 
-    private boolean isBugReportTarget(final Object key) {
+    private static boolean isBugReportTarget(final Object key) {
         if ("snapshot.path".equals(key) || "label.value".equals(key)) {
             return false;
         }
         return true;
     }
 
-    protected Map<String, String> createPropItem(final String key) {
+    protected static Map<String, String> createPropItem(final String key) {
         return createItem(key, System.getProperty(key));
     }
 
-    protected Map<String, String> createItem(final Object label, final Object value) {
+    protected static Map<String, String> createItem(final Object label, final Object value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label != null ? label.toString() : StringUtil.EMPTY);
         map.put(Constants.ITEM_VALUE, value != null ? value.toString() : StringUtil.EMPTY);

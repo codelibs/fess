@@ -65,6 +65,18 @@
 												<th><la:message key="labels.key_match_boost" /></th>
 												<td>${f:h(boost)}<la:hidden property="boost" /></td>
 											</tr>
+											<tr>
+												<th><la:message key="labels.key_match_urls" /></th>
+												<td><c:forEach var="doc" varStatus="s"
+														items="${docs}">
+														${f:h(doc.url)}<br/>
+													</c:forEach></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message
+														key="labels.virtual_host" /></th>
+												<td>${f:h(virtualHost)}<la:hidden property="virtualHost" /></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>

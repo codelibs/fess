@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import org.codelibs.fess.app.service.ProtwordsService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.protwords.ProtwordsItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -39,6 +41,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author ma2tani
@@ -68,6 +71,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        protwordsPager.clear();
         return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -208,9 +212,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return protwordsService.getProtwordsFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                try (InputStream inputStream = file.getInputStream()) {
-                    out.write(inputStream);
-                }
+                file.writeOut(out);
             });
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL), () -> downloadpage(form.dictId));
@@ -249,7 +251,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
                     return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
                 });
             }
-            saveInfo(messages -> messages.addSuccessUploadSynonymFile(GLOBAL));
+            saveInfo(messages -> messages.addSuccessUploadProtwordsFile(GLOBAL));
             return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL), () -> uploadpage(form.dictId));
@@ -309,14 +311,14 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<ProtwordsItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<ProtwordsItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final ProtwordsItem entity = new ProtwordsItem(0, StringUtil.EMPTY);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return protwordsService.getProtwordsItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(ProtwordsService.class).getProtwordsItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -326,9 +328,19 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     protected OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createProtwordsItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<ProtwordsItem> createProtwordsItem(final FessBaseAction action, final CreateForm form,
+            final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String newInput = form.input;
-            validateProtwordsString(newInput, "input", hook);
+            validateProtwordsString(action, newInput, "input", hook);
             entity.setNewInput(newInput);
             return entity;
         });
@@ -345,10 +357,8 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         }
     }
 
-    private void validateProtwordsString(final String values, final String propertyName, final VaErrorHook hook) {
-        if (values.length() == 0) {
-            return;
-        }
+    private static void validateProtwordsString(final FessBaseAction action, final String values, final String propertyName,
+            final VaErrorHook hook) {
         // TODO validation
     }
 

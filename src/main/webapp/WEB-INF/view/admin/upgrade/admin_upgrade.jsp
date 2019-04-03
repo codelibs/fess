@@ -20,8 +20,16 @@
 				</h1>
 			</section>
 			<section class="content">
-				<la:form action="/admin/upgrade/">
-					<div class="row">
+				<div class="row">
+					<la:form action="/admin/upgrade/">
+						<%-- Message: BEGIN --%>
+						<div class="col-md-12">
+							<la:info id="msg" message="true">
+								<div class="alert alert-info">${msg}</div>
+							</la:info>
+							<la:errors />
+						</div>
+						<%-- Message: END --%>
 						<div class="col-md-12">
 							<div class="box box-primary">
 								<div class="box-header with-border">
@@ -31,20 +39,15 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message: BEGIN --%>
-									<div>
-										<la:info id="msg" message="true">
-											<div class="alert alert-info">${msg}</div>
-										</la:info>
-										<la:errors />
-									</div>
-									<%-- Message: END --%>
 									<div class="form-group">
 										<label for="targetVersion" class="col-sm-3 control-label"><la:message key="labels.target_version" /></label>
 										<div class="col-sm-9">
 											<la:errors property="targetVersion" />
-											<la:select property="targetVersion" styleClass="form-control">
-												<la:option value="">Not supported</la:option>
+											<la:select styleId="targetVersion" property="targetVersion" styleClass="form-control">
+												<la:option value="12.0">12.0</la:option>
+												<la:option value="12.1">12.1</la:option>
+												<la:option value="12.2">12.2</la:option>
+												<la:option value="12.3">12.3</la:option>
 											</la:select>
 										</div>
 									</div>
@@ -62,8 +65,8 @@
 							</div>
 							<!-- /.box -->
 						</div>
-					</div>
-				</la:form>
+					</la:form>
+				</div>
 			</section>
 		</div>
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>

@@ -63,7 +63,7 @@
 												<th><la:message key="labels.handler_name" /></th>
 												<td><c:forEach var="hn" varStatus="s"
 														items="${handlerNameItems}">
-														<c:if test="${handlerName==hn.value}">
+														<c:if test="${handlerName==f:u(hn.value)}">
 															${f:h(hn.label)}<br />
 														</c:if>
 													</c:forEach> <la:hidden property="handlerName" /></td>
@@ -86,6 +86,11 @@
 												<th><la:message key="labels.permissions" /></th>
 												<td>${f:br(f:h(permissions))}<la:hidden
 														property="permissions" /></td>
+											</tr>
+											<tr>
+												<th><la:message key="labels.virtual_hosts" /></th>
+												<td>${f:br(f:h(virtualHosts))}<la:hidden
+														property="virtualHosts" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.label_type" /></th>

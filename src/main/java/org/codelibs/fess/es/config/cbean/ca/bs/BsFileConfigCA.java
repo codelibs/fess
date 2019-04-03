@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -211,16 +211,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setAvailable_PercentileRanks() {
-        setAvailable_PercentileRanks(null);
+    public void setAvailable_PercentileRanks(double[] values) {
+        setAvailable_PercentileRanks(values, null);
     }
 
-    public void setAvailable_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setAvailable_PercentileRanks("available", opLambda);
+    public void setAvailable_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setAvailable_PercentileRanks("available", values, opLambda);
     }
 
-    public void setAvailable_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available");
+    public void setAvailable_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -436,16 +436,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setBoost_PercentileRanks() {
-        setBoost_PercentileRanks(null);
+    public void setBoost_PercentileRanks(double[] values) {
+        setBoost_PercentileRanks(values, null);
     }
 
-    public void setBoost_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setBoost_PercentileRanks("boost", opLambda);
+    public void setBoost_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setBoost_PercentileRanks("boost", values, opLambda);
     }
 
-    public void setBoost_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost");
+    public void setBoost_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -922,16 +922,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setCreatedTime_PercentileRanks() {
-        setCreatedTime_PercentileRanks(null);
+    public void setCreatedTime_PercentileRanks(double[] values) {
+        setCreatedTime_PercentileRanks(values, null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setCreatedTime_PercentileRanks("createdTime", opLambda);
+    public void setCreatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1147,16 +1147,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setDepth_PercentileRanks() {
-        setDepth_PercentileRanks(null);
+    public void setDepth_PercentileRanks(double[] values) {
+        setDepth_PercentileRanks(values, null);
     }
 
-    public void setDepth_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setDepth_PercentileRanks("depth", opLambda);
+    public void setDepth_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setDepth_PercentileRanks("depth", values, opLambda);
     }
 
-    public void setDepth_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "depth");
+    public void setDepth_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "depth", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1950,16 +1950,17 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setIntervalTime_PercentileRanks() {
-        setIntervalTime_PercentileRanks(null);
+    public void setIntervalTime_PercentileRanks(double[] values) {
+        setIntervalTime_PercentileRanks(values, null);
     }
 
-    public void setIntervalTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setIntervalTime_PercentileRanks("intervalTime", opLambda);
+    public void setIntervalTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setIntervalTime_PercentileRanks("intervalTime", values, opLambda);
     }
 
-    public void setIntervalTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "intervalTime");
+    public void setIntervalTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "intervalTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2060,231 +2061,6 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
     public void setIntervalTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsFileConfigCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "intervalTime");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FileConfigCA ca = new FileConfigCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTimeToLive_Avg() {
-        setTimeToLive_Avg(null);
-    }
-
-    public void setTimeToLive_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        setTimeToLive_Avg("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
-        AvgAggregationBuilder builder = regAvgA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Max() {
-        setTimeToLive_Max(null);
-    }
-
-    public void setTimeToLive_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        setTimeToLive_Max("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
-        MaxAggregationBuilder builder = regMaxA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Min() {
-        setTimeToLive_Min(null);
-    }
-
-    public void setTimeToLive_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        setTimeToLive_Min("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
-        MinAggregationBuilder builder = regMinA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Sum() {
-        setTimeToLive_Sum(null);
-    }
-
-    public void setTimeToLive_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        setTimeToLive_Sum("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
-        SumAggregationBuilder builder = regSumA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_ExtendedStats() {
-        setTimeToLive_ExtendedStats(null);
-    }
-
-    public void setTimeToLive_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        setTimeToLive_ExtendedStats("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
-        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Stats() {
-        setTimeToLive_Stats(null);
-    }
-
-    public void setTimeToLive_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        setTimeToLive_Stats("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
-        StatsAggregationBuilder builder = regStatsA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Percentiles() {
-        setTimeToLive_Percentiles(null);
-    }
-
-    public void setTimeToLive_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        setTimeToLive_Percentiles("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
-        PercentilesAggregationBuilder builder = regPercentilesA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_PercentileRanks() {
-        setTimeToLive_PercentileRanks(null);
-    }
-
-    public void setTimeToLive_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setTimeToLive_PercentileRanks("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Histogram() {
-        setTimeToLive_Histogram(null);
-    }
-
-    public void setTimeToLive_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
-        setTimeToLive_Histogram("timeToLive", opLambda, null);
-    }
-
-    public void setTimeToLive_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
-        setTimeToLive_Histogram("timeToLive", opLambda, aggsLambda);
-    }
-
-    public void setTimeToLive_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
-            OperatorCall<BsFileConfigCA> aggsLambda) {
-        HistogramAggregationBuilder builder = regHistogramA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FileConfigCA ca = new FileConfigCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTimeToLive_Range() {
-        setTimeToLive_Range(null);
-    }
-
-    public void setTimeToLive_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
-        setTimeToLive_Range("timeToLive", opLambda, null);
-    }
-
-    public void setTimeToLive_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
-        setTimeToLive_Range("timeToLive", opLambda, aggsLambda);
-    }
-
-    public void setTimeToLive_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
-            OperatorCall<BsFileConfigCA> aggsLambda) {
-        RangeAggregationBuilder builder = regRangeA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-        if (aggsLambda != null) {
-            FileConfigCA ca = new FileConfigCA();
-            aggsLambda.callback(ca);
-            ca.getAggregationBuilderList().forEach(builder::subAggregation);
-        }
-    }
-
-    public void setTimeToLive_Count() {
-        setTimeToLive_Count(null);
-    }
-
-    public void setTimeToLive_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        setTimeToLive_Count("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
-        ValueCountAggregationBuilder builder = regCountA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Cardinality() {
-        setTimeToLive_Cardinality(null);
-    }
-
-    public void setTimeToLive_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        setTimeToLive_Cardinality("timeToLive", opLambda);
-    }
-
-    public void setTimeToLive_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
-        CardinalityAggregationBuilder builder = regCardinalityA(name, "timeToLive");
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setTimeToLive_Missing() {
-        setTimeToLive_Missing(null);
-    }
-
-    public void setTimeToLive_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
-        setTimeToLive_Missing("timeToLive", opLambda, null);
-    }
-
-    public void setTimeToLive_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
-        setTimeToLive_Missing("timeToLive", opLambda, aggsLambda);
-    }
-
-    public void setTimeToLive_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
-            OperatorCall<BsFileConfigCA> aggsLambda) {
-        MissingAggregationBuilder builder = regMissingA(name, "timeToLive");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2400,16 +2176,17 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setMaxAccessCount_PercentileRanks() {
-        setMaxAccessCount_PercentileRanks(null);
+    public void setMaxAccessCount_PercentileRanks(double[] values) {
+        setMaxAccessCount_PercentileRanks(values, null);
     }
 
-    public void setMaxAccessCount_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setMaxAccessCount_PercentileRanks("maxAccessCount", opLambda);
+    public void setMaxAccessCount_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setMaxAccessCount_PercentileRanks("maxAccessCount", values, opLambda);
     }
 
-    public void setMaxAccessCount_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "maxAccessCount");
+    public void setMaxAccessCount_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "maxAccessCount", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2756,16 +2533,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setNumOfThread_PercentileRanks() {
-        setNumOfThread_PercentileRanks(null);
+    public void setNumOfThread_PercentileRanks(double[] values) {
+        setNumOfThread_PercentileRanks(values, null);
     }
 
-    public void setNumOfThread_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setNumOfThread_PercentileRanks("numOfThread", opLambda);
+    public void setNumOfThread_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setNumOfThread_PercentileRanks("numOfThread", values, opLambda);
     }
 
-    public void setNumOfThread_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "numOfThread");
+    public void setNumOfThread_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "numOfThread", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3242,16 +3019,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setSortOrder_PercentileRanks() {
-        setSortOrder_PercentileRanks(null);
+    public void setSortOrder_PercentileRanks(double[] values) {
+        setSortOrder_PercentileRanks(values, null);
     }
 
-    public void setSortOrder_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setSortOrder_PercentileRanks("sortOrder", opLambda);
+    public void setSortOrder_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder");
+    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3352,6 +3129,231 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
     public void setSortOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsFileConfigCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setTimeToLive_Avg() {
+        setTimeToLive_Avg(null);
+    }
+
+    public void setTimeToLive_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setTimeToLive_Avg("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Max() {
+        setTimeToLive_Max(null);
+    }
+
+    public void setTimeToLive_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setTimeToLive_Max("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Min() {
+        setTimeToLive_Min(null);
+    }
+
+    public void setTimeToLive_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setTimeToLive_Min("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Sum() {
+        setTimeToLive_Sum(null);
+    }
+
+    public void setTimeToLive_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setTimeToLive_Sum("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_ExtendedStats() {
+        setTimeToLive_ExtendedStats(null);
+    }
+
+    public void setTimeToLive_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setTimeToLive_ExtendedStats("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Stats() {
+        setTimeToLive_Stats(null);
+    }
+
+    public void setTimeToLive_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setTimeToLive_Stats("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Percentiles() {
+        setTimeToLive_Percentiles(null);
+    }
+
+    public void setTimeToLive_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setTimeToLive_Percentiles("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_PercentileRanks(double[] values) {
+        setTimeToLive_PercentileRanks(values, null);
+    }
+
+    public void setTimeToLive_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setTimeToLive_PercentileRanks("timeToLive", values, opLambda);
+    }
+
+    public void setTimeToLive_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "timeToLive", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Histogram() {
+        setTimeToLive_Histogram(null);
+    }
+
+    public void setTimeToLive_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setTimeToLive_Histogram("timeToLive", opLambda, null);
+    }
+
+    public void setTimeToLive_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+        setTimeToLive_Histogram("timeToLive", opLambda, aggsLambda);
+    }
+
+    public void setTimeToLive_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setTimeToLive_Range() {
+        setTimeToLive_Range(null);
+    }
+
+    public void setTimeToLive_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setTimeToLive_Range("timeToLive", opLambda, null);
+    }
+
+    public void setTimeToLive_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+        setTimeToLive_Range("timeToLive", opLambda, aggsLambda);
+    }
+
+    public void setTimeToLive_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setTimeToLive_Count() {
+        setTimeToLive_Count(null);
+    }
+
+    public void setTimeToLive_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setTimeToLive_Count("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Cardinality() {
+        setTimeToLive_Cardinality(null);
+    }
+
+    public void setTimeToLive_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setTimeToLive_Cardinality("timeToLive", opLambda);
+    }
+
+    public void setTimeToLive_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Missing() {
+        setTimeToLive_Missing(null);
+    }
+
+    public void setTimeToLive_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setTimeToLive_Missing("timeToLive", opLambda, null);
+    }
+
+    public void setTimeToLive_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+        setTimeToLive_Missing("timeToLive", opLambda, aggsLambda);
+    }
+
+    public void setTimeToLive_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "timeToLive");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3598,16 +3600,16 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void setUpdatedTime_PercentileRanks() {
-        setUpdatedTime_PercentileRanks(null);
+    public void setUpdatedTime_PercentileRanks(double[] values) {
+        setUpdatedTime_PercentileRanks(values, null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        setUpdatedTime_PercentileRanks("updatedTime", opLambda);
+    public void setUpdatedTime_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
-        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3708,6 +3710,137 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
     public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsFileConfigCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_Terms() {
+        setVirtualHosts_Terms(null);
+    }
+
+    public void setVirtualHosts_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setVirtualHosts_Terms("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+        setVirtualHosts_Terms("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_SignificantTerms() {
+        setVirtualHosts_SignificantTerms(null);
+    }
+
+    public void setVirtualHosts_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setVirtualHosts_SignificantTerms("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        setVirtualHosts_SignificantTerms("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_IpRange() {
+        setVirtualHosts_IpRange(null);
+    }
+
+    public void setVirtualHosts_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setVirtualHosts_IpRange("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+        setVirtualHosts_IpRange("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FileConfigCA ca = new FileConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setVirtualHosts_Count() {
+        setVirtualHosts_Count(null);
+    }
+
+    public void setVirtualHosts_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setVirtualHosts_Count("virtualHosts", opLambda);
+    }
+
+    public void setVirtualHosts_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Cardinality() {
+        setVirtualHosts_Cardinality(null);
+    }
+
+    public void setVirtualHosts_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setVirtualHosts_Cardinality("virtualHosts", opLambda);
+    }
+
+    public void setVirtualHosts_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "virtualHosts");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setVirtualHosts_Missing() {
+        setVirtualHosts_Missing(null);
+    }
+
+    public void setVirtualHosts_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setVirtualHosts_Missing("virtualHosts", opLambda, null);
+    }
+
+    public void setVirtualHosts_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+        setVirtualHosts_Missing("virtualHosts", opLambda, aggsLambda);
+    }
+
+    public void setVirtualHosts_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "virtualHosts");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

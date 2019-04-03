@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,9 @@ public class BsDataConfig extends EsAbstractEntity {
     /** updatedTime */
     protected Long updatedTime;
 
+    /** virtualHosts */
+    protected String[] virtualHosts;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -136,6 +139,9 @@ public class BsDataConfig extends EsAbstractEntity {
         if (updatedTime != null) {
             addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
+        if (virtualHosts != null) {
+            addFieldToSource(sourceMap, "virtualHosts", virtualHosts);
+        }
         return sourceMap;
     }
 
@@ -162,6 +168,7 @@ public class BsDataConfig extends EsAbstractEntity {
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
+        sb.append(dm).append(virtualHosts);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -300,5 +307,15 @@ public class BsDataConfig extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
+    }
+
+    public String[] getVirtualHosts() {
+        checkSpecifiedProperty("virtualHosts");
+        return virtualHosts;
+    }
+
+    public void setVirtualHosts(String[] value) {
+        registerModifiedProperty("virtualHosts");
+        this.virtualHosts = value;
     }
 }

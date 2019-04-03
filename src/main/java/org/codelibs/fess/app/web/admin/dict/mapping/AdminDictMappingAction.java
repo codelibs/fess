@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@ import org.codelibs.fess.app.service.CharMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -41,6 +43,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author nullpos
@@ -71,6 +74,7 @@ public class AdminDictMappingAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        charMappingPager.clear();
         return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -213,9 +217,7 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return charMappingService.getCharMappingFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                try (InputStream inputStream = file.getInputStream()) {
-                    out.write(inputStream);
-                }
+                file.writeOut(out);
             });
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL), () -> downloadpage(form.dictId));
@@ -335,14 +337,14 @@ public class AdminDictMappingAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<CharMappingItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<CharMappingItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final CharMappingItem entity = new CharMappingItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return charMappingService.getCharMappingItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(CharMappingService.class).getCharMappingItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -352,9 +354,19 @@ public class AdminDictMappingAction extends FessAdminAction {
     }
 
     protected OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createCharMappingItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<CharMappingItem> createCharMappingItem(final FessBaseAction action, final CreateForm form,
+            final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
-            validateMappingString(newInputs, "inputs", hook);
+            validateMappingString(action, newInputs, "inputs", hook);
             entity.setNewInputs(newInputs);
             final String newOutput = form.output;
             entity.setNewOutput(newOutput);
@@ -373,25 +385,26 @@ public class AdminDictMappingAction extends FessAdminAction {
         }
     }
 
-    private void validateMappingString(final String[] values, final String propertyName, final VaErrorHook hook) {
+    private static void validateMappingString(final FessBaseAction action, final String[] values, final String propertyName,
+            final VaErrorHook hook) {
         if (values.length == 0) {
             return;
         }
         for (final String value : values) {
             if (value.indexOf(',') >= 0) {
-                throwValidationError(messages -> {
+                action.throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
                 }, hook);
             }
             if (value.indexOf("=>") >= 0) {
-                throwValidationError(messages -> {
+                action.throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
                 }, hook);
             }
         }
     }
 
-    private String[] splitLine(final String value) {
+    private static String[] splitLine(final String value) {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }

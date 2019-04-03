@@ -39,7 +39,7 @@
 										<div class="col-sm-9">
 											<la:errors property="webApiJson" />
 											<div class="checkbox">
-												<label> <la:checkbox property="webApiJson" /> <la:message
+												<label> <la:checkbox styleId="webApiJson" property="webApiJson" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -51,7 +51,7 @@
 										<div class="col-sm-9">
 											<la:errors property="loginRequired" />
 											<div class="checkbox">
-												<label> <la:checkbox property="loginRequired" /> <la:message
+												<label> <la:checkbox styleId="loginRequired" property="loginRequired" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -63,7 +63,19 @@
 										<div class="col-sm-9">
 											<la:errors property="loginLink" />
 											<div class="checkbox">
-												<label> <la:checkbox property="loginLink" /> <la:message
+												<label> <la:checkbox styleId="loginLink" property="loginLink" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="resultCollapsed" class="col-sm-3 control-label"><la:message
+												key="labels.result_collapsed" /></label>
+										<div class="col-sm-9">
+											<la:errors property="resultCollapsed" />
+											<div class="checkbox">
+												<label> <la:checkbox styleId="resultCollapsed" property="resultCollapsed" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -75,7 +87,7 @@
 										<div class="col-sm-9">
 											<la:errors property="thumbnail" />
 											<div class="checkbox">
-												<label> <la:checkbox property="thumbnail" /> <la:message
+												<label> <la:checkbox styleId="thumbnail" property="thumbnail" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -86,7 +98,7 @@
 												key="labels.default_label_value" /></label>
 										<div class="col-sm-9">
 											<la:errors property="defaultLabelValue" />
-											<la:textarea property="defaultLabelValue"
+											<la:textarea styleId="defaultLabelValue" property="defaultLabelValue"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -95,7 +107,16 @@
 												key="labels.default_sort_value" /></label>
 										<div class="col-sm-9">
 											<la:errors property="defaultSortValue" />
-											<la:textarea property="defaultSortValue"
+											<la:textarea styleId="defaultSortValue" property="defaultSortValue"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="virtualHostValue" class="col-sm-3 control-label"><la:message
+												key="labels.virtual_host_value" /></label>
+										<div class="col-sm-9">
+											<la:errors property="virtualHostValue" />
+											<la:textarea styleId="virtualHostValue" property="virtualHostValue"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -105,7 +126,7 @@
 										<div class="col-sm-9">
 											<la:errors property="popularWord" />
 											<div class="checkbox">
-												<label> <la:checkbox property="popularWord" /> <la:message
+												<label> <la:checkbox styleId="popularWord" property="popularWord" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -116,7 +137,7 @@
 												key="labels.csv_file_encoding" /></label>
 										<div class="col-sm-9">
 											<la:errors property="csvFileEncoding" />
-											<la:text property="csvFileEncoding" styleClass="form-control" />
+											<la:text styleId="csvFileEncoding" property="csvFileEncoding" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -126,7 +147,7 @@
 										<div class="col-sm-9">
 											<la:errors property="appendQueryParameter" />
 											<div class="checkbox">
-												<label> <la:checkbox property="appendQueryParameter" />
+												<label> <la:checkbox styleId="appendQueryParameter" property="appendQueryParameter" />
 													<la:message key="labels.enabled" />
 												</label>
 											</div>
@@ -138,7 +159,7 @@
 										<div class="col-sm-9">
 											<la:errors property="notificationTo" />
 											<div class="input-group">
-												<la:text property="notificationTo" styleClass="form-control" />
+												<la:text styleId="notificationTo" property="notificationTo" styleClass="form-control" />
 												<span class="input-group-btn">
 													<button type="submit" class="btn btn-default" name="sendmail" value="test">
 														<la:message key="labels.send_testmail" />
@@ -155,7 +176,7 @@
 										<div class="col-sm-9">
 											<la:errors property="incrementalCrawling" />
 											<div class="checkbox">
-												<label> <la:checkbox property="incrementalCrawling" /> <la:message
+												<label> <la:checkbox styleId="incrementalCrawling" property="incrementalCrawling" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -167,7 +188,7 @@
 												key="labels.crawling_thread_count" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="crawlingThreadCount" />
-											<input type="number" name="crawlingThreadCount"
+											<input type="number" name="crawlingThreadCount" id="crawlingThreadCount"
 												value="${f:h(crawlingThreadCount)}" class="form-control"
 												min="1" max="1000">
 										</div>
@@ -177,7 +198,7 @@
 												key="labels.day_for_cleanup" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="dayForCleanup" />
-											<input type="number" name="dayForCleanup"
+											<input type="number" name="dayForCleanup" id="dayForCleanup"
 												value="${f:h(dayForCleanup)}" class="form-control"
 												min="-1" max="3650">
 											<la:message key="labels.day" />
@@ -188,7 +209,7 @@
 												key="labels.ignore_failure_type" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ignoreFailureType" />
-											<la:text property="ignoreFailureType"
+											<la:text styleId="ignoreFailureType" property="ignoreFailureType"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -198,7 +219,7 @@
 												key="labels.failure_count_threshold" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="failureCountThreshold" />
-											<input type="number" name="failureCountThreshold"
+											<input type="number" name="failureCountThreshold" id="failureCountThreshold"
 												value="${f:h(failureCountThreshold)}" class="form-control"
 												min="-1" max="1000">
 										</div>
@@ -211,7 +232,7 @@
 										<div class="col-sm-9">
 											<la:errors property="searchLog" />
 											<div class="checkbox">
-												<label> <la:checkbox property="searchLog" /> <la:message
+												<label> <la:checkbox styleId="searchLog" property="searchLog" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -223,7 +244,7 @@
 										<div class="col-sm-9">
 											<la:errors property="userInfo" />
 											<div class="checkbox">
-												<label> <la:checkbox property="userInfo" /> <la:message
+												<label> <la:checkbox styleId="userInfo" property="userInfo" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -235,7 +256,7 @@
 										<div class="col-sm-9">
 											<la:errors property="userFavorite" />
 											<div class="checkbox">
-												<label> <la:checkbox property="userFavorite" /> <la:message
+												<label> <la:checkbox styleId="userFavorite" property="userFavorite" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>
@@ -246,7 +267,7 @@
 												key="labels.purge_search_log_day" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="purgeSearchLogDay" />
-											<input type="number" name="purgeSearchLogDay"
+											<input type="number" name="purgeSearchLogDay" id="purgeSearchLogDay"
 												value="${f:h(purgeSearchLogDay)}" class="form-control"
 												min="-1" max="3650">
 											<la:message key="labels.day" />
@@ -257,7 +278,7 @@
 												key="labels.purge_job_log_day" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="purgeJobLogDay" />
-											<input type="number" name="purgeJobLogDay"
+											<input type="number" name="purgeJobLogDay" id="purgeJobLogDay"
 												value="${f:h(purgeJobLogDay)}" class="form-control"
 												min="-1" max="3650">
 											<la:message key="labels.day" />
@@ -268,7 +289,7 @@
 												key="labels.purge_user_info_day" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="purgeUserInfoDay" />
-											<input type="number" name="purgeUserInfoDay"
+											<input type="number" name="purgeUserInfoDay" id="purgeUserInfoDay"
 												value="${f:h(purgeUserInfoDay)}" class="form-control"
 												min="-1" max="3650">
 											<la:message key="labels.day" />
@@ -279,7 +300,24 @@
 												key="labels.purge_by_bots" /></label>
 										<div class="col-sm-9">
 											<la:errors property="purgeByBots" />
-											<la:text property="purgeByBots" styleClass="form-control" />
+											<la:text styleId="purgeByBots" property="purgeByBots" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="logLevel" class="col-sm-3 control-label"><la:message
+												key="labels.log_level" /></label>
+										<div class="form-inline col-sm-9">
+											<la:errors property="logLevel" />
+											<la:select styleId="logLevel" property="logLevel" styleClass="form-control">
+												<la:option value="OFF">OFF</la:option>
+												<la:option value="FATAL">FATAL</la:option>
+												<la:option value="ERROR">ERROR</la:option>
+												<la:option value="WARN">WARN</la:option>
+												<la:option value="INFO">INFO</la:option>
+												<la:option value="DEBUG">DEBUG</la:option>
+												<la:option value="TRACE">TRACE</la:option>
+												<la:option value="ALL">ALL</la:option>
+											</la:select>
 										</div>
 									</div>
 									<%-- Suggest --%>
@@ -290,7 +328,7 @@
 										<div class="col-sm-9">
 											<la:errors property="suggestSearchLog" />
 											<div class="checkbox">
-												<label> <la:checkbox property="suggestSearchLog" />
+												<label> <la:checkbox styleId="suggestSearchLog" property="suggestSearchLog" />
 													<la:message key="labels.enabled" />
 												</label>
 											</div>
@@ -302,7 +340,7 @@
 										<div class="col-sm-9">
 											<la:errors property="suggestDocuments" />
 											<div class="checkbox">
-												<label> <la:checkbox property="suggestDocuments" />
+												<label> <la:checkbox styleId="suggestDocuments" property="suggestDocuments" />
 													<la:message key="labels.enabled" />
 												</label>
 											</div>
@@ -314,7 +352,7 @@
 												key="labels.purge_suggest_search_log_day" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="purgeSuggestSearchLogDay" />
-											<input type="number" name="purgeSuggestSearchLogDay"
+											<input type="number" name="purgeSuggestSearchLogDay" id="purgeSuggestSearchLogDay"
 												value="${f:h(purgeSuggestSearchLogDay)}" class="form-control"
 												min="-1" max="3650">
 											<la:message key="labels.day" />
@@ -328,8 +366,8 @@
 												key="labels.ldap_provider_url" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapProviderUrl" />
-											<la:text property="ldapProviderUrl"
-												styleClass="form-control" />
+											<la:text styleId="ldapProviderUrl" property="ldapProviderUrl"
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -338,8 +376,8 @@
 												key="labels.ldap_base_dn" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapBaseDn" />
-											<la:text property="ldapBaseDn"
-												styleClass="form-control" />
+											<la:text styleId="ldapBaseDn" property="ldapBaseDn"
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -348,8 +386,8 @@
 												key="labels.ldap_admin_security_principal" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapAdminSecurityPrincipal" />
-											<la:text property="ldapAdminSecurityPrincipal"
-												styleClass="form-control" />
+											<la:text styleId="ldapAdminSecurityPrincipal" property="ldapAdminSecurityPrincipal"
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -358,8 +396,8 @@
 												key="labels.ldap_admin_security_credentials" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapAdminSecurityCredentials" />
-											<la:password property="ldapAdminSecurityCredentials"
-												styleClass="form-control" />
+											<la:password styleId="ldapAdminSecurityCredentials" property="ldapAdminSecurityCredentials"
+												styleClass="form-control" autocomplete="new-password" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -368,8 +406,8 @@
 												key="labels.ldap_security_principal" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapSecurityPrincipal" />
-											<la:text property="ldapSecurityPrincipal"
-												styleClass="form-control" />
+											<la:text styleId="ldapSecurityPrincipal" property="ldapSecurityPrincipal"
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -378,8 +416,18 @@
 												key="labels.ldap_account_filter" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapAccountFilter" />
-											<la:text property="ldapAccountFilter"
-												styleClass="form-control" />
+											<la:text styleId="ldapAccountFilter" property="ldapAccountFilter"
+												styleClass="form-control" autocomplete="off" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="ldapGroupFilter"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_group_filter" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapGroupFilter" />
+											<la:text styleId="ldapGroupFilter" property="ldapGroupFilter"
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -388,8 +436,8 @@
 												key="labels.ldap_memberof_attribute" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapMemberofAttribute" />
-											<la:text property="ldapMemberofAttribute"
-												styleClass="form-control" />
+											<la:text styleId="ldapMemberofAttribute" property="ldapMemberofAttribute"
+												styleClass="form-control" autocomplete="off" />
 										</div>
 									</div>
 									<%-- Nortification --%>
@@ -400,7 +448,7 @@
 												key="labels.notification_login" /></label>
 										<div class="col-sm-9">
 											<la:errors property="notificationLogin" />
-											<la:textarea property="notificationLogin"
+											<la:textarea styleId="notificationLogin" property="notificationLogin"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -410,7 +458,7 @@
 												key="labels.notification_search_top" /></label>
 										<div class="col-sm-9">
 											<la:errors property="notificationSearchTop" />
-											<la:textarea property="notificationSearchTop"
+											<la:textarea styleId="notificationSearchTop" property="notificationSearchTop"
 												styleClass="form-control" />
 										</div>
 									</div>
@@ -419,7 +467,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-warning" name="update"
 										value="<la:message key="labels.crawl_button_update" />">
-										<i class="fa fa-pencil"></i>
+										<i class="fa fa-pencil-alt"></i>
 										<la:message key="labels.crawl_button_update" />
 									</button>
 								</div>

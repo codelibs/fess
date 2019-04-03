@@ -2,8 +2,6 @@
 <project name="plugin" basedir=".">
 	<property name="plugins.dir" value="${basedir}/plugins" />
 	<property name="target.dir" value="${basedir}/target/plugins" />
-	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
-	<property name="kopf.branch" value="fess-5.0" />
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
@@ -13,71 +11,51 @@
 		<mkdir dir="${target.dir}" />
 		<delete dir="${plugins.dir}" />
 		<mkdir dir="${plugins.dir}" />
+		<!-- analysis-extension -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="analysis-extension" />
+			<param name="plugin.version" value="7.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.0.0-20190328.123004-6" />
+		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="5.2.1" />
-			<param name="plugin.zip.version" value="5.2.1" />
-		</antcall>
-		<!-- analysis-ja -->
-		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
-			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="analysis-ja" />
-			<param name="plugin.version" value="5.2.1" />
-			<param name="plugin.zip.version" value="5.2.1" />
-		</antcall>
-		<!-- analysis-synonym -->
-		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
-			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="analysis-synonym" />
-			<param name="plugin.version" value="5.2.1" />
-			<param name="plugin.zip.version" value="5.2.1" />
+			<param name="plugin.version" value="7.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.0.0-20190328.011541-2" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="5.2.0" />
-			<param name="plugin.zip.version" value="5.2.0" />
+			<param name="plugin.version" value="7.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.0.0-20190328.012107-2" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="5.2.1" />
-			<param name="plugin.zip.version" value="5.2.1" />
+			<param name="plugin.version" value="7.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.0.0-20190328.012248-2" />
 		</antcall>
-		<!-- langfield -->
+		<!-- minhash -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="5.2.1" />
-			<param name="plugin.zip.version" value="5.2.1" />
+			<param name="plugin.name" value="minhash" />
+			<param name="plugin.version" value="7.0.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.0.0-20190328.013145-2" />
 		</antcall>
-		<!-- kopf -->
-		<get dest="${target.dir}/kopf.zip">
-			<url url="https://github.com/codelibs/elasticsearch-kopf/archive/${kopf.branch}.zip" />
-		</get>
-		<delete dir="${site.dir}/kopf" />
-		<unzip dest="${site.dir}/kopf" src="${target.dir}/kopf.zip">
-			<patternset>
-				<include name="elasticsearch-kopf-${kopf.branch}/_site/**" />
-			</patternset>
-			<cutdirsmapper dirs="2" />
-		</unzip>
 
 		<antcall target="remove.jars" />
 	</target>
@@ -88,7 +66,7 @@
 		</get>
 		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip">
 			<patternset>
-				<include name="elasticsearch/**" />
+				<include name="**" />
 			</patternset>
 			<cutdirsmapper dirs="1" />
 		</unzip>
@@ -99,12 +77,15 @@
 			<fileset dir="${plugins.dir}">
 				<include name="configsync/commons-codec-*" />
 				<include name="dataformat/commons-codec-*" />
+				<include name="dataformat/commons-collections4-*" />
+				<include name="dataformat/commons-compress-*" />
+				<include name="dataformat/commons-math3-*" />
 				<include name="dataformat/curvesapi-*" />
 				<include name="dataformat/orangesignal-csv-*" />
 				<include name="dataformat/poi-*" />
 				<include name="dataformat/stax-api-*" />
 				<include name="dataformat/xmlbeans-*" />
-				<include name="langfield/jackson-*" />
+				<include name="minhash/guava-*" />
 			</fileset>
 		</delete>
 	</target>

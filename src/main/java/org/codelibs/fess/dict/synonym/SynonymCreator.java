@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,27 @@ package org.codelibs.fess.dict.synonym;
 
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SynonymCreator extends DictionaryCreator {
+    private static final Logger logger = LoggerFactory.getLogger(SynonymCreator.class);
 
     public SynonymCreator() {
         super("synonym.*\\.txt");
     }
 
-    public SynonymCreator(final String pattern) {
-        super(pattern);
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        dictionaryManager.addCreator(this);
     }
 
     @Override

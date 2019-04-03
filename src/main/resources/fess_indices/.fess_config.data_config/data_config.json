@@ -1,0 +1,46 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "handlerName": {
+        "type": "keyword"
+      },
+      "handlerParameter": {
+        "type": "keyword"
+      },
+      "handlerScript": {
+        "type": "keyword"
+      },
+      "boost": {
+        "type": "float"
+      },
+      "available": {
+        "type": "boolean"
+      },
+      "permissions": {
+        "type": "keyword"
+      },
+      "virtualHosts": {
+        "type": "keyword"
+      },
+      "sortOrder": {
+        "type": "integer"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      },
+      "description" : {
+        "type": "text"
+      }
+    }
+}

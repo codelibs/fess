@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,8 +101,6 @@ public class FileConfigDbm extends AbstractDBMeta {
                 (et, vl) -> ((FileConfig) et).setIncludedPaths(DfTypeUtil.toString(vl)), "includedPaths");
         setupEpg(_epgMap, et -> ((FileConfig) et).getIntervalTime(),
                 (et, vl) -> ((FileConfig) et).setIntervalTime(DfTypeUtil.toInteger(vl)), "intervalTime");
-        setupEpg(_epgMap, et -> ((FileConfig) et).getTimeToLive(), (et, vl) -> ((FileConfig) et).setTimeToLive(DfTypeUtil.toInteger(vl)),
-                "timeToLive");
         setupEpg(_epgMap, et -> ((FileConfig) et).getMaxAccessCount(),
                 (et, vl) -> ((FileConfig) et).setMaxAccessCount(DfTypeUtil.toLong(vl)), "maxAccessCount");
         setupEpg(_epgMap, et -> ((FileConfig) et).getName(), (et, vl) -> ((FileConfig) et).setName(DfTypeUtil.toString(vl)), "name");
@@ -113,10 +111,14 @@ public class FileConfigDbm extends AbstractDBMeta {
                 "permissions");
         setupEpg(_epgMap, et -> ((FileConfig) et).getSortOrder(), (et, vl) -> ((FileConfig) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
+        setupEpg(_epgMap, et -> ((FileConfig) et).getTimeToLive(), (et, vl) -> ((FileConfig) et).setTimeToLive(DfTypeUtil.toInteger(vl)),
+                "timeToLive");
         setupEpg(_epgMap, et -> ((FileConfig) et).getUpdatedBy(), (et, vl) -> ((FileConfig) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((FileConfig) et).getUpdatedTime(), (et, vl) -> ((FileConfig) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
+        setupEpg(_epgMap, et -> ((FileConfig) et).getVirtualHosts(), (et, vl) -> ((FileConfig) et).setVirtualHosts((String[]) vl),
+                "virtualHosts");
     }
 
     @Override
@@ -154,47 +156,49 @@ public class FileConfigDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnAvailable = cci("available", "available", null, null, Boolean.class, "available", null, false, false,
-            false, "Boolean", 0, 0, null, false, null, null, null, null, null, false);
+            false, "Boolean", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float",
-            0, 0, null, false, null, null, null, null, null, false);
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnConfigParameter = cci("configParameter", "configParameter", null, null, String.class,
-            "configParameter", null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "configParameter", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnDepth = cci("depth", "depth", null, null, Integer.class, "depth", null, false, false, false,
-            "Integer", 0, 0, null, false, null, null, null, null, null, false);
+            "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnDescription = cci("description", "description", null, null, String.class, "description", null, false,
-            false, false, "text", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "text", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedDocPaths = cci("excludedDocPaths", "excludedDocPaths", null, null, String.class,
-            "excludedDocPaths", null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "excludedDocPaths", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedPaths = cci("excludedPaths", "excludedPaths", null, null, String.class, "excludedPaths",
-            null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedDocPaths = cci("includedDocPaths", "includedDocPaths", null, null, String.class,
-            "includedDocPaths", null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "includedDocPaths", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths",
-            null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIntervalTime = cci("intervalTime", "intervalTime", null, null, Integer.class, "intervalTime", null,
-            false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTimeToLive = cci("timeToLive", "timeToLive", null, null, Integer.class, "timeToLive", null, false,
-            false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnMaxAccessCount = cci("maxAccessCount", "maxAccessCount", null, null, Long.class, "maxAccessCount",
-            null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
-            0, null, false, null, null, null, null, null, false);
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnNumOfThread = cci("numOfThread", "numOfThread", null, null, Integer.class, "numOfThread", null,
-            false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPaths = cci("paths", "paths", null, null, String.class, "paths", null, false, false, false,
-            "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
-            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
-            false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+            false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTimeToLive = cci("timeToLive", "timeToLive", null, null, Integer.class, "timeToLive", null, false,
+            false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnVirtualHosts = cci("virtualHosts", "virtualHosts", null, null, String[].class, "virtualHosts", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnAvailable() {
         return _columnAvailable;
@@ -244,10 +248,6 @@ public class FileConfigDbm extends AbstractDBMeta {
         return _columnIntervalTime;
     }
 
-    public ColumnInfo columnTimeToLive() {
-        return _columnTimeToLive;
-    }
-
     public ColumnInfo columnMaxAccessCount() {
         return _columnMaxAccessCount;
     }
@@ -272,12 +272,20 @@ public class FileConfigDbm extends AbstractDBMeta {
         return _columnSortOrder;
     }
 
+    public ColumnInfo columnTimeToLive() {
+        return _columnTimeToLive;
+    }
+
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
+    }
+
+    public ColumnInfo columnVirtualHosts() {
+        return _columnVirtualHosts;
     }
 
     protected List<ColumnInfo> ccil() {
@@ -294,15 +302,16 @@ public class FileConfigDbm extends AbstractDBMeta {
         ls.add(columnIncludedDocPaths());
         ls.add(columnIncludedPaths());
         ls.add(columnIntervalTime());
-        ls.add(columnTimeToLive());
         ls.add(columnMaxAccessCount());
         ls.add(columnName());
         ls.add(columnNumOfThread());
         ls.add(columnPaths());
         ls.add(columnPermissions());
         ls.add(columnSortOrder());
+        ls.add(columnTimeToLive());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
+        ls.add(columnVirtualHosts());
         return ls;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaErrorHook;
 import org.slf4j.Logger;
@@ -87,7 +87,7 @@ public class ProfileAction extends FessSearchAction {
             }, validationErrorLambda);
         }
 
-        fessLoginAssist.findLoginUser(new UserPasswordCredential(getUserBean().get().getUserId(), form.oldPassword)).orElseGet(() -> {
+        fessLoginAssist.findLoginUser(new LocalUserCredential(getUserBean().get().getUserId(), form.oldPassword)).orElseGet(() -> {
             throwValidationError(messages -> {
                 messages.addErrorsNoUserForChangingPassword(GLOBAL);
             }, validationErrorLambda);
@@ -96,7 +96,7 @@ public class ProfileAction extends FessSearchAction {
     }
 
     protected HtmlResponse asIndexHtml() {
-        return getUserBean().map(u -> asHtml(path_Profile_IndexJsp).useForm(ProfileForm.class))
-                .orElseGet(() -> redirect(LoginAction.class));
+        return getUserBean().map(u -> asHtml(virtualHost(path_Profile_IndexJsp)).useForm(ProfileForm.class)).orElseGet(
+                () -> redirect(LoginAction.class));
     }
 }

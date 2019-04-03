@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ public class CreateForm {
     public String name;
 
     @Required
-    @Size(max = 20)
-    @Pattern(regexp = "^[a-zA-Z0-9_-| ]+$")
+    @Size(max = 100)
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$")
     public String value;
 
     @CustomSize(maxKey = "form.admin.max.input.size")
@@ -54,16 +54,17 @@ public class CreateForm {
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
+    @Size(max = 1000)
+    public String virtualHost;
+
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
-    @Required
     @Size(max = 1000)
     public String createdBy;
 
-    @Required
     @ValidateTypeFailure
     public Long createdTime;
 

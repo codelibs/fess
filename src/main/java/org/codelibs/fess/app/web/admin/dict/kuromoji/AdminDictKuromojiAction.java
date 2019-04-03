@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import org.codelibs.fess.app.service.KuromojiService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -38,6 +40,8 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * @author shinsuke
@@ -68,6 +72,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
+        kuromojiPager.clear();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -209,9 +214,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                try (InputStream inputStream = file.getInputStream()) {
-                    out.write(inputStream);
-                }
+                file.writeOut(out);
             });
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> downloadpage(form.dictId));
@@ -267,7 +270,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        createKuromojiItem(form).ifPresent(
+        createKuromojiItem(form, () -> asEditHtml()).ifPresent(
                 entity -> {
                     try {
                         kuromojiService.store(form.dictId, entity);
@@ -287,7 +290,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        createKuromojiItem(form).ifPresent(
+        createKuromojiItem(form, () -> asEditHtml()).ifPresent(
                 entity -> {
                     try {
                         kuromojiService.store(form.dictId, entity);
@@ -331,14 +334,14 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<KuromojiItem> getEntity(final CreateForm form) {
+    private static OptionalEntity<KuromojiItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final KuromojiItem entity = new KuromojiItem(0, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return kuromojiService.getKuromojiItem(form.dictId, ((EditForm) form).id);
+                return ComponentUtil.getComponent(KuromojiService.class).getKuromojiItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -347,7 +350,16 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
+    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form, final VaErrorHook hook) {
+        try {
+            return createKuromojiItem(this, form, hook);
+        } catch (final ValidationErrorException e) {
+            saveToken();
+            throw e;
+        }
+    }
+
+    public static OptionalEntity<KuromojiItem> createKuromojiItem(final FessBaseAction action, final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             entity.setNewToken(form.token);
             entity.setNewSegmentation(form.segmentation);

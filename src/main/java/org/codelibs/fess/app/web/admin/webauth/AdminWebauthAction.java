@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
 import org.codelibs.fess.es.config.exentity.WebConfig;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -103,7 +104,7 @@ public class AdminWebauthAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
-        RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null).isEmpty());
         // restore from pager
         copyBeanToBean(webAuthPager, form, op -> op.include("id"));
     }
@@ -242,7 +243,7 @@ public class AdminWebauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<WebAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
+    public static OptionalEntity<WebAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new WebAuthentication()).map(entity -> {
@@ -252,7 +253,7 @@ public class AdminWebauthAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return webAuthenticationService.getWebAuthentication(((EditForm) form).id);
+                return ComponentUtil.getComponent(WebAuthenticationService.class).getWebAuthentication(((EditForm) form).id);
             }
             break;
         default:
@@ -261,7 +262,8 @@ public class AdminWebauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<WebAuthentication> getWebAuthentication(final CreateForm form) {
+    public static OptionalEntity<WebAuthentication> getWebAuthentication(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -284,7 +286,7 @@ public class AdminWebauthAction extends FessAdminAction {
 
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
+        final List<WebConfig> webConfigList = crawlingConfigHelper.getAllWebConfigList(false, false, false, null);
         for (final WebConfig webConfig : webConfigList) {
             itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
         }
@@ -316,7 +318,7 @@ public class AdminWebauthAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
             RenderDataUtil.register(data, "webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
-                RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null)
+                RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null)
                         .isEmpty());
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {

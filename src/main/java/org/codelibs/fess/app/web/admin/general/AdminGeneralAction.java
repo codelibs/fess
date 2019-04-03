@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class AdminGeneralAction extends FessAdminAction {
         saveToken();
         return asHtml(path_AdminGeneral_AdminGeneralJsp).useForm(EditForm.class, setup -> {
             setup.setup(form -> {
-                updateForm(form);
+                updateForm(fessConfig, form);
             });
         });
     }
@@ -119,30 +119,38 @@ public class AdminGeneralAction extends FessAdminAction {
             return asHtml(path_AdminGeneral_AdminGeneralJsp);
         });
 
-        fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
-        fessConfig.setLoginLinkEnabled(Constants.ON.equalsIgnoreCase(form.loginLink));
-        fessConfig.setThumbnailEnabled(Constants.ON.equalsIgnoreCase(form.thumbnail));
-        fessConfig.setIncrementalCrawling(Constants.ON.equalsIgnoreCase(form.incrementalCrawling));
+        updateConfig(fessConfig, form);
+        saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
+        return redirect(getClass());
+    }
+
+    public static void updateConfig(final FessConfig fessConfig, final EditForm form) {
+        fessConfig.setLoginRequired(isCheckboxEnabled(form.loginRequired));
+        fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
+        fessConfig.setLoginLinkEnabled(isCheckboxEnabled(form.loginLink));
+        fessConfig.setThumbnailEnabled(isCheckboxEnabled(form.thumbnail));
+        fessConfig.setIncrementalCrawling(isCheckboxEnabled(form.incrementalCrawling));
         fessConfig.setDayForCleanup(form.dayForCleanup);
         fessConfig.setCrawlingThreadCount(form.crawlingThreadCount);
-        fessConfig.setSearchLog(Constants.ON.equalsIgnoreCase(form.searchLog));
-        fessConfig.setUserInfo(Constants.ON.equalsIgnoreCase(form.userInfo));
-        fessConfig.setUserFavorite(Constants.ON.equalsIgnoreCase(form.userFavorite));
-        fessConfig.setWebApiJson(Constants.ON.equalsIgnoreCase(form.webApiJson));
+        fessConfig.setSearchLog(isCheckboxEnabled(form.searchLog));
+        fessConfig.setUserInfo(isCheckboxEnabled(form.userInfo));
+        fessConfig.setUserFavorite(isCheckboxEnabled(form.userFavorite));
+        fessConfig.setWebApiJson(isCheckboxEnabled(form.webApiJson));
         fessConfig.setDefaultLabelValue(form.defaultLabelValue);
         fessConfig.setDefaultSortValue(form.defaultSortValue);
-        fessConfig.setAppendQueryParameter(Constants.ON.equalsIgnoreCase(form.appendQueryParameter));
+        fessConfig.setVirtualHostValue(form.virtualHostValue);
+        fessConfig.setAppendQueryParameter(isCheckboxEnabled(form.appendQueryParameter));
         fessConfig.setIgnoreFailureType(form.ignoreFailureType);
         fessConfig.setFailureCountThreshold(form.failureCountThreshold);
-        fessConfig.setWebApiPopularWord(Constants.ON.equalsIgnoreCase(form.popularWord));
+        fessConfig.setWebApiPopularWord(isCheckboxEnabled(form.popularWord));
         fessConfig.setCsvFileEncoding(form.csvFileEncoding);
         fessConfig.setPurgeSearchLogDay(form.purgeSearchLogDay);
         fessConfig.setPurgeJobLogDay(form.purgeJobLogDay);
         fessConfig.setPurgeUserInfoDay(form.purgeUserInfoDay);
         fessConfig.setPurgeByBots(form.purgeByBots);
         fessConfig.setNotificationTo(form.notificationTo);
-        fessConfig.setSuggestSearchLog(Constants.ON.equalsIgnoreCase(form.suggestSearchLog));
-        fessConfig.setSuggestDocuments(Constants.ON.equalsIgnoreCase(form.suggestDocuments));
+        fessConfig.setSuggestSearchLog(isCheckboxEnabled(form.suggestSearchLog));
+        fessConfig.setSuggestDocuments(isCheckboxEnabled(form.suggestDocuments));
         fessConfig.setPurgeSuggestSearchLogDay(form.purgeSuggestSearchLogDay);
         fessConfig.setLdapProviderUrl(form.ldapProviderUrl);
         fessConfig.setLdapSecurityPrincipal(form.ldapSecurityPrincipal);
@@ -152,18 +160,23 @@ public class AdminGeneralAction extends FessAdminAction {
         }
         fessConfig.setLdapBaseDn(form.ldapBaseDn);
         fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
+        fessConfig.setLdapGroupFilter(form.ldapGroupFilter);
         fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute);
         fessConfig.setNotificationLogin(form.notificationLogin);
         fessConfig.setNotificationSearchTop(form.notificationSearchTop);
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
-        saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
-        return redirect(getClass());
+        ComponentUtil.getSystemHelper().refreshDesignJspFiles();
+
+        if (StringUtil.isNotBlank(form.logLevel)) {
+            ComponentUtil.getSystemHelper().setLogLevel(form.logLevel);
+        }
     }
 
-    protected void updateForm(final EditForm form) {
+    public static void updateForm(final FessConfig fessConfig, final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
+        form.resultCollapsed = fessConfig.isResultCollapsed() ? Constants.TRUE : Constants.FALSE;
         form.loginLink = fessConfig.isLoginLinkEnabled() ? Constants.TRUE : Constants.FALSE;
         form.thumbnail = fessConfig.isThumbnailEnabled() ? Constants.TRUE : Constants.FALSE;
         form.incrementalCrawling = fessConfig.isIncrementalCrawling() ? Constants.TRUE : Constants.FALSE;
@@ -175,6 +188,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.webApiJson = fessConfig.isWebApiJson() ? Constants.TRUE : Constants.FALSE;
         form.defaultLabelValue = fessConfig.getDefaultLabelValue();
         form.defaultSortValue = fessConfig.getDefaultSortValue();
+        form.virtualHostValue = fessConfig.getVirtualHostValue();
         form.appendQueryParameter = fessConfig.isAppendQueryParameter() ? Constants.TRUE : Constants.FALSE;
         form.ignoreFailureType = fessConfig.getIgnoreFailureType();
         form.failureCountThreshold = fessConfig.getFailureCountThreshold();
@@ -191,12 +205,15 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ldapProviderUrl = fessConfig.getLdapProviderUrl();
         form.ldapSecurityPrincipal = fessConfig.getLdapSecurityPrincipal();
         form.ldapAdminSecurityPrincipal = fessConfig.getLdapAdminSecurityPrincipal();
-        form.ldapAdminSecurityCredentials = DUMMY_PASSWORD;//fessConfig.getLdapAdminSecurityCredentials();
+        form.ldapAdminSecurityCredentials =
+                StringUtil.isNotBlank(fessConfig.getLdapAdminSecurityCredentials()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
         form.ldapBaseDn = fessConfig.getLdapBaseDn();
         form.ldapAccountFilter = fessConfig.getLdapAccountFilter();
+        form.ldapGroupFilter = fessConfig.getLdapGroupFilter();
         form.ldapMemberofAttribute = fessConfig.getLdapMemberofAttribute();
         form.notificationLogin = fessConfig.getNotificationLogin();
         form.notificationSearchTop = fessConfig.getNotificationSearchTop();
+        form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
     }
 
     private void updateProperty(final String key, final String value) {

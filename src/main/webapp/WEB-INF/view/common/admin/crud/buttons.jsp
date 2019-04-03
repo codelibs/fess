@@ -18,7 +18,7 @@
 	</button>
 	<button type="submit" class="btn btn-warning" name="update"
 		value="<la:message key="labels.crud_button_update" />">
-		<i class="fa fa-pencil"></i>
+		<i class="fa fa-pencil-alt"></i>
 		<la:message key="labels.crud_button_update" />
 	</button>
 </c:if>
@@ -29,7 +29,7 @@
 	</button>
 	<button type="submit" class="btn btn-warning" name="edit"
 		value="<la:message key="labels.crud_button_edit" />">
-		<i class="fa fa-pencil"></i>
+		<i class="fa fa-pencil-alt"></i>
 		<la:message key="labels.crud_button_edit" />
 	</button>
 	<button type="button" class="btn btn-danger" name="delete"

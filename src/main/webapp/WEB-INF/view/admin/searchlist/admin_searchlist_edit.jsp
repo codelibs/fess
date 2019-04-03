@@ -28,9 +28,9 @@
 					<la:hidden property="crudMode" />
 					<la:hidden property="q" />
 					<c:if test="${crudMode==2}">
-						<la:hidden property="docId" />
 						<la:hidden property="id" />
-						<la:hidden property="version" />
+						<la:hidden property="seqNo" />
+						<la:hidden property="primaryTerm" />
 					</c:if>
 					<div class="row">
 						<div class="col-md-12">
@@ -78,16 +78,19 @@
 										</la:info>
 										<la:errors property="_global" />
 									</div>
+									<c:if test="${crudMode==2}">
+									<div class="form-group">
+										<label for="doc_id" class="col-sm-3 control-label">_id</label>
+										<div class="col-sm-9">${f:h(id)}</div>
+									</div>
 									<div class="form-group">
 										<label for="doc_id" class="col-sm-3 control-label">doc_id</label>
 										<div class="col-sm-9">
-											<la:errors property="doc.doc_id" />
-											<la:text property="doc.doc_id" styleClass="form-control"
-												required="required" data-validation="custom"
-												data-validation-regexp="^([a-z0-9]+)$"
-												data-validation-help="[a-z] or [0-9]" />
+											${f:h(doc.doc_id)}
+											<la:hidden property="doc.doc_id"/>
 										</div>
 									</div>
+									</c:if>
 									<div class="form-group">
 										<label for="url" class="col-sm-3 control-label">url</label>
 										<div class="col-sm-9">
@@ -109,8 +112,6 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.role" />
 											<la:textarea property="doc.role" styleClass="form-control"
-												required="required" data-validation="custom"
-												data-validation-regexp="^[1|2|R](\w+)$"
 												data-validation-help="1(username) | 2(groupname) | R(rolename)  e.g. Rguest" />
 										</div>
 									</div>
@@ -130,13 +131,6 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.label" />
 											<la:textarea property="doc.label" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="version" class="col-sm-3 control-label">version</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.version" />
-											<la:text property="doc.version" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -224,34 +218,10 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="_id" class="col-sm-3 control-label">_id</label>
-										<div class="col-sm-9">
-											<la:errors property="doc._id" />
-											<la:text property="doc._id" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
 										<label for="parent_id" class="col-sm-3 control-label">parent_id</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.parent_id" />
 											<la:text property="doc.parent_id" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="content_title" class="col-sm-3 control-label">content_title</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.content_title" />
-											<la:text property="doc.content_title"
-												styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="content_description"
-											class="col-sm-3 control-label">content_description</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.content_description" />
-											<la:text property="doc.content_description"
-												styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -262,20 +232,6 @@
 												styleClass="form-control" title="Integer"
 												data-validation="custom" data-validation-regexp="^(\d+)?$"
 												data-validation-help="number (Integer)" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="url_link" class="col-sm-3 control-label">url_link</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.url_link" />
-											<la:text property="doc.url_link" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="site_path" class="col-sm-3 control-label">site_path</label>
-										<div class="col-sm-9">
-											<la:errors property="doc.site_path" />
-											<la:text property="doc.site_path" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -341,6 +297,13 @@
 												data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="virtual_host" class="col-sm-3 control-label">virtual_host</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.virtual_host" />
+											<la:textarea property="doc.virtual_host" styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
@@ -362,7 +325,7 @@
 										</la:link>
 										<button type="submit" class="btn btn-warning" name="update"
 											value="<la:message key="labels.crud_button_update" />">
-											<i class="fa fa-pencil"></i>
+											<i class="fa fa-pencil-alt"></i>
 											<la:message key="labels.crud_button_update" />
 										</button>
 									</c:if>
@@ -378,7 +341,7 @@
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-	<script src="${fe:url('/js/admin/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
-	<script src="${fe:url('/js/admin/load-validator.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/plugins/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
+	<script src="${fe:url('/js/admin/searchlist.js')}" type="text/javascript"></script>
 </body>
 </html>

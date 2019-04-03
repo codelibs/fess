@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="convention.xml" />
+	<include path="lastaflute_core.xml"/>
+	<include path="fess.xml" />
+
+	<include path="crawler_es.xml" />
+	<include path="fess_thumbnail.xml" />
+
+	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
+	</component>
+	<component name="webFsIndexHelper" class="org.codelibs.fess.helper.WebFsIndexHelper">
+	</component>
+	<component name="dataIndexHelper" class="org.codelibs.fess.helper.DataIndexHelper">
+	</component>
+	<component name="duplicateHostHelper" class="org.codelibs.fess.helper.DuplicateHostHelper">
+	</component>
+	<component name="intervalControlHelper" class="org.codelibs.fess.helper.IntervalControlHelper">
+		<!--
+		<postConstruct name="addIntervalRule">
+			<arg>"5:00"</arg>
+			<arg>"10:00"</arg>
+			<arg>"2,3,4,5,6"</arg>
+			<arg>3600000</arg>
+		</postConstruct>
+		 -->
+	</component>
+	<component name="indexUpdater" class="org.codelibs.fess.indexer.IndexUpdater"
+		instance="prototype">
+		<!--
+		<property name="maxDocumentCacheSize">5</property>
+		<property name="unprocessedDocumentSize">100</property>
+		<property name="threadDump">false</property>
+		<postConstruct name="addBoostDocumentRule">
+			<arg>
+				<component class="org.codelibs.fess.indexer.BoostDocumentRule">
+					<property name="matchExpression">"url.matches(\".*fess.*\")"</property>
+					<property name="boostExpression">"1000.0"</property>
+				</component>
+			</arg>
+		</postConstruct>
+		 -->
+	</component>
+	<component name="fileTypeHelper" class="org.codelibs.fess.helper.FileTypeHelper">
+		<postConstruct name="add">
+			<arg>"text/html"</arg>
+			<arg>"html"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/msword"</arg>
+			<arg>"word"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</arg>
+			<arg>"word"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.sheet.2"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.sheet.3"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.sheet.4"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.workspace.3"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-excel.workspace.4"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</arg>
+			<arg>"excel"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-powerpoint"</arg>
+			<arg>"powerpoint"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.openxmlformats-officedocument.presentationml.presentation"</arg>
+			<arg>"powerpoint"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.oasis.opendocument.text"</arg>
+			<arg>"odt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.oasis.opendocument.spreadsheet"</arg>
+			<arg>"ods"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.oasis.opendocument.presentation"</arg>
+			<arg>"odp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/pdf"</arg>
+			<arg>"pdf"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-fictionbook+xml"</arg>
+			<arg>"fb2"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/e-pub+zip"</arg>
+			<arg>"epub"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-ibooks+zip"</arg>
+			<arg>"ibooks"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"text/plain"</arg>
+			<arg>"txt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/rtf"</arg>
+			<arg>"rtf"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-htmlhelp"</arg>
+			<arg>"chm"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/zip"</arg>
+			<arg>"zip"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-7z-comressed"</arg>
+			<arg>"7z"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-bzip"</arg>
+			<arg>"bz"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-bzip2"</arg>
+			<arg>"bz2"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-tar"</arg>
+			<arg>"tar"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-rar-compressed"</arg>
+			<arg>"rar"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/3gp"</arg>
+			<arg>"3gp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/3g2"</arg>
+			<arg>"3g2"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/x-msvideo"</arg>
+			<arg>"avi"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/x-flv"</arg>
+			<arg>"flv"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/mpeg"</arg>
+			<arg>"mpeg"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/mp4"</arg>
+			<arg>"mp4"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/ogv"</arg>
+			<arg>"ogv"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/quicktime"</arg>
+			<arg>"qt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/x-m4v"</arg>
+			<arg>"m4v"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/x-aif"</arg>
+			<arg>"aif"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/midi"</arg>
+			<arg>"midi"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/mpga"</arg>
+			<arg>"mpga"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/mp4"</arg>
+			<arg>"mp4a"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/ogg"</arg>
+			<arg>"oga"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/x-wav"</arg>
+			<arg>"wav"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/webp"</arg>
+			<arg>"webp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/bmp"</arg>
+			<arg>"bmp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/x-icon"</arg>
+			<arg>"ico"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/x-icon"</arg>
+			<arg>"ico"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/png"</arg>
+			<arg>"png"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/svg+xml"</arg>
+			<arg>"svg"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/tiff"</arg>
+			<arg>"tiff"</arg>
+		</postConstruct>
+	</component>
+	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
+		instance="prototype">
+	</component>
+
+</components>

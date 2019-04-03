@@ -1,0 +1,65 @@
+{
+  ".fess_config.label_type" : {
+    "aliases" : { },
+    "mappings" : {
+      "label_type" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "excludedPaths" : {
+            "type" : "keyword"
+          },
+          "includedPaths" : {
+            "type" : "keyword"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "permissions" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "value" : {
+            "type" : "keyword"
+          },
+          "virtualHost" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "label_type" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021055215",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "Zylt7BsVRhiOasQfUWBg0w",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.label_type"
+      }
+    }
+  }
+}

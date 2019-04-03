@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsThumbnailQueueBhv extends EsAbstractBehavior<ThumbnailQu
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.thumbnail_queue";
     }
 
     @Override
@@ -75,10 +75,10 @@ public abstract class BsThumbnailQueueBhv extends EsAbstractBehavior<ThumbnailQu
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setTarget(DfTypeUtil.toString(source.get("target")));
             result.setGenerator(DfTypeUtil.toString(source.get("generator")));
             result.setPath(DfTypeUtil.toString(source.get("path")));
-            result.setUrl(DfTypeUtil.toString(source.get("url")));
+            result.setTarget(DfTypeUtil.toString(source.get("target")));
+            result.setThumbnailId(DfTypeUtil.toString(source.get("thumbnail_id")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

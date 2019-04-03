@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,39 @@
  */
 package org.codelibs.fess.taglib;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.pdfbox.util.DateConverter;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.common.joda.Joda;
 import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -61,16 +66,18 @@ public class FessFunctions {
 
     private static final String FACET_PREFIX = "facet.";
 
+    private static final String PDF_DATE = "pdf_date";
+
     private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
                 @Override
-                public Long load(String key) throws Exception {
+                public Long load(final String key) throws Exception {
                     try {
                         final Path path = Paths.get(LaServletContextUtil.getServletContext().getRealPath(key));
                         if (Files.isRegularFile(path)) {
                             return Files.getLastModifiedTime(path).toMillis();
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.debug("Failed to access " + key, e);
                     }
                     return 0L;
@@ -110,29 +117,40 @@ public class FessFunctions {
     }
 
     public static Date parseDate(final String value) {
-        return parseDate(value, Constants.ISO_DATETIME_FORMAT);
+        return parseDate(value, Constants.DATE_OPTIONAL_TIME);
     }
 
     public static Date parseDate(final String value, final String format) {
         if (value == null) {
             return null;
         }
+
         try {
-            final SimpleDateFormat sdf = new SimpleDateFormat(format);
-            sdf.setTimeZone(Constants.TIMEZONE_UTC);
-            return sdf.parse(value);
-        } catch (final ParseException e) {
+            if (PDF_DATE.equals(format)) {
+                final Calendar cal = DateConverter.toCalendar(value);
+                return cal != null ? cal.getTime() : null;
+            }
+
+            final long time = Joda.forPattern(format).parseMillis(value);
+            return new Date(time);
+        } catch (final Exception e) {
             return null;
         }
     }
 
     public static String formatDate(final Date date) {
+        if (date == null) {
+            return StringUtil.EMPTY;
+        }
         final SimpleDateFormat sdf = new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT);
         sdf.setTimeZone(Constants.TIMEZONE_UTC);
         return sdf.format(date);
     }
 
     public static String formatDate(final LocalDateTime date) {
+        if (date == null) {
+            return StringUtil.EMPTY;
+        }
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
     }
 
@@ -260,13 +278,13 @@ public class FessFunctions {
         return file.exists();
     }
 
-    public static String url(String input) {
+    public static String url(final String input) {
         if (input == null) {
-            String msg = "The argument 'input' should not be null.";
+            final String msg = "The argument 'input' should not be null.";
             throw new IllegalArgumentException(msg);
         }
         if (!input.startsWith("/")) {
-            String msg = "The argument 'input' should start with slash '/': " + input;
+            final String msg = "The argument 'input' should start with slash '/': " + input;
             throw new IllegalArgumentException(msg);
         }
         final String contextPath = LaRequestUtil.getRequest().getContextPath();
@@ -281,10 +299,39 @@ public class FessFunctions {
                 if (value.longValue() > 0) {
                     sb.append("?t=").append(value.toString());
                 }
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 logger.debug("Failed to access " + input, e);
             }
         }
         return LaResponseUtil.getResponse().encodeURL(sb.toString());
+    }
+
+    public static String sdh(final String input) {
+        if (StringUtil.isBlank(input)) {
+            return input;
+        }
+        return ComponentUtil.getDocumentHelper().encodeSimilarDocHash(input);
+    }
+
+    public static String join(final Object input) {
+        String[] values = null;
+        if (input instanceof String[]) {
+            values = (String[]) input;
+        } else if (input instanceof List) {
+            values = ((List<?>) input).stream().filter(Objects::nonNull).map(Object::toString).toArray(n -> new String[n]);
+        } else if (input instanceof String) {
+            return input.toString();
+        }
+        if (values != null) {
+            return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining(" ")));
+        }
+        return StringUtil.EMPTY;
+    }
+
+    public static String replace(final Object input, final String regex, final String replacement) {
+        if (input == null) {
+            return StringUtil.EMPTY;
+        }
+        return input.toString().replaceAll(regex, replacement);
     }
 }

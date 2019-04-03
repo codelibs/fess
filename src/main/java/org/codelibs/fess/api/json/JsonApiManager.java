@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,24 @@
  */
 package org.codelibs.fess.api.json;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseJsonApiManager;
@@ -35,6 +40,7 @@ import org.codelibs.fess.app.service.FavoriteLogService;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -43,17 +49,18 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
+import org.codelibs.fess.helper.RelatedContentHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.EsUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,10 +73,26 @@ public class JsonApiManager extends BaseJsonApiManager {
         setPathPrefix("/json");
     }
 
+    @PostConstruct
+    public void register() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + this.getClass().getSimpleName());
+        }
+        ComponentUtil.getWebApiManagerFactory().add(this);
+    }
+
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (!ComponentUtil.getFessConfig().isWebApiJson()) {
-            return false;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isWebApiJson()) {
+            switch (getFormatType(request)) {
+            case SEARCH:
+            case LABEL:
+            case POPULARWORD:
+                return false;
+            default:
+                break;
+            }
         }
 
         final String servletPath = request.getServletPath();
@@ -79,8 +102,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
-        final String formatType = request.getParameter("type");
-        switch (getFormatType(formatType)) {
+        switch (getFormatType(request)) {
         case SEARCH:
             processSearchRequest(request, response, chain);
             break;
@@ -99,10 +121,72 @@ public class JsonApiManager extends BaseJsonApiManager {
         case PING:
             processPingRequest(request, response, chain);
             break;
+        case SCROLL:
+            processScrollSearchRequest(request, response, chain);
+            break;
         default:
             writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
             break;
         }
+    }
+
+    protected void processScrollSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
+            writeJsonResponse(99, StringUtil.EMPTY, "Referer is invalid.");
+            return;
+        }
+
+        if (!fessConfig.isApiSearchScroll()) {
+            writeJsonResponse(99, StringUtil.EMPTY, "Scroll Search is not available.");
+            return;
+        }
+
+        final StringBuilder buf = new StringBuilder(1000);
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+        final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
+        try {
+            response.setContentType("application/x-ndjson; charset=UTF-8");
+            final long count = searchService.scrollSearch(params, doc -> {
+                buf.setLength(0);
+                buf.append('{');
+                boolean first2 = true;
+                for (final Map.Entry<String, Object> entry : doc.entrySet()) {
+                    final String name = entry.getKey();
+                    if (StringUtil.isNotBlank(name) && entry.getValue() != null) {
+                        if (!first2) {
+                            buf.append(',');
+                        } else {
+                            first2 = false;
+                        }
+                        buf.append(escapeJson(name));
+                        buf.append(':');
+                        buf.append(escapeJson(entry.getValue()));
+                    }
+                }
+                buf.append('}');
+                buf.append('\n');
+                try {
+                    response.getWriter().print(buf.toString());
+                } catch (final IOException e) {
+                    throw new IORuntimeException(e);
+                }
+                return true;
+            }, OptionalThing.empty());
+            response.flushBuffer();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Loaded " + count + " docs");
+            }
+        } catch (final Exception e) {
+            final int status = 9;
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to process a ping request.", e);
+            }
+            writeJsonResponse(status, null, e);
+        }
+
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
@@ -126,6 +210,8 @@ public class JsonApiManager extends BaseJsonApiManager {
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
+        final RelatedContentHelper relatedContentHelper = ComponentUtil.getRelatedContentHelper();
 
         int status = 0;
         Exception err = null;
@@ -136,7 +222,6 @@ public class JsonApiManager extends BaseJsonApiManager {
             final SearchRenderData data = new SearchRenderData();
             final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
             query = params.getQuery();
-            request.setAttribute(Constants.REQUEST_QUERIES, query);
             searchService.search(params, data, OptionalThing.empty());
             final String execTime = data.getExecTime();
             final String queryTime = Long.toString(data.getQueryTime());
@@ -146,8 +231,16 @@ public class JsonApiManager extends BaseJsonApiManager {
             final String allPageCount = Integer.toString(data.getAllPageCount());
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
-            final GeoInfo geoInfo = params.getGeoInfo();
             final String queryId = data.getQueryId();
+            final String highlightParams = data.getAppendHighlightParams();
+            final boolean nextPage = data.isExistNextPage();
+            final boolean prevPage = data.isExistPrevPage();
+            final long startRecordNumber = data.getCurrentStartRecordNumber();
+            final long endRecordNumber = data.getCurrentEndRecordNumber();
+            final List<String> pageNumbers = data.getPageNumberList();
+            final boolean partial = data.isPartialResults();
+            final String searchQuery = data.getSearchQuery();
+            final long requestedTime = data.getRequestedTime();
 
             buf.append("\"q\":");
             buf.append(escapeJson(query));
@@ -169,9 +262,33 @@ public class JsonApiManager extends BaseJsonApiManager {
             buf.append(',');
             buf.append("\"page_count\":");
             buf.append(allPageCount);
+            buf.append(",\"highlight_params\":");
+            buf.append(escapeJson(highlightParams));
+            buf.append(",\"next_page\":");
+            buf.append(escapeJson(nextPage));
+            buf.append(",\"prev_page\":");
+            buf.append(escapeJson(prevPage));
+            buf.append(",\"start_record_number\":");
+            buf.append(startRecordNumber);
+            buf.append(",\"end_record_number\":");
+            buf.append(escapeJson(endRecordNumber));
+            buf.append(",\"page_numbers\":");
+            buf.append(escapeJson(pageNumbers));
+            buf.append(",\"partial\":");
+            buf.append(escapeJson(partial));
+            buf.append(",\"search_query\":");
+            buf.append(escapeJson(searchQuery));
+            buf.append(",\"requested_time\":");
+            buf.append(requestedTime);
+            final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(params.getQuery());
+            buf.append(",\"related_query\":");
+            buf.append(escapeJson(relatedQueries));
+            final String[] relatedContents = relatedContentHelper.getRelatedContents(params.getQuery());
+            buf.append(",\"related_contents\":");
+            buf.append(escapeJson(relatedContents));
+            buf.append(',');
+            buf.append("\"result\":[");
             if (!documentItems.isEmpty()) {
-                buf.append(',');
-                buf.append("\"result\":[");
                 boolean first1 = true;
                 for (final Map<String, Object> document : documentItems) {
                     if (!first1) {
@@ -197,13 +314,13 @@ public class JsonApiManager extends BaseJsonApiManager {
                     }
                     buf.append('}');
                 }
-                buf.append(']');
             }
+            buf.append(']');
             if (facetResponse != null && facetResponse.hasFacetResponse()) {
                 // facet field
+                buf.append(',');
+                buf.append("\"facet_field\":[");
                 if (facetResponse.getFieldList() != null) {
-                    buf.append(',');
-                    buf.append("\"facet_field\":[");
                     boolean first1 = true;
                     for (final Field field : facetResponse.getFieldList()) {
                         if (!first1) {
@@ -230,12 +347,12 @@ public class JsonApiManager extends BaseJsonApiManager {
                         buf.append(']');
                         buf.append('}');
                     }
-                    buf.append(']');
                 }
+                buf.append(']');
                 // facet q
+                buf.append(',');
+                buf.append("\"facet_query\":[");
                 if (facetResponse.getQueryCountMap() != null) {
-                    buf.append(',');
-                    buf.append("\"facet_query\":[");
                     boolean first1 = true;
                     for (final Map.Entry<String, Long> entry : facetResponse.getQueryCountMap().entrySet()) {
                         if (!first1) {
@@ -249,13 +366,8 @@ public class JsonApiManager extends BaseJsonApiManager {
                         buf.append(entry.getValue());
                         buf.append('}');
                     }
-                    buf.append(']');
                 }
-                if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
-                    buf.append(',');
-                    buf.append("\"geo\":");
-                    buf.append(toGeoRequestString(geoInfo));
-                }
+                buf.append(']');
             }
         } catch (final Exception e) {
             status = 1;
@@ -270,36 +382,36 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected String toGeoRequestString(final GeoInfo geoInfo) {
-        try {
-            final XContentBuilder builder = XContentFactory.jsonBuilder();
-            return geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string();
+        try (OutputStream out = EsUtil.getXContentOutputStream(geoInfo.toQueryBuilder(), XContentType.JSON)) {
+            return ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
         } catch (final Exception e) {
             return "{\"error\":\"" + detailedMessage(e) + "\"}";
         }
     }
 
-    protected String detailedMessage(Throwable t) {
+    protected String detailedMessage(final Throwable t) {
         if (t == null) {
             return "Unknown";
         }
-        if (t.getCause() != null) {
+        Throwable target = t;
+        if (target.getCause() != null) {
             final StringBuilder sb = new StringBuilder();
-            while (t != null) {
-                sb.append(t.getClass().getSimpleName());
-                if (t.getMessage() != null) {
+            while (target != null) {
+                sb.append(target.getClass().getSimpleName());
+                if (target.getMessage() != null) {
                     sb.append("[");
-                    sb.append(t.getMessage());
+                    sb.append(target.getMessage());
                     sb.append("]");
                 }
                 sb.append("; ");
-                t = t.getCause();
-                if (t != null) {
+                target = target.getCause();
+                if (target != null) {
                     sb.append("nested: ");
                 }
             }
             return sb.toString();
         } else {
-            return t.getClass().getSimpleName() + "[" + t.getMessage() + "]";
+            return target.getClass().getSimpleName() + "[" + target.getMessage() + "]";
         }
     }
 
@@ -350,7 +462,15 @@ public class JsonApiManager extends BaseJsonApiManager {
         }
 
         final String seed = request.getParameter("seed");
+        final List<String> tagList = new ArrayList<>();
         final String[] tags = request.getParameterValues("labels");
+        if (tags != null) {
+            tagList.addAll(Arrays.asList(tags));
+        }
+        final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        if (StringUtil.isNotBlank(key)) {
+            tagList.add(key);
+        }
         final String[] fields = request.getParameterValues("fields");
         final String[] excludes = StringUtil.EMPTY_STRINGS;// TODO
 
@@ -360,7 +480,9 @@ public class JsonApiManager extends BaseJsonApiManager {
         Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
-            final List<String> popularWordList = popularWordHelper.getWordList(SearchRequestType.JSON, seed, tags, null, fields, excludes);
+            final List<String> popularWordList =
+                    popularWordHelper.getWordList(SearchRequestType.JSON, seed, tagList.toArray(new String[tagList.size()]), null, fields,
+                            excludes);
 
             buf.append("\"result\":[");
             boolean first1 = true;
@@ -525,16 +647,16 @@ public class JsonApiManager extends BaseJsonApiManager {
 
             final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
             buf.append("\"num\":").append(docIdList.size());
+            buf.append(", \"doc_ids\":[");
             if (!docIdList.isEmpty()) {
-                buf.append(", \"doc_ids\":[");
                 for (int i = 0; i < docIdList.size(); i++) {
                     if (i > 0) {
                         buf.append(',');
                     }
                     buf.append(escapeJson(docIdList.get(i)));
                 }
-                buf.append(']');
             }
+            buf.append(']');
             body = buf.toString();
         } catch (final Exception e) {
             if (e instanceof WebApiException) {
@@ -553,7 +675,7 @@ public class JsonApiManager extends BaseJsonApiManager {
 
     }
 
-    protected static class JsonRequestParams implements SearchRequestParams {
+    protected static class JsonRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -589,6 +711,19 @@ public class JsonApiManager extends BaseJsonApiManager {
                 }
             }
             return fields;
+        }
+
+        @Override
+        public Map<String, String[]> getConditions() {
+            final Map<String, String[]> conditions = new HashMap<>();
+            for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                final String key = entry.getKey();
+                if (key.startsWith("as.")) {
+                    final String[] value = simplifyArray(entry.getValue());
+                    conditions.put(key.substring("as.".length()), value);
+                }
+            }
+            return conditions;
         }
 
         @Override
@@ -667,5 +802,19 @@ public class JsonApiManager extends BaseJsonApiManager {
             return SearchRequestType.JSON;
         }
 
+        @Override
+        public String getSimilarDocHash() {
+            return request.getParameter("sdh");
+        }
+
+        @Override
+        public HighlightInfo getHighlightInfo() {
+            return ComponentUtil.getViewHelper().createHighlightInfo();
+        }
+    }
+
+    @Override
+    protected void writeHeaders(final HttpServletResponse response) {
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config";
+        return ".fess_config.path_mapping";
     }
 
     @Override
@@ -79,9 +79,9 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
             result.setRegex(DfTypeUtil.toString(source.get("regex")));
             result.setReplacement(DfTypeUtil.toString(source.get("replacement")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
-            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,47 @@
  */
 package org.codelibs.fess.sso;
 
-import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SsoManager {
+    private static final Logger logger = LoggerFactory.getLogger(SsoManager.class);
 
-    private SsoAuthenticator authenticator;
+    protected static final String SSO_TYPE = "sso.type";
 
-    @PostConstruct
-    public void init() {
-        final String ssoType = ComponentUtil.getFessConfig().getSsoType();
-        if (!"none".equals(ssoType)) {
-            authenticator = ComponentUtil.getComponent(ssoType + "Authenticator");
-        }
-    }
+    protected static final String NONE = "none";
+
+    protected final List<SsoAuthenticator> authenticatorList = new ArrayList<>();
 
     public boolean available() {
-        return authenticator != null;
+        return !NONE.equals(getSsoType());
     }
 
     public LoginCredential getLoginCredential() {
-        if (authenticator != null) {
+        if (available()) {
+            final SsoAuthenticator authenticator = ComponentUtil.getComponent(getSsoType() + "Authenticator");
             return authenticator.getLoginCredential();
         }
         return null;
+    }
+
+    protected String getSsoType() {
+        return ComponentUtil.getFessConfig().getSystemProperty(SSO_TYPE, NONE);
+    }
+
+    public SsoAuthenticator[] getAuthenticators() {
+        return authenticatorList.toArray(new SsoAuthenticator[authenticatorList.size()]);
+    }
+
+    public void register(final SsoAuthenticator authenticator) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Load " + authenticator.getClass().getSimpleName());
+        }
+        authenticatorList.add(authenticator);
     }
 }

@@ -7,7 +7,7 @@
 		<label for="contentNum"><la:message key="labels.index_num" /></label>
 		<la:select property="num" styleId="numSearchOption"
 			styleClass="form-control">
-			<option value="">
+			<option value="10">
 				<la:message key="labels.search_result_select_num" />
 			</option>
 			<la:option value="10">10</la:option>

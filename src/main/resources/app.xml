@@ -13,10 +13,13 @@
 	<include path="fess_job.xml"/>
 	<include path="fess_thumbnail.xml"/>
 	<include path="fess_sso.xml"/>
+	<include path="fess_score.xml"/>
 
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
 
+	<component name="accessTokenHelper" class="org.codelibs.fess.helper.AccessTokenHelper">
+	</component>
 	<component name="activityHelper" class="org.codelibs.fess.helper.ActivityHelper">
 	</component>
 	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">
@@ -25,81 +28,94 @@
 	</component>
 	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">
 	</component>
+	<component name="relatedContentHelper" class="org.codelibs.fess.helper.RelatedContentHelper">
+	</component>
+	<component name="relatedQueryHelper" class="org.codelibs.fess.helper.RelatedQueryHelper">
+	</component>
+	<component name="queryStringBuilder" class="org.codelibs.fess.util.QueryStringBuilder" instance="prototype">
+	</component>
 	<component name="queryParser" class="org.apache.lucene.queryparser.ext.ExtendableQueryParser" instance="prototype">
 		<arg>org.codelibs.fess.Constants.DEFAULT_FIELD</arg>
 		<arg>
 			<component class="org.apache.lucene.analysis.core.WhitespaceAnalyzer"></component>
 		</arg>
-		<property name="lowercaseExpandedTerms">false</property>
 		<property name="allowLeadingWildcard">true</property>
 		<property name="defaultOperator">org.apache.lucene.queryparser.classic.QueryParser$Operator.AND</property>
 	</component>
-	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
-		<property name="defaultFacetInfo">
-			<component class="org.codelibs.fess.entity.FacetInfo">
-				<property name="minDocCount">1</property>
-				<property name="field">["label"]</property>
-				<property name="query">[
-					"timestamp:[now/d-1d TO *]",
-					"timestamp:[now/d-7d TO *]",
-					"timestamp:[now/d-1M TO *]",
-					"timestamp:[now/d-1y TO *]",
-					"content_length:[0 TO 9999]",
-					"content_length:[10000 TO 99999]",
-					"content_length:[100000 TO 499999]",
-					"content_length:[500000 TO 999999]",
-					"content_length:[1000000 TO *]",
-					"filetype:html",
-					"filetype:word",
-					"filetype:excel",
-					"filetype:powerpoint",
-					"filetype:odt",
-					"filetype:ods",
-					"filetype:odp",
-					"filetype:pdf",
-					"filetype:fb2",
-					"filetype:epub",
-					"filetype:ibooks",
-					"filetype:txt",
-					"filetype:rtf",
-					"filetype:chm",
-					"filetype:zip",
-					"filetype:7z",
-					"filetype:bz",
-					"filetype:bz2",
-					"filetype:tar",
-					"filetype:rar",
-					"filetype:3gp",
-					"filetype:3g2",
-					"filetype:avi",
-					"filetype:flv",
-					"filetype:mpeg",
-					"filetype:mp4",
-					"filetype:ogv",
-					"filetype:qt",
-					"filetype:m4v",
-					"filetype:aif",
-					"filetype:mid",
-					"filetype:mpga",
-					"filetype:mp4a",
-					"filetype:oga",
-					"filetype:ogg",
-					"filetype:wav",
-					"filetype:webp",
-					"filetype:bmp",
-					"filetype:ico",
-					"filetype:png",
-					"filetype:svg",
-					"filetype:tiff",
-					"filetype:others"
-				]</property>
-			</component>
+	<component name="facetInfo" class="org.codelibs.fess.entity.FacetInfo">
+		<property name="sort">"count.desc"</property>
+		<property name="size">100</property>
+		<property name="minDocCount">1</property>
+		<property name="field">["label"]</property>
+		<property name="query">[
+			"timestamp:[now/d-1d TO *]",
+			"timestamp:[now/d-7d TO *]",
+			"timestamp:[now/d-1M TO *]",
+			"timestamp:[now/d-1y TO *]",
+			"content_length:[0 TO 9999]",
+			"content_length:[10000 TO 99999]",
+			"content_length:[100000 TO 499999]",
+			"content_length:[500000 TO 999999]",
+			"content_length:[1000000 TO *]",
+			"filetype:html",
+			"filetype:word",
+			"filetype:excel",
+			"filetype:powerpoint",
+			"filetype:odt",
+			"filetype:ods",
+			"filetype:odp",
+			"filetype:pdf",
+			"filetype:fb2",
+			"filetype:epub",
+			"filetype:ibooks",
+			"filetype:txt",
+			"filetype:rtf",
+			"filetype:chm",
+			"filetype:zip",
+			"filetype:7z",
+			"filetype:bz",
+			"filetype:bz2",
+			"filetype:tar",
+			"filetype:rar",
+			"filetype:3gp",
+			"filetype:3g2",
+			"filetype:avi",
+			"filetype:flv",
+			"filetype:mpeg",
+			"filetype:mp4",
+			"filetype:ogv",
+			"filetype:qt",
+			"filetype:m4v",
+			"filetype:aif",
+			"filetype:mid",
+			"filetype:mpga",
+			"filetype:mp4a",
+			"filetype:oga",
+			"filetype:ogg",
+			"filetype:wav",
+			"filetype:webp",
+			"filetype:bmp",
+			"filetype:ico",
+			"filetype:png",
+			"filetype:svg",
+			"filetype:tiff",
+			"filetype:others"
+			]
 		</property>
+	</component>
+	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
+		<property name="defaultFacetInfo">facetInfo</property>
+		<property name="lowercaseWildcard">false</property>
 		<postConstruct name="addHighlightField">
 			<arg>"title"</arg>
 		</postConstruct>
 		<postConstruct name="addHighlightField">
 			<arg>"content"</arg>
+		</postConstruct>
+		<postConstruct name="addQueryRescorer">
+			<arg>
+				<component class="org.codelibs.fess.score.LtrQueryRescorer" />
+			</arg>
 		</postConstruct>
 	</component>
 	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
@@ -321,9 +337,11 @@
 						<arg>"labels.facet_filetype_others"</arg>
 						<arg>"filetype:others"</arg>
 					</postConstruct>
-
 				</component>
 			</arg>
+		</postConstruct>
+		<postConstruct name="addInlineMimeType">
+			<arg>"application/pdf"</arg>
 		</postConstruct>
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
@@ -332,14 +350,47 @@
 	</component>
 	<component name="userInfoHelper" class="org.codelibs.fess.helper.UserInfoHelper">
 	</component>
+	<component name="authenticationManager" class="org.codelibs.fess.auth.AuthenticationManager">
+		<!--
+		<postConstruct name="addChain">
+			<arg>
+				<component class="org.codelibs.fess.auth.chain.CommandChain">
+					<property name="updateCommand">[
+					"/usr/sbin/htpasswd",
+					"-b",
+					"/tmp/test.txt",
+					"$USERNAME",
+					"$PASSWORD"
+					]</property>
+					<property name="deleteCommand">[
+					"/usr/sbin/htpasswd",
+					"-D",
+					"/tmp/test.txt",
+					"$USERNAME"
+					]</property>
+					<property name="targetUsers">[
+					"admin"
+					]</property>
+				</component>
+			</arg>
+		</postConstruct>
+		 -->
+		<postConstruct name="addChain">
+			<arg>
+				<component class="org.codelibs.fess.auth.chain.LdapChain">
+				</component>
+			</arg>
+		</postConstruct>
+	</component>
 	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
 		<property name="encoding">"UTF-8"</property>
 	</component>
+	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
+	</component>
 	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
 	</component>
-	<component name="userAgentName" class="java.lang.String">
-		<arg>"Mozilla/5.0 (compatible; Fess/" + org.codelibs.fess.Constants.FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
+	<component name="gsaConfigParser" class="org.codelibs.fess.util.GsaConfigParser" instance="prototype">
 	</component>
 
 </components>

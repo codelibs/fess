@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,18 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public abstract class BaseJsonApiManager extends BaseApiManager {
+
+    protected String mimeType = "application/json";
 
     protected void writeJsonResponse(final int status, final String body, final Throwable t) {
         if (t == null) {
@@ -78,7 +81,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
 
     protected void writeJsonResponse(final int status, final String body) {
         final String callback = LaRequestUtil.getRequest().getParameter("callback");
-        final boolean isJsonp = StringUtil.isNotBlank(callback);
+        final boolean isJsonp = ComponentUtil.getFessConfig().isApiJsonpEnabled() && StringUtil.isNotBlank(callback);
 
         final StringBuilder buf = new StringBuilder(1000);
         if (isJsonp) {
@@ -87,7 +90,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         }
         buf.append("{\"response\":");
         buf.append("{\"version\":");
-        buf.append(Constants.WEB_API_VERSION);
+        buf.append(ComponentUtil.getSystemHelper().getProductVersion());
         buf.append(',');
         buf.append("\"status\":");
         buf.append(status);
@@ -100,7 +103,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         if (isJsonp) {
             buf.append(')');
         }
-        write(buf.toString(), "text/javascript+json", Constants.UTF_8);
+        write(buf.toString(), mimeType, Constants.UTF_8);
 
     }
 
@@ -114,7 +117,19 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         }
 
         final StringBuilder buf = new StringBuilder(255);
-        if (obj instanceof List<?>) {
+        if (obj instanceof String[]) {
+            buf.append('[');
+            boolean first = true;
+            for (final Object child : (String[]) obj) {
+                if (first) {
+                    first = false;
+                } else {
+                    buf.append(',');
+                }
+                buf.append(escapeJson(child));
+            }
+            buf.append(']');
+        } else if (obj instanceof List<?>) {
             buf.append('[');
             boolean first = true;
             for (final Object child : (List<?>) obj) {
@@ -138,8 +153,16 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
                 buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
             }
             buf.append('}');
-        } else if (obj instanceof Number) {
-            buf.append(obj);
+        } else if (obj instanceof Integer) {
+            buf.append(((Integer) obj).intValue());
+        } else if (obj instanceof Long) {
+            buf.append(((Long) obj).longValue());
+        } else if (obj instanceof Float) {
+            buf.append(((Float) obj).floatValue());
+        } else if (obj instanceof Double) {
+            buf.append(((Double) obj).doubleValue());
+        } else if (obj instanceof Boolean) {
+            buf.append(obj.toString());
         } else if (obj instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND, Locale.ROOT);
             buf.append('\"').append(StringEscapeUtils.escapeJson(sdf.format(obj))).append('\"');
@@ -147,6 +170,10 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
             buf.append('\"').append(StringEscapeUtils.escapeJson(obj.toString())).append('\"');
         }
         return buf.toString();
+    }
+
+    public void setMimeType(final String mimeType) {
+        this.mimeType = mimeType;
     }
 
 }

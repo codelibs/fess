@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -42,17 +41,19 @@ import org.slf4j.LoggerFactory;
 public class LabelTypeHelper {
     private static final Logger logger = LoggerFactory.getLogger(LabelTypeHelper.class);
 
-    @Resource
-    protected RoleQueryHelper roleQueryHelper;
-
     protected volatile List<LabelTypeItem> labelTypeItemList = new ArrayList<>();
 
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
     @PostConstruct
     public void init() {
+        update();
+    }
+
+    public int update() {
         final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
+        return labelTypeList.size();
     }
 
     public void refresh(final List<LabelType> labelTypeList) {
@@ -66,6 +67,7 @@ public class LabelTypeHelper {
             item.setLabel(labelType.getName());
             item.setValue(labelType.getValue());
             item.setPermissions(labelType.getPermissions());
+            item.setVirtualHost(labelType.getVirtualHost());
             itemList.add(item);
         }
         labelTypeItemList = itemList;
@@ -76,10 +78,19 @@ public class LabelTypeHelper {
             init();
         }
 
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        final List<LabelTypeItem> labelList;
+        if (StringUtil.isBlank(virtualHostKey)) {
+            labelList = labelTypeItemList;
+        } else {
+            labelList =
+                    labelTypeItemList.stream().filter(item -> virtualHostKey.equals(item.getVirtualHost())).collect(Collectors.toList());
+        }
+
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
+        final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
         if (roleSet.isEmpty()) {
-            for (final LabelTypeItem item : labelTypeItemList) {
+            for (final LabelTypeItem item : labelList) {
                 if (item.getPermissions().length == 0) {
                     final Map<String, String> map = new HashMap<>(2);
                     map.put(Constants.ITEM_LABEL, item.getLabel());
@@ -88,7 +99,7 @@ public class LabelTypeHelper {
                 }
             }
         } else {
-            for (final LabelTypeItem item : labelTypeItemList) {
+            for (final LabelTypeItem item : labelList) {
                 final Set<String> permissions = stream(item.getPermissions()).get(stream -> stream.collect(Collectors.toSet()));
                 for (final String roleValue : roleSet) {
                     if (permissions.contains(roleValue)) {
@@ -148,6 +159,8 @@ public class LabelTypeHelper {
 
         private String[] permissions;
 
+        private String virtualHost;
+
         public String getLabel() {
             return label;
         }
@@ -171,6 +184,14 @@ public class LabelTypeHelper {
         public void setPermissions(final String[] permissions) {
             this.permissions = permissions;
         }
+
+        public String getVirtualHost() {
+            return virtualHost;
+        }
+
+        public void setVirtualHost(final String virtualHost) {
+            this.virtualHost = virtualHost;
+        }
     }
 
     public static class LabelTypePattern {
@@ -184,6 +205,7 @@ public class LabelTypeHelper {
         public LabelTypePattern(final String value, final String includedPaths, final String excludedPaths) {
             this.value = value;
 
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             if (StringUtil.isNotBlank(includedPaths)) {
                 final StringBuilder buf = new StringBuilder(100);
                 char split = 0;
@@ -193,7 +215,10 @@ public class LabelTypeHelper {
                     } else {
                         buf.append(split);
                     }
-                    buf.append(path.trim());
+                    final String normalizePath = systemHelper.normalizeConfigPath(path);
+                    if (StringUtil.isNotBlank(normalizePath)) {
+                        buf.append(normalizePath);
+                    }
                 }
                 this.includedPaths = Pattern.compile(buf.toString());
             }
@@ -207,7 +232,10 @@ public class LabelTypeHelper {
                     } else {
                         buf.append(split);
                     }
-                    buf.append(path.trim());
+                    final String normalizePath = systemHelper.normalizeConfigPath(path);
+                    if (StringUtil.isNotBlank(normalizePath)) {
+                        buf.append(normalizePath);
+                    }
                 }
                 this.excludedPaths = Pattern.compile(buf.toString());
             }
@@ -221,13 +249,25 @@ public class LabelTypeHelper {
             if (includedPaths != null) {
                 if (includedPaths.matcher(path).matches()) {
                     if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                        }
                         return false;
                     }
                     return true;
                 }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Path " + path + " wasn't matched against the include paths expression " + includedPaths.toString());
+                }
                 return false;
             } else {
-                return !excludedPaths.matcher(path).matches();
+                if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                    }
+                    return false;
+                }
+                return true;
             }
         }
 

@@ -1,0 +1,59 @@
+{
+  ".fess_config.web_authentication" : {
+    "aliases" : { },
+    "mappings" : {
+      "web_authentication" : {
+        "properties" : {
+          "authRealm" : {
+            "type" : "keyword"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "hostname" : {
+            "type" : "keyword"
+          },
+          "parameters" : {
+            "type" : "keyword"
+          },
+          "password" : {
+            "type" : "keyword"
+          },
+          "port" : {
+            "type" : "integer"
+          },
+          "protocolScheme" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "username" : {
+            "type" : "keyword"
+          },
+          "webConfigId" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021057587",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "8lg38XiCSh-kJgbOgYzMFA",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.web_authentication"
+      }
+    }
+  }
+}

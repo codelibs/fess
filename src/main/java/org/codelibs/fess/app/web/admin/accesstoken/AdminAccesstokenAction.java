@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 CodeLibs Project and the Others.
+ * Copyright 2012-2019 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.AccessTokenPager;
@@ -30,6 +31,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.AccessToken;
 import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -44,11 +46,11 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminAccesstokenAction extends FessAdminAction {
 
-    private static final String TOKEN = "token";
+    public static final String TOKEN = "token";
 
-    private static final String EXPIRES = "expires";
+    public static final String EXPIRES = "expires";
 
-    private static final String EXPIRED_TIME = "expiredTime";
+    public static final String EXPIRED_TIME = "expiredTime";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -201,7 +203,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
         verifyToken(() -> asEditHtml());
         getAccessToken(form).ifPresent(
                 entity -> {
-                    entity.setToken(systemHelper.generateAccessToken());
+                    entity.setToken(accessTokenHelper.generateAccessToken());
                     try {
                         accessTokenService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -263,7 +265,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<AccessToken> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private static OptionalEntity<AccessToken> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new AccessToken()).map(entity -> {
@@ -273,7 +275,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return accessTokenService.getAccessToken(((EditForm) form).id);
+                return ComponentUtil.getComponent(AccessTokenService.class).getAccessToken(((EditForm) form).id);
             }
             break;
         default:
@@ -282,14 +284,15 @@ public class AdminAccesstokenAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<AccessToken> getAccessToken(final CreateForm form) {
+    public static OptionalEntity<AccessToken> getAccessToken(final CreateForm form) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(form, entity,
+                    BeanUtil.copyBeanToBean(form, entity,
                             op -> op.exclude(Constants.COMMON_CONVERSION_RULE).exclude(TOKEN, Constants.PERMISSIONS, EXPIRED_TIME)
                                     .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();

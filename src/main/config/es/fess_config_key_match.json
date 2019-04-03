@@ -1,0 +1,50 @@
+{
+  ".fess_config.key_match" : {
+    "aliases" : { },
+    "mappings" : {
+      "key_match" : {
+        "properties" : {
+          "boost" : {
+            "type" : "float"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "maxSize" : {
+            "type" : "integer"
+          },
+          "query" : {
+            "type" : "keyword"
+          },
+          "term" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "virtualHost" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021054613",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "tqxL0WgAR665iLtdrY81AA",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.key_match"
+      }
+    }
+  }
+}
