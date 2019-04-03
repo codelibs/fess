@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>13.0.0-SNAPSHOT</version>
+	<version>12.3.6-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -35,8 +35,8 @@
 	</parent>
 	<properties>
 		<!-- Main Framework -->
-		<dbflute.version>1.1.9</dbflute.version>
-		<lastaflute.version>1.1.1</lastaflute.version>
+		<dbflute.version>1.1.8</dbflute.version>
+		<lastaflute.version>1.0.9</lastaflute.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.3</lasta.job.version>
 		<mailflute.version>0.6.0</mailflute.version>
@@ -54,22 +54,21 @@
 		<junit.jupiter.version>5.0.2</junit.jupiter.version>
 		<junit.vintage.version>${junit.version}.0</junit.vintage.version>
 		<junit.platform.version>1.0.0</junit.platform.version>
-		<utflute.version>0.9.0</utflute.version>
+		<utflute.version>0.8.8</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.0.0-SNAPSHOT</crawler.version>
+		<crawler.version>2.3.5</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.0.0-SNAPSHOT</suggest.version>
+		<suggest.version>6.4.2</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.0.0-rc1</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.0.0-SNAPSHOT</elasticsearch.httpclient.version>
+		<elasticsearch.version>6.4.3</elasticsearch.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.17</tomcat.version>
-		<tomcat.boot.version>0.7.1</tomcat.boot.version>
+		<tomcat.version>9.0.11</tomcat.version>
+		<tomcat.boot.version>0.7.0</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>

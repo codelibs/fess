@@ -58,24 +58,6 @@ public class SambaHelper {
         if (logger.isDebugEnabled()) {
             try {
                 logger.debug("Processing SID: {} {} {}", type, sid, sid.toDisplayString());
-            } catch (final Exception e) {
-                // ignore
-            }
-        }
-        final Integer id = fessConfig.getAvailableSmbSidType(type);
-        if (id != null) {
-            return createSearchRole(id, sid.getAccountName());
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("Ignored SID: {} {}", type, sid);
-        }
-        return null;
-    }
-
-    public String getAccountId(final jcifs.smb1.smb1.SID sid) {
-        final int type = sid.getType();
-        if (logger.isDebugEnabled()) {
-            try {
-                logger.debug("Processing SID: {} {} {}", type, sid, sid.toDisplayString());
             } catch (Exception e) {
                 // ignore
             }

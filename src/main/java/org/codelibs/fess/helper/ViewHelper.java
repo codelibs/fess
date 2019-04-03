@@ -147,13 +147,6 @@ public class ViewHelper {
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
         fessConfig.getQueryHighlightTerminalChars().codePoints().forEach(hihglightTerminalCharSet::add);
-        try {
-            final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
-            servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf)
-                    .collect(Collectors.toSet()));
-        } catch (final Throwable t) {
-            logger.warn("Failed to set SessionTrackingMode.", t);
-        }
     }
 
     public String getContentTitle(final Map<String, Object> document) {
@@ -210,7 +203,7 @@ public class ViewHelper {
         final String escaped = LaFunctions.h(text);
         int pos = escaped.indexOf(escapedHighlightPre);
         while (pos >= 0) {
-            final int c = escaped.codePointAt(pos);
+            int c = escaped.codePointAt(pos);
             if (Character.isISOControl(c) || hihglightTerminalCharSet.contains(c)) {
                 break;
             }

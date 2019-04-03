@@ -4,7 +4,12 @@ language: java
 
 matrix:
   include:
-    - jdk: openjdk11
+    - jdk: openjdk8
+    - jdk: openjdk9
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+    - jdk: openjdk10
       before_install:
         - rm "${JAVA_HOME}/lib/security/cacerts"
         - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
@@ -23,4 +28,3 @@ before_script:
 
 script:
   - bash .travis/run.sh
-

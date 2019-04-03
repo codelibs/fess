@@ -49,8 +49,6 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private static final String VERSION_12_2 = "12.2";
 
-    private static final String VERSION_12_3 = "12.3";
-
     // ===================================================================================
     //                                                                           Attribute
     //
@@ -114,7 +112,6 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_0();
                 upgradeFrom12_1();
                 upgradeFrom12_2();
-                upgradeFrom12_3();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -128,7 +125,6 @@ public class AdminUpgradeAction extends FessAdminAction {
             try {
                 upgradeFrom12_1();
                 upgradeFrom12_2();
-                upgradeFrom12_3();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -141,19 +137,6 @@ public class AdminUpgradeAction extends FessAdminAction {
         } else if (VERSION_12_2.equals(form.targetVersion)) {
             try {
                 upgradeFrom12_2();
-                upgradeFrom12_3();
-                upgradeFromAll();
-
-                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
-
-                systemHelper.reloadConfiguration();
-            } catch (final Exception e) {
-                logger.warn("Failed to upgrade data.", e);
-                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_12_2, e.getLocalizedMessage()));
-            }
-        } else if (VERSION_12_3.equals(form.targetVersion)) {
-            try {
-                upgradeFrom12_3();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -184,10 +167,6 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom12_2() {
-        // nothing
-    }
-
-    private void upgradeFrom12_3() {
         ComponentUtil.getThumbnailManager().migrate();
     }
 

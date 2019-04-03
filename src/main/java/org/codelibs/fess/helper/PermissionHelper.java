@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jcifs.SID;
-import jcifs.smb1.smb1.ACE;
 
 public class PermissionHelper {
     private static final Logger logger = LoggerFactory.getLogger(PermissionHelper.class);
@@ -110,37 +109,18 @@ public class PermissionHelper {
     public List<String> getSmbRoleTypeList(final ResponseData responseData) {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (fessConfig.isSmbRoleFromFile()) {
-            if (responseData.getUrl().startsWith("smb:")) {
-                final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-                final SID[] sids = (SID[]) responseData.getMetaDataMap().get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
-                if (sids != null) {
-                    for (final SID sid : sids) {
-                        final String accountId = sambaHelper.getAccountId(sid);
-                        if (accountId != null) {
-                            roleTypeList.add(accountId);
-                        }
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb:")) {
+            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+            final SID[] sids = (SID[]) responseData.getMetaDataMap().get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
+            if (sids != null) {
+                for (final SID sid : sids) {
+                    final String accountId = sambaHelper.getAccountId(sid);
+                    if (accountId != null) {
+                        roleTypeList.add(accountId);
                     }
                 }
-            } else if (responseData.getUrl().startsWith("smb1:")) {
-                final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-                final ACE[] aces =
-                        (ACE[]) responseData.getMetaDataMap().get(
-                                org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-                if (aces != null) {
-                    for (final ACE item : aces) {
-                        final jcifs.smb1.smb1.SID sid = item.getSID();
-                        final String accountId = sambaHelper.getAccountId(sid);
-                        if (accountId != null) {
-                            roleTypeList.add(accountId);
-                        }
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
-                    }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
                 }
             }
         }

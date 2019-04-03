@@ -152,7 +152,6 @@ public class EsApiManager extends BaseApiManager {
 
             try (ServletOutputStream out = response.getOutputStream(); InputStream in = curlResponse.getContentAsStream()) {
                 response.setStatus(curlResponse.getHttpStatusCode());
-                writeHeaders(response);
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);

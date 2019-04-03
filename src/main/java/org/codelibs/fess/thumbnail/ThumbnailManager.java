@@ -216,7 +216,7 @@ public class ThumbnailManager {
         }).filter(f -> f != null).forEach(f -> {
             try {
                 f.get();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 logger.warn("Failed to process a thumbnail generation.", e);
             }
         });
@@ -502,12 +502,12 @@ public class ThumbnailManager {
                     }
                     Files.move(path, newPath);
                     logger.info("Move " + path + " to " + newPath);
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     logger.warn("Failed to move " + path, e);
                 }
             }
         }       );
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 logger.warn("Failed to migrate thumbnail images.", e);
             }
         }, "ThumbnailMigrator").start();

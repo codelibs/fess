@@ -81,7 +81,7 @@ public class QueryStringBuilder {
         return queryBuf.toString().trim();
     }
 
-    protected void appendQuery(final StringBuilder queryBuf, final String q) {
+    protected void appendQuery(final StringBuilder queryBuf, String q) {
         final boolean exists = q.indexOf(OR) != -1 || q.indexOf(OR_ALT) != -1;
         queryBuf.append(' ');
         if (exists) {

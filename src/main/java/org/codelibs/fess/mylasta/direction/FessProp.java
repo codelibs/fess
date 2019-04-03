@@ -70,14 +70,6 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
-    String CORS_ALLOW_ORIGIN = "CorsAllowOrigin";
-
-    String API_DASHBOARD_RESPONSE_HEADER_LIST = "apiDashboardResponseHeaderList";
-
-    String API_JSON_RESPONSE_HEADER_LIST = "apiJsonResponseHeaderList";
-
-    String API_GSA_RESPONSE_HEADER_LIST = "apiGsaResponseHeaderList";
-
     String SMB_AVAILABLE_SID_TYPES = "smbAvailableSidTypes";
 
     String LOGGING_SEARCH_DOCS_FIELDS = "loggingSearchDocsFields";
