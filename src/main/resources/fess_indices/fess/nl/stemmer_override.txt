@@ -1,4 +1,0 @@
-fiets=>fiets
-bromfiets=>bromfiets
-ei=>eier
-kind=>kinder
