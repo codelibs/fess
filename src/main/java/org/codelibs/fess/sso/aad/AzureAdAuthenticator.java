@@ -18,6 +18,7 @@ package org.codelibs.fess.sso.aad;
 import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -129,13 +130,21 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String authUrl =
                 getAuthority() + getTenant()
                         + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                        + URLEncoder.encode(request.getRequestURL().toString(), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
+                        + encodeUrl(request.getRequestURL().toString()) + "&client_id=" + getClientId()
                         + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {}", authUrl);
         }
         return authUrl;
 
+    }
+
+    protected String encodeUrl(final String s) {
+        try {
+            return URLEncoder.encode(s, Constants.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            throw new SsoLoginException("invalid encoding.", e);
+        }
     }
 
     protected void storeStateInSession(final HttpSession session, final String state, final String nonce) {
@@ -372,8 +381,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             logger.warn("Failed to access groups/roles in AzureAD.", e);
         }
 
-        user.setGroups(groupList.toArray(n -> new String[n]));
-        user.setRoles(roleList.toArray(n -> new String[n]));
+        user.setGroups(groupList.toArray(new String[groupList.size()]));
+        user.setRoles(roleList.toArray(new String[roleList.size()]));
     }
 
     protected List<String> getDefaultGroupList() {

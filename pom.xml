@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>12.5.3-SNAPSHOT</version>
+	<version>12.6.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -35,14 +35,14 @@
 	</parent>
 	<properties>
 		<!-- Main Framework -->
-		<dbflute.version>1.1.8</dbflute.version>
-		<lastaflute.version>1.0.9</lastaflute.version>
+		<dbflute.version>1.1.9</dbflute.version>
+		<lastaflute.version>1.1.1</lastaflute.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.3</lasta.job.version>
 		<mailflute.version>0.6.0</mailflute.version>
 
 		<!-- Partner Library -->
-		<slf4j.version>1.7.25</slf4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 		<log4j.version>2.11.1</log4j.version>
 		<jackson.version>2.8.11</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
@@ -57,17 +57,17 @@
 		<utflute.version>0.9.0</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>2.5.2</crawler.version>
+		<crawler.version>2.6.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.6.1</suggest.version>
+		<suggest.version>6.7.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>6.6.2</elasticsearch.version>
+		<elasticsearch.version>6.7.0</elasticsearch.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.14</tomcat.version>
+		<tomcat.version>9.0.17</tomcat.version>
 		<tomcat.boot.version>0.7.1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
@@ -1312,17 +1312,6 @@
 				<exclusion>
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava-jdk5</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-langdetect</artifactId>
-			<version>${tika.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.annotation</groupId>
-					<artifactId>javax.annotation-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

@@ -1889,7 +1889,7 @@ public interface FessProp {
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_GSA_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiGsaResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                String[] values = s.split(":", 2);
+                final String[] values = s.split(":", 2);
                 if (values.length == 2) {
                     return new Pair<>(values[0], values[1]);
                 }
@@ -1906,7 +1906,7 @@ public interface FessProp {
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_JSON_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiJsonResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                String[] values = s.split(":", 2);
+                final String[] values = s.split(":", 2);
                 if (values.length == 2) {
                     return new Pair<>(values[0], values[1]);
                 }
@@ -1923,7 +1923,7 @@ public interface FessProp {
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_DASHBOARD_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiDashboardResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                String[] values = s.split(":", 2);
+                final String[] values = s.split(":", 2);
                 if (values.length == 2) {
                     return new Pair<>(values[0], values[1]);
                 }
