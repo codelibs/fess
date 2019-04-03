@@ -1,0 +1,77 @@
+{
+    "dynamic_templates": [
+      {
+        "search_fields": {
+          "path_match": "searchField.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      },
+      {
+        "documents": {
+          "path_match": "documents.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+    ],
+    "properties": {
+      "user": {
+        "type": "keyword"
+      },
+      "roles": {
+        "type": "keyword"
+      },
+      "queryId": {
+        "type": "keyword"
+      },
+      "searchWord": {
+        "type": "keyword"
+      },
+      "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "responseTime": {
+        "type": "long"
+      },
+      "queryTime": {
+        "type": "long"
+      },
+      "hitCount": {
+        "type": "long"
+      },
+      "queryOffset": {
+        "type": "integer"
+      },
+      "queryPageSize": {
+        "type": "integer"
+      },
+      "userAgent": {
+        "type": "keyword"
+      },
+      "referer": {
+        "type": "keyword"
+      },
+      "clientIp": {
+        "type": "keyword"
+      },
+      "userSessionId": {
+        "type": "keyword"
+      },
+      "accessType": {
+        "type": "keyword"
+      },
+      "userInfoId": {
+        "type": "keyword"
+      },
+      "languages" : {
+        "type" : "keyword"
+      },
+      "virtualHost" : {
+        "type" : "keyword"
+      }
+    }
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="fess_config.xml" />
+
+	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
+	</component>
+
+	<component name="kuromojiDictCreator"
+		class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
+	</component>
+	<component name="synonymCreator"
+		class="org.codelibs.fess.dict.synonym.SynonymCreator">
+	</component>
+	<component name="stemmerOverrideCreator"
+		class="org.codelibs.fess.dict.stemmeroverride.StemmerOverrideCreator">
+	</component>
+	<component name="protwordsCreator"
+		class="org.codelibs.fess.dict.protwords.ProtwordsCreator">
+	</component>
+	<component name="stopwordsCreator"
+		class="org.codelibs.fess.dict.stopwords.StopwordsCreator">
+	</component>
+	<component name="charMappingCreator"
+		class="org.codelibs.fess.dict.mapping.CharMappingCreator">
+	</component>
+</components>

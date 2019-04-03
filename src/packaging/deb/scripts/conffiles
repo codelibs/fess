@@ -1,0 +1,3 @@
+${packaging.env.file}
+/etc/init.d/fess
+/usr/lib/systemd/system/fess.service

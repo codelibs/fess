@@ -1,0 +1,50 @@
+{
+  ".fess_config.path_mapping" : {
+    "aliases" : { },
+    "mappings" : {
+      "path_mapping" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "processType" : {
+            "type" : "keyword"
+          },
+          "regex" : {
+            "type" : "keyword"
+          },
+          "replacement" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "userAgent" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021055516",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "Vn_Ry5JPRSet5M3Cg2D17w",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.path_mapping"
+      }
+    }
+  }
+}

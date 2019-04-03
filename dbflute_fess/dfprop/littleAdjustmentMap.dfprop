@@ -1,0 +1,208 @@
+# /---------------------------------------------------------------------------
+# littleAdjustmentMap: (NotRequired - Default map:{})
+#
+# The various settings about a little adjustment.
+#
+# o isAvailableAddingSchemaToTableSqlName: (NotRequired - Default false)
+# o isAvailableAddingCatalogToTableSqlName: (NotRequired - Default false)
+# o isAvailableDatabaseDependency: (NotRequired - Default false)
+# o isAvailableDatabaseNativeJDBC: (NotRequired - Default false)
+# o classificationUndefinedHandlingType: (NotRequired - Default LOGGING)
+# o isEntityConvertEmptyStringToNull: (NotRequired - Default false)
+# o isTableDispNameUpperCase: (NotRequired - Default false)
+# o isTableSqlNameUpperCase: (NotRequired - Default false)
+# o isColumnSqlNameUpperCase: (NotRequired - Default false)
+# o extendedDBFluteInitializerClass: (NotRequired - Default null)
+# o shortCharHandlingMode: (NotRequired - Default NONE)
+# o quoteTableNameList: (NotRequired - Default list:{})
+# o quoteColumnNameList: (NotRequired - Default list:{})
+# o columnNullObjectMap: (NotRequired - Default map:{})
+# o relationalNullObjectMap: (NotRequired - Default map:{})
+# o cursorSelectFetchSize: (NotRequired - Default null)
+# o refreshMap: (NotRequired - Default map:{})
+# o optimisticLockMap: (NotRequired - Default map:{})
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isAvailableAddingSchemaToTableSqlName: (NotRequired - Default false)
+    #   [true]
+    #     Add schema to table SQL name. (The table name on query is SCHEMA.TABLE)
+    #
+    #; isAvailableAddingSchemaToTableSqlName = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isAvailableAddingCatalogToTableSqlName: (NotRequired - Default false)
+    #   [true]
+    #     Add catalog to table SQL name. (The table name on query is CATALOG.SCHEMA.TABLE)
+    #
+    #; isAvailableAddingCatalogToTableSqlName = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isAvailableDatabaseDependency: (NotRequired - Default false)
+    #   [true]
+    #     Generate the method that depends on the database. e.g. cb.lockWithRR() at DB2.
+    #
+    #; isAvailableDatabaseDependency = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isAvailableDatabaseNativeJDBC: (NotRequired - Default false)
+    #   [true]
+    #     Use classes of database native JDBC on generated classes to get best performances of DB access.
+    #     Your project needs to refer to database native JDBC.
+    #
+    #; isAvailableDatabaseNativeJDBC = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o classificationUndefinedHandlingType: (NotRequired - Default LOGGING)
+    #  The handling type when undefined classification is found.
+    #
+    #   EXCEPTION - throws exception when found
+    #   LOGGING   - logging only when found (exception if ReplaceSchema)
+    #   ALLOWED   - no action
+    #
+    #; classificationUndefinedHandlingType = LOGGING
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isEntityConvertEmptyStringToNull: (NotRequired - Default false)
+    #   [true]
+    #     Convert empty-string data to null in entity.
+    #
+    #; isEntityConvertEmptyStringToNull = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isTableDispNameUpperCase: (NotRequired - Default false)
+    #   [true]
+    #     Table names for display, e.g. on documents, are forcedly treated as upper case.
+    #
+    #; isTableDispNameUpperCase = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isTableSqlNameUpperCase: (NotRequired - Default false)
+    #   [true]
+    #     Table names on SQL executed by condition-bean or behavior
+    #     are forcedly treated as upper case. (except outside-SQL)
+    #
+    #; isTableSqlNameUpperCase = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isColumnSqlNameUpperCase: (NotRequired - Default false)
+    #   [true]
+    #     Column names on SQL executed by condition-bean or behavior
+    #     are forcedly treated as upper case. (except outside-SQL)
+    #
+    #; isColumnSqlNameUpperCase = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o extendedDBFluteInitializerClass: (NotRequired - Default null)
+    #  If you want to extend the embedded DBFlute initializer,
+    #  specify the class name of your original initializer
+    #  that extends the embedded one.
+    #  *Basically for fixed DBFluteConfig settings
+    #
+    #; extendedDBFluteInitializerClass = com.example.ExtendedDBFluteInitializer
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o shortCharHandlingMode: (NotRequired - Default NONE)
+    #  If the parameter of condition-bean or parameter-bean has short size,
+    #   NONE - Do nothing. (default)
+    #   EXCEPTION - It throws an exception.
+    #   RFILL - It fills the parameter by right spaces.
+    #   LFILL - It fills the parameter by left spaces.
+    #
+    #; shortCharHandlingMode = NONE
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o quoteTableNameList: (NotRequired - Default list:{})
+    #  The list of table DB names that need to be quoted. Specified tables is quoted on auto-generated SQL.
+    #
+    #; quoteTableNameList = list:{}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o quoteColumnNameList: (NotRequired - Default list:{})
+    #  The list of column DB names that need to be quoted. Specified columns is quoted on auto-generated SQL.
+    #
+    #; quoteColumnNameList = list:{}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o columnNullObjectMap: (NotRequired - Default map:{})
+    #  You can get a null object when the column is null.
+    #
+    #; columnNullObjectMap = map:{
+    #    ; providerPackage = $$packageBase$$.nogen.cache
+    #    ; isGearedToSpecify = true
+    #    ; columnMap = map:{
+    #        ; MEMBER_STATUS = map:{
+    #            ; DESCRIPTION = CachedMemberStatus.get(this, "$$columnName$$", $$primaryKey$$)
+    #        }
+    #        ; MEMBER_SECURITY = map:{
+    #            ; REMINDER_ANSWER = CachedMemberSecurity.get(this, "$$columnName$$", $$primaryKey$$)
+    #            ; REMINDER_QUESTION = CachedMemberSecurity.get(this, "$$columnName$$", $$primaryKey$$)
+    #        }
+    #    }
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o relationalNullObjectMap: (NotRequired - Default map:{})
+    #  You can get a null object when the relation is null.
+    #
+    #; relationalNullObjectMap = map:{
+    #    ; providerPackage = $$packageBase$$.nogen.cache
+    #    ; foreignMap = map:{
+    #        ; MEMBER_STATUS = CachedMemberStatus.get(this, "$$foreignPropertyName$$", $$primaryKey$$)
+    #        ; MEMBER_SECURITY = CachedMemberSecurity.get(this, "$$foreignPropertyName$$", $$primaryKey$$)
+    #    }
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o cursorSelectFetchSize: (NotRequired - Default null)
+    #  The fetch size of JDBC parameter for cursor select.
+    #  For example, specify Integer.MIN_VALUE to enable fetch of MySQL.
+    #
+    #; cursorSelectFetchSize = Integer.MIN_VALUE
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o refreshMap: (NotRequired - Default map:{projectName=$$AutoDetect$$ ; requestUrl=http://localhost:8386/})
+    #  If you use synchronizer and specify this property, no need to refresh(F5) your eclipse project.
+    #  The projectName can be set plural names by slash '/'. e.g. sea/land
+    #
+    #; refreshMap = map:{
+    #    ; projectName = $$AutoDetect$$
+    #    ; requestUrl = http://localhost:8386/
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o optimisticLockMap: (NotRequired - Default map:{})
+    #  The definition for optimistic lock of DBFlute.
+    #
+    #; optimisticLockMap = map:{
+    #    # o updateDateFieldName: (NotRequired - Default '')
+    #    ; updateDateFieldName = UPDATE_DATE
+    #
+    #    # o versionNoFieldName: (NotRequired - Default 'VERSION_NO')
+    #    #  The column name of version no for optimistic lock.
+    #    #  Basically you don't need this if your tables have the column 'VERSION_NO'.
+    #    #  because the default value is 'VERSION_NO'.
+    #    ; versionNoFieldName = VERSION_NO
+    #}
+    # - - - - - - - - - -/
+}
+# ----------------/

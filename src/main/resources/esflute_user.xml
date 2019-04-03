@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="esclient.xml"/>
+
+	<!-- The components of DBFlute Runtime. -->
+	<component name="invokerAssistant" class="org.codelibs.fess.es.common.ImplementedInvokerAssistant"/>
+	<component name="behaviorCommandInvoker" class="org.dbflute.bhv.core.BehaviorCommandInvoker"/>
+
+	<!-- The components of Behavior. -->
+	<component name="userBhv" class="org.codelibs.fess.es.user.exbhv.UserBhv"/>
+	<component name="roleBhv" class="org.codelibs.fess.es.user.exbhv.RoleBhv"/>
+	<component name="groupBhv" class="org.codelibs.fess.es.user.exbhv.GroupBhv"/>
+</components>

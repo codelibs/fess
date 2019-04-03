@@ -1,0 +1,7 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      }
+    }
+}

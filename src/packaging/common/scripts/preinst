@@ -1,0 +1,86 @@
+${packaging.scripts.header}
+
+#
+# This script is executed in the pre-installation phase
+#
+#   On Debian,
+#       $1=install : indicates an new install
+#       $1=upgrade : indicates an upgrade
+#
+#   On RedHat,
+#       $1=1       : indicates an new install
+#       $1=2       : indicates an upgrade
+
+
+
+# Sets the default values for fess variables used in this script
+FESS_USER="${packaging.fess.user}"
+FESS_GROUP="${packaging.fess.group}"
+FESS_USER_HOME="${packaging.fess.var.dir}"
+
+# Source the default env file
+FESS_ENV_FILE="${packaging.env.file}"
+if [ -f "$FESS_ENV_FILE" ]; then
+    . "$FESS_ENV_FILE"
+fi
+
+case "$1" in
+
+    # Debian ####################################################
+    install|upgrade)
+
+        # Create fess group if not existing
+        if ! getent group "$FESS_GROUP" > /dev/null 2>&1 ; then
+            echo -n "Creating $FESS_GROUP group..."
+            addgroup --quiet --system "$FESS_GROUP"
+            echo " OK"
+        fi
+
+        # Create fess user if not existing
+        if ! id $FESS_USER > /dev/null 2>&1 ; then
+            echo -n "Creating $FESS_USER user..."
+            adduser --quiet \
+                    --system \
+                    --no-create-home \
+                    --ingroup "$FESS_GROUP" \
+                    --disabled-password \
+                    --shell /bin/false \
+                    --home "$FESS_USER_HOME"  \
+                    "$FESS_USER"
+            echo " OK"
+        fi
+    ;;
+    abort-deconfigure|abort-upgrade|abort-remove)
+    ;;
+
+    # RedHat ####################################################
+    1|2)
+
+        # Create fess group if not existing
+        if ! getent group "$FESS_GROUP" > /dev/null 2>&1 ; then
+            echo -n "Creating $FESS_GROUP group..."
+            groupadd -r "$FESS_GROUP"
+            echo " OK"
+        fi
+
+        # Create fess user if not existing
+        if ! id $FESS_USER > /dev/null 2>&1 ; then
+            echo -n "Creating $FESS_USER user..."
+            useradd --system \
+                    -M \
+                    --gid "$FESS_GROUP" \
+                    --shell /sbin/nologin \
+                    --comment "fess user" \
+                    -d "$FESS_USER_HOME"  \
+                    "$FESS_USER"
+            echo " OK"
+        fi
+    ;;
+
+    *)
+        echo "pre install script called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+${packaging.scripts.footer}

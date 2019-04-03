@@ -1,0 +1,25 @@
+{
+    "properties": {
+      "url": {
+        "type": "keyword"
+      },
+      "threadName": {
+        "type": "keyword"
+      },
+      "errorName": {
+        "type": "keyword"
+      },
+      "errorLog": {
+        "type": "keyword"
+      },
+      "errorCount": {
+        "type": "integer"
+      },
+      "lastAccessTime": {
+        "type": "long"
+      },
+      "configId": {
+        "type": "keyword"
+      }
+    }
+}

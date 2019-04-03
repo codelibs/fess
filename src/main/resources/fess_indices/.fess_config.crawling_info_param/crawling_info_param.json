@@ -1,0 +1,16 @@
+{
+    "properties": {
+      "crawlingInfoId": {
+        "type": "keyword"
+      },
+      "key": {
+        "type": "keyword"
+      },
+      "value": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      }
+    }
+}

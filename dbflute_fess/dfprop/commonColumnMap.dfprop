@@ -1,0 +1,49 @@
+# /---------------------------------------------------------------------------
+# commonColumnMap: (Default map:{})
+#
+# The definition of common column(contains auto set-up).
+# For example, the date you registered the record,
+# the user who updated the record and so on...
+# The column names are treated as case insensitive.
+#
+# The variable '$$AccessContext$$' means allcommon.AccessContext.
+#
+# Example:
+# map:{
+#     ; commonColumnMap = map:{
+#         ; REGISTER_DATETIME=TIMESTAMP ; REGISTER_USER=VARCHAR
+#         ; UPDATE_DATETIME=TIMESTAMP   ; UPDATE_USER=VARCHAR
+#     }
+#     ; beforeInsertMap = map:{
+#         ; REGISTER_DATETIME = $$AccessContext$$.getAccessLocalDateTimeOnThread()
+#         ; REGISTER_USER     = $$AccessContext$$.getAccessUserOnThread()
+#         ; UPDATE_DATETIME   = entity.getRegisterDatetime()
+#         ; UPDATE_USER       = entity.getRegisterUser()
+#     }
+#     ; beforeUpdateMap = map:{
+#         ; UPDATE_DATETIME   = $$AccessContext$$.getAccessLocalDateTimeOnThread()
+#         ; UPDATE_USER       = $$AccessContext$$.getAccessUserOnThread()
+#     }
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    #; commonColumnMap = map:{
+    #    ; REGISTER_DATETIME=TIMESTAMP ; REGISTER_USER=VARCHAR
+    #    ; UPDATE_DATETIME=TIMESTAMP   ; UPDATE_USER=VARCHAR
+    #}
+    #; beforeInsertMap = map:{
+    #    ; REGISTER_DATETIME = $$AccessContext$$.getAccessLocalDateTimeOnThread()
+    #    ; REGISTER_USER     = $$AccessContext$$.getAccessUserOnThread()
+    #    ; UPDATE_DATETIME   = entity.getRegisterDatetime()
+    #    ; UPDATE_USER       = entity.getRegisterUser()
+    #}
+    #; beforeUpdateMap = map:{
+    #    ; UPDATE_DATETIME   = $$AccessContext$$.getAccessLocalDateTimeOnThread()
+    #    ; UPDATE_USER       = $$AccessContext$$.getAccessUserOnThread()
+    #}
+}
+# ----------------/
+#
+# *Refer to typeMappingMap.dfprop for JDBC type reference.

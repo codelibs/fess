@@ -1,0 +1,66 @@
+# /---------------------------------------------------------------------------
+# lastafluteMap: (NotRequired - Default map:{})
+#
+# Specification:
+# map:{
+#     ; serviceName = [your service name]
+#     ; domainPackage = [package]
+#     ; environmentList = list:{ [environment name] }
+#     ; isMakeActionHtml = [true or false]
+#     ; commonMap = map:{
+#         ; path = [relative path to common project from DBFlute client]
+#         ; freeGenList = list:{ [env or config or label or message or html] }
+#         ; propertiesHtmlList = list:{ [env or config or label or message] }
+#     }
+#     ; appMap = map:{
+#         ; [application name, camel case, initial uncapitalised] = map:{
+#             ; path = [relative path to application project from DBFlute client]
+#             ; freeGenList = list:{ [env or config or label or message or html] }
+#             ; propertiesHtmlList = list:{ [env or config or label or message] }
+#         }
+#     }
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # your service name, camel case, initial uncapitalised
+    ; serviceName = fess
+
+    # package for your domain name, e.g. com.example
+    ; domainPackage = org.codelibs.fess
+
+    # keywords for environment properties, same as directory name
+    ; environmentList = list:{}
+
+    # environment dispatch by lasta.env of system property?
+    ; isUseLastaEnv = false
+
+    # settings for web applications
+    ; appMap = map:{
+        ; fess = map:{
+            ; path = ..
+            ; freeGenList = list:{ env ; config ; label ; message ; mail ; template ; jsp ; doc }
+            ; configPluginInterface = org.codelibs.fess.mylasta.direction.FessProp
+            ; propertiesHtmlList = list:{ env ; config ; label ; message }
+        }
+    }
+
+    ; isUseDefaultConfigAtGeneration = true
+    # you can override (several) default settings like this:
+    #; overrideMap = map:{
+    #    ; fess.freeGen.mail.targetDir = ./playsql/data/mail
+    #}
+
+    # you can adjust LastaDoc contents
+    ; lastaDocContentsMap = map:{
+        ; headerMap = map:{
+            #; isSuppressSchemaHtmlLink = true
+        }
+        ; actionMap = map:{
+            ; isSuppressDescriptionInList = true
+            ; isSuppressAuthorInList = true
+        }
+    }
+}
+# ----------------/

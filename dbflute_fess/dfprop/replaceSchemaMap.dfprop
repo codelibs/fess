@@ -1,0 +1,234 @@
+# /---------------------------------------------------------------------------
+# replaceSchemaMap: (NotRequired - Default map:{})
+#
+# The various settings about replace-schema.
+#
+# o repsEnvType: (NotRequired - Default inherits or 'ut')
+# o isLoggingInsertSql: (NotRequired - Default true)
+# o isLoggingReplaceSql: (NotRequired - Default true)
+# o isErrorSqlContinue: (NotRequired - Default false)
+# o sqlFileEncoding: (NotRequired - Default 'UTF-8')
+# o skipSheet: (NotRequired - Default '')
+# o isIncrementSequenceToDataMax: (NotRequired - Default false)
+# o isSuppressBatchUpdate: (NotRequired - Default false)
+# o objectTypeTargetList: (NotRequired - Default databaseInfoMap's)
+# o filterVariablesMap: (NotRequired - Default map:{})
+# o additionalUserMap: (NotRequired - Default map:{})
+# o additionalDropMapList: (NotRequired - Default list:{})
+# o playSqlDirectory: (NotRequired - Default 'playsql')
+# o applicationPlaySqlDirectory: (NotRequired - Default '')
+# o arrangeBeforeRepsMap: (NotRequired - Default map:{})
+# o isSuppressTruncateTable: (NotRequired - Default false)
+# o isSuppressDropForeignKey: (NotRequired - Default false)
+# o isSuppressDropTable: (NotRequired - Default false)
+# o isSuppressDropSequence: (NotRequired - Default false)
+# o isSuppressDropProcedure: (NotRequired - Default false)
+# o isSuppressDropDBLink: (NotRequired - Default false)
+# o initializeFirstSqlList: (NotRequired - Default list:{})
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o repsEnvType: (NotRequired - Default inherits or 'ut')
+    #  The environment type of ReplaceSchema.
+    #   e.g. if ut, data files in './playsql/data/ut/...' are loaded
+    #  If DBFlute environment type is specified, inherits it as default.
+    #
+    #; repsEnvType = ut
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isLoggingInsertSql: (NotRequired - Default true)
+    #  Does it show insert values on log?
+    #
+    #; isLoggingInsertSql = true
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isLoggingReplaceSql: (NotRequired - Default true)
+    #  Does it show replace-SQL on log?
+    #
+    #; isLoggingReplaceSql = true
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isErrorSqlContinue: (NotRequired - Default false)
+    #  Does it continue the task when error SQL exists?
+    #
+    #; isErrorSqlContinue = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o sqlFileEncoding: (NotRequired - Default 'UTF-8')
+    #  The encoding of SQL(DDL) file for Replace Schema.
+    #  Basically you don't need this.
+    #
+    #; sqlFileEncoding = UTF-8
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o skipSheet: (NotRequired - Default '')
+    #  You can specify the skip sheet by regular expression
+    #
+    #; skipSheet = P.+
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isIncrementSequenceToDataMax: (NotRequired - Default false)
+    #  Does it increment sequence values to max value of table data?
+    #  Referring the property 'sequenceDefinitionMap'.
+    #
+    #; isIncrementSequenceToDataMax = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressBatchUpdate: (NotRequired - Default false)
+    #  Does it suppress batch update at loading data?
+    #  When you have a data error, you may get details for the error
+    #  by this property changing. Because it is possible that
+    #  the BatchUpdateException information is very short for debug.
+    #
+    #; isSuppressBatchUpdate = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o objectTypeTargetList: (NotRequired - Default databaseInfoMap's)
+    #  This property overrides databaseInfoMap's one for ReplaceSchema.
+    #    e.g. Synonym of Oracle --> list:{TABLE ; VIEW ; SYNONYM}
+    #
+    #; objectTypeTargetList = list:{TABLE ; VIEW}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o filterVariablesMap: (NotRequired - Default map:{})
+    #  You can specify the filter variables for DDL.
+    #
+    #; filterVariablesMap = map:{abc=AAA}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o additionalUserMap: (NotRequired - Default map:{})
+    #  You can set additional users.
+    #  Elements of this map are as below:
+    #   o key of map: User Definition Name (userDefName)
+    #   o url: (NotRequired - Default same as one of main schema)
+    #   o schema: (NotRequired - Default treated as no schema setting)
+    #   o user: (Required)
+    #   o password: password plainly or path to password file (with default password)
+    #       e.g. foo or df:dfprop/system-password.txt|foo
+    #       (NotRequired - Default '')
+    #   o isSkipIfNotFoundPasswordFileAndDefault: Does it skip the user SQL statement
+    #       when using password file but not found it and also default password?
+    #       (NotRequired - Default false)
+    #
+    #; additionalUserMap = map:{
+    #    ; system = map:{
+    #        #; url = ...
+    #        #; schema = ...
+    #        ; user = system
+    #        ; password = df:dfprop/system-password.txt
+    #    }
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o additionalDropMapList: (NotRequired - Default list:{})
+    #  You can drop additional other schemas.
+    #  Elements of this map are as below:
+    #   o url: (NotRequired - Default same as main schema)
+    #   o schema: (Required: if empty schema means valid schema, not required)
+    #   o user: (NotRequired - Default same as main schema)
+    #   o password: (NotRequired - Default same as main schema)
+    #   o propertiesMap: (NotRequired - Default map:{})
+    #   o objectTypeTargetList: (NotRequired - Default list{TABLE;VIEW})
+    #
+    #; additionalDropMapList = list:{
+    #    ; map:{
+    #        ; url = jdbc:oracle:thin:...
+    #        ; schema = NEXTEXAMPLEDB
+    #        ; user = NEXTEXAMPLEDB
+    #        ; password = NEXTEXAMPLEDB
+    #        ; propertiesMap = map:{}
+    #        ; objectTypeTargetList = list:{TABLE;VIEW}
+    #    }
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o playSqlDirectory: (NotRequired - Default 'playsql' relative to DBFlute client)
+    #  This property is relative path to (main) PlaySql directory,
+    #  You should not use this property easily.
+    #
+    #; playSqlDirectory = ../../foo-project/playsql
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o applicationPlaySqlDirectory: (NotRequired - Default '')
+    #  This property is relative path to Application PlaySql directory,
+    #  which is basically used with ApplicationBehavior.
+    #
+    #; applicationPlaySqlDirectory = ../../foo-project/dbflute_apbranch/playsql
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o arrangeBeforeRepsMap: (NotRequired - Default map:{})
+    #  You can arrange resource files before ReplaceSchema.
+    #
+    #; arrangeBeforeRepsMap = map:{
+    #    ; copy = map:{
+    #        ; ../erd/*.ddl = ./playsql/replace-schema-10-basic.sql
+    #    }
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressTruncateTable: (NotRequired - Default false)
+    #  You can suppress truncating tables at initializing schema.
+    #
+    #; isSuppressTruncateTable = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressDropForeignKey: (NotRequired - Default false)
+    #  You can suppress dropping foreign keys at initializing schema.
+    #
+    #; isSuppressDropForeignKey = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressDropTable: (NotRequired - Default false)
+    #  You can suppress dropping tables at initializing schema.
+    #
+    #; isSuppressDropTable = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressDropSequence: (NotRequired - Default false)
+    #  You can suppress dropping sequences at initializing schema.
+    #
+    #; isSuppressDropSequence = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressDropProcedure: (NotRequired - Default false)
+    #  You can suppress dropping procedures at initializing schema.
+    #
+    #; isSuppressDropProcedure = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isSuppressDropDBLink: (NotRequired - Default false)
+    #  You can suppress dropping DB links at initializing schema.
+    #
+    #; isSuppressDropDBLink = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o initializeFirstSqlList: (NotRequired - Default list:{})
+    #  You can execute the SQL statements before initializing schema.
+    #
+    #; initializeFirstSqlList = list:{}
+    # - - - - - - - - - -/
+}
+# ----------------/

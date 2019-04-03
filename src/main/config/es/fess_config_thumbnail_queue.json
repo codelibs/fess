@@ -1,0 +1,41 @@
+{
+  ".fess_config.thumbnail_queue" : {
+    "aliases" : { },
+    "mappings" : {
+      "thumbnail_queue" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "generator" : {
+            "type" : "keyword"
+          },
+          "path" : {
+            "type" : "keyword"
+          },
+          "target" : {
+            "type" : "keyword"
+          },
+          "thumbnail_id" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021057304",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "gofu2g1ATH6L2rVweOWmtg",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.thumbnail_queue"
+      }
+    }
+  }
+}

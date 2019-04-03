@@ -1,0 +1,31 @@
+{
+    "properties": {
+      "jobName": {
+        "type": "keyword"
+      },
+      "jobStatus": {
+        "type": "keyword"
+      },
+      "target": {
+        "type": "keyword"
+      },
+      "scriptType": {
+        "type": "keyword"
+      },
+      "scriptData": {
+        "type": "keyword"
+      },
+      "scriptResult": {
+        "type": "keyword"
+      },
+      "lastUpdated": {
+        "type": "long"
+      },
+      "startTime": {
+        "type": "long"
+      },
+      "endTime": {
+        "type": "long"
+      }
+    }
+}

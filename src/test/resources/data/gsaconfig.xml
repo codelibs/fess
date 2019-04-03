@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<eef>
+	<config Schema="2.0" EnterpriseVersion="'7.6.50'">
+		<collections Count="3">
+			<collection Name="fess">
+				<bad_urls><![CDATA[
+https://fess.codelibs.org/images/
+              ]]></bad_urls>
+				<good_urls><![CDATA[
+https://fess.codelibs.org/
+https://www.codelibs.org/
+              ]]></good_urls>
+				<prerequisite_results><![CDATA[
+20
+              ]]></prerequisite_results>
+				<testwords><![CDATA[
+
+              ]]></testwords>
+			</collection>
+			<collection Name="n2sm">
+				<bad_urls><![CDATA[
+contains:\\.xml$
+              ]]></bad_urls>
+				<good_urls><![CDATA[
+https://www.n2sm.net/
+              ]]></good_urls>
+				<prerequisite_results><![CDATA[
+20
+              ]]></prerequisite_results>
+				<testwords><![CDATA[
+
+              ]]></testwords>
+			</collection>
+			<collection Name="smb">
+				<bad_urls><![CDATA[
+smb://storage/sample/
+              ]]></bad_urls>
+				<good_urls><![CDATA[
+smb://storage/
+              ]]></good_urls>
+				<prerequisite_results><![CDATA[
+20
+              ]]></prerequisite_results>
+				<testwords><![CDATA[
+
+              ]]></testwords>
+			</collection>
+		</collections>
+		<globalparams>
+			<bad_urls><![CDATA[
+contains:/images/
+contains:?
+contains:\\.xml$
+# test
+regexp:/([^/]*)/\\1/\\1/
+.gif$
+.jpg$
+.jpeg$
+.png$
+regexpIgnoreCase:\\.dll$
+regexpIgnoreCase:\\.exe$
+/?S=A$
+/?S=D$
+contains:\001
+contains:\002
+contains:\003
+.html/$
+
+          ]]></bad_urls>
+			<good_urls><![CDATA[
+https://fess.codelibs.org/
+https://www.codelibs.org/
+https://www.n2sm.net/
+smb://storage/
+
+          ]]></good_urls>
+			<start_urls><![CDATA[
+https://fess.codelibs.org/
+https://www.codelibs.org/
+https://www.n2sm.net/
+smb://storage/
+
+          ]]></start_urls>
+		</globalparams>
+	</config>
+</eef>

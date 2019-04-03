@@ -1,0 +1,149 @@
+# /---------------------------------------------------------------------------
+# databaseInfoMap: (Required)
+#
+# The database information for the tasks of DBFlute.
+# You should specify before your first generating.
+#
+# o driver   -- The class name of JDBC-Driver.
+# o url      -- The URL for connecting database.
+# o schema   -- The schema name.
+# o user     -- The database user name.
+# o password -- The database password.
+# o propertiesMap -- The properties that depends on the database.
+# o variousMap    -- The various settings about JDBC task.
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    ; driver   = org.h2.Driver
+    ; url      = jdbc:h2:file:../src/test/resources/dummydb/dummydb
+    ; schema   =  
+    ; user     = sa
+    ; password =  
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o propertiesMap: (NotRequired - Default map:{})
+    #  The properties that depends on the database.
+    #
+    ; propertiesMap = map:{
+        # If you use Oracle and its Synonym, specify this property.
+        #; includeSynonyms=true
+    }
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o variousMap: (NotRequired - Default map:{})
+    #  The various settings about JDBC task mainly.
+    #
+    ; variousMap = map:{
+        # o objectTypeTargetList: (NotRequired - Default list:{TABLE;VIEW})
+        #  If you want to include other object types in generating target,
+        #  you should specify the list of included object types as adding.
+        #    e.g. Synonym of Oracle --> list:{TABLE ; VIEW ; SYNONYM}
+        #  This is only for the main schema. Additional schemas are unconcerned.
+        #  However ReplaceSchema and Sql2Entity task also uses this.
+        #  But you can set ReplaceSchema-original setting in its own dfprop.
+        #
+        #; objectTypeTargetList = list:{TABLE ; VIEW}
+
+        # o tableExceptList: (NotRequired - Default list:{})
+        #  If you want to exclude some tables in generating target,
+        #  you should specify the list of excepted table hints.
+        #    e.g. list:{PRODUCT_STATUS ; prefix:TMP_}
+        #  This is only for the main schema. Additional schemas are unconcerned.
+        #  And ReplaceSchema task basically ignores this.
+        #
+        #  Normally this 'except' means no getting meta data for excepted tables.
+        #  (so the tables are not existing in SchemaHTML and HistoryHTML and so on).
+        #  But you can specify the '@gen' suffix that means generate-only except.
+        #  A table with the mark can be treated as documents but no generating classes.
+        #
+        #; tableExceptList = list:{FOO_TABLE@gen ; prefix:FOO_@gen ; suffix:_FOO ; contain:_FOO_}
+
+        # o tableTargetList: (NotRequired - Default list:{})
+        #  If you want to include some tables in generating target expressly,
+        #  you should specify the list of target table hints.
+        #    e.g. list:{PURCHASE ; contain:MEMBER}
+        #  This is only for the main schema. Additional schemas are unconcerned.
+        #  And ReplaceSchema task basically ignores this.
+        #
+        #; tableTargetList = list:{FOO_TABLE ; prefix:FOO_ ; suffix:_FOO ; contain:_FOO_}
+
+        # o columnExceptMap: (NotRequired - Default map:{})
+        #  If you want to exclude some columns in generating target,
+        #  you should specify the list of excepted column hints.
+        #    e.g. map:{HEAVY_MASTER = list:{APP_NOT_USED_ID; suffix:_IMAGE}}
+        #  This is only for the main schema. Additional schemas are unconcerned.
+        #
+        #; columnExceptMap = map:{
+        #    ; FOO_TABLE = list:{FOO_COLUMN ; prefix:FOO_ ; suffix:_FOO ; contain:_FOO_}
+        #}
+
+        # o additionalSchemaMap: (NotRequired - Default map:{})
+        #  If you want to include other schemas in generating target,
+        #  you should specify the map of included schemas.
+        #  Additional schemas have original settings apart from the main schema.
+        #  The settings are objectTypeTargetList, tableExceptList,
+        #  tableTargetList, and columnExceptMap.
+        #  They have the same specification as ones of the main schema.
+        #  Elements of this map are as below: 
+        #    o objectTypeTargetList: (NotRequired - Default 'map:{TABLE;VIEW}')
+        #    o tableExceptList: (NotRequired - Default list:{})
+        #    o tableTargetList: (NotRequired - Default list:{})
+        #    o columnExceptMap: (NotRequired - Default map:{})
+        #    o isSuppressCommonColumn: (NotRequired - Default false)
+        #    o isSuppressProcedure: (NotRequired - Default false)
+        #
+        #; additionalSchemaMap = map:{
+        #    ; NEXTEXAMPLEDB = map:{
+        #        ; objectTypeTargetList=list:{TABLE ; VIEW}
+        #        ; tableExceptList=list:{FOO_TABLE ; prefix:FOO_ ; suffix:_FOO ; contain:_FOO_}
+        #        ; tableTargetList=list:{FOO_TABLE ; prefix:FOO_ ; suffix:_FOO ; contain:_FOO_}
+        #        ; columnExceptMap=map:{
+        #            ; FOO_TABLE = list:{FOO_COLUMN ; prefix:FOO_ ; suffix:_FOO ; contain:_FOO_}
+        #        }
+        #        ; isSuppressCommonColumn=false
+        #        ; isSuppressProcedure=false
+        #    }
+        #}
+
+        # o typeMappingMap: (NotRequired - Default map:{NUMERIC=$$AutoMapping$$ ; DECIMAL=$$AutoMapping$$})
+        #  If you want to change mappings from default mappings, you can specify your original mappings.
+        #  But it is possible that unanticipated problems occurs, so be careful!
+        #; typeMappingMap = map:{
+        #    # AutoMapping for Numeric and Decimal, (1-9,0): INTEGER, (10-18,0): BIGINT, else: NUMERIC
+        #    ; NUMERIC = $$AutoMapping$$ ; DECIMAL = $$AutoMapping$$
+        #}
+    }
+    # - - - - - - - - - -/
+}
+# ----------------/
+#
+# Default mapping as follows:
+# --------------------------------------------------------
+# | JDBC Type     | Java Native          | CSharp Native |
+# | ------------------------------------------------------
+# | CHAR          | java.lang.String     | String        |
+# | VARCHAR       | java.lang.String     | String        |
+# | LONGVARCHAR   | java.lang.String     | String        |
+# | NUMERIC       | java.math.BigDecimal | decimal?      |
+# | DECIMAL       | java.math.BigDecimal | decimal?      |
+# | TINYINT       | java.lang.Integer    | int?          |
+# | SMALLINT      | java.lang.Integer    | int?          |
+# | INTEGER       | java.lang.Integer    | int?          |
+# | BIGINT        | java.lang.Long       | long?         |
+# | REAL          | java.math.BigDecimal | decimal?      |
+# | FLOAT         | java.math.BigDecimal | decimal?      |
+# | DOUBLE        | java.math.BigDecimal | decimal?      |
+# | DATE          | java.util.Date       | DateTime?     |
+# | TIME          | java.sql.Time        | DateTime?     |
+# | TIMESTAMP     | java.sql.Timestamp   | DateTime?     |
+# | BIT           | java.lang.Boolean    | bool?         |
+# | BOOLEAN       | java.lang.Boolean    | bool?         |
+# | BINARY        | byte[]               | byte[]        |
+# | VARBINARY     | byte[]               | byte[]        |
+# | LONGVARBINARY | byte[]               | byte[]        |
+# | BLOB          | byte[]               | byte[]        |
+# | ARRAY         | *Unsupported         | *Unsupported  |
+# | UUID          | java.util.UUID       | *Unsupported  |
+# --------------------------------------------------------

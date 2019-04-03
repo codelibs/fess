@@ -1,0 +1,47 @@
+{
+  ".fess_config.related_content" : {
+    "aliases" : { },
+    "mappings" : {
+      "related_content" : {
+        "properties" : {
+          "content" : {
+            "type" : "keyword"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "term" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "virtualHost" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021055837",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "34AXOK0ITy6U7fzGItZJsQ",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.related_content"
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  ".fess_config.elevate_word" : {
+    "aliases" : { },
+    "mappings" : {
+      "elevate_word" : {
+        "properties" : {
+          "boost" : {
+            "type" : "float"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "permissions" : {
+            "type" : "keyword"
+          },
+          "reading" : {
+            "type" : "keyword"
+          },
+          "suggestWord" : {
+            "type" : "keyword"
+          },
+          "targetLabel" : {
+            "type" : "keyword"
+          },
+          "targetRole" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "elevate_word" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021052202",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "KVOz6G2oR1S8lU5BvNyQrg",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.elevate_word"
+      }
+    }
+  }
+}

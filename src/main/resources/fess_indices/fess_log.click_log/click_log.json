@@ -1,0 +1,30 @@
+{
+    "properties": {
+      "urlId": {
+        "type": "keyword"
+      },
+      "docId": {
+        "type": "keyword"
+      },
+      "queryId": {
+        "type": "keyword"
+      },
+      "userSessionId": {
+        "type": "keyword"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "order": {
+        "type": "integer"
+      },
+      "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "queryRequestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      }
+    }
+}

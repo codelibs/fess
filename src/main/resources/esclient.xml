@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="fessEsClient" class="org.codelibs.fess.es.client.FessEsClient">
+		<property name="settings">
+			{"http.cors.enabled":"true",
+			 "http.cors.allow-origin":"*",
+			 "action.auto_create_index":"-*"}
+<!--
+			{"http.cors.enabled":"true",
+			 "http.cors.allow-origin":"*",
+			 "searchguard.ssl.transport.pemkey_filepath":"/path/to/the/key",
+			 "searchguard.ssl.transport.pemcert_filepath":"/path/to/the/CERTIFICATE",
+			 "searchguard.ssl.transport.pemtrustedcas_filepath":"/path/to/the/CA"
+			 }
+ -->
+		</property>
+		<!-- Dictionaries -->
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"synonym.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ar/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ca/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ckb-iq/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"cs/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"da/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"de/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"el/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en-ie/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"es/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"eu/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fa/mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fa/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fi/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fr/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"gl/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hi/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hu/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hy/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"id/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"it/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/kuromoji.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ko/seunjeon.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"lt/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"lv/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"nl/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"no/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"pt-br/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"pt/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ro/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ru/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"sv/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"th/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"tr/protwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ar/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"bg/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ca/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ckb-iq/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"cs/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"da/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"de/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"el/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en-ie/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"es/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"eu/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fa/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fi/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fr/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"gl/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hi/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hu/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hy/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"id/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"it/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ko/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"lt/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"lv/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"nl/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"no/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"pt-br/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"pt/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ro/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ru/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"sv/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"th/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"tr/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"vi/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"zh-cn/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"zh-tw/stopwords.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ar/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"bg/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ca/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ckb-iq/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"cs/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"da/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"de/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"el/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"en-ie/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"es/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"eu/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fi/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"fr/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"gl/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hi/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hu/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"hy/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"id/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"it/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"lt/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"lv/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"nl/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"no/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"pt-br/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"pt/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ro/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ru/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"sv/stemmer_override.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"tr/stemmer_override.txt"</arg>
+		</postConstruct>
+		<!-- fess index -->
+		<postConstruct name="addIndexConfig">
+			<arg>"fess/doc"</arg>
+		</postConstruct>
+		<!-- .fess_config index -->
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.access_token/access_token"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.bad_word/bad_word"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.boost_document_rule/boost_document_rule"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.crawling_info/crawling_info"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.crawling_info_param/crawling_info_param"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.data_config/data_config"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.duplicate_host/duplicate_host"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.elevate_word/elevate_word"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.elevate_word_to_label/elevate_word_to_label"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.failure_url/failure_url"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.file_authentication/file_authentication"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.file_config/file_config"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.job_log/job_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.key_match/key_match"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.label_type/label_type"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.path_mapping/path_mapping"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.related_content/related_content"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.related_query/related_query"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.request_header/request_header"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.role_type/role_type"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.scheduled_job/scheduled_job"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.thumbnail_queue/thumbnail_queue"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.web_authentication/web_authentication"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config.web_config/web_config"</arg>
+		</postConstruct>
+		<!-- .fess_user index -->
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user.user/user"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user.role/role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user.group/group"</arg>
+		</postConstruct>
+		<!-- fess_log index -->
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.click_log/click_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.favorite_log/favorite_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.search_log/search_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.user_info/user_info"</arg>
+		</postConstruct>
+	</component>
+</components>

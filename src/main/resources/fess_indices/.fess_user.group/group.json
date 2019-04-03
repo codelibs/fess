@@ -1,0 +1,10 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "gidNumber" : {
+        "type" : "long"
+      }
+    }
+}

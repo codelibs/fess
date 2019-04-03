@@ -1,0 +1,10 @@
+{
+  "settings": {
+    "index": {
+      "refresh_interval": "1s",
+      "number_of_shards": 5,
+      "number_of_replicas": 0,
+      "auto_expand_replicas": "0-1"
+    }
+  }
+}

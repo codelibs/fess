@@ -1,0 +1,39 @@
+{
+  "fess_log.favorite_log" : {
+    "aliases" : { },
+    "mappings" : {
+      "favorite_log" : {
+        "properties" : {
+          "createdAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
+          },
+          "docId" : {
+            "type" : "keyword"
+          },
+          "queryId" : {
+            "type" : "keyword"
+          },
+          "url" : {
+            "type" : "keyword"
+          },
+          "userInfoId" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021060038",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "LRohRohXTCGxGdsabXPNnQ",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : "fess_log.favorite_log"
+      }
+    }
+  }
+}

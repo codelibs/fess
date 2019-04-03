@@ -1,0 +1,25 @@
+{
+    "properties": {
+      "suggestWord": {
+        "type": "keyword"
+      },
+      "targetRole": {
+        "type": "keyword"
+      },
+      "targetLabel": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

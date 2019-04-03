@@ -1,0 +1,10 @@
+{
+    "properties": {
+      "elevateWordId": {
+        "type": "keyword"
+      },
+      "labelTypeId": {
+        "type": "keyword"
+      }
+    }
+}

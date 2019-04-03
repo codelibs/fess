@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="plugin" basedir=".">
+	<property name="plugins.dir" value="${basedir}/plugins" />
+	<property name="target.dir" value="${basedir}/target/plugins" />
+
+	<!-- Maven Repository -->
+	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+	<property name="maven.release.repo.url" value="http://central.maven.org/maven2" />
+
+	<target name="install.plugins">
+		<mkdir dir="${target.dir}" />
+		<delete dir="${plugins.dir}" />
+		<mkdir dir="${plugins.dir}" />
+		<!-- analysis-extension -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="analysis-extension" />
+			<param name="plugin.version" value="6.5.1" />
+			<param name="plugin.zip.version" value="6.5.1" />
+		</antcall>
+		<!-- analysis-fess -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="analysis-fess" />
+			<param name="plugin.version" value="6.5.0" />
+			<param name="plugin.zip.version" value="6.5.0" />
+		</antcall>
+		<!-- configsync -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="configsync" />
+			<param name="plugin.version" value="6.5.0" />
+			<param name="plugin.zip.version" value="6.5.0" />
+		</antcall>
+		<!-- dataformat -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="dataformat" />
+			<param name="plugin.version" value="6.5.0" />
+			<param name="plugin.zip.version" value="6.5.0" />
+		</antcall>
+		<!-- langfield -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="langfield" />
+			<param name="plugin.version" value="6.5.0" />
+			<param name="plugin.zip.version" value="6.5.0" />
+		</antcall>
+		<!-- learning-to-rank -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="learning-to-rank" />
+			<param name="plugin.version" value="6.5.0" />
+			<param name="plugin.zip.version" value="6.5.0" />
+		</antcall>
+		<!-- minhash -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
+			<param name="plugin.name" value="minhash" />
+			<param name="plugin.version" value="6.5.0" />
+			<param name="plugin.zip.version" value="6.5.0" />
+		</antcall>
+
+		<antcall target="remove.jars" />
+	</target>
+
+	<target name="install.plugin">
+		<get dest="${target.dir}">
+			<url url="${repo.url}/${plugin.groupId}/${plugin.name.prefix}${plugin.name}/${plugin.version}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip" />
+		</get>
+		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip">
+			<patternset>
+				<include name="**" />
+			</patternset>
+			<cutdirsmapper dirs="1" />
+		</unzip>
+	</target>
+
+	<target name="remove.jars" if="with.fess">
+		<delete>
+			<fileset dir="${plugins.dir}">
+				<include name="configsync/commons-codec-*" />
+				<include name="dataformat/commons-codec-*" />
+				<include name="dataformat/commons-collections4-*" />
+				<include name="dataformat/commons-compress-*" />
+				<include name="dataformat/commons-math3-*" />
+				<include name="dataformat/curvesapi-*" />
+				<include name="dataformat/orangesignal-csv-*" />
+				<include name="dataformat/poi-*" />
+				<include name="dataformat/stax-api-*" />
+				<include name="dataformat/xmlbeans-*" />
+				<include name="minhash/guava-*" />
+			</fileset>
+		</delete>
+	</target>
+</project>

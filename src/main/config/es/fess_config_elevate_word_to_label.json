@@ -1,0 +1,29 @@
+{
+  ".fess_config.elevate_word_to_label" : {
+    "aliases" : { },
+    "mappings" : {
+      "elevate_word_to_label" : {
+        "properties" : {
+          "elevateWordId" : {
+            "type" : "keyword"
+          },
+          "labelTypeId" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021052498",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "z3miZa9NSdywfPRNGhrlzg",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.elevate_word_to_label"
+      }
+    }
+  }
+}

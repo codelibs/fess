@@ -1,0 +1,227 @@
+# /---------------------------------------------------------------------------
+# basicInfoMap: (Required)
+#
+# The basic information for the tasks of DBFlute.
+# You should specify before your first generating.
+#
+# Core Properties:
+# o database: (Required)
+# o targetLanguage: (Required)
+# o targetContainer: (Required)
+# o packageBase: (Required)
+#
+# Adjustment Properties:
+# o generateOutputDirectory: (NotRequired - Default Java:'../src/main/java' CSharp:'../source')
+# o resourceOutputDirectory: (NotRequired - Default '../resources')
+# o isTableNameCamelCase: (NotRequired - Default false)
+# o isColumnNameCamelCase: (NotRequired - Default false)
+# o projectPrefix: (NotRequired - Default '')
+# o classAuthor: (NotRequired - Default 'DBFlute(AutoGenerator)')
+# o sourceFileEncoding: (NotRequired - Default 'UTF-8')
+# o sourceCodeLineSeparator: (NotRequired - Default no setting)
+# o applicationBehaviorMap: (NotRequired - Default map:{})
+# o outputPackageAdjustmentMap: (NotRequired - Default map:{})
+# o dbfluteSystemFinalTimeZone: (NotRequired - Default null)
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o database: (Required)
+    #  This is the target database, only considered when generating
+    #  the SQL for your DBFlute project.
+    #  Your possible choices are:
+    #
+    #    mysql, postgresql, oracle, db2, sqlserver,
+    #    h2, derby, (sqlite, firebird, msaccess)
+    #
+    ; database = h2
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o targetLanguage: (Required)
+    #  The target language.
+    #  Your possible choices are:
+    #
+    #       java, csharp, scala
+    #
+    ; targetLanguage = java
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o targetContainer: (Required)
+    #  The target DI container.
+    #  Your possible choices are:
+    #
+    #       spring, guice, seasar, cdi, lasta_di
+    #
+    ; targetContainer = spring
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o packageBase: (Required)
+    #  The base directory of package for generated class.
+    #  The class package is 'this property value + detail package value'.
+    #  However, detail packages have default value so basically
+    #  you only have to specify the property 'packageBase'.
+    #  If this property is specified and detail package properties is not specified, 
+    #  Then the packages of generated class are as follows:
+    #
+    #  e.g. packageBase = org.docksidestage.dbflute
+    #      --> org.docksidestage.dbflute.allcommon
+    #      --> org.docksidestage.dbflute.bsbhv
+    #      --> org.docksidestage.dbflute.bsentity
+    #      --> org.docksidestage.dbflute.cbean
+    #      --> org.docksidestage.dbflute.exbhv
+    #      --> org.docksidestage.dbflute.exentity
+    #
+    ; packageBase = org.codelibs.fess.db
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o generateOutputDirectory: (NotRequired - Default Java:'../src/main/java' CSharp:'../source')
+    #  The base output directory for generating.
+    #  Basically you don't need to specify this if the project style is as follows:
+    #
+    #   *Java Project Style
+    #     If this value is '../src/main/java' and your project is under the Maven,
+    #     you don't need to set up this property!
+    #
+    #     {app-project}
+    #         |
+    #         |-dbflute_[project]
+    #         |       |-dfprop
+    #         |       |-...
+    #         |
+    #         |-src/main/java         // *Here!
+    #         |-src/main/resources
+    #         |-...
+    #
+    #   *CSharp Project Style
+    #     [app-solution]/dbflute_[project]/dfprop
+    #     [app-solution]/mydbflute/dbflute-0.9.6
+    #     [app-solution]/source/[app-solution].sln
+    #     [app-solution]/source/[app-project(top-namespace)]/[part-namespace]/AllCommon
+    #     [app-solution]/source/[app-project(top-namespace)]/[part-namespace]/BsBhv
+    #     [app-solution]/source/[app-project(top-namespace)]/[part-namespace]/...
+    #     [app-solution]/source/[app-project(top-namespace)]/Resources/...
+    #
+    #; generateOutputDirectory = ../src/main/java
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o resourceOutputDirectory: (NotRequired - Default '../resources')
+    #  The base output directory for resource files that contain DI configurations.
+    #  Basically you don't need to specify this if your project is under the Maven.
+    #
+    #; resourceOutputDirectory = ../resources
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isTableNameCamelCase: (NotRequired - Default false)
+    #  Is the table name camel case?
+    #  Basically you don't need this if the style of table name is like 'FOO_STATUS'.
+    #    [true]
+    #      The table name is camel case.
+    #      e.g. If the table name is 'OrderDetail', the class name is 'OrderDetail'.
+    #
+    #    [false]
+    #      e.g. If the table name is 'ORDER_DETAIL', the class name is 'OrderDetail'.
+    #      e.g. If the table name is 'OrderDetail', the class name is 'Orderdetail'.
+    #
+    #; isTableNameCamelCase = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o isColumnNameCamelCase: (NotRequired - Default false)
+    #  Is the column name camel case?
+    #  Basically you don't need this if the style of column name is like 'FOO_NAME'.
+    #    [true]
+    #      The column name is camel case.
+    #      e.g. If the column name is 'OrderDetailId', the class name is 'OrderDetailId'.
+    #
+    #    [false]
+    #      e.g. If the column name is 'ORDER_DETAIL_ID', the class name is 'OrderDetailId'.
+    #      e.g. If the column name is 'OrderDetailId',  the class name is 'Orderdetailid'.
+    #
+    #; isColumnNameCamelCase = false
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o projectPrefix: (NotRequired - Default '')
+    #  If the value is 'Ld', all class names are 'LdXxx'.
+    #  Basically you don't need this if you don't want the common prefix of class name.
+    #
+    #; projectPrefix = Ld
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o classAuthor: (NotRequired - Default 'DBFlute(AutoGenerator)')
+    #  The value of the author tag in java-doc of generated classes.
+    #  All classes are target.
+    #
+    #; classAuthor = DBFlute(AutoGenerator)
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o sourceFileEncoding: (NotRequired - Default 'UTF-8')
+    #  The value of an encoding for source files that are generated classes.
+    #  If source files of your project are not UTF-8, specify your encoding here.
+    #
+    #; sourceFileEncoding = UTF-8
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o sourceCodeLineSeparator: (NotRequired - Default no setting)
+    #  The line separator setting for source code of generated classes.
+    #   LF   -> converted to LF
+    #   CRLF -> converted to CRLF
+    #   (no setting) -> no convert (template default is CRLF)
+    #
+    #; sourceCodeLineSeparator = LF
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o applicationBehaviorMap: (NotRequired - Default map:{})
+    #  The settings for Application Behavior.
+    #  Elements of this map are as below:
+    #   o isApplicationBehaviorProject: (NotRequired - Default false)
+    #    Does the project is for application behaviors?
+    #    This property is a main signal for Application Behavior.
+    #    Other properties (for Application Behavior) work when this is true.
+    #   o libraryProjectPackageBase: (NotRequired - Default same as application's one)
+    #    If application package base is different from library's one,
+    #    set the property a value 'library's one'.
+    #
+    #; applicationBehaviorMap = map:{
+    #    ; isApplicationBehaviorProject = false
+    #    ; libraryProjectPackageBase = 
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o outputPackageAdjustmentMap: (NotRequired - Default map:{})
+    #  The adjustments for output package.
+    #  Elements of this map are as below:
+    #   o flatDirectoryPackage: (Required - Default '')
+    #    This is only for CSharp.
+    #    e.g. Aaa.Bbb.DBFlute --> Directory: source/Aaa.Bbb.DBFlute/AllCommon
+    #   o omitDirectoryPackage: (NotRequired - Default '')
+    #    This is only for CSharp.
+    #    e.g. Aaa --> Directory: source/Bbb/DBFlute/AllCommon
+    #
+    #; outputPackageAdjustmentMap = map:{
+    #    ; flatDirectoryPackage = Aaa.Bbb.DBFlute
+    #    ; omitDirectoryPackage = Aaa
+    #}
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o dbfluteSystemFinalTimeZone: (NotRequired - Default null)
+    #  The ID of time-zone for DBFlute system.
+    #  basically for e.g. DisplaySql, Date conversion, LocalDate mapping and so on...
+    #
+    #; dbfluteSystemFinalTimeZone = GMT
+    # - - - - - - - - - -/
+}
+# ----------------/

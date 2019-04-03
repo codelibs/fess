@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="fessCrawler">
+	<include path="crawler/container.xml" />
+
+	<component name="contentLengthHelper"
+		class="org.codelibs.fess.crawler.helper.ContentLengthHelper" instance="singleton">
+		<property name="defaultMaxLength">10485760</property><!-- 10M -->
+		<postConstruct name="addMaxLength">
+			<arg>"text/html"</arg>
+			<arg>2621440</arg><!-- 2.5M -->
+		</postConstruct>
+	</component>
+</components>

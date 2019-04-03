@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="esclient.xml"/>
+
+	<!-- The components of DBFlute Runtime. -->
+	<component name="invokerAssistant" class="org.codelibs.fess.es.common.ImplementedInvokerAssistant"/>
+	<component name="behaviorCommandInvoker" class="org.dbflute.bhv.core.BehaviorCommandInvoker"/>
+
+	<!-- The components of Behavior. -->
+	<component name="accessTokenBhv" class="org.codelibs.fess.es.config.exbhv.AccessTokenBhv"/>
+	<component name="badWordBhv" class="org.codelibs.fess.es.config.exbhv.BadWordBhv"/>
+	<component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv"/>
+	<component name="crawlingInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv"/>
+	<component name="crawlingInfoParamBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv"/>
+	<component name="dataConfigBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigBhv"/>
+	<component name="duplicateHostBhv" class="org.codelibs.fess.es.config.exbhv.DuplicateHostBhv"/>
+	<component name="elevateWordToLabelBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv"/>
+	<component name="elevateWordBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordBhv"/>
+	<component name="failureUrlBhv" class="org.codelibs.fess.es.config.exbhv.FailureUrlBhv"/>
+	<component name="fileAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv"/>
+	<component name="fileConfigBhv" class="org.codelibs.fess.es.config.exbhv.FileConfigBhv"/>
+	<component name="jobLogBhv" class="org.codelibs.fess.es.config.exbhv.JobLogBhv"/>
+	<component name="keyMatchBhv" class="org.codelibs.fess.es.config.exbhv.KeyMatchBhv"/>
+	<component name="labelTypeBhv" class="org.codelibs.fess.es.config.exbhv.LabelTypeBhv"/>
+	<component name="pathMappingBhv" class="org.codelibs.fess.es.config.exbhv.PathMappingBhv"/>
+	<component name="relatedContentBhv" class="org.codelibs.fess.es.config.exbhv.RelatedContentBhv"/>
+	<component name="relatedQueryBhv" class="org.codelibs.fess.es.config.exbhv.RelatedQueryBhv"/>
+	<component name="requestHeaderBhv" class="org.codelibs.fess.es.config.exbhv.RequestHeaderBhv"/>
+	<component name="roleTypeBhv" class="org.codelibs.fess.es.config.exbhv.RoleTypeBhv"/>
+	<component name="scheduledJobBhv" class="org.codelibs.fess.es.config.exbhv.ScheduledJobBhv"/>
+	<component name="thumbnailQueueBhv" class="org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv"/>
+	<component name="webAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv"/>
+	<component name="webConfigBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigBhv"/>
+
+</components>

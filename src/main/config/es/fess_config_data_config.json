@@ -1,0 +1,77 @@
+{
+  ".fess_config.data_config" : {
+    "aliases" : { },
+    "mappings" : {
+      "data_config" : {
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "boost" : {
+            "type" : "float"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "description" : {
+            "type" : "text"
+          },
+          "handlerName" : {
+            "type" : "keyword"
+          },
+          "handlerParameter" : {
+            "type" : "keyword"
+          },
+          "handlerScript" : {
+            "type" : "keyword"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "permissions" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "virtualHosts" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "data_config" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              },
+              "virtualHosts" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021051038",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "H4zzbuU5SJWFOLRnofoiNw",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.data_config"
+      }
+    }
+  }
+}

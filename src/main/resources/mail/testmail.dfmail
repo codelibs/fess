@@ -1,0 +1,7 @@
+/*
+ [Test Mail]
+*/
+subject: [FESS] Test Mail: /*pmb.hostname:orElse('Unknown')*/
+>>>
+This is a test mail from /*pmb.hostname:orElse('Unknown')*/
+

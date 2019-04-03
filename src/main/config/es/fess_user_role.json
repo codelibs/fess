@@ -1,0 +1,26 @@
+{
+  ".fess_user.role" : {
+    "aliases" : { },
+    "mappings" : {
+      "role" : {
+        "properties" : {
+          "name" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021059090",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "ugUWT7UpRCau5xEMgWOBsw",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_user.role"
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="fessCrawler">
+	<include path="crawler/transformer_basic.xml"/>
+
+	<component name="fessXpathTransformer" class="org.codelibs.fess.crawler.transformer.FessXpathTransformer" instance="singleton">
+		<property name="name">"fessXpathTransformer"</property>
+		<property name="featureMap">defaultFeatureMap</property>
+		<property name="propertyMap">defaultPropertyMap</property>
+		<property name="childUrlRuleMap">htmlUrlRuleMap</property>
+		<!--
+		<property name="invalidUrlPattern">@java.util.regex.Pattern@compile("^\\s*javascript:|^\\s*mailto:|^\\s*irc:|^\\s*skype:|^\\s*callto:",@java.util.regex.Pattern@CASE_INSENSITIVE)</property>
+		 -->
+		<property name="convertUrlMap">
+			{"feed:" : "http:"}
+		</property>
+		<!-- segment -->
+		<postConstruct name="addFieldRule">
+			<arg>"title"</arg>
+			<arg>"//TITLE"</arg>
+			<arg>true</arg>
+		</postConstruct>
+		<postConstruct name="addFieldRule">
+			<arg>"important_content"</arg>
+			<arg>"//*[self::H1 or self::H2 or self::H3]"</arg>
+			<arg>true</arg>
+		</postConstruct>
+	</component>
+
+	<component name="fessFileTransformer" class="org.codelibs.fess.crawler.transformer.FessFileTransformer" instance="singleton">
+		<property name="name">"fessFileTransformer"</property>
+	</component>
+
+	<component name="fessStandardTransformer" class="org.codelibs.fess.crawler.transformer.FessStandardTransformer" instance="singleton">
+		<property name="name">"fessStandardTransformer"</property>
+	</component>
+</components>

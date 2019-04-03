@@ -1,0 +1,12 @@
+/*
+ [Crawler Notification]
+*/
+subject: [FESS] Status Change: /*pmb.hostname:orElse('Unknown')*/
+>>>
+--- Server Info ---
+Cluster Name: /*pmb.clustername:orElse('Unknown')*/
+Host Name: /*pmb.hostname:orElse('Unknown')*/
+
+--- Status ---
+Cluster Status: /*pmb.clusterstatus:orElse('Unknown')*/
+

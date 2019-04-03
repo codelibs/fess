@@ -1,0 +1,30 @@
+sudo: required
+
+language: java
+
+matrix:
+  include:
+    - jdk: openjdk8
+    - jdk: openjdk9
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+    - jdk: openjdk10
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+
+install:
+  - mvn antrun:run
+  - mvn package
+
+before_script:
+  - java -version
+  - bash .travis/before_script.sh
+
+script:
+  - bash .travis/run.sh

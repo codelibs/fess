@@ -1,0 +1,24 @@
+# /---------------------------------------------------------------------------
+# sequenceMap: (NotRequired - Default map:{})
+# 
+# The relation mappings between sequence and table.
+# If you don't specify the mappings, you cannot insert a record of the table by sequence. 
+# The table names are treated as case insensitive.
+# 
+# Example:
+# map:{
+#     ; PURCHASE     = SEQ_PURCHASE
+#     ; MEMBER       = SEQ_MEMBER
+#     ; MEMBER_LOGIN = SEQ_MEMBER_LOGIN
+#     ; PRODUCT      = SEQ_PRODUCT
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    #; PURCHASE     = SEQ_PURCHASE
+    #; MEMBER       = SEQ_MEMBER
+    #; MEMBER_LOGIN = SEQ_MEMBER_LOGIN
+    #; PRODUCT      = SEQ_PRODUCT
+}
+# ----------------/

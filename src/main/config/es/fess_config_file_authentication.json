@@ -1,0 +1,56 @@
+{
+  ".fess_config.file_authentication" : {
+    "aliases" : { },
+    "mappings" : {
+      "file_authentication" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "fileConfigId" : {
+            "type" : "keyword"
+          },
+          "hostname" : {
+            "type" : "keyword"
+          },
+          "parameters" : {
+            "type" : "keyword"
+          },
+          "password" : {
+            "type" : "keyword"
+          },
+          "port" : {
+            "type" : "integer"
+          },
+          "protocolScheme" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "username" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021053135",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "-gono3d2R0KP5po-ggBr0A",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.file_authentication"
+      }
+    }
+  }
+}

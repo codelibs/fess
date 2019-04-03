@@ -1,0 +1,59 @@
+{
+  ".fess_config.access_token" : {
+    "aliases" : { },
+    "mappings" : {
+      "access_token" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "expiredTime" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "parameter_name" : {
+            "type" : "keyword"
+          },
+          "permissions" : {
+            "type" : "keyword"
+          },
+          "token" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "access_token" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021049417",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "s8tK7hldQzWbNtsfzHIZZQ",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.access_token"
+      }
+    }
+  }
+}

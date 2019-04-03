@@ -1,0 +1,44 @@
+{
+  ".fess_config.duplicate_host" : {
+    "aliases" : { },
+    "mappings" : {
+      "duplicate_host" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "duplicateHostName" : {
+            "type" : "keyword"
+          },
+          "regularName" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021051920",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "fP473Sr-RZO2d36NkKGgKQ",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.duplicate_host"
+      }
+    }
+  }
+}

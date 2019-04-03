@@ -1,0 +1,28 @@
+{
+    "properties": {
+      "term": {
+        "type": "keyword"
+      },
+      "content": {
+        "type": "keyword"
+      },
+      "virtualHost": {
+        "type": "keyword"
+      },
+      "sortOrder": {
+        "type": "integer"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

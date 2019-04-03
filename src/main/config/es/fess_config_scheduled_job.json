@@ -1,0 +1,62 @@
+{
+  ".fess_config.scheduled_job" : {
+    "aliases" : { },
+    "mappings" : {
+      "scheduled_job" : {
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "crawler" : {
+            "type" : "boolean"
+          },
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "cronExpression" : {
+            "type" : "keyword"
+          },
+          "jobLogging" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "scriptData" : {
+            "type" : "keyword"
+          },
+          "scriptType" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "target" : {
+            "type" : "keyword"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021057017",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "bhfc7WeARZymc_hr4dF1og",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.scheduled_job"
+      }
+    }
+  }
+}

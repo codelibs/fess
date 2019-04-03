@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="dataStoreFactory" class="org.codelibs.fess.ds.DataStoreFactory">
+	</component>
+	<component name="indexUpdateCallback" class="org.codelibs.fess.ds.callback.IndexUpdateCallbackImpl" instance="prototype">
+	</component>
+</components>

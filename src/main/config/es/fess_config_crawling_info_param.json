@@ -1,0 +1,35 @@
+{
+  ".fess_config.crawling_info_param" : {
+    "aliases" : { },
+    "mappings" : {
+      "crawling_info_param" : {
+        "properties" : {
+          "crawlingInfoId" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "key" : {
+            "type" : "keyword"
+          },
+          "value" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021050704",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "X-fixtWRQdGqWMpUEEs_Ag",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.crawling_info_param"
+      }
+    }
+  }
+}

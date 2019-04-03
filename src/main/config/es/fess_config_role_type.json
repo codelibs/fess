@@ -1,0 +1,44 @@
+{
+  ".fess_config.role_type" : {
+    "aliases" : { },
+    "mappings" : {
+      "role_type" : {
+        "properties" : {
+          "createdBy" : {
+            "type" : "keyword"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "keyword"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "keyword"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "value" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "creation_date" : "1509021056731",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "MnnT8tsrT5GqpB8pYafyWg",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : ".fess_config.role_type"
+      }
+    }
+  }
+}

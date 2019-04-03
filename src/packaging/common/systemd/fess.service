@@ -1,0 +1,40 @@
+[Unit]
+Description=Fess
+Documentation=http://fess.codelibs.org/
+Wants=network-online.target
+After=network-online.target elasticsearch.service
+Requires=elasticsearch.service
+
+[Service]
+Environment=FESS_HOME=${packaging.fess.home.dir}
+EnvironmentFile=-${packaging.env.file}
+
+User=${packaging.fess.user}
+Group=${packaging.fess.group}
+
+ExecStart=${packaging.fess.bin.dir}/fess
+
+# Connects standard output to /dev/null
+StandardOutput=null
+
+# Connects standard error to journal
+StandardError=journal
+
+# When a JVM receives a SIGTERM signal it exits with code 143
+SuccessExitStatus=143
+
+# Specifies the maximum file descriptor number that can be opened by this process
+LimitNOFILE=${packaging.os.max.open.files}
+
+# Specifies the maximum number of bytes of memory that may be locked into RAM
+# Set to "infinity" if you use the 'bootstrap.mlockall: true' option
+# in fess.yml and 'MAX_LOCKED_MEMORY=unlimited' in ${packaging.env.file}
+#LimitMEMLOCK=infinity
+
+# Shutdown delay in seconds, before process is tried to be killed with KILL (if configured)
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
+
+# Built for ${project.name}-${project.version} (${packaging.type})

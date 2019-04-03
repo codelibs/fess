@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="fess_config.xml"/>
+
+	<component name="webApiManagerFactory" class="org.codelibs.fess.api.WebApiManagerFactory">
+	</component>
+
+	<component name="jsonApiManager" class="org.codelibs.fess.api.json.JsonApiManager">
+	</component>
+	<component name="esApiManager" class="org.codelibs.fess.api.es.EsApiManager">
+	</component>
+	<component name="suggestApiManager" class="org.codelibs.fess.api.suggest.SuggestApiManager">
+	</component>
+	<component name="gsaApiManager" class="org.codelibs.fess.api.gsa.GsaApiManager">
+	</component>
+
+</components>
