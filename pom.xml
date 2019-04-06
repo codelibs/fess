@@ -37,7 +37,7 @@
 		<!-- Main Framework -->
 		<dbflute.version>1.1.9</dbflute.version>
 		<lastaflute.version>1.1.1</lastaflute.version>
-		<lasta.di.version>0.8.0-B-SNAPSHOT</lasta.di.version>
+		<lasta.di.version>0.8.0-RC1</lasta.di.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.3</lasta.job.version>
 		<mailflute.version>0.6.0</mailflute.version>
