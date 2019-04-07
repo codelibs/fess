@@ -31,7 +31,7 @@
 		</property>
 		<postConstruct name="addRule">
 			<arg>"url"</arg>
-			<arg>"http[s]?:.*sitemap[^/]*.xml$|http[s]?:.*sitemap[^/]*.gz$|http[s]?:.*sitemap[^/]*.txt$"</arg>
+			<arg>"http[s]?:.*sitemap[^/]*\.xml.*|http[s]?:.*sitemap[^/]*\.gz.*|http[s]?:.*sitemap[^/]*\.txt.*"</arg>
 		</postConstruct>
 	</component>
 
