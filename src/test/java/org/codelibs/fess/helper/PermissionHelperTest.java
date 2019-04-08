@@ -37,6 +37,14 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.encode("{user}"));
         assertNull(permissionHelper.encode("{role}"));
         assertNull(permissionHelper.encode("{group}"));
+        assertNull(permissionHelper.encode("(allow)"));
+        assertNull(permissionHelper.encode("(allow){user}"));
+        assertNull(permissionHelper.encode("(allow){group}"));
+        assertNull(permissionHelper.encode("(allow){group}"));
+        assertNull(permissionHelper.encode("(deny)"));
+        assertNull(permissionHelper.encode("(deny){user}"));
+        assertNull(permissionHelper.encode("(deny){group}"));
+        assertNull(permissionHelper.encode("(deny){group}"));
 
         assertEquals("1guest", permissionHelper.encode("{user}guest"));
         assertEquals("Rguest", permissionHelper.encode("{role}guest"));
@@ -44,6 +52,18 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("1guest", permissionHelper.encode("{USER}guest"));
         assertEquals("Rguest", permissionHelper.encode("{ROLE}guest"));
         assertEquals("2guest", permissionHelper.encode("{GROUP}guest"));
+        assertEquals("1guest", permissionHelper.encode("(allow){user}guest"));
+        assertEquals("Rguest", permissionHelper.encode("(allow){role}guest"));
+        assertEquals("2guest", permissionHelper.encode("(allow){group}guest"));
+        assertEquals("1guest", permissionHelper.encode("(allow){USER}guest"));
+        assertEquals("Rguest", permissionHelper.encode("(allow){ROLE}guest"));
+        assertEquals("2guest", permissionHelper.encode("(allow){GROUP}guest"));
+        assertEquals("D1guest", permissionHelper.encode("(deny){user}guest"));
+        assertEquals("DRguest", permissionHelper.encode("(deny){role}guest"));
+        assertEquals("D2guest", permissionHelper.encode("(deny){group}guest"));
+        assertEquals("D1guest", permissionHelper.encode("(deny){USER}guest"));
+        assertEquals("DRguest", permissionHelper.encode("(deny){ROLE}guest"));
+        assertEquals("D2guest", permissionHelper.encode("(deny){GROUP}guest"));
 
         assertEquals("guest", permissionHelper.encode("guest"));
 
@@ -83,10 +103,14 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.decode(null));
         assertNull(permissionHelper.decode(""));
         assertNull(permissionHelper.decode(" "));
+        assertNull(permissionHelper.decode("D"));
 
         assertEquals("{user}guest", permissionHelper.decode("1guest"));
         assertEquals("{role}guest", permissionHelper.decode("Rguest"));
         assertEquals("{group}guest", permissionHelper.decode("2guest"));
+        assertEquals("(deny){user}guest", permissionHelper.decode("D1guest"));
+        assertEquals("(deny){role}guest", permissionHelper.decode("DRguest"));
+        assertEquals("(deny){group}guest", permissionHelper.decode("D2guest"));
 
         assertEquals("guest", permissionHelper.decode("guest"));
 
@@ -107,6 +131,11 @@ public class PermissionHelperTest extends UnitFessTestCase {
             @Override
             public String getRoleSearchRolePrefix() {
                 return "";
+            }
+
+            @Override
+            public String getRoleSearchDeniedPrefix() {
+                return "D";
             }
         });
         try {
