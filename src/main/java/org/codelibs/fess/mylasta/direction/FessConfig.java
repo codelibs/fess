@@ -857,6 +857,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. R */
     String ROLE_SEARCH_ROLE_PREFIX = "role.search.role.prefix";
 
+    /** The key of the configuration. e.g. D */
+    String ROLE_SEARCH_DENIED_PREFIX = "role.search.denied.prefix";
+
     /** The key of the configuration. e.g. / */
     String COOKIE_DEFAULT_PATH = "cookie.default.path";
 
@@ -3982,6 +3985,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchRolePrefix();
+
+    /**
+     * Get the value for the key 'role.search.denied.prefix'. <br>
+     * The value is, e.g. D <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchDeniedPrefix();
 
     /**
      * Get the value for the key 'cookie.default.path'. <br>
@@ -7220,6 +7230,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ROLE_SEARCH_ROLE_PREFIX);
         }
 
+        public String getRoleSearchDeniedPrefix() {
+            return get(FessConfig.ROLE_SEARCH_DENIED_PREFIX);
+        }
+
         public String getCookieDefaultPath() {
             return get(FessConfig.COOKIE_DEFAULT_PATH);
         }
@@ -8508,6 +8522,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ROLE_SEARCH_USER_PREFIX, "1");
             defaultMap.put(FessConfig.ROLE_SEARCH_GROUP_PREFIX, "2");
             defaultMap.put(FessConfig.ROLE_SEARCH_ROLE_PREFIX, "R");
+            defaultMap.put(FessConfig.ROLE_SEARCH_DENIED_PREFIX, "D");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_PATH, "/");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
             defaultMap.put(FessConfig.COOKIE_ETERNAL_EXPIRE, "86400");
