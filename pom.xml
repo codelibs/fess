@@ -64,7 +64,7 @@
 		<suggest.version>7.0.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.0.0-rc2</elasticsearch.version>
+		<elasticsearch.version>7.0.0</elasticsearch.version>
 		<elasticsearch.httpclient.version>7.0.0-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
