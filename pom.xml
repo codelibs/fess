@@ -1253,7 +1253,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
-			<version>1.28.0</version>
+			<version>1.25.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1268,7 +1268,7 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-jackson2</artifactId>
-			<version>1.29.0</version>
+			<version>1.25.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
