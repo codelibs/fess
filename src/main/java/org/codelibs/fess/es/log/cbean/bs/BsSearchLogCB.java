@@ -188,6 +188,10 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("hitCount");
         }
 
+        public void columnHitCountRelation() {
+            doColumn("hitCountRelation");
+        }
+
         public void columnLanguages() {
             doColumn("languages");
         }

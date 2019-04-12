@@ -413,6 +413,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             RenderDataUtil.register(data, "pageSize", pageSize);
             RenderDataUtil.register(data, "currentPageNumber", currentPageNumber);
             RenderDataUtil.register(data, "allRecordCount", allRecordCount);
+            RenderDataUtil.register(data, "allRecordCountRelation", allRecordCountRelation);
             RenderDataUtil.register(data, "allPageCount", allPageCount);
             RenderDataUtil.register(data, "existNextPage", existNextPage);
             RenderDataUtil.register(data, "existPrevPage", existPrevPage);

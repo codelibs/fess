@@ -624,6 +624,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_TIMEOUT_LOGGING = "query.timeout.logging";
 
+    /** The key of the configuration. e.g. 10000 */
+    String QUERY_TRACK_TOTAL_HITS = "query.track.total.hits";
+
     /** The key of the configuration. e.g. location */
     String QUERY_GEO_FIELDS = "query.geo.fields";
 
@@ -3254,6 +3257,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryTimeoutLogging();
+
+    /**
+     * Get the value for the key 'query.track.total.hits'. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryTrackTotalHits();
+
+    /**
+     * Get the value for the key 'query.track.total.hits' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryTrackTotalHitsAsInteger();
 
     /**
      * Get the value for the key 'query.geo.fields'. <br>
@@ -6866,6 +6884,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_TIMEOUT_LOGGING);
         }
 
+        public String getQueryTrackTotalHits() {
+            return get(FessConfig.QUERY_TRACK_TOTAL_HITS);
+        }
+
+        public Integer getQueryTrackTotalHitsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_TRACK_TOTAL_HITS);
+        }
+
         public String getQueryGeoFields() {
             return get(FessConfig.QUERY_GEO_FIELDS);
         }
@@ -8460,6 +8486,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");
+            defaultMap.put(FessConfig.QUERY_TRACK_TOTAL_HITS, "10000");
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");

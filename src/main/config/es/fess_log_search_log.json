@@ -13,6 +13,9 @@
           "hitCount" : {
             "type" : "long"
           },
+          "hitCountRelation" : {
+            "type" : "keyword"
+          },
           "languages" : {
             "type" : "keyword"
           },

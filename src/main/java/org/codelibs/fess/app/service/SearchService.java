@@ -166,6 +166,7 @@ public class SearchService {
         data.setPageSize(queryResponseList.getPageSize());
         data.setCurrentPageNumber(queryResponseList.getCurrentPageNumber());
         data.setAllRecordCount(queryResponseList.getAllRecordCount());
+        data.setAllRecordCountRelation(queryResponseList.getAllRecordCountRelation());
         data.setAllPageCount(queryResponseList.getAllPageCount());
         data.setExistNextPage(queryResponseList.isExistNextPage());
         data.setExistPrevPage(queryResponseList.isExistPrevPage());

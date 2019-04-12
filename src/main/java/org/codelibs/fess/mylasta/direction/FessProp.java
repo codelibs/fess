@@ -70,6 +70,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    String QUERY_TRACK_TOTAL_HITS_VALUE = "queryTrackTotalHitsValue";
+
     String CORS_ALLOW_ORIGIN = "CorsAllowOrigin";
 
     String API_DASHBOARD_RESPONSE_HEADER_LIST = "apiDashboardResponseHeaderList";
@@ -1959,6 +1961,28 @@ public interface FessProp {
     default Set<String> getSessionTrackingModesAsSet() {
         return split(getSessionTrackingModes(), ",").get(
                 stream -> stream.map(s -> s.trim().toUpperCase(Locale.ENGLISH)).collect(Collectors.toSet()));
+    }
+
+    String getQueryTrackTotalHits();
+
+    default Object getQueryTrackTotalHitsValue() {
+        Object value = propMap.get(QUERY_TRACK_TOTAL_HITS_VALUE);
+        if (value == null) {
+            String v = getQueryTrackTotalHits();
+            if (Constants.TRUE.equalsIgnoreCase(v)) {
+                value = Boolean.TRUE;
+            } else if (Constants.FALSE.equalsIgnoreCase(v)) {
+                value = Boolean.FALSE;
+            } else {
+                try {
+                    value = Integer.valueOf(Integer.parseInt(v));
+                } catch (NumberFormatException e) {
+                    value = StringUtil.EMPTY;
+                }
+            }
+            propMap.put(QUERY_TRACK_TOTAL_HITS_VALUE, value);
+        }
+        return value;
     }
 
 }

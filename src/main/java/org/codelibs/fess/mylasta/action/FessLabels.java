@@ -620,6 +620,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt;&lt;span class="hidden-phone"&gt; -&lt;/span&gt; &lt;b&gt;{3}&lt;/b&gt; of &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
     public static final String LABELS_search_result_status = "{labels.search_result_status}";
 
+    /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt;&lt;span class="hidden-phone"&gt; -&lt;/span&gt; &lt;b&gt;{3}&lt;/b&gt; of about &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
+    public static final String LABELS_search_result_status_over = "{labels.search_result_status_over}";
+
     /** The key of the message: ({0} sec) */
     public static final String LABELS_search_result_time = "{labels.search_result_time}";
 

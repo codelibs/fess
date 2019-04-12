@@ -57,6 +57,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     protected long allRecordCount;
 
+    protected String allRecordCountRelation;
+
     protected int allPageCount;
 
     protected boolean existNextPage;
@@ -93,6 +95,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final SearchHits searchHits = searchResponse.getHits();
             allRecordCount = searchHits.getTotalHits().value;
+            allRecordCountRelation = searchHits.getTotalHits().relation.toString();
             queryTime = searchResponse.getTook().millis();
 
             if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
@@ -360,6 +363,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     public long getAllRecordCount() {
         return allRecordCount;
+    }
+
+    public String getAllRecordCountRelation() {
+        return allRecordCountRelation;
     }
 
     public int getAllPageCount() {

@@ -43,6 +43,9 @@
       "hitCount": {
         "type": "long"
       },
+      "hitCountRelation": {
+        "type": "keyword"
+      },
       "queryOffset": {
         "type": "integer"
       },
