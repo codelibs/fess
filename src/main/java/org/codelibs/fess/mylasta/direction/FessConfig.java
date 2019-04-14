@@ -47,13 +47,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=75
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -82,12 +81,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=75
     -Dgroovy.use.classvalue=true
     -Dio.netty.noUnsafe=true
     -Dio.netty.noKeySetOptimization=true
@@ -107,13 +105,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=75
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -1484,13 +1481,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=75
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -1524,12 +1520,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=75
     -Dgroovy.use.classvalue=true
     -Dio.netty.noUnsafe=true
     -Dio.netty.noKeySetOptimization=true
@@ -1553,13 +1548,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=75
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -8310,13 +8304,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=75\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=75\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap
                     .put(FessConfig.JVM_THUMBNAIL_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=75\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");

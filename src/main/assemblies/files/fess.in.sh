@@ -47,10 +47,8 @@ fi
 JAVA_OPTS="$JAVA_OPTS -Djna.nosys=true"
 JAVA_OPTS="$JAVA_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
 
-JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"
-
-JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
-JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
+JAVA_OPTS="$JAVA_OPTS -XX:+UseG1GC"
+JAVA_OPTS="$JAVA_OPTS -XX:InitiatingHeapOccupancyPercent=75"
 
 JAVA_OPTS="$JAVA_OPTS -Dio.netty.noUnsafe=true"
 JAVA_OPTS="$JAVA_OPTS -Dio.netty.noKeySetOptimization=true"
