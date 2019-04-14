@@ -82,6 +82,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected static final String AZUREAD_CLIENT_ID = "aad.client.id";
 
+    protected static final String AZUREAD_REPLY_URL = "aad.reply.url";
+
     protected static final String STATES = "aadStates";
 
     protected static final String STATE = "state";
@@ -129,7 +131,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String authUrl =
                 getAuthority() + getTenant()
                         + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                        + URLEncoder.encode(request.getRequestURL().toString(), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
+                        + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
                         + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {}", authUrl);
@@ -179,7 +181,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (authResponse instanceof AuthenticationSuccessResponse) {
             final AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse) authResponse;
             validateAuthRespMatchesCodeFlow(oidcResponse);
-            final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), request.getRequestURL().toString());
+            final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
             validateNonce(stateData, authData);
 
             return new AzureAdCredential(authData);
@@ -435,6 +437,14 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected long getStateTtl() {
         return Long.parseLong(ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_STATE_TTL, "3600"));
+    }
+
+    protected String getReplyUrl(final HttpServletRequest request) {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_REPLY_URL, StringUtil.EMPTY);
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        }
+        return request.getRequestURL().toString();
     }
 
     @Override
