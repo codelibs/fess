@@ -93,18 +93,6 @@
 														property="virtualHosts" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.label_type" /></th>
-												<td><c:forEach var="l" varStatus="s"
-														items="${labelTypeItems}">
-														<c:forEach var="ltid" varStatus="s"
-															items="${labelTypeIds}">
-															<c:if test="${ltid==l.id}">
-																${f:h(l.name)}<br />
-															</c:if>
-														</c:forEach>
-													</c:forEach></td>
-											</tr>
-											<tr>
 												<th><la:message key="labels.available" /></th>
 												<td><la:hidden property="available" /> <c:if
 														test="${available=='true'}">

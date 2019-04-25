@@ -112,19 +112,6 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
-												key="labels.label_type" /></label>
-										<div class="col-sm-9">
-											<la:errors property="labelTypeIds" />
-											<la:select styleId="labelTypeIds" property="labelTypeIds" multiple="true"
-												styleClass="form-control">
-												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
-												</c:forEach>
-											</la:select>
-										</div>
-									</div>
-									<div class="form-group">
 										<label for="available" class="col-sm-3 control-label"><la:message
 												key="labels.available" /></label>
 										<div class="col-sm-9">
