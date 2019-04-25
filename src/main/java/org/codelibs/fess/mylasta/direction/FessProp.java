@@ -55,6 +55,7 @@ import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.JvmUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.search.sort.SortBuilder;
@@ -679,19 +680,19 @@ public interface FessProp {
     String getJvmCrawlerOptions();
 
     default String[] getJvmCrawlerOptionsAsArray() {
-        return getJvmCrawlerOptions().split("\n");
+        return JvmUtil.filterJvmOptions(getJvmCrawlerOptions().split("\n"));
     }
 
     String getJvmSuggestOptions();
 
     default String[] getJvmSuggestOptionsAsArray() {
-        return getJvmSuggestOptions().split("\n");
+        return JvmUtil.filterJvmOptions(getJvmSuggestOptions().split("\n"));
     }
 
     String getJvmThumbnailOptions();
 
     default String[] getJvmThumbnailOptionsAsArray() {
-        return getJvmThumbnailOptions().split("\n");
+        return JvmUtil.filterJvmOptions(getJvmThumbnailOptions().split("\n"));
     }
 
     String getCrawlerDocumentHtmlPrunedTags();
