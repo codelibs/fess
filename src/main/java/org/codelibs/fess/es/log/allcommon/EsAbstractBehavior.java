@@ -106,7 +106,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
         }
-        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits().value;
+        return (int) getSearchHits(esCb.build(builder).execute().actionGet(searchTimeout)).getTotalHits().value;
     }
 
     @Override
@@ -145,7 +145,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final SearchResponse response = esCb.build(builder).execute().actionGet(searchTimeout);
 
         final EsPagingResultBean<RESULT> list = new EsPagingResultBean<>(builder);
-        final SearchHits searchHits = response.getHits();
+        final SearchHits searchHits = getSearchHits(response);
         searchHits.forEach(hit -> {
             final Map<String, Object> source = hit.getSourceAsMap();
             final RESULT entity = createEntity(source, entityType);
@@ -237,7 +237,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         String scrollId = response.getScrollId();
         try {
             while (scrollId != null) {
-                final SearchHits searchHits = response.getHits();
+                final SearchHits searchHits = getSearchHits(response);
                 final SearchHit[] hits = searchHits.getHits();
                 if (hits.length == 0) {
                     break;
@@ -375,7 +375,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         int count = 0;
         try {
             while (scrollId != null) {
-                final SearchHits searchHits = response.getHits();
+                final SearchHits searchHits = getSearchHits(response);
                 final SearchHit[] hits = searchHits.getHits();
                 if (hits.length == 0) {
                     break;
@@ -550,6 +550,14 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     protected Date toDate(Object value) {
         return DfTypeUtil.toDate(value);
+    }
+
+    protected SearchHits getSearchHits(final SearchResponse response) {
+        SearchHits hits = response.getHits();
+        if (hits == null) {
+            throw new IllegalBehaviorStateException("hits is null." + response.status());
+        }
+        return hits;
     }
 
     public static class BulkList<E, B> implements List<E> {
