@@ -187,7 +187,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
                             .setTransport(true).execute().actionGet(10000L);
             final XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
-            response.toXContent(XContentFactory.jsonBuilder(), ToXContent.EMPTY_PARAMS);
+            response.toXContent(builder, ToXContent.EMPTY_PARAMS);
             builder.endObject();
             builder.flush();
             try (OutputStream out = builder.getOutputStream()) {
