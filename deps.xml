@@ -74,6 +74,7 @@
 			<param name="file.version" value="12.6.0" />
 		</antcall>
 		<!-- fess-ds-gitbucket -->
+		<!--
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
@@ -81,6 +82,7 @@
 			<param name="jar.version" value="12.6.0" />
 			<param name="file.version" value="12.6.0" />
 		</antcall>
+		-->
 		<!-- fess-ds-gsuite -->
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
