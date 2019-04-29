@@ -2,12 +2,8 @@ sudo: required
 
 language: java
 
-matrix:
-  include:
-    - jdk: openjdk11
-      before_install:
-        - rm "${JAVA_HOME}/lib/security/cacerts"
-        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+jdk:
+  - openjdk11
 
 cache:
   directories:
