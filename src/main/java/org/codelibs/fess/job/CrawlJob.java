@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.job;
 
-import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -216,7 +215,7 @@ public class CrawlJob extends ExecJob {
         buf.append(File.separator);
         buf.append("env");
         buf.append(File.separator);
-        buf.append("crawler");
+        buf.append(getExecuteType());
         buf.append(File.separator);
         buf.append("resources");
         buf.append(cpSeparator);
@@ -236,8 +235,8 @@ public class CrawlJob extends ExecJob {
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
                 + File.separator);
         // WEB-INF/env/crawler/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/crawler/lib")), "WEB-INF" + File.separator
-                + "env" + File.separator + "crawler" + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")), "WEB-INF"
+                + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -254,7 +253,7 @@ public class CrawlJob extends ExecJob {
         final String systemLastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(systemLastaEnv)) {
             if (systemLastaEnv.equals("web")) {
-                cmdList.add("-Dlasta.env=crawler");
+                cmdList.add("-Dlasta.env=" + getExecuteType());
             } else {
                 cmdList.add("-Dlasta.env=" + systemLastaEnv);
             }
@@ -263,9 +262,9 @@ public class CrawlJob extends ExecJob {
         }
 
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
-        cmdList.add("-Dfess.crawler.process=true");
+        cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
-        addSystemProperty(cmdList, "fess.log.name", "fess-crawler", "-crawler");
+        addSystemProperty(cmdList, "fess.log.name", "fess-" + getExecuteType(), "-" + getExecuteType());
         if (logLevel == null) {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {
@@ -291,8 +290,8 @@ public class CrawlJob extends ExecJob {
 
         cmdList.add(ComponentUtil.getThumbnailManager().getThumbnailPathOption());
 
-        if (StringUtil.isNotBlank(jvmOptions)) {
-            split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
+        if (!jvmOptions.isEmpty()) {
+            jvmOptions.stream().filter(StringUtil::isNotBlank).forEach(cmdList::add);
         }
 
         cmdList.add(Crawler.class.getCanonicalName());
@@ -322,7 +321,7 @@ public class CrawlJob extends ExecJob {
         File propFile = null;
         try {
             cmdList.add("-p");
-            propFile = File.createTempFile("crawler_", ".properties");
+            propFile = File.createTempFile(getExecuteType() + "_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 final Properties prop = new Properties();
@@ -372,6 +371,11 @@ public class CrawlJob extends ExecJob {
                 deleteTempDir(ownTmpDir);
             }
         }
+    }
+
+    @Override
+    protected String getExecuteType() {
+        return "crawler";
     }
 
 }
