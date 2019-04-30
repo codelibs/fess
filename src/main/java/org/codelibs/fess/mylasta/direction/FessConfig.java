@@ -408,6 +408,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. content,important_content,title */
     String INDEXER_LANGUAGE_FIELDS = "indexer.language.fields";
 
+    /** The key of the configuration. e.g. 1000 */
+    String INDEXER_LANGUAGE_DETECT_LENGTH = "indexer.language.detect.length";
+
     /** The key of the configuration. e.g. default */
     String INDEX_CODEC = "index.codec";
 
@@ -2623,6 +2626,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerLanguageFields();
+
+    /**
+     * Get the value for the key 'indexer.language.detect.length'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerLanguageDetectLength();
+
+    /**
+     * Get the value for the key 'indexer.language.detect.length' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerLanguageDetectLengthAsInteger();
 
     /**
      * Get the value for the key 'index.codec'. <br>
@@ -6546,6 +6564,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEXER_LANGUAGE_FIELDS);
         }
 
+        public String getIndexerLanguageDetectLength() {
+            return get(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH);
+        }
+
+        public Integer getIndexerLanguageDetectLengthAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH);
+        }
+
         public String getIndexCodec() {
             return get(FessConfig.INDEX_CODEC);
         }
@@ -8439,6 +8465,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_FIELDS, "content,important_content,title");
+            defaultMap.put(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH, "1000");
             defaultMap.put(FessConfig.INDEX_CODEC, "default");
             defaultMap.put(FessConfig.INDEX_number_of_shards, "5");
             defaultMap.put(FessConfig.INDEX_auto_expand_replicas, "0-1");
