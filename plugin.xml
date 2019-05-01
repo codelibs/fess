@@ -22,12 +22,12 @@
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="7.0.1-SNAPSHOT" />
-			<param name="plugin.zip.version" value="7.0.1-20190412.223833-2" />
+			<param name="plugin.version" value="7.0.1" />
+			<param name="plugin.zip.version" value="7.0.1" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
@@ -35,8 +35,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="7.0.0" />
-			<param name="plugin.zip.version" value="7.0.0" />
+			<param name="plugin.version" value="7.0.1" />
+			<param name="plugin.zip.version" value="7.0.1" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
