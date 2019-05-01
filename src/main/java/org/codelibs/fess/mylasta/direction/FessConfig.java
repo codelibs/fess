@@ -396,13 +396,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10 */
     String INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE = "indexer.webfs.max.document.cache.size";
 
-    /** The key of the configuration. e.g. 10485760 */
+    /** The key of the configuration. e.g. 1048576 */
     String INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE = "indexer.webfs.max.document.request.size";
 
     /** The key of the configuration. e.g. 5 */
     String INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE = "indexer.data.max.document.cache.size";
 
-    /** The key of the configuration. e.g. 10485760 */
+    /** The key of the configuration. e.g. 1048576 */
     String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
 
     /** The key of the configuration. e.g. content,important_content,title */
@@ -2577,14 +2577,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.request.size'. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentRequestSize();
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.request.size' as {@link Integer}. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2607,14 +2607,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.data.max.document.request.size'. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxDocumentRequestSize();
 
     /**
      * Get the value for the key 'indexer.data.max.document.request.size' as {@link Integer}. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -8461,9 +8461,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT, "3600");
             defaultMap.put(FessConfig.INDEXER_WEBFS_UPDATE_INTERVAL, "10000");
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE, "10");
-            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
+            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
-            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
+            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_FIELDS, "content,important_content,title");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH, "1000");
             defaultMap.put(FessConfig.INDEX_CODEC, "default");
