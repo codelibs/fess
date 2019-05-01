@@ -65,7 +65,7 @@ public class SuggestJob extends ExecJob {
         try {
             executeSuggestCreator();
         } catch (final Exception e) {
-            logger.error("Failed to create suggest data.", e);
+            logger.warn("Failed to create suggest data.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 

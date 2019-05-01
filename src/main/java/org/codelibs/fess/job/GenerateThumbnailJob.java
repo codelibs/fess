@@ -78,7 +78,7 @@ public class GenerateThumbnailJob extends ExecJob {
         try {
             executeThumbnailGenerator();
         } catch (final Exception e) {
-            logger.error("Failed to generate thumbnails.", e);
+            logger.warn("Failed to generate thumbnails.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
