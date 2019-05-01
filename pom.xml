@@ -70,7 +70,7 @@
 
 		<!-- Tomcat -->
 		<tomcat.version>9.0.17</tomcat.version>
-		<tomcat.boot.version>0.7.1</tomcat.boot.version>
+		<tomcat.boot.version>0.7.2-RC1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
