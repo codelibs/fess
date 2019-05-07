@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -35,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jcifs.SID;
-import jcifs.smb1.smb1.ACE;
 
 public class PermissionHelper {
     private static final Logger logger = LoggerFactory.getLogger(PermissionHelper.class);
@@ -46,6 +46,10 @@ public class PermissionHelper {
 
     protected String userPrefix = "{user}";
 
+    protected String allowPrefix = "(allow)";
+
+    protected String denyPrefix = "(deny)";
+
     @Resource
     protected SystemHelper systemHelper;
 
@@ -54,23 +58,38 @@ public class PermissionHelper {
             return null;
         }
 
-        final String permission = value.trim();
-        final String lower = permission.toLowerCase(Locale.ROOT);
+        String permission = value.trim();
+        String lower = permission.toLowerCase(Locale.ROOT);
+        final String aclPrefix;
+        if (lower.startsWith(allowPrefix)) {
+            lower = lower.substring(allowPrefix.length());
+            permission = permission.substring(allowPrefix.length());
+            aclPrefix = StringUtil.EMPTY;
+        } else if (lower.startsWith(denyPrefix)) {
+            lower = lower.substring(denyPrefix.length());
+            permission = permission.substring(denyPrefix.length());
+            aclPrefix = ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix();
+        } else {
+            aclPrefix = StringUtil.EMPTY;
+        }
+        if (StringUtil.isBlank(permission)) {
+            return null;
+        }
         if (lower.startsWith(userPrefix)) {
             if (permission.length() > userPrefix.length()) {
-                return systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
+                return aclPrefix + systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
             } else {
                 return null;
             }
         } else if (lower.startsWith(groupPrefix)) {
             if (permission.length() > groupPrefix.length()) {
-                return systemHelper.getSearchRoleByGroup(permission.substring(groupPrefix.length()));
+                return aclPrefix + systemHelper.getSearchRoleByGroup(permission.substring(groupPrefix.length()));
             } else {
                 return null;
             }
         } else if (lower.startsWith(rolePrefix)) {
             if (permission.length() > rolePrefix.length()) {
-                return systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
+                return aclPrefix + systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
             } else {
                 return null;
             }
@@ -84,15 +103,30 @@ public class PermissionHelper {
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (value.startsWith(fessConfig.getRoleSearchUserPrefix()) && value.length() > fessConfig.getRoleSearchUserPrefix().length()) {
-            return userPrefix + value.substring(fessConfig.getRoleSearchUserPrefix().length());
-        } else if (value.startsWith(fessConfig.getRoleSearchGroupPrefix())
-                && value.length() > fessConfig.getRoleSearchGroupPrefix().length()) {
-            return groupPrefix + value.substring(fessConfig.getRoleSearchGroupPrefix().length());
-        } else if (value.startsWith(fessConfig.getRoleSearchRolePrefix()) && value.length() > fessConfig.getRoleSearchRolePrefix().length()) {
-            return rolePrefix + value.substring(fessConfig.getRoleSearchRolePrefix().length());
+        final String aclPrefix;
+        final String permission;
+        final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
+        if (value.startsWith(deniedPrefix)) {
+            permission = value.substring(deniedPrefix.length());
+            aclPrefix = denyPrefix;
+        } else {
+            permission = value;
+            aclPrefix = StringUtil.EMPTY;
         }
-        return value;
+        if (StringUtil.isBlank(permission)) {
+            return null;
+        }
+        if (permission.startsWith(fessConfig.getRoleSearchUserPrefix())
+                && permission.length() > fessConfig.getRoleSearchUserPrefix().length()) {
+            return aclPrefix + userPrefix + permission.substring(fessConfig.getRoleSearchUserPrefix().length());
+        } else if (permission.startsWith(fessConfig.getRoleSearchGroupPrefix())
+                && permission.length() > fessConfig.getRoleSearchGroupPrefix().length()) {
+            return aclPrefix + groupPrefix + permission.substring(fessConfig.getRoleSearchGroupPrefix().length());
+        } else if (permission.startsWith(fessConfig.getRoleSearchRolePrefix())
+                && permission.length() > fessConfig.getRoleSearchRolePrefix().length()) {
+            return aclPrefix + rolePrefix + permission.substring(fessConfig.getRoleSearchRolePrefix().length());
+        }
+        return permission;
     }
 
     public void setRolePrefix(final String rolePrefix) {
@@ -111,36 +145,53 @@ public class PermissionHelper {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isSmbRoleFromFile()) {
+            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+            final Map<String, Object> metaDataMap = responseData.getMetaDataMap();
             if (responseData.getUrl().startsWith("smb:")) {
-                final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-                final SID[] sids = (SID[]) responseData.getMetaDataMap().get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
-                if (sids != null) {
-                    for (final SID sid : sids) {
+                final SID[] allowedSids = (SID[]) metaDataMap.get(SmbClient.SMB_ALLOWED_SID_ENTRIES);
+                if (allowedSids != null) {
+                    for (final SID sid : allowedSids) {
                         final String accountId = sambaHelper.getAccountId(sid);
                         if (accountId != null) {
                             roleTypeList.add(accountId);
                         }
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
                     }
                 }
+                final SID[] deniedSids = (SID[]) metaDataMap.get(SmbClient.SMB_DENIED_SID_ENTRIES);
+                if (deniedSids != null) {
+                    for (final SID sid : deniedSids) {
+                        final String accountId = sambaHelper.getAccountId(sid);
+                        if (accountId != null) {
+                            roleTypeList.add(fessConfig.getRoleSearchDeniedPrefix() + accountId);
+                        }
+                    }
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                }
             } else if (responseData.getUrl().startsWith("smb1:")) {
-                final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-                final ACE[] aces =
-                        (ACE[]) responseData.getMetaDataMap().get(
-                                org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-                if (aces != null) {
-                    for (final ACE item : aces) {
-                        final jcifs.smb1.smb1.SID sid = item.getSID();
+                final jcifs.smb1.smb1.SID[] allowedSids =
+                        (jcifs.smb1.smb1.SID[]) metaDataMap.get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_ALLOWED_SID_ENTRIES);
+                if (allowedSids != null) {
+                    for (final jcifs.smb1.smb1.SID sid : allowedSids) {
                         final String accountId = sambaHelper.getAccountId(sid);
                         if (accountId != null) {
                             roleTypeList.add(accountId);
                         }
                     }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                }
+                final jcifs.smb1.smb1.SID[] deniedSids =
+                        (jcifs.smb1.smb1.SID[]) metaDataMap.get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_DENIED_SID_ENTRIES);
+                if (deniedSids != null) {
+                    for (final jcifs.smb1.smb1.SID sid : deniedSids) {
+                        final String accountId = sambaHelper.getAccountId(sid);
+                        if (accountId != null) {
+                            roleTypeList.add(fessConfig.getRoleSearchDeniedPrefix() + accountId);
+                        }
                     }
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("smb1Url:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
                 }
             }
         }
@@ -183,5 +234,13 @@ public class PermissionHelper {
             }
         }
         return roleTypeList;
+    }
+
+    public void setAllowPrefix(String allowPrefix) {
+        this.allowPrefix = allowPrefix;
+    }
+
+    public void setDenyPrefix(String denyPrefix) {
+        this.denyPrefix = denyPrefix;
     }
 }

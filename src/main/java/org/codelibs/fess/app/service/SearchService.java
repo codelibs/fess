@@ -166,6 +166,7 @@ public class SearchService {
         data.setPageSize(queryResponseList.getPageSize());
         data.setCurrentPageNumber(queryResponseList.getCurrentPageNumber());
         data.setAllRecordCount(queryResponseList.getAllRecordCount());
+        data.setAllRecordCountRelation(queryResponseList.getAllRecordCountRelation());
         data.setAllPageCount(queryResponseList.getAllPageCount());
         data.setExistNextPage(queryResponseList.isExistNextPage());
         data.setExistPrevPage(queryResponseList.isExistPrevPage());
@@ -304,11 +305,7 @@ public class SearchService {
                             QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
                     final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
                     if (!roleSet.isEmpty()) {
-                        final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
-                        roleSet.stream().forEach(name -> {
-                            roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
-                        });
-                        boolQuery.filter(roleQuery);
+                        ComponentUtil.getQueryHelper().buildRoleQuery(roleSet, boolQuery);
                     }
                     builder.setQuery(boolQuery);
                     builder.setFetchSource(fields, null);
@@ -328,11 +325,7 @@ public class SearchService {
                     if (searchRequestType != SearchRequestType.ADMIN_SEARCH) {
                         final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
                         if (!roleSet.isEmpty()) {
-                            final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
-                            roleSet.stream().forEach(name -> {
-                                roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
-                            });
-                            boolQuery.filter(roleQuery);
+                            ComponentUtil.getQueryHelper().buildRoleQuery(roleSet, boolQuery);
                         }
                     }
                     builder.setQuery(boolQuery);

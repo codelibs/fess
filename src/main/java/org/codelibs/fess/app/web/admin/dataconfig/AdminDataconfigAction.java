@@ -31,7 +31,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.app.service.DataConfigService;
-import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -63,8 +62,6 @@ public class AdminDataconfigAction extends FessAdminAction {
     private DataConfigPager dataConfigPager;
     @Resource
     private RoleTypeService roleTypeService;
-    @Resource
-    private LabelTypeService labelTypeService;
     @Resource
     protected DataStoreFactory dataStoreFactory;
 
@@ -323,7 +320,6 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     protected void registerRolesAndLabels(final RenderData data) {
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
-        RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
     protected void registerHandlerNames(final RenderData data) {

@@ -154,6 +154,7 @@ public class ApiResult {
         protected int pageSize;
         protected int pageNumber;
         protected long recordCount;
+        protected String recordCountRelation;
         protected int pageCount;
         protected boolean nextPage;
         protected boolean prevPage;
@@ -175,6 +176,7 @@ public class ApiResult {
             pageSize = data.getPageSize();
             pageNumber = data.getCurrentPageNumber();
             recordCount = data.getAllRecordCount();
+            recordCountRelation = data.getAllRecordCountRelation();
             pageCount = data.getAllPageCount();
             nextPage = data.isExistNextPage();
             prevPage = data.isExistPrevPage();

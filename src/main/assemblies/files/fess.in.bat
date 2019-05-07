@@ -55,10 +55,9 @@ set JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true
 
 set JAVA_OPTS=%JAVA_OPTS% -Djna.nosys=true
 set JAVA_OPTS=%JAVA_OPTS% -Djdk.io.permissionsUseCanonicalPath=true
-set JAVA_OPTS=%JAVA_OPTS% -XX:+UseConcMarkSweepGC
 
-set JAVA_OPTS=%JAVA_OPTS% -XX:CMSInitiatingOccupancyFraction=75
-set JAVA_OPTS=%JAVA_OPTS% -XX:+UseCMSInitiatingOccupancyOnly
+set JAVA_OPTS=%JAVA_OPTS% -XX:+UseG1GC
+set JAVA_OPTS=%JAVA_OPTS% -XX:InitiatingHeapOccupancyPercent=75
 
 set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.noUnsafe=true
 set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.noKeySetOptimization=true

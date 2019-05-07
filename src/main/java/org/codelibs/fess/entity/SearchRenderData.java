@@ -36,6 +36,8 @@ public class SearchRenderData {
 
     protected long allRecordCount;
 
+    protected String allRecordCountRelation;
+
     protected int allPageCount;
 
     protected boolean existNextPage;
@@ -84,6 +86,10 @@ public class SearchRenderData {
 
     public void setAllRecordCount(final long allRecordCount) {
         this.allRecordCount = allRecordCount;
+    }
+
+    public void setAllRecordCountRelation(final String allRecordCountRelation) {
+        this.allRecordCountRelation = allRecordCountRelation;
     }
 
     public void setAllPageCount(final int allPageCount) {
@@ -156,6 +162,10 @@ public class SearchRenderData {
 
     public long getAllRecordCount() {
         return allRecordCount;
+    }
+
+    public String getAllRecordCountRelation() {
+        return allRecordCountRelation;
     }
 
     public int getAllPageCount() {

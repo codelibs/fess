@@ -106,6 +106,7 @@ public class SearchLogHelper {
         searchLog.setRoles(roleQueryHelper.build(params.getType()).stream().toArray(n -> new String[n]));
         searchLog.setQueryId(queryId);
         searchLog.setHitCount(queryResponseList.getAllRecordCount());
+        searchLog.setHitCountRelation(queryResponseList.getAllRecordCountRelation());
         searchLog.setResponseTime(queryResponseList.getExecTime());
         searchLog.setQueryTime(queryResponseList.getQueryTime());
         searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));

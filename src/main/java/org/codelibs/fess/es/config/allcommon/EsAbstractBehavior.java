@@ -41,6 +41,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -105,7 +106,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
         }
-        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits().value;
+        return (int) getSearchHits(esCb.build(builder).execute().actionGet(searchTimeout)).getTotalHits().value;
     }
 
     @Override
@@ -144,7 +145,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final SearchResponse response = esCb.build(builder).execute().actionGet(searchTimeout);
 
         final EsPagingResultBean<RESULT> list = new EsPagingResultBean<>(builder);
-        final SearchHits searchHits = response.getHits();
+        final SearchHits searchHits = getSearchHits(response);
         searchHits.forEach(hit -> {
             final Map<String, Object> source = hit.getSourceAsMap();
             final RESULT entity = createEntity(source, entityType);
@@ -226,30 +227,40 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected void delegateBulkRequest(final ConditionBean cb, Function<SearchHits, Boolean> handler) {
-        SearchResponse response = null;
-        while (true) {
-            if (response == null) {
-                final SearchRequestBuilder builder =
-                        client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForCursor).setSize(sizeForCursor);
-                final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
-                if (esCb.getPreference() != null) {
-                    builder.setPreference(esCb.getPreference());
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForCursor).setSize(sizeForCursor);
+        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        if (esCb.getPreference() != null) {
+            builder.setPreference(esCb.getPreference());
+        }
+        esCb.request().build(builder);
+        SearchResponse response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
+        String scrollId = response.getScrollId();
+        try {
+            while (scrollId != null) {
+                final SearchHits searchHits = getSearchHits(response);
+                final SearchHit[] hits = searchHits.getHits();
+                if (hits.length == 0) {
+                    break;
                 }
-                esCb.request().build(builder);
-                response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
-            } else {
-                final String scrollId = response.getScrollId();
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
-            }
-            final SearchHits searchHits = response.getHits();
-            final SearchHit[] hits = searchHits.getHits();
-            if (hits.length == 0) {
-                break;
-            }
 
-            if (!handler.apply(searchHits)) {
-                break;
+                if (!handler.apply(searchHits)) {
+                    break;
+                }
+
+                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
+                if (!scrollId.equals(response.getScrollId())) {
+                    deleteScrollContext(scrollId);
+                }
+                scrollId = response.getScrollId();
             }
+        } finally {
+            deleteScrollContext(scrollId);
+        }
+    }
+
+    protected void deleteScrollContext(final String scrollId) {
+        if (scrollId != null) {
+            client.prepareClearScroll().addScrollId(scrollId).execute(ActionListener.wrap(() -> {}));
         }
     }
 
@@ -353,37 +364,40 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     @Override
     protected int delegateQueryDelete(final ConditionBean cb, final DeleteOption<? extends ConditionBean> option) {
-        SearchResponse response = null;
+        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForDelete).setSize(sizeForDelete);
+        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        if (esCb.getPreference() != null) {
+            esCb.setPreference(esCb.getPreference());
+        }
+        esCb.request().build(builder);
+        SearchResponse response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
+        String scrollId = response.getScrollId();
         int count = 0;
-        while (true) {
-            if (response == null) {
-                final SearchRequestBuilder builder =
-                        client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForDelete).setSize(sizeForDelete);
-                final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
-                if (esCb.getPreference() != null) {
-                    esCb.setPreference(esCb.getPreference());
+        try {
+            while (scrollId != null) {
+                final SearchHits searchHits = getSearchHits(response);
+                final SearchHit[] hits = searchHits.getHits();
+                if (hits.length == 0) {
+                    break;
                 }
-                esCb.request().build(builder);
-                response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
-            } else {
-                final String scrollId = response.getScrollId();
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
-            }
-            final SearchHits searchHits = response.getHits();
-            final SearchHit[] hits = searchHits.getHits();
-            if (hits.length == 0) {
-                break;
-            }
 
-            final BulkRequestBuilder bulkRequest = client.prepareBulk();
-            for (final SearchHit hit : hits) {
-                bulkRequest.add(client.prepareDelete(asEsIndex(), asEsIndexType(), hit.getId()));
+                final BulkRequestBuilder bulkRequest = client.prepareBulk();
+                for (final SearchHit hit : hits) {
+                    bulkRequest.add(client.prepareDelete().setIndex(asEsIndex()).setId(hit.getId()));
+                }
+                count += hits.length;
+                final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
+                if (bulkResponse.hasFailures()) {
+                    throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+                }
+
+                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
+                if (!scrollId.equals(response.getScrollId())) {
+                    deleteScrollContext(scrollId);
+                }
             }
-            count += hits.length;
-            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
-            if (bulkResponse.hasFailures()) {
-                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
-            }
+        } finally {
+            deleteScrollContext(scrollId);
         }
         return count;
     }
@@ -536,6 +550,14 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     protected Date toDate(Object value) {
         return DfTypeUtil.toDate(value);
+    }
+
+    protected SearchHits getSearchHits(final SearchResponse response) {
+        SearchHits hits = response.getHits();
+        if (hits == null) {
+            throw new IllegalBehaviorStateException("hits is null." + response.status());
+        }
+        return hits;
     }
 
     public static class BulkList<E, B> implements List<E> {

@@ -228,6 +228,7 @@ public class JsonApiManager extends BaseJsonApiManager {
             final String pageSize = Integer.toString(data.getPageSize());
             final String currentPageNumber = Integer.toString(data.getCurrentPageNumber());
             final String allRecordCount = Long.toString(data.getAllRecordCount());
+            final String allRecordCountRelation = data.getAllRecordCountRelation();
             final String allPageCount = Integer.toString(data.getAllPageCount());
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
@@ -259,6 +260,9 @@ public class JsonApiManager extends BaseJsonApiManager {
             buf.append(',');
             buf.append("\"record_count\":");
             buf.append(allRecordCount);
+            buf.append(',');
+            buf.append("\"record_count_relation\":");
+            buf.append(escapeJson(allRecordCountRelation));
             buf.append(',');
             buf.append("\"page_count\":");
             buf.append(allPageCount);

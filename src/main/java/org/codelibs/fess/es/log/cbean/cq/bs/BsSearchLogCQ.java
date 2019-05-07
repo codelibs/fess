@@ -807,6 +807,228 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setHitCountRelation_Equal(String hitCountRelation) {
+        setHitCountRelation_Term(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Equal(String hitCountRelation, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setHitCountRelation_Term(hitCountRelation, opLambda);
+    }
+
+    public void setHitCountRelation_Term(String hitCountRelation) {
+        setHitCountRelation_Term(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Term(String hitCountRelation, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_NotEqual(String hitCountRelation) {
+        setHitCountRelation_NotTerm(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_NotTerm(String hitCountRelation) {
+        setHitCountRelation_NotTerm(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_NotEqual(String hitCountRelation, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setHitCountRelation_NotTerm(hitCountRelation, opLambda);
+    }
+
+    public void setHitCountRelation_NotTerm(String hitCountRelation, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setHitCountRelation_Term(hitCountRelation), opLambda);
+    }
+
+    public void setHitCountRelation_Terms(Collection<String> hitCountRelationList) {
+        setHitCountRelation_Terms(hitCountRelationList, null);
+    }
+
+    public void setHitCountRelation_Terms(Collection<String> hitCountRelationList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("hitCountRelation", hitCountRelationList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_InScope(Collection<String> hitCountRelationList) {
+        setHitCountRelation_Terms(hitCountRelationList, null);
+    }
+
+    public void setHitCountRelation_InScope(Collection<String> hitCountRelationList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setHitCountRelation_Terms(hitCountRelationList, opLambda);
+    }
+
+    public void setHitCountRelation_Match(String hitCountRelation) {
+        setHitCountRelation_Match(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Match(String hitCountRelation, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_MatchPhrase(String hitCountRelation) {
+        setHitCountRelation_MatchPhrase(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_MatchPhrase(String hitCountRelation, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_MatchPhrasePrefix(String hitCountRelation) {
+        setHitCountRelation_MatchPhrasePrefix(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_MatchPhrasePrefix(String hitCountRelation, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Fuzzy(String hitCountRelation) {
+        setHitCountRelation_Fuzzy(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Fuzzy(String hitCountRelation, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Prefix(String hitCountRelation) {
+        setHitCountRelation_Prefix(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Prefix(String hitCountRelation, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Wildcard(String hitCountRelation) {
+        setHitCountRelation_Wildcard(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Wildcard(String hitCountRelation, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Regexp(String hitCountRelation) {
+        setHitCountRelation_Regexp(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_Regexp(String hitCountRelation, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_SpanTerm(String hitCountRelation) {
+        setHitCountRelation_SpanTerm("hitCountRelation", null);
+    }
+
+    public void setHitCountRelation_SpanTerm(String hitCountRelation, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_GreaterThan(String hitCountRelation) {
+        setHitCountRelation_GreaterThan(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_GreaterThan(String hitCountRelation, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = hitCountRelation;
+        RangeQueryBuilder builder = regRangeQ("hitCountRelation", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_LessThan(String hitCountRelation) {
+        setHitCountRelation_LessThan(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_LessThan(String hitCountRelation, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = hitCountRelation;
+        RangeQueryBuilder builder = regRangeQ("hitCountRelation", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_GreaterEqual(String hitCountRelation) {
+        setHitCountRelation_GreaterEqual(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_GreaterEqual(String hitCountRelation, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = hitCountRelation;
+        RangeQueryBuilder builder = regRangeQ("hitCountRelation", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_LessEqual(String hitCountRelation) {
+        setHitCountRelation_LessEqual(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_LessEqual(String hitCountRelation, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = hitCountRelation;
+        RangeQueryBuilder builder = regRangeQ("hitCountRelation", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Exists() {
+        setHitCountRelation_Exists(null);
+    }
+
+    public void setHitCountRelation_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_CommonTerms(String hitCountRelation) {
+        setHitCountRelation_CommonTerms(hitCountRelation, null);
+    }
+
+    public void setHitCountRelation_CommonTerms(String hitCountRelation, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("hitCountRelation", hitCountRelation);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_HitCountRelation_Asc() {
+        regOBA("hitCountRelation");
+        return this;
+    }
+
+    public BsSearchLogCQ addOrderBy_HitCountRelation_Desc() {
+        regOBD("hitCountRelation");
+        return this;
+    }
+
     public void setLanguages_Equal(String languages) {
         setLanguages_Term(languages, null);
     }

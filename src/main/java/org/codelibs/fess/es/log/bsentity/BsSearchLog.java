@@ -46,6 +46,9 @@ public class BsSearchLog extends EsAbstractEntity {
     /** hitCount */
     protected Long hitCount;
 
+    /** hitCountRelation */
+    protected String hitCountRelation;
+
     /** languages */
     protected String languages;
 
@@ -121,6 +124,9 @@ public class BsSearchLog extends EsAbstractEntity {
         if (hitCount != null) {
             addFieldToSource(sourceMap, "hitCount", hitCount);
         }
+        if (hitCountRelation != null) {
+            addFieldToSource(sourceMap, "hitCountRelation", hitCountRelation);
+        }
         if (languages != null) {
             addFieldToSource(sourceMap, "languages", languages);
         }
@@ -182,6 +188,7 @@ public class BsSearchLog extends EsAbstractEntity {
         sb.append(dm).append(accessType);
         sb.append(dm).append(clientIp);
         sb.append(dm).append(hitCount);
+        sb.append(dm).append(hitCountRelation);
         sb.append(dm).append(languages);
         sb.append(dm).append(queryId);
         sb.append(dm).append(queryOffset);
@@ -235,6 +242,16 @@ public class BsSearchLog extends EsAbstractEntity {
     public void setHitCount(Long value) {
         registerModifiedProperty("hitCount");
         this.hitCount = value;
+    }
+
+    public String getHitCountRelation() {
+        checkSpecifiedProperty("hitCountRelation");
+        return convertEmptyToNull(hitCountRelation);
+    }
+
+    public void setHitCountRelation(String value) {
+        registerModifiedProperty("hitCountRelation");
+        this.hitCountRelation = value;
     }
 
     public String getLanguages() {

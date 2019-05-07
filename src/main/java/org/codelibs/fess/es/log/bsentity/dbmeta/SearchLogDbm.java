@@ -84,6 +84,8 @@ public class SearchLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((SearchLog) et).getClientIp(), (et, vl) -> ((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)),
                 "clientIp");
         setupEpg(_epgMap, et -> ((SearchLog) et).getHitCount(), (et, vl) -> ((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)), "hitCount");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getHitCountRelation(),
+                (et, vl) -> ((SearchLog) et).setHitCountRelation(DfTypeUtil.toString(vl)), "hitCountRelation");
         setupEpg(_epgMap, et -> ((SearchLog) et).getLanguages(), (et, vl) -> ((SearchLog) et).setLanguages(DfTypeUtil.toString(vl)),
                 "languages");
         setupEpg(_epgMap, et -> ((SearchLog) et).getQueryId(), (et, vl) -> ((SearchLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
@@ -152,6 +154,8 @@ public class SearchLogDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHitCount = cci("hitCount", "hitCount", null, null, Long.class, "hitCount", null, false, false, false,
             "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnHitCountRelation = cci("hitCountRelation", "hitCountRelation", null, null, String.class,
+            "hitCountRelation", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLanguages = cci("languages", "languages", null, null, String.class, "languages", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
@@ -193,6 +197,10 @@ public class SearchLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnHitCount() {
         return _columnHitCount;
+    }
+
+    public ColumnInfo columnHitCountRelation() {
+        return _columnHitCountRelation;
     }
 
     public ColumnInfo columnLanguages() {
@@ -260,6 +268,7 @@ public class SearchLogDbm extends AbstractDBMeta {
         ls.add(columnAccessType());
         ls.add(columnClientIp());
         ls.add(columnHitCount());
+        ls.add(columnHitCountRelation());
         ls.add(columnLanguages());
         ls.add(columnQueryId());
         ls.add(columnQueryOffset());

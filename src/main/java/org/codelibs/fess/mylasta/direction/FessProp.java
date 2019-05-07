@@ -55,6 +55,7 @@ import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.JvmUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.search.sort.SortBuilder;
@@ -69,6 +70,8 @@ import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
+
+    String QUERY_TRACK_TOTAL_HITS_VALUE = "queryTrackTotalHitsValue";
 
     String CORS_ALLOW_ORIGIN = "CorsAllowOrigin";
 
@@ -677,19 +680,19 @@ public interface FessProp {
     String getJvmCrawlerOptions();
 
     default String[] getJvmCrawlerOptionsAsArray() {
-        return getJvmCrawlerOptions().split("\n");
+        return JvmUtil.filterJvmOptions(getJvmCrawlerOptions().split("\n"));
     }
 
     String getJvmSuggestOptions();
 
     default String[] getJvmSuggestOptionsAsArray() {
-        return getJvmSuggestOptions().split("\n");
+        return JvmUtil.filterJvmOptions(getJvmSuggestOptions().split("\n"));
     }
 
     String getJvmThumbnailOptions();
 
     default String[] getJvmThumbnailOptionsAsArray() {
-        return getJvmThumbnailOptions().split("\n");
+        return JvmUtil.filterJvmOptions(getJvmThumbnailOptions().split("\n"));
     }
 
     String getCrawlerDocumentHtmlPrunedTags();
@@ -1947,10 +1950,40 @@ public interface FessProp {
         return list;
     }
 
+    String getIndexerLanguageFields();
+
+    default String[] getIndexerLanguageFieldsAsArray() {
+        return split(getIndexerLanguageFields(), ",").get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
+
+    }
+
     String getSessionTrackingModes();
 
     default Set<String> getSessionTrackingModesAsSet() {
         return split(getSessionTrackingModes(), ",").get(
                 stream -> stream.map(s -> s.trim().toUpperCase(Locale.ENGLISH)).collect(Collectors.toSet()));
     }
+
+    String getQueryTrackTotalHits();
+
+    default Object getQueryTrackTotalHitsValue() {
+        Object value = propMap.get(QUERY_TRACK_TOTAL_HITS_VALUE);
+        if (value == null) {
+            String v = getQueryTrackTotalHits();
+            if (Constants.TRUE.equalsIgnoreCase(v)) {
+                value = Boolean.TRUE;
+            } else if (Constants.FALSE.equalsIgnoreCase(v)) {
+                value = Boolean.FALSE;
+            } else {
+                try {
+                    value = Integer.valueOf(Integer.parseInt(v));
+                } catch (NumberFormatException e) {
+                    value = StringUtil.EMPTY;
+                }
+            }
+            propMap.put(QUERY_TRACK_TOTAL_HITS_VALUE, value);
+        }
+        return value;
+    }
+
 }

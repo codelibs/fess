@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.job;
 
-import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -79,7 +78,7 @@ public class GenerateThumbnailJob extends ExecJob {
         try {
             executeThumbnailGenerator();
         } catch (final Exception e) {
-            logger.error("Failed to generate thumbnails.", e);
+            logger.warn("Failed to generate thumbnails.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -113,7 +112,7 @@ public class GenerateThumbnailJob extends ExecJob {
         buf.append(File.separator);
         buf.append("env");
         buf.append(File.separator);
-        buf.append("thumbnail");
+        buf.append(getExecuteType());
         buf.append(File.separator);
         buf.append("resources");
         buf.append(cpSeparator);
@@ -133,8 +132,8 @@ public class GenerateThumbnailJob extends ExecJob {
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
                 + File.separator);
         // WEB-INF/env/thumbnail/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/thumbnail/lib")), "WEB-INF" + File.separator
-                + "env" + File.separator + "thumbnail" + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")), "WEB-INF"
+                + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -151,7 +150,7 @@ public class GenerateThumbnailJob extends ExecJob {
         final String systemLastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(systemLastaEnv)) {
             if (systemLastaEnv.equals("web")) {
-                cmdList.add("-Dlasta.env=thumbnail");
+                cmdList.add("-Dlasta.env=" + getExecuteType());
             } else {
                 cmdList.add("-Dlasta.env=" + systemLastaEnv);
             }
@@ -160,7 +159,7 @@ public class GenerateThumbnailJob extends ExecJob {
         }
 
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
-        cmdList.add("-Dfess.thumbnail.process=true");
+        cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
@@ -168,7 +167,7 @@ public class GenerateThumbnailJob extends ExecJob {
         cmdList.add("-Dfess.log.path=" + logFilePath);
         addSystemProperty(cmdList, Constants.FESS_VAR_PATH, null, null);
         addSystemProperty(cmdList, Constants.FESS_THUMBNAIL_PATH, null, null);
-        addSystemProperty(cmdList, "fess.log.name", "fess-thumbnail", "-thumbnail");
+        addSystemProperty(cmdList, "fess.log.name", "fess-" + getExecuteType(), "-" + getExecuteType());
         if (logLevel != null) {
             cmdList.add("-Dfess.log.level=" + logLevel);
         }
@@ -186,8 +185,8 @@ public class GenerateThumbnailJob extends ExecJob {
             }
         }
 
-        if (StringUtil.isNotBlank(jvmOptions)) {
-            split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
+        if (!jvmOptions.isEmpty()) {
+            jvmOptions.stream().filter(StringUtil::isNotBlank).forEach(cmdList::add);
         }
 
         cmdList.add(ThumbnailGenerator.class.getCanonicalName());
@@ -203,7 +202,7 @@ public class GenerateThumbnailJob extends ExecJob {
         File propFile = null;
         try {
             cmdList.add("-p");
-            propFile = File.createTempFile("thumbnail_", ".properties");
+            propFile = File.createTempFile(getExecuteType() + "_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 final Properties prop = new Properties();
@@ -254,5 +253,10 @@ public class GenerateThumbnailJob extends ExecJob {
                 deleteTempDir(ownTmpDir);
             }
         }
+    }
+
+    @Override
+    protected String getExecuteType() {
+        return "thumbnail";
     }
 }
