@@ -3,10 +3,17 @@
 <div id="subheader" class="row">
 	<div class="col">
 		<p>
-			<la:message key="labels.search_result_status"
-				arg0="${displayQuery}" arg1="${f:h(allRecordCount)}"
-				arg2="${f:h(currentStartRecordNumber)}"
-				arg3="${f:h(currentEndRecordNumber)}" />
+			<c:if test="${allRecordCountRelation=='EQUAL_TO'}">
+				<la:message key="labels.search_result_status"
+					arg0="${displayQuery}" arg1="${f:h(allRecordCount)}"
+					arg2="${f:h(currentStartRecordNumber)}"
+					arg3="${f:h(currentEndRecordNumber)}" />
+			</c:if><c:if test="${allRecordCountRelation!='EQUAL_TO'}">
+				<la:message key="labels.search_result_status_over"
+					arg0="${displayQuery}" arg1="${f:h(allRecordCount)}"
+					arg2="${f:h(currentStartRecordNumber)}"
+					arg3="${f:h(currentEndRecordNumber)}" />
+			</c:if>
 			<c:if test="${execTime!=null}">
 				<la:message key="labels.search_result_time" arg0="${f:h(execTime)}" />
 			</c:if>

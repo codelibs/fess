@@ -593,6 +593,137 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setHitCountRelation_Terms() {
+        setHitCountRelation_Terms(null);
+    }
+
+    public void setHitCountRelation_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setHitCountRelation_Terms("hitCountRelation", opLambda, null);
+    }
+
+    public void setHitCountRelation_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+        setHitCountRelation_Terms("hitCountRelation", opLambda, aggsLambda);
+    }
+
+    public void setHitCountRelation_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setHitCountRelation_SignificantTerms() {
+        setHitCountRelation_SignificantTerms(null);
+    }
+
+    public void setHitCountRelation_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setHitCountRelation_SignificantTerms("hitCountRelation", opLambda, null);
+    }
+
+    public void setHitCountRelation_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        setHitCountRelation_SignificantTerms("hitCountRelation", opLambda, aggsLambda);
+    }
+
+    public void setHitCountRelation_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setHitCountRelation_IpRange() {
+        setHitCountRelation_IpRange(null);
+    }
+
+    public void setHitCountRelation_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setHitCountRelation_IpRange("hitCountRelation", opLambda, null);
+    }
+
+    public void setHitCountRelation_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+        setHitCountRelation_IpRange("hitCountRelation", opLambda, aggsLambda);
+    }
+
+    public void setHitCountRelation_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setHitCountRelation_Count() {
+        setHitCountRelation_Count(null);
+    }
+
+    public void setHitCountRelation_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setHitCountRelation_Count("hitCountRelation", opLambda);
+    }
+
+    public void setHitCountRelation_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Cardinality() {
+        setHitCountRelation_Cardinality(null);
+    }
+
+    public void setHitCountRelation_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setHitCountRelation_Cardinality("hitCountRelation", opLambda);
+    }
+
+    public void setHitCountRelation_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHitCountRelation_Missing() {
+        setHitCountRelation_Missing(null);
+    }
+
+    public void setHitCountRelation_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setHitCountRelation_Missing("hitCountRelation", opLambda, null);
+    }
+
+    public void setHitCountRelation_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+        setHitCountRelation_Missing("hitCountRelation", opLambda, aggsLambda);
+    }
+
+    public void setHitCountRelation_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "hitCountRelation");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            SearchLogCA ca = new SearchLogCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setLanguages_Terms() {
         setLanguages_Terms(null);
     }

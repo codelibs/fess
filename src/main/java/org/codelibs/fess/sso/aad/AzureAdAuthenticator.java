@@ -18,7 +18,6 @@ package org.codelibs.fess.sso.aad;
 import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -83,6 +82,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected static final String AZUREAD_CLIENT_ID = "aad.client.id";
 
+    protected static final String AZUREAD_REPLY_URL = "aad.reply.url";
+
     protected static final String STATES = "aadStates";
 
     protected static final String STATE = "state";
@@ -130,21 +131,13 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String authUrl =
                 getAuthority() + getTenant()
                         + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                        + encodeUrl(request.getRequestURL().toString()) + "&client_id=" + getClientId()
+                        + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
                         + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {}", authUrl);
         }
         return authUrl;
 
-    }
-
-    protected String encodeUrl(final String s) {
-        try {
-            return URLEncoder.encode(s, Constants.UTF_8);
-        } catch (UnsupportedEncodingException e) {
-            throw new SsoLoginException("invalid encoding.", e);
-        }
     }
 
     protected void storeStateInSession(final HttpSession session, final String state, final String nonce) {
@@ -188,7 +181,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (authResponse instanceof AuthenticationSuccessResponse) {
             final AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse) authResponse;
             validateAuthRespMatchesCodeFlow(oidcResponse);
-            final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), request.getRequestURL().toString());
+            final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
             validateNonce(stateData, authData);
 
             return new AzureAdCredential(authData);
@@ -381,8 +374,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             logger.warn("Failed to access groups/roles in AzureAD.", e);
         }
 
-        user.setGroups(groupList.toArray(new String[groupList.size()]));
-        user.setRoles(roleList.toArray(new String[roleList.size()]));
+        user.setGroups(groupList.toArray(n -> new String[n]));
+        user.setRoles(roleList.toArray(n -> new String[n]));
     }
 
     protected List<String> getDefaultGroupList() {
@@ -444,6 +437,14 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected long getStateTtl() {
         return Long.parseLong(ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_STATE_TTL, "3600"));
+    }
+
+    protected String getReplyUrl(final HttpServletRequest request) {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_REPLY_URL, StringUtil.EMPTY);
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        }
+        return request.getRequestURL().toString();
     }
 
     @Override

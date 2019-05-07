@@ -43,17 +43,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djdk.io.permissionsUseCanonicalPath=true
     -Dhttp.maxConnections=20
     -server
+    -Xms512m
     -Xmx512m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UnlockExperimentalVMOptions
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=45
+    -XX:G1HeapRegionSize=1m
+    -XX:MaxGCPauseMillis=1000
+    -XX:G1NewSizePercent=5
+    -XX:G1MaxNewSizePercent=5
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -78,16 +83,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djna.nosys=true
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
+    -Xms256m
     -Xmx256m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+UnlockExperimentalVMOptions
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=45
+    -XX:G1HeapRegionSize=1m
+    -XX:MaxGCPauseMillis=1000
+    -XX:G1NewSizePercent=5
+    -XX:G1MaxNewSizePercent=30
     -Dgroovy.use.classvalue=true
     -Dio.netty.noUnsafe=true
     -Dio.netty.noKeySetOptimization=true
@@ -103,17 +113,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djna.nosys=true
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
+    -Xms128m
     -Xmx128m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UnlockExperimentalVMOptions
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=45
+    -XX:G1HeapRegionSize=4m
+    -XX:MaxGCPauseMillis=1000
+    -XX:G1NewSizePercent=5
+    -XX:G1MaxNewSizePercent=50
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -205,7 +220,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String API_DASHBOARD_RESPONSE_HEADERS = "api.dashboard.response.headers";
 
-    /** The key of the configuration. e.g.  */
+    /** The key of the configuration. e.g. * */
     String API_CORS_ALLOW_ORIGIN = "api.cors.allow.origin";
 
     /** The key of the configuration. e.g. GET, POST, OPTIONS, DELETE, PUT */
@@ -220,7 +235,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String API_CORS_ALLOW_CREDENTIALS = "api.cors.allow.credentials";
 
-    /** The key of the configuration. e.g. true */
+    /** The key of the configuration. e.g. false */
     String API_JSONP_ENABLED = "api.jsonp.enabled";
 
     /** The key of the configuration. e.g.  */
@@ -378,20 +393,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10000 */
     String INDEXER_WEBFS_UPDATE_INTERVAL = "indexer.webfs.update.interval";
 
-    /** The key of the configuration. e.g. 20 */
+    /** The key of the configuration. e.g. 10 */
     String INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE = "indexer.webfs.max.document.cache.size";
 
-    /** The key of the configuration. e.g. 10485760 */
+    /** The key of the configuration. e.g. 1048576 */
     String INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE = "indexer.webfs.max.document.request.size";
 
     /** The key of the configuration. e.g. 5 */
     String INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE = "indexer.data.max.document.cache.size";
 
-    /** The key of the configuration. e.g. 10485760 */
+    /** The key of the configuration. e.g. 1048576 */
     String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
 
     /** The key of the configuration. e.g. content,important_content,title */
     String INDEXER_LANGUAGE_FIELDS = "indexer.language.fields";
+
+    /** The key of the configuration. e.g. 1000 */
+    String INDEXER_LANGUAGE_DETECT_LENGTH = "indexer.language.detect.length";
 
     /** The key of the configuration. e.g. default */
     String INDEX_CODEC = "index.codec";
@@ -623,6 +641,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. true */
     String QUERY_TIMEOUT_LOGGING = "query.timeout.logging";
+
+    /** The key of the configuration. e.g. 10000 */
+    String QUERY_TRACK_TOTAL_HITS = "query.track.total.hits";
 
     /** The key of the configuration. e.g. location */
     String QUERY_GEO_FIELDS = "query.geo.fields";
@@ -856,6 +877,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. R */
     String ROLE_SEARCH_ROLE_PREFIX = "role.search.role.prefix";
+
+    /** The key of the configuration. e.g. D */
+    String ROLE_SEARCH_DENIED_PREFIX = "role.search.denied.prefix";
 
     /** The key of the configuration. e.g. / */
     String COOKIE_DEFAULT_PATH = "cookie.default.path";
@@ -1474,17 +1498,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djdk.io.permissionsUseCanonicalPath=true
     -Dhttp.maxConnections=20
     -server
+    -Xms512m
     -Xmx512m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UnlockExperimentalVMOptions
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=45
+    -XX:G1HeapRegionSize=1m
+    -XX:MaxGCPauseMillis=1000
+    -XX:G1NewSizePercent=5
+    -XX:G1MaxNewSizePercent=5
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -1514,16 +1543,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djna.nosys=true
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
+    -Xms256m
     -Xmx256m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+UnlockExperimentalVMOptions
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=45
+    -XX:G1HeapRegionSize=1m
+    -XX:MaxGCPauseMillis=1000
+    -XX:G1NewSizePercent=5
+    -XX:G1MaxNewSizePercent=30
     -Dgroovy.use.classvalue=true
     -Dio.netty.noUnsafe=true
     -Dio.netty.noKeySetOptimization=true
@@ -1543,17 +1577,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djna.nosys=true
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
+    -Xms128m
     -Xmx128m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseCMSInitiatingOccupancyOnly
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
+    -XX:+UnlockExperimentalVMOptions
+    -XX:+UseG1GC
+    -XX:InitiatingHeapOccupancyPercent=45
+    -XX:G1HeapRegionSize=4m
+    -XX:MaxGCPauseMillis=1000
+    -XX:G1NewSizePercent=5
+    -XX:G1MaxNewSizePercent=50
     -Djcifs.smb.client.responseTimeout=30000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.connTimeout=60000
@@ -1831,18 +1870,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.cors.allow.origin'. <br>
-     * The value is, e.g.  <br>
+     * The value is, e.g. * <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowOrigin();
-
-    /**
-     * Get the value for the key 'api.cors.allow.origin' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getApiCorsAllowOriginAsInteger();
 
     /**
      * Get the value for the key 'api.cors.allow.methods'. <br>
@@ -1889,14 +1920,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.jsonp.enabled'. <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiJsonpEnabled();
 
     /**
      * Is the property for the key 'api.jsonp.enabled' true? <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiJsonpEnabled();
@@ -2531,14 +2562,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size'. <br>
-     * The value is, e.g. 20 <br>
+     * The value is, e.g. 10 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentCacheSize();
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size' as {@link Integer}. <br>
-     * The value is, e.g. 20 <br>
+     * The value is, e.g. 10 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2546,14 +2577,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.request.size'. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentRequestSize();
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.request.size' as {@link Integer}. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2576,14 +2607,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.data.max.document.request.size'. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxDocumentRequestSize();
 
     /**
      * Get the value for the key 'indexer.data.max.document.request.size' as {@link Integer}. <br>
-     * The value is, e.g. 10485760 <br>
+     * The value is, e.g. 1048576 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2595,6 +2626,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerLanguageFields();
+
+    /**
+     * Get the value for the key 'indexer.language.detect.length'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerLanguageDetectLength();
+
+    /**
+     * Get the value for the key 'indexer.language.detect.length' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerLanguageDetectLengthAsInteger();
 
     /**
      * Get the value for the key 'index.codec'. <br>
@@ -3259,6 +3305,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryTimeoutLogging();
+
+    /**
+     * Get the value for the key 'query.track.total.hits'. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryTrackTotalHits();
+
+    /**
+     * Get the value for the key 'query.track.total.hits' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryTrackTotalHitsAsInteger();
 
     /**
      * Get the value for the key 'query.geo.fields'. <br>
@@ -3990,6 +4051,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchRolePrefix();
+
+    /**
+     * Get the value for the key 'role.search.denied.prefix'. <br>
+     * The value is, e.g. D <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchDeniedPrefix();
 
     /**
      * Get the value for the key 'cookie.default.path'. <br>
@@ -6088,10 +6156,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.API_CORS_ALLOW_ORIGIN);
         }
 
-        public Integer getApiCorsAllowOriginAsInteger() {
-            return getAsInteger(FessConfig.API_CORS_ALLOW_ORIGIN);
-        }
-
         public String getApiCorsAllowMethods() {
             return get(FessConfig.API_CORS_ALLOW_METHODS);
         }
@@ -6500,6 +6564,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEXER_LANGUAGE_FIELDS);
         }
 
+        public String getIndexerLanguageDetectLength() {
+            return get(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH);
+        }
+
+        public Integer getIndexerLanguageDetectLengthAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH);
+        }
+
         public String getIndexCodec() {
             return get(FessConfig.INDEX_CODEC);
         }
@@ -6868,6 +6940,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_TIMEOUT_LOGGING);
         }
 
+        public String getQueryTrackTotalHits() {
+            return get(FessConfig.QUERY_TRACK_TOTAL_HITS);
+        }
+
+        public Integer getQueryTrackTotalHitsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_TRACK_TOTAL_HITS);
+        }
+
         public String getQueryGeoFields() {
             return get(FessConfig.QUERY_GEO_FIELDS);
         }
@@ -7230,6 +7310,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getRoleSearchRolePrefix() {
             return get(FessConfig.ROLE_SEARCH_ROLE_PREFIX);
+        }
+
+        public String getRoleSearchDeniedPrefix() {
+            return get(FessConfig.ROLE_SEARCH_DENIED_PREFIX);
         }
 
         public String getCookieDefaultPath() {
@@ -8282,13 +8366,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-server\n-Xms512m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=1000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xms256m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=1000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap
                     .put(FessConfig.JVM_THUMBNAIL_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseConcMarkSweepGC\n-XX:CMSInitiatingOccupancyFraction=75\n-XX:+UseCMSInitiatingOccupancyOnly\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xms128m\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=1000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");
@@ -8317,12 +8401,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
-            defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "");
+            defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
-            defaultMap.put(FessConfig.API_JSONP_ENABLED, "true");
+            defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");
@@ -8376,11 +8460,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_WEBFS_COMMIT_MARGIN_TIME, "5000");
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT, "3600");
             defaultMap.put(FessConfig.INDEXER_WEBFS_UPDATE_INTERVAL, "10000");
-            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE, "20");
-            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
+            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE, "10");
+            defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
-            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "10485760");
+            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_FIELDS, "content,important_content,title");
+            defaultMap.put(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH, "1000");
             defaultMap.put(FessConfig.INDEX_CODEC, "default");
             defaultMap.put(FessConfig.INDEX_number_of_shards, "5");
             defaultMap.put(FessConfig.INDEX_auto_expand_replicas, "0-1");
@@ -8458,6 +8543,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");
+            defaultMap.put(FessConfig.QUERY_TRACK_TOTAL_HITS, "10000");
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
@@ -8520,6 +8606,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ROLE_SEARCH_USER_PREFIX, "1");
             defaultMap.put(FessConfig.ROLE_SEARCH_GROUP_PREFIX, "2");
             defaultMap.put(FessConfig.ROLE_SEARCH_ROLE_PREFIX, "R");
+            defaultMap.put(FessConfig.ROLE_SEARCH_DENIED_PREFIX, "D");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_PATH, "/");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
             defaultMap.put(FessConfig.COOKIE_ETERNAL_EXPIRE, "86400");

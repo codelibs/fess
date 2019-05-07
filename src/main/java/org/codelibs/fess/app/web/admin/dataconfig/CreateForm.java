@@ -31,8 +31,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  */
 public class CreateForm {
 
-    public String[] labelTypeIds;
-
     @ValidateTypeFailure
     public Integer crudMode;
 

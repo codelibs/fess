@@ -137,7 +137,7 @@ call:convertxm %FESS_MIN_MEM% JVM_XMS
 call:convertxm %FESS_MAX_MEM% JVM_XMX
 
 REM java_opts might be empty - init to avoid tripping commons daemon (if the command starts with ;)
-if "%JAVA_OPTS%" == "" set JAVA_OPTS=-XX:+UseParNewGC
+if "%JAVA_OPTS%" == "" set JAVA_OPTS=-XX:+UseG1GC
 
 CALL "%FESS_HOME%\bin\fess.in.bat"
 

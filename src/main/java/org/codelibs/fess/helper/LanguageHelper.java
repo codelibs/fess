@@ -37,11 +37,14 @@ public class LanguageHelper {
 
     protected LanguageDetector detector;
 
+    protected int maxTextLength;
+
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         langFields = fessConfig.getIndexerLanguageFieldsAsArray();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
+        maxTextLength = fessConfig.getIndexerLanguageDetectLengthAsInteger().intValue();
     }
 
     public void updateDocument(final Map<String, Object> doc) {
@@ -80,11 +83,22 @@ public class LanguageHelper {
         if (StringUtil.isBlank(text)) {
             return null;
         }
-        final LanguageResult result = detector.detect(text);
+        final String target = getDetectText(text);
+        final LanguageResult result = detector.detect(target);
         if (logger.isDebugEnabled()) {
-            logger.debug("detected lang:{}({}) from {}", result, result.getRawScore(), text);
+            logger.debug("detected lang:{}({}) from {}", result, result.getRawScore(), target);
         }
         return getSupportedLanguage(result.getLanguage());
+    }
+
+    protected String getDetectText(final String text) {
+        final String result;
+        if (text.length() <= maxTextLength) {
+            result = text;
+        } else {
+            result = text.substring(0, maxTextLength);
+        }
+        return result.replaceAll("\\s+", " ");
     }
 
     protected String getSupportedLanguage(final String lang) {

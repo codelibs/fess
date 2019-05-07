@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.job;
 
-import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -66,7 +65,7 @@ public class SuggestJob extends ExecJob {
         try {
             executeSuggestCreator();
         } catch (final Exception e) {
-            logger.error("Failed to create suggest data.", e);
+            logger.warn("Failed to create suggest data.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -100,7 +99,7 @@ public class SuggestJob extends ExecJob {
         buf.append(File.separator);
         buf.append("env");
         buf.append(File.separator);
-        buf.append("suggest");
+        buf.append(getExecuteType());
         buf.append(File.separator);
         buf.append("resources");
         buf.append(cpSeparator);
@@ -120,8 +119,8 @@ public class SuggestJob extends ExecJob {
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
                 + File.separator);
         // WEB-INF/env/suggest/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/suggest/lib")), "WEB-INF" + File.separator
-                + "env" + File.separator + "suggest" + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")), "WEB-INF"
+                + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -138,7 +137,7 @@ public class SuggestJob extends ExecJob {
         final String systemLastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(systemLastaEnv)) {
             if (systemLastaEnv.equals("web")) {
-                cmdList.add("-Dlasta.env=suggest");
+                cmdList.add("-Dlasta.env=" + getExecuteType());
             } else {
                 cmdList.add("-Dlasta.env=" + systemLastaEnv);
             }
@@ -147,13 +146,13 @@ public class SuggestJob extends ExecJob {
         }
 
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
-        cmdList.add("-Dfess.suggest.process=true");
+        cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
         cmdList.add("-Dfess.log.path=" + logFilePath);
-        addSystemProperty(cmdList, "fess.log.name", "fess-suggest", "-suggest");
+        addSystemProperty(cmdList, "fess.log.name", "fess-" + getExecuteType(), "-" + getExecuteType());
         if (logLevel == null) {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {
@@ -173,8 +172,8 @@ public class SuggestJob extends ExecJob {
             }
         }
 
-        if (StringUtil.isNotBlank(jvmOptions)) {
-            split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
+        if (!jvmOptions.isEmpty()) {
+            jvmOptions.stream().filter(StringUtil::isNotBlank).forEach(cmdList::add);
         }
 
         cmdList.add(SuggestCreator.class.getCanonicalName());
@@ -185,7 +184,7 @@ public class SuggestJob extends ExecJob {
         File propFile = null;
         try {
             cmdList.add("-p");
-            propFile = File.createTempFile("suggest_", ".properties");
+            propFile = File.createTempFile(getExecuteType() + "_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 final Properties prop = new Properties();
@@ -236,6 +235,11 @@ public class SuggestJob extends ExecJob {
                 deleteTempDir(ownTmpDir);
             }
         }
+    }
+
+    @Override
+    protected String getExecuteType() {
+        return "suggest";
     }
 
 }

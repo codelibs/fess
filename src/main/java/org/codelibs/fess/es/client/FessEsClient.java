@@ -1075,6 +1075,13 @@ public class FessEsClient implements Client {
 
             searchRequestBuilder.setFrom(offset).setSize(size);
 
+            final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
+            if (trackTotalHitsValue instanceof Boolean) {
+                searchRequestBuilder.setTrackTotalHits((Boolean) trackTotalHitsValue);
+            } else if (trackTotalHitsValue instanceof Number) {
+                searchRequestBuilder.setTrackTotalHitsUpTo(((Number) trackTotalHitsValue).intValue());
+            }
+
             if (responseFields != null) {
                 searchRequestBuilder.setFetchSource(responseFields, null);
             }

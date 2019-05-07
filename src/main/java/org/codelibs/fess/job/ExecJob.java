@@ -17,17 +17,17 @@ package org.codelibs.fess.job;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class ExecJob {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecJob.class);
-
-    protected static final String REMOTE_DEBUG_OPTIONS = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=localhost:8000";
 
     protected JobExecutor jobExecutor;
 
@@ -39,11 +39,13 @@ public abstract class ExecJob {
 
     protected String logLevel;
 
-    protected String jvmOptions;
+    protected List<String> jvmOptions = new ArrayList<>();
 
     protected String lastaEnv;
 
     public abstract String execute();
+
+    protected abstract String getExecuteType();
 
     public ExecJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
@@ -71,11 +73,27 @@ public abstract class ExecJob {
     }
 
     public ExecJob remoteDebug() {
-        return jvmOptions(REMOTE_DEBUG_OPTIONS);
+        return jvmOptions("-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=localhost:8000");
     }
 
-    public ExecJob jvmOptions(final String option) {
-        this.jvmOptions = option;
+    public ExecJob gcLogging() {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("-Xlog:gc*,gc+age=trace,safepoint:file=");
+        if (logFilePath != null) {
+            buf.append(logFilePath);
+        } else {
+            buf.append(ComponentUtil.getSystemHelper().getLogFilePath());
+        }
+        buf.append(File.separator);
+        buf.append("gc-").append(getExecuteType()).append(".log");
+        buf.append(":utctime,pid,tags:filecount=32,filesize=64m");
+        return jvmOptions(buf.toString());
+    }
+
+    public ExecJob jvmOptions(final String... options) {
+        for (final String s : options) {
+            this.jvmOptions.add(s);
+        }
         return this;
     }
 

@@ -71,10 +71,17 @@
 									<c:when test="${f:h(allRecordCount) > 0}">
 										<div id="subheader" class="row top10">
 											<div class="col-xs-12">
-												<la:message key="labels.search_result_status"
-													arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
-													arg2="${f:h(currentStartRecordNumber)}"
-													arg3="${f:h(currentEndRecordNumber)}" />
+												<c:if test="${allRecordCountRelation==null}">
+													<la:message key="labels.search_result_status"
+														arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
+														arg2="${f:h(currentStartRecordNumber)}"
+														arg3="${f:h(currentEndRecordNumber)}" />
+												</c:if><c:if test="${allRecordCountRelation!=null}">
+													<la:message key="labels.search_result_status_over"
+														arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
+														arg2="${f:h(currentStartRecordNumber)}"
+														arg3="${f:h(currentEndRecordNumber)}" />
+												</c:if>
 												<c:if test="${execTime!=null}">
 													<la:message key="labels.search_result_time"
 														arg0="${f:h(execTime)}" />

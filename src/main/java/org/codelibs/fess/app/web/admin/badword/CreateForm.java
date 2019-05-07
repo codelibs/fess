@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.badword;
 
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.util.ComponentUtil;
@@ -31,6 +32,7 @@ public class CreateForm {
     public Integer crudMode;
 
     @Required
+    @Pattern(regexp = "[^\\s]+")
     public String suggestWord;
 
     @Size(max = 1000)

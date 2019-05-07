@@ -372,15 +372,19 @@ public class QueryHelper {
         if (queryContext.roleQueryEnabled()) {
             final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
             if (!roleSet.isEmpty()) {
-                queryContext.addQuery(boolQuery -> {
-                    final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
-                    roleSet.stream().forEach(name -> {
-                        roleQuery.should(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldRole(), name));
-                    });
-                    boolQuery.filter(roleQuery);
-                });
+                queryContext.addQuery(boolQuery -> buildRoleQuery(roleSet, boolQuery));
             }
         }
+    }
+
+    public void buildRoleQuery(final Set<String> roleSet, final BoolQueryBuilder boolQuery) {
+        final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String roleField = fessConfig.getIndexFieldRole();
+        roleSet.stream().forEach(name -> roleQuery.should(QueryBuilders.termQuery(roleField, name)));
+        final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
+        roleSet.stream().forEach(name -> roleQuery.mustNot(QueryBuilders.termQuery(roleField, deniedPrefix + name)));
+        boolQuery.filter(roleQuery);
     }
 
     protected void buildBoostQuery(final QueryContext queryContext) {

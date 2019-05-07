@@ -33,8 +33,8 @@ public final class EsUtil {
     private EsUtil() {
     }
 
-    public static OutputStream getXContentOutputStream(final ToXContent xContent, final XContentType xContentType) {
-        try (final XContentBuilder builder = xContent.toXContent(XContentFactory.contentBuilder(xContentType), ToXContent.EMPTY_PARAMS)) {
+    public static OutputStream getXContentBuilderOutputStream(final XContentBuilderCallback func, final XContentType xContentType) {
+        try (final XContentBuilder builder = func.apply(XContentFactory.contentBuilder(xContentType), ToXContent.EMPTY_PARAMS)) {
             builder.flush();
             return builder.getOutputStream();
         } catch (IOException e) {
@@ -43,5 +43,13 @@ public final class EsUtil {
             }
             return new ByteArrayOutputStream();
         }
+    }
+
+    public static OutputStream getXContentOutputStream(final ToXContent xContent, final XContentType xContentType) {
+        return getXContentBuilderOutputStream((builder, params) -> xContent.toXContent(builder, params), xContentType);
+    }
+
+    public interface XContentBuilderCallback {
+        XContentBuilder apply(XContentBuilder builder, ToXContent.Params params) throws IOException;
     }
 }
