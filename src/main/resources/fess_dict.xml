@@ -10,6 +10,9 @@
 	<component name="kuromojiDictCreator"
 		class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
 	</component>
+	<component name="noriDictCreator"
+			   class="org.codelibs.fess.dict.nori.NoriCreator">
+	</component>
 	<component name="synonymCreator"
 		class="org.codelibs.fess.dict.synonym.SynonymCreator">
 	</component>

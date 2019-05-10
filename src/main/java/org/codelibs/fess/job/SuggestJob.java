@@ -128,9 +128,9 @@ public class SuggestJob extends ExecJob {
         cmdList.add(buf.toString());
 
         if (useLocalElasticsearch) {
-            final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-            if (StringUtil.isNotBlank(transportAddresses)) {
-                cmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+            final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+            if (StringUtil.isNotBlank(httpAddress)) {
+                cmdList.add("-D" + Constants.FESS_ES_HTTP_ADDRESS + "=" + httpAddress);
             }
         }
 

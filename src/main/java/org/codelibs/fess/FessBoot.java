@@ -127,13 +127,4 @@ public class FessBoot extends TomcatBoot {
     protected static String getTomcatConfigPath() {
         return System.getProperty(TOMCAT_CONFIG_PATH);
     }
-
-    @Override
-    protected void adjustServer() {
-        super.adjustServer();
-        final Host host = server.getHost();
-        if (host instanceof StandardHost) {
-            ((StandardHost) host).setErrorReportValveClass(SuppressErrorReportValve.class.getName());
-        }
-    }
 }

@@ -37,7 +37,7 @@ public final class EsUtil {
         try (final XContentBuilder builder = func.apply(XContentFactory.contentBuilder(xContentType), ToXContent.EMPTY_PARAMS)) {
             builder.flush();
             return builder.getOutputStream();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to print the output.", e);
             }

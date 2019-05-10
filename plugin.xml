@@ -56,6 +56,12 @@
 			<param name="plugin.version" value="7.0.0" />
 			<param name="plugin.zip.version" value="7.0.0" />
 		</antcall>
+		<!-- analysis-nori -->
+		<antcall target="install.nori.plugin">
+			<param name="repo.url" value="https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-nori" />
+			<param name="plugin.name" value="analysis-nori" />
+			<param name="plugin.zip.version" value="7.0.1" />
+		</antcall>
 
 		<antcall target="remove.jars" />
 	</target>
@@ -65,6 +71,18 @@
 			<url url="${repo.url}/${plugin.groupId}/${plugin.name.prefix}${plugin.name}/${plugin.version}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip" />
 		</get>
 		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip">
+			<patternset>
+				<include name="**" />
+			</patternset>
+			<cutdirsmapper dirs="1" />
+		</unzip>
+	</target>
+
+	<target name="install.nori.plugin">
+		<get dest="${target.dir}">
+			<url url="${repo.url}/${plugin.name}-${plugin.zip.version}.zip" />
+		</get>
+		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name}-${plugin.zip.version}.zip">
 			<patternset>
 				<include name="**" />
 			</patternset>

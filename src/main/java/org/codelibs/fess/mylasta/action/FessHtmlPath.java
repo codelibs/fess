@@ -101,6 +101,21 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/kuromoji/admin_dict_kuromoji_upload.jsp */
     HtmlNext path_AdminDictKuromoji_AdminDictKuromojiUploadJsp = new HtmlNext("/admin/dict/kuromoji/admin_dict_kuromoji_upload.jsp");
 
+    /** The path of the HTML: /admin/dict/nori/admin_dict_nori.jsp */
+    HtmlNext path_AdminDictNori_AdminDictNoriJsp = new HtmlNext("/admin/dict/nori/admin_dict_nori.jsp");
+
+    /** The path of the HTML: /admin/dict/nori/admin_dict_nori_details.jsp */
+    HtmlNext path_AdminDictNori_AdminDictNoriDetailsJsp = new HtmlNext("/admin/dict/nori/admin_dict_nori_details.jsp");
+
+    /** The path of the HTML: /admin/dict/nori/admin_dict_nori_download.jsp */
+    HtmlNext path_AdminDictNori_AdminDictNoriDownloadJsp = new HtmlNext("/admin/dict/nori/admin_dict_nori_download.jsp");
+
+    /** The path of the HTML: /admin/dict/nori/admin_dict_nori_edit.jsp */
+    HtmlNext path_AdminDictNori_AdminDictNoriEditJsp = new HtmlNext("/admin/dict/nori/admin_dict_nori_edit.jsp");
+
+    /** The path of the HTML: /admin/dict/nori/admin_dict_nori_upload.jsp */
+    HtmlNext path_AdminDictNori_AdminDictNoriUploadJsp = new HtmlNext("/admin/dict/nori/admin_dict_nori_upload.jsp");
+
     /** The path of the HTML: /admin/dict/mapping/admin_dict_mapping.jsp */
     HtmlNext path_AdminDictMapping_AdminDictMappingJsp = new HtmlNext("/admin/dict/mapping/admin_dict_mapping.jsp");
 

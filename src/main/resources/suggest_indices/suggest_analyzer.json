@@ -13,10 +13,9 @@
         "discard_punctuation" : "false"
       },
       "fess_korean_normal": {
-        "type": "fess_korean_tokenizer",
-        "index_eojeol": false,
-        "pos_tagging": false,
-        "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+        "type": "nori_tokenizer",
+        "mode":"normal",
+        "user_dict_path": "${fess.dictionary.path}ko/nori.txt"
       }
     },
     "analyzer" : {

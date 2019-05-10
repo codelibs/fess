@@ -107,11 +107,6 @@
 			</excludes>
 			<filtered>false</filtered>
 		</fileSet>
-		<!-- seunjeon/plugins -->
-		<fileSet>
-			<directory>${project.basedir}/seunjeon</directory>
-			<outputDirectory>fess-${project.version}/es/plugins</outputDirectory>
-		</fileSet>
 	</fileSets>
 	<files>
 		<file>

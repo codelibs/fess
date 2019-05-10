@@ -1103,6 +1103,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. kuromoji */
     String ONLINE_HELP_NAME_DICT_KUROMOJI = "online.help.name.dict.kuromoji";
 
+    /** The key of the configuration. e.g. nori */
+    String ONLINE_HELP_NAME_DICT_NORI = "online.help.name.dict.nori";
+
     /** The key of the configuration. e.g. protwords */
     String ONLINE_HELP_NAME_DICT_PROTWORDS = "online.help.name.dict.protwords";
 
@@ -5021,6 +5024,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameDictKuromoji();
 
     /**
+     * Get the value for the key 'online.help.name.dict.nori'. <br>
+     * The value is, e.g. nori <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictNori();
+
+    /**
      * Get the value for the key 'online.help.name.dict.protwords'. <br>
      * The value is, e.g. protwords <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7824,6 +7834,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_DICT_KUROMOJI);
         }
 
+        public String getOnlineHelpNameDictNori() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_NORI);
+        }
+
         public String getOnlineHelpNameDictProtwords() {
             return get(FessConfig.ONLINE_HELP_NAME_DICT_PROTWORDS);
         }
@@ -8681,6 +8695,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_SYNONYM, "synonym");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT, "dict");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_KUROMOJI, "kuromoji");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_NORI, "nori");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_PROTWORDS, "protwords");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_STOPWORDS, "stopwords");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DICT_STEMMEROVERRIDE, "stemmeroverride");

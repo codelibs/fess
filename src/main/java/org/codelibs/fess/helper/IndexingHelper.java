@@ -71,11 +71,10 @@ public class IndexingHelper {
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             synchronized (fessEsClient) {
                 deleteOldDocuments(fessEsClient, docList);
-                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList,
-                        (doc, builder) -> {
-                            final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
-                            crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
-                        });
+                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
+                    final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
+                    crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
+                });
             }
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {

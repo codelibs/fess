@@ -213,7 +213,7 @@ public class EsApiManager extends BaseApiManager {
     }
 
     @Override
-    protected void writeHeaders(HttpServletResponse response) {
+    protected void writeHeaders(final HttpServletResponse response) {
         ComponentUtil.getFessConfig().getApiDashboardResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }
