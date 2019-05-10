@@ -61,7 +61,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
         return this;
     }
 
-    public void writeOut(WrittenStreamOut out) throws IOException {
+    public void writeOut(final WrittenStreamOut out) throws IOException {
         try (final CurlResponse curlResponse = dictionaryManager.getContentResponse(this);
                 final InputStream inputStream = new BufferedInputStream(curlResponse.getContentAsStream())) {
             out.write(inputStream);

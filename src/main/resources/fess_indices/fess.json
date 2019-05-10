@@ -436,6 +436,28 @@
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}ja/stopwords.txt"
         },
+        "korean_pos_filter" : {
+          "type" : "nori_part_of_speech",
+          "stoptags" : [
+            "E",
+            "IC",
+            "J",
+            "MAG",
+            "MM",
+            "SP",
+            "SSC",
+            "SSO",
+            "SC",
+            "SE",
+            "XPN",
+            "XSA",
+            "XSN",
+            "XSV",
+            "UNA",
+            "NA",
+            "VSV"
+          ]
+        },
         "korean_stop": {
           "type":       "stop",
           "stopwords_path": "${fess.dictionary.path}ko/stopwords.txt"
@@ -664,10 +686,9 @@
           "reload_interval":"1m"
         },
         "korean_tokenizer": {
-            "type": "fess_korean_tokenizer",
-            "index_eojeol": false,
-            "pos_tagging": false,
-            "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+            "type": "nori_tokenizer",
+            "mode":"MIXED",
+            "user_dict_path": "${fess.dictionary.path}ko/nori.txt"
         },
         "simplified_chinese_tokenizer": {
             "type": "fess_simplified_chinese_tokenizer"
@@ -954,6 +975,8 @@
           "tokenizer":"korean_tokenizer",
           "filter": [
             "truncate10_filter",
+            "korean_pos_filter",
+            "nori_readingform",
             "lowercase",
             "korean_stop"
           ]

@@ -1,6 +1,6 @@
 Fess Enterprise Search Server [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Fess+is+very+powerful+and+easily+deployable+Enterprise+Search+Server.&url=https://github.com/codelibs/fess)
 ====
-[![Build Status](https://travis-ci.org/codelibs/fess.svg?branch=master)](https://travis-ci.org/codelibs/fess)
+[![Build Status](https://travis-ci.org/codelibs/fess.svg?branch=master)](https://travis-ci.org/codelibs/fess) 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gitbucket/gitbucket/blob/master/LICENSE)
 
@@ -39,7 +39,7 @@ For more details, see the [Installation Guide](https://fess.codelibs.org/13.0/in
 
 ### Docker
 
-We provide Docker images on [Docker Hub](https://hub.docker.com/r/codelibs/fess/). We also provide a Docker Compose (YAML) file in [this repository](https://github.com/codelibs/docker-fess/tree/master/compose).
+We provide Docker images on [Docker Hub](https://hub.docker.com/r/codelibs/fess/). We also provide a Docker Compose (YAML) file in [this repository](https://github.com/codelibs/docker-fess/tree/master/compose). 
 
 ### Browser UI
 
@@ -95,7 +95,7 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
     $ cd ~/workspace
     $ git clone https://github.com/codelibs/fess.git
     ```
-
+    
 2. Import the cloned repository as a [Maven](https://maven.apache.org/) project on [Eclipse](https://www.eclipse.org/eclipseide/) or another IDE.
 
 ### Setup for Elasticsearch Plugins

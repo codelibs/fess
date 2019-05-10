@@ -104,7 +104,7 @@ public final class UpgradeUtil {
             }
             try {
                 final AcknowledgedResponse putMappingResponse =
-                        indicesClient.preparePutMapping(index).setType(type).setSource(source, XContentType.JSON).execute()
+                        indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON).execute()
                                 .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created " + index + "/" + type + " mapping.");
@@ -128,7 +128,7 @@ public final class UpgradeUtil {
         if (fieldMappings == null || fieldMappings.isNull()) {
             try {
                 final AcknowledgedResponse pmResponse =
-                        indicesClient.preparePutMapping(index).setType(type).setSource(source, XContentType.JSON).execute().actionGet();
+                        indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON).execute().actionGet();
                 if (!pmResponse.isAcknowledged()) {
                     logger.warn("Failed to add " + field + " to " + index + "/" + type);
                 } else {
@@ -148,9 +148,6 @@ public final class UpgradeUtil {
     public static boolean putMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String source) {
         try {
             final PutMappingRequestBuilder builder = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON);
-            if (type != null) {
-                builder.setType(type);
-            }
             final AcknowledgedResponse pmResponse = builder.execute().actionGet();
             if (!pmResponse.isAcknowledged()) {
                 logger.warn("Failed to update " + index + " settings.");

@@ -184,6 +184,8 @@ public class FessEsClient implements Client {
 
     protected int maxEsStatusRetry = 60;
 
+    protected String clusterName = "elasticsearch";
+
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
     }
@@ -406,8 +408,8 @@ public class FessEsClient implements Client {
             }
             try {
                 final AcknowledgedResponse putMappingResponse =
-                        client.admin().indices().preparePutMapping(indexName).setType(docType).setSource(source, XContentType.JSON)
-                                .execute().actionGet(fessConfig.getIndexIndicesTimeout());
+                        client.admin().indices().preparePutMapping(indexName).setSource(source, XContentType.JSON).execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created " + indexName + "/" + docType + " mapping.");
                 } else {
@@ -586,9 +588,9 @@ public class FessEsClient implements Client {
             }
         }
         final String message =
-                "Elasticsearch (" + System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES)
-                        + ") is not available. Check the state of your Elasticsearch cluster (" + fessConfig.getElasticsearchClusterName()
-                        + ") in " + (System.currentTimeMillis() - startTime) + "ms.";
+                "Elasticsearch (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
+                        + ") is not available. Check the state of your Elasticsearch cluster (" + clusterName + ") in "
+                        + (System.currentTimeMillis() - startTime) + "ms.";
         throw new ContainerInitFailureException(message, cause);
     }
 
@@ -661,7 +663,7 @@ public class FessEsClient implements Client {
 
                 final BulkRequestBuilder bulkRequest = client.prepareBulk();
                 for (final SearchHit hit : hits) {
-                    bulkRequest.add(client.prepareDelete().setIndex(index).setType(type).setId(hit.getId()));
+                    bulkRequest.add(client.prepareDelete().setIndex(index).setId(hit.getId()));
                     count++;
                 }
                 final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
@@ -759,7 +761,6 @@ public class FessEsClient implements Client {
                     for (final SearchHit hit : hits) {
                         count++;
                         if (!cursor.apply(creator.build(response, hit))) {
-                            scrollId = null;
                             if (scrollId != null) {
                                 client.prepareClearScroll().addScrollId(scrollId)
                                         .execute(ActionListener.wrap(res -> {}, e1 -> logger.warn("Failed to clear scrollId.", e1)));
@@ -925,13 +926,13 @@ public class FessEsClient implements Client {
         }
     }
 
-    public void addAll(final String index, final String type, final List<Map<String, Object>> docList,
+    public void addAll(final String index, final List<Map<String, Object>> docList,
             final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
             final Object id = doc.remove(fessConfig.getIndexFieldId());
-            final IndexRequestBuilder builder = client.prepareIndex(index, type, id.toString()).setSource(new DocMap(doc));
+            final IndexRequestBuilder builder = client.prepareIndex().setIndex(index).setId(id.toString()).setSource(new DocMap(doc));
             options.accept(doc, builder);
             bulkRequestBuilder.add(builder);
         }
@@ -1514,13 +1515,7 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
-            final Action<Request, Response, RequestBuilder> action) {
-        return client.prepareExecute(action);
-    }
-
-    @Override
-    public FieldCapabilitiesRequestBuilder prepareFieldCaps(String... indices) {
+    public FieldCapabilitiesRequestBuilder prepareFieldCaps(final String... indices) {
         return client.prepareFieldCaps(indices);
     }
 
@@ -1535,7 +1530,7 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public BulkRequestBuilder prepareBulk(String globalIndex, String globalType) {
+    public BulkRequestBuilder prepareBulk(final String globalIndex, final String globalType) {
         return client.prepareBulk(globalIndex, globalType);
     }
 }
