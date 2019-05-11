@@ -345,26 +345,41 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     if (logger.isDebugEnabled()) {
                         logger.debug("member: {}", memberOf);
                     }
-                    final String id = (String) memberOf.get("id");
-                    if (StringUtil.isBlank(id)) {
-                        logger.warn("id is empty: {}", memberOf);
-                        continue;
-                    }
                     String memberType = (String) memberOf.get("@odata.type");
                     if (memberType == null) {
                         logger.warn("@odata.type is null: {}", memberOf);
                         continue;
                     }
                     memberType = memberType.toLowerCase(Locale.ENGLISH);
-                    if (memberType.contains("group")) {
-                        groupList.add(id);
-                    } else if (memberType.contains("role")) {
-                        roleList.add(id);
-                    } else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("unknown @odata.type: {}", memberOf);
+                    final String id = (String) memberOf.get("id");
+                    if (StringUtil.isNotBlank(id)) {
+                        if (memberType.contains("group")) {
+                            groupList.add(id);
+                        } else if (memberType.contains("role")) {
+                            roleList.add(id);
+                        } else {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("unknown @odata.type: {}", memberOf);
+                            }
+                            groupList.add(id);
                         }
-                        groupList.add(id);
+                    } else {
+                        logger.warn("id is empty: {}", memberOf);
+                    }
+                    final String mail = (String) memberOf.get("mail");
+                    if (StringUtil.isNotBlank(mail)) {
+                        if (memberType.contains("group")) {
+                            groupList.add(mail);
+                        } else if (memberType.contains("role")) {
+                            roleList.add(mail);
+                        } else {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("unknown @odata.type: {}", memberOf);
+                            }
+                            groupList.add(mail);
+                        }
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("mail is empty: {}", memberOf);
                     }
                 }
             } else if (contentMap.containsKey("error")) {
