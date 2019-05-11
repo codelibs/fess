@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.sso.aad.AzureAdAuthenticator;
@@ -27,6 +28,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
 import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.aad.adal4j.UserInfo;
 
 public class AzureAdCredential implements LoginCredential, FessCredential {
 
@@ -87,10 +89,12 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
-                permissionSet.add(systemHelper.getSearchRoleByUser(authResult.getUserInfo().getUniqueId()));
+                final UserInfo userInfo = authResult.getUserInfo();
+                permissionSet.add(systemHelper.getSearchRoleByUser(userInfo.getUniqueId()));
+                permissionSet.add(systemHelper.getSearchRoleByUser(userInfo.getDisplayableId()));
                 stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
                 stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
-                permissions = permissionSet.toArray(new String[permissionSet.size()]);
+                permissions = permissionSet.stream().filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]);
             }
             return permissions;
         }
