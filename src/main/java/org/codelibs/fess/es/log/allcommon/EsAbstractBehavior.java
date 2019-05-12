@@ -555,7 +555,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected SearchHits getSearchHits(final SearchResponse response) {
         SearchHits hits = response.getHits();
         if (hits == null) {
-            throw new IllegalBehaviorStateException("hits is null." + response.status());
+            throw new IllegalBehaviorStateException("hits is null: " + response);
         }
         return hits;
     }
