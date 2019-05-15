@@ -1016,12 +1016,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3.0 */
     String THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO = "thumbnail.html.image.max.aspect.ratio";
 
-    /** The key of the configuration. e.g. 1200 */
-    String THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH = "thumbnail.html.image.window.width";
-
-    /** The key of the configuration. e.g. 800 */
-    String THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT = "thumbnail.html.image.window.height";
-
     /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH = "thumbnail.html.image.thumbnail.width";
 
@@ -4726,36 +4720,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     java.math.BigDecimal getThumbnailHtmlImageMaxAspectRatioAsDecimal();
 
     /**
-     * Get the value for the key 'thumbnail.html.image.window.width'. <br>
-     * The value is, e.g. 1200 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlImageWindowWidth();
-
-    /**
-     * Get the value for the key 'thumbnail.html.image.window.width' as {@link Integer}. <br>
-     * The value is, e.g. 1200 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlImageWindowWidthAsInteger();
-
-    /**
-     * Get the value for the key 'thumbnail.html.image.window.height'. <br>
-     * The value is, e.g. 800 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThumbnailHtmlImageWindowHeight();
-
-    /**
-     * Get the value for the key 'thumbnail.html.image.window.height' as {@link Integer}. <br>
-     * The value is, e.g. 800 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThumbnailHtmlImageWindowHeightAsInteger();
-
-    /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.width'. <br>
      * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7664,22 +7628,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsDecimal(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO);
         }
 
-        public String getThumbnailHtmlImageWindowWidth() {
-            return get(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH);
-        }
-
-        public Integer getThumbnailHtmlImageWindowWidthAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH);
-        }
-
-        public String getThumbnailHtmlImageWindowHeight() {
-            return get(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT);
-        }
-
-        public Integer getThumbnailHtmlImageWindowHeightAsInteger() {
-            return getAsInteger(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT);
-        }
-
         public String getThumbnailHtmlImageThumbnailWidth() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH);
         }
@@ -8652,8 +8600,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO, "3.0");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_WIDTH, "1200");
-            defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_WINDOW_HEIGHT, "800");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_WIDTH, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_THUMBNAIL_HEIGHT, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_FORMAT, "png");
