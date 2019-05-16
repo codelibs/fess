@@ -58,14 +58,14 @@
 		<utflute.version>0.9.1</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.0.1-SNAPSHOT</crawler.version>
+		<crawler.version>3.1.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>7.0.0</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.0.1</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.0.1-SNAPSHOT</elasticsearch.httpclient.version>
+		<elasticsearch.httpclient.version>7.0.1</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
