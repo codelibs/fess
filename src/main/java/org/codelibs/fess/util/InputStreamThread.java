@@ -64,7 +64,9 @@ public class InputStreamThread extends Thread {
                 }
             } catch (final Exception e) {
                 running = false;
-                logger.error("Failed to process an input stream.", e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to process an input stream.", e);
+                }
             }
         }
     }
