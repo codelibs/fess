@@ -58,7 +58,7 @@ public class RelatedContentHelper {
             cb.query().matchAll();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Term_Asc();
-            cb.fetchFirst(ComponentUtil.getFessConfig().getPageRelatedqueryMaxFetchSizeAsInteger());
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageRelatedcontentMaxFetchSizeAsInteger());
         });
     }
 
