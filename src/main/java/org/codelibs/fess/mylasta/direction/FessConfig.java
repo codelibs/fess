@@ -887,12 +887,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3600 */
     String COOKIE_DEFAULT_EXPIRE = "cookie.default.expire";
 
-    /** The key of the configuration. e.g. 86400 */
-    String COOKIE_ETERNAL_EXPIRE = "cookie.eternal.expire";
-
-    /** The key of the configuration. e.g. FES */
-    String COOKIE_REMEMBER_ME_HARBOR_KEY = "cookie.remember.me.harbor.key";
-
     /** The key of the configuration. e.g. cookie */
     String SESSION_TRACKING_MODES = "session.tracking.modes";
 
@@ -965,9 +959,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGE_SCHEDULED_JOB_MAX_FETCH_SIZE = "page.scheduled.job.max.fetch.size";
 
-    /** The key of the configuration. e.g. 100 */
-    String PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE = "page.search.field.log.max.fetch.size";
-
     /** The key of the configuration. e.g. 1000 */
     String PAGE_ELEVATE_WORD_MAX_FETCH_SIZE = "page.elevate.word.max.fetch.size";
 
@@ -976,9 +967,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 1000 */
     String PAGE_DICTIONARY_MAX_FETCH_SIZE = "page.dictionary.max.fetch.size";
-
-    /** The key of the configuration. e.g. 5000 */
-    String PAGE_RELATEDCONTENT_MAX_FETCH_SIZE = "page.relatedcontent.max.fetch.size";
 
     /** The key of the configuration. e.g. 5000 */
     String PAGE_RELATEDQUERY_MAX_FETCH_SIZE = "page.relatedquery.max.fetch.size";
@@ -4079,31 +4067,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getCookieDefaultExpireAsInteger();
 
     /**
-     * Get the value for the key 'cookie.eternal.expire'. <br>
-     * The value is, e.g. 86400 <br>
-     * comment: The eternal expire of cookie in seconds e.g. 315360000: ten year, 86400: one day
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getCookieEternalExpire();
-
-    /**
-     * Get the value for the key 'cookie.eternal.expire' as {@link Integer}. <br>
-     * The value is, e.g. 86400 <br>
-     * comment: The eternal expire of cookie in seconds e.g. 315360000: ten year, 86400: one day
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getCookieEternalExpireAsInteger();
-
-    /**
-     * Get the value for the key 'cookie.remember.me.harbor.key'. <br>
-     * The value is, e.g. FES <br>
-     * comment: The cookie key of remember-me for Fess
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getCookieRememberMeHarborKey();
-
-    /**
      * Get the value for the key 'session.tracking.modes'. <br>
      * The value is, e.g. cookie <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4463,21 +4426,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageScheduledJobMaxFetchSizeAsInteger();
 
     /**
-     * Get the value for the key 'page.search.field.log.max.fetch.size'. <br>
-     * The value is, e.g. 100 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getPageSearchFieldLogMaxFetchSize();
-
-    /**
-     * Get the value for the key 'page.search.field.log.max.fetch.size' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getPageSearchFieldLogMaxFetchSizeAsInteger();
-
-    /**
      * Get the value for the key 'page.elevate.word.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4521,21 +4469,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPageDictionaryMaxFetchSizeAsInteger();
-
-    /**
-     * Get the value for the key 'page.relatedcontent.max.fetch.size'. <br>
-     * The value is, e.g. 5000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getPageRelatedcontentMaxFetchSize();
-
-    /**
-     * Get the value for the key 'page.relatedcontent.max.fetch.size' as {@link Integer}. <br>
-     * The value is, e.g. 5000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getPageRelatedcontentMaxFetchSizeAsInteger();
 
     /**
      * Get the value for the key 'page.relatedquery.max.fetch.size'. <br>
@@ -6644,10 +6577,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_parent_id);
         }
 
-        public String getIndexFieldImportantContent() {
-            return get(FessConfig.INDEX_FIELD_important_content);
-        }
-
         public String getIndexFieldContent() {
             return get(FessConfig.INDEX_FIELD_CONTENT);
         }
@@ -7292,18 +7221,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.COOKIE_DEFAULT_EXPIRE);
         }
 
-        public String getCookieEternalExpire() {
-            return get(FessConfig.COOKIE_ETERNAL_EXPIRE);
-        }
-
-        public Integer getCookieEternalExpireAsInteger() {
-            return getAsInteger(FessConfig.COOKIE_ETERNAL_EXPIRE);
-        }
-
-        public String getCookieRememberMeHarborKey() {
-            return get(FessConfig.COOKIE_REMEMBER_ME_HARBOR_KEY);
-        }
-
         public String getSessionTrackingModes() {
             return get(FessConfig.SESSION_TRACKING_MODES);
         }
@@ -7492,14 +7409,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_SCHEDULED_JOB_MAX_FETCH_SIZE);
         }
 
-        public String getPageSearchFieldLogMaxFetchSize() {
-            return get(FessConfig.PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE);
-        }
-
-        public Integer getPageSearchFieldLogMaxFetchSizeAsInteger() {
-            return getAsInteger(FessConfig.PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE);
-        }
-
         public String getPageElevateWordMaxFetchSize() {
             return get(FessConfig.PAGE_ELEVATE_WORD_MAX_FETCH_SIZE);
         }
@@ -7522,14 +7431,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPageDictionaryMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_DICTIONARY_MAX_FETCH_SIZE);
-        }
-
-        public String getPageRelatedcontentMaxFetchSize() {
-            return get(FessConfig.PAGE_RELATEDCONTENT_MAX_FETCH_SIZE);
-        }
-
-        public Integer getPageRelatedcontentMaxFetchSizeAsInteger() {
-            return getAsInteger(FessConfig.PAGE_RELATEDCONTENT_MAX_FETCH_SIZE);
         }
 
         public String getPageRelatedqueryMaxFetchSize() {
@@ -8557,8 +8458,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ROLE_SEARCH_DENIED_PREFIX, "D");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_PATH, "/");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
-            defaultMap.put(FessConfig.COOKIE_ETERNAL_EXPIRE, "86400");
-            defaultMap.put(FessConfig.COOKIE_REMEMBER_ME_HARBOR_KEY, "FES");
             defaultMap.put(FessConfig.SESSION_TRACKING_MODES, "cookie");
             defaultMap.put(FessConfig.PAGING_PAGE_SIZE, "25");
             defaultMap.put(FessConfig.PAGING_PAGE_RANGE_SIZE, "5");
@@ -8583,11 +8482,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_PATH_MAPPING_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_REQUEST_HEADER_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_SCHEDULED_JOB_MAX_FETCH_SIZE, "100");
-            defaultMap.put(FessConfig.PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE, "100");
             defaultMap.put(FessConfig.PAGE_ELEVATE_WORD_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_BAD_WORD_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_DICTIONARY_MAX_FETCH_SIZE, "1000");
-            defaultMap.put(FessConfig.PAGE_RELATEDCONTENT_MAX_FETCH_SIZE, "5000");
             defaultMap.put(FessConfig.PAGE_RELATEDQUERY_MAX_FETCH_SIZE, "5000");
             defaultMap.put(FessConfig.PAGE_THUMBNAIL_QUEUE_MAX_FETCH_SIZE, "100");
             defaultMap.put(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE, "100");
