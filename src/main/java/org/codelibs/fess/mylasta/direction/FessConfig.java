@@ -6577,6 +6577,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_parent_id);
         }
 
+        public String getIndexFieldImportantContent() {
+            return get(FessConfig.INDEX_FIELD_important_content);
+        }
+
         public String getIndexFieldContent() {
             return get(FessConfig.INDEX_FIELD_CONTENT);
         }
