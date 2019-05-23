@@ -14,9 +14,8 @@
       },
       "fess_korean_normal": {
         "type": "fess_korean_tokenizer",
-        "index_eojeol": false,
-        "pos_tagging": false,
-        "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+        "decompound_mode": "mixed",
+        "user_dict_path": "${fess.dictionary.path}ko/nori.txt"
       }
     },
     "analyzer" : {

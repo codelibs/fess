@@ -114,7 +114,7 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"ko/seunjeon.txt"</arg>
+			<arg>"ko/nori.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>

@@ -665,9 +665,8 @@
         },
         "korean_tokenizer": {
             "type": "fess_korean_tokenizer",
-            "index_eojeol": false,
-            "pos_tagging": false,
-            "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+            "decompound_mode": "mixed",
+            "user_dict_path": "${fess.dictionary.path}ko/nori.txt"
         },
         "simplified_chinese_tokenizer": {
             "type": "fess_simplified_chinese_tokenizer"
