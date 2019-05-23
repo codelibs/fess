@@ -147,19 +147,7 @@ public interface FessTransformer {
             target = evaluateValue(template, paramMap);
         }
         if (key != null && target != null) {
-            if (target.getClass().isArray()) {
-                if (key.endsWith("_m")) {
-                    putResultDataBody(dataMap, key, target);
-                } else {
-                    putResultDataBody(dataMap, key, Arrays.toString((Object[]) target));
-                }
-            } else {
-                if (key.endsWith("_m")) {
-                    putResultDataBody(dataMap, key, new Object[] { target });
-                } else {
-                    putResultDataBody(dataMap, key, target);
-                }
-            }
+            putResultDataBody(dataMap, key, target);
         }
     }
 
