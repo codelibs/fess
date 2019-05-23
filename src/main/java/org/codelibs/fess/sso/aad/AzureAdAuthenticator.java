@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -172,10 +173,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             urlBuf.append('?').append(queryStr);
         }
 
-        final Map<String, String> params = new HashMap<>();
+        final Map<String, List<String>> params = new HashMap<>();
         for (final Map.Entry<String, String[]> e : request.getParameterMap().entrySet()) {
             if (e.getValue().length > 0) {
-                params.put(e.getKey(), e.getValue()[0]);
+                params.put(e.getKey(), Arrays.asList(e.getValue()));
             }
         }
         if (logger.isDebugEnabled()) {
@@ -183,7 +184,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
 
         // validate that state in response equals to state in request
-        final StateData stateData = validateState(request.getSession(), params.get(STATE));
+        final StateData stateData = validateState(request.getSession(), params.containsKey(STATE) ? params.get(STATE).get(0) : null);
         if (logger.isDebugEnabled()) {
             logger.debug("load {}", stateData);
         }
@@ -203,7 +204,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
     }
 
-    protected AuthenticationResponse parseAuthenticationResponse(final String url, final Map<String, String> params) {
+    protected AuthenticationResponse parseAuthenticationResponse(final String url, final Map<String, List<String>> params) {
         if (logger.isDebugEnabled()) {
             logger.debug("Parse: {} : {}", url, params);
         }

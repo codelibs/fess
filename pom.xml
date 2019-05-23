@@ -35,7 +35,7 @@
 	</parent>
 	<properties>
 		<!-- Main Framework -->
-		<dbflute.version>1.1.9</dbflute.version>
+		<dbflute.version>1.2.0</dbflute.version>
 		<lastaflute.version>1.1.2</lastaflute.version>
 		<lasta.di.version>0.8.0</lasta.di.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
@@ -45,10 +45,10 @@
 		<!-- Partner Library -->
 		<slf4j.version>1.7.26</slf4j.version>
 		<log4j.version>2.11.1</log4j.version>
-		<jackson.version>2.8.11</jackson.version>
+		<jackson.version>2.9.9</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
 		<asm.version>7.1</asm.version>
-		<tika.version>1.20</tika.version>
+		<tika.version>1.21</tika.version>
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
@@ -69,7 +69,7 @@
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.17</tomcat.version>
+		<tomcat.version>9.0.19</tomcat.version>
 		<tomcat.boot.version>0.7.2</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
@@ -1140,41 +1140,6 @@
 			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>transport</artifactId>
-			<version>${elasticsearch.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>lang-mustache-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>percolator-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>reindex-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>transport-netty3-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>transport-netty4-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>parent-join-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.elasticsearch.plugin</groupId>
-					<artifactId>rank-eval-client</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>elasticsearch-cluster-runner</artifactId>
 			<version>${cluster.runner.version}</version>
@@ -1293,7 +1258,7 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.11</version>
+			<version>1.12</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -1303,17 +1268,17 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.8.1</version>
+			<version>3.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-			<version>63.1</version>
+			<version>64.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.apis</groupId>
 			<artifactId>google-api-services-analyticsreporting</artifactId>
-			<version>v4-rev133-1.25.0</version>
+			<version>v4-rev141-1.25.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -1330,12 +1295,16 @@
 					<groupId>javax.annotation</groupId>
 					<artifactId>javax.annotation-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.cxf</groupId>
+					<artifactId>cxf-rt-rs-client</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
 			<artifactId>adal4j</artifactId>
-			<version>1.6.3</version>
+			<version>1.6.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.stephenc.jcip</groupId>
@@ -1427,7 +1396,22 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}.3</version>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-cbor</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-smile</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<!-- template -->
@@ -1441,7 +1425,7 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy</artifactId>
-			<version>2.5.5</version>
+			<version>2.5.7</version>
 		</dependency>
 
 		<!-- Tomcat -->
@@ -1500,7 +1484,7 @@
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
-			<version>3.2.0</version>
+			<version>3.3.0</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
