@@ -6,17 +6,10 @@
 		<property name="settings">
 			{"http.cors.enabled":"true",
 			 "http.cors.allow-origin":"*",
+			 "indices.breaker.total.limit":"100%",
 			 "discovery.seed_hosts":"127.0.0.1:9301",
 			 "cluster.initial_master_nodes":"127.0.0.1:9301",
 			 "action.auto_create_index":"-*"}
-<!--
-			{"http.cors.enabled":"true",
-			 "http.cors.allow-origin":"*",
-			 "searchguard.ssl.transport.pemkey_filepath":"/path/to/the/key",
-			 "searchguard.ssl.transport.pemcert_filepath":"/path/to/the/CERTIFICATE",
-			 "searchguard.ssl.transport.pemtrustedcas_filepath":"/path/to/the/CA"
-			 }
- -->
 		</property>
 		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">
