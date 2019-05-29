@@ -20,6 +20,8 @@
 	</component>
 	<component name="purgeThumbnailJob" class="org.codelibs.fess.job.PurgeThumbnailJob" instance="prototype">
 	</component>
+	<component name="updateLabelJob" class="org.codelibs.fess.job.UpdateLabelJob" instance="prototype">
+	</component>
 	<component name="pingEsJob" class="org.codelibs.fess.job.PingEsJob" instance="prototype">
 	</component>
 </components>

@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class LabelTypeHelper {
     private static final Logger logger = LoggerFactory.getLogger(LabelTypeHelper.class);
 
-    protected volatile List<LabelTypeItem> labelTypeItemList = new ArrayList<>();
+    protected volatile List<LabelTypeItem> labelTypeItemList;
 
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
@@ -53,14 +53,16 @@ public class LabelTypeHelper {
     public int update() {
         final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
+        buildLabelTypePatternList(labelTypeList);
         return labelTypeList.size();
     }
 
     public void refresh(final List<LabelType> labelTypeList) {
         buildLabelTypeItems(labelTypeList);
+        buildLabelTypePatternList(labelTypeList);
     }
 
-    private void buildLabelTypeItems(final List<LabelType> labelTypeList) {
+    protected void buildLabelTypeItems(final List<LabelType> labelTypeList) {
         final List<LabelTypeItem> itemList = new ArrayList<>();
         for (final LabelType labelType : labelTypeList) {
             final LabelTypeItem item = new LabelTypeItem();
@@ -120,21 +122,7 @@ public class LabelTypeHelper {
         if (labelTypePatternList == null) {
             synchronized (this) {
                 if (labelTypePatternList == null) {
-                    final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
-                    final List<LabelTypePattern> list = new ArrayList<>();
-                    for (final LabelType labelType : labelTypeList) {
-                        final String includedPaths = labelType.getIncludedPaths();
-                        final String excludedPaths = labelType.getExcludedPaths();
-                        if (StringUtil.isNotBlank(includedPaths) || StringUtil.isNotBlank(excludedPaths)) {
-                            try {
-                                list.add(new LabelTypePattern(labelType.getValue(), includedPaths, excludedPaths));
-                            } catch (final Exception e) {
-                                logger.warn("Failed to create a matching pattern of a label: " + labelType.getValue() + ", includedPaths:"
-                                        + includedPaths + ", excludedPaths:" + excludedPaths, e);
-                            }
-                        }
-                    }
-                    labelTypePatternList = list;
+                    buildLabelTypePatternList(ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList());
                 }
             }
         }
@@ -150,6 +138,23 @@ public class LabelTypeHelper {
             }
         }
         return valueSet;
+    }
+
+    protected void buildLabelTypePatternList(final List<LabelType> labelTypeList) {
+        final List<LabelTypePattern> list = new ArrayList<>();
+        for (final LabelType labelType : labelTypeList) {
+            final String includedPaths = labelType.getIncludedPaths();
+            final String excludedPaths = labelType.getExcludedPaths();
+            if (StringUtil.isNotBlank(includedPaths) || StringUtil.isNotBlank(excludedPaths)) {
+                try {
+                    list.add(new LabelTypePattern(labelType.getValue(), includedPaths, excludedPaths));
+                } catch (final Exception e) {
+                    logger.warn("Failed to create a matching pattern of a label: " + labelType.getValue() + ", includedPaths:"
+                            + includedPaths + ", excludedPaths:" + excludedPaths, e);
+                }
+            }
+        }
+        labelTypePatternList = list;
     }
 
     protected static class LabelTypeItem {
