@@ -58,14 +58,14 @@
 		<utflute.version>0.9.1</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.1.0-SNAPSHOT</crawler.version>
+		<crawler.version>3.1.0</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.1.0-SNAPSHOT</suggest.version>
+		<suggest.version>7.1.0</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.1.0</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.1.0-SNAPSHOT</elasticsearch.httpclient.version>
+		<elasticsearch.httpclient.version>7.1.0</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -1094,6 +1094,17 @@
 			<groupId>javax.transaction</groupId>
 			<artifactId>javax.transaction-api</artifactId>
 			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
+			<version>2.28</version>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.annotation</groupId>
+					<artifactId>jakarta.annotation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- logging -->
