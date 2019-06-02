@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -202,8 +203,14 @@ public class ThumbnailGenerator {
                 count = ComponentUtil.getThumbnailManager().generate(executorService, options.cleanup);
                 totalCount += count;
             }
-        } finally {
             executorService.shutdown();
+            executorService.awaitTermination(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Interrupted.", e);
+            }
+        } finally {
+            executorService.shutdownNow();
         }
         return totalCount;
     }
