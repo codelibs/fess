@@ -86,8 +86,8 @@
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-gsuite" />
-			<param name="jar.version" value="13.1.1" />
-			<param name="file.version" value="13.1.1" />
+			<param name="jar.version" value="13.1.2" />
+			<param name="file.version" value="13.1.2" />
 		</antcall>
 		<!-- fess-ds-json -->
 		<antcall target="install.lib.jar">
