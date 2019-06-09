@@ -60,13 +60,13 @@
 		<utflute.version>0.9.0</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>2.6.3-SNAPSHOT</crawler.version>
+		<crawler.version>2.6.3</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>6.7.0</suggest.version>
+		<suggest.version>6.7.1</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>6.7.1</elasticsearch.version>
+		<elasticsearch.version>6.7.2</elasticsearch.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
