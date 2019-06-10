@@ -49,6 +49,14 @@
 			<param name="jar.version" value="13.0.0" />
 			<param name="file.version" value="13.0.0" />
 		</antcall>
+		<!-- fess-ds-box -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-box" />
+			<param name="jar.version" value="13.0.0" />
+			<param name="file.version" value="13.0.0" />
+		</antcall>
 		<!-- fess-ds-csv -->
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
