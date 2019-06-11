@@ -66,6 +66,7 @@ Please see [fess-xpack](https://github.com/codelibs/fess-xpack).
 Currently, Fess supports crawling the following [storage locations and APIs](https://fess.codelibs.org/13.1/admin/dataconfig-guide.html):
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
+ - [Box](https://github.com/codelibs/fess-ds-box)
  - [CSV](https://github.com/codelibs/fess-ds-csv)
  - [Database](https://github.com/codelibs/fess-ds-db)
  - [Elasticsearch](https://github.com/codelibs/fess-ds-elasticsearch)
