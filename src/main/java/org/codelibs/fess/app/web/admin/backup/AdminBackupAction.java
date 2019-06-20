@@ -17,11 +17,16 @@ package org.codelibs.fess.app.web.admin.backup;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -40,6 +45,7 @@ import javax.annotation.Resource;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
@@ -64,6 +70,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author shinsuke
@@ -104,44 +113,110 @@ public class AdminBackupAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
+        final String fileName = form.bulkFile.getFileName();
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile("fess_restore_", ".tmp");
+            try (final InputStream in = form.bulkFile.getInputStream(); final OutputStream out = new FileOutputStream(tempFile)) {
+                CopyUtil.copy(in, out);
+            }
+            asyncImport(fileName, tempFile);
+        } catch (final Exception e) {
+            logger.warn("Failed to import " + fileName, e);
+        }
+        saveInfo(messages -> messages.addSuccessBulkProcessStarted(GLOBAL));
+        return redirect(getClass()); // no-op
+    }
+
+    protected void asyncImport(final String fileName, final File tempFile) {
         asyncManager.async(() -> {
-            final String fileName = form.bulkFile.getFileName();
             if (fileName.startsWith("system") && fileName.endsWith(".properties")) {
-                try (final InputStream in = form.bulkFile.getInputStream()) {
+                try (final InputStream in = new FileInputStream(tempFile)) {
                     ComponentUtil.getSystemProperties().load(in);
                 } catch (final IOException e) {
-                    logger.warn("Failed to process system.properties file: " + form.bulkFile.getFileName(), e);
+                    logger.warn("Failed to process system.properties file: " + fileName, e);
+                } finally {
+                    if (tempFile != null) {
+                        tempFile.delete();
+                    }
                 }
             } else if (fileName.startsWith("gsa") && fileName.endsWith(".xml")) {
                 final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
-                try (final InputStream in = form.bulkFile.getInputStream()) {
+                try (final InputStream in = new FileInputStream(tempFile)) {
                     configParser.parse(new InputSource(in));
                 } catch (final IOException e) {
-                    logger.warn("Failed to process gsa.xml file: " + form.bulkFile.getFileName(), e);
+                    logger.warn("Failed to process gsa.xml file: " + fileName, e);
+                } finally {
+                    if (tempFile != null) {
+                        tempFile.delete();
+                    }
                 }
                 configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
                 configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
                 labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
             } else {
-                try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
-                    con.setDoOutput(true);
-                    try (InputStream in = form.bulkFile.getInputStream(); OutputStream out = con.getOutputStream()) {
-                        CopyUtil.copy(in, out);
-                    } catch (IOException e) {
-                        throw new IORuntimeException(e);
-                    }
-                }).execute()) {
+                final ObjectMapper mapper = new ObjectMapper();
+                try (CurlResponse response =
+                        ComponentUtil
+                                .getCurlHelper()
+                                .post("/_bulk")
+                                .onConnect(
+                                        (req, con) -> {
+                                            con.setDoOutput(true);
+                                            try (final BufferedReader br =
+                                                    new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
+                                                    final BufferedWriter bw =
+                                                            new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),
+                                                                    Constants.CHARSET_UTF_8))) {
+                                                String line;
+                                                while ((line = br.readLine()) != null) {
+                                                    if (StringUtil.isNotBlank(line)) {
+                                                        final Map<String, Map<String, String>> dataObj = parseObject(mapper, line);
+                                                        if (dataObj != null) {
+                                                            final Map<String, String> indexObj = dataObj.get("index");
+                                                            if (indexObj != null && indexObj.containsKey("_type")) {
+                                                                indexObj.remove("_type");
+                                                                bw.write(mapper.writeValueAsString(dataObj));
+                                                            } else {
+                                                                bw.write(line);
+                                                            }
+                                                        } else {
+                                                            bw.write(line);
+                                                        }
+                                                    }
+                                                    bw.write("\n");
+                                                }
+                                                bw.flush();
+                                            } catch (IOException e) {
+                                                throw new IORuntimeException(e);
+                                            }
+                                        }).execute()) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Bulk Response:\n" + response.getContentAsString());
                     }
                     systemHelper.reloadConfiguration();
                 } catch (final Exception e) {
-                    logger.warn("Failed to process bulk file: " + form.bulkFile.getFileName(), e);
+                    logger.warn("Failed to process bulk file: " + fileName, e);
+                } finally {
+                    if (tempFile != null) {
+                        tempFile.delete();
+                    }
                 }
             }
         });
-        saveInfo(messages -> messages.addSuccessBulkProcessStarted(GLOBAL));
-        return redirect(getClass()); // no-op
+    }
+
+    private Map<String, Map<String, String>> parseObject(final ObjectMapper mapper, String line) {
+        try {
+            final Map<String, Map<String, String>> dataObj = mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
+            });
+            return dataObj;
+        } catch (Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse " + line, e);
+            }
+            return null;
+        }
     }
 
     @Execute
