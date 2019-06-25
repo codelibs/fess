@@ -136,8 +136,8 @@ public class AdminBackupAction extends FessAdminAction {
                 } catch (final IOException e) {
                     logger.warn("Failed to process system.properties file: " + fileName, e);
                 } finally {
-                    if (tempFile != null) {
-                        tempFile.delete();
+                    if (tempFile != null && !tempFile.delete()) {
+                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
                     }
                 }
             } else if (fileName.startsWith("gsa") && fileName.endsWith(".xml")) {
@@ -147,8 +147,8 @@ public class AdminBackupAction extends FessAdminAction {
                 } catch (final IOException e) {
                     logger.warn("Failed to process gsa.xml file: " + fileName, e);
                 } finally {
-                    if (tempFile != null) {
-                        tempFile.delete();
+                    if (tempFile != null && !tempFile.delete()) {
+                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
                     }
                 }
                 configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
@@ -198,8 +198,8 @@ public class AdminBackupAction extends FessAdminAction {
                 } catch (final Exception e) {
                     logger.warn("Failed to process bulk file: " + fileName, e);
                 } finally {
-                    if (tempFile != null) {
-                        tempFile.delete();
+                    if (tempFile != null && !tempFile.delete()) {
+                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
                     }
                 }
             }
