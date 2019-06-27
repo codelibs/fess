@@ -229,7 +229,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3600 */
     String API_CORS_MAX_AGE = "api.cors.max.age";
 
-    /** The key of the configuration. e.g. Origin, Content-Type, Accept, Authorization */
+    /** The key of the configuration. e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With */
     String API_CORS_ALLOW_HEADERS = "api.cors.allow.headers";
 
     /** The key of the configuration. e.g. true */
@@ -1884,7 +1884,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.cors.allow.headers'. <br>
-     * The value is, e.g. Origin, Content-Type, Accept, Authorization <br>
+     * The value is, e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowHeaders();
@@ -8283,7 +8283,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
-            defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization");
+            defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization, X-Requested-With");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
