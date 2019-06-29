@@ -459,7 +459,7 @@ public class LdapManager {
                                 name -> {
                                     search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
                                             subResult -> {
-                                                if (!!subResult.isEmpty()) {
+                                                if (subResult.isEmpty()) {
                                                     final Group group = new Group();
                                                     group.setName(name);
                                                     insert(group);
@@ -492,7 +492,7 @@ public class LdapManager {
                                 name -> {
                                     search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
                                             subResult -> {
-                                                if (!!subResult.isEmpty()) {
+                                                if (subResult.isEmpty()) {
                                                     final Role role = new Role();
                                                     role.setName(name);
                                                     insert(role);
@@ -507,7 +507,7 @@ public class LdapManager {
                                 stream -> stream.forEach(name -> {
                                     search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
                                             subResult -> {
-                                                if (!!subResult.isEmpty()) {
+                                                if (subResult.isEmpty()) {
                                                     final Group group = new Group();
                                                     group.setName(name);
                                                     insert(group);
@@ -522,7 +522,7 @@ public class LdapManager {
                                 stream -> stream.forEach(name -> {
                                     search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
                                             subResult -> {
-                                                if (!!subResult.isEmpty()) {
+                                                if (subResult.isEmpty()) {
                                                     final Role role = new Role();
                                                     role.setName(name);
                                                     insert(role);
@@ -869,7 +869,7 @@ public class LdapManager {
 
         stream(user.getGroupNames()).of(stream -> stream.forEach(name -> {
             search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv, subResult -> {
-                if (!!subResult.isEmpty()) {
+                if (subResult.isEmpty()) {
                     final Group group = new Group();
                     group.setName(name);
                     insert(group);
@@ -881,7 +881,7 @@ public class LdapManager {
         }));
         stream(user.getRoleNames()).of(stream -> stream.forEach(name -> {
             search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv, subResult -> {
-                if (!!subResult.isEmpty()) {
+                if (subResult.isEmpty()) {
                     final Role role = new Role();
                     role.setName(name);
                     insert(role);

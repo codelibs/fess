@@ -87,7 +87,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     @Override
     public String getDocumentBoost() {
-        return Float.valueOf(getBoost().floatValue()).toString();
+        return getBoost().toString();
     }
 
     public String getBoostValue() {

@@ -56,7 +56,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     @Override
     public String getDocumentBoost() {
-        return Float.valueOf(getBoost().floatValue()).toString();
+        return getBoost().toString();
     }
 
     @Override

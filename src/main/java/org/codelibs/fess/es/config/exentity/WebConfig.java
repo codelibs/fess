@@ -57,7 +57,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     @Override
     public String getDocumentBoost() {
-        return Float.valueOf(getBoost().floatValue()).toString();
+        return getBoost().toString();
     }
 
     @Override
