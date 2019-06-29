@@ -50,6 +50,8 @@ public class UserInfoHelper {
 
     protected Boolean cookieSecure;
 
+    protected boolean httpOnly = true;
+
     public String getUserCode() {
         final HttpServletRequest request = LaRequestUtil.getRequest();
 
@@ -140,6 +142,7 @@ public class UserInfoHelper {
     protected void updateCookie(final String userCode, final int age) {
         final Cookie cookie = new Cookie(cookieName, userCode);
         cookie.setMaxAge(age);
+        cookie.setHttpOnly(httpOnly);
         if (StringUtil.isNotBlank(cookieDomain)) {
             cookie.setDomain(cookieDomain);
         }
@@ -228,5 +231,9 @@ public class UserInfoHelper {
 
     public void setCookieSecure(final Boolean cookieSecure) {
         this.cookieSecure = cookieSecure;
+    }
+
+    public void setCookieHttpOnly(boolean httpOnly) {
+        this.httpOnly = httpOnly;
     }
 }
