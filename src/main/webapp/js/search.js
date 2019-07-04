@@ -14,11 +14,8 @@ $(function() {
     return true;
   });
 
-  $("#content").on("click touchend", function(e) {
-    if (
-      !$(e.target).closest("#searchOptions, [data-toggle='control-options']")
-        .length
-    ) {
+  $(document).on("click touchend", function(e) {
+    if (!$(e.target).closest("#searchOptions, #searchOptionsButton").length) {
       $("#searchOptions").removeClass("active");
     }
   });
