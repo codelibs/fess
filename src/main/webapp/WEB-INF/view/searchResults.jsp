@@ -47,7 +47,7 @@
 					<div class="mr-3">
 						<a class="link d-none d-sm-flex" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
 							data-order="${s.index}"
-						> <img src="${fe:url('/images/blank.png')}"
+						> <img src="${fe:url('/images/blank.png')}" alt="thumbnail"
 							data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}" class="thumbnail"
 						>
 						</a>
