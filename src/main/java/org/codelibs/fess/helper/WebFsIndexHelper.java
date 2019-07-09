@@ -146,12 +146,15 @@ public class WebFsIndexHelper {
                 }
             }
 
+            final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
+
             // set urls
             split(urlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
                 if (!urlValue.startsWith("#") && fessConfig.isValidCrawlerWebProtocol(urlValue)) {
-                    crawler.addUrl(urlValue);
+                    final String u = duplicateHostHelper.convert(urlValue);
+                    crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Target URL: " + urlValue);
+                        logger.info("Target URL: " + u);
                     }
                 }
             }));
