@@ -21,12 +21,9 @@ import static org.codelibs.fess.app.web.admin.accesstoken.AdminAccesstokenAction
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.AccessTokenPager;
-import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.accesstoken.AdminAccesstokenAction;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -50,8 +47,6 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
-    private AccessTokenService accessTokenService;
 
     // ===================================================================================
     //                                                                      Search Execute

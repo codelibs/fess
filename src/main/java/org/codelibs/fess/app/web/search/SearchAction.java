@@ -28,7 +28,6 @@ import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -56,8 +55,6 @@ public class SearchAction extends FessSearchAction {
     // ===================================================================================
     //                                                                           Attribute
     //
-    @Resource
-    protected SearchService searchService;
 
     @Resource
     protected RelatedContentHelper relatedContentHelper;

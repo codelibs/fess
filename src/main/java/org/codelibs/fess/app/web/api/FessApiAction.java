@@ -26,7 +26,6 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.mylasta.action.FessMessages;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.web.login.LoginManager;
@@ -35,9 +34,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaMessenger;
 
 public abstract class FessApiAction extends FessBaseAction {
-
-    @Resource
-    protected FessConfig fessConfig;
 
     @Resource
     protected MessageManager messageManager;
