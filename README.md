@@ -69,6 +69,7 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
  - [Box](https://github.com/codelibs/fess-ds-box)
  - [CSV](https://github.com/codelibs/fess-ds-csv)
  - [Database](https://github.com/codelibs/fess-ds-db)
+ - [Dropbox](https://github.com/codelibs/fess-ds-dropbox)
  - [Elasticsearch](https://github.com/codelibs/fess-ds-elasticsearch)
  - [Gitbucket](https://github.com/codelibs/fess-ds-gitbucket)
  - [G Suite](https://github.com/codelibs/fess-ds-gsuite)

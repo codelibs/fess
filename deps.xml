@@ -73,6 +73,14 @@
 			<param name="jar.version" value="13.2.0" />
 			<param name="file.version" value="13.2.0" />
 		</antcall>
+		<!-- fess-ds-dropbox -->
+		<antcall target="install.lib.jar">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-ds-dropbox" />
+			<param name="jar.version" value="13.2.0" />
+			<param name="file.version" value="13.2.0" />
+		</antcall>
 		<!-- fess-ds-elasticsearch -->
 		<antcall target="install.lib.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
