@@ -50,13 +50,13 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-primary" name="download"
 										value="<la:message key="labels.design_download_button" />">
-										<i class="fa fa-download"></i>
+										<em class="fa fa-download"></em>
 										<la:message key="labels.design_download_button" />
 									</button>
 									<button type="button" class="btn btn-danger" name="delete"
 										data-toggle="modal" data-target="#confirmToDelete"
 										value="<la:message key="labels.design_delete_button" />">
-										<i class="fa fa-trash"></i>
+										<em class="fa fa-trash"></em>
 										<la:message key="labels.design_delete_button" />
 									</button>
 									<div class="modal modal-danger fade" id="confirmToDelete"
@@ -85,7 +85,7 @@
 													<button type="submit" class="btn btn-outline btn-danger"
 														name="delete"
 														value="<la:message key="labels.crud_button_delete" />">
-														<i class="fa fa-trash"></i>
+														<em class="fa fa-trash"></em>
 														<la:message key="labels.crud_button_delete" />
 													</button>
 												</div>
@@ -119,13 +119,13 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-warning" name="edit"
 										value="<la:message key="labels.design_edit_button" />">
-										<i class="fa fa-pencil-alt"></i>
+										<em class="fa fa-pencil-alt"></em>
 										<la:message key="labels.design_edit_button" />
 									</button>
 									<button type="submit" class="btn btn-danger"
 										name="editAsUseDefault"
 										value="<la:message key="labels.design_use_default_button" />">
-										<i class="fa fa-recycle"></i>
+										<em class="fa fa-recycle"></em>
 										<la:message key="labels.design_use_default_button" />
 									</button>
 								</div>
@@ -166,7 +166,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-success" name="upload"
 										value="<la:message key="labels.design_button_upload" />">
-										<i class="fa fa-upload"></i>
+										<em class="fa fa-upload"></em>
 										<la:message key="labels.design_button_upload" />
 									</button>
 								</div>

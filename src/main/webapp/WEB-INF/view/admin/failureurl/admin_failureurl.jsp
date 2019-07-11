@@ -76,7 +76,7 @@
 											<button type="submit" class="btn btn-primary" id="submit"
 												name="search"
 												value="<la:message key="labels.crud_button_search" />">
-												<i class="fa fa-search"></i>
+												<em class="fa fa-search"></em>
 												<la:message key="labels.crud_button_search" />
 											</button>
 											<button type="submit" class="btn btn-default" name="reset"
@@ -91,7 +91,7 @@
 									<c:if test="${failureUrlPager.allRecordCount == 0}">
 										<div class="row top20">
 											<div class="col-sm-12">
-												<i class="fa fa-info-circle text-light-blue"></i>
+												<em class="fa fa-info-circle text-light-blue"></em>
 												<la:message key="labels.list_could_not_find_crud_table" />
 											</div>
 										</div>
@@ -134,7 +134,7 @@
 												<div class="col-sm-12 center">
 													<button type="button" class="btn btn-danger"
 														data-toggle="modal" data-target="#confirmToDeleteAll">
-														<i class="fa fa-trash"></i>
+														<em class="fa fa-trash"></em>
 														<la:message key="labels.failure_url_delete_all_link" />
 													</button>
 												</div>
@@ -165,7 +165,7 @@
 																<button type="submit" class="btn btn-outline btn-danger"
 																	name="deleteall"
 																	value="<la:message key="labels.failure_url_delete_all_link" />">
-																	<i class="fa fa-trash"></i>
+																	<em class="fa fa-trash"></em>
 																	<la:message key="labels.failure_url_delete_all_link" />
 																</button>
 															</div>

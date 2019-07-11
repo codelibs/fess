@@ -53,7 +53,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="crawlingConfigForm"
 										value="<la:message key="labels.wizard_start_button"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.wizard_start_button" />
 									</button>
 								</div>

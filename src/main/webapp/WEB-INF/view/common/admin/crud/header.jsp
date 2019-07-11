@@ -20,13 +20,13 @@
 	<c:choose>
 		<c:when test="${crudMode == null}">
 			<la:link href="createnew" styleClass="btn btn-success btn-xs">
-				<i class="fa fa-plus"></i>
+				<em class="fa fa-plus"></em>
 				<la:message key="labels.crud_link_create" />
 			</la:link>
 		</c:when>
 		<c:otherwise>
 			<la:link href="../list" styleClass="btn btn-primary btn-xs">
-				<i class="fa fa-th-list"></i>
+				<em class="fa fa-th-list"></em>
 				<la:message key="labels.crud_link_list" />
 			</la:link>
 		</c:otherwise>

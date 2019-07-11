@@ -88,13 +88,13 @@
 									<button type="submit" class="btn btn-primary"
 										name="crawlingConfig"
 										value="<la:message key="labels.wizard_button_register_again"/>">
-										<i class="fa fa-redo-alt"></i>
+										<em class="fa fa-redo-alt"></em>
 										<la:message key="labels.wizard_button_register_again" />
 									</button>
 									<button type="submit" class="btn btn-success"
 										name="crawlingConfigNext"
 										value="<la:message key="labels.wizard_button_register_next"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.wizard_button_register_next" />
 									</button>
 								</div>

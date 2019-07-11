@@ -20,18 +20,18 @@
 				<c:if test="${developmentMode}">
 				<li data-toggle="tooltip" data-placement="left" title="<la:message
 					key="labels.development_mode_warning" />">
-					<a href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle"></i></a></li>
+					<a href="${installationLink}" target="_olh"><em class="fa fa-exclamation-triangle"></em></a></li>
 				</c:if>
-				<li><a href="${contextPath}/"><i class="fa fa-list-alt"></i></a></li>
+				<li><a href="${contextPath}/"><em class="fa fa-list-alt"></em></a></li>
 				<li><a
-					href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
-						class="fa fa-play-circle"></i></a></li>
+					href="${contextPath}/admin/scheduler/details/4/default_crawler"><em
+						class="fa fa-play-circle"></em></a></li>
 				<c:if test="${not empty helpLink}">
-				<li><a href="${helpLink}" target="_olh"><i
-						class="fa fa-question-circle"></i></a></li>
+				<li><a href="${helpLink}" target="_olh"><em
+						class="fa fa-question-circle"></em></a></li>
 				</c:if>
-				<li><a href="${contextPath}/logout"><i
-						class="fa fa-sign-out-alt"></i></a></li>
+				<li><a href="${contextPath}/logout"><em
+						class="fa fa-sign-out-alt"></em></a></li>
 			</ul>
 		</div>
 	</nav>

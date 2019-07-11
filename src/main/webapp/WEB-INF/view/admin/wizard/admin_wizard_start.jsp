@@ -54,12 +54,12 @@
 									<button type="submit" class="btn btn-success"
 										name="startCrawling"
 										value="<la:message key="labels.wizard_button_start_crawling"/>">
-										<i class="fa fa-play-circle"></i>
+										<em class="fa fa-play-circle"></em>
 										<la:message key="labels.wizard_button_start_crawling" />
 									</button>
 									<button type="submit" class="btn btn-default" name="index"
 										value="<la:message key="labels.wizard_button_finish"/>">
-										<i class="fa fa-step-forward"></i>
+										<em class="fa fa-step-forward"></em>
 										<la:message key="labels.wizard_button_finish" />
 									</button>
 								</div>

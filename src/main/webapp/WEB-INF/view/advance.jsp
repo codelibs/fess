@@ -39,7 +39,7 @@
 										<div class="dropdown">
 											<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
 												aria-expanded="false"
-											> <i class="fa fa-fw fa-user"></i>${username}
+											> <em class="fa fa-fw fa-user"></em>${username}
 											</a>
 											<div class="dropdown-menu" aria-labelledby="userMenu">
 												<c:if test="${editableUser == true}">
@@ -63,13 +63,13 @@
 									<li class="nav-item"><la:link href="/login" styleClass="nav-link" role="button" aria-haspopup="true"
 											aria-expanded="false"
 										>
-											<i class="fa fa-fw fa-sign-in"></i>
+											<em class="fa fa-fw fa-sign-in"></em>
 											<la:message key="labels.login" />
 										</la:link></li>
 								</c:when>
 							</c:choose>
 							<li class="nav-item"><la:link href="/help" styleClass="nav-link help-link">
-									<i class="fa fa-fw fa-question-circle"></i>
+									<em class="fa fa-fw fa-question-circle"></em>
 									<la:message key="labels.index_help" />
 								</la:link></li>
 						</ul>
@@ -332,7 +332,7 @@
 
 			<div class="row">
 				<button type="submit" name="search" id="searchButton" class="btn btn-primary mx-auto">
-					<i class="fa fa-search"></i>
+					<em class="fa fa-search"></em>
 					<la:message key="labels.index_form_search_btn" />
 				</button>
 			</div>

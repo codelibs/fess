@@ -63,7 +63,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="upgradeFrom"
 										value="<la:message key="labels.upgrade_start_button"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.upgrade_start_button" />
 									</button>
 								</div>

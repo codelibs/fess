@@ -48,7 +48,7 @@
 									<div class="btn-group pull-right">
 										<la:link href="/admin/failureurl"
 											styleClass="btn btn-primary btn-xs">
-											<i class="fa fa-th-list"></i>
+											<em class="fa fa-th-list"></em>
 											<la:message key="labels.failure_url_link_list" />
 										</la:link>
 									</div>
@@ -109,13 +109,13 @@
 									<c:if test="${crudMode == 4}">
 										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.crud_button_back" />">
-											<i class="fa fa-arrow-circle-left"></i>
+											<em class="fa fa-arrow-circle-left"></em>
 											<la:message key="labels.crud_button_back" />
 										</button>
 										<button type="button" class="btn btn-danger" name="delete"
 											data-toggle="modal" data-target="#confirmToDelete"
 											value="<la:message key="labels.crud_button_delete" />">
-											<i class="fa fa-trash"></i>
+											<em class="fa fa-trash"></em>
 											<la:message key="labels.crud_button_delete" />
 										</button>
 										<div class="modal modal-danger fade" id="confirmToDelete"
@@ -144,7 +144,7 @@
 														<button type="submit" class="btn btn-outline btn-danger"
 															name="delete"
 															value="<la:message key="labels.crud_button_delete" />">
-															<i class="fa fa-trash"></i>
+															<em class="fa fa-trash"></em>
 															<la:message key="labels.crud_button_delete" />
 														</button>
 													</div>

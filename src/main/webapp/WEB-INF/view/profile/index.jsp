@@ -39,7 +39,7 @@
 			<la:form styleId="login" method="post">
 				<div class="form-group has-feedback">
 					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
 						<c:set var="ph_old_password">
 							<la:message key="labels.profile.placeholder_old_password" />
 						</c:set>
@@ -49,7 +49,7 @@
 				</div>
 				<div class="form-group has-feedback">
 					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
 						<c:set var="ph_new_password">
 							<la:message key="labels.profile.placeholder_new_password" />
 						</c:set>
@@ -59,7 +59,7 @@
 				</div>
 				<div class="form-group has-feedback">
 					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
 						<c:set var="ph_confirm_password">
 							<la:message key="labels.profile.placeholder_confirm_new_password" />
 						</c:set>
@@ -70,13 +70,13 @@
 				<div class="text-center">
 					<la:link href="/"
 						styleClass="btn btn-default">
-						<i class="fa fa-arrow-circle-left"></i>
+						<em class="fa fa-arrow-circle-left"></em>
 						<la:message key="labels.profile.back" />
 					</la:link>
 					<button type="submit" name="changePassword"
 						class="btn btn-warning"
 						value="<la:message key="labels.profile.update"/>">
-						<i class="fa fa-pencil-alt"></i>
+						<em class="fa fa-pencil-alt"></em>
 						<la:message key="labels.profile.update" />
 					</button>
 				</div>

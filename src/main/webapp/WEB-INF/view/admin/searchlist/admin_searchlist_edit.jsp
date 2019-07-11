@@ -57,13 +57,13 @@
 										<c:choose>
 											<c:when test="${crudMode == null}">
 												<la:link href="createnew" styleClass="btn btn-success btn-xs">
-													<i class="fa fa-plus"></i>
+													<em class="fa fa-plus"></em>
 													<la:message key="labels.crud_link_create" />
 												</la:link>
 											</c:when>
 											<c:otherwise>
 												<la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-primary btn-xs">
-													<i class="fa fa-th-list"></i>
+													<em class="fa fa-th-list"></em>
 													<la:message key="labels.crud_link_list" />
 												</la:link>
 											</c:otherwise>
@@ -309,23 +309,23 @@
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
 										<la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
-											<i class="fa fa-arrow-circle-left"></i>
+											<em class="fa fa-arrow-circle-left"></em>
 											<la:message key="labels.crud_button_back" />
 										</la:link>
 										<button type="submit" class="btn btn-success" name="create"
 											value="<la:message key="labels.crud_button_create" />">
-											<i class="fa fa-plus"></i>
+											<em class="fa fa-plus"></em>
 											<la:message key="labels.crud_button_create" />
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
 										<la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
-											<i class="fa fa-arrow-circle-left"></i>
+											<em class="fa fa-arrow-circle-left"></em>
 											<la:message key="labels.crud_button_back" />
 										</la:link>
 										<button type="submit" class="btn btn-warning" name="update"
 											value="<la:message key="labels.crud_button_update" />">
-											<i class="fa fa-pencil-alt"></i>
+											<em class="fa fa-pencil-alt"></em>
 											<la:message key="labels.crud_button_update" />
 										</button>
 									</c:if>

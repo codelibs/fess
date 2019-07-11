@@ -107,19 +107,19 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<button type="submit" class="btn btn-default" name="list" value="back">
-										<i class="fa fa-arrow-circle-left"></i>
+										<em class="fa fa-arrow-circle-left"></em>
 										<la:message key="labels.crud_button_back" />
 									</button>
 									<button type="submit" class="btn btn-warning" name="edit"
 										value="<la:message key="labels.crud_button_edit" />">
-										<i class="fa fa-pencil-alt"></i>
+										<em class="fa fa-pencil-alt"></em>
 										<la:message key="labels.crud_button_edit" />
 									</button>
 									<c:if test="${!running and !systemJobId}">
 									<button type="button" class="btn btn-danger" name="delete"
 										data-toggle="modal" data-target="#confirmToDelete"
 										value="<la:message key="labels.crud_button_delete" />">
-										<i class="fa fa-trash"></i>
+										<em class="fa fa-trash"></em>
 										<la:message key="labels.crud_button_delete" />
 									</button>
 									<div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
@@ -148,7 +148,7 @@
 													<button type="submit" class="btn btn-outline btn-danger"
 														name="delete"
 														value="<la:message key="labels.crud_button_delete" />">
-														<i class="fa fa-trash"></i>
+														<em class="fa fa-trash"></em>
 														<la:message key="labels.crud_button_delete" />
 													</button>
 												</div>
@@ -159,14 +159,14 @@
 									<c:if test="${running}">
 										<button type="submit" class="btn btn-danger" name="stop"
 											value="<la:message key="labels.scheduledjob_button_stop" />">
-											<i class="fa fa-stop"></i>
+											<em class="fa fa-stop"></em>
 											<la:message key="labels.scheduledjob_button_stop" />
 										</button>
 									</c:if>
 									<c:if test="${!running && enabled}">
 										<button type="submit" class="btn btn-success" name="start"
 											value="<la:message key="labels.scheduledjob_button_start" />">
-											<i class="fa fa-play-circle"></i>
+											<em class="fa fa-play-circle"></em>
 											<la:message key="labels.scheduledjob_button_start" />
 										</button>
 									</c:if>

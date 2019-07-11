@@ -35,27 +35,27 @@
 								</h3>
 								<div class="btn-group pull-right">
 									<la:link href="/admin/dict" styleClass="btn btn-default btn-xs">
-										<i class="fa fa-book"></i>
+										<em class="fa fa-book"></em>
 										<la:message key="labels.dict_list_link" />
 									</la:link>
 									<la:link href="list/1?dictId=${f:u(dictId)}"
 										styleClass="btn btn-primary btn-xs">
-										<i class="fa fa-th-list"></i>
+										<em class="fa fa-th-list"></em>
 										<la:message key="labels.dict_mapping_list_link" />
 									</la:link>
 									<la:link href="createnew/${f:u(dictId)}"
 										styleClass="btn btn-success btn-xs">
-										<i class="fa fa-plus"></i>
+										<em class="fa fa-plus"></em>
 										<la:message key="labels.dict_mapping_link_create" />
 									</la:link>
 									<la:link href="downloadpage/${f:u(dictId)}"
 										styleClass="btn btn-primary btn-xs">
-										<i class="fa fa-download"></i>
+										<em class="fa fa-download"></em>
 										<la:message key="labels.dict_mapping_link_download" />
 									</la:link>
 									<la:link href="uploadpage/${f:u(dictId)}"
 										styleClass="btn btn-success btn-xs">
-										<i class="fa fa-upload"></i>
+										<em class="fa fa-upload"></em>
 										<la:message key="labels.dict_mapping_link_upload" />
 									</la:link>
 								</div>
@@ -73,7 +73,7 @@
 								<c:if test="${charMappingPager.allRecordCount == 0}">
 									<div class="row top10">
 										<div class="col-sm-12">
-											<i class="fa fa-info-circle text-light-blue"></i>
+											<em class="fa fa-info-circle text-light-blue"></em>
 											<la:message key="labels.list_could_not_find_crud_table" />
 										</div>
 									</div>

@@ -85,7 +85,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="reindexOnly"
 										value="<la:message key="labels.reindex_start_button"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.reindex_start_button" />
 									</button>
 								</div>
@@ -105,7 +105,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="reloadDocIndex"
 										value="<la:message key="labels.reload_doc_index_button"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.reload_doc_index_button" />
 									</button>
 								</div>
@@ -125,7 +125,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="clearCrawlerIndex"
 										value="<la:message key="labels.clear_crawler_index_button"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.clear_crawler_index_button" />
 									</button>
 								</div>
@@ -145,7 +145,7 @@
 									<button type="submit" class="btn btn-primary"
 										name="downloadLogs"
 										value="<la:message key="labels.download_diagnostic_logs_button"/>">
-										<i class="fa fa-arrow-circle-right"></i>
+										<em class="fa fa-arrow-circle-right"></em>
 										<la:message key="labels.download_diagnostic_logs_button" />
 									</button>
 								</div>

@@ -37,22 +37,22 @@
 								<div class="btn-group pull-right">
 									<la:link href="/admin/elevateword"
 										styleClass="btn btn-default btn-xs">
-										<i class="fa fa-th-list"></i>
+										<em class="fa fa-th-list"></em>
 										<la:message key="labels.elevate_word_link_list" />
 									</la:link>
 									<la:link href="../createnew"
 										styleClass="btn btn-success btn-xs">
-										<i class="fa fa-plus"></i>
+										<em class="fa fa-plus"></em>
 										<la:message key="labels.elevate_word_link_create" />
 									</la:link>
 									<la:link href="../downloadpage"
 										styleClass="btn btn-primary btn-xs">
-										<i class="fa fa-download"></i>
+										<em class="fa fa-download"></em>
 										<la:message key="labels.elevate_word_link_download" />
 									</la:link>
 									<la:link href="../uploadpage"
 										styleClass="btn btn-success btn-xs">
-										<i class="fa fa-upload"></i>
+										<em class="fa fa-upload"></em>
 										<la:message key="labels.elevate_word_link_upload" />
 									</la:link>
 								</div>
@@ -81,7 +81,7 @@
 												<td colspan="2">
 													<button type="submit" class="btn btn-success" name="upload"
 														value="<la:message key="labels.elevate_word_button_upload" />">
-														<i class="fa fa-upload"></i>
+														<em class="fa fa-upload"></em>
 														<la:message
 															key="labels.elevate_word_button_upload" />
 													</button>
