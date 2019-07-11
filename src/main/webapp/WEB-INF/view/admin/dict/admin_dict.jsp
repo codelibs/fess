@@ -44,7 +44,7 @@
 								<c:if test="${fn:length(dictFiles) == 0}">
 									<div class="row top10">
 										<div class="col-sm-12">
-											<i class="fa fa-info-circle text-light-blue"></i>
+											<em class="fa fa-info-circle text-light-blue"></em>
 											<la:message key="labels.list_could_not_find_crud_table" />
 										</div>
 									</div>

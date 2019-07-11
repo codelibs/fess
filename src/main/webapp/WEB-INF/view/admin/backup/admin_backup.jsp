@@ -48,7 +48,7 @@
 													</label> <input type="file" name="bulkFile" class="form-control" />
 												</div>
 												<button type="submit" class="btn btn-success" name="upload">
-													<i class="fa fa-upload"></i>
+													<em class="fa fa-upload"></em>
 													<la:message key="labels.backup_button_upload" />
 												</button>
 											</la:form>

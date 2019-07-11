@@ -51,7 +51,7 @@
 															<button type="button" class="btn btn-danger" name="deleteAllWords"
 																data-toggle="modal" data-target="#confirmToAllDelete"
 																value="<la:message key="labels.design_delete_button" />">
-																<i class="fa fa-trash"></i>
+																<em class="fa fa-trash"></em>
 																<la:message key="labels.design_delete_button" />
 															</button>
 															<div class="modal modal-danger fade" id="confirmToAllDelete"
@@ -80,7 +80,7 @@
 																			<button type="submit" class="btn btn-outline btn-danger"
 																				name="deleteAllWords"
 																				value="<la:message key="labels.crud_button_delete" />">
-																				<i class="fa fa-trash"></i>
+																				<em class="fa fa-trash"></em>
 																				<la:message key="labels.crud_button_delete" />
 																			</button>
 																		</div>
@@ -96,7 +96,7 @@
 															<button type="button" class="btn btn-danger" name="deleteDocumentWords"
 																data-toggle="modal" data-target="#confirmToDocumentDelete"
 																value="<la:message key="labels.design_delete_button" />">
-																<i class="fa fa-trash"></i>
+																<em class="fa fa-trash"></em>
 																<la:message key="labels.design_delete_button" />
 															</button>
 															<div class="modal modal-danger fade" id="confirmToDocumentDelete"
@@ -125,7 +125,7 @@
 																			<button type="submit" class="btn btn-outline btn-danger"
 																				name="deleteDocumentWords"
 																				value="<la:message key="labels.crud_button_delete" />">
-																				<i class="fa fa-trash"></i>
+																				<em class="fa fa-trash"></em>
 																				<la:message key="labels.crud_button_delete" />
 																			</button>
 																		</div>
@@ -141,7 +141,7 @@
 															<button type="button" class="btn btn-danger" name="deleteQueryWords"
 																data-toggle="modal" data-target="#confirmToQueryDelete"
 																value="<la:message key="labels.design_delete_button" />">
-																<i class="fa fa-trash"></i>
+																<em class="fa fa-trash"></em>
 																<la:message key="labels.design_delete_button" />
 															</button>
 															<div class="modal modal-danger fade" id="confirmToQueryDelete"
@@ -170,7 +170,7 @@
 																			<button type="submit" class="btn btn-outline btn-danger"
 																				name="deleteQueryWords"
 																				value="<la:message key="labels.crud_button_delete" />">
-																				<i class="fa fa-trash"></i>
+																				<em class="fa fa-trash"></em>
 																				<la:message key="labels.crud_button_delete" />
 																			</button>
 																		</div>

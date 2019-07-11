@@ -38,22 +38,22 @@
 									<div class="btn-group pull-right">
 										<la:link href="/admin/badword"
 											styleClass="btn btn-default btn-xs">
-											<i class="fa fa-th-list"></i>
+											<em class="fa fa-th-list"></em>
 											<la:message key="labels.bad_word_link_list" />
 										</la:link>
 										<la:link href="../createnew"
 											styleClass="btn btn-success btn-xs">
-											<i class="fa fa-plus"></i>
+											<em class="fa fa-plus"></em>
 											<la:message key="labels.bad_word_link_create" />
 										</la:link>
 										<la:link href="../downloadpage"
 											styleClass="btn btn-primary btn-xs">
-											<i class="fa fa-download"></i>
+											<em class="fa fa-download"></em>
 											<la:message key="labels.bad_word_link_download" />
 										</la:link>
 										<la:link href="../uploadpage"
 											styleClass="btn btn-success btn-xs">
-											<i class="fa fa-upload"></i>
+											<em class="fa fa-upload"></em>
 											<la:message key="labels.bad_word_link_upload" />
 										</la:link>
 									</div>
@@ -76,7 +76,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-primary" name="download"
 										value="<la:message key="labels.bad_word_button_download" />">
-										<i class="fa fa-download"></i>
+										<em class="fa fa-download"></em>
 										<la:message key="labels.bad_word_button_download" />
 									</button>
 								</div>

@@ -49,12 +49,12 @@
 									<div class="box-footer">
 										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.design_button_back" />">
-											<i class="fa fa-arrow-circle-left"></i>
+											<em class="fa fa-arrow-circle-left"></em>
 											<la:message key="labels.design_button_back" />
 										</button>
 										<button type="submit" class="btn btn-warning" name="update"
 											value="<la:message key="labels.design_button_update" />">
-											<i class="fa fa-pencil-alt"></i>
+											<em class="fa fa-pencil-alt"></em>
 											<la:message key="labels.design_button_update" />
 										</button>
 									</div>

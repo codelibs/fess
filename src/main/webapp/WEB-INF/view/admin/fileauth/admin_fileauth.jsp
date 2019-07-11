@@ -25,7 +25,7 @@
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
 							<la:link href="/admin/fileconfig/" styleClass="btn btn-primary">
-								<i class="fa fa-arrow-circle-right"></i>
+								<em class="fa fa-arrow-circle-right"></em>
 								<la:message key="labels.file_auth_create_file_config" />
 							</la:link>
 						</c:if>
@@ -47,7 +47,7 @@
 									<c:if test="${fileAuthPager.allRecordCount == 0}">
 										<div class="row top10">
 											<div class="col-sm-12">
-												<i class="fa fa-info-circle text-light-blue"></i>
+												<em class="fa fa-info-circle text-light-blue"></em>
 												<la:message key="labels.list_could_not_find_crud_table" />
 											</div>
 										</div>

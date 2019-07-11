@@ -35,7 +35,7 @@
 								</h3>
 								<div class="btn-group pull-right">
 									<la:link href="/admin/searchlist/createnew?q=${f:u(q)}" styleClass="btn btn-success btn-xs">
-										<i class="fa fa-plus"></i>
+										<em class="fa fa-plus"></em>
 										<la:message key="labels.crud_link_create" />
 									</la:link>
 								</div>
@@ -59,7 +59,7 @@
 									<div class="form-group">
 										<button type="submit" class="btn btn-primary" id="submit"
 											name="search" value="<la:message key="labels.search"/>">
-											<i class="fa fa-search"></i>
+											<em class="fa fa-search"></em>
 											<la:message key="labels.search" />
 										</button>
 									</div>
@@ -102,7 +102,7 @@
 															<la:message key="labels.doc_score" />${f:h(doc.score)}<br>
 															<la:link href="/admin/searchlist/edit?crudMode=2&amp;doc.doc_id=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
 																styleClass="btn btn-xs btn-warning">
-																<i class="fa fa-pencil-alt"></i>
+																<em class="fa fa-pencil-alt"></em>
 																<la:message key="labels.crud_button_update" />
 															</la:link>
 															<button type="button"
@@ -111,7 +111,7 @@
 																data-docid="${f:u(doc.doc_id)}"
 																data-title="${fe:replace(doc.content_title, '<[^>]+>', '')}"
 																data-url="${f:h(doc.url_link)}">
-																<i class="fa fa-trash"></i>
+																<em class="fa fa-trash"></em>
 																<la:message key="labels.search_list_button_delete" />
 															</button>
 														</div>
@@ -199,7 +199,7 @@
 													<button type="submit" class="btn btn-outline btn-danger"
 														name="delete"
 														value="<la:message key="labels.search_list_button_delete" />">
-														<i class="fa fa-trash"></i>
+														<em class="fa fa-trash"></em>
 														<la:message key="labels.search_list_button_delete" />
 													</button>
 												</la:form>
@@ -215,7 +215,7 @@
 										<div class="col-sm-12 center">
 											<button type="button" class="btn btn-danger"
 												data-toggle="modal" data-target="#confirmToDeleteAll">
-												<i class="fa fa-trash"></i>
+												<em class="fa fa-trash"></em>
 												<la:message key="labels.search_list_button_delete_all" />
 											</button>
 										</div>
@@ -248,7 +248,7 @@
 															<button type="submit" class="btn btn-outline btn-danger"
 																name="deleteall"
 																value="<la:message key="labels.search_list_button_delete_all" />">
-																<i class="fa fa-trash"></i>
+																<em class="fa fa-trash"></em>
 																<la:message key="labels.search_list_button_delete_all" />
 															</button>
 														</la:form>

@@ -19,12 +19,12 @@
 						<span class="input-group-append">
 							<button type="submit" name="search" id="searchButton"
 								class="btn btn-primary">
-								<i class="fa fa-search"></i>
+								<em class="fa fa-search"></em>
 							</button>
 							<button type="button" class="btn btn-light"
 								data-toggle="control-options" data-target="#searchOptions"
 								id="searchOptionsButton">
-								<i class="fa fa-cog"></i> <span class="sr-only"><la:message
+								<em class="fa fa-cog"></em> <span class="sr-only"><la:message
 										key="labels.header_form_option_btn" /></span>
 							</button>
 						</span>
@@ -37,7 +37,7 @@
 								<div class="dropdown">
 									<a class="nav-link dropdown-toggle" data-toggle="dropdown"
 										href="#" role="button" aria-haspopup="true"
-										aria-expanded="false"> <i class="fa fa-fw fa-user"></i>
+										aria-expanded="false"> <em class="fa fa-fw fa-user"></em>
 										<span>${username}</span>
 									</a>
 									<div class="dropdown-menu" aria-labelledby="userMenu">
@@ -62,14 +62,14 @@
 							<li class="nav-item"><la:link href="/login"
 									styleClass="nav-link  " role="button" aria-haspopup="true"
 									aria-expanded="false">
-									<i class="fa fa-fw fa-sign-in"></i>
+									<em class="fa fa-fw fa-sign-in"></em>
 									<span><la:message key="labels.login" /></span>
 								</la:link></li>
 						</c:when>
 					</c:choose>
 					<li class="nav-item"><la:link href="/help" styleClass="nav-link" role="help" aria-haspopup="true"
 							aria-expanded="false">
-							<i class="fa fa-fw fa-question-circle"></i>
+							<em class="fa fa-fw fa-question-circle"></em>
 							<span><la:message key="labels.index_help" /></span>
 						</la:link></li>
 				</ul>
@@ -84,13 +84,13 @@
 					<la:message key="labels.search_options_clear" />
 				</button>
 				<la:link href="/search/advance?q=${f:u(q)}${fe:pagingQuery(null)}" styleClass="btn btn-info">
-					<i class="fa fa-cog"></i>
+					<em class="fa fa-cog"></em>
 					<la:message key="labels.advance" />
 				</la:link>
 				<button type="button" class="btn btn-light pull-right"
 					data-toggle="control-options" data-target="#searchOptions"
 					id="searchOptionsCloseButton">
-					<i class="fa fa-times-circle"></i>
+					<em class="fa fa-times-circle"></em>
 					<la:message key="labels.search_options_close" />
 				</button>
 			</div>
