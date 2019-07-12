@@ -5,12 +5,12 @@
 		<p>
 			<c:if test="${allRecordCountRelation=='EQUAL_TO'}">
 				<la:message key="labels.search_result_status"
-					arg0="${displayQuery}" arg1="${f:h(allRecordCount)}"
+					arg0="${displayQuery}" arg1="${fe:formatNumber(allRecordCount,'###,###')}"
 					arg2="${f:h(currentStartRecordNumber)}"
 					arg3="${f:h(currentEndRecordNumber)}" />
 			</c:if><c:if test="${allRecordCountRelation!='EQUAL_TO'}">
 				<la:message key="labels.search_result_status_over"
-					arg0="${displayQuery}" arg1="${f:h(allRecordCount)}"
+					arg0="${displayQuery}" arg1="${fe:formatNumber(allRecordCount,'###,###')}"
 					arg2="${f:h(currentStartRecordNumber)}"
 					arg3="${f:h(currentEndRecordNumber)}" />
 			</c:if>
@@ -69,7 +69,7 @@
 						<small class="d-none d-lg-inline-block"> <la:link
 								href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
 								<la:message key="labels.search_result_similar"
-											arg0="${fe:formatNumber(doc.similar_docs_count-1)}" />
+											arg0="${fe:formatFileSize(doc.similar_docs_count-1)}" />
 							</la:link>
 						</small>
 					</c:if>
@@ -103,7 +103,7 @@
 							</c:if>
 							<c:set var="hasInfo" value="true" />
 							<la:message key="labels.search_result_size"
-								arg0="${fe:formatNumber(doc.content_length)}" />
+								arg0="${fe:formatFileSize(doc.content_length)}" />
 						</c:if> <c:if test="${searchLogSupport}">
 							<c:if test="${hasInfo}">
 								<div class="d-sm-none"></div>

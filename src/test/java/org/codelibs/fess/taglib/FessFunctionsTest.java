@@ -20,6 +20,21 @@ import java.util.Date;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class FessFunctionsTest extends UnitFessTestCase {
+    public void test_formatNumber() {
+        assertEquals("0", FessFunctions.formatNumber(0, "###,###"));
+        assertEquals("1,000", FessFunctions.formatNumber(1000, "###,###"));
+        assertEquals("1,000,000", FessFunctions.formatNumber(1000000, "###,###"));
+    }
+
+    public void test_formatFileSize() {
+        assertEquals("0", FessFunctions.formatFileSize(0));
+        assertEquals("1000", FessFunctions.formatFileSize(1000));
+        assertEquals("976.6K", FessFunctions.formatFileSize(1000000));
+        assertEquals("953.7M", FessFunctions.formatFileSize(1000000000));
+        assertEquals("931.3G", FessFunctions.formatFileSize(1000000000000L));
+        assertEquals("909.5T", FessFunctions.formatFileSize(1000000000000000L));
+    }
+
     public void test_parseDate() {
         Date date;
 

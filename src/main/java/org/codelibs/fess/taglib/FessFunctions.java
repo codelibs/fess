@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -154,25 +155,49 @@ public class FessFunctions {
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
     }
 
-    public static String formatNumber(final long value) {
-        int ratio = 1;
-        String unit = "";
+    public static String formatNumber(final long value, final String pattern) {
+        final DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(getUserLocale());
+        df.applyPattern(pattern);
+        return df.format(value);
+    }
+
+    private static Locale getUserLocale() {
+        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
+        if (locale == null) {
+            return Locale.ROOT;
+        }
+        return locale;
+    }
+
+    public static String formatFileSize(final long value) {
+        double target = (double) value;
+        String unit = ""; // TODO l10n?
         String format = "0.#";
         if (value < 1024) {
             format = "0";
-        } else if (value < (1024 * 1024)) {
-            ratio = 1024;
+        } else if (value < 1024L * 1024L) {
+            target /= 1024;
             unit = "K";
-        } else if (value < (1024 * 1024 * 1024)) {
-            ratio = 1024 * 1024;
+        } else if (value < 1024L * 1024L * 1024L) {
+            target /= 1024;
+            target /= 1024;
             unit = "M";
-        } else {
-            ratio = 1024 * 1024 * 1024;
+        } else if (value < 1024L * 1024L * 1024L * 1024L) {
+            target /= 1024;
+            target /= 1024;
+            target /= 1024;
             unit = "G";
+        } else {
+            target /= 1024;
+            target /= 1024;
+            target /= 1024;
+            target /= 1024;
+            unit = "T";
         }
-        final DecimalFormat df = new DecimalFormat(format + unit);
+        final DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(getUserLocale());
+        df.applyPattern(format);
         df.setRoundingMode(RoundingMode.HALF_UP);
-        return df.format((double) value / ratio);
+        return df.format(target) + unit;
     }
 
     public static String pagingQuery(final String query) {

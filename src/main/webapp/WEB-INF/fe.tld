@@ -73,13 +73,25 @@
 
   <function>
     <description>
+      Returns formatted number as a file size from a given value.
+    </description>
+    <name>formatFileSize</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String formatFileSize(long)</function-signature>
+    <example>
+      ${fe:formatFileSize(doc.content_length)}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns formatted number from a given value.
     </description>
     <name>formatNumber</name>
     <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String formatNumber(long)</function-signature>
+    <function-signature>java.lang.String formatNumber(long, java.lang.String)</function-signature>
     <example>
-      ${fe:formatNumber(doc.content_length)}
+      ${fe:formatNumber(doc.content_length, "###,###")}
     </example>
   </function>
 
