@@ -54,7 +54,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.MemoryUtil;
-import org.cyberneko.html.parsers.DOMParser;
+import org.codelibs.nekohtml.parsers.DOMParser;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;

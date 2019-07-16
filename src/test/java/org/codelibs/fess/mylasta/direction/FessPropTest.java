@@ -25,7 +25,7 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.PrunedTag;
-import org.cyberneko.html.parsers.DOMParser;
+import org.codelibs.nekohtml.parsers.DOMParser;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
