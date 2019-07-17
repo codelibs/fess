@@ -113,6 +113,7 @@
 							suffix="errors.front_suffix" />
 					</div>
 					<fieldset>
+						<legend><la:message key="labels.search" /></legend>
 						<div class="clearfix">
 							<div class="mx-auto col-10 col-sm-8 col-md-8 col-lg-6">
 								<la:text styleClass="query form-control center-block"

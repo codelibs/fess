@@ -4,6 +4,7 @@
 </h3>
 <div>
 	<fieldset class="form-group">
+		<legend><la:message key="labels.index_num" /></legend>
 		<label for="contentNum"><la:message key="labels.index_num" /></label>
 		<la:select property="num" styleId="numSearchOption"
 			styleClass="form-control">
@@ -19,6 +20,7 @@
 		</la:select>
 	</fieldset>
 	<fieldset class="form-group">
+		<legend><la:message key="labels.index_sort" /></legend>
 		<label for="contentSort"><la:message key="labels.index_sort" /></label>
 		<la:select property="sort" styleId="sortSearchOption"
 			styleClass="form-control">
@@ -71,6 +73,7 @@
 		</la:select>
 	</fieldset>
 	<fieldset class="form-group">
+		<legend><la:message key="labels.index_lang" /></legend>
 		<label for="contentLang"><la:message key="labels.index_lang" /></label>
 		<la:select property="lang" styleId="langSearchOption" multiple="true"
 			styleClass="form-control">
@@ -81,6 +84,7 @@
 	</fieldset>
 	<c:if test="${displayLabelTypeItems}">
 		<fieldset class="form-group">
+			<legend><la:message key="labels.index_label" /></legend>
 			<label for="contentLabelType"><la:message
 					key="labels.index_label" /></label>
 			<la:select property="fields.label" styleId="labelTypeSearchOption"
