@@ -136,6 +136,7 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.InnerHitBuilder;
@@ -323,8 +324,8 @@ public class FessEsClient implements Client {
     }
 
     protected Client createHttpClient(final FessConfig fessConfig, final String host) {
-        final Settings settings = Settings.builder().putList("http.hosts", host).build();
-        return new HttpClient(settings, null);
+        final Builder builder = Settings.builder().putList("http.hosts", host).put("processors", fessConfig.availableProcessors());
+        return new HttpClient(builder.build(), null);
     }
 
     public boolean existsIndex(final String indexName) {

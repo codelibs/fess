@@ -1986,4 +1986,13 @@ public interface FessProp {
         return value;
     }
 
+    Integer getProcessorsAsInteger();
+
+    default int availableProcessors() {
+        final int num = getProcessorsAsInteger().intValue();
+        if (num > 0) {
+            return num;
+        }
+        return Runtime.getRuntime().availableProcessors();
+    }
 }
