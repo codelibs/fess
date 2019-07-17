@@ -41,6 +41,10 @@ h3 {
 	border-radius: 0px;
 }
 
+legend{
+	display: none;
+}
+
 /* header */
 
 #searchOptions {
