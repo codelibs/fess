@@ -1,4 +1,4 @@
-kibana6 settings for fess
+kibana 7 settings for fess
 =====
 
 Providing example of kibana settings file for monitoring search logs of fess.
@@ -6,13 +6,14 @@ Providing example of kibana settings file for monitoring search logs of fess.
 ## Install
 
 1. Install and launch Fess.
-1. Install and launch kibana6.
+1. Install and launch kibana.
 1. Go to kibana home [http://localhost:5601/](http://localhost:5601/).
 1. Click **Management**.
 1. Click **Index Patterns**.
+1. Click **Create index pattern** button
 1. Input "fess_log*" to the textbox of **index pattern**.
 1. Click **Next step**.
-1. Set "requestedAt" to the **Time-field name**.
+1. Set "requestedAt" to the **Time Filter field name**.
 1. Click **Create index pattern**.
 1. Click **Saved Objects**.
 1. Click **Import** and select "fess_log.json" to import example settings.
