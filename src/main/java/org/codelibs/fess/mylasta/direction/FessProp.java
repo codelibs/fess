@@ -109,6 +109,8 @@ public interface FessProp {
 
     String CRAWLER_DOCUMENT_SPACE_CHARS = "crawlerDocumentSpaceChars";
 
+    String CRAWLER_DOCUMENT_SPACES = "crawlerDocumentSpaces";
+
     String CRAWLER_DOCUMENT_FULLSTOP_CHARS = "crawlerDocumentFullstopChars";
 
     String INDEX_ADMIN_ARRAY_FIELD_SET = "indexAdminArrayFieldSet";
@@ -1458,6 +1460,15 @@ public interface FessProp {
 
     default int[] getCrawlerDocumentSpaceCharsAsArray() {
         return getCrawlerDocumentCharsAsArray(CRAWLER_DOCUMENT_SPACE_CHARS, getCrawlerDocumentSpaceChars());
+    }
+
+    default String[] getCrawlerDocumentSpaces() {
+        String[] spaces = (String[]) propMap.get(CRAWLER_DOCUMENT_SPACES);
+        if (spaces == null) {
+            spaces = Arrays.stream(getCrawlerDocumentSpaceCharsAsArray()).mapToObj(Character::toString).toArray(n -> new String[n]);
+            propMap.put(CRAWLER_DOCUMENT_SPACES, spaces);
+        }
+        return spaces;
     }
 
     default int[] getCrawlerDocumentCharsAsArray(final String key, final String spaceStr) {

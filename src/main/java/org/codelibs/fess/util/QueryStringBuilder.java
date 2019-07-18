@@ -28,9 +28,11 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 
 public class QueryStringBuilder {
 
-    private static final String OR_ALT = "||";
+    private static final String OR_ALT = " || ";
 
     private static final String OR = " OR ";
+
+    private static final String SPACE = " ";
 
     private SearchRequestParams params;
 
@@ -81,13 +83,17 @@ public class QueryStringBuilder {
         return queryBuf.toString().trim();
     }
 
-    protected void appendQuery(final StringBuilder queryBuf, final String q) {
+    protected void appendQuery(final StringBuilder queryBuf, final String query) {
+        String q = query;
+        for (final String s : ComponentUtil.getFessConfig().getCrawlerDocumentSpaces()) {
+            q = q.replace(s, SPACE);
+        }
         final boolean exists = q.indexOf(OR) != -1 || q.indexOf(OR_ALT) != -1;
         queryBuf.append(' ');
         if (exists) {
             queryBuf.append('(');
         }
-        queryBuf.append(q);
+        queryBuf.append(query);
         if (exists) {
             queryBuf.append(')');
         }
