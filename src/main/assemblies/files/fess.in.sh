@@ -27,6 +27,7 @@ fi
 # out.
 JAVA_OPTS="$JAVA_OPTS -Xms${FESS_MIN_MEM}"
 JAVA_OPTS="$JAVA_OPTS -Xmx${FESS_MAX_MEM}"
+JAVA_OPTS="$JAVA_OPTS -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=32m"
 
 # new generation
 if [ "x$FESS_HEAP_NEWSIZE" != "x" ]; then

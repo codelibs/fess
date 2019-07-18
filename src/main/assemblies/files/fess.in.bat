@@ -31,6 +31,7 @@ REM stop-the-world GC pauses during resize, and so that we can lock the
 REM heap in memory on startup to prevent any of it from being swapped
 REM out.
 set JAVA_OPTS=%JAVA_OPTS% -Xms%FESS_MIN_MEM% -Xmx%FESS_MAX_MEM%
+set JAVA_OPTS=%JAVA_OPTS% -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=32m
 
 REM new generation
 if NOT "%FESS_HEAP_NEWSIZE%" == "" (
