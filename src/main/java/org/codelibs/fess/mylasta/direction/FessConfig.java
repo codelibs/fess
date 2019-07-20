@@ -1301,6 +1301,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LDAP_ADMIN_SYNC_PASSWORD = "ldap.admin.sync.password";
 
+    /** The key of the configuration. e.g. true */
+    String LDAP_AUTH_VALIDATION = "ldap.auth.validation";
+
     /** The key of the configuration. e.g. -1 */
     String LDAP_MAX_USERNAME_LENGTH = "ldap.max.username.length";
 
@@ -5582,6 +5585,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapAdminSyncPassword();
 
     /**
+     * Get the value for the key 'ldap.auth.validation'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAuthValidation();
+
+    /**
+     * Is the property for the key 'ldap.auth.validation' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapAuthValidation();
+
+    /**
      * Get the value for the key 'ldap.max.username.length'. <br>
      * The value is, e.g. -1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -8077,6 +8094,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.LDAP_ADMIN_SYNC_PASSWORD);
         }
 
+        public String getLdapAuthValidation() {
+            return get(FessConfig.LDAP_AUTH_VALIDATION);
+        }
+
+        public boolean isLdapAuthValidation() {
+            return is(FessConfig.LDAP_AUTH_VALIDATION);
+        }
+
         public String getLdapMaxUsernameLength() {
             return get(FessConfig.LDAP_MAX_USERNAME_LENGTH);
         }
@@ -8652,6 +8677,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ADMIN_GROUP_BASE_DN, "ou=Group,dc=fess,dc=codelibs,dc=org");
             defaultMap.put(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES, "groupOfNames");
             defaultMap.put(FessConfig.LDAP_ADMIN_SYNC_PASSWORD, "true");
+            defaultMap.put(FessConfig.LDAP_AUTH_VALIDATION, "true");
             defaultMap.put(FessConfig.LDAP_MAX_USERNAME_LENGTH, "-1");
             defaultMap.put(FessConfig.LDAP_IGNORE_NETBIOS_NAME, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED, "true");

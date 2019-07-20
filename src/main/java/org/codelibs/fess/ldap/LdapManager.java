@@ -49,6 +49,7 @@ import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.exception.LdapConfigurationException;
 import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -76,15 +77,22 @@ public class LdapManager {
     protected Hashtable<String, String> createEnvironment(final String initialContextFactory, final String securityAuthentication,
             final String providerUrl, final String principal, final String credntials) {
         final Hashtable<String, String> env = new Hashtable<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-        env.put(Context.SECURITY_AUTHENTICATION, securityAuthentication);
-        env.put(Context.PROVIDER_URL, providerUrl);
-        env.put(Context.SECURITY_PRINCIPAL, principal);
-        env.put(Context.SECURITY_CREDENTIALS, credntials);
+        putEnv(env, Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+        putEnv(env, Context.SECURITY_AUTHENTICATION, securityAuthentication);
+        putEnv(env, Context.PROVIDER_URL, providerUrl);
+        putEnv(env, Context.SECURITY_PRINCIPAL, principal);
+        putEnv(env, Context.SECURITY_CREDENTIALS, credntials);
         if (providerUrl != null && providerUrl.startsWith("ldaps://")) {
-            env.put(Context.SECURITY_PROTOCOL, "ssl");
+            putEnv(env, Context.SECURITY_PROTOCOL, "ssl");
         }
         return env;
+    }
+
+    protected void putEnv(final Hashtable<String, String> env, final String key, final String value) {
+        if (value == null) {
+            throw new LdapConfigurationException(key + " is null.");
+        }
+        env.put(key, value);
     }
 
     protected Hashtable<String, String> createAdminEnv() {
@@ -117,6 +125,10 @@ public class LdapManager {
 
     protected boolean validate() {
         if (!isBind) {
+            if (fessConfig.getLdapAdminSecurityPrincipal() == null || fessConfig.getLdapAdminSecurityCredentials() == null) {
+                // no credentials
+                return !fessConfig.isLdapAuthValidation();
+            }
             final Hashtable<String, String> env = createAdminEnv();
             try (DirContextHolder holder = getDirContext(() -> env)) {
                 final DirContext context = holder.get();
