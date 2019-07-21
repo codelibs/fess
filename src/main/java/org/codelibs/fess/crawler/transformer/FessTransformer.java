@@ -156,11 +156,7 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
-        final Object value = GroovyUtil.evaluate(template, paramMap);
-        if (value == null) {
-            return null;
-        }
-        return value;
+        return GroovyUtil.evaluate(template, paramMap);
     }
 
     default int getMaxSiteLength() {
