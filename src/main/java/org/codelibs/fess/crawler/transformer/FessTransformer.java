@@ -151,7 +151,7 @@ public interface FessTransformer {
         }
     }
 
-    default String evaluateValue(final String template, final Map<String, Object> paramMap) {
+    default Object evaluateValue(final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }
@@ -160,7 +160,7 @@ public interface FessTransformer {
         if (value == null) {
             return null;
         }
-        return value.toString();
+        return value;
     }
 
     default int getMaxSiteLength() {
