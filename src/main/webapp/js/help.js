@@ -11,7 +11,7 @@ $(function() {
   });
 
   $(document).on("click touchend", function(e) {
-    if (!$(e.target).closest("#searchOptions, #searchOptionsButton").length) {
+    if (!$(e.target).closest("#searchOptions, [data-toggle='control-options']").length) {
       $("#searchOptions").removeClass("active");
     }
   });
