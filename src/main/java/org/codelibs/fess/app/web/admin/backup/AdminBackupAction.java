@@ -67,6 +67,7 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -121,6 +122,8 @@ public class AdminBackupAction extends FessAdminAction {
                 CopyUtil.copy(in, out);
             }
             asyncImport(fileName, tempFile);
+        } catch (final ValidationErrorException e) {
+            throw e;
         } catch (final Exception e) {
             logger.warn("Failed to import " + fileName, e);
         }
@@ -129,8 +132,22 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     protected void asyncImport(final String fileName, final File tempFile) {
+        final int fileType;
+        if (fileName.startsWith("system") && fileName.endsWith(".properties")) {
+            fileType = 1;
+        } else if (fileName.startsWith("gsa") && fileName.endsWith(".xml")) {
+            fileType = 2;
+        } else if (fileName.endsWith(".bulk")) {
+            fileType = 3;
+        } else {
+            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> {
+                return asListHtml();
+            });
+            return;
+        }
+
         asyncManager.async(() -> {
-            if (fileName.startsWith("system") && fileName.endsWith(".properties")) {
+            if (fileType == 1) {
                 try (final InputStream in = new FileInputStream(tempFile)) {
                     ComponentUtil.getSystemProperties().load(in);
                 } catch (final IOException e) {
@@ -140,7 +157,7 @@ public class AdminBackupAction extends FessAdminAction {
                         logger.warn("Failed to delete " + tempFile.getAbsolutePath());
                     }
                 }
-            } else if (fileName.startsWith("gsa") && fileName.endsWith(".xml")) {
+            } else if (fileType == 2) {
                 final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
                 try (final InputStream in = new FileInputStream(tempFile)) {
                     configParser.parse(new InputSource(in));
@@ -154,7 +171,7 @@ public class AdminBackupAction extends FessAdminAction {
                 configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
                 configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
                 labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
-            } else {
+            } else if (fileType == 3) {
                 final ObjectMapper mapper = new ObjectMapper();
                 try (CurlResponse response =
                         ComponentUtil
@@ -171,7 +188,12 @@ public class AdminBackupAction extends FessAdminAction {
                                                 String line;
                                                 while ((line = br.readLine()) != null) {
                                                     if (StringUtil.isNotBlank(line)) {
-                                                        final Map<String, Map<String, String>> dataObj = parseObject(mapper, line);
+                                                        final Map<String, Map<String, String>> dataObj;
+                                                        if (line.contains("_type")) {
+                                                            dataObj = parseObject(mapper, line);
+                                                        } else {
+                                                            dataObj = null;
+                                                        }
                                                         if (dataObj != null) {
                                                             final Map<String, String> indexObj = dataObj.get("index");
                                                             if (indexObj != null && indexObj.containsKey("_type")) {

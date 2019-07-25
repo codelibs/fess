@@ -344,6 +344,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to print thread dump. */
     public static final String ERRORS_failed_to_print_thread_dump = "{errors.failed_to_print_thread_dump}";
 
+    /** The key of the message: {0} is not supported. */
+    public static final String ERRORS_file_is_not_supported = "{errors.file_is_not_supported}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -2007,6 +2010,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToPrintThreadDump(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_print_thread_dump));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.file_is_not_supported' with parameters.
+     * <pre>
+     * message: {0} is not supported.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFileIsNotSupported(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_file_is_not_supported, arg0));
         return this;
     }
 
