@@ -6,12 +6,6 @@
       "reading": {
         "type": "keyword"
       },
-      "targetRole": {
-        "type": "keyword"
-      },
-      "targetLabel": {
-        "type": "keyword"
-      },
       "permissions": {
         "type": "keyword"
       },

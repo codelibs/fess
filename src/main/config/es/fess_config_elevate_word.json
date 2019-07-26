@@ -22,12 +22,6 @@
           "suggestWord" : {
             "type" : "keyword"
           },
-          "targetLabel" : {
-            "type" : "keyword"
-          },
-          "targetRole" : {
-            "type" : "keyword"
-          },
           "updatedBy" : {
             "type" : "keyword"
           },

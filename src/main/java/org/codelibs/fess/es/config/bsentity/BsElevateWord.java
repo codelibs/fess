@@ -55,12 +55,6 @@ public class BsElevateWord extends EsAbstractEntity {
     /** suggestWord */
     protected String suggestWord;
 
-    /** targetLabel */
-    protected String targetLabel;
-
-    /** targetRole */
-    protected String targetRole;
-
     /** updatedBy */
     protected String updatedBy;
 
@@ -106,12 +100,6 @@ public class BsElevateWord extends EsAbstractEntity {
         if (suggestWord != null) {
             addFieldToSource(sourceMap, "suggestWord", suggestWord);
         }
-        if (targetLabel != null) {
-            addFieldToSource(sourceMap, "targetLabel", targetLabel);
-        }
-        if (targetRole != null) {
-            addFieldToSource(sourceMap, "targetRole", targetRole);
-        }
         if (updatedBy != null) {
             addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
@@ -137,8 +125,6 @@ public class BsElevateWord extends EsAbstractEntity {
         sb.append(dm).append(permissions);
         sb.append(dm).append(reading);
         sb.append(dm).append(suggestWord);
-        sb.append(dm).append(targetLabel);
-        sb.append(dm).append(targetRole);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         if (sb.length() > dm.length()) {
@@ -209,26 +195,6 @@ public class BsElevateWord extends EsAbstractEntity {
     public void setSuggestWord(String value) {
         registerModifiedProperty("suggestWord");
         this.suggestWord = value;
-    }
-
-    public String getTargetLabel() {
-        checkSpecifiedProperty("targetLabel");
-        return convertEmptyToNull(targetLabel);
-    }
-
-    public void setTargetLabel(String value) {
-        registerModifiedProperty("targetLabel");
-        this.targetLabel = value;
-    }
-
-    public String getTargetRole() {
-        checkSpecifiedProperty("targetRole");
-        return convertEmptyToNull(targetRole);
-    }
-
-    public void setTargetRole(String value) {
-        registerModifiedProperty("targetRole");
-        this.targetRole = value;
     }
 
     public String getUpdatedBy() {

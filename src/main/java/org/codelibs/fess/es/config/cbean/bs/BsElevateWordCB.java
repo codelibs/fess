@@ -200,14 +200,6 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
             doColumn("suggestWord");
         }
 
-        public void columnTargetLabel() {
-            doColumn("targetLabel");
-        }
-
-        public void columnTargetRole() {
-            doColumn("targetRole");
-        }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }

@@ -35,6 +35,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.cbean.ElevateWordCB;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
+import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.config.exentity.ElevateWordToLabel;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -59,6 +60,9 @@ public class ElevateWordService {
 
     @Resource
     protected ElevateWordBhv elevateWordBhv;
+
+    @Resource
+    protected LabelTypeBhv labelTypeBhv;
 
     @Resource
     protected FessConfig fessConfig;
@@ -201,14 +205,13 @@ public class ElevateWordService {
                             split(getValue(list, 2), ",").get(
                                     stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct()
                                             .toArray(n -> new String[n]));
-                    final String label = getValue(list, 3);
+                    final String[] labels =
+                            split(getValue(list, 3), ",").get(
+                                    stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
                     ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(suggestWord);
                         if (permissions.length > 0) {
                             cb.query().setPermissions_InScope(stream(permissions).get(stream -> stream.collect(Collectors.toList())));
-                        }
-                        if (StringUtil.isNotBlank(label)) {
-                            cb.query().setTargetLabel_Equal(label);
                         }
                     }).orElse(null);
                     final String reading = getValue(list, 1);
@@ -219,13 +222,26 @@ public class ElevateWordService {
                         elevateWord.setSuggestWord(suggestWord);
                         elevateWord.setReading(reading);
                         elevateWord.setPermissions(permissions);
-                        elevateWord.setTargetLabel(label);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setCreatedBy(Constants.SYSTEM_USER);
                         elevateWord.setCreatedTime(now);
                         elevateWordBhv.insert(elevateWord);
+                        final String id = elevateWord.getId();
+                        final List<ElevateWordToLabel> mappingList =
+                                stream(labels).get(
+                                        stream -> stream.map(l -> labelTypeBhv.selectEntity(cb -> cb.query().setValue_Equal(l)).map(e -> {
+                                            final ElevateWordToLabel m = new ElevateWordToLabel();
+                                            m.setElevateWordId(id);
+                                            m.setLabelTypeId(e.getId());
+                                            return m;
+                                        }).orElse(null)).filter(e -> e != null).collect(Collectors.toList()));
+                        if (!mappingList.isEmpty()) {
+                            elevateWordToLabelBhv.batchInsert(mappingList);
+                        }
                     } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
                         elevateWordBhv.delete(elevateWord);
+                        final String id = elevateWord.getId();
+                        elevateWordToLabelBhv.queryDelete(cb -> cb.query().setElevateWordId_Equal(id));
                     } else {
                         elevateWord.setReading(reading);
                         elevateWord.setPermissions(permissions);
@@ -233,6 +249,25 @@ public class ElevateWordService {
                         elevateWord.setUpdatedBy(Constants.SYSTEM_USER);
                         elevateWord.setUpdatedTime(now);
                         elevateWordBhv.update(elevateWord);
+                        final String id = elevateWord.getId();
+                        final List<ElevateWordToLabel> mappingList =
+                                stream(labels).get(
+                                        stream -> stream.map(l -> labelTypeBhv.selectEntity(cb -> cb.query().setValue_Equal(l)).map(e -> {
+                                            final List<ElevateWordToLabel> mList = elevateWordToLabelBhv.selectList(cb -> {
+                                                cb.query().setElevateWordId_Equal(id);
+                                                cb.query().setLabelTypeId_Equal(e.getId());
+                                            });
+                                            if (!mList.isEmpty()) {
+                                                return null;
+                                            }
+                                            final ElevateWordToLabel m = new ElevateWordToLabel();
+                                            m.setElevateWordId(id);
+                                            m.setLabelTypeId(e.getId());
+                                            return m;
+                                        }).orElse(null)).filter(e -> e != null).collect(Collectors.toList()));
+                        if (!mappingList.isEmpty()) {
+                            elevateWordToLabelBhv.batchInsert(mappingList);
+                        }
                     }
                 } catch (final Exception e) {
                     logger.warn("Failed to read a sugget elevate word: " + list, e);
@@ -256,7 +291,7 @@ public class ElevateWordService {
             list.add("SuggestWord");
             list.add("Reading");
             list.add("Permissions");
-            list.add("Label");
+            list.add("Labels");
             list.add("Boost");
             csvWriter.writeValues(list);
 
@@ -268,10 +303,17 @@ public class ElevateWordService {
                             stream(entity.getPermissions()).get(
                                     stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
                                             .collect(Collectors.joining(",")));
+                    final String labels =
+                            elevateWordToLabelBhv
+                                    .selectList(cb -> cb.query().setElevateWordId_Equal(entity.getId()))
+                                    .stream()
+                                    .map(e -> labelTypeBhv.selectByPK(e.getLabelTypeId()).map(lt -> lt.getValue())
+                                            .filter(StringUtil::isNotBlank).orElse(null)).distinct().sorted()
+                                    .collect(Collectors.joining(","));
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());
                     addToList(list, permissions);
-                    addToList(list, entity.getTargetLabel());
+                    addToList(list, labels);
                     addToList(list, entity.getBoost());
                     try {
                         csvWriter.writeValues(list);
