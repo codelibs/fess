@@ -3,10 +3,17 @@
 <div id="subheader" class="row">
 	<div class="col">
 		<p>
-			<la:message key="labels.search_result_status"
-				arg0="${f:h(displayQuery)}" arg1="${f:h(allRecordCount)}"
-				arg2="${f:h(currentStartRecordNumber)}"
-				arg3="${f:h(currentEndRecordNumber)}" />
+			<c:if test="${allRecordCountRelation=='EQUAL_TO'}">
+				<la:message key="labels.search_result_status"
+					arg0="${displayQuery}" arg1="${fe:formatNumber(allRecordCount,'###,###')}"
+					arg2="${f:h(currentStartRecordNumber)}"
+					arg3="${f:h(currentEndRecordNumber)}" />
+			</c:if><c:if test="${allRecordCountRelation!='EQUAL_TO'}">
+				<la:message key="labels.search_result_status_over"
+					arg0="${displayQuery}" arg1="${fe:formatNumber(allRecordCount,'###,###')}"
+					arg2="${f:h(currentStartRecordNumber)}"
+					arg3="${f:h(currentEndRecordNumber)}" />
+			</c:if>
 			<c:if test="${execTime!=null}">
 				<la:message key="labels.search_result_time" arg0="${f:h(execTime)}" />
 			</c:if>
@@ -37,12 +44,14 @@
 				</h3>
 				<div class="body">
 					<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
-						<a class="link mr-3 d-none d-sm-flex" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
+					<div class="mr-3">
+						<a class="link d-none d-sm-flex" href="${doc.url_link}" data-uri="${doc.url_link}" data-id="${doc.doc_id}"
 							data-order="${s.index}"
-						> <img src="${fe:url('/images/blank.png')}"
+						> <img src="${fe:url('/images/blank.png')}" alt="thumbnail"
 							data-src="${fe:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}" class="thumbnail"
 						>
 						</a>
+					</div>
 					</c:if>
 					<div class="description">${doc.content_description}</div>
 				</div>
@@ -60,7 +69,7 @@
 						<small class="d-none d-lg-inline-block"> <la:link
 								href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
 								<la:message key="labels.search_result_similar"
-											arg0="${fe:formatNumber(doc.similar_docs_count-1)}" />
+											arg0="${fe:formatFileSize(doc.similar_docs_count-1)}" />
 							</la:link>
 						</small>
 					</c:if>
@@ -94,7 +103,7 @@
 							</c:if>
 							<c:set var="hasInfo" value="true" />
 							<la:message key="labels.search_result_size"
-								arg0="${fe:formatNumber(doc.content_length)}" />
+								arg0="${fe:formatFileSize(doc.content_length)}" />
 						</c:if> <c:if test="${searchLogSupport}">
 							<c:if test="${hasInfo}">
 								<div class="d-sm-none"></div>

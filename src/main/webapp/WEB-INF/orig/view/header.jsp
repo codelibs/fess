@@ -83,16 +83,14 @@
 				<button type="button" class="btn btn-light" id="searchOptionsClearButton">
 					<la:message key="labels.search_options_clear" />
 				</button>
+				<button type="submit" class="btn btn-primary">
+					<em class="fa fa-search"></em>
+					<la:message key="labels.search" />
+				</button>
 				<la:link href="/search/advance?q=${f:u(q)}${fe:pagingQuery(null)}" styleClass="btn btn-info">
 					<em class="fa fa-cog"></em>
 					<la:message key="labels.advance" />
 				</la:link>
-				<button type="button" class="btn btn-light pull-right"
-					data-toggle="control-options" data-target="#searchOptions"
-					id="searchOptionsCloseButton">
-					<em class="fa fa-times-circle"></em>
-					<la:message key="labels.search_options_close" />
-				</button>
 			</div>
 		</div>
 	</div>
