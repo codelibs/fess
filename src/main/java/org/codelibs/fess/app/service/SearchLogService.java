@@ -166,7 +166,7 @@ public class SearchLogService {
                 cb.fetchFirst(0);
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_COUNT_HOUR, op -> {
-                    op.dateHistogramInterval(DateHistogramInterval.HOUR);
+                    op.calendarInterval(DateHistogramInterval.HOUR);
                     op.minDocCount(0);
                     op.order(BucketOrder.key(true));
                 }, null);
@@ -186,7 +186,7 @@ public class SearchLogService {
                 cb.fetchFirst(0);
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_COUNT_DAY, op -> {
-                    op.dateHistogramInterval(DateHistogramInterval.DAY);
+                    op.calendarInterval(DateHistogramInterval.DAY);
                     op.minDocCount(0);
                     op.order(BucketOrder.key(true));
                 }, null);
@@ -206,7 +206,7 @@ public class SearchLogService {
                 cb.fetchFirst(0);
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_USER_HOUR, op -> {
-                    op.dateHistogramInterval(DateHistogramInterval.HOUR);
+                    op.calendarInterval(DateHistogramInterval.HOUR);
                     op.subAggregation(AggregationBuilders.cardinality(USER_INFO_ID).field(USER_INFO_ID));
                     op.minDocCount(0);
                     op.order(BucketOrder.key(true));
@@ -228,7 +228,7 @@ public class SearchLogService {
                 cb.fetchFirst(0);
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_USER_DAY, op -> {
-                    op.dateHistogramInterval(DateHistogramInterval.DAY);
+                    op.calendarInterval(DateHistogramInterval.DAY);
                     op.subAggregation(AggregationBuilders.cardinality(USER_INFO_ID).field(USER_INFO_ID));
                     op.minDocCount(0);
                     op.order(BucketOrder.key(true));
@@ -250,7 +250,7 @@ public class SearchLogService {
                 cb.fetchFirst(0);
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_HOUR, op -> {
-                    op.dateHistogramInterval(DateHistogramInterval.HOUR);
+                    op.calendarInterval(DateHistogramInterval.HOUR);
                     op.subAggregation(AggregationBuilders.avg(QUERY_TIME).field(QUERY_TIME));
                     op.minDocCount(0);
                     op.order(BucketOrder.key(true));
@@ -272,7 +272,7 @@ public class SearchLogService {
                 cb.fetchFirst(0);
                 createSearchLogCondition(pager, cb);
                 cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_DAY, op -> {
-                    op.dateHistogramInterval(DateHistogramInterval.DAY);
+                    op.calendarInterval(DateHistogramInterval.DAY);
                     op.subAggregation(AggregationBuilders.avg(QUERY_TIME).field(QUERY_TIME));
                     op.minDocCount(0);
                     op.order(BucketOrder.key(true));

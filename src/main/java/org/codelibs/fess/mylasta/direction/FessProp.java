@@ -1900,6 +1900,7 @@ public interface FessProp {
     String getApiGsaResponseHeaders();
 
     default List<Pair<String, String>> getApiGsaResponseHeaderList() {
+        @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_GSA_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiGsaResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
@@ -1917,6 +1918,7 @@ public interface FessProp {
     String getApiJsonResponseHeaders();
 
     default List<Pair<String, String>> getApiJsonResponseHeaderList() {
+        @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_JSON_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiJsonResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
@@ -1934,6 +1936,7 @@ public interface FessProp {
     String getApiDashboardResponseHeaders();
 
     default List<Pair<String, String>> getApiDashboardResponseHeaderList() {
+        @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_DASHBOARD_RESPONSE_HEADER_LIST);
         if (list == null) {
             list = split(getApiDashboardResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
@@ -1951,6 +1954,7 @@ public interface FessProp {
     String getApiCorsAllowOrigin();
 
     default List<String> getApiCorsAllowOriginList() {
+        @SuppressWarnings("unchecked")
         List<String> list = (List<String>) propMap.get(CORS_ALLOW_ORIGIN);
         if (list == null) {
             list =

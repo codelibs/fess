@@ -993,7 +993,6 @@ public class FessEsClient implements Client {
         final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
         if (response.hasFailures()) {
             if (logger.isDebugEnabled()) {
-                @SuppressWarnings("rawtypes")
                 final List<DocWriteRequest<?>> requests = bulkRequestBuilder.request().requests();
                 final BulkItemResponse[] items = response.getItems();
                 if (requests.size() == items.length) {

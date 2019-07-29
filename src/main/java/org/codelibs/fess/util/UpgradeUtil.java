@@ -161,13 +161,13 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static boolean addData(final Client fessEsClient, final String index, final String type, final String id, final String source) {
+    public static boolean addData(final Client fessEsClient, final String index, final String id, final String source) {
         try {
-            final IndexRequest indexRequest = new IndexRequest(index, type, id).source(source, XContentType.JSON);
+            final IndexRequest indexRequest = new IndexRequest(index).id(id).source(source, XContentType.JSON);
             fessEsClient.index(indexRequest).actionGet();
             return true;
         } catch (final Exception e) {
-            logger.warn("Failed to add " + id + " to " + index + "/" + type, e);
+            logger.warn("Failed to add " + id + " to " + index, e);
         }
         return false;
     }
