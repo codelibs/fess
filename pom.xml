@@ -58,14 +58,14 @@
 		<utflute.version>0.9.1</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.2.1-SNAPSHOT</crawler.version>
+		<crawler.version>3.2.1</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.2.0</suggest.version>
+		<suggest.version>7.2.1</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.2.0</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.2.1-SNAPSHOT</elasticsearch.httpclient.version>
+		<elasticsearch.version>7.2.1</elasticsearch.version>
+		<elasticsearch.httpclient.version>7.2.1</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -1249,7 +1249,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.5.1-SNAPSHOT</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>

@@ -50,7 +50,7 @@ public class DictionaryManager {
         try (CurlResponse response =
                 ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
                         .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
-            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
+            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
             return fileList
@@ -96,7 +96,7 @@ public class DictionaryManager {
                 try (CurlResponse response =
                         ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
                                 .body(FileUtil.readUTF8(file)).execute()) {
-                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
+                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
                     if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                         throw new DictionaryException("Failed to update " + dictFile.getPath());
                     }

@@ -357,7 +357,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try (CurlResponse response =
                 Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
                         .header("Accept", "application/json").execute()) {
-            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
+            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);
             }
@@ -439,7 +439,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                                 Curl.post(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
                                         .header("Accept", "application/json").header("Content-type", "application/json")
                                         .body("{\"securityEnabledOnly\":false}").execute()) {
-                            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
+                            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
                             if (logger.isDebugEnabled()) {
                                 logger.debug("response: {}", contentMap);
                             }
@@ -478,7 +478,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try (CurlResponse response =
                 Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
                         .header("Accept", "application/json").execute()) {
-            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser);
+            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);
             }
