@@ -68,11 +68,11 @@ import org.codelibs.fess.util.DocMap;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.ActionType;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.DocWriteRequest.OpType;
 import org.elasticsearch.action.DocWriteResponse.Result;
@@ -1564,13 +1564,13 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(final Action<Response> action,
-            final Request request) {
+    public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(
+            final ActionType<Response> action, final Request request) {
         return client.execute(action, request);
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse> void execute(final Action<Response> action,
+    public <Request extends ActionRequest, Response extends ActionResponse> void execute(final ActionType<Response> action,
             final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
