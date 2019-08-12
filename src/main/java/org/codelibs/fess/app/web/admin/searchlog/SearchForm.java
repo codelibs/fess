@@ -15,9 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.searchlog;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.SearchLogPager;
 import org.codelibs.fess.util.ComponentUtil;
-import org.jsoup.helper.StringUtil;
 
 /**
  * @author shinsuke
