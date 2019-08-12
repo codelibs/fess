@@ -1427,6 +1427,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. homeDirectory */
     String LDAP_ATTR_HOME_DIRECTORY = "ldap.attr.homeDirectory";
 
+    /** The key of the configuration. e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://oss.sonatype.org/content/repositories/snapshots/org/codelibs/fess/ */
+    String PLUGIN_REPOSITORIES = "plugin.repositories";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -5922,6 +5925,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAttrHomeDirectory();
 
     /**
+     * Get the value for the key 'plugin.repositories'. <br>
+     * The value is, e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://oss.sonatype.org/content/repositories/snapshots/org/codelibs/fess/ <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPluginRepositories();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -8286,6 +8297,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.LDAP_ATTR_HOME_DIRECTORY);
         }
 
+        public String getPluginRepositories() {
+            return get(FessConfig.PLUGIN_REPOSITORIES);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -8719,6 +8734,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ATTR_UID_NUMBER, "uidNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_GID_NUMBER, "gidNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_HOME_DIRECTORY, "homeDirectory");
+            defaultMap
+                    .put(FessConfig.PLUGIN_REPOSITORIES,
+                            "https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://oss.sonatype.org/content/repositories/snapshots/org/codelibs/fess/");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "hot");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");
