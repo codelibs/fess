@@ -36,17 +36,17 @@ public class PluginHelperTest extends UnitFessTestCase {
         super.setUp();
         pluginHelper = new PluginHelper() {
             protected String[] getRepositories() {
-                return new String[] { "plugin/repo1.html", "plugin/repo2.html" };
+                return new String[] { "plugin/repo1/", "plugin/repo2/" };
             }
 
             protected String getRepositoryContent(String url) {
-                if (url.contains("repo1")) {
+                if (url.contains("plugin/repo1")) {
                     try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
                         return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
                     } catch (IOException e) {
                         throw new IORuntimeException(e);
                     }
-                } else if (url.contains("repo2")) {
+                } else if (url.contains("plugin/repo2")) {
                     try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
                         return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
                     } catch (IOException e) {
@@ -59,14 +59,30 @@ public class PluginHelperTest extends UnitFessTestCase {
     }
 
     public void test_processRepository1() {
-        List<Artifact> list = pluginHelper.processRepository(PluginType.DATA_STORE, "plugin/repo1.html");
-        assertEquals(11, list.size());
+        List<Artifact> list = pluginHelper.processRepository(PluginType.DATA_STORE, "plugin/repo1/", "index.html");
+        assertEquals(7, list.size());
         assertEquals("fess-ds-atlassian", list.get(0).getName());
+        assertEquals("12.2.0", list.get(0).getVersion());
+        assertEquals("plugin/repo1/fess-ds-atlassian/12.2.0/fess-ds-atlassian-12.2.0.jar", list.get(0).getUrl().replace("//", "/"));
     }
 
     public void test_processRepository2() {
-        List<Artifact> list = pluginHelper.processRepository(PluginType.DATA_STORE, "plugin/repo2.html");
-        assertEquals(14, list.size());
+        List<Artifact> list = pluginHelper.processRepository(PluginType.DATA_STORE, "plugin/repo2/", "index.html");
+        assertEquals(7, list.size());
         assertEquals("fess-ds-atlassian", list.get(0).getName());
+        assertEquals("12.2.0", list.get(0).getVersion());
+        assertEquals("plugin/repo2/fess-ds-atlassian/12.2.0/fess-ds-atlassian-12.2.0.jar", list.get(0).getUrl().replace("//", "/"));
+    }
+
+    public void test_getArtifactFromFileName1() {
+        Artifact artifact = pluginHelper.getArtifactFromFileName(PluginType.DATA_STORE, "fess-ds-atlassian-13.2.0.jar");
+        assertEquals("fess-ds-atlassian", artifact.getName());
+        assertEquals("13.2.0", artifact.getVersion());
+    }
+
+    public void test_getArtifactFromFileName2() {
+        Artifact artifact = pluginHelper.getArtifactFromFileName(PluginType.DATA_STORE, "fess-ds-atlassian-13.2.1-20190708.212247-1.jar");
+        assertEquals("fess-ds-atlassian", artifact.getName());
+        assertEquals("13.2.1-20190708.212247-1", artifact.getVersion());
     }
 }
