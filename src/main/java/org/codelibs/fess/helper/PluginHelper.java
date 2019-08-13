@@ -43,10 +43,10 @@ public class PluginHelper {
 
     protected static final String VERSION = "version";
 
-    public Artifact[] getArtifacts(final PluginType pluginType) {
+    public Artifact[] getArtifacts(final ArtifactType artifactType) {
         final List<Artifact> list = new ArrayList<>();
         for (final String url : getRepositories()) {
-            list.addAll(processRepository(pluginType, url, ""));
+            list.addAll(processRepository(artifactType, url));
         }
         return list.toArray(new Artifact[list.size()]);
     }
@@ -56,17 +56,17 @@ public class PluginHelper {
                 stream -> stream.map(s -> s.trim()).toArray(n -> new String[n]));
     }
 
-    protected List<Artifact> processRepository(final PluginType pluginType, final String url, final String index) {
+    protected List<Artifact> processRepository(final ArtifactType artifactType, final String url) {
         final List<Artifact> list = new ArrayList<>();
-        final String repoContent = getRepositoryContent(url + "/" + index);
-        final Matcher matcher = Pattern.compile("href=\"[^\"]*(" + pluginType.getId() + "[a-zA-Z0-9\\-]+)/?\"").matcher(repoContent);
+        final String repoContent = getRepositoryContent(url);
+        final Matcher matcher = Pattern.compile("href=\"[^\"]*(" + artifactType.getId() + "[a-zA-Z0-9\\-]+)/?\"").matcher(repoContent);
         while (matcher.find()) {
             final String name = matcher.group(1);
-            try {
-                final String pluginUrl = url + "/" + name + "/";
-                final String mavenMetadata = getRepositoryContent(pluginUrl + "maven-metadata.xml");
+            final String pluginUrl = url + (url.endsWith("/") ? name + "/" : "/" + name + "/");
+            final String mavenMetadata = getRepositoryContent(pluginUrl + "maven-metadata.xml");
+            try (StringReader reader = new StringReader(mavenMetadata)) {
                 final DOMParser parser = new DOMParser();
-                parser.parse(new InputSource(new StringReader(mavenMetadata)));
+                parser.parse(new InputSource(reader));
                 final Document document = parser.getDocument();
                 final NodeList nodeList = document.getElementsByTagName(VERSION);
                 for (int i = 0; i < nodeList.getLength(); i++) {
@@ -74,7 +74,7 @@ public class PluginHelper {
                     list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to parse maven-metadata.xml.", e);
+                logger.warn("Failed to parse " + pluginUrl + "metadata.xml.", e);
             }
         }
         return list;
@@ -88,21 +88,29 @@ public class PluginHelper {
         }
     }
 
-    protected Artifact[] getArtifactsAlreadyInstalled(final PluginType pluginType) {
-        final List<Artifact> list = new ArrayList<>();
-        File[] jarFiles = ResourceUtil.getJarFiles(pluginType.getId());
+    public Artifact[] getInstalledArtifacts(final ArtifactType artifactType) {
+        final File[] jarFiles = ResourceUtil.getJarFiles(artifactType.getId());
+        final List<Artifact> list = new ArrayList<>(jarFiles.length);
         for (final File file : jarFiles) {
-            list.add(getArtifactFromFileName(pluginType, file.getName()));
+            list.add(getArtifactFromFileName(artifactType, file.getName()));
         }
         return list.toArray(new Artifact[list.size()]);
     }
 
-    protected Artifact getArtifactFromFileName(final PluginType pluginType, final String fileName) {
-        final String convertedFileName = fileName.substring(pluginType.getId().length() + 1, fileName.lastIndexOf('.'));
+    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String fileName) {
+        final String convertedFileName = fileName.substring(artifactType.getId().length() + 1, fileName.lastIndexOf('.'));
         final int firstIndexOfDash = convertedFileName.indexOf("-");
-        final String artifactName = pluginType.getId() + "-" + convertedFileName.substring(0, firstIndexOfDash);
+        final String artifactName = artifactType.getId() + "-" + convertedFileName.substring(0, firstIndexOfDash);
         final String artifactVersion = convertedFileName.substring(firstIndexOfDash + 1);
-        return new Artifact(artifactName, artifactVersion, "NONE");
+        return new Artifact(artifactName, artifactVersion, null);
+    }
+
+    public void installArtifact(Artifact artifact) {
+        // TODO
+    }
+
+    public void deleteInstalledArtifact(Artifact artifact) {
+        // TODO
     }
 
     public static class Artifact {
@@ -129,17 +137,24 @@ public class PluginHelper {
         }
     }
 
-    public enum PluginType {
-        DATA_STORE("fess-ds");
+    public enum ArtifactType {
+        DATA_STORE("fess-ds"), UNKNOWN("unknown");
 
         private String id;
 
-        private PluginType(String id) {
+        private ArtifactType(String id) {
             this.id = id;
         }
 
         public String getId() {
             return id;
+        }
+
+        public ArtifactType getType(String name) {
+            if (name.startsWith(DATA_STORE.getId())) {
+                return DATA_STORE;
+            }
+            return UNKNOWN;
         }
     }
 }
