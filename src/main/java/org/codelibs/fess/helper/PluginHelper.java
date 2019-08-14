@@ -19,12 +19,16 @@ import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.codelibs.core.io.CopyUtil;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.util.ComponentUtil;
@@ -37,7 +41,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-// TODO: refactoring
+import javax.servlet.ServletContext;
+
+// TODO: refactoring, exception handling, improving codes
 public class PluginHelper {
     private static final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
 
@@ -58,13 +64,13 @@ public class PluginHelper {
 
     protected List<Artifact> processRepository(final ArtifactType artifactType, final String url) {
         final List<Artifact> list = new ArrayList<>();
-        final String repoContent = getRepositoryContent(url);
+        final String repoContent = getRepositoryContentAsString(url);
         final Matcher matcher = Pattern.compile("href=\"[^\"]*(" + artifactType.getId() + "[a-zA-Z0-9\\-]+)/?\"").matcher(repoContent);
         while (matcher.find()) {
             final String name = matcher.group(1);
             final String pluginUrl = url + (url.endsWith("/") ? name + "/" : "/" + name + "/");
-            final String mavenMetadata = getRepositoryContent(pluginUrl + "maven-metadata.xml");
-            try (StringReader reader = new StringReader(mavenMetadata)) {
+            final String mavenMetadata = getRepositoryContentAsString(pluginUrl + "maven-metadata.xml");
+            try (final StringReader reader = new StringReader(mavenMetadata)) {
                 final DOMParser parser = new DOMParser();
                 parser.parse(new InputSource(reader));
                 final Document document = parser.getDocument();
@@ -74,15 +80,23 @@ public class PluginHelper {
                     list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to parse " + pluginUrl + "metadata.xml.", e);
+                logger.warn("Failed to parse " + pluginUrl + "maven-metadata.xml.", e);
             }
         }
         return list;
     }
 
-    protected String getRepositoryContent(final String url) {
+    protected String getRepositoryContentAsString(final String url) {
         try (final CurlResponse response = Curl.get(url).execute()) {
             return response.getContentAsString();
+        } catch (final IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    protected InputStream getRepositoryContentAsStream(final String url) {
+        try (final CurlResponse response = Curl.get(url).execute()) {
+            return response.getContentAsStream();
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
@@ -105,12 +119,39 @@ public class PluginHelper {
         return new Artifact(artifactName, artifactVersion, null);
     }
 
-    public void installArtifact(Artifact artifact) {
-        // TODO
+    public boolean installArtifact(Artifact artifact) {
+        try (final InputStream in = getRepositoryContentAsStream(artifact.getUrl())) {
+            final String fileName = artifact.getName() + "-" + artifact.getVersion() + ".jar";
+            final File file = Paths.get(getLibPath().toString(), fileName).toFile();
+            if (!file.exists()) {
+                file.createNewFile();
+                CopyUtil.copy(in, file);
+            } else {
+                final File tempFile = File.createTempFile(fileName, "bk");
+                CopyUtil.copy(file, tempFile);
+                CopyUtil.copy(in, file);
+                tempFile.delete();
+            }
+            return file.exists();
+        } catch (final Exception e) {
+            logger.warn("Failed to install the artifact " + artifact.getName(), e);
+            return false;
+        }
     }
 
-    public void deleteInstalledArtifact(Artifact artifact) {
-        // TODO
+    public boolean deleteInstalledArtifact(Artifact artifact) {
+        final String fileName = artifact.getName() + "-" + artifact.getVersion() + ".jar";
+        final File file = Paths.get(getLibPath().toString(), fileName).toFile();
+        if (file != null && file.exists() && file.delete()) {
+            return true;
+        } else {
+            logger.warn("Failed to delete the artifact " + file.getAbsolutePath());
+            return false;
+        }
+    }
+
+    protected Path getLibPath() {
+        return Paths.get(ComponentUtil.getComponent(ServletContext.class).getRealPath("/WEB-INF/lib/"));
     }
 
     public static class Artifact {
