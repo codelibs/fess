@@ -16,6 +16,8 @@
 		<mkdir dir="${target.dir}" />
 		<delete dir="${webinf.dir}/lib" />
 		<mkdir dir="${webinf.dir}/lib" />
+		<delete dir="${webinf.dir}/plugin" />
+		<mkdir dir="${webinf.dir}/plugin" />
 		<delete dir="${crawler.dir}/lib" />
 		<mkdir dir="${crawler.dir}/lib" />
 		<delete dir="${suggest.dir}/lib" />
@@ -42,7 +44,7 @@
 			<cutdirsmapper dirs="2" />
 		</unzip>
 		<!-- fess-ds-atlassian -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-atlassian" />
@@ -50,7 +52,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-box -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-box" />
@@ -58,7 +60,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-csv -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-csv" />
@@ -66,7 +68,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-db -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-db" />
@@ -74,7 +76,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-dropbox -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-dropbox" />
@@ -82,7 +84,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-elasticsearch -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-elasticsearch" />
@@ -90,7 +92,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-gitbucket -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-gitbucket" />
@@ -98,7 +100,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-gsuite -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-gsuite" />
@@ -106,7 +108,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-json -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-json" />
@@ -114,7 +116,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-office365 -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-office365" />
@@ -122,7 +124,7 @@
 			<param name="file.version" value="13.2.0" />
 		</antcall>
 		<!-- fess-ds-slack -->
-		<antcall target="install.lib.jar">
+		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-slack" />
@@ -143,11 +145,11 @@
 			todir="${thumbnail.dir}/lib"/>
 	</target>
 
-	<target name="install.lib.jar">
+	<target name="install.plugin.jar">
 		<get dest="${target.dir}">
 			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
 		</get>
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
-			todir="${webinf.dir}/lib"/>
+			todir="${webinf.dir}/plugin"/>
 	</target>
 </project>

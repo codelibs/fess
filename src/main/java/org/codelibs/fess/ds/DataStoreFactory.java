@@ -15,20 +15,42 @@
  */
 package org.codelibs.fess.ds;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.helper.PluginHelper;
+import org.codelibs.fess.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class DataStoreFactory {
     private static final Logger logger = LoggerFactory.getLogger(DataStoreFactory.class);
 
     protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<>();
+
+    protected String[] dataStoreNames = StringUtil.EMPTY_STRINGS;
+
+    protected long lastLoadedTime = 0;
 
     public void add(final String name, final DataStore dataStore) {
         if (name == null || dataStore == null) {
@@ -37,19 +59,58 @@ public class DataStoreFactory {
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded " + name);
         }
-        dataStoreMap.put(name, dataStore);
+        dataStoreMap.put(name.toLowerCase(Locale.ROOT), dataStore);
+        dataStoreMap.put(dataStore.getClass().getSimpleName().toLowerCase(Locale.ROOT), dataStore);
     }
 
     public DataStore getDataStore(final String name) {
-        return dataStoreMap.get(name);
+        if (name == null) {
+            return null;
+        }
+        return dataStoreMap.get(name.toLowerCase(Locale.ROOT));
     }
 
-    public List<String> getDataStoreNameList() {
-        final Set<String> nameSet = dataStoreMap.keySet();
-        final List<String> nameList = new ArrayList<>();
-        nameList.addAll(nameSet);
-        Collections.sort(nameList);
-        return nameList;
+    public String[] getDataStoreNames() {
+        if (System.currentTimeMillis() - lastLoadedTime > 60000L) {
+            final List<String> nameList = loadDataStoreNameList();
+            dataStoreNames = nameList.toArray(n -> new String[nameList.size()]);
+        }
+        return dataStoreNames;
+    }
+
+    protected List<String> loadDataStoreNameList() {
+        final Set<String> nameSet = new HashSet<>();
+        final File[] jarFiles = ResourceUtil.getPluginJarFiles(PluginHelper.ArtifactType.DATA_STORE.getId());
+        for (final File jarFile : jarFiles) {
+            try (FileSystem fs = FileSystems.newFileSystem(jarFile.toPath(), ClassLoader.getSystemClassLoader())) {
+                final Path xmlPath = fs.getPath("fess_ds++.xml");
+                try (InputStream is = Files.newInputStream(xmlPath)) {
+                    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                    final DocumentBuilder builder = factory.newDocumentBuilder();
+
+                    final Document doc = builder.parse(is);
+                    final NodeList nodeList = doc.getElementsByTagName("component");
+                    for (int i = 0; i < nodeList.getLength(); i++) {
+                        final Node node = nodeList.item(i);
+                        final NamedNodeMap attributes = node.getAttributes();
+                        if (attributes != null) {
+                            final Node classAttr = attributes.getNamedItem("class");
+                            if (classAttr != null) {
+                                final String value = classAttr.getNodeValue();
+                                if (StringUtil.isNotBlank(value)) {
+                                    final String[] values = value.split("\\.");
+                                    nameSet.add(values[values.length - 1]);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to load " + jarFile.getAbsolutePath(), e);
+            }
+        }
+        return nameSet.stream().sorted().collect(Collectors.toList());
     }
 
 }

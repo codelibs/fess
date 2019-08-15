@@ -323,9 +323,9 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     protected void registerHandlerNames(final RenderData data) {
-        final List<String> dataStoreNameList = dataStoreFactory.getDataStoreNameList();
+        final String[] dataStoreNames = dataStoreFactory.getDataStoreNames();
         final List<Map<String, String>> itemList = new ArrayList<>();
-        for (final String name : dataStoreNameList) {
+        for (final String name : dataStoreNames) {
             final Map<String, String> map = new HashMap<>();
             map.put(Constants.ITEM_LABEL, name);
             map.put(Constants.ITEM_VALUE, name);

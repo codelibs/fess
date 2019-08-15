@@ -111,6 +111,10 @@ public class ResourceUtil {
         return getPath("site", names);
     }
 
+    public static Path getPluginPath(final String... names) {
+        return getPath("plutin", names);
+    }
+
     public static Path getProjectPropertiesFile() {
         return getPath("", "project.properties");
     }
@@ -149,6 +153,19 @@ public class ResourceUtil {
             return new File[0];
         }
         final String libPath = context.getRealPath("/WEB-INF/lib");
+        if (StringUtil.isBlank(libPath)) {
+            return new File[0];
+        }
+        final File libDir = new File(libPath);
+        return libDir.listFiles((FilenameFilter) (file, name) -> name.startsWith(namePrefix));
+    }
+
+    public static File[] getPluginJarFiles(final String namePrefix) {
+        final ServletContext context = LaServletContextUtil.getServletContext();
+        if (context == null) {
+            return new File[0];
+        }
+        final String libPath = context.getRealPath("/WEB-INF/plugin");
         if (StringUtil.isBlank(libPath)) {
             return new File[0];
         }

@@ -121,6 +121,9 @@ public class SuggestJob extends ExecJob {
         // WEB-INF/env/suggest/lib
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")), "WEB-INF"
                 + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
+        // WEB-INF/plugin
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/plugin")), "WEB-INF" + File.separator + "plugin"
+                + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
