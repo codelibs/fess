@@ -69,10 +69,10 @@ public class PluginHelperTest extends UnitFessTestCase {
 
     public void test_processRepository2() {
         List<Artifact> list = pluginHelper.processRepository(ArtifactType.DATA_STORE, "plugin/repo2/");
-        assertEquals(7, list.size());
+        assertEquals(1, list.size());
         assertEquals("fess-ds-atlassian", list.get(0).getName());
-        assertEquals("12.2.0", list.get(0).getVersion());
-        assertEquals("plugin/repo2/fess-ds-atlassian/12.2.0/fess-ds-atlassian-12.2.0.jar", list.get(0).getUrl());
+        assertEquals("12.2.0-20180814.210714-10", list.get(0).getVersion());
+        assertEquals("plugin/repo2/fess-ds-atlassian/12.2.0-SNAPSHOT/fess-ds-atlassian-12.2.0-20180814.210714-10.jar", list.get(0).getUrl());
     }
 
     public void test_getArtifactFromFileName1() {

@@ -17,10 +17,10 @@ package org.codelibs.fess.helper;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,26 +30,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.codelibs.core.io.CopyUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
+import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.PluginException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.codelibs.nekohtml.parsers.DOMParser;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 // TODO: refactoring, exception handling, improving codes
 public class PluginHelper {
     private static final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
-
-    protected static final String VERSION = "version";
 
     public Artifact[] getArtifacts(final ArtifactType artifactType) {
         final List<Artifact> list = new ArrayList<>();
@@ -71,21 +74,58 @@ public class PluginHelper {
         while (matcher.find()) {
             final String name = matcher.group(1);
             final String pluginUrl = url + (url.endsWith("/") ? name + "/" : "/" + name + "/");
-            final String mavenMetadata = getRepositoryContent(pluginUrl + "maven-metadata.xml");
-            try (final StringReader reader = new StringReader(mavenMetadata)) {
-                final DOMParser parser = new DOMParser();
-                parser.parse(new InputSource(reader));
-                final Document document = parser.getDocument();
-                final NodeList nodeList = document.getElementsByTagName(VERSION);
+            final String pluginMetaContent = getRepositoryContent(pluginUrl + "maven-metadata.xml");
+            try (final InputStream is = new ByteArrayInputStream(pluginMetaContent.getBytes(Constants.UTF_8_CHARSET))) {
+                final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                final DocumentBuilder builder = factory.newDocumentBuilder();
+                final Document document = builder.parse(is);
+                final NodeList nodeList = document.getElementsByTagName("version");
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     final String version = nodeList.item(i).getTextContent();
-                    list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
+                    if (version.endsWith("SNAPSHOT")) {
+                        final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
+                        if (StringUtil.isNotBlank(snapshotVersion)) {
+                            String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
+                            list.add(new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
+                        } else if (logger.isDebugEnabled()) {
+                            logger.debug("Snapshot name is not found: " + name + "/" + version);
+                        }
+                    } else {
+                        list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
+                    }
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to parse " + pluginUrl + "maven-metadata.xml.", e);
             }
         }
         return list;
+    }
+
+    protected String getSnapshotActualVersion(final DocumentBuilder builder, final String pluginUrl, final String version)
+            throws SAXException, IOException {
+        String timestamp = null;
+        String buildNumber = null;
+        final String versionMetaContent = getRepositoryContent(pluginUrl + version + "/maven-metadata.xml");
+        try (final InputStream is = new ByteArrayInputStream(versionMetaContent.getBytes(Constants.UTF_8_CHARSET))) {
+            final Document doc = builder.parse(is);
+            final NodeList snapshotNodeList = doc.getElementsByTagName("snapshot");
+            if (snapshotNodeList.getLength() > 0) {
+                NodeList nodeList = snapshotNodeList.item(0).getChildNodes();
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    final Node node = nodeList.item(i);
+                    if ("timestamp".equalsIgnoreCase(node.getNodeName())) {
+                        timestamp = node.getTextContent();
+                    } else if ("buildNumber".equalsIgnoreCase(node.getNodeName())) {
+                        buildNumber = node.getTextContent();
+                    }
+                }
+            }
+        }
+        if (StringUtil.isNotBlank(timestamp) && StringUtil.isNotBlank(buildNumber)) {
+            return timestamp + "-" + buildNumber;
+        }
+        return null;
     }
 
     protected String getRepositoryContent(final String url) {
@@ -113,7 +153,7 @@ public class PluginHelper {
         return new Artifact(artifactName, artifactVersion, null);
     }
 
-    public void installArtifact(Artifact artifact) {
+    public void installArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
         try (final CurlResponse response = Curl.get(artifact.getUrl()).execute()) {
             try (final InputStream in = response.getContentAsStream()) {
@@ -124,7 +164,7 @@ public class PluginHelper {
         }
     }
 
-    public void deleteInstalledArtifact(Artifact artifact) {
+    public void deleteInstalledArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
         final Path jarPath = Paths.get(getPluginPath().toString(), fileName);
         if (!Files.exists(jarPath)) {
@@ -132,7 +172,7 @@ public class PluginHelper {
         }
         try {
             Files.delete(jarPath);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new PluginException("Failed to delete the artifact " + fileName, e);
         }
     }
@@ -146,7 +186,7 @@ public class PluginHelper {
         protected final String version;
         protected final String url;
 
-        public Artifact(String name, String version, String url) {
+        public Artifact(final String name, final String version, final String url) {
             this.name = name;
             this.version = version;
             this.url = url;
@@ -167,14 +207,19 @@ public class PluginHelper {
         public String getUrl() {
             return url;
         }
+
+        @Override
+        public String toString() {
+            return "Artifact [name=" + name + ", version=" + version + "]";
+        }
     }
 
     public enum ArtifactType {
         DATA_STORE("fess-ds"), UNKNOWN("unknown");
 
-        private String id;
+        private final String id;
 
-        private ArtifactType(String id) {
+        private ArtifactType(final String id) {
             this.id = id;
         }
 
@@ -182,7 +227,7 @@ public class PluginHelper {
             return id;
         }
 
-        public ArtifactType getType(String name) {
+        public ArtifactType getType(final String name) {
             if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
             }
