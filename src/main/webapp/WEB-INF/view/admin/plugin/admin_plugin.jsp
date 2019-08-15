@@ -10,7 +10,7 @@
 <div class="wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
-        <jsp:param name="menuCategoryType" value="log" />
+        <jsp:param name="menuCategoryType" value="system" />
         <jsp:param name="menuType" value="plugin" />
     </jsp:include>
     <div class="content-wrapper">
@@ -49,7 +49,7 @@
                                             <c:forEach var="artifact" varStatus="s"
                                                        items="${installedArtifactItems}">
                                                 <tr>
-                                                    <td>${f:h(artifact.artifactType)}</td>
+                                                    <td>${f:h(artifact.type)}</td>
                                                     <td>${f:h(artifact.name)}</td>
                                                     <td>${f:h(artifact.version)}</td>
                                                     <td>

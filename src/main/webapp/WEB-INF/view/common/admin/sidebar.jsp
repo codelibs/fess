@@ -76,6 +76,12 @@
 							<span><la:message key="labels.menu_access_token" /></span>
 						</la:link></li>
 
+					<li <c:if test="${param.menuType=='plugin'}">class="active"</c:if>><la:link
+							href="/admin/plugin/">
+							<em class='fa fa-genderless'></em>
+							<span><la:message key="labels.menu_plugin" /></span>
+						</la:link></li>
+
 				</ul></li>
 			<li
 				class="treeview <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>"><a

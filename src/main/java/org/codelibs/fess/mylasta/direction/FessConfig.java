@@ -1202,6 +1202,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. maintenance */
     String ONLINE_HELP_NAME_MAINTENANCE = "online.help.name.maintenance";
 
+    /** The key of the configuration. e.g. plugin */
+    String ONLINE_HELP_NAME_PLUGIN = "online.help.name.plugin";
+
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
@@ -5219,6 +5222,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameMaintenance();
 
     /**
+     * Get the value for the key 'online.help.name.plugin'. <br>
+     * The value is, e.g. plugin <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNamePlugin();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -7905,6 +7915,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_MAINTENANCE);
         }
 
+        public String getOnlineHelpNamePlugin() {
+            return get(FessConfig.ONLINE_HELP_NAME_PLUGIN);
+        }
+
         public String getOnlineHelpSupportedLangs() {
             return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
@@ -8659,6 +8673,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SUGGEST, "suggest");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEARCHLOG, "searchlog");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_MAINTENANCE, "maintenance");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_PLUGIN, "plugin");
             defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "ja");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_SEED, "0");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_TAGS, "");

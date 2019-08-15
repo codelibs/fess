@@ -15,21 +15,24 @@
  */
 package org.codelibs.fess.app.web.admin.plugin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
-import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.util.RenderDataUtil;
+import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class AdminPluginAction extends FessAdminAction {
 
@@ -41,8 +44,9 @@ public class AdminPluginAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-//        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNamePlugin()));
-
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNamePlugin()));
+        // runtime.registerData("availableArtifactItems", getAllAvailableArtifacts());
+        runtime.registerData("installedArtifactItems", getAllInstalledArtifacts());
     }
 
     @Execute
@@ -52,12 +56,20 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse delete(final PluginBean pluginBean) {
-        // TODO
+    public HtmlResponse delete(final DeleteForm form) {
+        validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminPlugin_AdminPluginJsp);
+        });
+        verifyToken(() -> {
+            return asHtml(path_AdminPlugin_AdminPluginJsp);
+        });
+        Artifact artifact = new Artifact(form.name, form.version, null);
         try {
-            pluginHelper.deleteInstalledArtifact(new Artifact(pluginBean.name, pluginBean.version, null));
+            pluginHelper.deleteInstalledArtifact(artifact);
+            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
         } catch (Exception e) {
-
+            logger.warn("Failed to delete " + artifact.getFileName(), e);
+            saveError(messages -> messages.addErrorsFailedToDeletePlugin(GLOBAL, artifact.getFileName()));
         }
         return redirect(getClass());
     }
@@ -69,26 +81,32 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminPlugin_AdminPluginJsp).renderWith(
-                data ->
-                        RenderDataUtil.register(data, "installedArtifactItems", getAllInstalledArtifacts()));
+        return asHtml(path_AdminPlugin_AdminPluginJsp);
     }
 
-    private List<PluginBean> getAllInstalledArtifacts() {
-        final List<PluginBean> result = new ArrayList<>();
-        for(PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
-            result.addAll(
-                    Arrays.stream(pluginHelper.getInstalledArtifacts(artifactType))
-                            .map(artifact -> mappingToBean(PluginHelper.ArtifactType.getType(artifactType.getId()).toString(), artifact)).collect(Collectors.toList()));
+    private List<Map<String, String>> getAllAvailableArtifacts() {
+        final List<Map<String, String>> result = new ArrayList<>();
+        for (PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
+            result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType)).map(artifact -> beanToMap(artifact))
+                    .collect(Collectors.toList()));
         }
         return result;
     }
 
-    private PluginBean mappingToBean(final String artifactType, final Artifact artifact) {
-        final PluginBean pluginBean = new PluginBean();
-        pluginBean.artifactType = artifactType;
-        pluginBean.name = artifact.getName();
-        pluginBean.version = artifact.getVersion();
-        return pluginBean;
+    private List<Map<String, String>> getAllInstalledArtifacts() {
+        final List<Map<String, String>> result = new ArrayList<>();
+        for (PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
+            result.addAll(Arrays.stream(pluginHelper.getInstalledArtifacts(artifactType)).map(artifact -> beanToMap(artifact))
+                    .collect(Collectors.toList()));
+        }
+        return result;
+    }
+
+    private Map<String, String> beanToMap(final Artifact artifact) {
+        Map<String, String> item = new HashMap<>();
+        item.put("type", ArtifactType.getType(artifact).getId());
+        item.put("name", artifact.getName());
+        item.put("version", artifact.getVersion());
+        return item;
     }
 }

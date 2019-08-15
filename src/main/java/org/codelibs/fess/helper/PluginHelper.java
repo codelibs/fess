@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,16 +51,30 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-// TODO: refactoring, exception handling, improving codes
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 public class PluginHelper {
     private static final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
 
-    public Artifact[] getArtifacts(final ArtifactType artifactType) {
-        final List<Artifact> list = new ArrayList<>();
-        for (final String url : getRepositories()) {
-            list.addAll(processRepository(artifactType, url));
+    protected LoadingCache<ArtifactType, Artifact[]> availableArtifacts = CacheBuilder.newBuilder().maximumSize(10)
+            .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<ArtifactType, Artifact[]>() {
+                public Artifact[] load(ArtifactType key) {
+                    final List<Artifact> list = new ArrayList<>();
+                    for (final String url : getRepositories()) {
+                        list.addAll(processRepository(key, url));
+                    }
+                    return list.toArray(new Artifact[list.size()]);
+                }
+            });
+
+    public Artifact[] getAvailableArtifacts(final ArtifactType artifactType) {
+        try {
+            return availableArtifacts.get(artifactType);
+        } catch (final Exception e) {
+            throw new PluginException("Failed to access " + artifactType, e);
         }
-        return list.toArray(new Artifact[list.size()]);
     }
 
     protected String[] getRepositories() {
@@ -227,8 +242,8 @@ public class PluginHelper {
             return id;
         }
 
-        static public ArtifactType getType(final String name) {
-            if (name.startsWith(DATA_STORE.getId())) {
+        public static ArtifactType getType(final Artifact artifact) {
+            if (artifact.getName().startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
             }
             return UNKNOWN;
