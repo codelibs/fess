@@ -227,7 +227,7 @@ public class PluginHelper {
             return id;
         }
 
-        public ArtifactType getType(final String name) {
+        static public ArtifactType getType(final String name) {
             if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
             }
