@@ -63,6 +63,8 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private static final String VERSION_13_1 = "13.1";
 
+    private static final String VERSION_13_2 = "13.2";
+
     // ===================================================================================
     //                                                                           Attribute
     //
@@ -132,6 +134,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -151,6 +154,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -169,6 +173,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -186,6 +191,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -202,6 +208,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -217,6 +224,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -231,6 +239,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom12_6();
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -244,6 +253,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             try {
                 upgradeFrom13_0();
                 upgradeFrom13_1();
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -256,6 +266,19 @@ public class AdminUpgradeAction extends FessAdminAction {
         } else if (VERSION_13_1.equals(form.targetVersion)) {
             try {
                 upgradeFrom13_1();
+                upgradeFrom13_2();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_13_0, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_13_2.equals(form.targetVersion)) {
+            try {
+                upgradeFrom13_2();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -316,6 +339,10 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom13_1() {
+        // nothing
+    }
+
+    private void upgradeFrom13_2() {
         // nothing
     }
 
