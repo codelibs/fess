@@ -66,7 +66,7 @@ public class AdminPluginAction extends FessAdminAction {
         Artifact artifact = new Artifact(form.name, form.version, null);
         try {
             pluginHelper.deleteInstalledArtifact(artifact);
-            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
+            saveInfo(messages -> messages.addSuccessDeletePlugin(GLOBAL, artifact.getFileName()));
         } catch (Exception e) {
             logger.warn("Failed to delete " + artifact.getFileName(), e);
             saveError(messages -> messages.addErrorsFailedToDeletePlugin(GLOBAL, artifact.getFileName()));
@@ -81,7 +81,7 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminPlugin_AdminPluginJsp);
+        return asHtml(path_AdminPlugin_AdminPluginJsp).useForm(DeleteForm.class);
     }
 
     private List<Map<String, String>> getAllAvailableArtifacts() {
