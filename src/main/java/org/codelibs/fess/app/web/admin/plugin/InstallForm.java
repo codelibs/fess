@@ -28,4 +28,7 @@ public class InstallForm {
     @Size(max = 100)
     public String version;
 
+    @Size(max = 200)
+    public String url;
+
 }

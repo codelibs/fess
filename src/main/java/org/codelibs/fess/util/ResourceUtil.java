@@ -112,7 +112,7 @@ public class ResourceUtil {
     }
 
     public static Path getPluginPath(final String... names) {
-        return getPath("plutin", names);
+        return getPath("plugin", names);
     }
 
     public static Path getProjectPropertiesFile() {

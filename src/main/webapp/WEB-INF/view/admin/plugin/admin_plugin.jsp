@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title" /> | <la:message
-            key="labels.plugin_management" /></title>
+            key="labels.plugin_title" /></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
     <div class="content-wrapper">
         <section class="content-header">
             <h1>
-                <la:message key="labels.plugin_management" />
+                <la:message key="labels.plugin_title" />
             </h1>
             <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
         </section>
@@ -31,7 +31,7 @@
 							<div class="btn-group pull-right">
 								<la:link href="installplugin" styleClass="btn btn-success btn-xs">
 									<em class="fa fa-plus"></em>
-									<la:message key="labels.crud_link_create" />
+									<la:message key="labels.plugin_install" />
 								</la:link>
 							</div>
 						</div>
@@ -63,15 +63,14 @@
                                                     <td>${f:h(artifact.name)}</td>
                                                     <td>${f:h(artifact.version)}</td>
                                                     <td>
-
                                                         <button type="button" class="btn btn-danger btn-xs" name="delete"
-                                                                data-toggle="modal" data-target="#confirmToDelete"
-                                                                value="<la:message key="labels.crud_button_delete" />">
+                                                                data-toggle="modal" data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
+                                                                value="<la:message key="labels.design_delete_button" />">
                                                             <em class="fa fa-trash"></em>
-                                                            <la:message key="labels.crud_button_delete" />
+                                                            <la:message key="labels.design_delete_button" />
                                                         </button>
-                                                        <div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
-                                                             role="dialog">
+                                                        <div class="modal modal-danger fade" id='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version)}'
+                                                             tabindex="-1" role="dialog">
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content">
                                                                     <div class="modal-header">
@@ -107,7 +106,6 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-
                                                     </td>
                                                 </tr>
                                             </c:forEach>

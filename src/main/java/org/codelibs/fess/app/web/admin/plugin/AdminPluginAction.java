@@ -28,6 +28,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -45,7 +46,7 @@ public class AdminPluginAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNamePlugin()));
-        // runtime.registerData("availableArtifactItems", getAllAvailableArtifacts());
+        //runtime.registerData("availableArtifactItems", getAllAvailableArtifacts());
         runtime.registerData("installedArtifactItems", getAllInstalledArtifacts());
     }
 
@@ -76,8 +77,30 @@ public class AdminPluginAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse install(final InstallForm form) {
-        // TODO
+        validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp);
+        });
+        verifyToken(() -> {
+            return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp);
+        });
+        Artifact artifact = new Artifact(form.name, form.version, form.url);
+        try {
+            pluginHelper.installArtifact(artifact);
+            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
+        } catch (Exception e) {
+            logger.warn("Failed to install " + artifact.getFileName(), e);
+            saveError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, artifact.getFileName()));
+        }
         return redirect(getClass());
+    }
+
+
+    @Execute
+    public HtmlResponse installplugin() {
+        saveToken();
+        return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "availableArtifactItems", getAllAvailableArtifacts());
+        }).useForm(InstallForm.class, op -> op.setup(form -> {}));
     }
 
     private HtmlResponse asListHtml() {
@@ -107,6 +130,7 @@ public class AdminPluginAction extends FessAdminAction {
         item.put("type", ArtifactType.getType(artifact).getId());
         item.put("name", artifact.getName());
         item.put("version", artifact.getVersion());
+        item.put("url", artifact.getUrl());
         return item;
     }
 }

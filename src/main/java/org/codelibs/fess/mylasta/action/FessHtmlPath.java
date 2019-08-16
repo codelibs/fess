@@ -291,6 +291,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/plugin/admin_plugin.jsp */
     HtmlNext path_AdminPlugin_AdminPluginJsp = new HtmlNext("/admin/plugin/admin_plugin.jsp");
 
+    /** The path of the HTML: /admin/plugin/admin_plugin_installplugin.jsp */
+    HtmlNext path_AdminPlugin_AdminPluginInstallpluginJsp = new HtmlNext("/admin/plugin/admin_plugin_installplugin.jsp");
+
     /** The path of the HTML: /admin/relatedcontent/admin_relatedcontent.jsp */
     HtmlNext path_AdminRelatedcontent_AdminRelatedcontentJsp = new HtmlNext("/admin/relatedcontent/admin_relatedcontent.jsp");
 

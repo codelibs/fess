@@ -2952,8 +2952,8 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Reload */
     public static final String LABELS_reload_doc_index_button = "{labels.reload_doc_index_button}";
 
-    /** The key of the message: Plugin Manager */
-    public static final String LABELS_plugin_management = "{labels.plugin_management}";
+    /** The key of the message: Plugin */
+    public static final String LABELS_plugin_title = "{labels.plugin_title}";
 
     /** The key of the message: Plugin List */
     public static final String LABELS_plugin_list_name = "{labels.plugin_list_name}";
@@ -2969,6 +2969,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Delete */
     public static final String LABELS_plugin_delete = "{labels.plugin_delete}";
+
+    /** The key of the message: Install */
+    public static final String LABELS_plugin_install = "{labels.plugin_install}";
 
     /**
      * Assert the property is not null.
