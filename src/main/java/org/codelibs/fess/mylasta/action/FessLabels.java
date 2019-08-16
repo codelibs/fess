@@ -2973,6 +2973,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Install */
     public static final String LABELS_plugin_install = "{labels.plugin_install}";
 
+    /** The key of the message: Install Plugin */
+    public static final String LABELS_plugin_install_title = "{labels.plugin_install_title}";
+
+    /** The key of the message: Install */
+    public static final String LABELS_crud_button_install = "{labels.crud_button_install}";
+    
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
