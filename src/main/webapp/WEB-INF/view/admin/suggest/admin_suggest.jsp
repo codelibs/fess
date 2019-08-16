@@ -48,7 +48,7 @@
 														<td><la:message key="labels.suggest_word_type_all" /></td>
 														<td class="text-right">${f:h(totalWordsNum)}</td>
 														<td class="text-center">
-															<button type="button" class="btn btn-danger" name="deleteAllWords"
+															<button type="button" class="btn btn-danger btn-xs" name="deleteAllWords"
 																data-toggle="modal" data-target="#confirmToAllDelete"
 																value="<la:message key="labels.design_delete_button" />">
 																<em class="fa fa-trash"></em>
@@ -93,7 +93,7 @@
 														<td><la:message key="labels.suggest_word_type_document" /></td>
 														<td class="text-right">${f:h(documentWordsNum)}</td>
 														<td class="text-center">
-															<button type="button" class="btn btn-danger" name="deleteDocumentWords"
+															<button type="button" class="btn btn-danger btn-xs" name="deleteDocumentWords"
 																data-toggle="modal" data-target="#confirmToDocumentDelete"
 																value="<la:message key="labels.design_delete_button" />">
 																<em class="fa fa-trash"></em>
@@ -138,7 +138,7 @@
 														<td><la:message key="labels.suggest_word_type_query" /></td>
 														<td class="text-right">${f:h(queryWordsNum)}</td>
 														<td class="text-center">
-															<button type="button" class="btn btn-danger" name="deleteQueryWords"
+															<button type="button" class="btn btn-danger btn-xs" name="deleteQueryWords"
 																data-toggle="modal" data-target="#confirmToQueryDelete"
 																value="<la:message key="labels.design_delete_button" />">
 																<em class="fa fa-trash"></em>
