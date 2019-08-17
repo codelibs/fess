@@ -18,68 +18,50 @@
             <h1>
                 <la:message key="labels.plugin_install_title" />
             </h1>
-            <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
         </section>
         <section class="content">
-            <la:form action="/admin/plugin/" styleClass="form-horizontal">
-                <div class="row">
-                    <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <la:info id="msg" message="true">
+                        <div class="alert alert-info">${msg}</div>
+                    </la:info>
+                    <la:errors property="_global" />
+                </div>
+                <div class="col-md-6">
+                    <div class="box box-primary">
+                        <la:form action="/admin/plugin/">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">
+                                    <la:message key="labels.plugin_install" />
+                                </h3>
+                            </div>
                             <!-- /.box-header -->
                             <div class="box-body">
-                                    <%-- Message --%>
-                                <div>
-                                    <la:info id="msg" message="true">
-                                        <div class="alert alert-info">${msg}</div>
-                                    </la:info>
-                                    <la:errors />
+                                <div class="form-group">
+                                    <la:errors property="selectedArtifact" />
+                                    <la:select styleId="TODO" property="selectedArtifact" styleClass="form-control">
+                                        <c:forEach var="item" varStatus="s"
+                                                   items="${availableArtifactItems}">
+                                            <la:option value="${f:h(item.name)}|${f:h(item.version)}|${f:h(item.url)}">${f:h(item.name)}-${f:h(item.version)}</la:option>
+                                        </c:forEach>
+                                    </la:select>
                                 </div>
-                                    <%-- List --%>
-                                <div class="data-wrapper">
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <table class="table table-bordered table-striped dataTable">
-                                                <tbody>
-                                                <tr>
-                                                    <th><la:message key="labels.plugin_type" /></th>
-                                                    <th><la:message key="labels.plugin_name" /></th>
-                                                    <th><la:message key="labels.plugin_version" /></th>
-                                                    <th></th>
-                                                </tr>
-                                                <c:forEach var="artifact" varStatus="s"
-                                                           items="${availableArtifactItems}">
-                                                    <tr>
-                                                        <td>${f:h(artifact.type)}</td>
-                                                        <td>${f:h(artifact.name)}</td>
-                                                        <td>${f:h(artifact.version)}</td>
-                                                        <td>
-                                                            <la:form action="/admin/plugin/" styleClass="form-horizontal">
-                                                                <input type="hidden" name="name" value="${f:h(artifact.name)}">
-                                                                <input type="hidden" name="version" value="${f:h(artifact.version)}">
-                                                                <input type="hidden" name="url" value="${f:h(artifact.url)}">
-                                                                <button type="submit" class="btn btn-warning"
-                                                                        name="install"
-                                                                        value="<la:message key="labels.crud_button_install" />">
-                                                                    <em class="fa fa-plus"></em>
-                                                                    <la:message key="labels.crud_button_install" />
-                                                                </button>
-                                                            </la:form>
-                                                        </td>
-                                                    </tr>
-                                                </c:forEach>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- /.data-wrapper -->
                             </div>
                             <!-- /.box-body -->
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-warning"
+                                        name="install"
+                                        value="<la:message key="labels.crud_button_install" />">
+                                    <em class="fa fa-plus"></em>
+                                    <la:message key="labels.crud_button_install" />
+                                </button>
+                            </div>
                             <!-- /.box-footer -->
-                        </div>
-                        <!-- /.box -->
+                        </la:form>
                     </div>
+                        <!-- /.box -->
                 </div>
-            </la:form>
+            </div>
         </section>
     </div>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>

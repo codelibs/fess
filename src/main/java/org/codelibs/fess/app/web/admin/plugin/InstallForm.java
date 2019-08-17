@@ -22,13 +22,7 @@ import org.lastaflute.web.validation.Required;
 public class InstallForm {
 
     @Required
-    @Size(max = 100)
-    public String name;
-
-    @Size(max = 100)
-    public String version;
-
-    @Size(max = 200)
-    public String url;
+    @Size(max = 400)
+    public String selectedArtifact;
 
 }

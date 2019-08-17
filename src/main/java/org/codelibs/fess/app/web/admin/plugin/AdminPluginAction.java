@@ -83,7 +83,7 @@ public class AdminPluginAction extends FessAdminAction {
         verifyToken(() -> {
             return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp);
         });
-        Artifact artifact = new Artifact(form.name, form.version, form.url);
+        Artifact artifact = getArtifactFromInstallForm(form);
         try {
             pluginHelper.installArtifact(artifact);
             saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
@@ -93,7 +93,6 @@ public class AdminPluginAction extends FessAdminAction {
         }
         return redirect(getClass());
     }
-
 
     @Execute
     public HtmlResponse installplugin() {
@@ -132,5 +131,10 @@ public class AdminPluginAction extends FessAdminAction {
         item.put("version", artifact.getVersion());
         item.put("url", artifact.getUrl());
         return item;
+    }
+
+    private Artifact getArtifactFromInstallForm(final InstallForm form) {
+        final String values[] = form.selectedArtifact.split("\\|");
+        return new Artifact(values[0], values[1], values[2]);
     }
 }
