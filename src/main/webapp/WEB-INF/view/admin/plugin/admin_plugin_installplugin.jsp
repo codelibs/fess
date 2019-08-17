@@ -49,6 +49,12 @@
                             </div>
                             <!-- /.box-body -->
                             <div class="box-footer">
+                                <button type="submit" class="btn btn-default"
+                                        name="back"
+                                        value="<la:message key="labels.crud_button_back" />">
+                                    <em class="fa fa-arrow-circle-left"></em>
+                                    <la:message key="labels.crud_button_back" />
+                                </button>
                                 <button type="submit" class="btn btn-warning"
                                         name="install"
                                         value="<la:message key="labels.crud_button_install" />">
