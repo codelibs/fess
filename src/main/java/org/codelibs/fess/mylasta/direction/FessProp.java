@@ -2010,4 +2010,16 @@ public interface FessProp {
         }
         return Runtime.getRuntime().availableProcessors();
     }
+
+    String getPluginVersionFilter();
+
+    default boolean isTargetPluginVersion(final String version) {
+        final Pattern pattern;
+        if (StringUtil.isBlank(getPluginVersionFilter())) {
+            pattern = Pattern.compile("^" + Pattern.quote(ComponentUtil.getSystemHelper().getProductVersion()) + ".*");
+        } else {
+            pattern = Pattern.compile(getPluginVersionFilter());
+        }
+        return pattern.matcher(version).matches();
+    }
 }

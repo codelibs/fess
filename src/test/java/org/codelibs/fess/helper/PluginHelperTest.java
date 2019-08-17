@@ -56,6 +56,10 @@ public class PluginHelperTest extends UnitFessTestCase {
                 }
                 throw new FessSystemException("unknown");
             }
+
+            protected boolean isTargetPluginVersion(final String version) {
+                return true;
+            }
         };
     }
 

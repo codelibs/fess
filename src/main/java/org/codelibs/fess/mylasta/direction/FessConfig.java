@@ -1433,6 +1433,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://oss.sonatype.org/content/repositories/snapshots/org/codelibs/fess/ */
     String PLUGIN_REPOSITORIES = "plugin.repositories";
 
+    /** The key of the configuration. e.g.  */
+    String PLUGIN_VERSION_FILTER = "plugin.version.filter";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -5943,6 +5946,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getPluginRepositories();
 
     /**
+     * Get the value for the key 'plugin.version.filter'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPluginVersionFilter();
+
+    /**
+     * Get the value for the key 'plugin.version.filter' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPluginVersionFilterAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -8315,6 +8333,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.PLUGIN_REPOSITORIES);
         }
 
+        public String getPluginVersionFilter() {
+            return get(FessConfig.PLUGIN_VERSION_FILTER);
+        }
+
+        public Integer getPluginVersionFilterAsInteger() {
+            return getAsInteger(FessConfig.PLUGIN_VERSION_FILTER);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -8752,6 +8778,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap
                     .put(FessConfig.PLUGIN_REPOSITORIES,
                             "https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://oss.sonatype.org/content/repositories/snapshots/org/codelibs/fess/");
+            defaultMap.put(FessConfig.PLUGIN_VERSION_FILTER, "");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "hot");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

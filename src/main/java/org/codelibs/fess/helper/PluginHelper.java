@@ -59,7 +59,7 @@ public class PluginHelper {
     private static final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
 
     protected LoadingCache<ArtifactType, Artifact[]> availableArtifacts = CacheBuilder.newBuilder().maximumSize(10)
-            .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<ArtifactType, Artifact[]>() {
+            .expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<ArtifactType, Artifact[]>() {
                 public Artifact[] load(ArtifactType key) {
                     final List<Artifact> list = new ArrayList<>();
                     for (final String url : getRepositories()) {
@@ -98,16 +98,20 @@ public class PluginHelper {
                 final NodeList nodeList = document.getElementsByTagName("version");
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     final String version = nodeList.item(i).getTextContent();
-                    if (version.endsWith("SNAPSHOT")) {
-                        final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
-                        if (StringUtil.isNotBlank(snapshotVersion)) {
-                            String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
-                            list.add(new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
-                        } else if (logger.isDebugEnabled()) {
-                            logger.debug("Snapshot name is not found: " + name + "/" + version);
+                    if (isTargetPluginVersion(version)) {
+                        if (version.endsWith("SNAPSHOT")) {
+                            final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
+                            if (StringUtil.isNotBlank(snapshotVersion)) {
+                                String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
+                                list.add(new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
+                            } else if (logger.isDebugEnabled()) {
+                                logger.debug("Snapshot name is not found: " + name + "/" + version);
+                            }
+                        } else {
+                            list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
                         }
-                    } else {
-                        list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug(name + ":" + version + " is ignored.");
                     }
                 }
             } catch (final Exception e) {
@@ -115,6 +119,10 @@ public class PluginHelper {
             }
         }
         return list;
+    }
+
+    protected boolean isTargetPluginVersion(final String version) {
+        return ComponentUtil.getFessConfig().isTargetPluginVersion(version);
     }
 
     protected String getSnapshotActualVersion(final DocumentBuilder builder, final String pluginUrl, final String version)
@@ -144,6 +152,9 @@ public class PluginHelper {
     }
 
     protected String getRepositoryContent(final String url) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Loading " + url);
+        }
         try (final CurlResponse response = Curl.get(url).execute()) {
             return response.getContentAsString();
         } catch (final IOException e) {
@@ -157,6 +168,7 @@ public class PluginHelper {
         for (final File file : jarFiles) {
             list.add(getArtifactFromFileName(artifactType, file.getName()));
         }
+        list.sort((a, b) -> a.getName().compareTo(b.getName()));
         return list.toArray(new Artifact[list.size()]);
     }
 
