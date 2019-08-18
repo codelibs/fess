@@ -64,14 +64,15 @@ public class AdminPluginAction extends FessAdminAction {
         verifyToken(() -> {
             return asHtml(path_AdminPlugin_AdminPluginJsp);
         });
-        Artifact artifact = new Artifact(form.name, form.version, null);
-        try {
-            pluginHelper.deleteInstalledArtifact(artifact);
-            saveInfo(messages -> messages.addSuccessDeletePlugin(GLOBAL, artifact.getFileName()));
-        } catch (Exception e) {
-            logger.warn("Failed to delete " + artifact.getFileName(), e);
-            saveError(messages -> messages.addErrorsFailedToDeletePlugin(GLOBAL, artifact.getFileName()));
-        }
+        final Artifact artifact = new Artifact(form.name, form.version, null);
+        new Thread(() -> {
+            try {
+                pluginHelper.deleteInstalledArtifact(artifact);
+            } catch (Exception e) {
+                logger.warn("Failed to delete " + artifact.getFileName(), e);
+            }
+        }).start();
+        saveInfo(messages -> messages.addSuccessDeletePlugin(GLOBAL, artifact.getFileName()));
         return redirect(getClass());
     }
 
@@ -83,14 +84,25 @@ public class AdminPluginAction extends FessAdminAction {
         verifyToken(() -> {
             return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp);
         });
-        Artifact artifact = getArtifactFromInstallForm(form);
-        try {
-            pluginHelper.installArtifact(artifact);
-            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
-        } catch (Exception e) {
-            logger.warn("Failed to install " + artifact.getFileName(), e);
-            saveError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, artifact.getFileName()));
-        }
+        final Artifact artifact = getArtifactFromInstallForm(form);
+        new Thread(() -> {
+            Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.getType(artifact));
+            try {
+                pluginHelper.installArtifact(artifact);
+            } catch (Exception e) {
+                logger.warn("Failed to install " + artifact.getFileName(), e);
+            }
+            for (Artifact a : artifacts) {
+                if (a.getName().equals(artifact.getName())) {
+                    try {
+                        pluginHelper.deleteInstalledArtifact(a);
+                    } catch (Exception e) {
+                        logger.warn("Failed to uninstall " + a.getFileName(), e);
+                    }
+                }
+            }
+        }).start();
+        saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
         return redirect(getClass());
     }
 
