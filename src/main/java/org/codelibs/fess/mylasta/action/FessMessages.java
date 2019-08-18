@@ -347,12 +347,6 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {0} is not supported. */
     public static final String ERRORS_file_is_not_supported = "{errors.file_is_not_supported}";
 
-    /** The key of the message: Failed to install {0} plugin. */
-    public static final String ERRORS_failed_to_install_plugin = "{errors.failed_to_install_plugin}";
-
-    /** The key of the message: Failed to delete {0} plugin. */
-    public static final String ERRORS_failed_to_delete_plugin = "{errors.failed_to_delete_plugin}";
-
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -2037,36 +2031,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFileIsNotSupported(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_file_is_not_supported, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_install_plugin' with parameters.
-     * <pre>
-     * message: Failed to install {0} plugin.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToInstallPlugin(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_failed_to_install_plugin, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_delete_plugin' with parameters.
-     * <pre>
-     * message: Failed to delete {0} plugin.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToDeletePlugin(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_failed_to_delete_plugin, arg0));
         return this;
     }
 
