@@ -46,8 +46,6 @@ public class AdminPluginAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNamePlugin()));
-        //runtime.registerData("availableArtifactItems", getAllAvailableArtifacts());
-        runtime.registerData("installedArtifactItems", getAllInstalledArtifacts());
     }
 
     @Execute
@@ -58,17 +56,13 @@ public class AdminPluginAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final DeleteForm form) {
-        validate(form, messages -> {}, () -> {
-            return asHtml(path_AdminPlugin_AdminPluginJsp);
-        });
-        verifyToken(() -> {
-            return asHtml(path_AdminPlugin_AdminPluginJsp);
-        });
+        validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginJsp));
+        verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginJsp));
         final Artifact artifact = new Artifact(form.name, form.version, null);
         new Thread(() -> {
             try {
                 pluginHelper.deleteInstalledArtifact(artifact);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to delete " + artifact.getFileName(), e);
             }
         }).start();
@@ -78,25 +72,21 @@ public class AdminPluginAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse install(final InstallForm form) {
-        validate(form, messages -> {}, () -> {
-            return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp);
-        });
-        verifyToken(() -> {
-            return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp);
-        });
+        validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
+        verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         final Artifact artifact = getArtifactFromInstallForm(form);
         new Thread(() -> {
-            Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.getType(artifact));
+            final Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.getType(artifact));
             try {
                 pluginHelper.installArtifact(artifact);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to install " + artifact.getFileName(), e);
             }
-            for (Artifact a : artifacts) {
-                if (a.getName().equals(artifact.getName())) {
+            for (final Artifact a : artifacts) {
+                if (a.getName().equals(artifact.getName()) && !a.getVersion().equals(artifact.getVersion())) {
                     try {
                         pluginHelper.deleteInstalledArtifact(a);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.warn("Failed to uninstall " + a.getFileName(), e);
                     }
                 }
@@ -115,12 +105,13 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminPlugin_AdminPluginJsp).useForm(DeleteForm.class);
+        return asHtml(path_AdminPlugin_AdminPluginJsp).renderWith(
+                data -> data.register("installedArtifactItems", getAllInstalledArtifacts())).useForm(DeleteForm.class);
     }
 
     private List<Map<String, String>> getAllAvailableArtifacts() {
         final List<Map<String, String>> result = new ArrayList<>();
-        for (PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
+        for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
             result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType)).map(artifact -> beanToMap(artifact))
                     .collect(Collectors.toList()));
         }
@@ -129,7 +120,7 @@ public class AdminPluginAction extends FessAdminAction {
 
     private List<Map<String, String>> getAllInstalledArtifacts() {
         final List<Map<String, String>> result = new ArrayList<>();
-        for (PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
+        for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
             result.addAll(Arrays.stream(pluginHelper.getInstalledArtifacts(artifactType)).map(artifact -> beanToMap(artifact))
                     .collect(Collectors.toList()));
         }
@@ -137,7 +128,7 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     private Map<String, String> beanToMap(final Artifact artifact) {
-        Map<String, String> item = new HashMap<>();
+        final Map<String, String> item = new HashMap<>();
         item.put("type", ArtifactType.getType(artifact).getId());
         item.put("name", artifact.getName());
         item.put("version", artifact.getVersion());
@@ -146,7 +137,7 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     private Artifact getArtifactFromInstallForm(final InstallForm form) {
-        final String values[] = form.selectedArtifact.split("\\|");
+        final String[] values = form.selectedArtifact.split("\\|");
         return new Artifact(values[0], values[1], values[2]);
     }
 }
