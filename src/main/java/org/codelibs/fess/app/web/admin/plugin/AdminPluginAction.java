@@ -22,12 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -38,9 +37,6 @@ import org.slf4j.LoggerFactory;
 public class AdminPluginAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminPluginAction.class);
-
-    @Resource
-    private PluginHelper pluginHelper;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -59,13 +55,7 @@ public class AdminPluginAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginJsp));
         final Artifact artifact = new Artifact(form.name, form.version, null);
-        new Thread(() -> {
-            try {
-                pluginHelper.deleteInstalledArtifact(artifact);
-            } catch (final Exception e) {
-                logger.warn("Failed to delete " + artifact.getFileName(), e);
-            }
-        }).start();
+        deleteArtifact(artifact);
         saveInfo(messages -> messages.addSuccessDeletePlugin(GLOBAL, artifact.getFileName()));
         return redirect(getClass());
     }
@@ -75,23 +65,7 @@ public class AdminPluginAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         final Artifact artifact = getArtifactFromInstallForm(form);
-        new Thread(() -> {
-            final Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.getType(artifact));
-            try {
-                pluginHelper.installArtifact(artifact);
-            } catch (final Exception e) {
-                logger.warn("Failed to install " + artifact.getFileName(), e);
-            }
-            for (final Artifact a : artifacts) {
-                if (a.getName().equals(artifact.getName()) && !a.getVersion().equals(artifact.getVersion())) {
-                    try {
-                        pluginHelper.deleteInstalledArtifact(a);
-                    } catch (final Exception e) {
-                        logger.warn("Failed to uninstall " + a.getFileName(), e);
-                    }
-                }
-            }
-        }).start();
+        installArtifact(artifact);
         saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
         return redirect(getClass());
     }
@@ -109,7 +83,8 @@ public class AdminPluginAction extends FessAdminAction {
                 data -> data.register("installedArtifactItems", getAllInstalledArtifacts())).useForm(DeleteForm.class);
     }
 
-    private List<Map<String, String>> getAllAvailableArtifacts() {
+    public static List<Map<String, String>> getAllAvailableArtifacts() {
+        final PluginHelper pluginHelper = ComponentUtil.getComponent(PluginHelper.class);
         final List<Map<String, String>> result = new ArrayList<>();
         for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
             result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType)).map(artifact -> beanToMap(artifact))
@@ -118,7 +93,8 @@ public class AdminPluginAction extends FessAdminAction {
         return result;
     }
 
-    private List<Map<String, String>> getAllInstalledArtifacts() {
+    public static List<Map<String, String>> getAllInstalledArtifacts() {
+        final PluginHelper pluginHelper = ComponentUtil.getComponent(PluginHelper.class);
         final List<Map<String, String>> result = new ArrayList<>();
         for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
             result.addAll(Arrays.stream(pluginHelper.getInstalledArtifacts(artifactType)).map(artifact -> beanToMap(artifact))
@@ -127,7 +103,7 @@ public class AdminPluginAction extends FessAdminAction {
         return result;
     }
 
-    private Map<String, String> beanToMap(final Artifact artifact) {
+    public static Map<String, String> beanToMap(final Artifact artifact) {
         final Map<String, String> item = new HashMap<>();
         item.put("type", ArtifactType.getType(artifact).getId());
         item.put("name", artifact.getName());
@@ -139,5 +115,37 @@ public class AdminPluginAction extends FessAdminAction {
     private Artifact getArtifactFromInstallForm(final InstallForm form) {
         final String[] values = form.selectedArtifact.split("\\|");
         return new Artifact(values[0], values[1], values[2]);
+    }
+
+    public static void installArtifact(final Artifact artifact) {
+        final PluginHelper pluginHelper = ComponentUtil.getComponent(PluginHelper.class);
+        new Thread(() -> {
+            final Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.getType(artifact));
+            try {
+                pluginHelper.installArtifact(artifact);
+            } catch (final Exception e) {
+                logger.warn("Failed to install " + artifact.getFileName(), e);
+            }
+            for (final Artifact a : artifacts) {
+                if (a.getName().equals(artifact.getName()) && !a.getVersion().equals(artifact.getVersion())) {
+                    try {
+                        pluginHelper.deleteInstalledArtifact(a);
+                    } catch (final Exception e) {
+                        logger.warn("Failed to delete " + a.getFileName(), e);
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public static void deleteArtifact(final Artifact artifact) {
+        final PluginHelper pluginHelper = ComponentUtil.getComponent(PluginHelper.class);
+        new Thread(() -> {
+            try {
+                pluginHelper.deleteInstalledArtifact(artifact);
+            } catch (final Exception e) {
+                logger.warn("Failed to delete " + artifact.getFileName(), e);
+            }
+        }).start();
     }
 }

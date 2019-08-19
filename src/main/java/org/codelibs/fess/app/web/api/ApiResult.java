@@ -347,4 +347,18 @@ public class ApiResult {
             return this;
         }
     }
+
+    public static class ApiPluginResponse extends ApiResponse {
+        protected List<Map<String, String>> plugins;
+
+        public ApiPluginResponse plugins(final List<Map<String, String>> plugins) {
+            this.plugins = plugins;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
 }
