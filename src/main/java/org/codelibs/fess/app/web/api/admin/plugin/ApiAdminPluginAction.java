@@ -15,20 +15,20 @@
  */
 package org.codelibs.fess.app.web.api.admin.plugin;
 
-import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.getAllInstalledArtifacts;
-import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.getAllAvailableArtifacts;
-import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.installArtifact;
 import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.deleteArtifact;
-
-import org.codelibs.fess.app.web.api.ApiResult;
-import org.codelibs.fess.helper.PluginHelper.Artifact;
-import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.lastaflute.web.Execute;
-import org.lastaflute.web.response.JsonResponse;
+import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.getAllAvailableArtifacts;
+import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.getAllInstalledArtifacts;
+import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.installArtifact;
 
 import java.util.List;
 import java.util.Map;
+
+import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.helper.PluginHelper.Artifact;
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.response.JsonResponse;
 
 public class ApiAdminPluginAction extends FessApiAdminAction {
 

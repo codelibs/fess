@@ -139,6 +139,7 @@ public class PluginTests extends CrudTestBase {
         {
             checkPutMethod(targetMap, getInstallEndpointSuffix()).then().body("response.status", equalTo(0));
 
+            boolean done = false;
             for (int i = 0; i < 60; i++) {
                 final List<Map<String, Object>> installed =
                         checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
@@ -151,12 +152,16 @@ public class PluginTests extends CrudTestBase {
                     continue;
                 }
                 assertTrue(exists);
+                done = true;
+                break;
             }
+            assertTrue(done);
         }
         // Delete
         {
             checkDeleteMethod(targetMap).then().body("response.status", equalTo(0));
 
+            boolean done = false;
             for (int i = 0; i < 60; i++) {
                 final List<Map<String, Object>> installed =
                         checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
@@ -169,7 +174,10 @@ public class PluginTests extends CrudTestBase {
                     continue;
                 }
                 assertFalse(exists);
+                done = true;
+                break;
             }
+            assertTrue(done);
         }
     }
 
