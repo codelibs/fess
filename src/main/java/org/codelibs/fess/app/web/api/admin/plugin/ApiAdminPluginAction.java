@@ -19,6 +19,8 @@ import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.getAllIns
 import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.getAllAvailableArtifacts;
 import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.installArtifact;
 import static org.codelibs.fess.app.web.admin.plugin.AdminPluginAction.deleteArtifact;
+import static org.codelibs.fess.helper.PluginHelper.getArtifactFromFileName;
+import static org.codelibs.fess.helper.PluginHelper.getArtifactTypeFromFileName;
 
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
@@ -31,28 +33,40 @@ import java.util.Map;
 
 public class ApiAdminPluginAction extends FessApiAdminAction {
     @Execute
-    public JsonResponse<ApiResult> installedplugins() {
+    public JsonResponse<ApiResult> get$installed() {
         final List<Map<String, String>> list = getAllInstalledArtifacts();
         return asJson(new ApiResult.ApiPluginResponse().plugins(list).status(ApiResult.Status.OK).result());
     }
 
     @Execute
-    public JsonResponse<ApiResult> availableplugins() {
+    public JsonResponse<ApiResult> get$available() {
         final List<Map<String, String>> list = getAllAvailableArtifacts();
         return asJson(new ApiResult.ApiPluginResponse().plugins(list).status(ApiResult.Status.OK).result());
     }
 
     @Execute
-    public JsonResponse<ApiResult> install(final InstallBody body) {
+    public JsonResponse<ApiResult> put$index(final InstallBody body) {
         validateApi(body, messages -> {});
-        installArtifact(new Artifact(body.name, body.version, body.url));
+        final Artifact artifact = new Artifact(body.name, body.version, body.url);
+        if (!isValidBody(artifact)) {
+            return asJson(new ApiResult.ApiErrorResponse().message("invalid name, version, or url").status(ApiResult.Status.BAD_REQUEST)
+                    .result());
+        }
+        installArtifact(artifact);
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
     @Execute
-    public JsonResponse<ApiResult> delete(final DeleteBody body) {
+    public JsonResponse<ApiResult> delete$index(final DeleteBody body) {
         validateApi(body, messages -> {});
         deleteArtifact(new Artifact(body.name, body.version, null));
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
+    }
+
+    protected Boolean isValidBody(final Artifact artifact) {
+        final String[] tokens = artifact.getUrl().split("/");
+        final String filenameFromUrl = tokens[tokens.length - 1];
+        return getArtifactFromFileName(getArtifactTypeFromFileName(filenameFromUrl), filenameFromUrl).getFileName().equals(
+                artifact.getFileName());
     }
 }

@@ -172,17 +172,25 @@ public class PluginHelper {
         return list.toArray(new Artifact[list.size()]);
     }
 
-    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String fileName) {
+    public static Artifact getArtifactFromFileName(final ArtifactType artifactType, final String fileName) {
         final String convertedFileName = fileName.substring(artifactType.getId().length() + 1, fileName.lastIndexOf('.'));
-        final int firstIndexOfDash = convertedFileName.indexOf("-");
+        final int firstIndexOfDash = convertedFileName.indexOf('-');
         final String artifactName = artifactType.getId() + "-" + convertedFileName.substring(0, firstIndexOfDash);
         final String artifactVersion = convertedFileName.substring(firstIndexOfDash + 1);
         return new Artifact(artifactName, artifactVersion, null);
     }
 
+    public static ArtifactType getArtifactTypeFromFileName(final String filename) {
+        return ArtifactType.getType(new Artifact(filename, null, null));
+    }
+
     public void installArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
         try (final CurlResponse response = Curl.get(artifact.getUrl()).execute()) {
+            if (response.getHttpStatusCode() != 200) {
+                throw new PluginException("HTTP Status " + response.getHttpStatusCode() + " : failed to get the artifact from "
+                        + artifact.getUrl());
+            }
             try (final InputStream in = response.getContentAsStream()) {
                 CopyUtil.copy(in, ResourceUtil.getPluginPath(fileName).toFile());
             }

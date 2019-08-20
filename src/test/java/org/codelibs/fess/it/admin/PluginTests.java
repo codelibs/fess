@@ -16,87 +16,108 @@
 package org.codelibs.fess.it.admin;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 
-import io.restassured.RestAssured;
-import org.codelibs.fess.it.ITBase;
+import io.restassured.response.Response;
+import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Tag("it")
-public class PluginTests extends ITBase {
+public class PluginTests extends CrudTestBase {
+    // TODO delete
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CrudTestBase.class);
 
+    private static final String NAME_PREFIX = "pluginTests_";
     private static final String API_PATH = "/api/admin/plugin";
-    private static final String INSTALLEDPLUGINS_ENDPOINT_SUFFIX = "installedplugins";
-    private static final String AVAILABLEPLUGINS_ENDPOINT_SUFFIX = "availableplugins";
-    private static final String INSTALL_ENDPOINT_SUFFIX = "install";
-    private static final String DELETE_ENDPOINT_SUFFIX = "delete";
+    private static final String INSTALLED_ENDPOINT_SUFFIX = "installed";
+    private static final String AVAILABLE_ENDPOINT_SUFFIX = "available";
 
-    @BeforeAll
-    protected static void initAll() {
-        RestAssured.baseURI = getFessUrl();
-        settingTestToken();
+    private static final String LIST_ENDPOINT_SUFFIX = "";
+    private static final String ITEM_ENDPOINT_SUFFIX = "";
+    private static final String KEY_PROPERTY = "";
+
+    @Override
+    protected String getNamePrefix() {
+        return NAME_PREFIX;
     }
 
-    @BeforeEach
-    protected void init() {
-    }
-
-    @AfterEach
-    protected void tearDown() {
-    }
-
-    @AfterAll
-    protected static void tearDownAll() {
-        deleteTestToken();
-    }
-
+    @Override
     protected String getApiPath() {
         return API_PATH;
     }
 
-    protected String getInstalledpluginsEndpointSuffix() {
-        return INSTALLEDPLUGINS_ENDPOINT_SUFFIX;
+    @Override
+    protected String getKeyProperty() {
+        return KEY_PROPERTY;
     }
 
-    protected String getAvailablepluginsEndpointSuffix() {
-        return AVAILABLEPLUGINS_ENDPOINT_SUFFIX;
+    @Override
+    protected String getListEndpointSuffix() {
+        return LIST_ENDPOINT_SUFFIX;
     }
 
-    protected String getInstallEndpointSuffix() {
-        return INSTALL_ENDPOINT_SUFFIX;
+    @Override
+    protected String getItemEndpointSuffix() {
+        return ITEM_ENDPOINT_SUFFIX;
     }
 
-    protected String getDeleteEndpointSuffix() {
-        return DELETE_ENDPOINT_SUFFIX;
+    @Override
+    protected Map<String, Object> createTestParam(int id) {
+        final Map<String, Object> requestBody = new HashMap<>();
+        return requestBody;
+    }
+
+    @Override
+    protected Map<String, Object> getUpdateMap() {
+        final Map<String, Object> updateMap = new HashMap<>();
+        return updateMap;
+    }
+
+    @AfterEach
+    protected void tearDown() {
+        // do nothing
+    }
+
+    protected String getInstalledEndpointSuffix() {
+        return INSTALLED_ENDPOINT_SUFFIX;
+    }
+
+    protected String getAvailableEndpointSuffix() {
+        return AVAILABLE_ENDPOINT_SUFFIX;
+    }
+
+    protected Response checkDeleteMethod(final Map<String, Object> body) {
+        return checkMethodBase(body).delete(getApiPath() + "/");
     }
 
     @Test
-    void testInstalledplugins() {
-        checkMethodBase(Collections.emptyMap()).get(getApiPath() + "/" + getInstalledpluginsEndpointSuffix() + "/").then()
-                .body("response.status", equalTo(0));
+    void testInstalled() {
+        checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").then().body("response.status", equalTo(0));
     }
 
     @Test
-    void testAvailavleplugins() {
-        checkMethodBase(Collections.emptyMap()).get(getApiPath() + "/" + getAvailablepluginsEndpointSuffix() + "/").then()
-                .body("response.status", equalTo(0));
+    void testAvailable() {
+        checkGetMethod(Collections.emptyMap(), getAvailableEndpointSuffix() + "/").then().body("response.status", equalTo(0));
     }
 
     @Test
     void testIntall() {
-        checkMethodBase(Collections.emptyMap()).get(getApiPath() + "/" + getInstallEndpointSuffix() + "/").then()
-                .body("response.status", equalTo(0));
+        checkPutMethod(Collections.emptyMap(), "").then().body("response.status", equalTo(1));
     }
 
     @Test
-    void testDelete() {
-        checkMethodBase(Collections.emptyMap()).get(getApiPath() + "/" + getDeleteEndpointSuffix() + "/").then()
-                .body("response.status", equalTo(0));
+    void testUninstall() {
+        checkDeleteMethod(Collections.emptyMap()).then().body("response.status", equalTo(1));
+    }
+
+    @Test
+    void testCRUD() {
+        // TODO
     }
 }
