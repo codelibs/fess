@@ -32,18 +32,22 @@ import java.util.List;
 import java.util.Map;
 
 public class ApiAdminPluginAction extends FessApiAdminAction {
+
+    // GET /api/admin/plugin/installed
     @Execute
     public JsonResponse<ApiResult> get$installed() {
         final List<Map<String, String>> list = getAllInstalledArtifacts();
         return asJson(new ApiResult.ApiPluginResponse().plugins(list).status(ApiResult.Status.OK).result());
     }
 
+    // GET /api/admin/plugin/available
     @Execute
     public JsonResponse<ApiResult> get$available() {
         final List<Map<String, String>> list = getAllAvailableArtifacts();
         return asJson(new ApiResult.ApiPluginResponse().plugins(list).status(ApiResult.Status.OK).result());
     }
 
+    // PUT /api/admin/plugin
     @Execute
     public JsonResponse<ApiResult> put$index(final InstallBody body) {
         validateApi(body, messages -> {});
@@ -56,6 +60,7 @@ public class ApiAdminPluginAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    // DELETE /api/admin/plugin
     @Execute
     public JsonResponse<ApiResult> delete$index(final DeleteBody body) {
         validateApi(body, messages -> {});
