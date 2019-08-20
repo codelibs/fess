@@ -15,25 +15,22 @@
  */
 package org.codelibs.fess.it.admin;
 
-import static org.codelibs.fess.helper.PluginHelper.Artifact;
-
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.concurrent.CountDownLatch;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertTrue;
+import org.codelibs.fess.helper.PluginHelper.Artifact;
+import org.codelibs.fess.it.CrudTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import io.restassured.response.Response;
-import org.codelibs.fess.it.CrudTestBase;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 
 @Tag("it")
 public class PluginTests extends CrudTestBase {
@@ -141,47 +138,42 @@ public class PluginTests extends CrudTestBase {
         // Install
         {
             checkPutMethod(targetMap, getInstallEndpointSuffix()).then().body("response.status", equalTo(0));
-            final CountDownLatch latch = new CountDownLatch(1);
-            try {
-                Thread.sleep(5000);
-                latch.countDown();
-            } catch (final Exception e) {
-                try {
-                    fail(e.getMessage());
-                } finally {
-                    latch.countDown();
+
+            for (int i = 0; i < 60; i++) {
+                final List<Map<String, Object>> installed =
+                        checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
+                                .get("response.plugins");
+                boolean exists =
+                        installed.stream().map(o -> getArtifactFromMap(o))
+                                .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
+                if (!exists) {
+                    Thread.sleep(500);
+                    continue;
                 }
+                assertTrue(exists);
             }
-            latch.await();
-            final List<Map<String, Object>> installed =
-                    checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath().get("response.plugins");
-            assertTrue(installed.stream().map(o -> getArtifactFromMap(o))
-                    .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion())));
         }
         // Delete
         {
             checkDeleteMethod(targetMap).then().body("response.status", equalTo(0));
-            final CountDownLatch latch = new CountDownLatch(1);
-            try {
-                Thread.sleep(5000);
-                latch.countDown();
-            } catch (final Exception e) {
-                try {
-                    fail(e.getMessage());
-                } finally {
-                    latch.countDown();
+
+            for (int i = 0; i < 60; i++) {
+                final List<Map<String, Object>> installed =
+                        checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
+                                .get("response.plugins");
+                boolean exists =
+                        installed.stream().map(o -> getArtifactFromMap(o))
+                                .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
+                if (exists) {
+                    Thread.sleep(500);
+                    continue;
                 }
+                assertFalse(exists);
             }
-            latch.await();
-            final List<Map<String, Object>> installed =
-                    checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath().get("response.plugins");
-            assertTrue(!installed.stream().map(o -> getArtifactFromMap(o))
-                    .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion())));
         }
     }
 
     protected Artifact getArtifactFromMap(final Map<String, Object> item) {
-        return new Artifact(String.valueOf(item.get("name").toString()), String.valueOf(item.get("version")), String.valueOf(item
-                .get("url")));
+        return new Artifact((String) item.get("name"), (String) item.get("version"));
     }
 }

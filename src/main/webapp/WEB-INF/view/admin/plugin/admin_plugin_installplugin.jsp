@@ -39,10 +39,10 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <la:errors property="selectedArtifact" />
-                                    <la:select styleId="TODO" property="selectedArtifact" styleClass="form-control">
+                                    <la:select styleId="artifacts" property="id" styleClass="form-control">
                                         <c:forEach var="item" varStatus="s"
                                                    items="${availableArtifactItems}">
-                                            <la:option value="${f:h(item.name)}|${f:h(item.version)}|${f:h(item.url)}">${f:h(item.name)}-${f:h(item.version)}</la:option>
+                                            <la:option value="${f:h(item.id)}">${f:h(item.name)}-${f:h(item.version)}</la:option>
                                         </c:forEach>
                                     </la:select>
                                 </div>

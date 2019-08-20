@@ -12,8 +12,4 @@ public class InstallBody {
     @Required
     @Size(max = 100)
     public String version;
-
-    @Required
-    @Size(max = 200)
-    public String url;
 }

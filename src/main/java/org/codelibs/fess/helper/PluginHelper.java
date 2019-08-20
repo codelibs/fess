@@ -79,7 +79,7 @@ public class PluginHelper {
 
     protected String[] getRepositories() {
         return split(ComponentUtil.getFessConfig().getPluginRepositories(), ",").get(
-                stream -> stream.map(s -> s.trim()).toArray(n -> new String[n]));
+                stream -> stream.map(String::trim).toArray(n -> new String[n]));
     }
 
     protected List<Artifact> processRepository(final ArtifactType artifactType, final String url) {
@@ -172,16 +172,12 @@ public class PluginHelper {
         return list.toArray(new Artifact[list.size()]);
     }
 
-    public static Artifact getArtifactFromFileName(final ArtifactType artifactType, final String fileName) {
+    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String fileName) {
         final String convertedFileName = fileName.substring(artifactType.getId().length() + 1, fileName.lastIndexOf('.'));
         final int firstIndexOfDash = convertedFileName.indexOf('-');
         final String artifactName = artifactType.getId() + "-" + convertedFileName.substring(0, firstIndexOfDash);
         final String artifactVersion = convertedFileName.substring(firstIndexOfDash + 1);
-        return new Artifact(artifactName, artifactVersion, null);
-    }
-
-    public static ArtifactType getArtifactTypeFromFileName(final String filename) {
-        return ArtifactType.getType(new Artifact(filename, null, null));
+        return new Artifact(artifactName, artifactVersion);
     }
 
     public void installArtifact(final Artifact artifact) {
@@ -212,6 +208,18 @@ public class PluginHelper {
         }
     }
 
+    public Artifact getArtifact(String name, String version) {
+        if (StringUtil.isBlank(name) || StringUtil.isBlank(version)) {
+            return null;
+        }
+        for (final Artifact artifact : getAvailableArtifacts(ArtifactType.getType(name))) {
+            if (name.equals(artifact.getName()) && version.equals(artifact.getVersion())) {
+                return artifact;
+            }
+        }
+        return null;
+    }
+
     protected Path getPluginPath() {
         return Paths.get(ComponentUtil.getComponent(ServletContext.class).getRealPath("/WEB-INF/plugin"));
     }
@@ -225,6 +233,10 @@ public class PluginHelper {
             this.name = name;
             this.version = version;
             this.url = url;
+        }
+
+        public Artifact(final String name, final String version) {
+            this(name, version, null);
         }
 
         public String getName() {
@@ -262,11 +274,12 @@ public class PluginHelper {
             return id;
         }
 
-        public static ArtifactType getType(final Artifact artifact) {
-            if (artifact.getName().startsWith(DATA_STORE.getId())) {
+        public static ArtifactType getType(final String name) {
+            if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
             }
             return UNKNOWN;
         }
     }
+
 }

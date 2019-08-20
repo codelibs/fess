@@ -23,6 +23,6 @@ public class InstallForm {
 
     @Required
     @Size(max = 400)
-    public String selectedArtifact;
+    public String id;
 
 }

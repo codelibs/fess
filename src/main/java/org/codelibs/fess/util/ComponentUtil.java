@@ -90,7 +90,7 @@ public final class ComponentUtil {
 
     private static Map<String, Object> componentMap = new HashMap<>();
 
-    private static final String PLUGIN_HELPER = "PluginHelper";
+    private static final String PLUGIN_HELPER = "pluginHelper";
 
     private static final String LANGUAGE_HELPER = "languageHelper";
 
