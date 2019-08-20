@@ -15,12 +15,19 @@
  */
 package org.codelibs.fess.it.admin;
 
+import static org.codelibs.fess.helper.PluginHelper.Artifact;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.concurrent.CountDownLatch;
+
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertTrue;
 
 import io.restassured.response.Response;
 import org.codelibs.fess.it.CrudTestBase;
@@ -30,16 +37,16 @@ import org.junit.jupiter.api.Test;
 
 @Tag("it")
 public class PluginTests extends CrudTestBase {
-    // TODO delete
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CrudTestBase.class);
 
     private static final String NAME_PREFIX = "pluginTests_";
     private static final String API_PATH = "/api/admin/plugin";
-    private static final String INSTALLED_ENDPOINT_SUFFIX = "installed";
-    private static final String AVAILABLE_ENDPOINT_SUFFIX = "available";
-
     private static final String LIST_ENDPOINT_SUFFIX = "";
     private static final String ITEM_ENDPOINT_SUFFIX = "";
+    private static final String INSTALLED_ENDPOINT_SUFFIX = "installed";
+    private static final String AVAILABLE_ENDPOINT_SUFFIX = "available";
+    private static final String INSTALL_ENDPOINT_SUFFIX = "";
+    private static final String DELETE_ENDPOINT_SUFFIX = "";
+
     private static final String KEY_PROPERTY = "";
 
     @Override
@@ -92,32 +99,89 @@ public class PluginTests extends CrudTestBase {
         return AVAILABLE_ENDPOINT_SUFFIX;
     }
 
+    protected String getInstallEndpointSuffix() {
+        return INSTALL_ENDPOINT_SUFFIX;
+    }
+
+    protected String getDeleteEndpointSuffix() {
+        return DELETE_ENDPOINT_SUFFIX;
+    }
+
     protected Response checkDeleteMethod(final Map<String, Object> body) {
         return checkMethodBase(body).delete(getApiPath() + "/");
     }
 
     @Test
-    void testInstalled() {
+    void testInstalled_ok() {
         checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").then().body("response.status", equalTo(0));
     }
 
     @Test
-    void testAvailable() {
+    void testAvailable_ok() {
         checkGetMethod(Collections.emptyMap(), getAvailableEndpointSuffix() + "/").then().body("response.status", equalTo(0));
     }
 
     @Test
-    void testIntall() {
-        checkPutMethod(Collections.emptyMap(), "").then().body("response.status", equalTo(1));
+    void testInstall_ng() {
+        checkPutMethod(Collections.emptyMap(), getInstallEndpointSuffix()).then().body("response.status", equalTo(1));
     }
 
     @Test
-    void testUninstall() {
+    void testDelete_ng() {
         checkDeleteMethod(Collections.emptyMap()).then().body("response.status", equalTo(1));
     }
 
     @Test
-    void testCRUD() {
-        // TODO
+    void testCRUD() throws Exception {
+        List<Map<String, Object>> available =
+                checkGetMethod(Collections.emptyMap(), getAvailableEndpointSuffix() + "/").body().jsonPath().get("response.plugins");
+        final Map<String, Object> targetMap = available.get(0);
+        final Artifact target = getArtifactFromMap(targetMap);
+
+        // Install
+        {
+            checkPutMethod(targetMap, getInstallEndpointSuffix()).then().body("response.status", equalTo(0));
+            final CountDownLatch latch = new CountDownLatch(1);
+            try {
+                Thread.sleep(5000);
+                latch.countDown();
+            } catch (final Exception e) {
+                try {
+                    fail(e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            }
+            latch.await();
+            final List<Map<String, Object>> installed =
+                    checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath().get("response.plugins");
+            assertTrue(installed.stream().map(o -> getArtifactFromMap(o))
+                    .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion())));
+        }
+        // Delete
+        {
+            checkDeleteMethod(targetMap).then().body("response.status", equalTo(0));
+            final CountDownLatch latch = new CountDownLatch(1);
+            try {
+                Thread.sleep(5000);
+                latch.countDown();
+            } catch (final Exception e) {
+                try {
+                    fail(e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            }
+            latch.await();
+            final List<Map<String, Object>> installed =
+                    checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath().get("response.plugins");
+            assertTrue(!installed.stream().map(o -> getArtifactFromMap(o))
+                    .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion())));
+        }
+    }
+
+    protected Artifact getArtifactFromMap(final Map<String, Object> item) {
+        return new Artifact(String.valueOf(item.get("name").toString()), String.valueOf(item.get("version")), String.valueOf(item
+                .get("url")));
     }
 }
