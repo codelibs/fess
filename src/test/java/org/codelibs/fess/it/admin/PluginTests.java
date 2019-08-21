@@ -145,7 +145,7 @@ public class PluginTests extends CrudTestBase {
                         checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
                                 .get("response.plugins");
                 boolean exists =
-                        installed.stream().map(o -> getArtifactFromMap(o))
+                        installed.stream().map(this::getArtifactFromMap)
                                 .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (!exists) {
                     Thread.sleep(500);
@@ -167,7 +167,7 @@ public class PluginTests extends CrudTestBase {
                         checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
                                 .get("response.plugins");
                 boolean exists =
-                        installed.stream().map(o -> getArtifactFromMap(o))
+                        installed.stream().map(this::getArtifactFromMap)
                                 .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (exists) {
                     Thread.sleep(500);
@@ -181,7 +181,7 @@ public class PluginTests extends CrudTestBase {
         }
     }
 
-    protected Artifact getArtifactFromMap(final Map<String, Object> item) {
+    private Artifact getArtifactFromMap(final Map<String, Object> item) {
         return new Artifact((String) item.get("name"), (String) item.get("version"));
     }
 }
