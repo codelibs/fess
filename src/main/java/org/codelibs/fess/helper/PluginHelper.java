@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -193,14 +192,35 @@ public class PluginHelper {
         } catch (final Exception e) {
             throw new PluginException("Failed to install the artifact " + artifact.getName(), e);
         }
+
+        switch (artifact.getType()) {
+        case DATA_STORE:
+            break;
+        case THEME:
+            ComponentUtil.getThemeHelper().install(artifact);
+            break;
+        default:
+            break;
+        }
     }
 
     public void deleteInstalledArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
-        final Path jarPath = Paths.get(getPluginPath().toString(), fileName);
+        final Path jarPath = Paths.get(ResourceUtil.getPluginPath().toString(), fileName);
         if (!Files.exists(jarPath)) {
             throw new PluginException(fileName + " does not exist.");
         }
+
+        switch (artifact.getType()) {
+        case DATA_STORE:
+            break;
+        case THEME:
+            ComponentUtil.getThemeHelper().uninstall(artifact);
+            break;
+        default:
+            break;
+        }
+
         try {
             Files.delete(jarPath);
         } catch (final IOException e) {
@@ -218,10 +238,6 @@ public class PluginHelper {
             }
         }
         return null;
-    }
-
-    protected Path getPluginPath() {
-        return Paths.get(ComponentUtil.getComponent(ServletContext.class).getRealPath("/WEB-INF/plugin"));
     }
 
     public static class Artifact {
@@ -255,14 +271,18 @@ public class PluginHelper {
             return url;
         }
 
+        public ArtifactType getType() {
+            return ArtifactType.getType(name);
+        }
+
         @Override
         public String toString() {
-            return "Artifact [name=" + name + ", version=" + version + "]";
+            return name + ":" + version;
         }
     }
 
     public enum ArtifactType {
-        DATA_STORE("fess-ds"), UNKNOWN("unknown");
+        DATA_STORE("fess-ds"), THEME("fess-theme"), UNKNOWN("unknown");
 
         private final String id;
 
@@ -277,6 +297,8 @@ public class PluginHelper {
         public static ArtifactType getType(final String name) {
             if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
+            } else if (name.startsWith(THEME.getId())) {
+                return THEME;
             }
             return UNKNOWN;
         }

@@ -61,6 +61,7 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.helper.ThemeHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
@@ -89,6 +90,8 @@ public final class ComponentUtil {
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
     private static Map<String, Object> componentMap = new HashMap<>();
+
+    private static final String THEME_HELPER = "themeHelper";
 
     private static final String PLUGIN_HELPER = "pluginHelper";
 
@@ -446,6 +449,10 @@ public final class ComponentUtil {
 
     public static PluginHelper getPluginHelper() {
         return getComponent(PLUGIN_HELPER);
+    }
+
+    public static ThemeHelper getThemeHelper() {
+        return getComponent(THEME_HELPER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

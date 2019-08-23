@@ -80,50 +80,62 @@ public class ResourceUtil {
         if (StringUtil.isNotBlank(confPath)) {
             return Paths.get(confPath, names);
         }
-        return getPath("conf", names);
+        return getPath("WEB-INF/", "conf", names);
     }
 
     public static Path getClassesPath(final String... names) {
-        return getPath("classes", names);
+        return getPath("WEB-INF/", "classes", names);
     }
 
     public static Path getOrigPath(final String... names) {
-        return getPath("orig", names);
+        return getPath("WEB-INF/", "orig", names);
     }
 
     public static Path getMailTemplatePath(final String... names) {
-        return getPath("mail", names);
+        return getPath("WEB-INF/", "mail", names);
     }
 
     public static Path getViewTemplatePath(final String... names) {
-        return getPath("view", names);
+        return getPath("WEB-INF/", "view", names);
     }
 
     public static Path getDictionaryPath(final String... names) {
-        return getPath("dict", names);
+        return getPath("WEB-INF/", "dict", names);
     }
 
     public static Path getThumbnailPath(final String... names) {
-        return getPath("thumbnails", names);
+        return getPath("WEB-INF/", "thumbnails", names);
     }
 
     public static Path getSitePath(final String... names) {
-        return getPath("site", names);
+        return getPath("WEB-INF/", "site", names);
     }
 
     public static Path getPluginPath(final String... names) {
-        return getPath("plugin", names);
+        return getPath("WEB-INF/", "plugin", names);
     }
 
     public static Path getProjectPropertiesFile() {
-        return getPath("", "project.properties");
+        return getPath("WEB-INF/", StringUtil.EMPTY, "project.properties");
     }
 
-    protected static Path getPath(final String base, final String... names) {
+    public static Path getImagePath(final String... names) {
+        return getPath(StringUtil.EMPTY, "images", names);
+    }
+
+    public static Path getCssPath(final String... names) {
+        return getPath(StringUtil.EMPTY, "css", names);
+    }
+
+    public static Path getJavaScriptPath(final String... names) {
+        return getPath(StringUtil.EMPTY, "js", names);
+    }
+
+    protected static Path getPath(final String root, final String base, final String... names) {
 
         try {
             final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
-            final String webinfPath = servletContext.getRealPath("/WEB-INF/" + base);
+            final String webinfPath = servletContext.getRealPath("/" + root + base);
             if (webinfPath != null) {
                 if (Files.exists(Paths.get(webinfPath))) {
                     return Paths.get(webinfPath, names);
@@ -132,15 +144,15 @@ public class ResourceUtil {
         } catch (final Throwable e) {
             // ignore
         }
-        final String webinfBase = "WEB-INF/" + base;
+        final String webinfBase = root + base;
         if (Files.exists(Paths.get(webinfBase))) {
             return Paths.get(webinfBase, names);
         }
-        final String srcWebInfBase = "src/main/webapps/WEB-INF/" + base;
+        final String srcWebInfBase = "src/main/webapps" + root + base;
         if (Files.exists(Paths.get(srcWebInfBase))) {
             return Paths.get(srcWebInfBase, names);
         }
-        final String targetWebInfBase = "target/fess/WEB-INF/" + base;
+        final String targetWebInfBase = "target/fess/" + root + base;
         if (Files.exists(Paths.get(targetWebInfBase))) {
             return Paths.get(targetWebInfBase, names);
         }
@@ -157,6 +169,9 @@ public class ResourceUtil {
             return new File[0];
         }
         final File libDir = new File(libPath);
+        if (!libDir.exists()) {
+            return new File[0];
+        }
         return libDir.listFiles((FilenameFilter) (file, name) -> name.startsWith(namePrefix));
     }
 
@@ -170,6 +185,9 @@ public class ResourceUtil {
             return new File[0];
         }
         final File libDir = new File(libPath);
+        if (!libDir.exists()) {
+            return new File[0];
+        }
         return libDir.listFiles((FilenameFilter) (file, name) -> name.startsWith(namePrefix));
     }
 

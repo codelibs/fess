@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
-import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -108,7 +107,7 @@ public class AdminPluginAction extends FessAdminAction {
 
     public static Map<String, String> beanToMap(final Artifact artifact) {
         final Map<String, String> item = new HashMap<>();
-        item.put("type", ArtifactType.getType(artifact.getName()).getId());
+        item.put("type", artifact.getType().getId());
         item.put("id", artifact.getName() + ":" + artifact.getVersion());
         item.put("name", artifact.getName());
         item.put("version", artifact.getVersion());
@@ -124,7 +123,7 @@ public class AdminPluginAction extends FessAdminAction {
     public static void installArtifact(final Artifact artifact) {
         new Thread(() -> {
             final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
-            final Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.getType(artifact.getName()));
+            final Artifact[] artifacts = pluginHelper.getInstalledArtifacts(artifact.getType());
             try {
                 pluginHelper.installArtifact(artifact);
             } catch (final Exception e) {
