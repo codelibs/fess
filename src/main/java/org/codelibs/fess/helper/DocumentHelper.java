@@ -50,6 +50,7 @@ import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.crawler.util.TextUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
@@ -74,9 +75,17 @@ public class DocumentHelper {
         }
     }
 
-    public String getContent(final ResponseData responseData, final String content, final Map<String, Object> dataMap) {
+    public String getContent(final CrawlingConfig crawlingConfig, final ResponseData responseData, final String content,
+            final Map<String, Object> dataMap) {
         if (content == null) {
             return StringUtil.EMPTY; // empty
+        }
+
+        if (crawlingConfig != null) {
+            Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+            if (configParam != null && Constants.TRUE.equalsIgnoreCase(configParam.get("keep_original_body"))) {
+                return content;
+            }
         }
 
         final int maxAlphanumTermSize = getMaxAlphanumTermSize();

@@ -33,16 +33,16 @@ public class DocumentHelperTest extends UnitFessTestCase {
 
         ResponseData responseData = new ResponseData();
         Map<String, Object> dataMap = new HashMap<>();
-        assertEquals("", documentHelper.getContent(responseData, null, dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, " ", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "  ", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t\t", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t \t", dataMap));
-        assertEquals("123 abc", documentHelper.getContent(responseData, " 123 abc ", dataMap));
-        assertEquals("１２３ あいう", documentHelper.getContent(responseData, "　１２３　あいう　", dataMap));
-        assertEquals("123 abc", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, null, dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, " ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "  ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t\t", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t \t", dataMap));
+        assertEquals("123 abc", documentHelper.getContent(null, responseData, " 123 abc ", dataMap));
+        assertEquals("１２３ あいう", documentHelper.getContent(null, responseData, "　１２３　あいう　", dataMap));
+        assertEquals("123 abc", documentHelper.getContent(null, responseData, " 123\nabc ", dataMap));
     }
 
     public void test_getContent_maxAlphanum() {
@@ -54,17 +54,17 @@ public class DocumentHelperTest extends UnitFessTestCase {
 
         ResponseData responseData = new ResponseData();
         Map<String, Object> dataMap = new HashMap<>();
-        assertEquals("", documentHelper.getContent(responseData, null, dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, " ", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "  ", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t\t", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t \t", dataMap));
-        assertEquals("12 ab", documentHelper.getContent(responseData, " 123 abc ", dataMap));
-        assertEquals("１２３ あいう", documentHelper.getContent(responseData, "　１２３　あいう　", dataMap));
-        assertEquals("12 ab", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
-        assertEquals("12", documentHelper.getContent(responseData, " 123abc ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, null, dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, " ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "  ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t\t", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t \t", dataMap));
+        assertEquals("12 ab", documentHelper.getContent(null, responseData, " 123 abc ", dataMap));
+        assertEquals("１２３ あいう", documentHelper.getContent(null, responseData, "　１２３　あいう　", dataMap));
+        assertEquals("12 ab", documentHelper.getContent(null, responseData, " 123\nabc ", dataMap));
+        assertEquals("12", documentHelper.getContent(null, responseData, " 123abc ", dataMap));
     }
 
     public void test_getContent_maxSymbol() {
@@ -76,27 +76,27 @@ public class DocumentHelperTest extends UnitFessTestCase {
 
         ResponseData responseData = new ResponseData();
         Map<String, Object> dataMap = new HashMap<>();
-        assertEquals("", documentHelper.getContent(responseData, null, dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, " ", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "  ", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t\t", dataMap));
-        assertEquals("", documentHelper.getContent(responseData, "\t \t", dataMap));
-        assertEquals("123 abc", documentHelper.getContent(responseData, " 123 abc ", dataMap));
-        assertEquals("１２３ あいう", documentHelper.getContent(responseData, "　１２３　あいう　", dataMap));
-        assertEquals("123 abc", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
-        assertEquals("123abc", documentHelper.getContent(responseData, " 123abc ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, null, dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, " ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "  ", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t\t", dataMap));
+        assertEquals("", documentHelper.getContent(null, responseData, "\t \t", dataMap));
+        assertEquals("123 abc", documentHelper.getContent(null, responseData, " 123 abc ", dataMap));
+        assertEquals("１２３ あいう", documentHelper.getContent(null, responseData, "　１２３　あいう　", dataMap));
+        assertEquals("123 abc", documentHelper.getContent(null, responseData, " 123\nabc ", dataMap));
+        assertEquals("123abc", documentHelper.getContent(null, responseData, " 123abc ", dataMap));
 
-        assertEquals("!!", documentHelper.getContent(responseData, "!!!", dataMap));
-        assertEquals("//", documentHelper.getContent(responseData, "///", dataMap));
-        assertEquals("::", documentHelper.getContent(responseData, ":::", dataMap));
-        assertEquals("@@", documentHelper.getContent(responseData, "@@@", dataMap));
-        assertEquals("[[", documentHelper.getContent(responseData, "[[[", dataMap));
-        assertEquals("``", documentHelper.getContent(responseData, "```", dataMap));
-        assertEquals("{{", documentHelper.getContent(responseData, "{{{", dataMap));
-        assertEquals("~~", documentHelper.getContent(responseData, "~~~", dataMap));
-        assertEquals("!\"", documentHelper.getContent(responseData, "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", dataMap));
+        assertEquals("!!", documentHelper.getContent(null, responseData, "!!!", dataMap));
+        assertEquals("//", documentHelper.getContent(null, responseData, "///", dataMap));
+        assertEquals("::", documentHelper.getContent(null, responseData, ":::", dataMap));
+        assertEquals("@@", documentHelper.getContent(null, responseData, "@@@", dataMap));
+        assertEquals("[[", documentHelper.getContent(null, responseData, "[[[", dataMap));
+        assertEquals("``", documentHelper.getContent(null, responseData, "```", dataMap));
+        assertEquals("{{", documentHelper.getContent(null, responseData, "{{{", dataMap));
+        assertEquals("~~", documentHelper.getContent(null, responseData, "~~~", dataMap));
+        assertEquals("!\"", documentHelper.getContent(null, responseData, "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", dataMap));
     }
 
     public void test_getDigest() {

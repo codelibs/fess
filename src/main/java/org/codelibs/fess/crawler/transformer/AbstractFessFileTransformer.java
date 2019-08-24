@@ -41,6 +41,7 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.crawler.transformer.impl.AbstractTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
@@ -218,7 +219,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             buf.append(contentMeta);
         }
         final String bodyBase = buf.toString().trim();
-        final String body = documentHelper.getContent(responseData, bodyBase, dataMap);
+        final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
                 .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
@@ -381,6 +382,14 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         params.put(HttpHeaders.CONTENT_TYPE, responseData.getMimeType());
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
         params.put(ExtractData.URL, responseData.getUrl());
+        Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        if (configParam != null) {
+            String keepOriginalBody = configParam.get("keep_original_body");
+            if (StringUtil.isNotBlank(keepOriginalBody)) {
+                params.put(TikaExtractor.NORMALIZE_TEXT, Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE
+                        : Constants.TRUE);
+            }
+        }
         return params;
     }
 

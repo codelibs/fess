@@ -392,7 +392,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         // title
         // content
         final String body = getSingleNodeValue(document, getContentXpath(fessConfig, xpathConfigMap), prunedContent);
-        putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), documentHelper.getContent(responseData, body, dataMap));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldContent(),
+                documentHelper.getContent(crawlingConfig, responseData, body, dataMap));
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
                 .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
