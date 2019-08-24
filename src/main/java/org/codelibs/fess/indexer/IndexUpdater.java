@@ -494,7 +494,7 @@ public class IndexUpdater extends Thread {
             if (totalHits > 0) {
                 buf.append(arList.size()).append('/').append(totalHits).append(" docs (Doc:{access ");
             } else {
-                buf.append("no docs (Doc:{access ");
+                buf.append("no docs in indexing queue (Doc:{access ");
             }
             buf.append(System.currentTimeMillis() - execTime).append("ms");
             if (cleanupTime >= 0) {
