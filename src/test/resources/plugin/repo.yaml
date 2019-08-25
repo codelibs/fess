@@ -1,0 +1,6 @@
+- name: mysql-connector-java
+  version: 8.0.17
+  url: https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.17/mysql-connector-java-8.0.17.jar
+- name: mysql-connector-java
+  version: 6.0.6
+  url: https://repo1.maven.org/maven2/mysql/mysql-connector-java/6.0.6/mysql-connector-java-6.0.6.jar

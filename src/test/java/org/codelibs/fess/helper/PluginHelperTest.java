@@ -53,6 +53,12 @@ public class PluginHelperTest extends UnitFessTestCase {
                     } catch (Exception e) {
                         return "";
                     }
+                } else if (url.contains("plugin/repo.yaml")) {
+                    try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
+                        return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
+                    } catch (Exception e) {
+                        return "";
+                    }
                 }
                 throw new FessSystemException("unknown");
             }
@@ -89,5 +95,16 @@ public class PluginHelperTest extends UnitFessTestCase {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "fess-ds-atlassian-13.2.1-20190708.212247-1.jar");
         assertEquals("fess-ds-atlassian", artifact.getName());
         assertEquals("13.2.1-20190708.212247-1", artifact.getVersion());
+    }
+
+    public void test_getArtifactFromFileName3() {
+        Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.UNKNOWN, "mysql-connector-java-8.0.17.jar");
+        assertEquals("mysql-connector-java", artifact.getName());
+        assertEquals("8.0.17", artifact.getVersion());
+    }
+
+    public void test_loadYaml() {
+        List<Artifact> artifacts = pluginHelper.loadArtifactsFromRepository("plugin/repo.yaml");
+        assertEquals(2, artifacts.size());
     }
 }

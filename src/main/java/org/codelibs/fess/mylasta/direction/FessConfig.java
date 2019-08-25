@@ -1430,7 +1430,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. homeDirectory */
     String LDAP_ATTR_HOME_DIRECTORY = "ldap.attr.homeDirectory";
 
-    /** The key of the configuration. e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/ */
+    /** The key of the configuration. e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://fess.codelibs.org/plugin/artifacts.yaml */
     String PLUGIN_REPOSITORIES = "plugin.repositories";
 
     /** The key of the configuration. e.g.  */
@@ -5939,7 +5939,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'plugin.repositories'. <br>
-     * The value is, e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/ <br>
+     * The value is, e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://fess.codelibs.org/plugin/artifacts.yaml <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPluginRepositories();
@@ -8774,7 +8774,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ATTR_UID_NUMBER, "uidNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_GID_NUMBER, "gidNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_HOME_DIRECTORY, "homeDirectory");
-            defaultMap.put(FessConfig.PLUGIN_REPOSITORIES, "https://repo.maven.apache.org/maven2/org/codelibs/fess/");
+            defaultMap.put(FessConfig.PLUGIN_REPOSITORIES,
+                    "https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://fess.codelibs.org/plugin/artifacts.yaml");
             defaultMap.put(FessConfig.PLUGIN_VERSION_FILTER, "");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "hot");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");

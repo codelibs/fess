@@ -172,10 +172,14 @@ public class ResourceUtil {
         if (!libDir.exists()) {
             return new File[0];
         }
-        return libDir.listFiles((FilenameFilter) (file, name) -> name.startsWith(namePrefix));
+        return libDir.listFiles((file, name) -> name.startsWith(namePrefix));
     }
 
     public static File[] getPluginJarFiles(final String namePrefix) {
+        return getPluginJarFiles((file, name) -> name.startsWith(namePrefix));
+    }
+
+    public static File[] getPluginJarFiles(final FilenameFilter filter) {
         final ServletContext context = LaServletContextUtil.getServletContext();
         if (context == null) {
             return new File[0];
@@ -188,7 +192,7 @@ public class ResourceUtil {
         if (!libDir.exists()) {
             return new File[0];
         }
-        return libDir.listFiles((FilenameFilter) (file, name) -> name.startsWith(namePrefix));
+        return libDir.listFiles(filter);
     }
 
     public static String resolve(final String value) {

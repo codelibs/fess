@@ -25,15 +25,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl;
@@ -50,6 +54,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -62,7 +68,13 @@ public class PluginHelper {
                 public Artifact[] load(ArtifactType key) {
                     final List<Artifact> list = new ArrayList<>();
                     for (final String url : getRepositories()) {
-                        list.addAll(processRepository(key, url));
+                        if (url.endsWith(".yaml")) {
+                            if (key == ArtifactType.UNKNOWN) {
+                                list.addAll(loadArtifactsFromRepository(url));
+                            }
+                        } else {
+                            list.addAll(processRepository(key, url));
+                        }
                     }
                     return list.toArray(new Artifact[list.size()]);
                 }
@@ -79,6 +91,22 @@ public class PluginHelper {
     protected String[] getRepositories() {
         return split(ComponentUtil.getFessConfig().getPluginRepositories(), ",").get(
                 stream -> stream.map(String::trim).toArray(n -> new String[n]));
+    }
+
+    protected List<Artifact> loadArtifactsFromRepository(final String url) {
+        final String content = getRepositoryContent(url);
+        ObjectMapper objectMapper = new YAMLMapper();
+        try {
+            @SuppressWarnings("unchecked")
+            List<Map<?, ?>> result = objectMapper.readValue(content, List.class);
+            if (result != null) {
+                return result.stream().map(o -> new Artifact((String) o.get("name"), (String) o.get("version"), (String) o.get("url")))
+                        .collect(Collectors.toList());
+            }
+            return Collections.emptyList();
+        } catch (Exception e) {
+            throw new PluginException("Failed to access " + url, e);
+        }
     }
 
     protected List<Artifact> processRepository(final ArtifactType artifactType, final String url) {
@@ -162,6 +190,23 @@ public class PluginHelper {
     }
 
     public Artifact[] getInstalledArtifacts(final ArtifactType artifactType) {
+        if (artifactType == ArtifactType.UNKNOWN) {
+            final File[] jarFiles = ResourceUtil.getPluginJarFiles((d, n) -> {
+                for (ArtifactType type : ArtifactType.values()) {
+                    if (n.startsWith(type.getId())) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            final List<Artifact> list = new ArrayList<>(jarFiles.length);
+            for (final File file : jarFiles) {
+                list.add(getArtifactFromFileName(artifactType, file.getName()));
+            }
+            list.sort((a, b) -> a.getName().compareTo(b.getName()));
+            return list.toArray(new Artifact[list.size()]);
+        }
+
         final File[] jarFiles = ResourceUtil.getPluginJarFiles(artifactType.getId());
         final List<Artifact> list = new ArrayList<>(jarFiles.length);
         for (final File file : jarFiles) {
@@ -171,12 +216,22 @@ public class PluginHelper {
         return list.toArray(new Artifact[list.size()]);
     }
 
-    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String fileName) {
-        final String convertedFileName = fileName.substring(artifactType.getId().length() + 1, fileName.lastIndexOf('.'));
-        final int firstIndexOfDash = convertedFileName.indexOf('-');
-        final String artifactName = artifactType.getId() + "-" + convertedFileName.substring(0, firstIndexOfDash);
-        final String artifactVersion = convertedFileName.substring(firstIndexOfDash + 1);
-        return new Artifact(artifactName, artifactVersion);
+    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String name) {
+        String baseName = StringUtils.removeEndIgnoreCase(name, ".jar");
+        List<String> nameList = new ArrayList<>();
+        List<String> versionList = new ArrayList<>();
+        boolean isName = true;
+        for (String value : baseName.split("-")) {
+            if (isName && value.length() > 0 && value.charAt(0) >= '0' && value.charAt(0) <= '9') {
+                isName = false;
+            }
+            if (isName) {
+                nameList.add(value);
+            } else {
+                versionList.add(value);
+            }
+        }
+        return new Artifact(nameList.stream().collect(Collectors.joining("-")), versionList.stream().collect(Collectors.joining("-")));
     }
 
     public void installArtifact(final Artifact artifact) {
@@ -282,7 +337,7 @@ public class PluginHelper {
     }
 
     public enum ArtifactType {
-        DATA_STORE("fess-ds"), THEME("fess-theme"), UNKNOWN("unknown");
+        DATA_STORE("fess-ds"), THEME("fess-theme"), UNKNOWN("jar");
 
         private final String id;
 
