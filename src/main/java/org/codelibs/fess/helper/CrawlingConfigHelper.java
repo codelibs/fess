@@ -38,6 +38,7 @@ import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.es.config.exentity.FailureUrl;
 import org.codelibs.fess.es.config.exentity.FileConfig;
@@ -125,7 +126,7 @@ public class CrawlingConfigHelper {
         if (config == null) {
             return OptionalThing.empty();
         }
-        final String pipeline = config.getConfigParameterMap(ConfigName.CONFIG).get("pipeline");
+        final String pipeline = config.getConfigParameterMap(ConfigName.CONFIG).get(Config.PIPELINE);
         if (StringUtil.isBlank(pipeline)) {
             return OptionalThing.empty();
         }

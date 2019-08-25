@@ -190,10 +190,10 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 ftpAuthList.add(ftpAuth);
             }
         }
-        paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
-        paramMap.put(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
+        paramMap.put(Param.Client.SMB_AUTHENTICATIONS, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+        paramMap.put(Param.Client.SMB1_AUTHENTICATIONS,
                 smb1AuthList.toArray(new org.codelibs.fess.crawler.client.smb1.SmbAuthentication[smb1AuthList.size()]));
-        paramMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
+        paramMap.put(Param.Client.FTP_AUTHENTICATIONS, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
 
         return paramMap;
     }

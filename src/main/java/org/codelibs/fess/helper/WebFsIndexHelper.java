@@ -36,6 +36,7 @@ import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
 import org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
@@ -135,9 +136,9 @@ public class WebFsIndexHelper {
             webConfig.initializeClientFactory(crawler.getClientFactory());
             final Map<String, String> configParamMap = webConfig.getConfigParameterMap(ConfigName.CONFIG);
 
-            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_ALL))) {
+            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
                 deleteCrawlData(sid);
-            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_FILTERS))) {
+            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
                 final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
                 try {
                     urlFilterService.delete(sid);
@@ -243,9 +244,9 @@ public class WebFsIndexHelper {
             fileConfig.initializeClientFactory(crawler.getClientFactory());
             final Map<String, String> configParamMap = fileConfig.getConfigParameterMap(ConfigName.CONFIG);
 
-            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_ALL))) {
+            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
                 deleteCrawlData(sid);
-            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_FILTERS))) {
+            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
                 final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
                 try {
                     urlFilterService.delete(sid);

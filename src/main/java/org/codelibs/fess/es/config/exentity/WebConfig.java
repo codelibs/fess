@@ -32,6 +32,7 @@ import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.client.http.Authentication;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.codelibs.fess.es.config.bsentity.BsWebConfig;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Client;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -159,13 +160,13 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         }
 
         // robots txt enabled
-        if (paramMap.get(HcHttpClient.ROBOTS_TXT_ENABLED_PROPERTY) == null) {
-            paramMap.put(HcHttpClient.ROBOTS_TXT_ENABLED_PROPERTY, !fessConfig.isCrawlerIgnoreRobotsTxt());
+        if (paramMap.get(Param.Client.ROBOTS_TXT_ENABLED) == null) {
+            paramMap.put(Param.Client.ROBOTS_TXT_ENABLED, !fessConfig.isCrawlerIgnoreRobotsTxt());
         }
 
         final String userAgent = getUserAgent();
         if (StringUtil.isNotBlank(userAgent)) {
-            paramMap.put(HcHttpClient.USER_AGENT_PROPERTY, userAgent);
+            paramMap.put(Client.USER_AGENT, userAgent);
         }
 
         final List<WebAuthentication> webAuthList = webAuthenticationService.getWebAuthenticationList(getId());
@@ -184,13 +185,15 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
                 rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
 
-        final String proxyHost = (String) paramMap.get("proxyHost");
-        final String proxyPort = (String) paramMap.get("proxyPort");
+        final String proxyHost = (String) paramMap.get(Param.Client.PROXY_HOST);
+        final String proxyPort = (String) paramMap.get(Param.Client.PROXY_PORT);
         if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
             // proxy credentials
-            if (paramMap.get("proxyUsername") != null && paramMap.get("proxyPassword") != null) {
-                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(paramMap.remove("proxyUsername")
-                        .toString(), paramMap.remove("proxyPassword").toString()));
+            if (paramMap.get(Param.Client.PROXY_USERNAME) != null && paramMap.get(Param.Client.PROXY_PASSWORD) != null) {
+                paramMap.put(
+                        HcHttpClient.PROXY_CREDENTIALS_PROPERTY,
+                        new UsernamePasswordCredentials(paramMap.remove(Param.Client.PROXY_USERNAME).toString(), paramMap.remove(
+                                Param.Client.PROXY_PASSWORD).toString()));
             }
         } else {
             initializeDefaultHttpProxy(paramMap);

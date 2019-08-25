@@ -51,6 +51,7 @@ import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.crawler.util.TextUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
@@ -83,7 +84,7 @@ public class DocumentHelper {
 
         if (crawlingConfig != null) {
             Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
-            if (configParam != null && Constants.TRUE.equalsIgnoreCase(configParam.get("keep_original_body"))) {
+            if (configParam != null && Constants.TRUE.equalsIgnoreCase(configParam.get(Param.Config.KEEP_ORIGINAL_BODY))) {
                 return content;
             }
         }

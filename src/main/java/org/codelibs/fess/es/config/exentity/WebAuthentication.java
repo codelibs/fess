@@ -36,6 +36,7 @@ import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsWebAuthentication;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.slf4j.Logger;
@@ -64,8 +65,8 @@ public class WebAuthentication extends BsWebAuthentication {
             return new DigestScheme();
         } else if (Constants.NTLM.equals(scheme)) {
             final Properties props = new Properties();
-            getWebConfig().getConfigParameterMap(ConfigName.CONFIG).entrySet().stream().filter(e -> e.getKey().startsWith("jcifs."))
-                    .forEach(e -> {
+            getWebConfig().getConfigParameterMap(ConfigName.CONFIG).entrySet().stream()
+                    .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX)).forEach(e -> {
                         props.setProperty(e.getKey(), e.getValue());
                     });
             return new NTLMScheme(new JcifsEngine(props));

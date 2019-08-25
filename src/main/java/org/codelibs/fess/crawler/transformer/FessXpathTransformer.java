@@ -54,6 +54,8 @@ import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.XPath;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DocumentHelper;
@@ -79,10 +81,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformer.class);
 
     private static final String X_ROBOTS_TAG = "X-Robots-Tag";
-
-    private static final String HTML_CANONICAL_XPATH = "html.canonical.xpath";
-
-    private static final String IGNORE_ROBOTS_TAGS = "ignore.robots.tags";
 
     private static final String META_NAME_THUMBNAIL_CONTENT = "//META[@name=\"thumbnail\" or @name=\"THUMBNAIL\"]/@content";
 
@@ -206,7 +204,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        final String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
+        final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
         if (ignore == null) {
             if (fessConfig.isCrawlerIgnoreRobotsTags()) {
                 return;
@@ -253,7 +251,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected void processXRobotsTag(final ResponseData responseData, final ResultData resultData) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        final String ignore = configMap.get(IGNORE_ROBOTS_TAGS);
+        final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
         if (ignore == null) {
             if (fessConfig.isCrawlerIgnoreRobotsTags()) {
                 return;
@@ -502,7 +500,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getLangXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
-        final String xpath = xpathConfigMap.get("default.lang");
+        final String xpath = xpathConfigMap.get(XPath.DEFAULT_LANG);
         if (StringUtil.isNotBlank(xpath)) {
             return xpath;
         }
@@ -510,7 +508,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getContentXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
-        final String xpath = xpathConfigMap.get("default.content");
+        final String xpath = xpathConfigMap.get(XPath.DEFAULT_CONTENT);
         if (StringUtil.isNotBlank(xpath)) {
             return xpath;
         }
@@ -518,7 +516,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getDigestXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
-        final String xpath = xpathConfigMap.get("default.digest");
+        final String xpath = xpathConfigMap.get(XPath.DEFAULT_DIGEST);
         if (StringUtil.isNotBlank(xpath)) {
             return xpath;
         }
@@ -527,7 +525,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        String xpath = configMap.get(HTML_CANONICAL_XPATH);
+        String xpath = configMap.get(Config.HTML_CANONICAL_XPATH);
         if (xpath == null) {
             xpath = fessConfig.getCrawlerDocumentHtmlCanonicalXpath();
         }

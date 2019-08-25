@@ -46,6 +46,7 @@ import org.codelibs.fess.crawler.transformer.impl.AbstractTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DocumentHelper;
@@ -384,7 +385,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         params.put(ExtractData.URL, responseData.getUrl());
         Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
         if (configParam != null) {
-            String keepOriginalBody = configParam.get("keep_original_body");
+            String keepOriginalBody = configParam.get(Config.KEEP_ORIGINAL_BODY);
             if (StringUtil.isNotBlank(keepOriginalBody)) {
                 params.put(TikaExtractor.NORMALIZE_TEXT, Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE
                         : Constants.TRUE);
