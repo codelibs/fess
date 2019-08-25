@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.io.ReaderUtil;
 import org.codelibs.core.io.SerializeUtil;
@@ -43,6 +45,8 @@ import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.crawler.processor.ResponseProcessor;
 import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.crawler.rule.Rule;
@@ -55,6 +59,7 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +67,25 @@ public class DocumentHelper {
     private static final Logger logger = LoggerFactory.getLogger(DocumentHelper.class);
 
     protected static final String SIMILAR_DOC_HASH_PREFIX = "$";
+
+    @PostConstruct
+    public void init() {
+        try {
+            final TikaExtractor tikaExtractor = ComponentUtil.getComponent("tikaExtractor");
+            if (tikaExtractor != null) {
+                tikaExtractor.setMaxAlphanumTermSize(getMaxAlphanumTermSize());
+                tikaExtractor.setMaxSymbolTermSize(getMaxSymbolTermSize());
+                tikaExtractor.setReplaceDuplication(isDuplicateTermRemoved());
+                tikaExtractor.setSpaceChars(getSpaceChars());
+            }
+        } catch (ComponentNotFoundException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("tikaExtractor is not found: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to initiaize TikaExtractor.", e);
+        }
+    }
 
     public String getTitle(final ResponseData responseData, final String title, final Map<String, Object> dataMap) {
         if (title == null) {
@@ -87,6 +111,10 @@ public class DocumentHelper {
             if (configParam != null && Constants.TRUE.equalsIgnoreCase(configParam.get(Param.Config.KEEP_ORIGINAL_BODY))) {
                 return content;
             }
+        }
+
+        if (responseData.getMetaDataMap().get(Extractor.class.getSimpleName()) instanceof TikaExtractor) {
+            return content;
         }
 
         final int maxAlphanumTermSize = getMaxAlphanumTermSize();

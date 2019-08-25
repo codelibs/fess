@@ -7,8 +7,5 @@
 		class="org.codelibs.fess.crawler.extractor.impl.TikaExtractor">
 		<property name="maxCompressionRatio">2</property>
 		<property name="maxUncompressionSize">10000000</property>
-		<property name="maxAlphanumTermSize">20</property>
-		<property name="maxSymbolTermSize">10</property>
-		<property name="readAsTextIfFailed">false</property>
 	</component>
 </components>

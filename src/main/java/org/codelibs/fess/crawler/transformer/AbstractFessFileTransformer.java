@@ -220,6 +220,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             buf.append(contentMeta);
         }
         final String bodyBase = buf.toString().trim();
+        responseData.addMetaData(Extractor.class.getSimpleName(), extractor);
         final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
