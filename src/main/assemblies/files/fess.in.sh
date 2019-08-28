@@ -121,3 +121,4 @@ if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.dictionary.path=$FESS_DICTIONARY_PATH"
 fi
 
+GROOVY_TURN_OFF_JAVA_WARNINGS=true
