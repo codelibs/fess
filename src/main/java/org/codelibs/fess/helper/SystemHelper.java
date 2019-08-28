@@ -50,6 +50,7 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
@@ -469,6 +470,14 @@ public class SystemHelper {
         return System.getProperty(Constants.FESS_LOG_LEVEL, Level.WARN.toString());
     }
 
+    public File createTempFile(String prefix, String suffix) {
+        try {
+            return File.createTempFile(prefix, suffix);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
     public String getVersion() {
         return version;
     }
@@ -484,5 +493,4 @@ public class SystemHelper {
     public String getProductVersion() {
         return productVersion;
     }
-
 }

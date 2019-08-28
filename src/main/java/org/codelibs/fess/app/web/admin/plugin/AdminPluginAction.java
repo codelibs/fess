@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.app.web.admin.plugin;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,9 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.codelibs.core.io.CopyUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
+import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -36,6 +42,8 @@ import org.slf4j.LoggerFactory;
 public class AdminPluginAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminPluginAction.class);
+
+    private static final String UPLOAD = "upload";
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -53,7 +61,7 @@ public class AdminPluginAction extends FessAdminAction {
     public HtmlResponse delete(final DeleteForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginJsp));
-        final Artifact artifact = new Artifact(form.name, form.version);
+        final Artifact artifact = new Artifact(form.name, form.version, null);
         deleteArtifact(artifact);
         saveInfo(messages -> messages.addSuccessDeletePlugin(GLOBAL, artifact.getFileName()));
         return redirect(getClass());
@@ -63,12 +71,48 @@ public class AdminPluginAction extends FessAdminAction {
     public HtmlResponse install(final InstallForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
-        final Artifact artifact = getArtifactFromInstallForm(form);
-        if (artifact == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asListHtml());
+        if (UPLOAD.equals(form.id)) {
+            if (form.jarFile == null) {
+                throwValidationError(messages -> messages.addErrorsPluginFileIsNotFound(GLOBAL, form.id), () -> asListHtml());
+            }
+            if (!form.jarFile.getFileName().endsWith(".jar")) {
+                throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()),
+                        () -> asListHtml());
+            }
+            final String filename = form.jarFile.getFileName();
+            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("tmp-adminplugin-", ".jar");
+            try (final InputStream is = form.jarFile.getInputStream(); final OutputStream os = new FileOutputStream(tempFile)) {
+                CopyUtil.copy(is, os);
+            } catch (final Exception e) {
+                if (tempFile.exists() && !tempFile.delete()) {
+                    logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
+                }
+                logger.debug("Failed to copy " + filename, e);
+                throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, filename), () -> asListHtml());
+            }
+            new Thread(() -> {
+                try {
+                    final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
+                    final Artifact artifact =
+                            pluginHelper.getArtifactFromFileName(ArtifactType.UNKNOWN, filename, tempFile.getAbsolutePath());
+                    pluginHelper.installArtifact(artifact);
+                } catch (final Exception e) {
+                    logger.warn("Failed to install " + filename, e);
+                } finally {
+                    if (tempFile.exists() && !tempFile.delete()) {
+                        logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
+                    }
+                }
+            }).start();
+            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, form.jarFile.getFileName()));
+        } else {
+            final Artifact artifact = getArtifactFromInstallForm(form);
+            if (artifact == null) {
+                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asListHtml());
+            }
+            installArtifact(artifact);
+            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
         }
-        installArtifact(artifact);
-        saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
         return redirect(getClass());
     }
 
@@ -88,6 +132,11 @@ public class AdminPluginAction extends FessAdminAction {
     public static List<Map<String, String>> getAllAvailableArtifacts() {
         final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
         final List<Map<String, String>> result = new ArrayList<>();
+        final Map<String, String> map = new HashMap<>();
+        map.put("id", UPLOAD);
+        map.put("name", "");
+        map.put("version", "");
+        result.add(map);
         for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
             result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType)).map(AdminPluginAction::beanToMap)
                     .collect(Collectors.toList()));

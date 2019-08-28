@@ -2976,6 +2976,15 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Install Plugin */
     public static final String LABELS_plugin_install_title = "{labels.plugin_install_title}";
 
+    /** The key of the message: Jar File */
+    public static final String LABELS_plugin_jar_file = "{labels.plugin_jar_file}";
+
+    /** The key of the message: Local */
+    public static final String LABELS_plugin_local_install = "{labels.plugin_local_install}";
+
+    /** The key of the message: Remote */
+    public static final String LABELS_plugin_remote_install = "{labels.plugin_remote_install}";
+
     /** The key of the message: Install */
     public static final String LABELS_crud_button_install = "{labels.crud_button_install}";
 

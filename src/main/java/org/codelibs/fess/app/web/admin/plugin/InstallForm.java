@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.plugin;
 
 import javax.validation.constraints.Size;
 
+import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 public class InstallForm {
@@ -25,4 +26,5 @@ public class InstallForm {
     @Size(max = 400)
     public String id;
 
+    public MultipartFormFile jarFile;
 }

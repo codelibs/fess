@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -65,7 +66,8 @@ public class PluginHelper {
 
     protected LoadingCache<ArtifactType, Artifact[]> availableArtifacts = CacheBuilder.newBuilder().maximumSize(10)
             .expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<ArtifactType, Artifact[]>() {
-                public Artifact[] load(ArtifactType key) {
+                @Override
+                public Artifact[] load(final ArtifactType key) {
                     final List<Artifact> list = new ArrayList<>();
                     for (final String url : getRepositories()) {
                         if (url.endsWith(".yaml")) {
@@ -95,16 +97,16 @@ public class PluginHelper {
 
     protected List<Artifact> loadArtifactsFromRepository(final String url) {
         final String content = getRepositoryContent(url);
-        ObjectMapper objectMapper = new YAMLMapper();
+        final ObjectMapper objectMapper = new YAMLMapper();
         try {
             @SuppressWarnings("unchecked")
-            List<Map<?, ?>> result = objectMapper.readValue(content, List.class);
+            final List<Map<?, ?>> result = objectMapper.readValue(content, List.class);
             if (result != null) {
                 return result.stream().map(o -> new Artifact((String) o.get("name"), (String) o.get("version"), (String) o.get("url")))
                         .collect(Collectors.toList());
             }
             return Collections.emptyList();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new PluginException("Failed to access " + url, e);
         }
     }
@@ -129,7 +131,7 @@ public class PluginHelper {
                         if (version.endsWith("SNAPSHOT")) {
                             final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
                             if (StringUtil.isNotBlank(snapshotVersion)) {
-                                String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
+                                final String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
                                 list.add(new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
                             } else if (logger.isDebugEnabled()) {
                                 logger.debug("Snapshot name is not found: " + name + "/" + version);
@@ -161,7 +163,7 @@ public class PluginHelper {
             final Document doc = builder.parse(is);
             final NodeList snapshotNodeList = doc.getElementsByTagName("snapshot");
             if (snapshotNodeList.getLength() > 0) {
-                NodeList nodeList = snapshotNodeList.item(0).getChildNodes();
+                final NodeList nodeList = snapshotNodeList.item(0).getChildNodes();
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     final Node node = nodeList.item(i);
                     if ("timestamp".equalsIgnoreCase(node.getNodeName())) {
@@ -192,7 +194,7 @@ public class PluginHelper {
     public Artifact[] getInstalledArtifacts(final ArtifactType artifactType) {
         if (artifactType == ArtifactType.UNKNOWN) {
             final File[] jarFiles = ResourceUtil.getPluginJarFiles((d, n) -> {
-                for (ArtifactType type : ArtifactType.values()) {
+                for (final ArtifactType type : ArtifactType.values()) {
                     if (n.startsWith(type.getId())) {
                         return false;
                     }
@@ -216,12 +218,16 @@ public class PluginHelper {
         return list.toArray(new Artifact[list.size()]);
     }
 
-    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String name) {
-        String baseName = StringUtils.removeEndIgnoreCase(name, ".jar");
-        List<String> nameList = new ArrayList<>();
-        List<String> versionList = new ArrayList<>();
+    protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String filename) {
+        return getArtifactFromFileName(artifactType, filename, null);
+    }
+
+    public Artifact getArtifactFromFileName(final ArtifactType artifactType, final String filename, final String url) {
+        final String baseName = StringUtils.removeEndIgnoreCase(filename, ".jar");
+        final List<String> nameList = new ArrayList<>();
+        final List<String> versionList = new ArrayList<>();
         boolean isName = true;
-        for (String value : baseName.split("-")) {
+        for (final String value : baseName.split("-")) {
             if (isName && value.length() > 0 && value.charAt(0) >= '0' && value.charAt(0) <= '9') {
                 isName = false;
             }
@@ -231,21 +237,31 @@ public class PluginHelper {
                 versionList.add(value);
             }
         }
-        return new Artifact(nameList.stream().collect(Collectors.joining("-")), versionList.stream().collect(Collectors.joining("-")));
+        return new Artifact(nameList.stream().collect(Collectors.joining("-")), versionList.stream().collect(Collectors.joining("-")), url);
     }
 
     public void installArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
-        try (final CurlResponse response = Curl.get(artifact.getUrl()).execute()) {
-            if (response.getHttpStatusCode() != 200) {
-                throw new PluginException("HTTP Status " + response.getHttpStatusCode() + " : failed to get the artifact from "
-                        + artifact.getUrl());
+        final String url = artifact.getUrl();
+        if (StringUtil.isBlank(url)) {
+            throw new PluginException("url is blank: " + artifact.getName());
+        } else if (url.startsWith("http:") || url.startsWith("https:")) {
+            try (final CurlResponse response = Curl.get(url).execute()) {
+                if (response.getHttpStatusCode() != 200) {
+                    throw new PluginException("HTTP Status " + response.getHttpStatusCode() + " : failed to get the artifact from " + url);
+                }
+                try (final InputStream in = response.getContentAsStream()) {
+                    CopyUtil.copy(in, ResourceUtil.getPluginPath(fileName).toFile());
+                }
+            } catch (final Exception e) {
+                throw new PluginException("Failed to install the artifact " + artifact.getName(), e);
             }
-            try (final InputStream in = response.getContentAsStream()) {
+        } else {
+            try (final InputStream in = new FileInputStream(url)) {
                 CopyUtil.copy(in, ResourceUtil.getPluginPath(fileName).toFile());
+            } catch (final Exception e) {
+                throw new PluginException("Failed to install the artifact " + artifact.getName(), e);
             }
-        } catch (final Exception e) {
-            throw new PluginException("Failed to install the artifact " + artifact.getName(), e);
         }
 
         switch (artifact.getType()) {
@@ -283,7 +299,7 @@ public class PluginHelper {
         }
     }
 
-    public Artifact getArtifact(String name, String version) {
+    public Artifact getArtifact(final String name, final String version) {
         if (StringUtil.isBlank(name) || StringUtil.isBlank(version)) {
             return null;
         }
