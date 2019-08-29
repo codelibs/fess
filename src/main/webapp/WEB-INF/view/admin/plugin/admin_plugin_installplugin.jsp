@@ -60,7 +60,7 @@
 										<div role="tabpanel" class="tab-pane" id="local">
 											<div class="box-body">
 												<div class="form-group">
-													<label for="name" class="col-md-2 control-label"><la:message key="labels.plugin_jar_file" /></label>
+													<label for="name" class="col-md-3 control-label"><la:message key="labels.plugin_jar_file" /></label>
 													<div>
 														<input type="file" name="jarFile" />
 													</div>

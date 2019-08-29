@@ -119,9 +119,16 @@ public class AdminPluginAction extends FessAdminAction {
     @Execute
     public HtmlResponse installplugin() {
         saveToken();
-        return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp).renderWith(
-                data -> RenderDataUtil.register(data, "availableArtifactItems", getAllAvailableArtifacts())).useForm(InstallForm.class,
-                op -> op.setup(form -> {}));
+        return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp).renderWith(data -> {
+            final List<Map<String, String>> result = new ArrayList<>();
+            final Map<String, String> map = new HashMap<>();
+            map.put("id", UPLOAD);
+            map.put("name", "");
+            map.put("version", "");
+            result.add(map);
+            result.addAll(getAllAvailableArtifacts());
+            RenderDataUtil.register(data, "availableArtifactItems", result);
+        }).useForm(InstallForm.class, op -> op.setup(form -> {}));
     }
 
     private HtmlResponse asListHtml() {
@@ -132,11 +139,6 @@ public class AdminPluginAction extends FessAdminAction {
     public static List<Map<String, String>> getAllAvailableArtifacts() {
         final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
         final List<Map<String, String>> result = new ArrayList<>();
-        final Map<String, String> map = new HashMap<>();
-        map.put("id", UPLOAD);
-        map.put("name", "");
-        map.put("version", "");
-        result.add(map);
         for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
             result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType)).map(AdminPluginAction::beanToMap)
                     .collect(Collectors.toList()));
