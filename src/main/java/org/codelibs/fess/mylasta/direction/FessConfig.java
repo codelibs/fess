@@ -839,7 +839,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String FTP_ROLE_FROM_FILE = "ftp.role.from.file";
 
-    /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
+    /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
     /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
@@ -3921,7 +3921,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.backup.targets'. <br>
-     * The value is, e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties <br>
+     * The value is, e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json <br>
      * comment: backup
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -8575,7 +8575,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2,4:2");
             defaultMap.put(FessConfig.FILE_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
-            defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS, ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties");
+            defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS,
+                    ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
             defaultMap

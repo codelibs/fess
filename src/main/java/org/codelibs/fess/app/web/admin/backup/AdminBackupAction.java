@@ -30,6 +30,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -61,6 +63,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -139,6 +142,10 @@ public class AdminBackupAction extends FessAdminAction {
             fileType = 2;
         } else if (fileName.endsWith(".bulk")) {
             fileType = 3;
+        } else if (fileName.startsWith("fess") && fileName.endsWith(".json")) {
+            fileType = 4;
+        } else if (fileName.startsWith("doc") && fileName.endsWith(".json")) {
+            fileType = 5;
         } else {
             throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> {
                 return asListHtml();
@@ -147,92 +154,128 @@ public class AdminBackupAction extends FessAdminAction {
         }
 
         asyncManager.async(() -> {
-            if (fileType == 1) {
-                try (final InputStream in = new FileInputStream(tempFile)) {
-                    ComponentUtil.getSystemProperties().load(in);
-                } catch (final IOException e) {
-                    logger.warn("Failed to process system.properties file: " + fileName, e);
-                } finally {
-                    if (tempFile != null && !tempFile.delete()) {
-                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
-                    }
-                }
-            } else if (fileType == 2) {
-                final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
-                try (final InputStream in = new FileInputStream(tempFile)) {
-                    configParser.parse(new InputSource(in));
-                } catch (final IOException e) {
-                    logger.warn("Failed to process gsa.xml file: " + fileName, e);
-                } finally {
-                    if (tempFile != null && !tempFile.delete()) {
-                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
-                    }
-                }
-                configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
-                configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
-                labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
-            } else if (fileType == 3) {
-                final ObjectMapper mapper = new ObjectMapper();
-                try (CurlResponse response =
-                        ComponentUtil
-                                .getCurlHelper()
-                                .post("/_bulk")
-                                .onConnect(
-                                        (req, con) -> {
-                                            con.setDoOutput(true);
-                                            try (final BufferedReader br =
-                                                    new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
-                                                    final BufferedWriter bw =
-                                                            new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),
-                                                                    Constants.CHARSET_UTF_8))) {
-                                                String line;
-                                                while ((line = br.readLine()) != null) {
-                                                    if (StringUtil.isNotBlank(line)) {
-                                                        final Map<String, Map<String, String>> dataObj;
-                                                        if (line.contains("_type")) {
-                                                            dataObj = parseObject(mapper, line);
-                                                        } else {
-                                                            dataObj = null;
-                                                        }
-                                                        if (dataObj != null) {
-                                                            final Map<String, String> indexObj = dataObj.get("index");
-                                                            if (indexObj != null && indexObj.containsKey("_type")) {
-                                                                indexObj.remove("_type");
-                                                                bw.write(mapper.writeValueAsString(dataObj));
-                                                            } else {
-                                                                bw.write(line);
-                                                            }
-                                                        } else {
-                                                            bw.write(line);
-                                                        }
-                                                    }
-                                                    bw.write("\n");
-                                                }
-                                                bw.flush();
-                                            } catch (IOException e) {
-                                                throw new IORuntimeException(e);
-                                            }
-                                        }).execute()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Bulk Response:\n" + response.getContentAsString());
-                    }
-                    systemHelper.reloadConfiguration();
-                } catch (final Exception e) {
-                    logger.warn("Failed to process bulk file: " + fileName, e);
-                } finally {
-                    if (tempFile != null && !tempFile.delete()) {
-                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
-                    }
-                }
+            switch (fileType) {
+            case 1:
+                importSystemProperties(fileName, tempFile);
+                break;
+            case 2:
+                importGsaXml(fileName, tempFile);
+                break;
+            case 3:
+                importBulk(fileName, tempFile);
+                break;
+            case 4:
+                importFessJson(fileName, tempFile);
+                break;
+            case 5:
+                importDocJson(fileName, tempFile);
+                break;
+            default:
+                break;
             }
         });
     }
 
+    private void importBulk(final String fileName, final File tempFile) {
+        final ObjectMapper mapper = new ObjectMapper();
+        try (CurlResponse response =
+                ComponentUtil
+                        .getCurlHelper()
+                        .post("/_bulk")
+                        .onConnect(
+                                (req, con) -> {
+                                    con.setDoOutput(true);
+                                    try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
+                                            final BufferedWriter bw =
+                                                    new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),
+                                                            Constants.CHARSET_UTF_8))) {
+                                        String line;
+                                        while ((line = br.readLine()) != null) {
+                                            if (StringUtil.isNotBlank(line)) {
+                                                final Map<String, Map<String, String>> dataObj;
+                                                if (line.contains("_type")) {
+                                                    dataObj = parseObject(mapper, line);
+                                                } else {
+                                                    dataObj = null;
+                                                }
+                                                if (dataObj != null) {
+                                                    final Map<String, String> indexObj = dataObj.get("index");
+                                                    if (indexObj != null && indexObj.containsKey("_type")) {
+                                                        indexObj.remove("_type");
+                                                        bw.write(mapper.writeValueAsString(dataObj));
+                                                    } else {
+                                                        bw.write(line);
+                                                    }
+                                                } else {
+                                                    bw.write(line);
+                                                }
+                                            }
+                                            bw.write("\n");
+                                        }
+                                        bw.flush();
+                                    } catch (IOException e) {
+                                        throw new IORuntimeException(e);
+                                    }
+                                }).execute()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Bulk Response:\n{}", response.getContentAsString());
+            }
+            systemHelper.reloadConfiguration();
+        } catch (final Exception e) {
+            logger.warn("Failed to process bulk file: " + fileName, e);
+        } finally {
+            deleteTempFile(tempFile);
+        }
+    }
+
+    private void importGsaXml(final String fileName, final File tempFile) {
+        final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
+        try (final InputStream in = new FileInputStream(tempFile)) {
+            configParser.parse(new InputSource(in));
+        } catch (final IOException e) {
+            logger.warn("Failed to process gsa.xml file: " + fileName, e);
+        } finally {
+            deleteTempFile(tempFile);
+        }
+        configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
+        configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
+        labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
+    }
+
+    private void importSystemProperties(final String fileName, final File tempFile) {
+        try (final InputStream in = new FileInputStream(tempFile)) {
+            ComponentUtil.getSystemProperties().load(in);
+        } catch (final IOException e) {
+            logger.warn("Failed to process system.properties file: " + fileName, e);
+        } finally {
+            deleteTempFile(tempFile);
+        }
+    }
+
+    private void importFessJson(final String fileName, final File tempFile) {
+        try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getFessJsonPath())) {
+            CopyUtil.copy(in, out);
+        } catch (final IOException e) {
+            logger.warn("Failed to process fess.json file: " + fileName, e);
+        } finally {
+            deleteTempFile(tempFile);
+        }
+    }
+
+    private void importDocJson(final String fileName, final File tempFile) {
+        try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getDocJsonPath())) {
+            CopyUtil.copy(in, out);
+        } catch (final IOException e) {
+            logger.warn("Failed to process doc.json file: " + fileName, e);
+        } finally {
+            deleteTempFile(tempFile);
+        }
+    }
+
     private Map<String, Map<String, String>> parseObject(final ObjectMapper mapper, String line) {
         try {
-            final Map<String, Map<String, String>> dataObj = mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
+            return mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
             });
-            return dataObj;
         } catch (Exception e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to parse " + line, e);
@@ -264,6 +307,20 @@ public class AdminBackupAction extends FessAdminAction {
                 } else if ("favorite_log".equals(name)) {
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
                 }
+            } else if (id.equals("fess.json")) {
+                return asStream(id).contentTypeOctetStream().stream(out -> {
+                    Path fessJsonPath = getFessJsonPath();
+                    try (final InputStream in = Files.newInputStream(fessJsonPath)) {
+                        out.write(in);
+                    }
+                });
+            } else if (id.equals("doc.json")) {
+                return asStream(id).contentTypeOctetStream().stream(out -> {
+                    Path fessJsonPath = getDocJsonPath();
+                    try (final InputStream in = Files.newInputStream(fessJsonPath)) {
+                        out.write(in);
+                    }
+                });
             } else {
                 final String index;
                 final String filename;
@@ -284,10 +341,16 @@ public class AdminBackupAction extends FessAdminAction {
                         });
             }
         }
-        throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), () -> {
-            return asListHtml();
-        });
+        throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), () -> asListHtml());
         return redirect(getClass()); // no-op
+    }
+
+    private Path getDocJsonPath() {
+        return ResourceUtil.getClassesPath("fess_indices", "fess", "doc.json");
+    }
+
+    private Path getFessJsonPath() {
+        return ResourceUtil.getClassesPath("fess_indices", "fess.json");
     }
 
     private StreamResponse writeNdjsonResponse(final String id, final Consumer<Writer> writeCall) {
@@ -480,6 +543,12 @@ public class AdminBackupAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminBackup_AdminBackupJsp).useForm(UploadForm.class).renderWith(
                 data -> RenderDataUtil.register(data, "backupItems", getBackupItems()));
+    }
+
+    private void deleteTempFile(final File tempFile) {
+        if (tempFile != null && !tempFile.delete()) {
+            logger.warn("Failed to delete {}", tempFile.getAbsolutePath());
+        }
     }
 
 }
