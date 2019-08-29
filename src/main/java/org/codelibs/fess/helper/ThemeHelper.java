@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -39,7 +40,7 @@ public class ThemeHelper {
         Path jarPath = getJarFile(artifact);
         String themeName = getThemeName(artifact);
         if (logger.isDebugEnabled()) {
-            logger.debug("Theme: " + themeName);
+            logger.debug("Theme: {}", themeName);
         }
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(jarPath))) {
             ZipEntry entry;
@@ -50,33 +51,33 @@ public class ThemeHelper {
                         continue;
                     }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Loading " + entry.getName());
+                        logger.debug("Loading {}", entry.getName());
                     }
                     if ("view".equals(names[0])) {
                         names[0] = themeName;
                         Path path = ResourceUtil.getViewTemplatePath(names);
                         Files.createDirectories(path.getParent());
-                        Files.copy(zis, path);
+                        Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     } else if ("css".equals(names[0])) {
                         names[0] = themeName;
                         Path path = ResourceUtil.getCssPath(names);
                         Files.createDirectories(path.getParent());
-                        Files.copy(zis, path);
+                        Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     } else if ("js".equals(names[0])) {
                         names[0] = themeName;
                         Path path = ResourceUtil.getJavaScriptPath(names);
                         Files.createDirectories(path.getParent());
-                        Files.copy(zis, path);
+                        Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     } else if ("images".equals(names[0])) {
                         names[0] = themeName;
                         Path path = ResourceUtil.getImagePath(names);
                         Files.createDirectories(path.getParent());
-                        Files.copy(zis, path);
+                        Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     }
                 }
             }
         } catch (IOException e) {
-            throw new ThemeException("Failed to install " + artifact);
+            throw new ThemeException("Failed to install " + artifact, e);
         }
     }
 
