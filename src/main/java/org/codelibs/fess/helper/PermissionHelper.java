@@ -236,11 +236,11 @@ public class PermissionHelper {
         return roleTypeList;
     }
 
-    public void setAllowPrefix(String allowPrefix) {
+    public void setAllowPrefix(final String allowPrefix) {
         this.allowPrefix = allowPrefix;
     }
 
-    public void setDenyPrefix(String denyPrefix) {
+    public void setDenyPrefix(final String denyPrefix) {
         this.denyPrefix = denyPrefix;
     }
 }

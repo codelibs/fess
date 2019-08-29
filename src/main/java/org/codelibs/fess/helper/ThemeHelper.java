@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
 public class ThemeHelper {
     private static final Logger logger = LoggerFactory.getLogger(ThemeHelper.class);
 
-    public void install(Artifact artifact) {
-        Path jarPath = getJarFile(artifact);
-        String themeName = getThemeName(artifact);
+    public void install(final Artifact artifact) {
+        final Path jarPath = getJarFile(artifact);
+        final String themeName = getThemeName(artifact);
         if (logger.isDebugEnabled()) {
             logger.debug("Theme: {}", themeName);
         }
@@ -46,7 +46,7 @@ public class ThemeHelper {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    String[] names = entry.getName().split("/");
+                    final String[] names = entry.getName().split("/");
                     if (names.length < 2) {
                         continue;
                     }
@@ -55,54 +55,54 @@ public class ThemeHelper {
                     }
                     if ("view".equals(names[0])) {
                         names[0] = themeName;
-                        Path path = ResourceUtil.getViewTemplatePath(names);
+                        final Path path = ResourceUtil.getViewTemplatePath(names);
                         Files.createDirectories(path.getParent());
                         Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     } else if ("css".equals(names[0])) {
                         names[0] = themeName;
-                        Path path = ResourceUtil.getCssPath(names);
+                        final Path path = ResourceUtil.getCssPath(names);
                         Files.createDirectories(path.getParent());
                         Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     } else if ("js".equals(names[0])) {
                         names[0] = themeName;
-                        Path path = ResourceUtil.getJavaScriptPath(names);
+                        final Path path = ResourceUtil.getJavaScriptPath(names);
                         Files.createDirectories(path.getParent());
                         Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     } else if ("images".equals(names[0])) {
                         names[0] = themeName;
-                        Path path = ResourceUtil.getImagePath(names);
+                        final Path path = ResourceUtil.getImagePath(names);
                         Files.createDirectories(path.getParent());
                         Files.copy(zis, path, StandardCopyOption.REPLACE_EXISTING);
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ThemeException("Failed to install " + artifact, e);
         }
     }
 
-    public void uninstall(Artifact artifact) {
-        String themeName = getThemeName(artifact);
+    public void uninstall(final Artifact artifact) {
+        final String themeName = getThemeName(artifact);
 
-        Path viewPath = ResourceUtil.getViewTemplatePath(themeName);
+        final Path viewPath = ResourceUtil.getViewTemplatePath(themeName);
         closeQuietly(viewPath);
-        Path imagePath = ResourceUtil.getImagePath(themeName);
+        final Path imagePath = ResourceUtil.getImagePath(themeName);
         closeQuietly(imagePath);
-        Path cssPath = ResourceUtil.getCssPath(themeName);
+        final Path cssPath = ResourceUtil.getCssPath(themeName);
         closeQuietly(cssPath);
-        Path jsPath = ResourceUtil.getJavaScriptPath(themeName);
+        final Path jsPath = ResourceUtil.getJavaScriptPath(themeName);
         closeQuietly(jsPath);
     }
 
-    protected String getThemeName(Artifact artifact) {
-        String themeName = artifact.getName().substring(ArtifactType.THEME.getId().length() + 1);
+    protected String getThemeName(final Artifact artifact) {
+        final String themeName = artifact.getName().substring(ArtifactType.THEME.getId().length() + 1);
         if (StringUtil.isBlank(themeName)) {
             throw new ThemeException("Theme name is empty: " + artifact);
         }
         return themeName;
     }
 
-    protected void closeQuietly(Path dir) {
+    protected void closeQuietly(final Path dir) {
         try (Stream<Path> walk = Files.walk(dir, FileVisitOption.FOLLOW_LINKS)) {
             walk.sorted(Comparator.reverseOrder()).forEach(f -> {
                 if (logger.isDebugEnabled()) {
@@ -110,18 +110,18 @@ public class ThemeHelper {
                 }
                 try {
                     Files.delete(f);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     logger.warn("Failed to delete " + f, e);
                 }
             });
             Files.deleteIfExists(dir);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.warn("Failed to delete " + dir, e);
         }
     }
 
-    protected Path getJarFile(Artifact artifact) {
-        Path jarPath = ResourceUtil.getPluginPath(artifact.getFileName());
+    protected Path getJarFile(final Artifact artifact) {
+        final Path jarPath = ResourceUtil.getPluginPath(artifact.getFileName());
         if (!Files.exists(jarPath)) {
             throw new ThemeException(artifact.getFileName() + " does not exist.");
         }

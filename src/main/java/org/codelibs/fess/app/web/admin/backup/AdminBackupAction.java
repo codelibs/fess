@@ -117,7 +117,7 @@ public class AdminBackupAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
         final String fileName = form.bulkFile.getFileName();
-        File tempFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".tmp");
+        final File tempFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".tmp");
         try (final InputStream in = form.bulkFile.getInputStream(); final OutputStream out = new FileOutputStream(tempFile)) {
             CopyUtil.copy(in, out);
             asyncImport(fileName, tempFile);
@@ -272,11 +272,11 @@ public class AdminBackupAction extends FessAdminAction {
         }
     }
 
-    private Map<String, Map<String, String>> parseObject(final ObjectMapper mapper, String line) {
+    private Map<String, Map<String, String>> parseObject(final ObjectMapper mapper, final String line) {
         try {
             return mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
             });
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to parse " + line, e);
             }
@@ -309,14 +309,14 @@ public class AdminBackupAction extends FessAdminAction {
                 }
             } else if (id.equals("fess.json")) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {
-                    Path fessJsonPath = getFessJsonPath();
+                    final Path fessJsonPath = getFessJsonPath();
                     try (final InputStream in = Files.newInputStream(fessJsonPath)) {
                         out.write(in);
                     }
                 });
             } else if (id.equals("doc.json")) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {
-                    Path fessJsonPath = getDocJsonPath();
+                    final Path fessJsonPath = getDocJsonPath();
                     try (final InputStream in = Files.newInputStream(fessJsonPath)) {
                         out.write(in);
                     }

@@ -233,7 +233,7 @@ public class UserInfoHelper {
         this.cookieSecure = cookieSecure;
     }
 
-    public void setCookieHttpOnly(boolean httpOnly) {
+    public void setCookieHttpOnly(final boolean httpOnly) {
         this.httpOnly = httpOnly;
     }
 }

@@ -84,7 +84,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
 
         return process(thumbnailId, responseData -> {
-            File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", "");
+            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", "");
             try {
                 CopyUtil.copy(responseData.getResponseBody(), tempFile);
 

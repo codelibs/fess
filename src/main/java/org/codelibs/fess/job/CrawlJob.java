@@ -321,7 +321,7 @@ public class CrawlJob extends ExecJob {
             cmdList.add(Integer.toString(documentExpires));
         }
 
-        File propFile = ComponentUtil.getSystemHelper().createTempFile(getExecuteType() + "_", ".properties");
+        final File propFile = ComponentUtil.getSystemHelper().createTempFile(getExecuteType() + "_", ".properties");
         try {
             cmdList.add("-p");
             cmdList.add(propFile.getAbsolutePath());

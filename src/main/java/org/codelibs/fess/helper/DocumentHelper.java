@@ -78,11 +78,11 @@ public class DocumentHelper {
                 tikaExtractor.setReplaceDuplication(isDuplicateTermRemoved());
                 tikaExtractor.setSpaceChars(getSpaceChars());
             }
-        } catch (ComponentNotFoundException e) {
+        } catch (final ComponentNotFoundException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("tikaExtractor is not found: " + e.getMessage());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to initiaize TikaExtractor.", e);
         }
     }
@@ -107,7 +107,7 @@ public class DocumentHelper {
         }
 
         if (crawlingConfig != null) {
-            Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+            final Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
             if (configParam != null && Constants.TRUE.equalsIgnoreCase(configParam.get(Param.Config.KEEP_ORIGINAL_BODY))) {
                 return content;
             }

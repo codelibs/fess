@@ -110,7 +110,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         fessLoginAssist.getSavedUserBean().ifPresent(u -> {
-            boolean result = u.getFessUser().refresh();
+            final boolean result = u.getFessUser().refresh();
             if (logger.isDebugEnabled()) {
                 logger.debug("refresh user info: {}", result);
             }

@@ -576,7 +576,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         this.acquisitionTimeout = acquisitionTimeout;
     }
 
-    public void setGroupCacheExpiry(long groupCacheExpiry) {
+    public void setGroupCacheExpiry(final long groupCacheExpiry) {
         this.groupCacheExpiry = groupCacheExpiry;
     }
 }

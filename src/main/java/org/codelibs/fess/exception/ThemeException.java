@@ -19,11 +19,11 @@ public class ThemeException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public ThemeException(String message, Throwable cause) {
+    public ThemeException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public ThemeException(String message) {
+    public ThemeException(final String message) {
         super(message);
     }
 

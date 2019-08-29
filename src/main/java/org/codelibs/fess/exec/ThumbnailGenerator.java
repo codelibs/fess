@@ -200,7 +200,7 @@ public class ThumbnailGenerator {
             }
             executorService.shutdown();
             executorService.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Interrupted.", e);
             }

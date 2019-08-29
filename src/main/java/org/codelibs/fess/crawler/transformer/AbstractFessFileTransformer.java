@@ -384,9 +384,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         params.put(HttpHeaders.CONTENT_TYPE, responseData.getMimeType());
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
         params.put(ExtractData.URL, responseData.getUrl());
-        Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        final Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
         if (configParam != null) {
-            String keepOriginalBody = configParam.get(Config.KEEP_ORIGINAL_BODY);
+            final String keepOriginalBody = configParam.get(Config.KEEP_ORIGINAL_BODY);
             if (StringUtil.isNotBlank(keepOriginalBody)) {
                 params.put(TikaExtractor.NORMALIZE_TEXT, Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE
                         : Constants.TRUE);

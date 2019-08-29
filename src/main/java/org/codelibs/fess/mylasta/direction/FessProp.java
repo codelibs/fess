@@ -1984,7 +1984,7 @@ public interface FessProp {
     default Object getQueryTrackTotalHitsValue() {
         Object value = propMap.get(QUERY_TRACK_TOTAL_HITS_VALUE);
         if (value == null) {
-            String v = getQueryTrackTotalHits();
+            final String v = getQueryTrackTotalHits();
             if (Constants.TRUE.equalsIgnoreCase(v)) {
                 value = Boolean.TRUE;
             } else if (Constants.FALSE.equalsIgnoreCase(v)) {
@@ -1992,7 +1992,7 @@ public interface FessProp {
             } else {
                 try {
                     value = Integer.valueOf(Integer.parseInt(v));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     value = StringUtil.EMPTY;
                 }
             }

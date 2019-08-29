@@ -170,7 +170,7 @@ public class FessFunctions {
     }
 
     public static String formatFileSize(final long value) {
-        double target = (double) value;
+        double target = value;
         String unit = ""; // TODO l10n?
         String format = "0.#";
         if (value < 1024) {

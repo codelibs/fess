@@ -62,7 +62,7 @@ public class UpdateLabelJob {
                                         return builder.setDoc(XContentFactory.jsonBuilder().startObject()
                                                 .field(fessConfig.getIndexFieldLabel(), labelSet.toArray(n -> new String[n])).endObject());
                                     }
-                                } catch (IOException e) {
+                                } catch (final IOException e) {
                                     logger.warn("Failed to process " + hit, e);
                                 }
                                 return null;

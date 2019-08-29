@@ -470,14 +470,14 @@ public class SystemHelper {
         return System.getProperty(Constants.FESS_LOG_LEVEL, Level.WARN.toString());
     }
 
-    public File createTempFile(String prefix, String suffix) {
+    public File createTempFile(final String prefix, final String suffix) {
         try {
             final File file = File.createTempFile(prefix, suffix);
             if (logger.isDebugEnabled()) {
                 logger.debug("Create {} as a temp file.", file.getAbsolutePath());
             }
             return file;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
     }

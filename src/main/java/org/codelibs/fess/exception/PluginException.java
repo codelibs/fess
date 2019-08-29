@@ -19,11 +19,11 @@ public class PluginException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public PluginException(String message, Throwable cause) {
+    public PluginException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public PluginException(String message) {
+    public PluginException(final String message) {
         super(message);
     }
 
