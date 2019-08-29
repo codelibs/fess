@@ -70,7 +70,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.validation.exception.ValidationErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -118,17 +117,18 @@ public class AdminBackupAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
         final String fileName = form.bulkFile.getFileName();
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile("fess_restore_", ".tmp");
-            try (final InputStream in = form.bulkFile.getInputStream(); final OutputStream out = new FileOutputStream(tempFile)) {
-                CopyUtil.copy(in, out);
-            }
+        File tempFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".tmp");
+        try (final InputStream in = form.bulkFile.getInputStream(); final OutputStream out = new FileOutputStream(tempFile)) {
+            CopyUtil.copy(in, out);
             asyncImport(fileName, tempFile);
-        } catch (final ValidationErrorException e) {
-            throw e;
-        } catch (final Exception e) {
-            logger.warn("Failed to import " + fileName, e);
+        } catch (final IOException e) {
+            logger.warn("Failed to create a temp file.", e);
+            if (tempFile.exists() && !tempFile.delete()) {
+                logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
+            }
+            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> {
+                return asListHtml();
+            });
         }
         saveInfo(messages -> messages.addSuccessBulkProcessStarted(GLOBAL));
         return redirect(getClass()); // no-op

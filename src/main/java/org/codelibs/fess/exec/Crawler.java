@@ -313,13 +313,13 @@ public class Crawler {
             systemProperties.reload(options.propertiesPath);
         } else {
             try {
-                final File propFile = File.createTempFile("crawler_", ".properties");
+                final File propFile = ComponentUtil.getSystemHelper().createTempFile("crawler_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
                     logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to create system properties file.", e);
             }
         }

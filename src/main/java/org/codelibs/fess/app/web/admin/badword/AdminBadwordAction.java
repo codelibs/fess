@@ -187,7 +187,7 @@ public class AdminBadwordAction extends FessAdminAction {
         verifyToken(() -> asDownloadHtml());
 
         return asStream("badword.csv").contentTypeOctetStream().stream(out -> {
-            final Path tempFile = Files.createTempFile(null, null);
+            final Path tempFile = ComponentUtil.getSystemHelper().createTempFile("fess-badword-", ".csv").toPath();
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     badWordService.exportCsv(writer);

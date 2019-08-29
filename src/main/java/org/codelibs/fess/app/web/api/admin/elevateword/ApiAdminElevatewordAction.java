@@ -174,7 +174,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     public StreamResponse get$download(final DownloadBody body) {
         validateApi(body, messages -> {});
         return asStream("elevate.csv").contentTypeOctetStream().stream(out -> {
-            final Path tempFile = Files.createTempFile(null, null);
+            final Path tempFile = ComponentUtil.getSystemHelper().createTempFile("fess-elevate-", ".csv").toPath();
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     elevateWordService.exportCsv(writer);

@@ -36,6 +36,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.KuromojiCSVUtil;
 import org.dbflute.optional.OptionalEntity;
 
@@ -208,9 +209,9 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
 
         protected KuromojiUpdater(final KuromojiItem newItem) {
             try {
-                newFile = File.createTempFile(KUROMOJI, ".txt");
+                newFile = ComponentUtil.getSystemHelper().createTempFile(KUROMOJI, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 if (newFile != null) {
                     newFile.delete();
                 }

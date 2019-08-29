@@ -16,7 +16,6 @@
 package org.codelibs.fess.exec;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -180,13 +179,13 @@ public class ThumbnailGenerator {
             systemProperties.reload(options.propertiesPath);
         } else {
             try {
-                final File propFile = File.createTempFile("thumbnail_", ".properties");
+                final File propFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
                     logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to create system properties file.", e);
             }
         }

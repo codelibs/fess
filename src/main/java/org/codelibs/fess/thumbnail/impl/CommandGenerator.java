@@ -30,6 +30,7 @@ import javax.annotation.PostConstruct;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +84,8 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
 
         return process(thumbnailId, responseData -> {
-            File tempFile = null;
+            File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", "");
             try {
-                tempFile = File.createTempFile("thumbnail_", "");
                 CopyUtil.copy(responseData.getResponseBody(), tempFile);
 
                 final String tempPath = tempFile.getAbsolutePath();

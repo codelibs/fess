@@ -36,6 +36,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
 public class StopwordsFile extends DictionaryFile<StopwordsItem> {
@@ -206,9 +207,9 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
 
         protected SynonymUpdater(final StopwordsItem newItem) {
             try {
-                newFile = File.createTempFile(STOPWORDS, ".txt");
+                newFile = ComponentUtil.getSystemHelper().createTempFile(STOPWORDS, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 if (newFile != null) {
                     newFile.delete();
                 }

@@ -472,7 +472,11 @@ public class SystemHelper {
 
     public File createTempFile(String prefix, String suffix) {
         try {
-            return File.createTempFile(prefix, suffix);
+            final File file = File.createTempFile(prefix, suffix);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Create {} as a temp file.", file.getAbsolutePath());
+            }
+            return file;
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }

@@ -83,7 +83,7 @@ public class AdminEsreqAction extends FessAdminAction {
             });
         } else {
             try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
-                final File tempFile = File.createTempFile("esreq_", ".json");
+                final File tempFile = ComponentUtil.getSystemHelper().createTempFile("esreq_", ".json");
                 try (final InputStream in = response.getContentAsStream()) {
                     CopyUtil.copy(in, tempFile);
                 } catch (final Exception e1) {

@@ -202,10 +202,9 @@ public class GenerateThumbnailJob extends ExecJob {
             cmdList.add("--cleanup");
         }
 
-        File propFile = null;
+        File propFile = ComponentUtil.getSystemHelper().createTempFile(getExecuteType() + "_", ".properties");
         try {
             cmdList.add("-p");
-            propFile = File.createTempFile(getExecuteType() + "_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 final Properties prop = new Properties();

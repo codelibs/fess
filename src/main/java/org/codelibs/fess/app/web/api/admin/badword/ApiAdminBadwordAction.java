@@ -43,6 +43,7 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
@@ -162,7 +163,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     public StreamResponse get$download(final DownloadBody body) {
         validateApi(body, messages -> {});
         return asStream("badword.csv").contentTypeOctetStream().stream(out -> {
-            final Path tempFile = Files.createTempFile(null, null);
+            final Path tempFile = ComponentUtil.getSystemHelper().createTempFile("fess-badword-", ".csv").toPath();
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     badWordService.exportCsv(writer);

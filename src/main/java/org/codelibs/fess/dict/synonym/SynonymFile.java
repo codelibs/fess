@@ -36,6 +36,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
@@ -280,9 +281,9 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
         protected SynonymUpdater(final SynonymItem newItem) {
             try {
-                newFile = File.createTempFile(SYNONYM, ".txt");
+                newFile = ComponentUtil.getSystemHelper().createTempFile(SYNONYM, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 if (newFile != null) {
                     newFile.delete();
                 }
