@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.security.MessageDigestUtil;
@@ -162,17 +163,15 @@ public class CrawlingInfoHelper {
         final List<String> roleTypeList = (List<String>) dataMap.get(fessConfig.getIndexFieldRole());
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
-            Collections.sort(roleTypeList);
             buf.append(";r=");
-            buf.append(String.join(",", roleTypeList));
+            buf.append(roleTypeList.stream().sorted().collect(Collectors.joining(",")));
         }
 
         @SuppressWarnings("unchecked")
         final List<String> virtualHostList = (List<String>) dataMap.get(fessConfig.getIndexFieldVirtualHost());
         if (virtualHostList != null && !virtualHostList.isEmpty()) {
-            Collections.sort(virtualHostList);
             buf.append(";v=");
-            buf.append(String.join(",", virtualHostList));
+            buf.append(virtualHostList.stream().sorted().collect(Collectors.joining(",")));
         }
 
         final String urlId = buf.toString().trim();

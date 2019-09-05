@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -143,5 +146,31 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals(
                 "6be41c30a9e5e7724f87134cecc6e5aa6fe771773b8845867ce41b1a6d46d50b25f504259c8e9a6657f6ada8865d06ab3bcee5abd306cdd1f43d60c451b34eb6",
                 crawlingInfoHelper.generateId(buf.substring(0, 520)));
+    }
+
+    public void test_generateId_multithread() throws Exception {
+        final Map<String, Object> dataMap = new HashMap<String, Object>();
+        dataMap.put("url", "http://example.com/");
+        final List<String> list = new ArrayList<>();
+        for (int i = 100; i > 0; i--) {
+            list.add(String.valueOf(i));
+        }
+        dataMap.put("role", list);
+        dataMap.put("virtual_host", list);
+        final String result =
+                "f8240bbae62b99960056c3a382844836c547c2ec73e019491bb7bbb02d92d98e876c8204b67a59ca8123b82d20986516b7d451f68dd634b39004c0d36c0eeca4";
+        assertEquals(result, crawlingInfoHelper.generateId(dataMap));
+
+        final AtomicInteger counter = new AtomicInteger(0);
+        final ForkJoinPool pool = new ForkJoinPool(10);
+        for (int i = 0; i < 1000; i++) {
+            pool.execute(() -> {
+                assertEquals(result, crawlingInfoHelper.generateId(dataMap));
+                counter.incrementAndGet();
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(10, TimeUnit.SECONDS);
+        assertEquals(1000, counter.get());
     }
 }
