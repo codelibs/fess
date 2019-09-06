@@ -22,12 +22,14 @@ public class HighlightInfo {
     private String type;
     private int fragmentSize;
     private int numOfFragments;
+    private int fragmentOffset;
 
     public HighlightInfo() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         this.type = fessConfig.getQueryHighlightType();
         this.fragmentSize = fessConfig.getQueryHighlightFragmentSizeAsInteger();
         this.numOfFragments = fessConfig.getQueryHighlightNumberOfFragmentsAsInteger();
+        this.fragmentOffset = fessConfig.getQueryHighlightFragmentOffsetAsInteger();
     }
 
     public String getType() {
@@ -54,6 +56,15 @@ public class HighlightInfo {
 
     public HighlightInfo numOfFragments(final int numOfFragments) {
         this.numOfFragments = numOfFragments;
+        return this;
+    }
+
+    public int getFragmentOffset() {
+        return fragmentOffset;
+    }
+
+    public HighlightInfo fragmentOffset(final int fragmentOffset) {
+        this.fragmentOffset = fragmentOffset;
         return this;
     }
 }

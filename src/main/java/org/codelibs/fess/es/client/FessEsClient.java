@@ -1108,8 +1108,116 @@ public class FessEsClient implements Client {
                 throw new ResultOffsetExceededException("The number of result size is exceeded.");
             }
 
-            final QueryContext queryContext =
-                    queryHelper.build(searchRequestType, query, context -> {
+            final QueryContext queryContext = buildQueryContext(queryHelper, fessConfig);
+
+            searchRequestBuilder.setFrom(offset).setSize(size);
+
+            final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
+            if (trackTotalHitsValue instanceof Boolean) {
+                searchRequestBuilder.setTrackTotalHits((Boolean) trackTotalHitsValue);
+            } else if (trackTotalHitsValue instanceof Number) {
+                searchRequestBuilder.setTrackTotalHitsUpTo(((Number) trackTotalHitsValue).intValue());
+            }
+
+            if (responseFields != null) {
+                searchRequestBuilder.setFetchSource(responseFields, null);
+            }
+
+            // rescorer
+            buildRescorer(queryHelper, fessConfig);
+
+            // sort
+            buildSort(queryContext, fessConfig);
+
+            // highlighting
+            if (highlightInfo != null) {
+                buildHighlighter(queryHelper, fessConfig);
+            }
+
+            // facets
+            if (facetInfo != null) {
+                buildFacet(queryHelper, fessConfig);
+            }
+
+            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && !isScroll && fessConfig.isResultCollapsed()
+                    && similarDocHash == null) {
+                searchRequestBuilder.setCollapse(getCollapseBuilder(fessConfig));
+            }
+
+            searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
+            return true;
+        }
+
+        protected void buildFacet(final QueryHelper queryHelper, final FessConfig fessConfig) {
+            stream(facetInfo.field).of(
+                    stream -> stream.forEach(f -> {
+                        if (queryHelper.isFacetField(f)) {
+                            final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
+                            final TermsAggregationBuilder termsBuilder =
+                                    AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
+                            termsBuilder.order(facetInfo.getBucketOrder());
+                            if (facetInfo.size != null) {
+                                termsBuilder.size(facetInfo.size);
+                            }
+                            if (facetInfo.minDocCount != null) {
+                                termsBuilder.minDocCount(facetInfo.minDocCount);
+                            }
+                            if (facetInfo.missing != null) {
+                                termsBuilder.missing(facetInfo.missing);
+                            }
+                            searchRequestBuilder.addAggregation(termsBuilder);
+                        } else {
+                            throw new SearchQueryException("Invalid facet field: " + f);
+                        }
+                    }));
+            stream(facetInfo.query)
+                    .of(stream -> stream.forEach(fq -> {
+                        final QueryContext facetContext = new QueryContext(fq, false);
+                        queryHelper.buildBaseQuery(facetContext, c -> {});
+                        final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
+                        final FilterAggregationBuilder filterBuilder =
+                                AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery, facetContext.getQueryBuilder());
+                        searchRequestBuilder.addAggregation(filterBuilder);
+                    }));
+        }
+
+        protected void buildHighlighter(final QueryHelper queryHelper, final FessConfig fessConfig) {
+            final String highlighterType = highlightInfo.getType();
+            final int fragmentSize = highlightInfo.getFragmentSize();
+            final int numOfFragments = highlightInfo.getNumOfFragments();
+            final int fragmentOffset = highlightInfo.getFragmentOffset();
+            final char[] boundaryChars = fessConfig.getQueryHighlightBoundaryCharsAsArray();
+            final int boundaryMaxScan = fessConfig.getQueryHighlightBoundaryMaxScanAsInteger();
+            final String boundaryScannerType = fessConfig.getQueryHighlightBoundaryScanner();
+            final boolean forceSource = fessConfig.isQueryHighlightForceSource();
+            final String fragmenter = fessConfig.getQueryHighlightFragmenter();
+            final int noMatchSize = fessConfig.getQueryHighlightNoMatchSizeAsInteger();
+            final String order = fessConfig.getQueryHighlightOrder();
+            final int phraseLimit = fessConfig.getQueryHighlightPhraseLimitAsInteger();
+            final String encoder = fessConfig.getQueryHighlightEncoder();
+            final HighlightBuilder highlightBuilder = new HighlightBuilder();
+            queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(
+                    new HighlightBuilder.Field(hf).highlighterType(highlighterType).fragmentSize(fragmentSize)
+                            .numOfFragments(numOfFragments).boundaryChars(boundaryChars).boundaryMaxScan(boundaryMaxScan)
+                            .boundaryScannerType(boundaryScannerType).forceSource(forceSource).fragmenter(fragmenter)
+                            .fragmentOffset(fragmentOffset).noMatchSize(noMatchSize).order(order).phraseLimit(phraseLimit))
+                    .encoder(encoder)));
+            searchRequestBuilder.highlighter(highlightBuilder);
+        }
+
+        protected void buildSort(final QueryContext queryContext, final FessConfig fessConfig) {
+            queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
+        }
+
+        protected void buildRescorer(final QueryHelper queryHelper, final FessConfig fessConfig) {
+            stream(queryHelper.getRescorers(condition())).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
+        }
+
+        protected QueryContext buildQueryContext(final QueryHelper queryHelper, final FessConfig fessConfig) {
+            return queryHelper.build(
+                    searchRequestType,
+                    query,
+                    context -> {
                         if (SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
                             context.skipRoleQuery();
                         } else if (similarDocHash != null) {
@@ -1126,77 +1234,6 @@ public class FessEsClient implements Client {
                             });
                         }
                     });
-
-            searchRequestBuilder.setFrom(offset).setSize(size);
-
-            final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
-            if (trackTotalHitsValue instanceof Boolean) {
-                searchRequestBuilder.setTrackTotalHits((Boolean) trackTotalHitsValue);
-            } else if (trackTotalHitsValue instanceof Number) {
-                searchRequestBuilder.setTrackTotalHitsUpTo(((Number) trackTotalHitsValue).intValue());
-            }
-
-            if (responseFields != null) {
-                searchRequestBuilder.setFetchSource(responseFields, null);
-            }
-
-            // rescorer
-            stream(queryHelper.getRescorers(condition())).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
-
-            // sort
-            queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
-
-            // highlighting
-            if (highlightInfo != null) {
-                final HighlightBuilder highlightBuilder = new HighlightBuilder();
-                queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf)
-                        .highlighterType(highlightInfo.getType()).fragmentSize(highlightInfo.getFragmentSize())
-                        .numOfFragments(highlightInfo.getNumOfFragments()))));
-                searchRequestBuilder.highlighter(highlightBuilder);
-            }
-
-            // facets
-            if (facetInfo != null) {
-                stream(facetInfo.field).of(
-                        stream -> stream.forEach(f -> {
-                            if (queryHelper.isFacetField(f)) {
-                                final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
-                                final TermsAggregationBuilder termsBuilder =
-                                        AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
-                                termsBuilder.order(facetInfo.getBucketOrder());
-                                if (facetInfo.size != null) {
-                                    termsBuilder.size(facetInfo.size);
-                                }
-                                if (facetInfo.minDocCount != null) {
-                                    termsBuilder.minDocCount(facetInfo.minDocCount);
-                                }
-                                if (facetInfo.missing != null) {
-                                    termsBuilder.missing(facetInfo.missing);
-                                }
-                                searchRequestBuilder.addAggregation(termsBuilder);
-                            } else {
-                                throw new SearchQueryException("Invalid facet field: " + f);
-                            }
-                        }));
-                stream(facetInfo.query).of(
-                        stream -> stream.forEach(fq -> {
-                            final QueryContext facetContext = new QueryContext(fq, false);
-                            queryHelper.buildBaseQuery(facetContext, c -> {});
-                            final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
-                            final FilterAggregationBuilder filterBuilder =
-                                    AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery,
-                                            facetContext.getQueryBuilder());
-                            searchRequestBuilder.addAggregation(filterBuilder);
-                        }));
-            }
-
-            if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && !isScroll && fessConfig.isResultCollapsed()
-                    && similarDocHash == null) {
-                searchRequestBuilder.setCollapse(getCollapseBuilder(fessConfig));
-            }
-
-            searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
-            return true;
         }
 
         protected CollapseBuilder getCollapseBuilder(final FessConfig fessConfig) {

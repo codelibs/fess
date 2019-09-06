@@ -83,7 +83,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djna.nosys=true
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
-    -Xms256m
+    -Xms128m
     -Xmx256m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
@@ -114,7 +114,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
     -Xms128m
-    -Xmx128m
+    -Xmx256m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
@@ -674,6 +674,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. &lt;/strong&gt; */
     String QUERY_HIGHLIGHT_TAG_POST = "query.highlight.tag.post";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_HIGHLIGHT_BOUNDARY_CHARS = "query.highlight.boundary.chars";
+
+    /** The key of the configuration. e.g. 20 */
+    String QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN = "query.highlight.boundary.max.scan";
+
+    /** The key of the configuration. e.g. sentence */
+    String QUERY_HIGHLIGHT_BOUNDARY_SCANNER = "query.highlight.boundary.scanner";
+
+    /** The key of the configuration. e.g. default */
+    String QUERY_HIGHLIGHT_ENCODER = "query.highlight.encoder";
+
+    /** The key of the configuration. e.g. false */
+    String QUERY_HIGHLIGHT_FORCE_SOURCE = "query.highlight.force.source";
+
+    /** The key of the configuration. e.g. span */
+    String QUERY_HIGHLIGHT_FRAGMENTER = "query.highlight.fragmenter";
+
+    /** The key of the configuration. e.g. -1 */
+    String QUERY_HIGHLIGHT_FRAGMENT_OFFSET = "query.highlight.fragment.offset";
+
+    /** The key of the configuration. e.g. 0 */
+    String QUERY_HIGHLIGHT_NO_MATCH_SIZE = "query.highlight.no.match.size";
+
+    /** The key of the configuration. e.g. score */
+    String QUERY_HIGHLIGHT_ORDER = "query.highlight.order";
+
+    /** The key of the configuration. e.g. 256 */
+    String QUERY_HIGHLIGHT_PHRASE_LIMIT = "query.highlight.phrase.limit";
 
     /** The key of the configuration. e.g. hl_content,digest */
     String QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS = "query.highlight.content.description.fields";
@@ -1543,7 +1573,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djna.nosys=true
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
-    -Xms256m
+    -Xms128m
     -Xmx256m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
@@ -1578,7 +1608,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djdk.io.permissionsUseCanonicalPath=true
     -server
     -Xms128m
-    -Xmx128m
+    -Xmx256m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
@@ -3421,6 +3451,123 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTagPost();
+
+    /**
+     * Get the value for the key 'query.highlight.boundary.chars'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightBoundaryChars();
+
+    /**
+     * Get the value for the key 'query.highlight.boundary.chars' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightBoundaryCharsAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.boundary.max.scan'. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightBoundaryMaxScan();
+
+    /**
+     * Get the value for the key 'query.highlight.boundary.max.scan' as {@link Integer}. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightBoundaryMaxScanAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.boundary.scanner'. <br>
+     * The value is, e.g. sentence <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightBoundaryScanner();
+
+    /**
+     * Get the value for the key 'query.highlight.encoder'. <br>
+     * The value is, e.g. default <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightEncoder();
+
+    /**
+     * Get the value for the key 'query.highlight.force.source'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightForceSource();
+
+    /**
+     * Is the property for the key 'query.highlight.force.source' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryHighlightForceSource();
+
+    /**
+     * Get the value for the key 'query.highlight.fragmenter'. <br>
+     * The value is, e.g. span <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightFragmenter();
+
+    /**
+     * Get the value for the key 'query.highlight.fragment.offset'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightFragmentOffset();
+
+    /**
+     * Get the value for the key 'query.highlight.fragment.offset' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightFragmentOffsetAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.no.match.size'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightNoMatchSize();
+
+    /**
+     * Get the value for the key 'query.highlight.no.match.size' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightNoMatchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.order'. <br>
+     * The value is, e.g. score <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightOrder();
+
+    /**
+     * Get the value for the key 'query.highlight.phrase.limit'. <br>
+     * The value is, e.g. 256 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightPhraseLimit();
+
+    /**
+     * Get the value for the key 'query.highlight.phrase.limit' as {@link Integer}. <br>
+     * The value is, e.g. 256 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightPhraseLimitAsInteger();
 
     /**
      * Get the value for the key 'query.highlight.content.description.fields'. <br>
@@ -6992,6 +7139,70 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_HIGHLIGHT_TAG_POST);
         }
 
+        public String getQueryHighlightBoundaryChars() {
+            return get(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS);
+        }
+
+        public Integer getQueryHighlightBoundaryCharsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS);
+        }
+
+        public String getQueryHighlightBoundaryMaxScan() {
+            return get(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN);
+        }
+
+        public Integer getQueryHighlightBoundaryMaxScanAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN);
+        }
+
+        public String getQueryHighlightBoundaryScanner() {
+            return get(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_SCANNER);
+        }
+
+        public String getQueryHighlightEncoder() {
+            return get(FessConfig.QUERY_HIGHLIGHT_ENCODER);
+        }
+
+        public String getQueryHighlightForceSource() {
+            return get(FessConfig.QUERY_HIGHLIGHT_FORCE_SOURCE);
+        }
+
+        public boolean isQueryHighlightForceSource() {
+            return is(FessConfig.QUERY_HIGHLIGHT_FORCE_SOURCE);
+        }
+
+        public String getQueryHighlightFragmenter() {
+            return get(FessConfig.QUERY_HIGHLIGHT_FRAGMENTER);
+        }
+
+        public String getQueryHighlightFragmentOffset() {
+            return get(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_OFFSET);
+        }
+
+        public Integer getQueryHighlightFragmentOffsetAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_OFFSET);
+        }
+
+        public String getQueryHighlightNoMatchSize() {
+            return get(FessConfig.QUERY_HIGHLIGHT_NO_MATCH_SIZE);
+        }
+
+        public Integer getQueryHighlightNoMatchSizeAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_NO_MATCH_SIZE);
+        }
+
+        public String getQueryHighlightOrder() {
+            return get(FessConfig.QUERY_HIGHLIGHT_ORDER);
+        }
+
+        public String getQueryHighlightPhraseLimit() {
+            return get(FessConfig.QUERY_HIGHLIGHT_PHRASE_LIMIT);
+        }
+
+        public Integer getQueryHighlightPhraseLimitAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_PHRASE_LIMIT);
+        }
+
         public String getQueryHighlightContentDescriptionFields() {
             return get(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS);
         }
@@ -8353,10 +8564,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                             "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-server\n-Xms512m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap
                     .put(FessConfig.JVM_SUGGEST_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xms256m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
             defaultMap
                     .put(FessConfig.JVM_THUMBNAIL_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xms128m\n-Xmx128m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:+HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");
@@ -8538,6 +8749,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_PRE, "<strong>");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_POST, "</strong>");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS, "\t\n ");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN, "20");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_SCANNER, "sentence");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_ENCODER, "default");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FORCE_SOURCE, "false");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENTER, "span");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_OFFSET, "-1");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NO_MATCH_SIZE, "0");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_ORDER, "score");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_PHRASE_LIMIT, "256");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS, "hl_content,digest");
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_DEFAULT_FIELDS, "");
