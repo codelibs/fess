@@ -657,7 +657,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
-    /** The key of the configuration. e.g. !.?։؟۔܀܁܂।၊။።፧፨᙮᠃᠉‼‽⁇⁈⁉。﹒﹗！．？｡ */
+    /** The key of the configuration. e.g. u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61 */
     String QUERY_HIGHLIGHT_TERMINAL_CHARS = "query.highlight.terminal.chars";
 
     /** The key of the configuration. e.g. 60 */
@@ -675,13 +675,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. &lt;/strong&gt; */
     String QUERY_HIGHLIGHT_TAG_POST = "query.highlight.tag.post";
 
-    /** The key of the configuration. e.g.  */
+    /** The key of the configuration. e.g. u0009u000Au0013u0020 */
     String QUERY_HIGHLIGHT_BOUNDARY_CHARS = "query.highlight.boundary.chars";
 
     /** The key of the configuration. e.g. 20 */
     String QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN = "query.highlight.boundary.max.scan";
 
-    /** The key of the configuration. e.g. sentence */
+    /** The key of the configuration. e.g. chars */
     String QUERY_HIGHLIGHT_BOUNDARY_SCANNER = "query.highlight.boundary.scanner";
 
     /** The key of the configuration. e.g. default */
@@ -3396,7 +3396,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.highlight.terminal.chars'. <br>
-     * The value is, e.g. !.?։؟۔܀܁܂।၊။።፧፨᙮᠃᠉‼‽⁇⁈⁉。﹒﹗！．？｡ <br>
+     * The value is, e.g. u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTerminalChars();
@@ -3454,18 +3454,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.highlight.boundary.chars'. <br>
-     * The value is, e.g.  <br>
+     * The value is, e.g. u0009u000Au0013u0020 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightBoundaryChars();
-
-    /**
-     * Get the value for the key 'query.highlight.boundary.chars' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getQueryHighlightBoundaryCharsAsInteger();
 
     /**
      * Get the value for the key 'query.highlight.boundary.max.scan'. <br>
@@ -3484,7 +3476,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.highlight.boundary.scanner'. <br>
-     * The value is, e.g. sentence <br>
+     * The value is, e.g. chars <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightBoundaryScanner();
@@ -7143,10 +7135,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS);
         }
 
-        public Integer getQueryHighlightBoundaryCharsAsInteger() {
-            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS);
-        }
-
         public String getQueryHighlightBoundaryMaxScan() {
             return get(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN);
         }
@@ -8743,15 +8731,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS, "!.?։؟۔܀܁܂।၊။።፧፨᙮᠃᠉‼‽⁇⁈⁉。﹒﹗！．？｡");
+            defaultMap
+                    .put(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS,
+                            "u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "60");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "2");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_PRE, "<strong>");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TAG_POST, "</strong>");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS, "\t\n ");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_CHARS, "u0009u000Au0013u0020");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_MAX_SCAN, "20");
-            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_SCANNER, "sentence");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_SCANNER, "chars");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_ENCODER, "default");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FORCE_SOURCE, "false");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENTER, "span");

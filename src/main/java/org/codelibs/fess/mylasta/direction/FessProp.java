@@ -71,6 +71,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    String QUERY_HIGHLIGHT_TERMINAL_CHARS = "queryHighlightTerminalChars";
+
     String QUERY_HIGHLIGHT_BOUNDARY_CHARS = "queryHighlightBoundaryChars";
 
     String QUERY_TRACK_TOTAL_HITS_VALUE = "queryTrackTotalHitsValue";
@@ -2028,16 +2030,18 @@ public interface FessProp {
     String getQueryHighlightBoundaryChars();
 
     default char[] getQueryHighlightBoundaryCharsAsArray() {
-        char[] chars = (char[]) propMap.get(QUERY_HIGHLIGHT_BOUNDARY_CHARS);
-        if (chars == null) {
-            final String value = getQueryHighlightBoundaryChars();
-            chars = new char[value.length()];
-            for (int i = 0; i < value.length(); i++) {
-                chars[i] = value.charAt(i);
-            }
-            propMap.put(QUERY_HIGHLIGHT_BOUNDARY_CHARS, chars);
+        final int[] values = getCrawlerDocumentCharsAsArray(QUERY_HIGHLIGHT_BOUNDARY_CHARS, getQueryHighlightBoundaryChars());
+        final char[] chars = new char[values.length];
+        for (int i = 0; i < values.length; i++) {
+            chars[i] = (char) values[i];
         }
         return chars;
+    }
+
+    String getQueryHighlightTerminalChars();
+
+    default int[] getQueryHighlightTerminalCharsAsArray() {
+        return getCrawlerDocumentCharsAsArray(QUERY_HIGHLIGHT_TERMINAL_CHARS, getQueryHighlightTerminalChars());
     }
 
 }

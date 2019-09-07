@@ -132,7 +132,7 @@ public class ViewHelper {
 
     protected String escapedHighlightPost = null;
 
-    protected Set<Integer> hihglightTerminalCharSet = new HashSet<>();
+    protected Set<Integer> highlightTerminalCharSet = new HashSet<>();
 
     protected ActionHook actionHook = new ActionHook();
 
@@ -146,7 +146,9 @@ public class ViewHelper {
         highlightTagPre = fessConfig.getQueryHighlightTagPre();
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
-        fessConfig.getQueryHighlightTerminalChars().codePoints().forEach(hihglightTerminalCharSet::add);
+        for (int v : fessConfig.getQueryHighlightTerminalCharsAsArray()) {
+            highlightTerminalCharSet.add(v);
+        }
         try {
             final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
             servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf)
@@ -211,7 +213,7 @@ public class ViewHelper {
         int pos = escaped.indexOf(escapedHighlightPre);
         while (pos >= 0) {
             final int c = escaped.codePointAt(pos);
-            if (Character.isISOControl(c) || hihglightTerminalCharSet.contains(c)) {
+            if (Character.isISOControl(c) || highlightTerminalCharSet.contains(c)) {
                 break;
             }
             pos--;
