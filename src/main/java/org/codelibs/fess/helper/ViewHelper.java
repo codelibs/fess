@@ -210,16 +210,21 @@ public class ViewHelper {
 
     protected String escapeHighlight(final String text) {
         final String escaped = LaFunctions.h(text);
-        int pos = escaped.indexOf(escapedHighlightPre);
-        while (pos >= 0) {
-            final int c = escaped.codePointAt(pos);
-            if (Character.isISOControl(c) || highlightTerminalCharSet.contains(c)) {
-                break;
+        final String value;
+        if (ComponentUtil.getFessConfig().isQueryHighlightBoundaryPositionDetect()) {
+            int pos = escaped.indexOf(escapedHighlightPre);
+            while (pos >= 0) {
+                final int c = escaped.codePointAt(pos);
+                if (Character.isISOControl(c) || highlightTerminalCharSet.contains(c)) {
+                    break;
+                }
+                pos--;
             }
-            pos--;
-        }
 
-        final String value = escaped.substring(pos + 1);
+            value = escaped.substring(pos + 1);
+        } else {
+            value = escaped;
+        }
         return value.replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
     }
 

@@ -708,6 +708,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. hl_content,digest */
     String QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS = "query.highlight.content.description.fields";
 
+    /** The key of the configuration. e.g. true */
+    String QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT = "query.highlight.boundary.position.detect";
+
     /** The key of the configuration. e.g. 100000 */
     String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
@@ -3567,6 +3570,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightContentDescriptionFields();
+
+    /**
+     * Get the value for the key 'query.highlight.boundary.position.detect'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightBoundaryPositionDetect();
+
+    /**
+     * Is the property for the key 'query.highlight.boundary.position.detect' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryHighlightBoundaryPositionDetect();
 
     /**
      * Get the value for the key 'query.max.search.result.offset'. <br>
@@ -7195,6 +7212,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS);
         }
 
+        public String getQueryHighlightBoundaryPositionDetect() {
+            return get(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT);
+        }
+
+        public boolean isQueryHighlightBoundaryPositionDetect() {
+            return is(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT);
+        }
+
         public String getQueryMaxSearchResultOffset() {
             return get(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
         }
@@ -8750,6 +8775,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_ORDER, "score");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_PHRASE_LIMIT, "256");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS, "hl_content,digest");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT, "true");
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_DEFAULT_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS, "");
