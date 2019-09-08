@@ -249,4 +249,12 @@
     <function-signature>java.lang.String replace(java.lang.Object, java.lang.String, java.lang.String)</function-signature>
     <example>${fe:replace(input, regex, replacement)}</example>
   </function>
+
+  <function>
+    <description>Format a content as code.</description>
+    <name>formatCode</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String formatCode(java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    <example>${fe:formatCode("L", doc.content_description, "prettyprint")}</example>
+  </function>
 </taglib>

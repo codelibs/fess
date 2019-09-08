@@ -27,6 +27,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -358,5 +361,34 @@ public class FessFunctions {
             return StringUtil.EMPTY;
         }
         return input.toString().replaceAll(regex, replacement);
+    }
+
+    public static String formatCode(final String prefix, final String input, final String style) {
+        if (input == null) {
+            return StringUtil.EMPTY;
+        }
+        final Pattern pattern = Pattern.compile("^" + prefix + "([0-9]+):(.*)$");
+        final String[] values = input.split("\n");
+        final List<String> list = new ArrayList<>(values.length);
+        int lineNum = 0;
+        for (final String line : values) {
+            final Matcher matcher = pattern.matcher(line);
+            if (matcher.matches()) {
+                if (lineNum == 0) {
+                    lineNum = Integer.parseInt(matcher.group(1));
+                    list.clear();
+                }
+                list.add(matcher.group(2));
+            } else {
+                list.add(line);
+            }
+        }
+        if (list.get(list.size() - 1).endsWith("...")) {
+            list.remove(list.size() - 1);
+        }
+        if (lineNum == 0) {
+            return "<pre class=\"" + style + "\">" + list.stream().collect(Collectors.joining("\n")) + "</pre>";
+        }
+        return "<pre class=\"" + style + " linenums:" + lineNum + "\">" + list.stream().collect(Collectors.joining("\n")) + "</pre>";
     }
 }
