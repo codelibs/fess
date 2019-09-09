@@ -174,4 +174,15 @@ public class DocumentHelperTest extends UnitFessTestCase {
 
         assertNull(documentHelper.decodeSimilarDocHash(null));
     }
+
+    public void test_appendLineNumber() {
+        DocumentHelper documentHelper = new DocumentHelper();
+
+        assertEquals("", documentHelper.appendLineNumber("L", null));
+        assertEquals("L1:", documentHelper.appendLineNumber("L", ""));
+        assertEquals("L1:aaa", documentHelper.appendLineNumber("L", "aaa"));
+        assertEquals("L1:aaa", documentHelper.appendLineNumber("L", "aaa\n"));
+        assertEquals("L1:aaa\nL2:bbb", documentHelper.appendLineNumber("L", "aaa\nbbb"));
+        assertEquals("L1:aaa\nL2:bbb\nL3:ccc", documentHelper.appendLineNumber("L", "aaa\nbbb\nccc"));
+    }
 }

@@ -252,4 +252,16 @@ public class DocumentHelper {
         return hash;
     }
 
+    public String appendLineNumber(final String prefix, final String content) {
+        if (content == null) {
+            return StringUtil.EMPTY;
+        }
+        final String[] values = content.split("\n");
+        final StringBuilder buf = new StringBuilder((int) (content.length() * 1.3));
+        buf.append(prefix).append(1).append(':').append(values[0]);
+        for (int i = 1; i < values.length; i++) {
+            buf.append('\n').append(prefix).append(i + 1).append(':').append(values[i]);
+        }
+        return buf.toString();
+    }
 }
