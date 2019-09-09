@@ -363,7 +363,7 @@ public class FessFunctions {
         return input.toString().replaceAll(regex, replacement);
     }
 
-    public static String formatCode(final String prefix, final String input, final String style) {
+    public static String formatCode(final String prefix, final String style, final String mimetype, final String input) {
         if (input == null) {
             return StringUtil.EMPTY;
         }

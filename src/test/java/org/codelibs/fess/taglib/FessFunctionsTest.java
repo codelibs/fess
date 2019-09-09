@@ -65,39 +65,39 @@ public class FessFunctionsTest extends UnitFessTestCase {
         String value;
 
         code = "";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint\"></pre>", value);
 
         code = "aaa";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint\">aaa</pre>", value);
 
         code = "aaa\nbbb";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint\">aaa\nbbb</pre>", value);
 
         code = "aaa\nbbb\nccc";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint\">aaa\nbbb\nccc</pre>", value);
 
         code = "L10:aaa";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:10\">aaa</pre>", value);
 
         code = "L10:aaa\nL11:bbb";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb</pre>", value);
 
         code = "L10:aaa\nL11:bbb\nL12:ccc";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb\nccc</pre>", value);
 
         code = "aaa\nL11:bbb\nL12:ccc";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:11\">bbb\nccc</pre>", value);
 
         code = "L10:aaa\nL11:bbb\nL12:ccc...";
-        value = FessFunctions.formatCode("L", code, "prettyprint");
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb</pre>", value);
 
     }

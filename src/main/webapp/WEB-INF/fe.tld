@@ -254,7 +254,7 @@
     <description>Format a content as code.</description>
     <name>formatCode</name>
     <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String formatCode(java.lang.String, java.lang.String, java.lang.String)</function-signature>
-    <example>${fe:formatCode("L", doc.content_description, "prettyprint")}</example>
+    <function-signature>java.lang.String formatCode(java.lang.String, java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    <example>${fe:formatCode("L", "prettyprint", doc.mimetype, doc.content_description)}</example>
   </function>
 </taglib>
