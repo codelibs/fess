@@ -77,6 +77,7 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
  - [JSON](https://github.com/codelibs/fess-ds-json)
  - [Office 365](https://github.com/codelibs/fess-ds-office365)
  - [S3](https://github.com/codelibs/fess-ds-s3)
+ - [Salesforce](https://github.com/codelibs/fess-ds-salesforce)
  - [Slack](https://github.com/codelibs/fess-ds-slack)
 
 ## Theme
