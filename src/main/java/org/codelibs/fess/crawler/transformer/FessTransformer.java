@@ -17,6 +17,7 @@ package org.codelibs.fess.crawler.transformer;
 
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,7 +115,14 @@ public interface FessTransformer {
         } else if (dataMap.containsKey(key)) {
             if (getFessConfig().isCrawlerDocumentAppendData()) {
                 final Object oldValue = dataMap.get(key);
-                final Object[] oldValues = oldValue instanceof Object[] ? (Object[]) oldValue : new Object[] { oldValue };
+                final Object[] oldValues;
+                if (oldValue instanceof Object[]) {
+                    oldValues = (Object[]) oldValue;
+                } else if (oldValue instanceof Collection<?>) {
+                    oldValues = ((Collection<?>) oldValue).toArray();
+                } else {
+                    oldValues = new Object[] { oldValue };
+                }
                 if (value.getClass().isArray()) {
                     final Object[] newValues = (Object[]) value;
                     final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
