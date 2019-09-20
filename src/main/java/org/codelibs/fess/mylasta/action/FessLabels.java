@@ -890,6 +890,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: TIFF Image */
     public static final String LABELS_facet_filetype_tiff = "{labels.facet_filetype_tiff}";
 
+    /** The key of the message: JPG Image */
+    public static final String LABELS_facet_filetype_jpg = "{labels.facet_filetype_jpg}";
+
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
 

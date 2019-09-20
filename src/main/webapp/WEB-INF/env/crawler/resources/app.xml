@@ -244,6 +244,10 @@
 			<arg>"image/tiff"</arg>
 			<arg>"tiff"</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/jpeg"</arg>
+			<arg>"jpg"</arg>
+		</postConstruct>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
