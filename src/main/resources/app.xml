@@ -103,6 +103,7 @@
 			"filetype:png",
 			"filetype:svg",
 			"filetype:tiff",
+			"filetype:jpg",
 			"filetype:others"
 			]
 		</property>
@@ -336,6 +337,10 @@
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_tiff"</arg>
 						<arg>"filetype:tiff"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_jpg"</arg>
+						<arg>"filetype:jpg"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_others"</arg>
