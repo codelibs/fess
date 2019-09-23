@@ -45,7 +45,7 @@
 		<!-- Partner Library -->
 		<slf4j.version>1.7.27</slf4j.version>
 		<log4j.version>2.11.1</log4j.version>
-		<jackson.version>2.9.9</jackson.version>
+		<jackson.version>2.9.10</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
 		<asm.version>7.1</asm.version>
 		<tika.version>1.22</tika.version>
@@ -1407,7 +1407,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}.3</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
