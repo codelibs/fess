@@ -80,7 +80,7 @@ public class DocumentHelper {
             }
         } catch (final ComponentNotFoundException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("tikaExtractor is not found: " + e.getMessage());
+                logger.debug("tikaExtractor is not found: {}", e.getMessage().replace('\n', ' '));
             }
         } catch (final Exception e) {
             logger.warn("Failed to initiaize TikaExtractor.", e);
