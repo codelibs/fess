@@ -77,8 +77,11 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryHelper {
+    private static final Logger logger = LoggerFactory.getLogger(QueryHelper.class);
 
     protected static final String PREFERENCE_QUERY = "_query";
 
@@ -136,6 +139,9 @@ public class QueryHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (responseFields == null) {
             responseFields = fessConfig.getQueryAdditionalResponseFields(//

@@ -106,6 +106,9 @@ public class SystemHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();

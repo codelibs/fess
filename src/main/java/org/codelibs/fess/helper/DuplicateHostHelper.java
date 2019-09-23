@@ -23,13 +23,19 @@ import javax.annotation.PostConstruct;
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DuplicateHostHelper {
+    private static final Logger logger = LoggerFactory.getLogger(DuplicateHostHelper.class);
 
     protected List<DuplicateHost> duplicateHostList;
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         if (duplicateHostList == null) {
             duplicateHostList = new ArrayList<>();
         }

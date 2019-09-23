@@ -70,6 +70,9 @@ public class DocumentHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         try {
             final TikaExtractor tikaExtractor = ComponentUtil.getComponent("tikaExtractor");
             if (tikaExtractor != null) {

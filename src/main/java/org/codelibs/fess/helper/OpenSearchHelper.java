@@ -48,6 +48,9 @@ public class OpenSearchHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         if (StringUtil.isNotBlank(osddPath)) {
             final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
             osddFile = new File(path);

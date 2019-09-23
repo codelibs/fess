@@ -232,6 +232,9 @@ public class FessEsClient implements Client {
 
     @PostConstruct
     public void open() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);

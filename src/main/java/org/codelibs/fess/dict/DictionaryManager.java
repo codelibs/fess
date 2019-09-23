@@ -41,6 +41,9 @@ public class DictionaryManager {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         creatorList.forEach(creator -> {
             creator.setDictionaryManager(this);
         });
