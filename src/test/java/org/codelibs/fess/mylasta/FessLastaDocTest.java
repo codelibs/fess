@@ -50,6 +50,7 @@ public class FessLastaDocTest extends UnitFessTestCase {
     //                                                                            ========
     public void test_document() throws Exception {
         saveLastaDocMeta();
+        assertTrue(true);
     }
 
     @Override
