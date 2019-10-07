@@ -55,6 +55,9 @@ public class EditForm {
     @Size(max = 10)
     public String webApiJson;
 
+    @Size(max = 10000)
+    public String appValue;
+
     @Size(max = 1000)
     public String defaultLabelValue;
 

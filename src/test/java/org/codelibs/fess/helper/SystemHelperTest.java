@@ -30,6 +30,10 @@ public class SystemHelperTest extends UnitFessTestCase {
             @Override
             protected void parseProjectProperties() {
             }
+
+            @Override
+            public void updateSystemProperties() {
+            }
         };
         systemHelper.init();
     }

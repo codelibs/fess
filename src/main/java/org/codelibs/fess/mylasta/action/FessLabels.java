@@ -1169,6 +1169,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: JSON Response */
     public static final String LABELS_web_api_json_enabled = "{labels.web_api_json_enabled}";
 
+    /** The key of the message: System Properties */
+    public static final String LABELS_app_value = "{labels.app_value}";
+
     /** The key of the message: Default Label Value */
     public static final String LABELS_default_label_value = "{labels.default_label_value}";
 
