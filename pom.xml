@@ -50,13 +50,6 @@
 		<asm.version>7.2</asm.version>
 		<tika.version>1.22</tika.version>
 
-		<!-- Testing -->
-		<junit.version>4.12</junit.version>
-		<junit.jupiter.version>5.0.2</junit.jupiter.version>
-		<junit.vintage.version>${junit.version}.0</junit.vintage.version>
-		<junit.platform.version>1.0.0</junit.platform.version>
-		<utflute.version>0.9.1</utflute.version>
-
 		<!-- Crawler -->
 		<crawler.version>3.4.0-SNAPSHOT</crawler.version>
 
@@ -71,6 +64,12 @@
 		<!-- Tomcat -->
 		<tomcat.version>9.0.26</tomcat.version>
 		<tomcat.boot.version>0.7.3</tomcat.boot.version>
+
+		<!-- Testing -->
+		<utflute.version>0.9.1</utflute.version>
+		<junit.version>4.12</junit.version>
+		<junit.jupiter.version>5.5.2</junit.jupiter.version>
+		<junit.vintage.version>5.5.2</junit.vintage.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
@@ -126,7 +125,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<release>11</release>
 					<encoding>UTF-8</encoding>
@@ -134,7 +133,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>source-jar</id>
@@ -147,7 +146,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>3.2.3</version>
 				<configuration>
 					<webResources>
 						<resource>
@@ -178,7 +177,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
+				<version>2.22.2</version>
 				<configuration>
 					<includes>
 						<include>${test.include.path}</include>
@@ -186,27 +185,14 @@
 					<argLine>${test.command.args}</argLine>
 					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.junit.platform</groupId>
-						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>${junit.platform.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.junit.jupiter</groupId>
-						<artifactId>junit-jupiter-engine</artifactId>
-						<version>${junit.jupiter.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.junit.vintage</groupId>
-						<artifactId>junit-vintage-engine</artifactId>
-						<version>${junit.vintage.version}</version>
-					</dependency>
-				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.2</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.1.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
@@ -423,7 +409,7 @@
 			<!-- zip, tarball -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.1</version>
 				<configuration>
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
@@ -447,7 +433,7 @@
 			<plugin>
 				<groupId>org.vafer</groupId>
 				<artifactId>jdeb</artifactId>
-				<version>1.7</version>
+				<version>1.8</version>
 				<configuration>
 					<deb>${project.build.directory}/releases/${project.artifactId}-${project.version}.deb</deb>
 					<controlDir>${project.build.directory}/generated-packaging/deb/scripts</controlDir>
@@ -971,61 +957,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											net.revelc.code
-										</groupId>
-										<artifactId>
-											formatter-maven-plugin
-										</artifactId>
-										<versionRange>
-											[0.5.2,)
-										</versionRange>
-										<goals>
-											<goal>format</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-dependency-plugin
-										</artifactId>
-										<versionRange>
-											[2.10,)
-										</versionRange>
-										<goals>
-											<goal>
-												unpack-dependencies
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	<pluginRepositories>
 		<pluginRepository>
@@ -1491,15 +1422,27 @@
 
 		<!-- test -->
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit.vintage.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
