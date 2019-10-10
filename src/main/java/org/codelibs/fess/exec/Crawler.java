@@ -289,6 +289,7 @@ public class Crawler {
 
     private static void destroyContainer() {
         if (running.getAndSet(false)) {
+            TimeoutManager.getInstance().stop();
             if (logger.isDebugEnabled()) {
                 logger.debug("Destroying LaContainer...");
             }

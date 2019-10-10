@@ -155,6 +155,7 @@ public class SuggestCreator {
     }
 
     private static void destroyContainer() {
+        TimeoutManager.getInstance().stop();
         synchronized (SingletonLaContainerFactory.class) {
             SingletonLaContainerFactory.destroy();
         }
