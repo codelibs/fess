@@ -140,6 +140,9 @@ public class ViewHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
         escapedHighlightPost = LaFunctions.h(originalHighlightTagPost);

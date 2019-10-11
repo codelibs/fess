@@ -35,10 +35,12 @@ public class FessActionDefTest extends UnitFessTestCase {
 
     public void test_nonActionExtendsAction() throws Exception {
         policeStoryOfJavaClassChase(new NonActionExtendsActionPolice());
+        assertTrue(true);
     }
 
     public void test_nonWebHasWebReference() throws Exception {
         policeStoryOfJavaClassChase(new NonWebHasWebReferencePolice());
+        assertTrue(true);
     }
 
     public void test_webPackageNinjaReferencePolice() throws Exception {

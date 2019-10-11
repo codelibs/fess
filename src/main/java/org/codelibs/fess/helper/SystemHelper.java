@@ -61,6 +61,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
+import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
@@ -106,6 +107,10 @@ public class SystemHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
+        updateSystemProperties();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
@@ -430,6 +435,25 @@ public class SystemHelper {
         ComponentUtil.getRelatedContentHelper().update();
         ComponentUtil.getRelatedQueryHelper().update();
         ComponentUtil.getKeyMatchHelper().update();
+        updateSystemProperties();
+    }
+
+    public void updateSystemProperties() {
+        final String value = ComponentUtil.getFessConfig().getAppValue();
+        if (StringUtil.isNotBlank(value)) {
+            ParameterUtil.parse(value).entrySet().stream().filter(e -> {
+                final String key = e.getKey();
+                if (StringUtil.isNotBlank(key)) {
+                    return false;
+                }
+                if (key.startsWith("fess.")) {
+                    return true;
+                }
+                return System.getProperty(key) == null;
+            }).forEach(e -> {
+                System.setProperty(e.getKey(), e.getValue());
+            });
+        }
     }
 
     public String updateConfiguration() {

@@ -104,6 +104,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_DESIGN_EDITOR_PROPERTY = "design.editor";
 
+    public static final String APP_VALUE_PROPERTY = "system.properties";
+
     public static final String DEFAULT_LABEL_VALUE_PROPERTY = "label.value";
 
     public static final String DEFAULT_SORT_VALUE_PROPERTY = "sort.value";

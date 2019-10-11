@@ -137,7 +137,7 @@ public class ThumbnailGenerator {
 
             systemMonitorTask =
                     TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
-                            ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(), true);
+                            ComponentUtil.getFessConfig().getThumbnailSystemMonitorIntervalAsInteger(), true);
 
             final int totalCount = process(options);
             if (totalCount != 0) {
@@ -167,6 +167,7 @@ public class ThumbnailGenerator {
     }
 
     private static void destroyContainer() {
+        TimeoutManager.getInstance().stop();
         synchronized (SingletonLaContainerFactory.class) {
             SingletonLaContainerFactory.destroy();
         }

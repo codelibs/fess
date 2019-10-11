@@ -94,6 +94,15 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="appValue" class="col-sm-3 control-label"><la:message
+												key="labels.app_value" /></label>
+										<div class="col-sm-9">
+											<la:errors property="appValue" />
+											<la:textarea styleId="appValue" property="appValue"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="defaultLabelValue" class="col-sm-3 control-label"><la:message
 												key="labels.default_label_value" /></label>
 										<div class="col-sm-9">

@@ -7,8 +7,7 @@
 			{"http.cors.enabled":"true",
 			 "http.cors.allow-origin":"*",
 			 "indices.breaker.total.limit":"100%",
-			 "discovery.seed_hosts":"127.0.0.1:9301",
-			 "cluster.initial_master_nodes":"127.0.0.1:9301",
+			 "discovery.type":"single-node",
 			 "action.auto_create_index":"-*"}
 		</property>
 		<!-- Dictionaries -->

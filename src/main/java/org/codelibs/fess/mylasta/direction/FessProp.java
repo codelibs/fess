@@ -139,6 +139,8 @@ public interface FessProp {
 
     String ROLE_VALUE_PREFIX = "role:";
 
+    String APP_VALUES = "appValues";
+
     String DEFAULT_SORT_VALUES = "defaultSortValues";
 
     String DEFAULT_LABEL_VALUES = "defaultLabelValues";
@@ -310,6 +312,15 @@ public interface FessProp {
                             }
                             return Stream.empty();
                         }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
+    }
+
+    default void setAppValue(final String value) {
+        setSystemProperty(Constants.APP_VALUE_PROPERTY, value);
+        propMap.remove(APP_VALUES);
+    }
+
+    default String getAppValue() {
+        return getSystemProperty(Constants.APP_VALUE_PROPERTY, StringUtil.EMPTY);
     }
 
     default void setDefaultLabelValue(final String value) {

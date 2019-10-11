@@ -67,6 +67,9 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         if (!Paths.get(keyFileLocation).toFile().exists()) {
             logger.info("GA Key File does not exist.");
             return;

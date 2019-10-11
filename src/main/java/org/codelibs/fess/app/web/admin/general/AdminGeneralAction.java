@@ -29,6 +29,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.TestmailPostcard;
 import org.codelibs.fess.util.ComponentUtil;
@@ -136,6 +137,7 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setUserInfo(isCheckboxEnabled(form.userInfo));
         fessConfig.setUserFavorite(isCheckboxEnabled(form.userFavorite));
         fessConfig.setWebApiJson(isCheckboxEnabled(form.webApiJson));
+        fessConfig.setAppValue(form.appValue);
         fessConfig.setDefaultLabelValue(form.defaultLabelValue);
         fessConfig.setDefaultSortValue(form.defaultSortValue);
         fessConfig.setVirtualHostValue(form.virtualHostValue);
@@ -167,10 +169,12 @@ public class AdminGeneralAction extends FessAdminAction {
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
-        ComponentUtil.getSystemHelper().refreshDesignJspFiles();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        systemHelper.refreshDesignJspFiles();
+        systemHelper.updateSystemProperties();
 
         if (StringUtil.isNotBlank(form.logLevel)) {
-            ComponentUtil.getSystemHelper().setLogLevel(form.logLevel);
+            systemHelper.setLogLevel(form.logLevel);
         }
     }
 
@@ -186,6 +190,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.userInfo = fessConfig.isUserInfo() ? Constants.TRUE : Constants.FALSE;
         form.userFavorite = fessConfig.isUserFavorite() ? Constants.TRUE : Constants.FALSE;
         form.webApiJson = fessConfig.isWebApiJson() ? Constants.TRUE : Constants.FALSE;
+        form.appValue = fessConfig.getAppValue();
         form.defaultLabelValue = fessConfig.getDefaultLabelValue();
         form.defaultSortValue = fessConfig.getDefaultSortValue();
         form.virtualHostValue = fessConfig.getVirtualHostValue();

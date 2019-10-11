@@ -49,6 +49,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         if (baseDir == null) {
             baseDir = new File(System.getProperty("java.io.tmpdir"));
         }

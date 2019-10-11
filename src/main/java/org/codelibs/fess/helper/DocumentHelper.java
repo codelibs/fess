@@ -70,6 +70,9 @@ public class DocumentHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         try {
             final TikaExtractor tikaExtractor = ComponentUtil.getComponent("tikaExtractor");
             if (tikaExtractor != null) {
@@ -80,7 +83,7 @@ public class DocumentHelper {
             }
         } catch (final ComponentNotFoundException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("tikaExtractor is not found: " + e.getMessage());
+                logger.debug("tikaExtractor is not found: {}", e.getMessage().replace('\n', ' '));
             }
         } catch (final Exception e) {
             logger.warn("Failed to initiaize TikaExtractor.", e);

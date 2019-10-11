@@ -1067,6 +1067,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String THUMBNAIL_CRAWLER_ENABLED = "thumbnail.crawler.enabled";
 
+    /** The key of the configuration. e.g. 60 */
+    String THUMBNAIL_SYSTEM_MONITOR_INTERVAL = "thumbnail.system.monitor.interval";
+
     /** The key of the configuration. e.g. userCode */
     String USER_CODE_REQUEST_PARAMETER = "user.code.request.parameter";
 
@@ -4944,6 +4947,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isThumbnailCrawlerEnabled();
 
     /**
+     * Get the value for the key 'thumbnail.system.monitor.interval'. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailSystemMonitorInterval();
+
+    /**
+     * Get the value for the key 'thumbnail.system.monitor.interval' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThumbnailSystemMonitorIntervalAsInteger();
+
+    /**
      * Get the value for the key 'user.code.request.parameter'. <br>
      * The value is, e.g. userCode <br>
      * comment: user
@@ -7912,6 +7930,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.THUMBNAIL_CRAWLER_ENABLED);
         }
 
+        public String getThumbnailSystemMonitorInterval() {
+            return get(FessConfig.THUMBNAIL_SYSTEM_MONITOR_INTERVAL);
+        }
+
+        public Integer getThumbnailSystemMonitorIntervalAsInteger() {
+            return getAsInteger(FessConfig.THUMBNAIL_SYSTEM_MONITOR_INTERVAL);
+        }
+
         public String getUserCodeRequestParameter() {
             return get(FessConfig.USER_CODE_REQUEST_PARAMETER);
         }
@@ -8880,6 +8906,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THUMBNAIL_GENERATOR_INTERVAL, "0");
             defaultMap.put(FessConfig.THUMBNAIL_GENERATOR_TARGETS, "all");
             defaultMap.put(FessConfig.THUMBNAIL_CRAWLER_ENABLED, "true");
+            defaultMap.put(FessConfig.THUMBNAIL_SYSTEM_MONITOR_INTERVAL, "60");
             defaultMap.put(FessConfig.USER_CODE_REQUEST_PARAMETER, "userCode");
             defaultMap.put(FessConfig.USER_CODE_MIN_LENGTH, "20");
             defaultMap.put(FessConfig.USER_CODE_MAX_LENGTH, "100");

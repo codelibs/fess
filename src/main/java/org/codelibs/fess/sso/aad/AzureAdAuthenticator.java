@@ -113,6 +113,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         ComponentUtil.getSsoManager().register(this);
         groupCache = CacheBuilder.newBuilder().expireAfterWrite(groupCacheExpiry, TimeUnit.SECONDS).build();
     }

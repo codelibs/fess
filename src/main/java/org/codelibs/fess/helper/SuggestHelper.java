@@ -85,6 +85,9 @@ public class SuggestHelper {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         fessConfig = ComponentUtil.getFessConfig();
         split(fessConfig.getSuggestFieldContents(), ",").of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(contentFieldNameSet::add));

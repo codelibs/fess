@@ -88,6 +88,9 @@ public class ThumbnailManager {
 
     @PostConstruct
     public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize " + this.getClass().getSimpleName());
+        }
         final String thumbnailPath = System.getProperty(Constants.FESS_THUMBNAIL_PATH);
         if (thumbnailPath != null) {
             baseDir = new File(thumbnailPath);
