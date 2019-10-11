@@ -3,21 +3,6 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="thumbnailManager" class="org.codelibs.fess.thumbnail.ThumbnailManager">
-		<postConstruct name="add">
-			<arg>htmlThumbnailGenerator</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>msofficeThumbnailGenerator</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>pdfThumbnailGenerator</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>psThumbnailGenerator</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>imageThumbnailGenerator</arg>
-		</postConstruct>
 	</component>
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.HtmlTagBasedGenerator">
 		<property name="name">"htmlThumbnailGenerator"</property>
@@ -25,6 +10,7 @@
 			<arg>"mimetype"</arg>
 			<arg>"text/html"</arg>
 		</postConstruct>
+		<postConstruct name="register"></postConstruct>
 	</component>
 	<component name="msofficeThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"msofficeThumbnailGenerator"</property>
@@ -86,6 +72,7 @@
 			<arg>"mimetype"</arg>
 			<arg>"application/rtf"</arg>
 		</postConstruct>
+		<postConstruct name="register"></postConstruct>
 	</component>
 	<component name="pdfThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"pdfThumbnailGenerator"</property>
@@ -103,6 +90,7 @@
 			<arg>"application/pdf"
 			</arg>
 		</postConstruct>
+		<postConstruct name="register"></postConstruct>
 	</component>
 	<component name="psThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"psThumbnailGenerator"</property>
@@ -120,6 +108,7 @@
 			<arg>"application/postscript"
 			</arg>
 		</postConstruct>
+		<postConstruct name="register"></postConstruct>
 	</component>
 	<component name="imageThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"imageThumbnailGenerator"</property>
@@ -187,5 +176,6 @@
 			<arg>"application/photoshop"
 			</arg>
 		</postConstruct>
+		<postConstruct name="register"></postConstruct>
 	</component>
 </components>

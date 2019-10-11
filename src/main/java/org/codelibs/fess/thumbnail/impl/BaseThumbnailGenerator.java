@@ -61,6 +61,10 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     protected Boolean available = null;
 
+    public void register() {
+        ComponentUtil.getThumbnailManager().add(this);
+    }
+
     public void addCondition(final String key, final String regex) {
         final String value = conditionMap.get(key);
         if (StringUtil.isBlank(value)) {
