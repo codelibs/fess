@@ -81,7 +81,7 @@ if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCAppli
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -Xloggc:%FESS_HOME%/logs/gc.log
 
 REM Causes the JVM to dump its heap on OutOfMemory.
-set JAVA_OPTS=%JAVA_OPTS% -XX:+HeapDumpOnOutOfMemoryError
+REM set JAVA_OPTS=%JAVA_OPTS% -XX:+HeapDumpOnOutOfMemoryError
 REM The path to the heap dump location, note directory must exists and have enough
 REM space for a full heap dump.
 REM JAVA_OPTS=%JAVA_OPTS% -XX:HeapDumpPath=%FESS_HOME%/logs/heapdump.hprof
