@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.codelibs.core.lang.StringUtil;
@@ -44,7 +45,7 @@ public interface CrawlingConfig {
 
     Integer getTimeToLive();
 
-    Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
+    CrawlerClientFactory initializeClientFactory(Supplier<CrawlerClientFactory> creator);
 
     Map<String, String> getConfigParameterMap(ConfigName name);
 

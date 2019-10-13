@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -76,9 +77,11 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     protected Pattern[] excludedDocPathPatterns;
 
-    private Map<String, String> handlerParameterMap;
+    protected Map<String, String> handlerParameterMap;
 
-    private Map<String, String> handlerScriptMap;
+    protected Map<String, String> handlerScriptMap;
+
+    protected CrawlerClientFactory crawlerClientFactory = null;
 
     public DataConfig() {
         super();
@@ -131,11 +134,16 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     }
 
     @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
+    public CrawlerClientFactory initializeClientFactory(final Supplier<CrawlerClientFactory> creator) {
+        if (crawlerClientFactory != null) {
+            return crawlerClientFactory;
+        }
+        final CrawlerClientFactory factory = creator.get();
+
         final Map<String, String> paramMap = getHandlerParameterMap();
 
         final Map<String, Object> factoryParamMap = new HashMap<>();
-        crawlerClientFactory.setInitParameterMap(factoryParamMap);
+        factory.setInitParameterMap(factoryParamMap);
 
         // parameters
         for (final Map.Entry<String, String> entry : paramMap.entrySet()) {
@@ -284,7 +292,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             }
         }
 
-        return factoryParamMap;
+        crawlerClientFactory = factory;
+        return factory;
     }
 
     private AuthScheme getAuthScheme(final Map<String, String> paramMap, final String webAuthName, final String scheme) {

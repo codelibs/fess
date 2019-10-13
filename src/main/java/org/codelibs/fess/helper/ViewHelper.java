@@ -606,8 +606,8 @@ public class ViewHelper {
             throw new FessSystemException("No crawlingConfig: " + configId);
         }
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-        final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getComponent(CrawlerClientFactory.class);
-        config.initializeClientFactory(crawlerClientFactory);
+        final CrawlerClientFactory crawlerClientFactory =
+                config.initializeClientFactory(() -> ComponentUtil.getComponent(CrawlerClientFactory.class));
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
             throw new FessSystemException("No CrawlerClient: " + configId + ", url: " + url);

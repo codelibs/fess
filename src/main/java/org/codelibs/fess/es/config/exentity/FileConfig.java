@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
@@ -46,6 +47,8 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     protected volatile Pattern[] excludedDocPathPatterns;
 
     protected transient volatile Map<ConfigName, Map<String, String>> configParameterMap;
+
+    protected CrawlerClientFactory crawlerClientFactory = null;
 
     public FileConfig() {
         super();
@@ -142,12 +145,17 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     }
 
     @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory clientFactory) {
+    public CrawlerClientFactory initializeClientFactory(final Supplier<CrawlerClientFactory> creator) {
+        if (crawlerClientFactory != null) {
+            return crawlerClientFactory;
+        }
+        final CrawlerClientFactory factory = creator.get();
+
         final FileAuthenticationService fileAuthenticationService = ComponentUtil.getComponent(FileAuthenticationService.class);
 
         //  Parameters
         final Map<String, Object> paramMap = new HashMap<>();
-        clientFactory.setInitParameterMap(paramMap);
+        factory.setInitParameterMap(paramMap);
 
         final Map<String, String> clientConfigMap = getConfigParameterMap(ConfigName.CLIENT);
         if (clientConfigMap != null) {
@@ -193,7 +201,8 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 smb1AuthList.toArray(new org.codelibs.fess.crawler.client.smb1.SmbAuthentication[smb1AuthList.size()]));
         paramMap.put(Param.Client.FTP_AUTHENTICATIONS, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
 
-        return paramMap;
+        crawlerClientFactory = factory;
+        return factory;
     }
 
     @Override

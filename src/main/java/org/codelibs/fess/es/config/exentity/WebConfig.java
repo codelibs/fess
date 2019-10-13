@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -50,6 +51,8 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     protected volatile Pattern[] excludedDocUrlPatterns;
 
     protected transient volatile Map<ConfigName, Map<String, String>> configParameterMap;
+
+    protected CrawlerClientFactory crawlerClientFactory = null;
 
     public WebConfig() {
         super();
@@ -145,14 +148,19 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     }
 
     @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory clientFactory) {
+    public CrawlerClientFactory initializeClientFactory(final Supplier<CrawlerClientFactory> creator) {
+        if (crawlerClientFactory != null) {
+            return crawlerClientFactory;
+        }
+        final CrawlerClientFactory factory = creator.get();
+
         final WebAuthenticationService webAuthenticationService = ComponentUtil.getComponent(WebAuthenticationService.class);
         final RequestHeaderService requestHeaderService = ComponentUtil.getComponent(RequestHeaderService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         // HttpClient Parameters
         final Map<String, Object> paramMap = new HashMap<>();
-        clientFactory.setInitParameterMap(paramMap);
+        factory.setInitParameterMap(paramMap);
 
         final Map<String, String> clientConfigMap = getConfigParameterMap(ConfigName.CLIENT);
         if (clientConfigMap != null) {
@@ -199,7 +207,8 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
             initializeDefaultHttpProxy(paramMap);
         }
 
-        return paramMap;
+        crawlerClientFactory = factory;
+        return factory;
     }
 
     @Override

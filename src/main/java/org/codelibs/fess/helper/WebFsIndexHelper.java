@@ -133,7 +133,7 @@ public class WebFsIndexHelper {
             final long maxCount = webConfig.getMaxAccessCount() != null ? webConfig.getMaxAccessCount() : maxAccessCount;
             crawlerContext.setMaxAccessCount(maxCount);
 
-            webConfig.initializeClientFactory(crawler.getClientFactory());
+            webConfig.initializeClientFactory(() -> crawler.getClientFactory());
             final Map<String, String> configParamMap = webConfig.getConfigParameterMap(ConfigName.CONFIG);
 
             if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
@@ -241,7 +241,7 @@ public class WebFsIndexHelper {
             final long maxCount = fileConfig.getMaxAccessCount() != null ? fileConfig.getMaxAccessCount() : maxAccessCount;
             crawlerContext.setMaxAccessCount(maxCount);
 
-            fileConfig.initializeClientFactory(crawler.getClientFactory());
+            fileConfig.initializeClientFactory(() -> crawler.getClientFactory());
             final Map<String, String> configParamMap = fileConfig.getConfigParameterMap(ConfigName.CONFIG);
 
             if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {

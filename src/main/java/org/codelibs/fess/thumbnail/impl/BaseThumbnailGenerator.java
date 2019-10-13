@@ -191,7 +191,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     }
 
     protected boolean process(final String id, final Predicate<ResponseData> consumer) {
-        return process(id,
+        return process(
+                id,
                 (configId, url) -> {
                     final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
                     final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
@@ -203,8 +204,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                         logger.info("Generating Thumbnail: " + url);
                     }
 
-                    final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getComponent(CrawlerClientFactory.class);
-                    config.initializeClientFactory(crawlerClientFactory);
+                    final CrawlerClientFactory crawlerClientFactory =
+                            config.initializeClientFactory(() -> ComponentUtil.getComponent(CrawlerClientFactory.class));
                     final CrawlerClient client = crawlerClientFactory.getClient(url);
                     if (client == null) {
                         throw new ThumbnailGenerationException("No CrawlerClient: " + configId + ", url: " + url);
