@@ -98,9 +98,15 @@ fi
 if [ "x$FESS_LOG_PATH" = "x" ]; then
   FESS_LOG_PATH=$FESS_HOME/logs
 fi
+if [ "x$FESS_PORT" = "x" ]; then
+  FESS_PORT=8080
+fi
+if [ "x$FESS_CONTEXT_PATH" = "x" ]; then
+  FESS_CONTEXT_PATH=/
+fi
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.home=$FESS_HOME"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=/"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.port=8080"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=$FESS_CONTEXT_PATH"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.port=$FESS_PORT"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webapp.path=$FESS_HOME/app"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_TEMP_PATH"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.name=$APP_NAME"
