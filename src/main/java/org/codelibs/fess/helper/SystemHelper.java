@@ -440,6 +440,9 @@ public class SystemHelper {
 
     public void updateSystemProperties() {
         final String value = ComponentUtil.getFessConfig().getAppValue();
+        if (logger.isDebugEnabled()) {
+            logger.debug("system.properties: {}", value);
+        }
         if (StringUtil.isNotBlank(value)) {
             ParameterUtil.parse(value).entrySet().stream().filter(e -> {
                 final String key = e.getKey();
@@ -451,6 +454,9 @@ public class SystemHelper {
                 }
                 return System.getProperty(key) == null;
             }).forEach(e -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("system.properties: setProperty({}, {})", e.getKey(), e.getValue());
+                }
                 System.setProperty(e.getKey(), e.getValue());
             });
         }
