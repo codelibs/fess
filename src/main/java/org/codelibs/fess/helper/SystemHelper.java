@@ -446,7 +446,7 @@ public class SystemHelper {
         if (StringUtil.isNotBlank(value)) {
             ParameterUtil.parse(value).entrySet().stream().filter(e -> {
                 final String key = e.getKey();
-                if (StringUtil.isNotBlank(key)) {
+                if (StringUtil.isBlank(key)) {
                     return false;
                 }
                 if (key.startsWith("fess.")) {
