@@ -636,6 +636,60 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1m */
     String INDEX_INDICES_TIMEOUT = "index.indices.timeout";
 
+    /** The key of the configuration. e.g. text/html=html
+    application/msword=word
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document=word
+    application/vnd.ms-excel=excel
+    application/vnd.ms-excel.sheet.2=excel
+    application/vnd.ms-excel.sheet.3=excel
+    application/vnd.ms-excel.sheet.4=excel
+    application/vnd.ms-excel.workspace.3=excel
+    application/vnd.ms-excel.workspace.4=excel
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel
+    application/vnd.ms-powerpoint=powerpoint
+    application/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint
+    application/vnd.oasis.opendocument.text=odt
+    application/vnd.oasis.opendocument.spreadsheet=ods
+    application/vnd.oasis.opendocument.presentation=odp
+    application/pdf=pdf
+    application/x-fictionbook+xml=fb2
+    application/e-pub+zip=epub
+    application/x-ibooks+zip=ibooks
+    text/plain=txt
+    application/rtf=rtf
+    application/vnd.ms-htmlhelp=chm
+    application/zip=zip
+    application/x-7z-comressed=7z
+    application/x-bzip=bz
+    application/x-bzip2=bz2
+    application/x-tar=tar
+    application/x-rar-compressed=rar
+    video/3gp=3gp
+    video/3g2=3g2
+    video/x-msvideo=avi
+    video/x-flv=flv
+    video/mpeg=mpeg
+    video/mp4=mp4
+    video/ogv=ogv
+    video/quicktime=qt
+    video/x-m4v=m4v
+    audio/x-aif=aif
+    audio/midi=midi
+    audio/mpga=mpga
+    audio/mp4=mp4a
+    audio/ogg=oga
+    audio/x-wav=wav
+    image/webp=webp
+    image/bmp=bmp
+    image/x-icon=ico
+    image/x-icon=ico
+    image/png=png
+    image/svg+xml=svg
+    image/tiff=tiff
+    image/jpeg=jpg
+    */
+    String INDEX_FILETYPE = "index.filetype";
+
     /** The key of the configuration. e.g. 1000 */
     String QUERY_MAX_LENGTH = "query.max.length";
 
@@ -3310,6 +3364,65 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexIndicesTimeout();
+
+    /**
+     * Get the value for the key 'index.filetype'. <br>
+     * The value is, e.g. text/html=html
+    application/msword=word
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document=word
+    application/vnd.ms-excel=excel
+    application/vnd.ms-excel.sheet.2=excel
+    application/vnd.ms-excel.sheet.3=excel
+    application/vnd.ms-excel.sheet.4=excel
+    application/vnd.ms-excel.workspace.3=excel
+    application/vnd.ms-excel.workspace.4=excel
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel
+    application/vnd.ms-powerpoint=powerpoint
+    application/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint
+    application/vnd.oasis.opendocument.text=odt
+    application/vnd.oasis.opendocument.spreadsheet=ods
+    application/vnd.oasis.opendocument.presentation=odp
+    application/pdf=pdf
+    application/x-fictionbook+xml=fb2
+    application/e-pub+zip=epub
+    application/x-ibooks+zip=ibooks
+    text/plain=txt
+    application/rtf=rtf
+    application/vnd.ms-htmlhelp=chm
+    application/zip=zip
+    application/x-7z-comressed=7z
+    application/x-bzip=bz
+    application/x-bzip2=bz2
+    application/x-tar=tar
+    application/x-rar-compressed=rar
+    video/3gp=3gp
+    video/3g2=3g2
+    video/x-msvideo=avi
+    video/x-flv=flv
+    video/mpeg=mpeg
+    video/mp4=mp4
+    video/ogv=ogv
+    video/quicktime=qt
+    video/x-m4v=m4v
+    audio/x-aif=aif
+    audio/midi=midi
+    audio/mpga=mpga
+    audio/mp4=mp4a
+    audio/ogg=oga
+    audio/x-wav=wav
+    image/webp=webp
+    image/bmp=bmp
+    image/x-icon=ico
+    image/x-icon=ico
+    image/png=png
+    image/svg+xml=svg
+    image/tiff=tiff
+    image/jpeg=jpg
+    <br>
+     * comment: filetype
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFiletype();
 
     /**
      * Get the value for the key 'query.max.length'. <br>
@@ -7086,6 +7199,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_INDICES_TIMEOUT);
         }
 
+        public String getIndexFiletype() {
+            return get(FessConfig.INDEX_FILETYPE);
+        }
+
         public String getQueryMaxLength() {
             return get(FessConfig.QUERY_MAX_LENGTH);
         }
@@ -8775,6 +8892,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_DELETE_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_HEALTH_TIMEOUT, "10m");
             defaultMap.put(FessConfig.INDEX_INDICES_TIMEOUT, "1m");
+            defaultMap
+                    .put(FessConfig.INDEX_FILETYPE,
+                            "text/html=html\napplication/msword=word\napplication/vnd.openxmlformats-officedocument.wordprocessingml.document=word\napplication/vnd.ms-excel=excel\napplication/vnd.ms-excel.sheet.2=excel\napplication/vnd.ms-excel.sheet.3=excel\napplication/vnd.ms-excel.sheet.4=excel\napplication/vnd.ms-excel.workspace.3=excel\napplication/vnd.ms-excel.workspace.4=excel\napplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel\napplication/vnd.ms-powerpoint=powerpoint\napplication/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint\napplication/vnd.oasis.opendocument.text=odt\napplication/vnd.oasis.opendocument.spreadsheet=ods\napplication/vnd.oasis.opendocument.presentation=odp\napplication/pdf=pdf\napplication/x-fictionbook+xml=fb2\napplication/e-pub+zip=epub\napplication/x-ibooks+zip=ibooks\ntext/plain=txt\napplication/rtf=rtf\napplication/vnd.ms-htmlhelp=chm\napplication/zip=zip\napplication/x-7z-comressed=7z\napplication/x-bzip=bz\napplication/x-bzip2=bz2\napplication/x-tar=tar\napplication/x-rar-compressed=rar\nvideo/3gp=3gp\nvideo/3g2=3g2\nvideo/x-msvideo=avi\nvideo/x-flv=flv\nvideo/mpeg=mpeg\nvideo/mp4=mp4\nvideo/ogv=ogv\nvideo/quicktime=qt\nvideo/x-m4v=m4v\naudio/x-aif=aif\naudio/midi=midi\naudio/mpga=mpga\naudio/mp4=mp4a\naudio/ogg=oga\naudio/x-wav=wav\nimage/webp=webp\nimage/bmp=bmp\nimage/x-icon=ico\nimage/x-icon=ico\nimage/png=png\nimage/svg+xml=svg\nimage/tiff=tiff\nimage/jpeg=jpg\n");
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");

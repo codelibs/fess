@@ -15,13 +15,43 @@
  */
 package org.codelibs.fess.entity;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
+import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FacetQueryView {
+    private static final Logger logger = LoggerFactory.getLogger(FacetQueryView.class);
+
     protected String title;
 
     protected Map<String, String> queryMap = new LinkedHashMap<>();
+
+    @PostConstruct
+    public void init() {
+        final String filetypeField = ComponentUtil.getFessConfig().getIndexFieldFiletype();
+        Collection<String> values = queryMap.values();
+        if (values.stream().anyMatch(s -> s.startsWith(filetypeField))) {
+            final String[] fileTypes = ComponentUtil.getFileTypeHelper().getTypes();
+            for (String fileType : fileTypes) {
+                final String value = filetypeField + ":" + fileType;
+                if (!values.contains(value)) {
+                    queryMap.put(fileType.toUpperCase(Locale.ROOT), value);
+                }
+            }
+            queryMap.remove("labels.facet_filetype_others");
+            queryMap.put("labels.facet_filetype_others", "filetype:others");
+            if (logger.isDebugEnabled()) {
+                logger.debug("updated query map: {}", queryMap);
+            }
+        }
+    }
 
     public String getTitle() {
         return title;

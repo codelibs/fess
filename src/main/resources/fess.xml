@@ -27,6 +27,8 @@
 	</component>
 	<component name="documentHelper" class="org.codelibs.fess.helper.DocumentHelper">
 	</component>
+	<component name="fileTypeHelper" class="org.codelibs.fess.helper.FileTypeHelper">
+	</component>
 	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>
 	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">

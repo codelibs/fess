@@ -18,13 +18,35 @@ package org.codelibs.fess.helper;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileTypeHelper {
+    private static final Logger logger = LoggerFactory.getLogger(FileTypeHelper.class);
 
     protected String defaultValue = "others";
 
     protected Map<String, String> mimetypeMap = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        StreamUtil.split(ComponentUtil.getFessConfig().getIndexFiletype(), "\n").of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> {
+                    final String[] values = StringUtils.split(s, "=", 2);
+                    if (values.length == 2) {
+                        mimetypeMap.put(values[0], values[1]);
+                    }
+                }));
+        if (logger.isDebugEnabled()) {
+            logger.debug("loaded filetype: {}", mimetypeMap);
+        }
+    }
 
     public void add(final String mimetype, final String filetype) {
         mimetypeMap.put(mimetype, filetype);
@@ -44,5 +66,9 @@ public class FileTypeHelper {
 
     public void setDefaultValue(final String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    public String[] getTypes() {
+        return mimetypeMap.values().stream().distinct().toArray(n -> new String[n]);
     }
 }

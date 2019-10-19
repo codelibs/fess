@@ -15,12 +15,21 @@
  */
 package org.codelibs.fess.entity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.search.aggregations.BucketOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FacetInfo {
+    private static final Logger logger = LoggerFactory.getLogger(FacetInfo.class);
+
     public String[] field;
 
     public String[] query;
@@ -32,6 +41,25 @@ public class FacetInfo {
     public String sort;
 
     public String missing;
+
+    @PostConstruct
+    public void init() {
+        final String[] fileTypes = ComponentUtil.getFileTypeHelper().getTypes();
+        if (fileTypes.length > 0) {
+            final List<String> queryList = new ArrayList<>();
+            for (String s : query) {
+                queryList.add(s);
+            }
+            final String field = ComponentUtil.getFessConfig().getIndexFieldFiletype();
+            for (String s : fileTypes) {
+                queryList.add(field + ":" + s);
+            }
+            query = queryList.toArray(n -> new String[n]);
+            if (logger.isDebugEnabled()) {
+                logger.debug("loaded facet query: {}", queryList);
+            }
+        }
+    }
 
     public BucketOrder getBucketOrder() {
         if (StringUtil.isNotBlank(sort)) {
