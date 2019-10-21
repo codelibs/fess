@@ -861,7 +861,7 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_facet_filetype_aif = "{labels.facet_filetype_aif}";
 
     /** The key of the message: MIDI Audio */
-    public static final String LABELS_facet_filetype_mid = "{labels.facet_filetype_mid}";
+    public static final String LABELS_facet_filetype_midi = "{labels.facet_filetype_midi}";
 
     /** The key of the message: MPGA Audio */
     public static final String LABELS_facet_filetype_mpga = "{labels.facet_filetype_mpga}";

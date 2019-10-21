@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -149,7 +151,7 @@ public class ViewHelper {
         highlightTagPre = fessConfig.getQueryHighlightTagPre();
         highlightTagPost = fessConfig.getQueryHighlightTagPost();
         highlightedFields = fessConfig.getQueryHighlightContentDescriptionFieldsAsArray();
-        for (int v : fessConfig.getQueryHighlightTerminalCharsAsArray()) {
+        for (final int v : fessConfig.getQueryHighlightTerminalCharsAsArray()) {
             highlightTerminalCharSet.add(v);
         }
         try {
@@ -159,6 +161,26 @@ public class ViewHelper {
         } catch (final Throwable t) {
             logger.warn("Failed to set SessionTrackingMode.", t);
         }
+
+        split(fessConfig.getQueryFacetQueries(), "\n").of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> {
+            final String[] values = StringUtils.split(s, ":", 2);
+            if (values.length != 2) {
+                return;
+            }
+            final FacetQueryView facetQueryView = new FacetQueryView();
+            facetQueryView.setTitle(values[0]);
+            split(values[1], "\t").of(subStream -> subStream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(v -> {
+                final String[] facet = StringUtils.split(v, "=", 2);
+                if (facet.length == 2) {
+                    facetQueryView.addQuery(facet[0], facet[1]);
+                }
+            }));
+            facetQueryView.init();
+            facetQueryViewList.add(facetQueryView);
+            if (logger.isDebugEnabled()) {
+                logger.debug("loaded {}", facetQueryView);
+            }
+        }));
     }
 
     public String getContentTitle(final Map<String, Object> document) {

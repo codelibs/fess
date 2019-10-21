@@ -19,11 +19,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -52,6 +54,8 @@ public class ViewHelperTest extends UnitFessTestCase {
         pathMappingHelper = new PathMappingHelper();
         pathMappingHelper.init();
         ComponentUtil.register(pathMappingHelper, "pathMappingHelper");
+        FileTypeHelper fileTypeHelper = new FileTypeHelper();
+        ComponentUtil.register(fileTypeHelper, "fileTypeHelper");
         viewHelper = new ViewHelper();
         viewHelper.init();
     }
@@ -60,6 +64,20 @@ public class ViewHelperTest extends UnitFessTestCase {
     public void tearDown() throws Exception {
         propertiesFile.delete();
         super.tearDown();
+    }
+
+    public void test_facetQueries() {
+        final List<FacetQueryView> list = viewHelper.getFacetQueryViewList();
+        assertEquals(3, list.size());
+        FacetQueryView view1 = list.get(0);
+        assertEquals("labels.facet_timestamp_title", view1.getTitle());
+        assertEquals(4, view1.getQueryMap().size());
+        FacetQueryView view2 = list.get(1);
+        assertEquals("labels.facet_contentLength_title", view2.getTitle());
+        assertEquals(5, view2.getQueryMap().size());
+        FacetQueryView view3 = list.get(2);
+        assertEquals("labels.facet_filetype_title", view3.getTitle());
+        assertEquals(10, view3.getQueryMap().size());
     }
 
     public void test_getUrlLink() throws IOException {
