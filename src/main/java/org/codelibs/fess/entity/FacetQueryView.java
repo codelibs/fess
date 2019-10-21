@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.annotation.PostConstruct;
 
@@ -36,13 +37,19 @@ public class FacetQueryView {
     @PostConstruct
     public void init() {
         final String filetypeField = ComponentUtil.getFessConfig().getIndexFieldFiletype();
-        Collection<String> values = queryMap.values();
+        final Collection<String> values = queryMap.values();
         if (values.stream().anyMatch(s -> s.startsWith(filetypeField))) {
+            final ResourceBundle resources = ResourceBundle.getBundle("fess_label", Locale.ENGLISH);
             final String[] fileTypes = ComponentUtil.getFileTypeHelper().getTypes();
-            for (String fileType : fileTypes) {
+            for (final String fileType : fileTypes) {
                 final String value = filetypeField + ":" + fileType;
                 if (!values.contains(value)) {
-                    queryMap.put(fileType.toUpperCase(Locale.ROOT), value);
+                    final String key = "labels.facet_filetype_" + fileType;
+                    if (resources.containsKey(key)) {
+                        queryMap.put(key, value);
+                    } else {
+                        queryMap.put(fileType.toUpperCase(Locale.ROOT), value);
+                    }
                 }
             }
             queryMap.remove("labels.facet_filetype_others");

@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.helper;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +32,7 @@ public class FileTypeHelper {
 
     protected String defaultValue = "others";
 
-    protected Map<String, String> mimetypeMap = new HashMap<>();
+    protected Map<String, String> mimetypeMap = new LinkedHashMap<>();
 
     @PostConstruct
     public void init() {
