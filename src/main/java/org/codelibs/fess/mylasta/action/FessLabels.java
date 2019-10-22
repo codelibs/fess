@@ -893,6 +893,72 @@ public class FessLabels extends UserMessages {
     /** The key of the message: JPEG Image */
     public static final String LABELS_facet_filetype_jpg = "{labels.facet_filetype_jpg}";
 
+    /** The key of the message: Archive */
+    public static final String LABELS_facet_filetype_archive = "{labels.facet_filetype_archive}";
+
+    /** The key of the message: Batch File */
+    public static final String LABELS_facet_filetype_bat = "{labels.facet_filetype_bat}";
+
+    /** The key of the message: C */
+    public static final String LABELS_facet_filetype_c = "{labels.facet_filetype_c}";
+
+    /** The key of the message: C++ */
+    public static final String LABELS_facet_filetype_cpp = "{labels.facet_filetype_cpp}";
+
+    /** The key of the message: C# */
+    public static final String LABELS_facet_filetype_csharp = "{labels.facet_filetype_csharp}";
+
+    /** The key of the message: CSS */
+    public static final String LABELS_facet_filetype_css = "{labels.facet_filetype_css}";
+
+    /** The key of the message: Go */
+    public static final String LABELS_facet_filetype_go = "{labels.facet_filetype_go}";
+
+    /** The key of the message: Groovy */
+    public static final String LABELS_facet_filetype_groovy = "{labels.facet_filetype_groovy}";
+
+    /** The key of the message: Haskell */
+    public static final String LABELS_facet_filetype_haskell = "{labels.facet_filetype_haskell}";
+
+    /** The key of the message: Image */
+    public static final String LABELS_facet_filetype_image = "{labels.facet_filetype_image}";
+
+    /** The key of the message: Java */
+    public static final String LABELS_facet_filetype_java = "{labels.facet_filetype_java}";
+
+    /** The key of the message: JavaScript */
+    public static final String LABELS_facet_filetype_javascript = "{labels.facet_filetype_javascript}";
+
+    /** The key of the message: Json */
+    public static final String LABELS_facet_filetype_json = "{labels.facet_filetype_json}";
+
+    /** The key of the message: OCaml */
+    public static final String LABELS_facet_filetype_ocaml = "{labels.facet_filetype_ocaml}";
+
+    /** The key of the message: Perl */
+    public static final String LABELS_facet_filetype_perl = "{labels.facet_filetype_perl}";
+
+    /** The key of the message: PHP */
+    public static final String LABELS_facet_filetype_php = "{labels.facet_filetype_php}";
+
+    /** The key of the message: Properties */
+    public static final String LABELS_facet_filetype_properties = "{labels.facet_filetype_properties}";
+
+    /** The key of the message: Python */
+    public static final String LABELS_facet_filetype_python = "{labels.facet_filetype_python}";
+
+    /** The key of the message: Ruby */
+    public static final String LABELS_facet_filetype_ruby = "{labels.facet_filetype_ruby}";
+
+    /** The key of the message: Scala */
+    public static final String LABELS_facet_filetype_scala = "{labels.facet_filetype_scala}";
+
+    /** The key of the message: Shell Script */
+    public static final String LABELS_facet_filetype_shell = "{labels.facet_filetype_shell}";
+
+    /** The key of the message: Visual Basic */
+    public static final String LABELS_facet_filetype_vb = "{labels.facet_filetype_vb}";
+
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
 
