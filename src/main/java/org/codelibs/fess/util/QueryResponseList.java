@@ -141,7 +141,9 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
             });
 
-        calculatePageInfo(start, pageSize);
+        if (pageSize > 0) {
+            calculatePageInfo(start, pageSize);
+        }
     }
 
     protected Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {

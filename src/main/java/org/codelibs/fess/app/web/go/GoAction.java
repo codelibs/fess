@@ -73,7 +73,7 @@ public class GoAction extends FessSearchAction {
         Map<String, Object> doc = null;
         try {
             doc =
-                    searchService.getDocumentByDocId(form.docId,
+                    searchHelper.getDocumentByDocId(form.docId,
                             new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId() }, getUserBean()).orElse(null);
         } catch (final Exception e) {
             logger.warn("Failed to request: " + form.docId, e);

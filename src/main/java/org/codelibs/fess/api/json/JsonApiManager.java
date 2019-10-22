@@ -37,7 +37,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.app.service.FavoriteLogService;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -51,6 +50,7 @@ import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
+import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -131,7 +131,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected void processScrollSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
@@ -149,7 +149,7 @@ public class JsonApiManager extends BaseJsonApiManager {
         final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
         try {
             response.setContentType("application/x-ndjson; charset=UTF-8");
-            final long count = searchService.scrollSearch(params, doc -> {
+            final long count = searchHelper.scrollSearch(params, doc -> {
                 buf.setLength(0);
                 buf.append('{');
                 boolean first2 = true;
@@ -208,7 +208,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
         final RelatedContentHelper relatedContentHelper = ComponentUtil.getRelatedContentHelper();
@@ -222,7 +222,7 @@ public class JsonApiManager extends BaseJsonApiManager {
             final SearchRenderData data = new SearchRenderData();
             final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
             query = params.getQuery();
-            searchService.search(params, data, OptionalThing.empty());
+            searchHelper.search(params, data, OptionalThing.empty());
             final String execTime = data.getExecTime();
             final String queryTime = Long.toString(data.getQueryTime());
             final String pageSize = Integer.toString(data.getPageSize());
@@ -523,7 +523,7 @@ public class JsonApiManager extends BaseJsonApiManager {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
-        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
@@ -536,7 +536,7 @@ public class JsonApiManager extends BaseJsonApiManager {
                 throw new WebApiException(6, "No searched urls.");
             }
 
-            searchService.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl() }, OptionalThing.empty())
+            searchHelper.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl() }, OptionalThing.empty())
                     .ifPresent(doc -> {
                         final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                         final String userCode = userInfoHelper.getUserCode();
@@ -569,7 +569,7 @@ public class JsonApiManager extends BaseJsonApiManager {
                         }
 
                         final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
-                        searchService.update(id, builder -> {
+                        searchHelper.update(id, builder -> {
                             final Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
                             builder.setScript(script);
                             final Map<String, Object> upsertMap = new HashMap<>();
@@ -607,7 +607,7 @@ public class JsonApiManager extends BaseJsonApiManager {
 
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
 
         int status = 0;
@@ -626,7 +626,7 @@ public class JsonApiManager extends BaseJsonApiManager {
 
             final String[] docIds = userInfoHelper.getResultDocIds(queryId);
             final List<Map<String, Object>> docList =
-                    searchService.getDocumentListByDocIds(
+                    searchHelper.getDocumentListByDocIds(
                             docIds,
                             new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
                                     fessConfig.getIndexFieldFavoriteCount() }, OptionalThing.empty(), SearchRequestType.JSON);

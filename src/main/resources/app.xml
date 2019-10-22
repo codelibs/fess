@@ -34,6 +34,8 @@
 	</component>
 	<component name="pluginHelper" class="org.codelibs.fess.helper.PluginHelper">
 	</component>
+	<component name="searchHelper" class="org.codelibs.fess.helper.SearchHelper">
+	</component>
 	<component name="themeHelper" class="org.codelibs.fess.helper.ThemeHelper">
 	</component>
 	<component name="queryStringBuilder" class="org.codelibs.fess.util.QueryStringBuilder" instance="prototype">

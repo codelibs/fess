@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseJsonApiManager;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -40,6 +39,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.helper.RoleQueryHelper;
+import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -83,11 +83,11 @@ public class SuggestApiManager extends BaseJsonApiManager {
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
-        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
 
         try {
             final RequestParameter parameter = RequestParameter.parse(request);
-            final String[] langs = searchService.getLanguages(request, parameter);
+            final String[] langs = searchHelper.getLanguages(request, parameter);
 
             final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
             final SuggestRequestBuilder builder = suggestHelper.suggester().suggest();

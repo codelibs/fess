@@ -33,6 +33,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -52,7 +54,10 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.base.SearchForm;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -60,12 +65,15 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.HighlightInfo;
+import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.taglib.function.LaFunctions;
@@ -82,6 +90,8 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper {
@@ -140,6 +150,10 @@ public class ViewHelper {
 
     protected final Set<String> inlineMimeTypeSet = new HashSet<>();
 
+    protected Cache<String, FacetResponse> facetCache;
+
+    protected long facetCacheDuration = 60 * 10; // 10min
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -181,6 +195,8 @@ public class ViewHelper {
                 logger.debug("loaded {}", facetQueryView);
             }
         }));
+
+        facetCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(facetCacheDuration, TimeUnit.SECONDS).build();
     }
 
     public String getContentTitle(final Map<String, Object> document) {
@@ -728,6 +744,40 @@ public class ViewHelper {
         }
     }
 
+    public FacetResponse getCachedFacetResponse(final String query) {
+        final OptionalThing<FessUserBean> userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+        final String permissionKey =
+                userBean.map(
+                        user -> StreamUtil.stream(user.getPermissions()).get(
+                                stream -> stream.sorted().distinct().collect(Collectors.joining("\n")))).orElse(StringUtil.EMPTY);
+
+        try {
+            return facetCache.get(query + "\n" + permissionKey, () -> {
+                final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
+                final SearchForm params = new SearchForm() {
+                    @Override
+                    public int getPageSize() {
+                        return 0;
+                    }
+
+                    @Override
+                    public int getStartPosition() {
+                        return 0;
+                    }
+                };
+                params.q = query;
+                final SearchRenderData data = new SearchRenderData();
+                searchHelper.search(params, data, userBean);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("loaded facet data: {}", data);
+                }
+                return data.getFacetResponse();
+            });
+        } catch (ExecutionException e) {
+            throw new FessSystemException("Cannot load facet from cache.", e);
+        }
+    }
+
     public boolean isUseSession() {
         return useSession;
     }
@@ -813,5 +863,9 @@ public class ViewHelper {
 
     public void setCacheTemplateName(final String cacheTemplateName) {
         this.cacheTemplateName = cacheTemplateName;
+    }
+
+    public void setFacetCacheDuration(final long facetCacheDuration) {
+        this.facetCacheDuration = facetCacheDuration;
     }
 }

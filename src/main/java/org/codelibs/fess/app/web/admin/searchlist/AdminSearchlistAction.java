@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -34,6 +33,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -72,7 +72,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     protected QueryHelper queryHelper;
 
     @Resource
-    protected SearchService searchService;
+    protected SearchHelper searchHelper;
 
     @Resource
     protected HttpServletRequest request;
@@ -130,7 +130,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         form.initialize();
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
         try {
-            searchService.search(form, renderData, getUserBean());
+            searchHelper.search(form, renderData, getUserBean());
             return asListHtml().renderWith(data -> {
                 renderData.register(data);
             });
@@ -211,7 +211,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
         try {
-            searchService.deleteByQuery(request, form);
+            searchHelper.deleteByQuery(request, form);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {

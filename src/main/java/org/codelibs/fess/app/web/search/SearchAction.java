@@ -148,9 +148,9 @@ public class SearchAction extends FessSearchAction {
 
         try {
             buildFormParams(form);
-            form.lang = searchService.getLanguages(request, form);
+            form.lang = searchHelper.getLanguages(request, form);
             final WebRenderData renderData = new WebRenderData();
-            searchService.search(form, renderData, getUserBean());
+            searchHelper.search(form, renderData, getUserBean());
             return asHtml(virtualHost(path_SearchJsp)).renderWith(
                     data -> {
                         if (form.hasConditionQuery()) {

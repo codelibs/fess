@@ -35,7 +35,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
@@ -345,11 +344,11 @@ public class SearchLogHelper {
         }
 
         if (!clickCountMap.isEmpty()) {
-            final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+            final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             try {
-                searchService.bulkUpdate(builder -> {
+                searchHelper.bulkUpdate(builder -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
+                    searchHelper.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
                             new String[] { fessConfig.getIndexFieldDocId() }, OptionalThing.of(FessUserBean.empty()),
                             SearchRequestType.ADMIN_SEARCH).forEach(
                             doc -> {

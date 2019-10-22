@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.service;
+package org.codelibs.fess.helper;
 
 import java.text.NumberFormat;
 import java.util.Enumeration;
@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
@@ -37,12 +36,8 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
-import org.codelibs.fess.helper.QueryHelper;
-import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -64,36 +59,20 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SearchService {
+public class SearchHelper {
 
     // ===================================================================================
     //                                                                            Constant
     //
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
-
-    // ===================================================================================
-    //                                                                           Attribute
-    //
-
-    @Resource
-    protected FessEsClient fessEsClient;
-
-    @Resource
-    protected SystemHelper systemHelper;
-
-    @Resource
-    protected FessConfig fessConfig;
-
-    @Resource
-    protected QueryHelper queryHelper;
+    private static final Logger logger = LoggerFactory.getLogger(SearchHelper.class);
 
     // ===================================================================================
     //                                                                              Method
     //                                                                      ==============
 
     public void search(final SearchRequestParams params, final SearchRenderData data, final OptionalThing<FessUserBean> userBean) {
-        final long requestedTime = systemHelper.getCurrentTimeAsLong();
+        final long requestedTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         final long startTime = System.currentTimeMillis();
 
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
@@ -110,8 +89,11 @@ public class SearchService {
         } else {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
         final List<Map<String, Object>> documentItems =
-                fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(),
+                ComponentUtil.getFessEsClient().search(
+                        fessConfig.getIndexDocumentSearchIndex(),
                         searchRequestBuilder -> {
                             queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
@@ -207,9 +189,11 @@ public class SearchService {
         } else {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
-        return fessEsClient.<Map<String, Object>> scrollSearch(
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return ComponentUtil.getFessEsClient().<Map<String, Object>> scrollSearch(
                 fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> {
+                    final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                     return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
@@ -247,16 +231,17 @@ public class SearchService {
     }
 
     public long deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
-
         final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
 
-        final QueryContext queryContext = queryHelper.build(params.getType(), query, context -> {
+        final QueryContext queryContext = ComponentUtil.getQueryHelper().build(params.getType(), query, context -> {
             context.skipRoleQuery();
         });
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryContext.getQueryBuilder());
+        return ComponentUtil.getFessEsClient().deleteByQuery(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(),
+                queryContext.getQueryBuilder());
     }
 
     public String[] getLanguages(final HttpServletRequest request, final SearchRequestParams params) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         if (params.getLanguages() != null) {
             final Set<String> langSet = new HashSet<>();
             for (final String lang : params.getLanguages()) {
@@ -277,7 +262,7 @@ public class SearchService {
                 langSet.remove(Constants.ALL_LANGUAGES);
             }
             return langSet.toArray(new String[langSet.size()]);
-        } else if (fessConfig.isBrowserLocaleForSearchUsed()) {
+        } else if (ComponentUtil.getFessConfig().isBrowserLocaleForSearchUsed()) {
             final Set<String> langSet = new HashSet<>();
             final Enumeration<Locale> locales = request.getLocales();
             if (locales != null) {
@@ -298,14 +283,16 @@ public class SearchService {
 
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
             final OptionalThing<FessUserBean> userBean) {
-        return fessEsClient.getDocument(
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return ComponentUtil.getFessEsClient().getDocument(
                 fessConfig.getIndexDocumentSearchIndex(),
                 builder -> {
                     final BoolQueryBuilder boolQuery =
                             QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
                     final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
+                    final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                     if (!roleSet.isEmpty()) {
-                        ComponentUtil.getQueryHelper().buildRoleQuery(roleSet, boolQuery);
+                        queryHelper.buildRoleQuery(roleSet, boolQuery);
                     }
                     builder.setQuery(boolQuery);
                     builder.setFetchSource(fields, null);
@@ -317,15 +304,17 @@ public class SearchService {
 
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
             final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
-        return fessEsClient.getDocumentList(
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return ComponentUtil.getFessEsClient().getDocumentList(
                 fessConfig.getIndexDocumentSearchIndex(),
                 builder -> {
                     final BoolQueryBuilder boolQuery =
                             QueryBuilders.boolQuery().must(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
+                    final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                     if (searchRequestType != SearchRequestType.ADMIN_SEARCH) {
                         final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
                         if (!roleSet.isEmpty()) {
-                            ComponentUtil.getQueryHelper().buildRoleQuery(roleSet, boolQuery);
+                            queryHelper.buildRoleQuery(roleSet, boolQuery);
                         }
                     }
                     builder.setQuery(boolQuery);
@@ -337,12 +326,14 @@ public class SearchService {
     }
 
     public boolean update(final String id, final String field, final Object value) {
-        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), id, field, value);
+        return ComponentUtil.getFessEsClient().update(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(), id, field, value);
     }
 
     public boolean update(final String id, final Consumer<UpdateRequestBuilder> builderLambda) {
         try {
-            final UpdateRequestBuilder builder = fessEsClient.prepareUpdate().setIndex(fessConfig.getIndexDocumentUpdateIndex()).setId(id);
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final UpdateRequestBuilder builder =
+                    ComponentUtil.getFessEsClient().prepareUpdate().setIndex(fessConfig.getIndexDocumentUpdateIndex()).setId(id);
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;
@@ -352,7 +343,7 @@ public class SearchService {
     }
 
     public boolean bulkUpdate(final Consumer<BulkRequestBuilder> consumer) {
-        final BulkRequestBuilder builder = fessEsClient.prepareBulk();
+        final BulkRequestBuilder builder = ComponentUtil.getFessEsClient().prepareBulk();
         consumer.accept(builder);
         try {
             final BulkResponse response = builder.execute().get();

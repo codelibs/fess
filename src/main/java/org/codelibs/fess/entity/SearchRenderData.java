@@ -212,4 +212,15 @@ public class SearchRenderData {
         return queryId;
     }
 
+    @Override
+    public String toString() {
+        return "SearchRenderData [documentItems=" + documentItems + ", facetResponse=" + facetResponse + ", appendHighlightParams="
+                + appendHighlightParams + ", execTime=" + execTime + ", pageSize=" + pageSize + ", currentPageNumber=" + currentPageNumber
+                + ", allRecordCount=" + allRecordCount + ", allRecordCountRelation=" + allRecordCountRelation + ", allPageCount="
+                + allPageCount + ", existNextPage=" + existNextPage + ", existPrevPage=" + existPrevPage + ", currentStartRecordNumber="
+                + currentStartRecordNumber + ", currentEndRecordNumber=" + currentEndRecordNumber + ", pageNumberList=" + pageNumberList
+                + ", partialResults=" + partialResults + ", searchQuery=" + searchQuery + ", queryTime=" + queryTime + ", requestedTime="
+                + requestedTime + ", queryId=" + queryId + "]";
+    }
+
 }

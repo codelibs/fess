@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiDeleteResponse;
@@ -38,6 +37,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -60,7 +60,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     // Attribute
     // =========
     @Resource
-    protected SearchService searchService;
+    protected SearchHelper searchHelper;
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -83,7 +83,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         final SearchRenderData renderData = new SearchRenderData();
         body.initialize();
         try {
-            searchService.search(body, renderData, getUserBean());
+            searchHelper.search(body, renderData, getUserBean());
             return asJson(new ApiDocsResponse().renderData(renderData).status(Status.OK).result());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
@@ -208,7 +208,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsInvalidQueryUnknown(GLOBAL));
         }
         try {
-            final long count = searchService.deleteByQuery(request, body);
+            final long count = searchHelper.deleteByQuery(request, body);
             return asJson(new ApiDeleteResponse().count(count).status(Status.OK).result());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {

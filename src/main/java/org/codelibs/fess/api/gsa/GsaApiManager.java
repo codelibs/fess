@@ -46,13 +46,13 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
-import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -115,7 +115,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final boolean xmlDtd = OUTPUT_XML.equals(request.getParameter("output"));
 
@@ -133,7 +133,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final SearchRenderData data = new SearchRenderData();
             final GsaRequestParams params = new GsaRequestParams(request, fessConfig);
             query = params.getQuery();
-            searchService.search(params, data, OptionalThing.empty());
+            searchHelper.search(params, data, OptionalThing.empty());
             final String execTime = data.getExecTime();
             final long allRecordCount = data.getAllRecordCount();
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
