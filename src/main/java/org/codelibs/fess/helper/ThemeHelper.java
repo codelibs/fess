@@ -103,6 +103,12 @@ public class ThemeHelper {
     }
 
     protected void closeQuietly(final Path dir) {
+        if (Files.notExists(dir)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} does not exists.", dir);
+            }
+            return;
+        }
         try (Stream<Path> walk = Files.walk(dir, FileVisitOption.FOLLOW_LINKS)) {
             walk.sorted(Comparator.reverseOrder()).forEach(f -> {
                 if (logger.isDebugEnabled()) {
