@@ -63,7 +63,7 @@ public class UpdateLabelJob {
                                                 .field(fessConfig.getIndexFieldLabel(), labelSet.toArray(n -> new String[n])).endObject());
                                     }
                                 } catch (final IOException e) {
-                                    logger.warn("Failed to process " + hit, e);
+                                    logger.warn("Failed to process {}", hit, e);
                                 }
                                 return null;
                             });

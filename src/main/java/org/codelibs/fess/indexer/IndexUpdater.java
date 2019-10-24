@@ -252,7 +252,7 @@ public class IndexUpdater extends Thread {
                         throw e;
                     }
                     errorCount++;
-                    logger.warn("Failed to access data. Retry to access.. " + errorCount, e);
+                    logger.warn("Failed to access data. Retry to access.. {}", errorCount, e);
                 } finally {
                     if (systemHelper.isForceStop()) {
                         finishCrawling = true;
@@ -318,7 +318,7 @@ public class IndexUpdater extends Thread {
         final long maxDocumentRequestSize = fessConfig.getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Indexing " + accessResult.getUrl());
+                logger.debug("Indexing {}", accessResult.getUrl());
             }
             accessResult.setStatus(Constants.DONE_STATUS);
             accessResultList.add(accessResult);
@@ -326,7 +326,7 @@ public class IndexUpdater extends Thread {
             if (accessResult.getHttpStatusCode() != 200) {
                 // invalid page
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Skipped. The response code is " + accessResult.getHttpStatusCode() + ".");
+                    logger.debug("Skipped. The response code is {}.", accessResult.getHttpStatusCode());
                 }
                 continue;
             }
@@ -379,7 +379,7 @@ public class IndexUpdater extends Thread {
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {
-                        logger.debug("The number of an added document is " + documentSize + ".");
+                        logger.debug("The number of an added document is {}.", documentSize);
                     }
                 } catch (final Exception e) {
                     logger.warn("Could not add a doc: " + accessResult.getUrl(), e);
@@ -427,7 +427,7 @@ public class IndexUpdater extends Thread {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         map.put(fessConfig.getIndexFieldBoost(), documentBoost);
         if (logger.isDebugEnabled()) {
-            logger.debug("Set a document boost (" + documentBoost + ").");
+            logger.debug("Set a document boost ({}).", documentBoost);
         }
     }
 
@@ -465,7 +465,7 @@ public class IndexUpdater extends Thread {
             accessResultList.clear();
             final long time = System.currentTimeMillis() - execTime;
             if (logger.isDebugEnabled()) {
-                logger.debug("Updated " + size + " access results. The execution time is " + time + "ms.");
+                logger.debug("Updated {} access results. The execution time is {}ms.", size, time);
             }
             return time;
         }

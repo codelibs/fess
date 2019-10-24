@@ -61,7 +61,7 @@ public class JobHelper {
                 unregister(scheduledJob);
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to delete Job " + scheduledJob, e);
+                    logger.debug("Failed to delete Job {}", scheduledJob, e);
                 }
             }
             return;
@@ -73,7 +73,7 @@ public class JobHelper {
                     final Map<String, Object> params = new HashMap<>();
                     ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(scheduledJob.getId())
                             .ifPresent(e -> params.put(Constants.SCHEDULED_JOB, e)).orElse(() -> {
-                                logger.warn("Job " + scheduledJob.getId() + " is not found.");
+                                logger.warn("Job {} is not found.", scheduledJob.getId());
                             });
                     return params;
                 };
@@ -176,7 +176,7 @@ public class JobHelper {
             if (jobLog.getEndTime() == null) {
                 jobLog.setLastUpdated(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Update " + jobLog);
+                    logger.debug("Update {}", jobLog);
                 }
                 ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
                     op.setRefreshPolicy(Constants.TRUE);

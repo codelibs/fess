@@ -51,7 +51,7 @@ public class ScheduledJobBhv extends BsScheduledJobBhv {
                 return super.selectByPK(id);
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to select a job by " + id, e);
+                    logger.debug("Failed to select a job by {}", id, e);
                 }
                 lastException = e;
                 try {
@@ -61,7 +61,7 @@ public class ScheduledJobBhv extends BsScheduledJobBhv {
                 }
             }
         }
-        logger.warn("Failed to select a job by " + id, lastException);
+        logger.warn("Failed to select a job by {}", id, lastException);
         return OptionalEntity.empty();
     }
 }

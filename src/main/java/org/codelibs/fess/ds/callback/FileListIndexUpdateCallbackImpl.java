@@ -191,7 +191,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     protected boolean deleteDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Deleting " + dataMap);
+            logger.debug("Deleting {}", dataMap);
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -242,7 +242,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             indexingHelper.deleteDocumentByUrl(fessEsClient, url);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Deleted " + deleteUrlList);
+            logger.debug("Deleted {}", deleteUrlList);
         }
         deleteUrlList.clear();
     }

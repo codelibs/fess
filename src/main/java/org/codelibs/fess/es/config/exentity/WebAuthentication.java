@@ -124,7 +124,7 @@ public class WebAuthentication extends BsWebAuthentication {
             try {
                 webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
             } catch (final Exception e) {
-                logger.warn("Web Config " + getWebConfigId() + " does not exist.", e);
+                logger.warn("Web Config {} does not exist.", getWebConfigId(), e);
             }
         }
         return webConfig;

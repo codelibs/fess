@@ -234,7 +234,7 @@ public class DocumentHelper {
                 return ReaderUtil.readText(reader);
             } catch (final IOException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to decode " + hash, e);
+                    logger.debug("Failed to decode {}", hash, e);
                 }
             }
         }
@@ -249,7 +249,7 @@ public class DocumentHelper {
                 }
                 return SIMILAR_DOC_HASH_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
             } catch (final IOException e) {
-                logger.warn("Failed to encode " + hash, e);
+                logger.warn("Failed to encode {}", hash, e);
             }
         }
         return hash;

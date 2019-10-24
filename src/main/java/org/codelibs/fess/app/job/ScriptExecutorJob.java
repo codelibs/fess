@@ -54,7 +54,7 @@ public class ScriptExecutorJob implements LaJob {
 
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         if (!jobHelper.isAvailable(id)) {
-            logger.info("Job " + id + " is unavailable. Unregistering this job.");
+            logger.info("Job {} is unavailable. Unregistering this job.", id);
             jobHelper.unregister(scheduledJob);
             return;
         }
@@ -70,7 +70,7 @@ public class ScriptExecutorJob implements LaJob {
 
         if (!jobManager.findJobByUniqueOf(LaJobUnique.of(id)).isPresent()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Job " + id + " is running.");
+                logger.debug("Job {} is running.", id);
             }
             return;
         }
@@ -85,13 +85,13 @@ public class ScriptExecutorJob implements LaJob {
             if (logger.isDebugEnabled()) {
                 logger.debug("Starting Job " + id + ". scriptType: " + scriptType + ", script: " + script);
             } else if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                logger.info("Starting Job " + id + ".");
+                logger.info("Starting Job {}.", id);
             }
 
             final Object ret = jobExecutor.execute(script);
             if (ret == null) {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                    logger.info("Finished Job " + id + ".");
+                    logger.info("Finished Job {}.", id);
                 }
             } else {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
@@ -109,7 +109,7 @@ public class ScriptExecutorJob implements LaJob {
                 try {
                     task.stop();
                 } catch (final Exception e) {
-                    logger.warn("Failed to stop " + jobLog, e);
+                    logger.warn("Failed to stop {}", jobLog, e);
                 }
             }
             jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());

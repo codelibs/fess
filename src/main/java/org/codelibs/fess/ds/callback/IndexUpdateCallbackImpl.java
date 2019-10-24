@@ -65,7 +65,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding " + dataMap);
+            logger.debug("Adding {}", dataMap);
         }
 
         //   required check
@@ -125,7 +125,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         documentSize.getAndIncrement();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("The number of an added document is " + documentSize.get() + ".");
+            logger.debug("The number of an added document is {}.", documentSize.get());
         }
 
     }

@@ -112,17 +112,17 @@ public class ThemeHelper {
         try (Stream<Path> walk = Files.walk(dir, FileVisitOption.FOLLOW_LINKS)) {
             walk.sorted(Comparator.reverseOrder()).forEach(f -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Deleting " + f);
+                    logger.debug("Deleting {}", f);
                 }
                 try {
                     Files.delete(f);
                 } catch (final IOException e) {
-                    logger.warn("Failed to delete " + f, e);
+                    logger.warn("Failed to delete {}", f, e);
                 }
             });
             Files.deleteIfExists(dir);
         } catch (final IOException e) {
-            logger.warn("Failed to delete " + dir, e);
+            logger.warn("Failed to delete {}", dir, e);
         }
     }
 

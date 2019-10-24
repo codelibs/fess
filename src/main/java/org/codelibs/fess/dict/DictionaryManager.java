@@ -71,7 +71,7 @@ public class DictionaryManager {
                                 }
                             }
                         } catch (final Exception e) {
-                            logger.warn("Failed to load " + fileMap, e);
+                            logger.warn("Failed to load {}", fileMap, e);
                         }
                         return null;
                     }).filter(file -> file != null).toArray(n -> new DictionaryFile<?>[n]);
