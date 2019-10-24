@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.entity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.slf4j.Logger;
@@ -44,20 +44,23 @@ public class FacetInfo {
 
     @PostConstruct
     public void init() {
-        final String[] fileTypes = ComponentUtil.getFileTypeHelper().getTypes();
-        if (fileTypes.length > 0) {
-            final List<String> queryList = new ArrayList<>();
-            for (String s : query) {
-                queryList.add(s);
-            }
-            final String field = ComponentUtil.getFessConfig().getIndexFieldFiletype();
-            for (String s : fileTypes) {
-                queryList.add(field + ":" + s);
-            }
-            query = queryList.toArray(n -> new String[n]);
-            if (logger.isDebugEnabled()) {
-                logger.debug("loaded facet query: {}", queryList);
-            }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (StringUtil.isNotBlank(fessConfig.getQueryFacetFields())) {
+            field =
+                    StreamUtil.split(fessConfig.getQueryFacetFields(), ",").get(
+                            stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).distinct().toArray(n -> new String[n]));
+        }
+        if (StringUtil.isNotBlank(fessConfig.getQueryFacetFieldsSize())) {
+            size = fessConfig.getQueryFacetFieldsSizeAsInteger();
+        }
+        if (StringUtil.isNotBlank(fessConfig.getQueryFacetFieldsMinDocCount())) {
+            minDocCount = Long.parseLong(fessConfig.getQueryFacetFieldsMinDocCount());
+        }
+        if (StringUtil.isNotBlank(fessConfig.getQueryFacetFieldsSort())) {
+            sort = fessConfig.getQueryFacetFieldsSort();
+        }
+        if (StringUtil.isNotBlank(fessConfig.getQueryFacetFieldsMissing())) {
+            missing = fessConfig.getQueryFacetFieldsMissing();
         }
     }
 
@@ -81,10 +84,22 @@ public class FacetInfo {
         return BucketOrder.count(false);
     }
 
+    public void addQuery(final String s) {
+        if (query == null) {
+            query = new String[] { s };
+        } else {
+            final String[] newQuery = Arrays.copyOf(query, query.length + 1);
+            newQuery[query.length] = s;
+            query = newQuery;
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("loaded facet query: {}", s);
+        }
+    }
+
     @Override
     public String toString() {
         return "FacetInfo [field=" + Arrays.toString(field) + ", query=" + Arrays.toString(query) + ", size=" + size + ", minDocCount="
                 + minDocCount + ", sort=" + sort + ", missing=" + missing + "]";
     }
-
 }

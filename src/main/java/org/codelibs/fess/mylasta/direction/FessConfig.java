@@ -914,6 +914,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0.5 */
     String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
 
+    /** The key of the configuration. e.g. label */
+    String QUERY_FACET_FIELDS = "query.facet.fields";
+
+    /** The key of the configuration. e.g. 100 */
+    String QUERY_FACET_FIELDS_SIZE = "query.facet.fields.size";
+
+    /** The key of the configuration. e.g. 1 */
+    String QUERY_FACET_FIELDS_min_doc_count = "query.facet.fields.min_doc_count";
+
+    /** The key of the configuration. e.g. count.desc */
+    String QUERY_FACET_FIELDS_SORT = "query.facet.fields.sort";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_FACET_FIELDS_MISSING = "query.facet.fields.missing";
+
     /** The key of the configuration. e.g. labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]	labels.facet_timestamp_1week=timestamp:[now/d-7d TO *]	labels.facet_timestamp_1month=timestamp:[now/d-1M TO *]	labels.facet_timestamp_1year=timestamp:[now/d-1y TO *]
     labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]
     labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others
@@ -4147,12 +4162,71 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     java.math.BigDecimal getQueryBoostContentLangAsDecimal();
 
     /**
+     * Get the value for the key 'query.facet.fields'. <br>
+     * The value is, e.g. label <br>
+     * comment: facet
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFields();
+
+    /**
+     * Get the value for the key 'query.facet.fields.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFieldsSize();
+
+    /**
+     * Get the value for the key 'query.facet.fields.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFacetFieldsSizeAsInteger();
+
+    /**
+     * Get the value for the key 'query.facet.fields.min_doc_count'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFieldsMinDocCount();
+
+    /**
+     * Get the value for the key 'query.facet.fields.min_doc_count' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFacetFieldsMinDocCountAsInteger();
+
+    /**
+     * Get the value for the key 'query.facet.fields.sort'. <br>
+     * The value is, e.g. count.desc <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFieldsSort();
+
+    /**
+     * Get the value for the key 'query.facet.fields.missing'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFieldsMissing();
+
+    /**
+     * Get the value for the key 'query.facet.fields.missing' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFacetFieldsMissingAsInteger();
+
+    /**
      * Get the value for the key 'query.facet.queries'. <br>
      * The value is, e.g. labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]	labels.facet_timestamp_1week=timestamp:[now/d-7d TO *]	labels.facet_timestamp_1month=timestamp:[now/d-1M TO *]	labels.facet_timestamp_1year=timestamp:[now/d-1y TO *]
     labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]
     labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others
     <br>
-     * comment: facet
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetQueries();
@@ -7576,6 +7650,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsDecimal(FessConfig.QUERY_BOOST_CONTENT_LANG);
         }
 
+        public String getQueryFacetFields() {
+            return get(FessConfig.QUERY_FACET_FIELDS);
+        }
+
+        public String getQueryFacetFieldsSize() {
+            return get(FessConfig.QUERY_FACET_FIELDS_SIZE);
+        }
+
+        public Integer getQueryFacetFieldsSizeAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FACET_FIELDS_SIZE);
+        }
+
+        public String getQueryFacetFieldsMinDocCount() {
+            return get(FessConfig.QUERY_FACET_FIELDS_min_doc_count);
+        }
+
+        public Integer getQueryFacetFieldsMinDocCountAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FACET_FIELDS_min_doc_count);
+        }
+
+        public String getQueryFacetFieldsSort() {
+            return get(FessConfig.QUERY_FACET_FIELDS_SORT);
+        }
+
+        public String getQueryFacetFieldsMissing() {
+            return get(FessConfig.QUERY_FACET_FIELDS_MISSING);
+        }
+
+        public Integer getQueryFacetFieldsMissingAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FACET_FIELDS_MISSING);
+        }
+
         public String getQueryFacetQueries() {
             return get(FessConfig.QUERY_FACET_QUERIES);
         }
@@ -8975,6 +9081,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE_LANG, "1.0");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.005");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.5");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS, "label");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE, "100");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SORT, "count.desc");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS_MISSING, "");
             defaultMap
                     .put(FessConfig.QUERY_FACET_QUERIES,
                             "labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]\tlabels.facet_timestamp_1week=timestamp:[now/d-7d TO *]\tlabels.facet_timestamp_1month=timestamp:[now/d-1M TO *]\tlabels.facet_timestamp_1year=timestamp:[now/d-1y TO *]\nlabels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]\tlabels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]\tlabels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]\tlabels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]\tlabels.facet_contentLength_1m=content_length:[1000000 TO *]\nlabels.facet_filetype_title:labels.facet_filetype_html=filetype:html\tlabels.facet_filetype_word=filetype:word\tlabels.facet_filetype_excel=filetype:excel\tlabels.facet_filetype_powerpoint=filetype:powerpoint\tlabels.facet_filetype_odt=filetype:odt\tlabels.facet_filetype_ods=filetype:ods\tlabels.facet_filetype_odp=filetype:odp\tlabels.facet_filetype_pdf=filetype:pdf\tlabels.facet_filetype_txt=filetype:txt\tlabels.facet_filetype_others=filetype:others\n");

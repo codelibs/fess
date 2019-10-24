@@ -58,6 +58,9 @@ public class FacetQueryView {
                 logger.debug("updated query map: {}", queryMap);
             }
         }
+
+        final FacetInfo facetInfo = ComponentUtil.getComponent("facetInfo");
+        queryMap.values().stream().distinct().forEach(facetInfo::addQuery);
     }
 
     public String getTitle() {

@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -56,6 +57,8 @@ public class ViewHelperTest extends UnitFessTestCase {
         ComponentUtil.register(pathMappingHelper, "pathMappingHelper");
         FileTypeHelper fileTypeHelper = new FileTypeHelper();
         ComponentUtil.register(fileTypeHelper, "fileTypeHelper");
+        FacetInfo facetInfo = new FacetInfo();
+        ComponentUtil.register(facetInfo, "facetInfo");
         viewHelper = new ViewHelper();
         viewHelper.init();
     }
