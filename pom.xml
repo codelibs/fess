@@ -51,13 +51,13 @@
 		<tika.version>1.22</tika.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.4.0</crawler.version>
+		<crawler.version>3.4.1-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>7.4.0</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.4.0</elasticsearch.version>
+		<elasticsearch.version>7.4.1</elasticsearch.version>
 		<elasticsearch.httpclient.version>7.4.0</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
