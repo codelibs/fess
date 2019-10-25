@@ -179,7 +179,7 @@ public class EsApiManager extends BaseApiManager {
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
-                logger.error("Failed to read {} from {}", path, filePath);
+                logger.error("Failed to read " + path + " from " + filePath);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         } else {
@@ -189,7 +189,7 @@ public class EsApiManager extends BaseApiManager {
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
-                logger.error("Failed to read {} from {}", path, filePath);
+                logger.error("Failed to read " + path + " from " + filePath);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         }

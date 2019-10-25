@@ -247,7 +247,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             }
         } catch (final TransformerException e) {
-            logger.warn("Could not parse a value of {}", META_NAME_ROBOTS_CONTENT, e);
+            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT, e);
         }
 
     }
@@ -593,7 +593,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 parseTextContent(node, buf);
             }
         } catch (final Exception e) {
-            logger.warn("Could not parse a value of {}", xpath);
+            logger.warn("Could not parse a value of " + xpath);
         }
         if (buf == null) {
             return null;
@@ -694,7 +694,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 buf.append("\n");
             }
         } catch (final Exception e) {
-            logger.warn("Could not parse a value of {}", xpath, e);
+            logger.warn("Could not parse a value of " + xpath, e);
         }
         return buf.toString().trim();
     }
@@ -854,7 +854,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                             return thumbnailUrl;
                         }
                     } catch (final Exception e) {
-                        logger.debug("Failed to parse {} at {}", imgNode, responseData.getUrl(), e);
+                        logger.debug("Failed to parse " + imgNode + " at " + responseData.getUrl(), e);
                     }
                 } else if (firstThumbnailUrl == null) {
                     firstThumbnailUrl = thumbnailUrl;
@@ -865,7 +865,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 return firstThumbnailUrl;
             }
         } catch (final Exception e) {
-            logger.warn("Failed to retrieve thumbnail url from {}", responseData.getUrl(), e);
+            logger.warn("Failed to retrieve thumbnail url from " + responseData.getUrl(), e);
         }
         return null;
     }

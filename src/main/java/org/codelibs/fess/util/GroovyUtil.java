@@ -48,7 +48,7 @@ public final class GroovyUtil {
             //                try {
             //                    GroovySystem.getMetaClassRegistry().removeMetaClass(c);
             //                } catch (Throwable t) {
-            //                    logger.warn("Failed to delete {}", c, t);
+            //                    logger.warn("Failed to delete " + c, t);
             //                }
             //            });
             loader.clearCache();

@@ -221,7 +221,7 @@ public class DataIndexHelper {
             final DataStoreFactory dataStoreFactory = ComponentUtil.getDataStoreFactory();
             dataStore = dataStoreFactory.getDataStore(dataConfig.getHandlerName());
             if (dataStore == null) {
-                logger.error("DataStore({}) is not found.", dataConfig.getHandlerName());
+                logger.error("DataStore(" + dataConfig.getHandlerName() + ") is not found.");
             } else {
                 try {
                     dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
@@ -242,7 +242,7 @@ public class DataIndexHelper {
             }
             final String sessionId = initParamMap.get(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
-                logger.warn("Invalid sessionId at {}", dataConfig);
+                logger.warn("Invalid sessionId at " + dataConfig);
                 return;
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -260,7 +260,7 @@ public class DataIndexHelper {
                 final long numOfDeleted = fessEsClient.deleteByQuery(index, queryBuilder);
                 logger.info("Deleted {} old docs.", numOfDeleted);
             } catch (final Exception e) {
-                logger.error("Could not delete old docs at {}", dataConfig, e);
+                logger.error("Could not delete old docs at " + dataConfig, e);
             }
         }
 

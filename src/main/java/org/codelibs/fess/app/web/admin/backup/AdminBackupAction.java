@@ -278,7 +278,7 @@ public class AdminBackupAction extends FessAdminAction {
             });
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to parse {}", line, e);
+                logger.debug("Failed to parse " + line, e);
             }
             return null;
         }
@@ -364,7 +364,7 @@ public class AdminBackupAction extends FessAdminAction {
                         writeCall.accept(writer);
                         writer.flush();
                     } catch (final Exception e) {
-                        logger.warn("Failed to write {} to response.", id, e);
+                        logger.warn("Failed to write " + id + " to response.", e);
                     }
                 });
     }

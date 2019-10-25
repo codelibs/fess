@@ -135,7 +135,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     }
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("principal={}", principal);
+                        logger.debug("principal=" + principal);
                     }
 
                     final String[] username = principal.getName().split("@", 2);

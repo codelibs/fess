@@ -360,7 +360,7 @@ public class ViewHelper {
                     url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
                 } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
-                        logger.warn("Failed to decode {}", url, e);
+                        logger.warn("Failed to decode " + url, e);
                     }
                 }
             }
@@ -675,7 +675,7 @@ public class ViewHelper {
                 CloseableUtil.closeQuietly(responseData);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Finished to write {}", url);
+                logger.debug("Finished to write " + url);
             }
         });
         return response;

@@ -177,7 +177,7 @@ public class JsonApiManager extends BaseJsonApiManager {
             }, OptionalThing.empty());
             response.flushBuffer();
             if (logger.isDebugEnabled()) {
-                logger.debug("Loaded {} docs", count);
+                logger.debug("Loaded " + count + " docs");
             }
         } catch (final Exception e) {
             final int status = 9;

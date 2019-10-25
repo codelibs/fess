@@ -352,10 +352,10 @@ public class FessEsClient implements Client {
             if (response.getHttpStatusCode() == 200) {
                 return true;
             } else {
-                logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex);
+                logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex);
             }
         } catch (final IOException e) {
-            logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
+            logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex, e);
         }
         return false;
     }
@@ -389,10 +389,10 @@ public class FessEsClient implements Client {
                     client.admin().indices().prepareCreate(indexName).setSource(source, XContentType.JSON).execute()
                             .actionGet(fessConfig.getIndexIndicesTimeout());
             if (indexResponse.isAcknowledged()) {
-                logger.info("Created {} index.", indexName);
+                logger.info("Created " + indexName + " index.");
                 return true;
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to create {} index.", indexName);
+                logger.debug("Failed to create " + indexName + " index.");
             }
         } catch (final Exception e) {
             logger.warn(indexConfigFile + " is not found.", e);
@@ -430,7 +430,7 @@ public class FessEsClient implements Client {
                     insertBulkData(fessConfig, indexName, docType, dataPath);
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to create {}/{} mapping.", indexName, docType, e);
+                logger.warn("Failed to create " + indexName + "/" + docType + " mapping.", e);
             }
         } else if (logger.isDebugEnabled()) {
             logger.debug(indexName + "/" + docType + " mapping exists.");
@@ -478,9 +478,9 @@ public class FessEsClient implements Client {
                                     client.admin().indices().prepareAliases().addAlias(createdIndexName, aliasName, source).execute()
                                             .actionGet(fessConfig.getIndexIndicesTimeout());
                             if (response.isAcknowledged()) {
-                                logger.info("Created {} alias for {}", aliasName, createdIndexName);
+                                logger.info("Created " + aliasName + " alias for " + createdIndexName);
                             } else if (logger.isDebugEnabled()) {
-                                logger.debug("Failed to create {} alias for {}", aliasName, createdIndexName);
+                                logger.debug("Failed to create " + aliasName + " alias for " + createdIndexName);
                             }
                         }));
             }
@@ -501,17 +501,17 @@ public class FessEsClient implements Client {
                         try (CurlResponse response =
                                 ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                             if (response.getHttpStatusCode() == 200) {
-                                logger.info("Register {} to {}", path, index);
+                                logger.info("Register " + path + " to " + index);
                             } else {
                                 if (response.getContentException() != null) {
-                                    logger.warn("Invalid request for {}.", path, response.getContentException());
+                                    logger.warn("Invalid request for " + path + ".", response.getContentException());
                                 } else {
-                                    logger.warn("Invalid request for {}. The response is {}", path, response.getContentAsString());
+                                    logger.warn("Invalid request for " + path + ". The response is " + response.getContentAsString());
                                 }
                             }
                         }
                     } catch (final Exception e) {
-                        logger.warn("Failed to register {}", filePath, e);
+                        logger.warn("Failed to register " + filePath, e);
                     }
                 });
         try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/flush").execute()) {
@@ -559,7 +559,7 @@ public class FessEsClient implements Client {
                                 }
                             }
                         } catch (final Exception e) {
-                            logger.warn("Failed to parse {}", dataPath);
+                            logger.warn("Failed to parse " + dataPath);
                         }
                         return StringUtil.EMPTY;
                     });

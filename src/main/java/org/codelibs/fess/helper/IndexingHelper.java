@@ -52,7 +52,7 @@ public class IndexingHelper {
         }
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending {} documents to a server.", docList.size());
+            logger.debug("Sending " + docList.size() + " documents to a server.");
         }
         try {
             if (fessConfig.isThumbnailCrawlerEnabled()) {

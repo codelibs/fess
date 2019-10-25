@@ -162,7 +162,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
                     if (documentExpires != null
                             && !indexingHelper.updateDocument(fessEsClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
-                        logger.debug("Failed to update {} at {}", fessConfig.getIndexFieldExpires(), url);
+                        logger.debug("Failed to update " + fessConfig.getIndexFieldExpires() + " at " + url);
                     }
 
                     return false;

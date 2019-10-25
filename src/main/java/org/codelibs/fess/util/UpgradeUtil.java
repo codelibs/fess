@@ -50,14 +50,14 @@ public final class UpgradeUtil {
             final String source = FileUtil.readUTF8(filePath);
             try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                 if (response.getHttpStatusCode() == 200) {
-                    logger.info("Register {} to {}", path, indexName);
+                    logger.info("Register " + path + " to " + indexName);
                     return true;
                 } else {
-                    logger.warn("Invalid request for {}", path);
+                    logger.warn("Invalid request for " + path);
                 }
             }
         } catch (final Exception e) {
-            logger.warn("Failed to register {}", filePath, e);
+            logger.warn("Failed to register " + filePath, e);
         }
         return false;
     }
@@ -74,10 +74,10 @@ public final class UpgradeUtil {
                         indicesClient.prepareAliases().addAlias(indexName, aliasName, source).execute()
                                 .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (response.isAcknowledged()) {
-                    logger.info("Created {} alias for {}", aliasName, indexName);
+                    logger.info("Created " + aliasName + " alias for " + indexName);
                     return true;
                 } else if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to create {} alias for {}", aliasName, indexName);
+                    logger.debug("Failed to create " + aliasName + " alias for " + indexName);
                 }
             }
         } catch (final ResourceNotFoundRuntimeException e) {
@@ -114,7 +114,7 @@ public final class UpgradeUtil {
                 }
                 // TODO bulk
             } catch (final Exception e) {
-                logger.warn("Failed to create {}/{} mapping.", index, type, e);
+                logger.warn("Failed to create " + index + "/" + type + " mapping.", e);
             }
         }
         return false;
@@ -150,12 +150,12 @@ public final class UpgradeUtil {
             final PutMappingRequestBuilder builder = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON);
             final AcknowledgedResponse pmResponse = builder.execute().actionGet();
             if (!pmResponse.isAcknowledged()) {
-                logger.warn("Failed to update {} settings.", index);
+                logger.warn("Failed to update " + index + " settings.");
             } else {
                 return true;
             }
         } catch (final Exception e) {
-            logger.warn("Failed to update {} settings.", index, e);
+            logger.warn("Failed to update " + index + " settings.", e);
         }
 
         return false;
@@ -167,7 +167,7 @@ public final class UpgradeUtil {
             fessEsClient.index(indexRequest).actionGet();
             return true;
         } catch (final Exception e) {
-            logger.warn("Failed to add {} to {}", id, index, e);
+            logger.warn("Failed to add " + id + " to " + index, e);
         }
         return false;
     }
@@ -191,13 +191,13 @@ public final class UpgradeUtil {
 
             @Override
             public void onResponse(final AcknowledgedResponse response) {
-                logger.info("Deleted {} index.", index);
+                logger.info("Deleted " + index + " index.");
                 comsumer.accept(response);
             }
 
             @Override
             public void onFailure(final Exception e) {
-                logger.warn("Failed to delete {} index.", index, e);
+                logger.warn("Failed to delete " + index + " index.", e);
             }
         });
     }

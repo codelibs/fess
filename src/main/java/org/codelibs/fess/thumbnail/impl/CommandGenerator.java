@@ -101,7 +101,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 executeCommand(thumbnailId, cmdList);
 
                 if (outputFile.isFile() && outputFile.length() == 0) {
-                    logger.warn("Thumbnail File is empty. ID is {}", thumbnailId);
+                    logger.warn("Thumbnail File is empty. ID is " + thumbnailId);
                     if (outputFile.delete()) {
                         logger.info("Deleted: " + outputFile.getAbsolutePath());
                     }
@@ -119,7 +119,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 return false;
             } finally {
                 if (tempFile != null && !tempFile.delete()) {
-                    logger.debug("Failed to delete {}", tempFile.getAbsolutePath());
+                    logger.debug("Failed to delete " + tempFile.getAbsolutePath());
                 }
             }
         });
@@ -164,7 +164,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 p.destroy();
             }
         } catch (final Exception e) {
-            logger.warn("Failed to generate a thumbnail of {}", thumbnailId, e);
+            logger.warn("Failed to generate a thumbnail of " + thumbnailId, e);
         }
         if (task != null) {
             task.cancel();

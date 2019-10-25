@@ -144,7 +144,7 @@ public class PluginHelper {
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to parse {}maven-metadata.xml.", pluginUrl, e);
+                logger.warn("Failed to parse " + pluginUrl + "maven-metadata.xml.", e);
             }
         }
         return list;
@@ -182,7 +182,7 @@ public class PluginHelper {
 
     protected String getRepositoryContent(final String url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Loading {}", url);
+            logger.debug("Loading " + url);
         }
         try (final CurlResponse response = Curl.get(url).execute()) {
             return response.getContentAsString();

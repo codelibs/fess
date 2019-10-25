@@ -154,7 +154,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                             if (dt != null) {
                                                 dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
                                             } else {
-                                                logger.warn("Failed to parse {}", mapping.toString());
+                                                logger.warn("Failed to parse " + mapping.toString());
                                             }
                                         } else {
                                             logger.warn("Unknown mapping type: {}={}", key, mapping);

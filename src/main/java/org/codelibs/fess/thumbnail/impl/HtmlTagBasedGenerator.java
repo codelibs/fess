@@ -120,7 +120,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         if (!created) {
                             updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                             if (outputFile.exists() && !outputFile.delete()) {
-                                logger.warn("Failed to delete {}", outputFile.getAbsolutePath());
+                                logger.warn("Failed to delete " + outputFile.getAbsolutePath());
                             }
                         }
                     }
