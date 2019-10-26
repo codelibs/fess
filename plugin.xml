@@ -5,7 +5,8 @@
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
-	<property name="maven.release.repo.url" value="http://central.maven.org/maven2" />
+	<property name="maven.release.repo.url" value="https://oss.sonatype.org/service/local/repositories/releases/content" />
+	<!--<property name="maven.release.repo.url" value="https://oss.sonatype.org/content/repositories/releases" />-->
 
 	<target name="install.plugins">
 		<mkdir dir="${target.dir}" />
@@ -17,8 +18,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="7.4.0" />
-			<param name="plugin.zip.version" value="7.4.0" />
+			<param name="plugin.version" value="7.4.1" />
+			<param name="plugin.zip.version" value="7.4.1" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
