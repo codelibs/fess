@@ -740,6 +740,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Past Year */
     public static final String LABELS_facet_timestamp_1year = "{labels.facet_timestamp_1year}";
 
+    /** The key of the message: Past 3 Months */
+    public static final String LABELS_facet_timestamp_3month = "{labels.facet_timestamp_3month}";
+
+    /** The key of the message: Past 6 Months */
+    public static final String LABELS_facet_timestamp_6month = "{labels.facet_timestamp_6month}";
+
+    /** The key of the message: Past 2 Years */
+    public static final String LABELS_facet_timestamp_2year = "{labels.facet_timestamp_2year}";
+
+    /** The key of the message: Past 3 Years */
+    public static final String LABELS_facet_timestamp_3year = "{labels.facet_timestamp_3year}";
+
     /** The key of the message: Size */
     public static final String LABELS_facet_contentLength_title = "{labels.facet_contentLength_title}";
 
@@ -757,6 +769,24 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: 1mb - &nbsp; */
     public static final String LABELS_facet_contentLength_1m = "{labels.facet_contentLength_1m}";
+
+    /** The key of the message: 10kb - 50kb */
+    public static final String LABELS_facet_contentLength_10kto50k = "{labels.facet_contentLength_10kto50k}";
+
+    /** The key of the message: 50kb - 100kb */
+    public static final String LABELS_facet_contentLength_50kto100k = "{labels.facet_contentLength_50kto100k}";
+
+    /** The key of the message: 100kb - 250kb */
+    public static final String LABELS_facet_contentLength_100kto250k = "{labels.facet_contentLength_100kto250k}";
+
+    /** The key of the message: 250kb - 500kb */
+    public static final String LABELS_facet_contentLength_250kto500k = "{labels.facet_contentLength_250kto500k}";
+
+    /** The key of the message: 1mb - 5mb */
+    public static final String LABELS_facet_contentLength_1mto5m = "{labels.facet_contentLength_1mto5m}";
+
+    /** The key of the message: 5mb - &nbsp; */
+    public static final String LABELS_facet_contentLength_5m = "{labels.facet_contentLength_5m}";
 
     /** The key of the message: File Type */
     public static final String LABELS_facet_filetype_title = "{labels.facet_filetype_title}";
