@@ -383,12 +383,20 @@ public class FessFunctions {
                 list.add(line);
             }
         }
+        if (lineNum == 0 || list.isEmpty()) {
+            return "<pre class=\"" + style + "\">" + input + "</pre>";
+        }
+        int lastIndex = list.size();
         if (list.get(list.size() - 1).endsWith("...")) {
-            list.remove(list.size() - 1);
+            lastIndex--;
         }
-        if (lineNum == 0) {
-            return "<pre class=\"" + style + "\">" + list.stream().collect(Collectors.joining("\n")) + "</pre>";
+        if (lastIndex <= 0) {
+            lastIndex = 1;
         }
-        return "<pre class=\"" + style + " linenums:" + lineNum + "\">" + list.stream().collect(Collectors.joining("\n")) + "</pre>";
+        final String content = list.subList(0, lastIndex).stream().collect(Collectors.joining("\n"));
+        if (StringUtil.isBlank(content)) {
+            return "<pre class=\"" + style + "\">" + input.replaceAll("L[0-9]+:", StringUtil.EMPTY).trim() + "</pre>";
+        }
+        return "<pre class=\"" + style + " linenums:" + lineNum + "\">" + content + "</pre>";
     }
 }

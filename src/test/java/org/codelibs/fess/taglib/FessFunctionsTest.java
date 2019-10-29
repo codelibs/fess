@@ -100,5 +100,21 @@ public class FessFunctionsTest extends UnitFessTestCase {
         value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb</pre>", value);
 
+        code = "aaa\nL11:bbb\nL12:ccc...";
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
+        assertEquals("<pre class=\"prettyprint linenums:11\">bbb</pre>", value);
+
+        code = "aaa\nL10:";
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
+        assertEquals("<pre class=\"prettyprint\">aaa</pre>", value);
+
+        code = "aaa\nL10:\nL11:ccc...";
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
+        assertEquals("<pre class=\"prettyprint\">aaa\n\nccc...</pre>", value);
+
+        code = "aaa\nL10:\nL11:ccc";
+        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
+        assertEquals("<pre class=\"prettyprint linenums:10\">\nccc</pre>", value);
+
     }
 }
