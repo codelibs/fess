@@ -123,6 +123,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     @Override
     public LoginCredential getLoginCredential() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logging in with Azure AD Authenticator");
+            }
             final HttpSession session = request.getSession(false);
             if (session != null && containsAuthenticationData(request)) {
                 try {
@@ -336,10 +339,16 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     protected boolean containsAuthenticationData(final HttpServletRequest request) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("HTTP Method: {}", request.getMethod());
+        }
         if (!request.getMethod().equalsIgnoreCase("POST")) {
             return false;
         }
         final Map<String, String[]> params = request.getParameterMap();
+        if (logger.isDebugEnabled()) {
+            logger.debug("params: {}", params);
+        }
         return params.containsKey(ERROR) || params.containsKey(ID_TOKEN) || params.containsKey(CODE);
     }
 

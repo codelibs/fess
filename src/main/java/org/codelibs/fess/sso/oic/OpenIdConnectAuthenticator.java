@@ -84,6 +84,9 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     @Override
     public LoginCredential getLoginCredential() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logging in with OpenID Connect Authenticator");
+            }
             final HttpSession session = request.getSession(false);
             if (session != null) {
                 final String sesState = (String) session.getAttribute(OIC_STATE);
@@ -91,11 +94,11 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                     session.removeAttribute(OIC_STATE);
                     final String code = request.getParameter("code");
                     final String reqState = request.getParameter("state");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("code: {}, state(request): {}, state(session): {}", code, reqState, sesState);
+                    }
                     if (sesState.equals(reqState) && StringUtil.isNotBlank(code)) {
                         return processCallback(request, code);
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("code:" + code + " state(request):" + reqState + " state(session):" + sesState);
                     }
                     return null;
                 }
@@ -126,9 +129,9 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             final String jwtSigniture = new String(Base64.decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("jwtHeader: " + jwtHeader);
-                logger.debug("jwtClaim: " + jwtClaim);
-                logger.debug("jwtSigniture: " + jwtSigniture);
+                logger.debug("jwtHeader: {}", jwtHeader);
+                logger.debug("jwtClaim: {}", jwtClaim);
+                logger.debug("jwtSigniture: {}", jwtSigniture);
             }
 
             // TODO validate signiture
@@ -142,6 +145,9 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             attributes.put("jwtclaim", jwtClaim);
             attributes.put("jwtsign", jwtSigniture);
 
+            if (logger.isDebugEnabled()) {
+                logger.debug("attribute: {}", attributes);
+            }
             parseJwtClaim(jwtClaim, attributes);
 
             return new OpenIdConnectCredential(attributes);

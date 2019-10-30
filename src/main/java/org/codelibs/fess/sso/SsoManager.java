@@ -33,7 +33,11 @@ public class SsoManager {
     protected final List<SsoAuthenticator> authenticatorList = new ArrayList<>();
 
     public boolean available() {
-        return !NONE.equals(getSsoType());
+        final String ssoType = getSsoType();
+        if (logger.isDebugEnabled()) {
+            logger.debug("sso.type: {}", ssoType);
+        }
+        return !NONE.equals(ssoType);
     }
 
     public LoginCredential getLoginCredential() {

@@ -16,6 +16,7 @@
 package org.codelibs.fess.sso.spnego;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 import javax.annotation.PostConstruct;
@@ -102,6 +103,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         return LaRequestUtil
                 .getOptionalRequest()
                 .map(request -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Logging in with SPNEGO Authenticator");
+                    }
                     final HttpServletResponse response = LaResponseUtil.getResponse();
                     final SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(response);
 
@@ -109,6 +113,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     final SpnegoPrincipal principal;
                     try {
                         principal = getAuthenticator().authenticate(request, spnegoResponse);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("principal: {}", principal);
+                        }
                     } catch (final Exception e) {
                         final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
                         if (logger.isDebugEnabled()) {
@@ -118,7 +125,11 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     }
 
                     // context/auth loop not yet complete
-                    if (spnegoResponse.isStatusSet()) {
+                    final boolean status = spnegoResponse.isStatusSet();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("isStatusSet: {}", status);
+                    }
+                    if (status) {
                         return new ActionResponseCredential(() -> {
                             throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.",
                                     "401 Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
@@ -139,6 +150,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     }
 
                     final String[] username = principal.getName().split("@", 2);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("username: {}", Arrays.toString(username));
+                    }
                     return new SpnegoCredential(username[0]);
                 }).orElseGet(() -> null);
 
