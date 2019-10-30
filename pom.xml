@@ -51,10 +51,10 @@
 		<tika.version>1.22</tika.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.4.1-SNAPSHOT</crawler.version>
+		<crawler.version>3.4.1</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.4.1-SNAPSHOT</suggest.version>
+		<suggest.version>7.4.1</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.4.1</elasticsearch.version>
