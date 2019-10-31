@@ -491,9 +491,8 @@ public class SystemHelper {
     public void setLogLevel(final String level) {
         final Level logLevel = Level.toLevel(level, Level.WARN);
         System.setProperty(Constants.FESS_LOG_LEVEL, logLevel.toString());
-        Configurator.setLevel("org.codelibs.fess", logLevel);
-        Configurator.setLevel("org.dbflute", logLevel);
-        Configurator.setLevel("org.lastaflute", logLevel);
+        stream(ComponentUtil.getFessConfig().getLoggingAppPackages(), ",").of(
+                stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> Configurator.setLevel(s, logLevel)));
     }
 
     public String getLogLevel() {
