@@ -29,7 +29,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.exec.SuggestCreator;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -218,15 +218,13 @@ public class SuggestJob extends ExecJob {
                 logger.info("SuggestCreator: Exit Code=" + exitValue + " - SuggestCreator Process Output:\n" + it.getOutput());
             }
             if (exitValue != 0) {
-                throw new FessSystemException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
+                throw new JobProcessingException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
             }
             ComponentUtil.getPopularWordHelper().clearCache();
-        } catch (final FessSystemException e) {
-            throw e;
         } catch (final InterruptedException e) {
             logger.warn("SuggestCreator Process interrupted.");
         } catch (final Exception e) {
-            throw new FessSystemException("SuggestCreator Process terminated.", e);
+            throw new JobProcessingException("SuggestCreator Process terminated.", e);
         } finally {
             try {
                 processHelper.destroyProcess(sessionId);

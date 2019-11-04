@@ -18,6 +18,7 @@ package org.codelibs.fess.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.exception.JobProcessingException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,8 @@ public final class GroovyUtil {
         final GroovyShell groovyShell = new GroovyShell(new Binding(bindingMap));
         try {
             return groovyShell.evaluate(template);
+        } catch (final JobProcessingException e) {
+            throw e;
         } catch (final Exception e) {
             logger.warn("Failed to evalue groovy script: " + template + " => " + paramMap, e);
             return null;

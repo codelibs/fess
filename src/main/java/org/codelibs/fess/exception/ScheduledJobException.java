@@ -13,9 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.job;
-
-import org.codelibs.fess.exception.FessSystemException;
+package org.codelibs.fess.exception;
 
 public class ScheduledJobException extends FessSystemException {
 
@@ -27,7 +25,6 @@ public class ScheduledJobException extends FessSystemException {
      */
     public ScheduledJobException(final String message, final Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -35,7 +32,6 @@ public class ScheduledJobException extends FessSystemException {
      */
     public ScheduledJobException(final String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
 }

@@ -33,7 +33,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.exec.Crawler;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -97,8 +97,8 @@ public class CrawlJob extends ExecJob {
         if (maxCrawlerProcesses > 0) {
             final int runningJobCount = getRunningJobCount();
             if (runningJobCount > maxCrawlerProcesses) {
-                throw new FessSystemException(runningJobCount + " crawler processes are running. Max processes are " + maxCrawlerProcesses
-                        + ".");
+                throw new JobProcessingException(runningJobCount + " crawler processes are running. Max processes are "
+                        + maxCrawlerProcesses + ".");
             }
         }
 
@@ -157,10 +157,8 @@ public class CrawlJob extends ExecJob {
         try {
             executeCrawler();
             ComponentUtil.getKeyMatchHelper().update();
-        } catch (final FessSystemException e) {
-            throw e;
         } catch (final Exception e) {
-            throw new FessSystemException("Failed to execute a crawl job.", e);
+            throw new JobProcessingException("Failed to execute a crawl job.", e);
         }
 
         return resultBuf.toString();
@@ -355,14 +353,12 @@ public class CrawlJob extends ExecJob {
                 logger.info("Crawler: Exit Code=" + exitValue + " - Crawler Process Output:\n" + it.getOutput());
             }
             if (exitValue != 0) {
-                throw new FessSystemException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
+                throw new JobProcessingException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
             }
-        } catch (final FessSystemException e) {
-            throw e;
         } catch (final InterruptedException e) {
             logger.warn("Crawler Process interrupted.");
         } catch (final Exception e) {
-            throw new FessSystemException("Crawler Process terminated.", e);
+            throw new JobProcessingException("Crawler Process terminated.", e);
         } finally {
             try {
                 processHelper.destroyProcess(sessionId);

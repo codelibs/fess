@@ -19,10 +19,10 @@ import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
+import org.codelibs.fess.exception.ScheduledJobException;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
-import org.codelibs.fess.job.ScheduledJobException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.job.LaJob;
@@ -101,7 +101,7 @@ public class ScriptExecutorJob implements LaJob {
             }
             jobLog.setJobStatus(Constants.OK);
         } catch (final Throwable t) {
-            logger.error("Failed to execute " + id + ": " + script, t);
+            logger.warn("Failed to execute " + id + ": " + script, t);
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {

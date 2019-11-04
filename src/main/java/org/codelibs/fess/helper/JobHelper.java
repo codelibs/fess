@@ -27,7 +27,7 @@ import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
-import org.codelibs.fess.job.ScheduledJobException;
+import org.codelibs.fess.exception.ScheduledJobException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
