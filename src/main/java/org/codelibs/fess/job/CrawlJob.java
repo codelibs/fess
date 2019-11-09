@@ -31,6 +31,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.exception.JobProcessingException;
@@ -154,11 +155,16 @@ public class CrawlJob extends ExecJob {
             jobExecutor.addShutdownListener(() -> ComponentUtil.getProcessHelper().destroyProcess(sessionId));
         }
 
+        final TimeoutTask timeoutTask = createTimeoutTask();
         try {
             executeCrawler();
             ComponentUtil.getKeyMatchHelper().update();
         } catch (final Exception e) {
             throw new JobProcessingException("Failed to execute a crawl job.", e);
+        } finally {
+            if (timeoutTask != null && !timeoutTask.isCanceled()) {
+                timeoutTask.cancel();
+            }
         }
 
         return resultBuf.toString();

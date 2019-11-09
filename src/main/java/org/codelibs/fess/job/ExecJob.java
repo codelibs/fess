@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,8 @@ public abstract class ExecJob {
 
     protected String lastaEnv;
 
+    protected int timeout = -1; // sec
+
     public abstract String execute();
 
     protected abstract String getExecuteType();
@@ -64,6 +68,11 @@ public abstract class ExecJob {
 
     public ExecJob logLevel(final String logLevel) {
         this.logLevel = logLevel;
+        return this;
+    }
+
+    public ExecJob timeout(final int timeout) {
+        this.timeout = timeout;
         return this;
     }
 
@@ -121,7 +130,7 @@ public abstract class ExecJob {
             return;
         }
         if (!FileUtils.deleteQuietly(ownTmpDir)) {
-            logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
+            logger.warn("Could not delete a temp dir: {}", ownTmpDir.getAbsolutePath());
         }
     }
 
@@ -136,4 +145,13 @@ public abstract class ExecJob {
         }
     }
 
+    protected TimeoutTask createTimeoutTask() {
+        if (timeout <= 0) {
+            return null;
+        }
+        return TimeoutManager.getInstance().addTimeoutTarget(() -> {
+            logger.warn("Process is terminated due to {}ms exceeded.", timeout);
+            ComponentUtil.getProcessHelper().destroyProcess(sessionId);
+        }, timeout, false);
+    }
 }

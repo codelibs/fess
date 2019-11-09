@@ -28,6 +28,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.exec.SuggestCreator;
@@ -62,11 +63,16 @@ public class SuggestJob extends ExecJob {
             jobExecutor.addShutdownListener(() -> ComponentUtil.getProcessHelper().destroyProcess(sessionId));
         }
 
+        final TimeoutTask timeoutTask = createTimeoutTask();
         try {
             executeSuggestCreator();
         } catch (final Exception e) {
             logger.warn("Failed to create suggest data.", e);
             resultBuf.append(e.getMessage()).append("\n");
+        } finally {
+            if (timeoutTask != null && !timeoutTask.isCanceled()) {
+                timeoutTask.cancel();
+            }
         }
 
         return resultBuf.toString();
