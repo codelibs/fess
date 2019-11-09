@@ -399,4 +399,9 @@ public class FessFunctions {
         }
         return "<pre class=\"" + style + " linenums:" + lineNum + "\">" + content + "</pre>";
     }
+
+    public static String getMessage(final String key, final String defaultValue) {
+        final Locale locale = LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ROOT);
+        return ComponentUtil.getMessageManager().findMessage(locale, key).orElse(defaultValue);
+    }
 }
