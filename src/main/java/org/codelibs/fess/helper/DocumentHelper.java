@@ -256,7 +256,7 @@ public class DocumentHelper {
     }
 
     public String appendLineNumber(final String prefix, final String content) {
-        if (content == null) {
+        if (StringUtil.isBlank(content)) {
             return StringUtil.EMPTY;
         }
         final String[] values = content.split("\n");

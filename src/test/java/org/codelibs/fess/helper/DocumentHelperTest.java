@@ -179,7 +179,11 @@ public class DocumentHelperTest extends UnitFessTestCase {
         DocumentHelper documentHelper = new DocumentHelper();
 
         assertEquals("", documentHelper.appendLineNumber("L", null));
-        assertEquals("L1:", documentHelper.appendLineNumber("L", ""));
+        assertEquals("", documentHelper.appendLineNumber("L", ""));
+        assertEquals("", documentHelper.appendLineNumber("L", " "));
+        assertEquals("", documentHelper.appendLineNumber("L", "\n"));
+        assertEquals("", documentHelper.appendLineNumber("L", "\n\n"));
+        assertEquals("", documentHelper.appendLineNumber("L", "\n \n"));
         assertEquals("L1:aaa", documentHelper.appendLineNumber("L", "aaa"));
         assertEquals("L1:aaa", documentHelper.appendLineNumber("L", "aaa\n"));
         assertEquals("L1:aaa\nL2:bbb", documentHelper.appendLineNumber("L", "aaa\nbbb"));
