@@ -221,7 +221,7 @@ public class GenerateThumbnailJob extends ExecJob {
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
             if (logger.isInfoEnabled()) {
-                logger.info("ThumbnailGenerator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
+                logger.info("ThumbnailGenerator: \nDirectory={}\nOptions={}", baseDir, cmdList);
             }
 
             final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
@@ -239,14 +239,19 @@ public class GenerateThumbnailJob extends ExecJob {
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("ThumbnailGenerator: Exit Code=" + exitValue + " - ThumbnailGenerator Process Output:\n" + it.getOutput());
+                logger.info("ThumbnailGenerator: Exit Code={} - Process Output:\n{}", exitValue, it.getOutput());
             }
             if (exitValue != 0) {
-                throw new JobProcessingException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
+                final StringBuilder out = new StringBuilder();
+                if (processTimeout) {
+                    out.append("Process is terminated due to ").append(timeout).append(" second exceeded.\n");
+                }
+                out.append("Exit Code: ").append(exitValue).append("\nOutput:\n").append(it.getOutput());
+                throw new JobProcessingException(out.toString());
             }
             ComponentUtil.getPopularWordHelper().clearCache();
-        } catch (final InterruptedException e) {
-            logger.warn("ThumbnailGenerator Process interrupted.");
+        } catch (final JobProcessingException e) {
+            throw e;
         } catch (final Exception e) {
             throw new JobProcessingException("ThumbnailGenerator Process terminated.", e);
         } finally {

@@ -203,7 +203,7 @@ public class SuggestJob extends ExecJob {
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
             if (logger.isInfoEnabled()) {
-                logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
+                logger.info("SuggestCreator: \nDirectory={}\nOptions={}", baseDir, cmdList);
             }
 
             final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
@@ -221,14 +221,19 @@ public class SuggestJob extends ExecJob {
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("SuggestCreator: Exit Code=" + exitValue + " - SuggestCreator Process Output:\n" + it.getOutput());
+                logger.info("SuggestCreator: Exit Code={} - Process Output:\n{}", exitValue, it.getOutput());
             }
             if (exitValue != 0) {
-                throw new JobProcessingException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
+                final StringBuilder out = new StringBuilder();
+                if (processTimeout) {
+                    out.append("Process is terminated due to ").append(timeout).append(" second exceeded.\n");
+                }
+                out.append("Exit Code: ").append(exitValue).append("\nOutput:\n").append(it.getOutput());
+                throw new JobProcessingException(out.toString());
             }
             ComponentUtil.getPopularWordHelper().clearCache();
-        } catch (final InterruptedException e) {
-            logger.warn("SuggestCreator Process interrupted.");
+        } catch (final JobProcessingException e) {
+            throw e;
         } catch (final Exception e) {
             throw new JobProcessingException("SuggestCreator Process terminated.", e);
         } finally {

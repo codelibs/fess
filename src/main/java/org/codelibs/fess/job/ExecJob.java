@@ -47,6 +47,8 @@ public abstract class ExecJob {
 
     protected int timeout = -1; // sec
 
+    protected boolean processTimeout = false;
+
     public abstract String execute();
 
     protected abstract String getExecuteType();
@@ -150,8 +152,9 @@ public abstract class ExecJob {
             return null;
         }
         return TimeoutManager.getInstance().addTimeoutTarget(() -> {
-            logger.warn("Process is terminated due to {}ms exceeded.", timeout);
+            logger.warn("Process is terminated due to {} second exceeded.", timeout);
             ComponentUtil.getProcessHelper().destroyProcess(sessionId);
+            processTimeout = true;
         }, timeout, false);
     }
 }

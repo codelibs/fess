@@ -159,6 +159,8 @@ public class CrawlJob extends ExecJob {
         try {
             executeCrawler();
             ComponentUtil.getKeyMatchHelper().update();
+        } catch (final JobProcessingException e) {
+            throw e;
         } catch (final Exception e) {
             throw new JobProcessingException("Failed to execute a crawl job.", e);
         } finally {
@@ -338,7 +340,7 @@ public class CrawlJob extends ExecJob {
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
             if (logger.isInfoEnabled()) {
-                logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
+                logger.info("Crawler: \nDirectory={}\nOptions={}", baseDir, cmdList);
             }
 
             final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
@@ -356,13 +358,18 @@ public class CrawlJob extends ExecJob {
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("Crawler: Exit Code=" + exitValue + " - Crawler Process Output:\n" + it.getOutput());
+                logger.info("Crawler: Exit Code={} - Process Output:\n{}", exitValue, it.getOutput());
             }
             if (exitValue != 0) {
-                throw new JobProcessingException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
+                final StringBuilder out = new StringBuilder();
+                if (processTimeout) {
+                    out.append("Process is terminated due to ").append(timeout).append(" second exceeded.\n");
+                }
+                out.append("Exit Code: ").append(exitValue).append("\nOutput:\n").append(it.getOutput());
+                throw new JobProcessingException(out.toString());
             }
-        } catch (final InterruptedException e) {
-            logger.warn("Crawler Process interrupted.");
+        } catch (final JobProcessingException e) {
+            throw e;
         } catch (final Exception e) {
             throw new JobProcessingException("Crawler Process terminated.", e);
         } finally {
