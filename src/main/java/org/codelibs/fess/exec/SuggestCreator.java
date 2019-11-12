@@ -82,8 +82,6 @@ public class SuggestCreator {
     }
 
     public static void main(final String[] args) {
-        SLF4JBridgeHandler.install();
-
         final Options options = new Options();
         final CmdLineParser parser = new CmdLineParser(options);
         try {
