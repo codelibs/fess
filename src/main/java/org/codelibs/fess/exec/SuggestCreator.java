@@ -45,6 +45,7 @@ import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegiste
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class SuggestCreator {
 
@@ -81,8 +82,9 @@ public class SuggestCreator {
     }
 
     public static void main(final String[] args) {
-        final Options options = new Options();
+        SLF4JBridgeHandler.install();
 
+        final Options options = new Options();
         final CmdLineParser parser = new CmdLineParser(options);
         try {
             parser.parseArgument(args);

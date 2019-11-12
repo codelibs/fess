@@ -54,7 +54,7 @@
 		<crawler.version>3.4.3-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.4.1</suggest.version>
+		<suggest.version>7.4.2-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.4.2</elasticsearch.version>
@@ -1392,6 +1392,7 @@
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
 			<version>${tomcat.version}</version>
+			<!-- Disable scope at development on IDEA -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency><!-- for jsp -->
