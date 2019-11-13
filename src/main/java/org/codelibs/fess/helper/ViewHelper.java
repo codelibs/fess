@@ -773,7 +773,7 @@ public class ViewHelper {
                 }
                 return data.getFacetResponse();
             });
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             throw new FessSystemException("Cannot load facet from cache.", e);
         }
     }

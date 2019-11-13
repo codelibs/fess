@@ -137,7 +137,7 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
                     final List<MetricHeaderEntry> metricHeaders = header.getMetricHeader().getMetricHeaderEntries();
                     for (final ReportRow row : rows) {
                         final List<DateRangeValues> metrics = row.getMetrics();
-                        for (int j = 0; j < metrics.size(); j++) {
+                        for (final DateRangeValues values : metrics) {
                             String path = null;
                             Long count = null;
 
@@ -149,7 +149,6 @@ public class GoogleAnalyticsScoreBooster extends ScoreBooster {
                                 }
                             }
 
-                            final DateRangeValues values = metrics.get(j);
                             for (int k = 0; k < values.getValues().size() && k < metricHeaders.size(); k++) {
                                 final String name = metricHeaders.get(k).getName();
                                 if ("ga:pageviews".equals(name)) {

@@ -68,7 +68,7 @@ public interface CrawlingConfig {
     public enum ConfigType {
         WEB("W"), FILE("F"), DATA("D");
 
-        private final String typePrefix;
+        private String typePrefix;
 
         ConfigType(final String typePrefix) {
             this.typePrefix = typePrefix;

@@ -45,7 +45,6 @@ import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegiste
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class SuggestCreator {
 
