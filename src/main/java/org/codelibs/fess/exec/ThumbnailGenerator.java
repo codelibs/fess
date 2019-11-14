@@ -102,10 +102,10 @@ public class ThumbnailGenerator {
 
         if (logger.isDebugEnabled()) {
             try {
-                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: " + s));
-                System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: " + e.getKey() + "=" + e.getValue()));
-                System.getenv().entrySet().forEach(e -> logger.debug("Env: " + e.getKey() + "=" + e.getValue()));
-                logger.debug("Option: " + options);
+                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
+                System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: {}={}", e.getKey(), e.getValue()));
+                System.getenv().entrySet().forEach(e -> logger.debug("Env: {}={}", e.getKey(), e.getValue()));
+                logger.debug("Option: {}", options);
             } catch (final Exception e) {
                 // ignore
             }
@@ -182,7 +182,7 @@ public class ThumbnailGenerator {
             try {
                 final File propFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
-                    logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
+                    logger.debug("Deleted a temp file: {}", propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();

@@ -386,7 +386,7 @@ public class SearchLogService {
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
                 }
             }
         }
@@ -411,7 +411,7 @@ public class SearchLogService {
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
                 }
             }
         }
@@ -433,7 +433,7 @@ public class SearchLogService {
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
                 }
             }
         }
@@ -458,7 +458,7 @@ public class SearchLogService {
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse " + pager.requestedTimeRange, e);
+                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
                 }
             }
         }

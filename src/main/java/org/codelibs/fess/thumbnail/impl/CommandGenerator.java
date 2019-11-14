@@ -50,7 +50,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         if (baseDir == null) {
             baseDir = new File(System.getProperty("java.io.tmpdir"));
@@ -67,12 +67,12 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     @Override
     public boolean generate(final String thumbnailId, final File outputFile) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Generate Thumbnail: " + thumbnailId);
+            logger.debug("Generate Thumbnail: {}", thumbnailId);
         }
 
         if (outputFile.exists()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("The thumbnail file exists: " + outputFile.getAbsolutePath());
+                logger.debug("The thumbnail file exists: {}", outputFile.getAbsolutePath());
             }
             return true;
         }
@@ -110,7 +110,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Thumbnail File: " + outputPath);
+                    logger.debug("Thumbnail File: {}", outputPath);
                 }
                 return true;
             } catch (final Exception e) {
@@ -119,7 +119,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 return false;
             } finally {
                 if (tempFile != null && !tempFile.delete()) {
-                    logger.debug("Failed to delete " + tempFile.getAbsolutePath());
+                    logger.debug("Failed to delete {}", tempFile.getAbsolutePath());
                 }
             }
         });
@@ -131,7 +131,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         Process p = null;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail Command: " + cmdList);
+            logger.debug("Thumbnail Command: {}", cmdList);
         }
 
         TimerTask task = null;

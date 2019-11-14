@@ -193,7 +193,7 @@ public class WebFsIndexHelper {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Crawling " + urlsStr);
+                logger.debug("Crawling {}", urlsStr);
             }
 
             crawler.setBackground(true);
@@ -326,7 +326,7 @@ public class WebFsIndexHelper {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Crawling " + pathsStr);
+                logger.debug("Crawling {}", pathsStr);
             }
 
             crawler.setBackground(true);

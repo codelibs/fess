@@ -318,7 +318,7 @@ public class IndexUpdater extends Thread {
         final long maxDocumentRequestSize = fessConfig.getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Indexing " + accessResult.getUrl());
+                logger.debug("Indexing {}", accessResult.getUrl());
             }
             accessResult.setStatus(Constants.DONE_STATUS);
             accessResultList.add(accessResult);
@@ -326,7 +326,7 @@ public class IndexUpdater extends Thread {
             if (accessResult.getHttpStatusCode() != 200) {
                 // invalid page
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Skipped. The response code is " + accessResult.getHttpStatusCode() + ".");
+                    logger.debug("Skipped. The response code is {}.", accessResult.getHttpStatusCode());
                 }
                 continue;
             }
@@ -365,8 +365,8 @@ public class IndexUpdater extends Thread {
                     final long processingTime = System.currentTimeMillis() - startTime;
                     docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document(" + MemoryUtil.byteCountToDisplaySize(docList.getContentSize()) + ", "
-                                + processingTime + "ms). " + "The number of a document cache is " + docList.size() + ".");
+                        logger.debug("Added the document({}, {}ms). " + "The number of a document cache is {}.",
+                                MemoryUtil.byteCountToDisplaySize(docList.getContentSize()), processingTime, docList.size());
                     }
 
                     if (accessResult.getContentLength() == null) {
@@ -379,7 +379,7 @@ public class IndexUpdater extends Thread {
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {
-                        logger.debug("The number of an added document is " + documentSize + ".");
+                        logger.debug("The number of an added document is {}.", documentSize);
                     }
                 } catch (final Exception e) {
                     logger.warn("Could not add a doc: " + accessResult.getUrl(), e);
@@ -427,7 +427,7 @@ public class IndexUpdater extends Thread {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         map.put(fessConfig.getIndexFieldBoost(), documentBoost);
         if (logger.isDebugEnabled()) {
-            logger.debug("Set a document boost (" + documentBoost + ").");
+            logger.debug("Set a document boost ({}).", documentBoost);
         }
     }
 
@@ -439,7 +439,7 @@ public class IndexUpdater extends Thread {
             final int count = searchLogHelper.getClickCount(url);
             doc.put(fessConfig.getIndexFieldClickCount(), count);
             if (logger.isDebugEnabled()) {
-                logger.debug("Click Count: " + count + ", url: " + url);
+                logger.debug("Click Count: {}, url: {}", count, url);
             }
         }
     }
@@ -452,7 +452,7 @@ public class IndexUpdater extends Thread {
             final long count = searchLogHelper.getFavoriteCount(url);
             map.put(fessConfig.getIndexFieldFavoriteCount(), count);
             if (logger.isDebugEnabled()) {
-                logger.debug("Favorite Count: " + count + ", url: " + url);
+                logger.debug("Favorite Count: {}, url: {}", count, url);
             }
         }
     }
@@ -465,7 +465,7 @@ public class IndexUpdater extends Thread {
             accessResultList.clear();
             final long time = System.currentTimeMillis() - execTime;
             if (logger.isDebugEnabled()) {
-                logger.debug("Updated " + size + " access results. The execution time is " + time + "ms.");
+                logger.debug("Updated {} access results. The execution time is {}ms.", size, time);
             }
             return time;
         }
@@ -523,12 +523,11 @@ public class IndexUpdater extends Thread {
         for (final String sessionId : finishedSessionIdList) {
             final long execTime2 = System.currentTimeMillis();
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleting document data: " + sessionId);
+                logger.debug("Deleting document data: {}", sessionId);
             }
             deleteBySessionId(sessionId);
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + sessionId + " documents. The execution time is " + (System.currentTimeMillis() - execTime2)
-                        + "ms.");
+                logger.debug("Deleted {} documents. The execution time is {}ms.", sessionId, (System.currentTimeMillis() - execTime2));
             }
         }
         finishedSessionIdList.clear();

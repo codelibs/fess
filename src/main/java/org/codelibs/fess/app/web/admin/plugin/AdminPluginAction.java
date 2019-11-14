@@ -87,7 +87,7 @@ public class AdminPluginAction extends FessAdminAction {
                 if (tempFile.exists() && !tempFile.delete()) {
                     logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
                 }
-                logger.debug("Failed to copy " + filename, e);
+                logger.debug("Failed to copy {}", filename, e);
                 throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, filename), () -> asListHtml());
             }
             new Thread(() -> {

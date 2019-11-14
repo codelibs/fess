@@ -233,7 +233,7 @@ public class FessEsClient implements Client {
     @PostConstruct
     public void open() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -392,7 +392,7 @@ public class FessEsClient implements Client {
                 logger.info("Created " + indexName + " index.");
                 return true;
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to create " + indexName + " index.");
+                logger.debug("Failed to create {} index.", indexName);
             }
         } catch (final Exception e) {
             logger.warn(indexConfigFile + " is not found.", e);
@@ -433,7 +433,7 @@ public class FessEsClient implements Client {
                 logger.warn("Failed to create " + indexName + "/" + docType + " mapping.", e);
             }
         } else if (logger.isDebugEnabled()) {
-            logger.debug(indexName + "/" + docType + " mapping exists.");
+            logger.debug("{}/{} mapping exists.", indexName, docType);
         }
     }
 
@@ -480,7 +480,7 @@ public class FessEsClient implements Client {
                             if (response.isAcknowledged()) {
                                 logger.info("Created " + aliasName + " alias for " + createdIndexName);
                             } else if (logger.isDebugEnabled()) {
-                                logger.debug("Failed to create " + aliasName + " alias for " + createdIndexName);
+                                logger.debug("Failed to create {} alias for {}", aliasName, createdIndexName);
                             }
                         }));
             }
@@ -581,14 +581,14 @@ public class FessEsClient implements Client {
                         client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
                                 .actionGet(fessConfig.getIndexHealthTimeout());
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+                    logger.debug("Elasticsearch Cluster Status: {}", response.getStatus());
                 }
                 return;
             } catch (final Exception e) {
                 cause = e;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access to Elasticsearch:" + i, cause);
+                logger.debug("Failed to access to Elasticsearch:{}", i, cause);
             }
             try {
                 Thread.sleep(1000L);
@@ -623,7 +623,7 @@ public class FessEsClient implements Client {
                 cause = new FessSystemException("Configsync is not available.", e);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access to configsync:" + i, cause);
+                logger.debug("Failed to access to configsync:{}", i, cause);
             }
             try {
                 Thread.sleep(1000L);
@@ -779,7 +779,7 @@ public class FessEsClient implements Client {
 
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL:\n" + searchRequestBuilder.toString());
+                    logger.debug("Query DSL:\n{}", searchRequestBuilder.toString());
                 }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
@@ -803,7 +803,7 @@ public class FessEsClient implements Client {
             String scrollId = null;
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL:\n" + searchRequestBuilder.toString());
+                    logger.debug("Query DSL:\n{}", searchRequestBuilder.toString());
                 }
                 SearchResponse response = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
 
@@ -1004,7 +1004,7 @@ public class FessEsClient implements Client {
                         if (resp.isFailed() && resp.getFailure() != null) {
                             final DocWriteRequest<?> req = requests.get(i);
                             final Failure failure = resp.getFailure();
-                            logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
+                            logger.debug("Failed Request: {}\n=>{}", req, failure.getMessage());
                         }
                     }
                 }

@@ -183,11 +183,11 @@ public class CrawlJob extends ExecJob {
             if (fessConfig.isSchedulerTarget(scheduledJob.getTarget())) {
                 if (scheduledJob.isRunning()) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(scheduledJob.getId() + " is running.");
+                        logger.debug("{} is running.", scheduledJob.getId());
                     }
                     counter.incrementAndGet();
                 } else if (logger.isDebugEnabled()) {
-                    logger.debug(scheduledJob.getId() + " is not running.");
+                    logger.debug("{} is not running.", scheduledJob.getId());
                 }
             }
         });

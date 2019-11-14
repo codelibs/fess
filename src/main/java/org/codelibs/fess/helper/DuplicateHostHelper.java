@@ -34,7 +34,7 @@ public class DuplicateHostHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         if (duplicateHostList == null) {
             duplicateHostList = new ArrayList<>();

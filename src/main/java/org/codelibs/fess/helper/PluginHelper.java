@@ -134,13 +134,13 @@ public class PluginHelper {
                                 final String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
                                 list.add(new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
                             } else if (logger.isDebugEnabled()) {
-                                logger.debug("Snapshot name is not found: " + name + "/" + version);
+                                logger.debug("Snapshot name is not found: {}/{}", name, version);
                             }
                         } else {
                             list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
                         }
                     } else if (logger.isDebugEnabled()) {
-                        logger.debug(name + ":" + version + " is ignored.");
+                        logger.debug("{}:{} is ignored.", name, version);
                     }
                 }
             } catch (final Exception e) {
@@ -182,7 +182,7 @@ public class PluginHelper {
 
     protected String getRepositoryContent(final String url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Loading " + url);
+            logger.debug("Loading {}", url);
         }
         try (final CurlResponse response = Curl.get(url).execute()) {
             return response.getContentAsString();

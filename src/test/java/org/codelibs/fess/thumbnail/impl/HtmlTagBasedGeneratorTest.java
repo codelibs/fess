@@ -92,7 +92,7 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
 
     private void assertImageSize(File file, int width, int height) throws IOException {
         BufferedImage img = ImageIO.read(file);
-        logger.debug("width: " + img.getWidth() + ", height: " + img.getHeight());
+        logger.debug("width: {}, height: {}", img.getWidth(), img.getHeight());
         assertEquals("Image Width", width, img.getWidth());
         assertEquals("Image Height", height, img.getHeight());
     }

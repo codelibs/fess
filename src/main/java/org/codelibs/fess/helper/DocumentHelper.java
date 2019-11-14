@@ -71,7 +71,7 @@ public class DocumentHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         try {
             final TikaExtractor tikaExtractor = ComponentUtil.getComponent("tikaExtractor");
@@ -234,7 +234,7 @@ public class DocumentHelper {
                 return ReaderUtil.readText(reader);
             } catch (final IOException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to decode " + hash, e);
+                    logger.debug("Failed to decode {}", hash, e);
                 }
             }
         }

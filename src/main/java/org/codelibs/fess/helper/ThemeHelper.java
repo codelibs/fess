@@ -112,7 +112,7 @@ public class ThemeHelper {
         try (Stream<Path> walk = Files.walk(dir, FileVisitOption.FOLLOW_LINKS)) {
             walk.sorted(Comparator.reverseOrder()).forEach(f -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Deleting " + f);
+                    logger.debug("Deleting {}", f);
                 }
                 try {
                     Files.delete(f);

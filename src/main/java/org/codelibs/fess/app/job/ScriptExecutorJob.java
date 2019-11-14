@@ -70,7 +70,7 @@ public class ScriptExecutorJob implements LaJob {
 
         if (!jobManager.findJobByUniqueOf(LaJobUnique.of(id)).isPresent()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Job " + id + " is running.");
+                logger.debug("Job {} is running.", id);
             }
             return;
         }
@@ -83,7 +83,7 @@ public class ScriptExecutorJob implements LaJob {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Starting Job " + id + ". scriptType: " + scriptType + ", script: " + script);
+                logger.debug("Starting Job {}. scriptType: {}, script: {}" , id, scriptType, script);
             } else if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
                 logger.info("Starting Job " + id + ".");
             }
@@ -114,7 +114,7 @@ public class ScriptExecutorJob implements LaJob {
             }
             jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
             if (logger.isDebugEnabled()) {
-                logger.debug("jobLog: " + jobLog);
+                logger.debug("jobLog: {}", jobLog);
             }
             if (scheduledJob.isLoggingEnabled()) {
                 jobHelper.store(jobLog);

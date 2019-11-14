@@ -278,7 +278,7 @@ public class AdminBackupAction extends FessAdminAction {
             });
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to parse " + line, e);
+                logger.debug("Failed to parse {}", line, e);
             }
             return null;
         }

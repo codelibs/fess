@@ -177,7 +177,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Could not create a highlighting value: " + docMap, e);
+                logger.debug("Could not create a highlighting value: {}", docMap, e);
             }
         }
 

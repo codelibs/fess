@@ -400,7 +400,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             return Integer.parseInt(value);
         } catch (final NumberFormatException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Invalid format: " + value, e);
+                logger.debug("Invalid format: {}", value, e);
             }
         }
         return null;

@@ -72,7 +72,7 @@ public class LdapManager {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
     }
@@ -198,7 +198,7 @@ public class LdapManager {
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, ldapUser.getName());
         if (logger.isDebugEnabled()) {
-            logger.debug("Account Filter: " + filter);
+            logger.debug("Account Filter: {}", filter);
         }
         search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
             processSearchRoles(result, entryDn -> {
@@ -211,7 +211,7 @@ public class LdapManager {
         });
 
         if (logger.isDebugEnabled()) {
-            logger.debug("role: " + roleSet);
+            logger.debug("role: {}", roleSet);
         }
         return roleSet.toArray(new String[roleSet.size()]);
     }
@@ -221,13 +221,13 @@ public class LdapManager {
         // (member:1.2.840.113556.1.4.1941:=%s)
         final String filter = String.format(groupFilter, dn);
         if (logger.isDebugEnabled()) {
-            logger.debug("Group Filter: " + filter);
+            logger.debug("Group Filter: {}", filter);
         }
         search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
             for (final SearchResult srcrslt : result) {
                 final String groupDn = srcrslt.getNameInNamespace();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("groupDn: " + groupDn);
+                    logger.debug("groupDn: {}", groupDn);
                 }
                 updateSearchRoles(roleSet, groupDn);
             }
@@ -276,7 +276,7 @@ public class LdapManager {
                     final String entryDn = attrValue.toString();
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("entryDn: " + entryDn);
+                        logger.debug("entryDn: {}", entryDn);
                     }
                     consumer.accept(entryDn);
                 }

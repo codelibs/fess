@@ -109,7 +109,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
     }
@@ -331,7 +331,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected boolean isValidCanonicalUrl(final String url, final String canonicalUrl) {
         if (url.startsWith("https:") && canonicalUrl.startsWith("http:")) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Invalid Canonical Url(https->http): " + url + " -> " + canonicalUrl);
+                logger.debug("Invalid Canonical Url(https->http): {} -> {}", url, canonicalUrl);
             }
             return false;
         }
@@ -786,16 +786,16 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug(attrValue + " -> " + u);
+            logger.debug("{} -> {}", attrValue, u);
         }
         if (StringUtil.isNotBlank(u)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Add Child: " + u);
+                logger.debug("Add Child: {}", u);
             }
             urlList.add(u);
         } else {
             if (logger.isDebugEnabled()) {
-                logger.debug("Skip Child: " + u);
+                logger.debug("Skip Child: {}", u);
             }
         }
     }
@@ -840,7 +840,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             for (int i = 0; i < imgNodeList.getLength(); i++) {
                 final Node imgNode = imgNodeList.item(i);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("img tag: " + imgNode);
+                    logger.debug("img tag: {}", imgNode);
                 }
                 final NamedNodeMap attributes = imgNode.getAttributes();
                 final String thumbnailUrl = getThumbnailSrc(responseData.getUrl(), attributes);
@@ -854,7 +854,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                             return thumbnailUrl;
                         }
                     } catch (final Exception e) {
-                        logger.debug("Failed to parse " + imgNode + " at " + responseData.getUrl(), e);
+                        logger.debug("Failed to parse {} at {}", imgNode, responseData.getUrl(), e);
                     }
                 } else if (firstThumbnailUrl == null) {
                     firstThumbnailUrl = thumbnailUrl;
@@ -880,7 +880,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse thumbnail url for " + url + " : " + attributes, e);
+                    logger.debug("Failed to parse thumbnail url for {} : {}", url, attributes, e);
                 }
             }
         }

@@ -50,7 +50,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         maxDocumentRequestSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSizeAsInteger().longValue();
     }
@@ -65,7 +65,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding " + dataMap);
+            logger.debug("Adding {}", dataMap);
         }
 
         //   required check
@@ -107,7 +107,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         synchronized (docList) {
             docList.add(dataMap);
             if (logger.isDebugEnabled()) {
-                logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
+                logger.debug("Added the document. The number of a document cache is {}.", docList.size());
             }
 
             final Long contentLength = DocumentUtil.getValue(dataMap, fessConfig.getIndexFieldContentLength(), Long.class);
@@ -125,7 +125,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         documentSize.getAndIncrement();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("The number of an added document is " + documentSize.get() + ".");
+            logger.debug("The number of an added document is {}.", documentSize.get());
         }
 
     }
@@ -146,7 +146,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final int count = searchLogHelper.getClickCount(url);
         doc.put(clickCountField, count);
         if (logger.isDebugEnabled()) {
-            logger.debug("Click Count: " + count + ", url: " + url);
+            logger.debug("Click Count: {}, url: {}", count, url);
         }
     }
 
@@ -155,7 +155,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final long count = searchLogHelper.getFavoriteCount(url);
         doc.put(favoriteCountField, count);
         if (logger.isDebugEnabled()) {
-            logger.debug("Favorite Count: " + count + ", url: " + url);
+            logger.debug("Favorite Count: {}, url: {}", count, url);
         }
     }
 

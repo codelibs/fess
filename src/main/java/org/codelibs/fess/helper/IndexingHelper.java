@@ -52,7 +52,7 @@ public class IndexingHelper {
         }
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending " + docList.size() + " documents to a server.");
+            logger.debug("Sending {} documents to a server.", docList.size());
         }
         try {
             if (fessConfig.isThumbnailCrawlerEnabled()) {
@@ -61,8 +61,8 @@ public class IndexingHelper {
                         doc -> {
                             if (!thumbnailManager.offer(doc)) {
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("Removing " + doc.get(fessConfig.getIndexFieldThumbnail()) + " from "
-                                            + doc.get(fessConfig.getIndexFieldUrl()));
+                                    logger.debug("Removing {} from {}", doc.get(fessConfig.getIndexFieldThumbnail()),
+                                            doc.get(fessConfig.getIndexFieldUrl()));
                                 }
                                 doc.remove(fessConfig.getIndexFieldThumbnail());
                             }
@@ -124,7 +124,7 @@ public class IndexingHelper {
                 }
             }
             if (logger.isDebugEnabled()) {
-                logger.debug(queryBuilder.toString() + " => " + docs);
+                logger.debug("{} => {}", queryBuilder.toString(), docs);
             }
         }
         if (!docIdList.isEmpty()) {

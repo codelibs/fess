@@ -96,7 +96,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 final String id = crawlingInfoHelper.generateId(dataMap);
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Searching indexed document: " + id);
+                    logger.debug("Searching indexed document: {}", id);
                 }
                 final Map<String, Object> document =
                         indexingHelper.getDocument(
@@ -115,7 +115,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
                     if (idValue != null && !indexingHelper.deleteDocument(fessEsClient, idValue.toString())) {
-                        logger.debug("Failed to delete expired document: " + url);
+                        logger.debug("Failed to delete expired document: {}", url);
                     }
                     return true;
                 }
@@ -137,12 +137,12 @@ public class FessCrawlerThread extends CrawlerThread {
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Accessing document: " + url + ", status: " + httpStatusCode);
+                    logger.debug("Accessing document: {}, status: {}", url, httpStatusCode);
                 }
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     if (!indexingHelper.deleteDocument(fessEsClient, id)) {
-                        logger.debug("Failed to delete 404 document: " + url);
+                        logger.debug("Failed to delete 404 document: {}", url);
                     }
                     return false;
                 } else if (responseData.getLastModified() == null) {
@@ -162,7 +162,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
                     if (documentExpires != null
                             && !indexingHelper.updateDocument(fessEsClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
-                        logger.debug("Failed to update " + fessConfig.getIndexFieldExpires() + " at " + url);
+                        logger.debug("Failed to update {} at {}", fessConfig.getIndexFieldExpires(), url);
                     }
 
                     return false;
@@ -223,7 +223,7 @@ public class FessCrawlerThread extends CrawlerThread {
             return null;
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Found documents: " + docList);
+            logger.debug("Found documents: {}", docList);
         }
         final Set<RequestData> urlSet = new HashSet<>(docList.size());
         for (final Map<String, Object> doc : docList) {

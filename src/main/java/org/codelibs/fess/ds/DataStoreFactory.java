@@ -57,7 +57,7 @@ public class DataStoreFactory {
             throw new IllegalArgumentException("name or dataStore is null.");
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded " + name);
+            logger.debug("Loaded {}", name);
         }
         dataStoreMap.put(name.toLowerCase(Locale.ROOT), dataStore);
         dataStoreMap.put(dataStore.getClass().getSimpleName().toLowerCase(Locale.ROOT), dataStore);

@@ -61,7 +61,7 @@ public class JobHelper {
                 unregister(scheduledJob);
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to delete Job " + scheduledJob, e);
+                    logger.debug("Failed to delete Job {}", scheduledJob, e);
                 }
             }
             return;
@@ -176,7 +176,7 @@ public class JobHelper {
             if (jobLog.getEndTime() == null) {
                 jobLog.setLastUpdated(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Update " + jobLog);
+                    logger.debug("Update {}", jobLog);
                 }
                 ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
                     op.setRefreshPolicy(Constants.TRUE);
