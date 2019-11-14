@@ -268,6 +268,7 @@
 					<webappDirectory>${project.build.directory}/${project.build.finalName}-compress</webappDirectory>
 					<excludes>
 						<exclude>**/*min.js</exclude>
+						<exclude>**/*min.css</exclude>
 						<exclude>**/plugins/**/*.js</exclude>
 						<exclude>**/WEB-INF/site/**</exclude>
 					</excludes>
