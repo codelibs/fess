@@ -54,7 +54,7 @@ public class KeyMatchHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         reload(0);
     }
@@ -77,11 +77,11 @@ public class KeyMatchHelper {
                 keyMatch -> {
                     final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Loading KeyMatch Query: " + keyMatch.getQuery() + ", Size: " + keyMatch.getMaxSize());
+                        logger.debug("Loading KeyMatch Query: {}, Size: {}", keyMatch.getQuery(), keyMatch.getMaxSize());
                     }
                     getDocumentList(keyMatch).stream().map(doc -> {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Loaded KeyMatch doc: " + doc);
+                            logger.debug("Loaded KeyMatch doc: {}", doc);
                         }
                         return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                     }).forEach(docId -> {
@@ -90,7 +90,7 @@ public class KeyMatchHelper {
 
                     if (boolQuery.hasClauses()) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Loaded KeyMatch Boost Query: " + boolQuery);
+                            logger.debug("Loaded KeyMatch Boost Query: {}", boolQuery);
                         }
                         String virtualHost = keyMatch.getVirtualHost();
                         if (StringUtil.isBlank(virtualHost)) {

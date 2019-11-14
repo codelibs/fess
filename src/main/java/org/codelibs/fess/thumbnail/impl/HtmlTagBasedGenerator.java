@@ -51,7 +51,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
         final Tuple3<String, String, String> task = new Tuple3<>(getName(), thumbnailId, path);
         if (logger.isDebugEnabled()) {
-            logger.debug("Create thumbnail task: " + task);
+            logger.debug("Create thumbnail task: {}", task);
         }
         return task;
     }
@@ -59,12 +59,12 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     @Override
     public boolean generate(final String thumbnailId, final File outputFile) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Generate Thumbnail: " + thumbnailId);
+            logger.debug("Generate Thumbnail: {}", thumbnailId);
         }
 
         if (outputFile.exists()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("The thumbnail file exists: " + outputFile.getAbsolutePath());
+                logger.debug("The thumbnail file exists: {}", outputFile.getAbsolutePath());
             }
             return true;
         }
@@ -83,7 +83,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 responseData -> {
                     if (!isImageMimeType(responseData)) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Thumbnail is not image: " + thumbnailId + " : " + responseData.getUrl());
+                            logger.debug("Thumbnail is not image: {} : {}", thumbnailId, responseData.getUrl());
                         }
                         updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                         return false;
@@ -102,7 +102,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                             break;
                         case NO_IMAGE:
                             if (logger.isDebugEnabled()) {
-                                logger.debug("No thumbnail: " + thumbnailId + " -> " + responseData.getUrl());
+                                logger.debug("No thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
                             }
                             break;
                         default:

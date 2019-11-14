@@ -80,7 +80,7 @@ public class RoleQueryHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         stream(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray()).of(stream -> stream.forEach(name -> {
             defaultRoleList.add(name);
@@ -150,7 +150,7 @@ public class RoleQueryHelper {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("roleSet: " + roleSet);
+            logger.debug("roleSet: {}", roleSet);
         }
 
         if (request != null) {
@@ -172,7 +172,7 @@ public class RoleQueryHelper {
     protected void processParameter(final HttpServletRequest request, final Set<String> roleSet) {
         final String parameter = request.getParameter(parameterKey);
         if (logger.isDebugEnabled()) {
-            logger.debug(parameterKey + ":" + parameter);
+            logger.debug("{}:{}", parameterKey, parameter);
         }
         if (StringUtil.isNotEmpty(parameter)) {
             parseRoleSet(parameter, encryptedParameterValue, roleSet);
@@ -184,7 +184,7 @@ public class RoleQueryHelper {
 
         final String parameter = request.getHeader(headerKey);
         if (logger.isDebugEnabled()) {
-            logger.debug(headerKey + ":" + parameter);
+            logger.debug("{}:{}", headerKey, parameter);
         }
         if (StringUtil.isNotEmpty(parameter)) {
             parseRoleSet(parameter, encryptedHeaderValue, roleSet);
@@ -200,7 +200,7 @@ public class RoleQueryHelper {
                 if (cookieKey.equals(cookie.getName())) {
                     final String value = cookie.getValue();
                     if (logger.isDebugEnabled()) {
-                        logger.debug(cookieKey + ":" + value);
+                        logger.debug("{}:{}", cookieKey, value);
                     }
                     if (StringUtil.isNotEmpty(value)) {
                         parseRoleSet(value, encryptedCookieValue, roleSet);

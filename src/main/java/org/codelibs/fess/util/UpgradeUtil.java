@@ -77,7 +77,7 @@ public final class UpgradeUtil {
                     logger.info("Created " + aliasName + " alias for " + indexName);
                     return true;
                 } else if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to create " + aliasName + " alias for " + indexName);
+                    logger.debug("Failed to create {} alias for {}", aliasName, indexName);
                 }
             }
         } catch (final ResourceNotFoundRuntimeException e) {

@@ -131,7 +131,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         final String thumbnailId = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldId(), String.class);
         final Tuple3<String, String, String> task = new Tuple3<>(getName(), thumbnailId, path);
         if (logger.isDebugEnabled()) {
-            logger.debug("Create thumbnail task: " + task);
+            logger.debug("Create thumbnail task: {}", task);
         }
         return task;
     }

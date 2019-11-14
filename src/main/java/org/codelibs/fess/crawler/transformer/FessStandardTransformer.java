@@ -32,7 +32,7 @@ public class FessStandardTransformer extends AbstractFessFileTransformer {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
     }
@@ -62,7 +62,7 @@ public class FessStandardTransformer extends AbstractFessFileTransformer {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("url=" + responseData.getUrl() + ", extractor=" + extractor);
+            logger.debug("url={}, extractor={}", responseData.getUrl(), extractor);
         }
         return extractor;
     }

@@ -192,10 +192,10 @@ public class Crawler {
 
         if (logger.isDebugEnabled()) {
             try {
-                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: " + s));
-                System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: " + e.getKey() + "=" + e.getValue()));
-                System.getenv().entrySet().forEach(e -> logger.debug("Env: " + e.getKey() + "=" + e.getValue()));
-                logger.debug("Option: " + options);
+                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
+                System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: {}={}", e.getKey(), e.getValue()));
+                System.getenv().entrySet().forEach(e -> logger.debug("Env: {}={}", e.getKey(), e.getValue()));
+                logger.debug("Option: {}", options);
             } catch (final Exception e) {
                 // ignore
             }
@@ -237,7 +237,7 @@ public class Crawler {
                             }
                             command = reader.readLine().trim();
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Process command: " + command);
+                                logger.debug("Process command: {}", command);
                             }
                             if (Constants.CRAWLER_PROCESS_COMMAND_THREAD_DUMP.equals(command)) {
                                 ThreadDumpUtil.printThreadDump();
@@ -316,7 +316,7 @@ public class Crawler {
             try {
                 final File propFile = ComponentUtil.getSystemHelper().createTempFile("crawler_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
-                    logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
+                    logger.debug("Deleted a temp file: {}", propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();

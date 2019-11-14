@@ -79,12 +79,12 @@ public class AllJobScheduler implements LaJobScheduler {
 
         TimeoutManager.getInstance().addTimeoutTarget(() -> {
             if (logger.isDebugEnabled()) {
-                logger.debug("Updating scheduled jobs. time:" + schedulerTime);
+                logger.debug("Updating scheduled jobs. time:{}", schedulerTime);
             }
             final long now = System.currentTimeMillis();
             scheduledJobService.getScheduledJobListAfter(schedulerTime).forEach(scheduledJob -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Updating job schedule:" + scheduledJob.getName());
+                    logger.debug("Updating job schedule:{}", scheduledJob.getName());
                 }
                 try {
                     jobHelper.register(scheduledJob);

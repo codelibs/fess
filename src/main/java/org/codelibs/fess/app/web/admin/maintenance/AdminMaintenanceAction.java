@@ -251,7 +251,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                         zos.putNextEntry(entry);
                         final long len = Files.copy(filePath, zos);
                         if (logger.isDebugEnabled()) {
-                            logger.debug(filePath.getFileName() + ": " + len);
+                            logger.debug("{}: {}", filePath.getFileName(), len);
                         }
                     } catch (final IOException e) {
                         logger.warn("Failed to access " + filePath, e);

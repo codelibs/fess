@@ -115,7 +115,7 @@ public class GsaConfigParser extends DefaultHandler {
     @Override
     public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) throws SAXException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Start Element: " + qName);
+            logger.debug("Start Element: {}", qName);
         }
         if (tagQueue.isEmpty() && !"eef".equalsIgnoreCase(qName)) {
             throw new GsaConfigException("Invalid format.");
@@ -137,7 +137,7 @@ public class GsaConfigParser extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         if (logger.isDebugEnabled()) {
-            logger.debug("End Element: " + qName);
+            logger.debug("End Element: {}", qName);
         }
         if (GOOD_URLS.equalsIgnoreCase(qName)) {
             if (labelType != null) {
@@ -224,7 +224,7 @@ public class GsaConfigParser extends DefaultHandler {
     public void characters(final char[] ch, final int start, final int length) throws SAXException {
         final String text = new String(ch, start, length);
         if (logger.isDebugEnabled()) {
-            logger.debug("Text: " + text);
+            logger.debug("Text: {}", text);
         }
         textBuf.append(text);
     }

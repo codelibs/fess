@@ -60,7 +60,7 @@ public class CorsFilter implements Filter {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("HTTP Request: " + httpRequest.getMethod());
+            logger.debug("HTTP Request: {}", httpRequest.getMethod());
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -68,7 +68,7 @@ public class CorsFilter implements Filter {
         final String allowOrigin = getAllowOrigin(fessConfig, origin);
         if (StringUtil.isNotBlank(allowOrigin)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("allowOrigin: " + allowOrigin);
+                logger.debug("allowOrigin: {}", allowOrigin);
             }
             final HttpServletResponse httpResponse = (HttpServletResponse) response;
             httpResponse.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, allowOrigin);

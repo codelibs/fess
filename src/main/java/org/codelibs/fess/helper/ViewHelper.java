@@ -157,7 +157,7 @@ public class ViewHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
@@ -628,7 +628,7 @@ public class ViewHelper {
 
     public StreamResponse asContentResponse(final Map<String, Object> doc) {
         if (logger.isDebugEnabled()) {
-            logger.debug("writing the content of: " + doc);
+            logger.debug("writing the content of: {}", doc);
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
@@ -675,7 +675,7 @@ public class ViewHelper {
                 CloseableUtil.closeQuietly(responseData);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Finished to write " + url);
+                logger.debug("Finished to write {}", url);
             }
         });
         return response;
@@ -719,7 +719,7 @@ public class ViewHelper {
     protected void writeContentType(final StreamResponse response, final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
         if (logger.isDebugEnabled()) {
-            logger.debug("mimeType: " + mimeType);
+            logger.debug("mimeType: {}", mimeType);
         }
         if (mimeType == null) {
             response.contentTypeOctetStream();

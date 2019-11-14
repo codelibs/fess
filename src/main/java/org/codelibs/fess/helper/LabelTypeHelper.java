@@ -48,7 +48,7 @@ public class LabelTypeHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         update();
     }
@@ -258,20 +258,20 @@ public class LabelTypeHelper {
                 if (includedPaths.matcher(path).matches()) {
                     if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                            logger.debug("Path {} matched against the excludes paths expression {}", path, excludedPaths.toString());
                         }
                         return false;
                     }
                     return true;
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Path " + path + " wasn't matched against the include paths expression " + includedPaths.toString());
+                    logger.debug("Path {} wasn't matched against the include paths expression {}" , path, includedPaths.toString());
                 }
                 return false;
             } else {
                 if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Path " + path + " matched against the excludes paths expression " + excludedPaths.toString());
+                        logger.debug("Path {} matched against the excludes paths expression {}", path, excludedPaths.toString());
                     }
                     return false;
                 }

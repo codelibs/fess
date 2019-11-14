@@ -89,7 +89,7 @@ public class ThumbnailManager {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         final String thumbnailPath = System.getProperty(Constants.FESS_THUMBNAIL_PATH);
         if (thumbnailPath != null) {
@@ -110,7 +110,7 @@ public class ThumbnailManager {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail Directory: " + baseDir.getAbsolutePath());
+            logger.debug("Thumbnail Directory: {}", baseDir.getAbsolutePath());
         }
 
         thumbnailTaskQueue = new LinkedBlockingQueue<>(thumbnailTaskQueueSize);
@@ -188,7 +188,7 @@ public class ThumbnailManager {
         });
         taskList.clear();
         if (logger.isDebugEnabled()) {
-            logger.debug("Storing " + list.size() + " thumbnail tasks.");
+            logger.debug("Storing {} thumbnail tasks.", list.size());
         }
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
         thumbnailQueueBhv.batchInsert(list);
@@ -210,7 +210,7 @@ public class ThumbnailManager {
             idList.add(entity.getId());
             if (cleanup) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Removing thumbnail queue: " + entity);
+                    logger.debug("Removing thumbnail queue: {}", entity);
                 }
                 return null;
             } else {
@@ -235,7 +235,7 @@ public class ThumbnailManager {
 
     protected void process(final FessConfig fessConfig, final ThumbnailQueue entity) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Processing thumbnail: " + entity);
+            logger.debug("Processing thumbnail: {}", entity);
         }
         final String generatorName = entity.getGenerator();
         try {
@@ -259,7 +259,7 @@ public class ThumbnailManager {
                     logger.warn(generatorName + " is not available.");
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("No image file exists: " + noImageFile.getAbsolutePath());
+                logger.debug("No image file exists: {}", noImageFile.getAbsolutePath());
             }
         } catch (final Exception e) {
             logger.warn("Failed to create thumbnail for " + entity, e);
@@ -273,7 +273,7 @@ public class ThumbnailManager {
                 final Tuple3<String, String, String> task = generator.createTask(path, docMap);
                 if (task != null) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Add thumbnail task: " + task);
+                        logger.debug("Add thumbnail task: {}", task);
                     }
                     if (!thumbnailTaskQueue.offer(task)) {
                         logger.warn("Failed to add thumbnail task: " + task);
@@ -284,7 +284,7 @@ public class ThumbnailManager {
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail generator is not found: " + (docMap != null ? docMap.get("url") : docMap));
+            logger.debug("Thumbnail generator is not found: {}", (docMap != null ? docMap.get("url") : docMap));
         }
         return false;
     }
@@ -320,7 +320,7 @@ public class ThumbnailManager {
 
     public void add(final ThumbnailGenerator generator) {
         if (logger.isDebugEnabled()) {
-            logger.debug(generator.getName() + " is available.");
+            logger.debug("{} is available.", generator.getName());
         }
         if (generator.isAvailable()) {
             generatorList.add(generator);
@@ -393,7 +393,7 @@ public class ThumbnailManager {
                     if (docId != null) {
                         deleteFileMap.remove(docId);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Keep thumbnail: " + docId);
+                            logger.debug("Keep thumbnail: {}", docId);
                         }
                     }
                 });
@@ -407,7 +407,7 @@ public class ThumbnailManager {
             try {
                 Files.delete(path);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Delete " + path);
+                    logger.debug("Delete {}", path);
                 }
 
                 Path parent = path.getParent();
@@ -424,7 +424,7 @@ public class ThumbnailManager {
             final String b = basePath.toUri().toString();
             final String id = s.replace(b, StringUtil.EMPTY).replace("." + imageExtention, StringUtil.EMPTY).replace("/", StringUtil.EMPTY);
             if (logger.isDebugEnabled()) {
-                logger.debug("Base: " + b + " File: " + s + " DocId: " + id);
+                logger.debug("Base: {} File: {} DocId: {}", b, s, id);
             }
             return id;
         }
@@ -477,7 +477,7 @@ public class ThumbnailManager {
             if (directory.list() != null && directory.list().length == 0 && !THUMBNAILS_DIR_NAME.equals(directory.getName())) {
                 Files.delete(dir);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Delete " + dir);
+                    logger.debug("Delete {}", dir);
                 }
                 return true;
             }

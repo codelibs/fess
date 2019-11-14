@@ -134,7 +134,7 @@ public class GoAction extends FessSearchAction {
                 try {
                     final StreamResponse response = viewHelper.asContentResponse(doc);
                     if (response.getHttpStatus().orElse(200) == 404) {
-                        logger.debug("Not found: " + targetUrl);
+                        logger.debug("Not found: {}", targetUrl);
                         saveError(messages -> messages.addErrorsNotFoundOnFileSystem(GLOBAL, targetUrl));
                         return redirect(ErrorAction.class);
                     }

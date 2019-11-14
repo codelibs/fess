@@ -53,7 +53,7 @@ public class ClickLogBhv extends BsClickLogBhv {
                 final LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 return date;
             } catch (final DateTimeParseException e) {
-                logger.debug("Invalid date format: " + value, e);
+                logger.debug("Invalid date format: {}", value, e);
             }
         }
         return DfTypeUtil.toLocalDateTime(value);

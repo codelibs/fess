@@ -75,7 +75,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected ExecutorService newFixedThreadPool(final int nThreads) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Executor Thread Pool: " + nThreads);
+            logger.debug("Executor Thread Pool: {}", nThreads);
         }
         return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(nThreads),
                 new ThreadPoolExecutor.CallerRunsPolicy());
@@ -191,7 +191,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     protected boolean deleteDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Deleting " + dataMap);
+            logger.debug("Deleting {}", dataMap);
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -242,7 +242,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             indexingHelper.deleteDocumentByUrl(fessEsClient, url);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Deleted " + deleteUrlList);
+            logger.debug("Deleted {}", deleteUrlList);
         }
         deleteUrlList.clear();
     }

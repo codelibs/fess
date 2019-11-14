@@ -167,7 +167,7 @@ public class PermissionHelper {
                     }
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                    logger.debug("smbUrl:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
                 }
             } else if (responseData.getUrl().startsWith("smb1:")) {
                 final jcifs.smb1.smb1.SID[] allowedSids =
@@ -191,7 +191,7 @@ public class PermissionHelper {
                     }
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smb1Url:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                    logger.debug("smb1Url:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
                 }
             }
         }
@@ -210,7 +210,7 @@ public class PermissionHelper {
             final String[] groups = (String[]) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_GROUPS);
             roleTypeList.addAll(stream(groups).get(stream -> stream.map(systemHelper::getSearchRoleByGroup).collect(Collectors.toList())));
             if (logger.isDebugEnabled()) {
-                logger.debug("fileUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                logger.debug("fileUrl:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
             }
         }
         return roleTypeList;
@@ -230,7 +230,7 @@ public class PermissionHelper {
                 roleTypeList.add(systemHelper.getSearchRoleByGroup(group));
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("ftpUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                logger.debug("ftpUrl:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
             }
         }
         return roleTypeList;

@@ -108,7 +108,7 @@ public class SystemHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         updateSystemProperties();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -419,7 +419,7 @@ public class SystemHelper {
     protected String createSearchRole(final String type, final String name) {
         final String value = type + ComponentUtil.getFessConfig().getCanonicalLdapName(name);
         if (logger.isDebugEnabled()) {
-            logger.debug("Search Role: " + type + ":" + name + "=" + value);
+            logger.debug("Search Role: {}:{}={}", type, name, value);
         }
         return value;
     }

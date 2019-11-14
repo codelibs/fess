@@ -77,7 +77,7 @@ public class SearchLogHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         userInfoCache = CacheBuilder.newBuilder()//
                 .maximumSize(userInfoCacheSize)//
