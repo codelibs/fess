@@ -58,7 +58,7 @@
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.4.2</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.4.0</elasticsearch.httpclient.version>
+		<elasticsearch.httpclient.version>7.4.1-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -1191,7 +1191,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>curl4j</artifactId>
-			<version>1.2.3</version>
+			<version>1.2.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
