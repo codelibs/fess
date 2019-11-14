@@ -265,7 +265,7 @@ public class LabelTypeHelper {
                     return true;
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Path {} wasn't matched against the include paths expression {}" , path, includedPaths.toString());
+                    logger.debug("Path {} wasn't matched against the include paths expression {}", path, includedPaths.toString());
                 }
                 return false;
             } else {

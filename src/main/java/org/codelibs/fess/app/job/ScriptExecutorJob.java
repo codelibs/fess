@@ -83,7 +83,7 @@ public class ScriptExecutorJob implements LaJob {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Starting Job {}. scriptType: {}, script: {}" , id, scriptType, script);
+                logger.debug("Starting Job {}. scriptType: {}, script: {}", id, scriptType, script);
             } else if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
                 logger.info("Starting Job " + id + ".");
             }
