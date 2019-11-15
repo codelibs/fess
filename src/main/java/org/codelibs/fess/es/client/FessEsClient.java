@@ -779,7 +779,7 @@ public class FessEsClient implements Client {
 
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL:\n{}", searchRequestBuilder.toString());
+                    logger.debug("Query DSL:\n{}", searchRequestBuilder);
                 }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
@@ -803,7 +803,7 @@ public class FessEsClient implements Client {
             String scrollId = null;
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL:\n{}", searchRequestBuilder.toString());
+                    logger.debug("Query DSL:\n{}", searchRequestBuilder);
                 }
                 SearchResponse response = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
 

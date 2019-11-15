@@ -152,7 +152,7 @@ public class ViewHelper {
 
     protected Cache<String, FacetResponse> facetCache;
 
-    protected long facetCacheDuration = 60 * 10; // 10min
+    protected long facetCacheDuration = 60 * 10L; // 10min
 
     @PostConstruct
     public void init() {

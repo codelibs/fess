@@ -167,7 +167,7 @@ public class PermissionHelper {
                     }
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smbUrl:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
+                    logger.debug("smbUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
                 }
             } else if (responseData.getUrl().startsWith("smb1:")) {
                 final jcifs.smb1.smb1.SID[] allowedSids =
@@ -191,7 +191,7 @@ public class PermissionHelper {
                     }
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smb1Url:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
+                    logger.debug("smb1Url:{} roleType:{}", responseData.getUrl(), roleTypeList);
                 }
             }
         }
@@ -202,7 +202,6 @@ public class PermissionHelper {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isFileRoleFromFile() && responseData.getUrl().startsWith("file:")) {
-            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final String owner = (String) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_USER);
             if (owner != null) {
                 roleTypeList.add(systemHelper.getSearchRoleByUser(owner));
@@ -210,7 +209,7 @@ public class PermissionHelper {
             final String[] groups = (String[]) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_GROUPS);
             roleTypeList.addAll(stream(groups).get(stream -> stream.map(systemHelper::getSearchRoleByGroup).collect(Collectors.toList())));
             if (logger.isDebugEnabled()) {
-                logger.debug("fileUrl:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
+                logger.debug("fileUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
             }
         }
         return roleTypeList;
@@ -220,7 +219,6 @@ public class PermissionHelper {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isFtpRoleFromFile() && responseData.getUrl().startsWith("ftp:")) {
-            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final String owner = (String) responseData.getMetaDataMap().get(FtpClient.FTP_FILE_USER);
             if (owner != null) {
                 roleTypeList.add(systemHelper.getSearchRoleByUser(owner));
@@ -230,7 +228,7 @@ public class PermissionHelper {
                 roleTypeList.add(systemHelper.getSearchRoleByGroup(group));
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("ftpUrl:{} roleType:{}", responseData.getUrl(), roleTypeList.toString());
+                logger.debug("ftpUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
             }
         }
         return roleTypeList;

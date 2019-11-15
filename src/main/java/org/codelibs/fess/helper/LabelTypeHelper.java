@@ -258,20 +258,20 @@ public class LabelTypeHelper {
                 if (includedPaths.matcher(path).matches()) {
                     if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Path {} matched against the excludes paths expression {}", path, excludedPaths.toString());
+                            logger.debug("Path {} matched against the excludes paths expression {}", path, excludedPaths);
                         }
                         return false;
                     }
                     return true;
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Path {} wasn't matched against the include paths expression {}", path, includedPaths.toString());
+                    logger.debug("Path {} wasn't matched against the include paths expression {}", path, includedPaths);
                 }
                 return false;
             } else {
                 if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Path {} matched against the excludes paths expression {}", path, excludedPaths.toString());
+                        logger.debug("Path {} matched against the excludes paths expression {}", path, excludedPaths);
                     }
                     return false;
                 }

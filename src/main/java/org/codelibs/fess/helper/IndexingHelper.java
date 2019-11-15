@@ -124,7 +124,7 @@ public class IndexingHelper {
                 }
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("{} => {}", queryBuilder.toString(), docs);
+                logger.debug("{} => {}", queryBuilder, docs);
             }
         }
         if (!docIdList.isEmpty()) {
