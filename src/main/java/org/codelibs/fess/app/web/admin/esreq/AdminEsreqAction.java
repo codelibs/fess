@@ -65,6 +65,12 @@ public class AdminEsreqAction extends FessAdminAction {
         final StringBuilder buf = new StringBuilder(1000);
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(form.requestFile.getInputStream(), Constants.UTF_8))) {
             header = ReaderUtil.readLine(reader);
+            if (header == null) {
+                throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, "no header"), () -> {
+                    return asListHtml(() -> saveToken());
+                });
+                return redirect(getClass()); // no-op
+            }
             String line;
             while ((line = ReaderUtil.readLine(reader)) != null) {
                 buf.append(line);
