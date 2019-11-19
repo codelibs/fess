@@ -24,6 +24,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.entity.AccessResult;
@@ -190,11 +191,7 @@ public class IndexUpdater extends Thread {
                     final long interval = updateInterval - updateTime;
                     if (interval > 0) {
                         // sleep
-                        try {
-                            Thread.sleep(interval); // 10 sec (default)
-                        } catch (final InterruptedException e) {
-                            logger.warn("Interrupted index update.", e);
-                        }
+                        ThreadUtil.sleep(interval); // 10 sec (default)
                     }
 
                     docList.clear();
@@ -217,11 +214,7 @@ public class IndexUpdater extends Thread {
                     long hitCount = ((EsResultList<EsAccessResult>) arList).getTotalHits();
                     while (hitCount > 0) {
                         if (arList.isEmpty()) {
-                            try {
-                                Thread.sleep(fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue());
-                            } catch (final Exception e) {
-                                // ignore
-                            }
+                            ThreadUtil.sleep(fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue());
                             cleanupTime = -1;
                         } else {
                             processAccessResults(docList, accessResultList, arList);

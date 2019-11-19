@@ -36,7 +36,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.exception.InterruptedRuntimeException;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
@@ -233,7 +235,7 @@ public class Crawler {
                     while (true) {
                         try {
                             while (!reader.ready()) {
-                                Thread.sleep(1000L);
+                                ThreadUtil.sleep(1000L);
                             }
                             command = reader.readLine().trim();
                             if (logger.isDebugEnabled()) {
@@ -247,7 +249,7 @@ public class Crawler {
                             if (Thread.interrupted()) {
                                 return;
                             }
-                        } catch (final InterruptedException e) {
+                        } catch (final InterruptedRuntimeException e) {
                             return;
                         }
                     }

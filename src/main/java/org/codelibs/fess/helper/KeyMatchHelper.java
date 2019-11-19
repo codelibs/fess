@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -108,13 +109,7 @@ public class KeyMatchHelper {
                     }
 
                     if (interval > 0) {
-                        try {
-                            Thread.sleep(interval);
-                        } catch (final InterruptedException e) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Interrupted.", e);
-                            }
-                        }
+                        ThreadUtil.sleep(interval);
                     }
                 });
         this.keyMatchQueryMap = keyMatchQueryMap;

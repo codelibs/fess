@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.exception.FessSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,26 +35,14 @@ public class IntervalControlHelper {
 
     public void checkCrawlerStatus() {
         while (!crawlerRunning) {
-            try {
-                Thread.sleep(crawlerWaitMillis);
-            } catch (final InterruptedException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Interrupted.", e);
-                }
-            }
+            ThreadUtil.sleepQuietly(crawlerWaitMillis);
         }
     }
 
     public void delayByRules() {
         final long delay = getDelay();
         if (delay > 0) {
-            try {
-                Thread.sleep(delay);
-            } catch (final InterruptedException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Interrupted.", e);
-                }
-            }
+            ThreadUtil.sleep(delay);
         }
     }
 

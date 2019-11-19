@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
@@ -123,13 +124,7 @@ public class DataIndexHelper {
                 dataCrawlingThreadStatusList.set(startedCrawlerNum, Constants.RUNNING);
                 startedCrawlerNum++;
                 activeCrawlerNum++;
-                try {
-                    Thread.sleep(crawlingExecutionInterval);
-                } catch (final InterruptedException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Interrupted.", e);
-                    }
-                }
+                ThreadUtil.sleep(crawlingExecutionInterval);
                 continue;
             }
 
@@ -141,13 +136,7 @@ public class DataIndexHelper {
                     activeCrawlerNum--;
                 }
             }
-            try {
-                Thread.sleep(crawlingExecutionInterval);
-            } catch (final InterruptedException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Interrupted.", e);
-                }
-            }
+            ThreadUtil.sleep(crawlingExecutionInterval);
         }
 
         boolean finishedAll = false;

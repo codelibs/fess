@@ -45,6 +45,7 @@ import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.elasticsearch.client.HttpClient;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
@@ -590,11 +591,7 @@ public class FessEsClient implements Client {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to access to Elasticsearch:{}", i, cause);
             }
-            try {
-                Thread.sleep(1000L);
-            } catch (final InterruptedException e) {
-                // ignore
-            }
+            ThreadUtil.sleep(1000L);
         }
         final String message =
                 "Elasticsearch (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
@@ -625,11 +622,7 @@ public class FessEsClient implements Client {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to access to configsync:{}", i, cause);
             }
-            try {
-                Thread.sleep(1000L);
-            } catch (final InterruptedException e) {
-                // ignore
-            }
+            ThreadUtil.sleep(1000L);
         }
         throw cause;
     }

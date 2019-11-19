@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
@@ -137,11 +138,7 @@ public abstract class AbstractDataStore implements DataStore {
     }
 
     protected void sleep(final long interval) {
-        try {
-            Thread.sleep(interval);
-        } catch (final Exception e) {
-            // ignore
-        }
+        ThreadUtil.sleepQuietly(interval);
     }
 
     protected abstract void storeData(DataConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,

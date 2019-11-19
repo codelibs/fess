@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.CrawlerContext;
@@ -365,13 +366,7 @@ public class WebFsIndexHelper {
                 crawlerStatusList.set(startedCrawlerNum, Constants.RUNNING);
                 startedCrawlerNum++;
                 activeCrawlerNum++;
-                try {
-                    Thread.sleep(crawlingExecutionInterval);
-                } catch (final InterruptedException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Interrupted.", e);
-                    }
-                }
+                ThreadUtil.sleep(crawlingExecutionInterval);
                 continue;
             }
 
@@ -386,13 +381,7 @@ public class WebFsIndexHelper {
                     activeCrawlerNum--;
                 }
             }
-            try {
-                Thread.sleep(crawlingExecutionInterval);
-            } catch (final InterruptedException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Interrupted.", e);
-                }
-            }
+            ThreadUtil.sleep(crawlingExecutionInterval);
         }
 
         boolean finishedAll = false;

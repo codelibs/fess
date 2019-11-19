@@ -52,6 +52,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
@@ -369,14 +370,9 @@ public class SystemHelper {
         }
     }
 
+    @Deprecated
     public void sleep(final int sec) {
-        try {
-            Thread.sleep(sec * 1000L);
-        } catch (final InterruptedException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Interrupted.", e);
-            }
-        }
+        ThreadUtil.sleepQuietly(sec * 1000L);
     }
 
     public void addShutdownHook(final Runnable hook) {

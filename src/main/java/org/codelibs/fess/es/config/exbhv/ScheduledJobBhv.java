@@ -18,6 +18,7 @@ package org.codelibs.fess.es.config.exbhv;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.es.config.bsbhv.BsScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
@@ -54,11 +55,7 @@ public class ScheduledJobBhv extends BsScheduledJobBhv {
                     logger.debug("Failed to select a job by {}", id, e);
                 }
                 lastException = e;
-                try {
-                    Thread.sleep(RandomUtils.nextLong(500, 5000));
-                } catch (final InterruptedException e1) {
-                    // ignore
-                }
+                ThreadUtil.sleep(RandomUtils.nextLong(500, 5000));
             }
         }
         logger.warn("Failed to select a job by " + id, lastException);

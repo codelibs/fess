@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -252,7 +253,7 @@ public class ThumbnailManager {
                     } else {
                         final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
                         if (interval > 0) {
-                            Thread.sleep(interval);
+                            ThreadUtil.sleep(interval);
                         }
                     }
                 } else {
