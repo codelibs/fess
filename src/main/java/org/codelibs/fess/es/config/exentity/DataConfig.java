@@ -414,4 +414,9 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                 + updatedBy + ", updatedTime=" + updatedTime + "]";
     }
 
+    @Override
+    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
+        initializeClientFactory(() -> crawlerClientFactory);
+        return Collections.emptyMap();
+    }
 }

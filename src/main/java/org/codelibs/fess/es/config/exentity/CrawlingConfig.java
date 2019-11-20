@@ -45,6 +45,9 @@ public interface CrawlingConfig {
 
     Integer getTimeToLive();
 
+    @Deprecated
+    Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
+
     CrawlerClientFactory initializeClientFactory(Supplier<CrawlerClientFactory> creator);
 
     Map<String, String> getConfigParameterMap(ConfigName name);
