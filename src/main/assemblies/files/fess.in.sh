@@ -40,8 +40,6 @@ JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true"
 # maximum # keep-alive connections to maintain at once
 JAVA_OPTS="$JAVA_OPTS -Dhttp.maxConnections=20"
 
-JAVA_OPTS="$JAVA_OPTS -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
-
 # Force the JVM to use IPv4 stack
 if [ "x$FESS_USE_IPV4" != "x" ]; then
   JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
