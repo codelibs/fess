@@ -26,6 +26,7 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.auth.AuthenticationManager;
+import org.codelibs.fess.crawler.client.CrawlerClientCreator;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.EsAccessResult;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
@@ -420,6 +421,10 @@ public final class ComponentUtil {
 
     public static CrawlerClientFactory getCrawlerClientFactory() {
         return getComponent(CrawlerClientFactory.class);
+    }
+
+    public static CrawlerClientCreator getCrawlerClientCreator() {
+        return getComponent(CrawlerClientCreator.class);
     }
 
     public static RelatedQueryHelper getRelatedQueryHelper() {
