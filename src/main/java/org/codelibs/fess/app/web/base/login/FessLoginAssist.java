@@ -105,6 +105,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     }
 
     protected void insertLogin(final Object member) {
+        // nothing
     }
 
     @Override

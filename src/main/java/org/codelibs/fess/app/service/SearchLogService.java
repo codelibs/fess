@@ -63,6 +63,8 @@ import org.slf4j.LoggerFactory;
 
 public class SearchLogService {
 
+    private static final String YYYY_MM_DD_HH_MM = "yyyy-MM-dd HH:mm";
+
     private static final String COUNT = "count";
 
     private static final String KEY = "key";
@@ -376,7 +378,7 @@ public class SearchLogService {
         }
         if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
             final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
             try {
                 if (values.length > 0) {
                     cb.query().setRequestedAt_GreaterEqual(parseDateTime(values[0], formatter));
@@ -401,7 +403,7 @@ public class SearchLogService {
         }
         if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
             final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
             try {
                 if (values.length > 0) {
                     cb.query().setCreatedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
@@ -423,7 +425,7 @@ public class SearchLogService {
         }
         if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
             final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
             try {
                 if (values.length > 0) {
                     cb.query().setUpdatedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
@@ -448,7 +450,7 @@ public class SearchLogService {
         }
         if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
             final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
             try {
                 if (values.length > 0) {
                     cb.query().setRequestedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));

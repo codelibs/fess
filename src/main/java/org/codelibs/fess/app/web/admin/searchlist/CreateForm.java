@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.searchlist;
 
 import java.util.Map;
 
+import org.codelibs.fess.app.web.CrudMode;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
@@ -32,5 +33,6 @@ public class CreateForm {
     public String q;
 
     public void initialize() {
+        crudMode = CrudMode.CREATE;
     }
 }
