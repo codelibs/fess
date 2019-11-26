@@ -448,6 +448,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
 
         @Override
+        public String getTrackTotalHits() {
+            return request.getParameter(Constants.TRACK_TOTAL_HITS);
+        }
+
+        @Override
         public String getQuery() {
             return request.getParameter("q");
         }

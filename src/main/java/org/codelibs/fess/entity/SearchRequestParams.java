@@ -72,6 +72,10 @@ public abstract class SearchRequestParams {
 
     public abstract String getSimilarDocHash();
 
+    public String getTrackTotalHits() {
+        return null;
+    }
+
     public boolean hasConditionQuery() {
         final Map<String, String[]> conditions = getConditions();
         return !isEmptyArray(conditions.get(AS_Q))//

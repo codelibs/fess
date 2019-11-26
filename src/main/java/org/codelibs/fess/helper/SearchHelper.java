@@ -99,7 +99,7 @@ public class SearchHelper {
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
                                     .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
                                     .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
-                                    .searchRequestType(params.getType()).build();
+                                    .searchRequestType(params.getType()).trackTotalHits(params.getTrackTotalHits()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
                             searchResponse.ifPresent(r -> {
                                 if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {

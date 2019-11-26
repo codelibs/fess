@@ -1007,17 +1007,18 @@ public class FessEsClient implements Client {
     }
 
     public static class SearchConditionBuilder {
-        private final SearchRequestBuilder searchRequestBuilder;
-        private String query;
-        private String[] responseFields;
-        private int offset = Constants.DEFAULT_START_COUNT;
-        private int size = Constants.DEFAULT_PAGE_SIZE;
-        private GeoInfo geoInfo;
-        private FacetInfo facetInfo;
-        private HighlightInfo highlightInfo;
-        private String similarDocHash;
-        private SearchRequestType searchRequestType = SearchRequestType.SEARCH;
-        private boolean isScroll = false;
+        protected final SearchRequestBuilder searchRequestBuilder;
+        protected String query;
+        protected String[] responseFields;
+        protected int offset = Constants.DEFAULT_START_COUNT;
+        protected int size = Constants.DEFAULT_PAGE_SIZE;
+        protected GeoInfo geoInfo;
+        protected FacetInfo facetInfo;
+        protected HighlightInfo highlightInfo;
+        protected String similarDocHash;
+        protected SearchRequestType searchRequestType = SearchRequestType.SEARCH;
+        protected boolean isScroll = false;
+        protected String trackTotalHits = null;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
             return new SearchConditionBuilder(searchRequestBuilder);
@@ -1092,6 +1093,11 @@ public class FessEsClient implements Client {
             return this;
         }
 
+        public SearchConditionBuilder trackTotalHits(final String trackTotalHits) {
+            this.trackTotalHits = trackTotalHits;
+            return this;
+        }
+
         public boolean build() {
             if (StringUtil.isBlank(query)) {
                 return false;
@@ -1108,12 +1114,7 @@ public class FessEsClient implements Client {
 
             searchRequestBuilder.setFrom(offset).setSize(size);
 
-            final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
-            if (trackTotalHitsValue instanceof Boolean) {
-                searchRequestBuilder.setTrackTotalHits((Boolean) trackTotalHitsValue);
-            } else if (trackTotalHitsValue instanceof Number) {
-                searchRequestBuilder.setTrackTotalHitsUpTo(((Number) trackTotalHitsValue).intValue());
-            }
+            buildTrackTotalHits(fessConfig);
 
             if (responseFields != null) {
                 searchRequestBuilder.setFetchSource(responseFields, null);
@@ -1142,6 +1143,27 @@ public class FessEsClient implements Client {
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
             return true;
+        }
+
+        protected void buildTrackTotalHits(final FessConfig fessConfig) {
+            if (StringUtil.isNotBlank(trackTotalHits)) {
+                try {
+                    searchRequestBuilder.setTrackTotalHitsUpTo(Integer.valueOf(trackTotalHits));
+                    return;
+                } catch (final NumberFormatException e) {
+                    // ignore
+                }
+                if (Constants.TRUE.equalsIgnoreCase(trackTotalHits) || Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
+                    searchRequestBuilder.setTrackTotalHits(Boolean.valueOf(trackTotalHits));
+                    return;
+                }
+            }
+            final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
+            if (trackTotalHitsValue instanceof Boolean) {
+                searchRequestBuilder.setTrackTotalHits((Boolean) trackTotalHitsValue);
+            } else if (trackTotalHitsValue instanceof Number) {
+                searchRequestBuilder.setTrackTotalHitsUpTo(((Number) trackTotalHitsValue).intValue());
+            }
         }
 
         protected void buildFacet(final QueryHelper queryHelper, final FessConfig fessConfig) {

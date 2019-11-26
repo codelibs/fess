@@ -61,6 +61,9 @@ public class SearchForm extends SearchRequestParams {
     @Size(max = 1000)
     public String sdh;
 
+    @Size(max = 100)
+    public String track_total_hits;
+
     // advance
 
     @Override
@@ -157,4 +160,10 @@ public class SearchForm extends SearchRequestParams {
     public Map<String, String[]> getConditions() {
         return as;
     }
+
+    @Override
+    public String getTrackTotalHits() {
+        return track_total_hits;
+    }
+
 }
