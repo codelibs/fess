@@ -1162,7 +1162,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
-			<version>1.25.0</version>
+			<version>1.30.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1177,7 +1177,7 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-jackson2</artifactId>
-			<version>1.25.0</version>
+			<version>1.33.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
@@ -1218,17 +1218,6 @@
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>65.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-analyticsreporting</artifactId>
-			<version>v4-rev153-1.25.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava-jdk5</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
