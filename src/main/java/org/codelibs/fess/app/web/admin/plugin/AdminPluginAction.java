@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
@@ -36,12 +38,10 @@ import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AdminPluginAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminPluginAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminPluginAction.class);
 
     private static final String UPLOAD = "upload";
 

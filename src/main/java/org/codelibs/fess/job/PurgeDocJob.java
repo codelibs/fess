@@ -15,17 +15,17 @@
  */
 package org.codelibs.fess.job;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PurgeDocJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(PurgeDocJob.class);
+    private static final Logger logger = LogManager.getLogger(PurgeDocJob.class);
 
     public String execute() {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();

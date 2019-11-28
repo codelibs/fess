@@ -20,6 +20,8 @@ import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.Constants;
@@ -46,8 +48,6 @@ import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
 import org.lastaflute.web.validation.VaMessenger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jflute
@@ -58,7 +58,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     // ===================================================================================
     //                                                                          Definition
     //                                                                          ==========
-    private static final Logger logger = LoggerFactory.getLogger(FessBaseAction.class);
+    private static final Logger logger = LogManager.getLogger(FessBaseAction.class);
 
     /** The application type for FESs, e.g. used by access context. */
     protected static final String APP_TYPE = "FES"; // #change_it_first

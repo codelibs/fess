@@ -32,6 +32,8 @@ import java.util.zip.GZIPOutputStream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ReaderUtil;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -60,11 +62,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DocumentHelper {
-    private static final Logger logger = LoggerFactory.getLogger(DocumentHelper.class);
+    private static final Logger logger = LogManager.getLogger(DocumentHelper.class);
 
     protected static final String SIMILAR_DOC_HASH_PREFIX = "$";
 

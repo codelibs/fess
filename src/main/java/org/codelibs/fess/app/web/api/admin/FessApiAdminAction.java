@@ -15,14 +15,14 @@
  */
 package org.codelibs.fess.app.web.api.admin;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.api.FessApiAction;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class FessApiAdminAction extends FessApiAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(FessApiAdminAction.class);
+    private static final Logger logger = LogManager.getLogger(FessApiAdminAction.class);
 
     @Override
     protected boolean isAccessAllowed() {

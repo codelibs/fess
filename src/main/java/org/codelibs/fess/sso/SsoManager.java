@@ -18,13 +18,13 @@ package org.codelibs.fess.sso;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SsoManager {
-    private static final Logger logger = LoggerFactory.getLogger(SsoManager.class);
+    private static final Logger logger = LogManager.getLogger(SsoManager.class);
 
     protected static final String SSO_TYPE = "sso.type";
 

@@ -32,6 +32,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ClassUtil;
 import org.codelibs.core.lang.FieldUtil;
 import org.codelibs.core.misc.ValueHolder;
@@ -57,14 +59,12 @@ import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.nekohtml.parsers.DOMParser;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 public class FessXpathTransformerTest extends UnitFessTestCase {
-    private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformerTest.class);
+    private static final Logger logger = LogManager.getLogger(FessXpathTransformerTest.class);
 
     public void test_transform() throws Exception {
         String data = "<html><head><title>Test</title></head><body><h1>Header1</h1><p>This is a pen.</p></body></html>";

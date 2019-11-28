@@ -25,17 +25,17 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RelatedContentHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(RelatedContentHelper.class);
+    private static final Logger logger = LogManager.getLogger(RelatedContentHelper.class);
 
     protected volatile Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = Collections.emptyMap();
 

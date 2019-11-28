@@ -23,6 +23,8 @@ import java.util.function.Consumer;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
@@ -47,8 +49,6 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaMessenger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
@@ -59,7 +59,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     // Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(AdminSearchlistAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminSearchlistAction.class);
 
     // ===================================================================================
     // Attribute

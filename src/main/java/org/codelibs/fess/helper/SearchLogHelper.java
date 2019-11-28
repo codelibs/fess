@@ -32,6 +32,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -54,15 +56,13 @@ import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 public class SearchLogHelper {
-    private static final Logger logger = LoggerFactory.getLogger(SearchLogHelper.class);
+    private static final Logger logger = LogManager.getLogger(SearchLogHelper.class);
 
     protected long userCheckInterval = 10 * 60 * 1000L;// 10 min
 

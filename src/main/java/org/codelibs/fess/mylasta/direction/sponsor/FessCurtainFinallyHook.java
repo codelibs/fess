@@ -17,17 +17,17 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 
 import java.lang.reflect.Method;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lastaflute.core.direction.CurtainFinallyHook;
 import org.lastaflute.core.direction.FwAssistantDirector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jflute
  */
 public class FessCurtainFinallyHook implements CurtainFinallyHook {
 
-    private static final Logger logger = LoggerFactory.getLogger(FessCurtainFinallyHook.class);
+    private static final Logger logger = LogManager.getLogger(FessCurtainFinallyHook.class);
 
     @Override
     public void hook(final FwAssistantDirector assistantDirector) {

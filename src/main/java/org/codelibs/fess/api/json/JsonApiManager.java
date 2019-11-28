@@ -30,6 +30,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -58,12 +60,10 @@ import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.script.Script;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JsonApiManager extends BaseJsonApiManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
+    private static final Logger logger = LogManager.getLogger(JsonApiManager.class);
 
     public JsonApiManager() {
         setPathPrefix("/json");

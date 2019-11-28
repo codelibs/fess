@@ -39,6 +39,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.net.UuidUtil;
@@ -59,8 +61,6 @@ import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -77,7 +77,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
 public class AzureAdAuthenticator implements SsoAuthenticator {
 
-    private static final Logger logger = LoggerFactory.getLogger(AzureAdAuthenticator.class);
+    private static final Logger logger = LogManager.getLogger(AzureAdAuthenticator.class);
 
     protected static final String AZUREAD_STATE_TTL = "aad.state.ttl";
 

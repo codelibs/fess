@@ -49,6 +49,8 @@ import javax.servlet.ServletContext;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
@@ -72,8 +74,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.ActionValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -82,7 +82,7 @@ import com.ibm.icu.util.ULocale;
 
 public class SystemHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
+    private static final Logger logger = LogManager.getLogger(SystemHelper.class);
 
     protected final Map<String, String> designJspFileNameMap = new LinkedHashMap<>();
 

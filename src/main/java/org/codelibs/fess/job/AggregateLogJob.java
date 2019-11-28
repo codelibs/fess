@@ -15,14 +15,14 @@
  */
 package org.codelibs.fess.job;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AggregateLogJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(AggregateLogJob.class);
+    private static final Logger logger = LogManager.getLogger(AggregateLogJob.class);
 
     public String execute() {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();

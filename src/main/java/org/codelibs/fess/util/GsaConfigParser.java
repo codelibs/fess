@@ -30,6 +30,8 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exentity.FileConfig;
@@ -37,8 +39,6 @@ import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.exception.GsaConfigException;
 import org.dbflute.optional.OptionalEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -46,7 +46,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class GsaConfigParser extends DefaultHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GsaConfigParser.class);
+    private static final Logger logger = LogManager.getLogger(GsaConfigParser.class);
 
     public static final String REGEXP = "regexp:";
 

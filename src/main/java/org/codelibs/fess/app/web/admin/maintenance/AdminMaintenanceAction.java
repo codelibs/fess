@@ -30,6 +30,8 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
@@ -43,15 +45,13 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AdminMaintenanceAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(AdminMaintenanceAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminMaintenanceAction.class);
 
     private static final String[] ES_CAT_NAMES = new String[] { "aliases", "allocation", "count", "fielddata", "health", "indices",
             "master", "nodeattrs", "nodes", "pending_tasks", "plugins", "recovery", "repositories", "thread_pool", "shards", "segments",

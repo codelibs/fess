@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.entity.UrlQueue;
@@ -24,11 +26,9 @@ import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CrawlerLogHelper extends LogHelperImpl {
-    private static final Logger logger = LoggerFactory.getLogger(CrawlerLogHelper.class);
+    private static final Logger logger = LogManager.getLogger(CrawlerLogHelper.class);
 
     @Override
     public void log(final LogType key, final Object... objs) {

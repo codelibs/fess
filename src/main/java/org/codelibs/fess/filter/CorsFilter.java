@@ -25,15 +25,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CorsFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
+    private static final Logger logger = LogManager.getLogger(CorsFilter.class);
 
     protected static final String OPTIONS = "OPTIONS";
 

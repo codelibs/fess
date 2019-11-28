@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.ReaderUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -35,15 +37,13 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  */
 public class AdminEsreqAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminEsreqAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminEsreqAction.class);
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {

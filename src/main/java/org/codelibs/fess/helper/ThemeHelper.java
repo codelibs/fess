@@ -25,16 +25,16 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.util.ResourceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ThemeHelper {
-    private static final Logger logger = LoggerFactory.getLogger(ThemeHelper.class);
+    private static final Logger logger = LogManager.getLogger(ThemeHelper.class);
 
     public void install(final Artifact artifact) {
         final Path jarPath = getJarFile(artifact);

@@ -50,6 +50,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -83,8 +85,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
@@ -96,7 +96,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
+    private static final Logger logger = LogManager.getLogger(ViewHelper.class);
 
     protected static final String SCREEN_WIDTH = "screen_width";
 

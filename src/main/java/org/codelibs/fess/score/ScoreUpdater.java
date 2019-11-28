@@ -18,11 +18,11 @@ package org.codelibs.fess.score;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ScoreUpdater {
-    private static final Logger logger = LoggerFactory.getLogger(ScoreUpdater.class);
+    private static final Logger logger = LogManager.getLogger(ScoreUpdater.class);
 
     private final List<ScoreBooster> scoreBoosterList = new ArrayList<>();
 

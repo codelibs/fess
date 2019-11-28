@@ -28,6 +28,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.AccessTokenService;
@@ -38,8 +40,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class returns a list of a role from a request parameter,
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RoleQueryHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(RoleQueryHelper.class);
+    private static final Logger logger = LogManager.getLogger(RoleQueryHelper.class);
 
     protected static final String USER_ROLES = "userRoles";
 

@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
@@ -39,15 +41,13 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GoAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(GoAction.class);
+    private static final Logger logger = LogManager.getLogger(GoAction.class);
 
     @Resource
     protected PathMappingHelper pathMappingHelper;

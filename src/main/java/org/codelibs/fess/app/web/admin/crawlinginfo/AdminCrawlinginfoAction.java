@@ -17,6 +17,8 @@ package org.codelibs.fess.app.web.admin.crawlinginfo;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.app.service.CrawlingInfoService;
@@ -28,8 +30,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminCrawlinginfoAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminCrawlinginfoAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminCrawlinginfoAction.class);
 
     // ===================================================================================
     //                                                                           Attribute

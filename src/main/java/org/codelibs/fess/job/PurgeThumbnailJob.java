@@ -15,12 +15,12 @@
  */
 package org.codelibs.fess.job;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PurgeThumbnailJob {
-    private static final Logger logger = LoggerFactory.getLogger(PurgeThumbnailJob.class);
+    private static final Logger logger = LogManager.getLogger(PurgeThumbnailJob.class);
 
     private long expiry = 30 * 24 * 60 * 60 * 1000L;
 

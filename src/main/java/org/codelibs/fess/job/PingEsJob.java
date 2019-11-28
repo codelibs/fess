@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.job;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -23,12 +25,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.EsStatusPostcard;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.mail.Postbox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PingEsJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(PingEsJob.class);
+    private static final Logger logger = LogManager.getLogger(PingEsJob.class);
 
     public String execute() {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();

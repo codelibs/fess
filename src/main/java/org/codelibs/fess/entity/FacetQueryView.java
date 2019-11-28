@@ -23,12 +23,12 @@ import java.util.ResourceBundle;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FacetQueryView {
-    private static final Logger logger = LoggerFactory.getLogger(FacetQueryView.class);
+    private static final Logger logger = LogManager.getLogger(FacetQueryView.class);
 
     protected String title;
 

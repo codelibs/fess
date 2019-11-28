@@ -19,14 +19,14 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StemmerOverrideCreator extends DictionaryCreator {
-    private static final Logger logger = LoggerFactory.getLogger(StemmerOverrideCreator.class);
+    private static final Logger logger = LogManager.getLogger(StemmerOverrideCreator.class);
 
     public StemmerOverrideCreator() {
         super("stemmer_override.*\\.txt");

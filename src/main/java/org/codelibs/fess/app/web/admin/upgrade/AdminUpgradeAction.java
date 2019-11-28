@@ -17,6 +17,8 @@ package org.codelibs.fess.app.web.admin.upgrade;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -33,15 +35,13 @@ import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AdminUpgradeAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(AdminUpgradeAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminUpgradeAction.class);
 
     private static final String VERSION_12_0 = "12.0";
 

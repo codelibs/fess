@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.client.fs.FileSystemClient;
 import org.codelibs.fess.crawler.client.ftp.FtpClient;
@@ -32,13 +34,11 @@ import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jcifs.SID;
 
 public class PermissionHelper {
-    private static final Logger logger = LoggerFactory.getLogger(PermissionHelper.class);
+    private static final Logger logger = LogManager.getLogger(PermissionHelper.class);
 
     protected String rolePrefix = "{role}";
 

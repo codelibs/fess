@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
@@ -41,11 +43,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.thumbnail.ThumbnailGenerator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
-    private static final Logger logger = LoggerFactory.getLogger(BaseThumbnailGenerator.class);
+    private static final Logger logger = LogManager.getLogger(BaseThumbnailGenerator.class);
 
     protected final Map<String, String> conditionMap = new HashMap<>();
 

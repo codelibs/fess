@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.timer.TimeoutTarget;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -40,11 +42,9 @@ import org.elasticsearch.monitor.jvm.JvmStats.Threads;
 import org.elasticsearch.monitor.os.OsProbe;
 import org.elasticsearch.monitor.os.OsStats;
 import org.elasticsearch.monitor.process.ProcessProbe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SystemMonitorTarget implements TimeoutTarget {
-    private static final Logger logger = LoggerFactory.getLogger(SystemMonitorTarget.class);
+    private static final Logger logger = LogManager.getLogger(SystemMonitorTarget.class);
 
     protected StringBuilder append(final StringBuilder buf, final String key, final Supplier<Object> supplier) {
         buf.append('"').append(key).append("\":");

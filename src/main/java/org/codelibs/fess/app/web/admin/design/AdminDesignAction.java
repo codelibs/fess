@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -38,8 +40,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author codelibs
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminDesignAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminDesignAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminDesignAction.class);
 
     // ===================================================================================
     //                                                                           Attribute

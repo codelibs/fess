@@ -24,6 +24,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
@@ -43,12 +45,10 @@ import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SpnegoAuthenticator implements SsoAuthenticator {
 
-    private static final Logger logger = LoggerFactory.getLogger(SpnegoAuthenticator.class);
+    private static final Logger logger = LogManager.getLogger(SpnegoAuthenticator.class);
 
     protected static final String SPNEGO_INITIALIZED = "spnego.initialized";
     protected static final String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";

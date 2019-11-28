@@ -33,18 +33,18 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.util.ResourceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class DataStoreFactory {
-    private static final Logger logger = LoggerFactory.getLogger(DataStoreFactory.class);
+    private static final Logger logger = LogManager.getLogger(DataStoreFactory.class);
 
     protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<>();
 

@@ -34,6 +34,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -77,11 +79,9 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QueryHelper {
-    private static final Logger logger = LoggerFactory.getLogger(QueryHelper.class);
+    private static final Logger logger = LogManager.getLogger(QueryHelper.class);
 
     protected static final String PREFERENCE_QUERY = "_query";
 

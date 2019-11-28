@@ -22,12 +22,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.exception.FessSystemException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class InputStreamThread extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(InputStreamThread.class);
+    private static final Logger logger = LogManager.getLogger(InputStreamThread.class);
 
     private BufferedReader br;
 

@@ -17,6 +17,8 @@ package org.codelibs.fess.app.job;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.fess.Constants;
@@ -33,12 +35,10 @@ import org.lastaflute.job.LaCron;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.LaJobRunner;
 import org.lastaflute.job.LaJobScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AllJobScheduler implements LaJobScheduler {
 
-    private static final Logger logger = LoggerFactory.getLogger(AllJobScheduler.class);
+    private static final Logger logger = LogManager.getLogger(AllJobScheduler.class);
 
     protected static final String APP_TYPE = "JOB";
 

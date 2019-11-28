@@ -18,6 +18,8 @@ package org.codelibs.fess.helper;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTarget;
@@ -36,11 +38,9 @@ import org.lastaflute.job.LaCron;
 import org.lastaflute.job.LaScheduledJob;
 import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.job.subsidiary.CronParamsSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JobHelper {
-    private static final Logger logger = LoggerFactory.getLogger(JobHelper.class);
+    private static final Logger logger = LogManager.getLogger(JobHelper.class);
 
     protected int monitorInterval = 60 * 60;// 1hour
 

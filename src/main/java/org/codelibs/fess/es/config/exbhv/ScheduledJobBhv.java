@@ -18,20 +18,20 @@ package org.codelibs.fess.es.config.exbhv;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.es.config.bsbhv.BsScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class ScheduledJobBhv extends BsScheduledJobBhv {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScheduledJobBhv.class);
+    private static final Logger logger = LogManager.getLogger(ScheduledJobBhv.class);
 
     private String indexName = null;
 

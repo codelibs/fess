@@ -19,14 +19,14 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SynonymCreator extends DictionaryCreator {
-    private static final Logger logger = LoggerFactory.getLogger(SynonymCreator.class);
+    private static final Logger logger = LogManager.getLogger(SynonymCreator.class);
 
     public SynonymCreator() {
         super("synonym.*\\.txt");

@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.it.CrawlTestBase;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -30,8 +32,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
@@ -45,7 +45,7 @@ import io.restassured.path.json.JsonPath;
  * */
 @Tag("it")
 public class CrawlerLogTests extends CrawlTestBase {
-    private static final Logger logger = LoggerFactory.getLogger(CrawlerLogTests.class);
+    private static final Logger logger = LogManager.getLogger(CrawlerLogTests.class);
 
     private static final String NAME_PREFIX = "crawlingInfoTest_";
 

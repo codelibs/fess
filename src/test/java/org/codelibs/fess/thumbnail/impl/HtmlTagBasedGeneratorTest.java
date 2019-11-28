@@ -22,12 +22,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
-    private static final Logger logger = LoggerFactory.getLogger(HtmlTagBasedGeneratorTest.class);
+    private static final Logger logger = LogManager.getLogger(HtmlTagBasedGeneratorTest.class);
 
     public void test_saveImage() throws Exception {
         HtmlTagBasedGenerator generator = new HtmlTagBasedGenerator();

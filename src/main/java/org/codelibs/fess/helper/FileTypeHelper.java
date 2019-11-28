@@ -21,14 +21,14 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FileTypeHelper {
-    private static final Logger logger = LoggerFactory.getLogger(FileTypeHelper.class);
+    private static final Logger logger = LogManager.getLogger(FileTypeHelper.class);
 
     protected String defaultValue = "others";
 

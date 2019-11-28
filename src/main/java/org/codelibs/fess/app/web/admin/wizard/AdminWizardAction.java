@@ -22,6 +22,8 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -40,15 +42,13 @@ import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AdminWizardAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(AdminWizardAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminWizardAction.class);
 
     // ===================================================================================
     //                                                                           Attribute

@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.ClientAbortException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl.Method;
@@ -46,13 +48,11 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.session.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EsApiManager extends BaseApiManager {
     private static final String ADMIN_SERVER = "/admin/server_";
 
-    private static final Logger logger = LoggerFactory.getLogger(EsApiManager.class);
+    private static final Logger logger = LogManager.getLogger(EsApiManager.class);
 
     protected String[] acceptedRoles = new String[] { "admin" };
 

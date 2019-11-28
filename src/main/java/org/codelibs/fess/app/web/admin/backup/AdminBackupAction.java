@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -70,8 +72,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -82,7 +82,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class AdminBackupAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminBackupAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminBackupAction.class);
 
     public static final String NDJSON_EXTENTION = ".ndjson";
 

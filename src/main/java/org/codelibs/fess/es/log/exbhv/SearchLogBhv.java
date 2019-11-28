@@ -24,20 +24,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.log.bsbhv.BsSearchLogBhv;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class SearchLogBhv extends BsSearchLogBhv {
-    private static final Logger logger = LoggerFactory.getLogger(SearchLogBhv.class);
+    private static final Logger logger = LogManager.getLogger(SearchLogBhv.class);
 
     private String indexName = null;
 

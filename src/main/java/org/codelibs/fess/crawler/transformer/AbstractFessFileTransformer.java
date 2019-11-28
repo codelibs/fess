@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.io.SerializeUtil;
@@ -58,12 +60,10 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFessFileTransformer extends AbstractTransformer implements FessTransformer {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractFessFileTransformer.class);
+    private static final Logger logger = LogManager.getLogger(AbstractFessFileTransformer.class);
 
     protected Map<String, String> metaContentMapping;
 

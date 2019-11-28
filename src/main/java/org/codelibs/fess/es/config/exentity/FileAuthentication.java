@@ -15,11 +15,11 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.es.config.bsentity.BsFileAuthentication;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
@@ -28,7 +28,7 @@ public class FileAuthentication extends BsFileAuthentication {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(FileAuthentication.class);
+    private static final Logger logger = LogManager.getLogger(FileAuthentication.class);
 
     private FileConfig fileConfig;
 

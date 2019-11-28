@@ -23,15 +23,15 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.exbhv.RelatedQueryBhv;
 import org.codelibs.fess.es.config.exentity.RelatedQuery;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RelatedQueryHelper {
-    private static final Logger logger = LoggerFactory.getLogger(RelatedQueryHelper.class);
+    private static final Logger logger = LogManager.getLogger(RelatedQueryHelper.class);
 
     protected volatile Map<String, Map<String, String[]>> relatedQueryMap = Collections.emptyMap();
 

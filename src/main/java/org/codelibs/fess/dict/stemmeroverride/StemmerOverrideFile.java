@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
@@ -40,11 +42,9 @@ import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
-    private static final Logger logger = LoggerFactory.getLogger(StemmerOverrideFile.class);
+    private static final Logger logger = LogManager.getLogger(StemmerOverrideFile.class);
 
     private static final String STEMMER_OVERRIDE = "stemmeroverride";
 

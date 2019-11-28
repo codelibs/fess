@@ -19,18 +19,18 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.bsentity.BsPathMapping;
 import org.codelibs.fess.helper.PathMappingHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class PathMapping extends BsPathMapping {
 
-    private static final Logger logger = LoggerFactory.getLogger(PathMapping.class);
+    private static final Logger logger = LogManager.getLogger(PathMapping.class);
 
     private static final long serialVersionUID = 1L;
 

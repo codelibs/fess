@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -57,11 +59,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.dbflute.optional.OptionalThing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GsaApiManager extends BaseApiManager implements WebApiManager {
-    private static final Logger logger = LoggerFactory.getLogger(GsaApiManager.class);
+    private static final Logger logger = LogManager.getLogger(GsaApiManager.class);
 
     private static final String OUTPUT_XML = "xml"; // or xml_no_dtd
     // http://www.google.com/google.dtd.

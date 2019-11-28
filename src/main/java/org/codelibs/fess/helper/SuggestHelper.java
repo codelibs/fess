@@ -32,6 +32,8 @@ import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
@@ -59,11 +61,9 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
-    private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
+    private static final Logger logger = LogManager.getLogger(SuggestHelper.class);
 
     protected static final String TEXT_SEP = " ";
 

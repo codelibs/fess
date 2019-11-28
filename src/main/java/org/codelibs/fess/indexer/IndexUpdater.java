@@ -23,6 +23,8 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
@@ -55,11 +57,9 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IndexUpdater extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(IndexUpdater.class);
+    private static final Logger logger = LogManager.getLogger(IndexUpdater.class);
 
     protected List<String> sessionIdList;
 

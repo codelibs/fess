@@ -20,14 +20,14 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DuplicateHostHelper {
-    private static final Logger logger = LoggerFactory.getLogger(DuplicateHostHelper.class);
+    private static final Logger logger = LogManager.getLogger(DuplicateHostHelper.class);
 
     protected List<DuplicateHost> duplicateHostList;
 

@@ -26,6 +26,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
@@ -46,11 +48,9 @@ import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
-    private static final Logger logger = LoggerFactory.getLogger(FileListIndexUpdateCallbackImpl.class);
+    private static final Logger logger = LogManager.getLogger(FileListIndexUpdateCallbackImpl.class);
 
     protected IndexUpdateCallback indexUpdateCallback;
 

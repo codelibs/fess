@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -58,8 +60,6 @@ import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.Avg;
 import org.elasticsearch.search.aggregations.metrics.Cardinality;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SearchLogService {
 
@@ -75,7 +75,7 @@ public class SearchLogService {
 
     private static final String QUERY_TIME = "queryTime";
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchLogService.class);
+    private static final Logger logger = LogManager.getLogger(SearchLogService.class);
 
     @Resource
     private SearchLogBhv searchLogBhv;

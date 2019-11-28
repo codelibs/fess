@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.util.DateConverter;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -56,15 +58,13 @@ import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 public class FessFunctions {
-    private static final Logger logger = LoggerFactory.getLogger(FessFunctions.class);
+    private static final Logger logger = LogManager.getLogger(FessFunctions.class);
 
     private static final String GEO_PREFIX = "geo.";
 

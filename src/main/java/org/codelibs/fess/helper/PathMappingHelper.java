@@ -24,6 +24,8 @@ import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
@@ -34,12 +36,10 @@ import org.codelibs.fess.util.GroovyUtil;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PathMappingHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(PathMappingHelper.class);
+    private static final Logger logger = LogManager.getLogger(PathMappingHelper.class);
 
     protected static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
 

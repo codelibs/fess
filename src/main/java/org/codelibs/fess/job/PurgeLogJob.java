@@ -15,18 +15,18 @@
  */
 package org.codelibs.fess.job;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.service.SearchLogService;
 import org.codelibs.fess.app.service.UserInfoService;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PurgeLogJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(PurgeLogJob.class);
+    private static final Logger logger = LogManager.getLogger(PurgeLogJob.class);
 
     public String execute() {
         final CrawlingInfoService crawlingInfoService = ComponentUtil.getComponent(CrawlingInfoService.class);

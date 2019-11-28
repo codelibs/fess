@@ -24,6 +24,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -37,8 +39,6 @@ import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
@@ -48,7 +48,7 @@ public class AdminGeneralAction extends FessAdminAction {
 
     private static final String DUMMY_PASSWORD = "**********";
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminGeneralAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminGeneralAction.class);
 
     // ===================================================================================
     //                                                                           Attribute

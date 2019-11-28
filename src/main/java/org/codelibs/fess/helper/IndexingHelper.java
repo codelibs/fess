@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
@@ -28,11 +30,9 @@ import org.codelibs.fess.util.MemoryUtil;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IndexingHelper {
-    private static final Logger logger = LoggerFactory.getLogger(IndexingHelper.class);
+    private static final Logger logger = LogManager.getLogger(IndexingHelper.class);
 
     protected int maxRetryCount = 5;
 

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.Assertions;
 
 public class DocumentUtilTest extends UnitFessTestCase {
 

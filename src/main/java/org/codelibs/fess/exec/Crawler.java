@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.exception.InterruptedRuntimeException;
 import org.codelibs.core.lang.StringUtil;
@@ -68,12 +70,10 @@ import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.di.core.external.GenericExternalContext;
 import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Crawler {
 
-    private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
+    private static final Logger logger = LogManager.getLogger(Crawler.class);
 
     private static final String WEB_FS_CRAWLING_PROCESS = "WebFsCrawler";
 

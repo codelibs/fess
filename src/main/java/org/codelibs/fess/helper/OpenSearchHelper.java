@@ -21,13 +21,13 @@ import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaServletContextUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for Open Search Description Document.
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class OpenSearchHelper {
-    private static final Logger logger = LoggerFactory.getLogger(OpenSearchHelper.class);
+    private static final Logger logger = LogManager.getLogger(OpenSearchHelper.class);
 
     protected String osddPath;
 

@@ -19,14 +19,14 @@ import static io.restassured.RestAssured.given;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
 
 public class ITBase {
-    private static final Logger logger = LoggerFactory.getLogger(ITBase.class);
+    private static final Logger logger = LogManager.getLogger(ITBase.class);
     public static final String DEFAULT_FESS_URL = "http://localhost:8080";
     public static final String DEFAULT_ES_URL = "http://localhost:9200";
     public static final String DEFAULT_TEST_TOKEN = "E44TjYrJQadtGBFFuECA0SBqqVtqj7lRGmhYep53ixNdvlRxnkhwqCVCpRoO";

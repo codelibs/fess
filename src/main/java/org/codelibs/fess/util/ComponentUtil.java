@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
@@ -84,12 +86,10 @@ import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.ResponseManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ComponentUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+    private static final Logger logger = LogManager.getLogger(ComponentUtil.class);
 
     private static Map<String, Object> componentMap = new HashMap<>();
 

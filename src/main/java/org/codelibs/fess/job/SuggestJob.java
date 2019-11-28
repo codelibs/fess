@@ -27,6 +27,8 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
@@ -38,12 +40,10 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.ResourceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SuggestJob extends ExecJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(SuggestJob.class);
+    private static final Logger logger = LogManager.getLogger(SuggestJob.class);
 
     @Deprecated
     public String execute(final JobExecutor jobExecutor) {

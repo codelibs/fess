@@ -17,16 +17,16 @@ package org.codelibs.fess.helper;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jcifs.SID;
 
 public class SambaHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(SambaHelper.class);
+    private static final Logger logger = LogManager.getLogger(SambaHelper.class);
 
     public static final int SID_TYPE_ALIAS = 4;
 

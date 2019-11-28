@@ -17,6 +17,8 @@ package org.codelibs.fess.app.web.cache;
 
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.error.ErrorAction;
@@ -24,15 +26,13 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CacheAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(CacheAction.class);
+    private static final Logger logger = LogManager.getLogger(CacheAction.class);
 
     // ===================================================================================
     //                                                                           Attribute

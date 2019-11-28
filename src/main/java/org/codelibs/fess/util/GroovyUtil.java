@@ -18,17 +18,17 @@ package org.codelibs.fess.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 
 public final class GroovyUtil {
-    private static final Logger logger = LoggerFactory.getLogger(GroovyUtil.class);
+    private static final Logger logger = LogManager.getLogger(GroovyUtil.class);
 
     private GroovyUtil() {
         // nothing

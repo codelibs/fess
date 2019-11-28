@@ -18,6 +18,8 @@ package org.codelibs.fess.util;
 import java.io.File;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.curl.CurlResponse;
@@ -35,11 +37,9 @@ import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class UpgradeUtil {
-    private static final Logger logger = LoggerFactory.getLogger(UpgradeUtil.class);
+    private static final Logger logger = LogManager.getLogger(UpgradeUtil.class);
 
     private UpgradeUtil() {
     }

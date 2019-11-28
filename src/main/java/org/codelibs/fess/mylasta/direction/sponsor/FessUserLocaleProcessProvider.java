@@ -18,6 +18,8 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 import java.util.Locale;
 
 import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -27,14 +29,12 @@ import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.UserLocaleProcessProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jflute
  */
 public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider {
-    private static final Logger logger = LoggerFactory.getLogger(FessUserLocaleProcessProvider.class);
+    private static final Logger logger = LogManager.getLogger(FessUserLocaleProcessProvider.class);
 
     @Override
     public boolean isAcceptCookieLocale() {

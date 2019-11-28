@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.entity.FacetInfo;
@@ -46,11 +48,9 @@ import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SuggestApiManager extends BaseJsonApiManager {
-    private static final Logger logger = LoggerFactory.getLogger(SuggestApiManager.class);
+    private static final Logger logger = LogManager.getLogger(SuggestApiManager.class);
 
     public SuggestApiManager() {
         setPathPrefix("/suggest");

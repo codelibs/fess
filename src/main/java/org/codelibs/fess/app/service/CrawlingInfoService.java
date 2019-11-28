@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -47,8 +49,6 @@ import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -56,7 +56,7 @@ import com.orangesignal.csv.CsvWriter;
 
 public class CrawlingInfoService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoService.class);
+    private static final Logger logger = LogManager.getLogger(CrawlingInfoService.class);
 
     @Resource
     protected CrawlingInfoParamBhv crawlingInfoParamBhv;

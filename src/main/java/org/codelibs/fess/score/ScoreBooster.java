@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -30,11 +32,9 @@ import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class ScoreBooster {
-    private static final Logger logger = LoggerFactory.getLogger(ScoreBooster.class);
+    private static final Logger logger = LogManager.getLogger(ScoreBooster.class);
 
     protected BulkRequestBuilder bulkRequestBuilder = null;
 

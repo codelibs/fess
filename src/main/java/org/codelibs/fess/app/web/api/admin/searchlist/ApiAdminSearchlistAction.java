@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
@@ -43,8 +45,6 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
@@ -54,7 +54,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     // ===================================================================================
     // Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(ApiAdminSearchlistAction.class);
+    private static final Logger logger = LogManager.getLogger(ApiAdminSearchlistAction.class);
 
     // ===================================================================================
     // Attribute

@@ -24,6 +24,8 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
@@ -38,12 +40,10 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QueryResponseList implements List<Map<String, Object>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(QueryResponseList.class);
+    private static final Logger logger = LogManager.getLogger(QueryResponseList.class);
 
     protected static final String ELLIPSIS = "...";
 

@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
@@ -42,7 +42,7 @@ public abstract class CrudTestBase extends ITBase {
     protected static final int NUM = 20;
     protected static final int SEARCH_ALL_NUM = 1000;
 
-    private static final Logger logger = LoggerFactory.getLogger(CrudTestBase.class);
+    private static final Logger logger = LogManager.getLogger(CrudTestBase.class);
 
     // ================
     // Abstract Methods

@@ -36,6 +36,8 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Tuple3;
@@ -51,8 +53,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -61,7 +61,7 @@ public class ThumbnailManager {
 
     protected static final String THUMBNAILS_DIR_NAME = "thumbnails";
 
-    private static final Logger logger = LoggerFactory.getLogger(ThumbnailManager.class);
+    private static final Logger logger = LogManager.getLogger(ThumbnailManager.class);
 
     protected File baseDir;
 

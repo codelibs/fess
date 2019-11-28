@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.sso;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
@@ -26,14 +28,12 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SsoAction extends FessLoginAction {
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(SsoAction.class);
+    private static final Logger logger = LogManager.getLogger(SsoAction.class);
 
     // ===================================================================================
     //                                                                       Login Execute

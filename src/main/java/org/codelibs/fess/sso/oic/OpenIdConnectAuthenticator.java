@@ -24,6 +24,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
@@ -36,8 +38,6 @@ import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
@@ -53,7 +53,7 @@ import com.google.api.client.util.Base64;
 
 public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpenIdConnectAuthenticator.class);
+    private static final Logger logger = LogManager.getLogger(OpenIdConnectAuthenticator.class);
 
     protected static final String OIC_AUTH_SERVER_URL = "oic.auth.server.url";
 

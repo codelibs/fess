@@ -28,18 +28,18 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
 
-    private static final Logger logger = LoggerFactory.getLogger(HtmlTagBasedGenerator.class);
+    private static final Logger logger = LogManager.getLogger(HtmlTagBasedGenerator.class);
 
     @Override
     public void destroy() {

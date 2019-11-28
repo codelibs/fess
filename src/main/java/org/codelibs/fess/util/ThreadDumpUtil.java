@@ -23,13 +23,13 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.fess.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ThreadDumpUtil {
-    private static final Logger logger = LoggerFactory.getLogger(ThreadDumpUtil.class);
+    private static final Logger logger = LogManager.getLogger(ThreadDumpUtil.class);
 
     protected ThreadDumpUtil() {
         // noop

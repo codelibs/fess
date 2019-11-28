@@ -27,17 +27,17 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProcessHelper {
-    private static final Logger logger = LoggerFactory.getLogger(ProcessHelper.class);
+    private static final Logger logger = LogManager.getLogger(ProcessHelper.class);
 
     protected final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 

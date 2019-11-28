@@ -22,17 +22,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.es.log.bsbhv.BsClickLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class ClickLogBhv extends BsClickLogBhv {
-    private static final Logger logger = LoggerFactory.getLogger(ClickLogBhv.class);
+    private static final Logger logger = LogManager.getLogger(ClickLogBhv.class);
 
     private String indexName = null;
 

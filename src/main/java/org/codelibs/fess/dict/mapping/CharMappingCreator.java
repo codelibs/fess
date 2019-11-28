@@ -19,14 +19,14 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CharMappingCreator extends DictionaryCreator {
-    private static final Logger logger = LoggerFactory.getLogger(CharMappingCreator.class);
+    private static final Logger logger = LogManager.getLogger(CharMappingCreator.class);
 
     public CharMappingCreator() {
         super("mapping.*\\.txt");

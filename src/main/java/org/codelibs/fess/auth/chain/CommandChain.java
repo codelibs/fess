@@ -26,18 +26,18 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.exception.CommandExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CommandChain implements AuthenticationChain {
 
-    private static final Logger logger = LoggerFactory.getLogger(CommandChain.class);
+    private static final Logger logger = LogManager.getLogger(CommandChain.class);
 
     protected File workingDirectory = null;
 

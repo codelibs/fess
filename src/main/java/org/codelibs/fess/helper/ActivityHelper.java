@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.login.FessCredential;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -30,8 +32,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
@@ -46,7 +46,7 @@ public class ActivityHelper {
 
     @PostConstruct
     public void init() {
-        logger = LoggerFactory.getLogger(loggerName);
+        logger = LogManager.getLogger(loggerName);
     }
 
     public void login(final OptionalThing<FessUserBean> user) {

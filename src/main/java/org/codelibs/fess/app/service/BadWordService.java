@@ -23,6 +23,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -36,8 +38,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -47,7 +47,7 @@ public class BadWordService {
 
     private static final String DELETE_PREFIX = "--";
 
-    private static final Logger logger = LoggerFactory.getLogger(BadWordService.class);
+    private static final Logger logger = LogManager.getLogger(BadWordService.class);
 
     @Resource
     protected BadWordBhv badWordBhv;

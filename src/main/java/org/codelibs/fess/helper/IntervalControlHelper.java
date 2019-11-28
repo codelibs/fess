@@ -19,13 +19,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.exception.FessSystemException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IntervalControlHelper {
-    private static final Logger logger = LoggerFactory.getLogger(IntervalControlHelper.class);
+    private static final Logger logger = LogManager.getLogger(IntervalControlHelper.class);
 
     protected volatile boolean crawlerRunning = true;
 

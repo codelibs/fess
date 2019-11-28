@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.timer.TimeoutManager;
@@ -43,12 +45,10 @@ import org.kohsuke.args4j.Option;
 import org.lastaflute.di.core.external.GenericExternalContext;
 import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SuggestCreator {
 
-    private static final Logger logger = LoggerFactory.getLogger(SuggestCreator.class);
+    private static final Logger logger = LogManager.getLogger(SuggestCreator.class);
 
     @Resource
     public FessEsClient fessEsClient;

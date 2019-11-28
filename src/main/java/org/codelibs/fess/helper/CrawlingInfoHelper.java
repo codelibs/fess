@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.security.MessageDigestUtil;
 import org.codelibs.fess.Constants;
@@ -44,11 +46,9 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CrawlingInfoHelper {
-    private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoHelper.class);
+    private static final Logger logger = LogManager.getLogger(CrawlingInfoHelper.class);
 
     public static final String FACET_COUNT_KEY = "count";
 

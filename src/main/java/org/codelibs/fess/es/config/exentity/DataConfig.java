@@ -34,6 +34,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -49,8 +51,6 @@ import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsDataConfig;
 import org.codelibs.fess.util.ParameterUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
@@ -59,7 +59,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(DataConfig.class);
+    private static final Logger logger = LogManager.getLogger(DataConfig.class);
 
     private static final String CRAWLER_WEB_PREFIX = "crawler.web.";
 

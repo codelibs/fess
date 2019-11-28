@@ -43,6 +43,8 @@ import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
@@ -57,11 +59,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.OptionalUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LdapManager {
-    private static final Logger logger = LoggerFactory.getLogger(LdapManager.class);
+    private static final Logger logger = LogManager.getLogger(LdapManager.class);
 
     protected ThreadLocal<DirContextHolder> contextLocal = new ThreadLocal<>();
 

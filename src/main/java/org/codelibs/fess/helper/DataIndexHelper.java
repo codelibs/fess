@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
@@ -34,12 +36,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DataIndexHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataIndexHelper.class);
+    private static final Logger logger = LogManager.getLogger(DataIndexHelper.class);
 
     private static final String DELETE_OLD_DOCS = "delete_old_docs";
 

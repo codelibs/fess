@@ -23,6 +23,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
@@ -42,11 +44,9 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KeyMatchHelper {
-    private static final Logger logger = LoggerFactory.getLogger(KeyMatchHelper.class);
+    private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);
 
     protected volatile Map<String, Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>>> keyMatchQueryMap = Collections.emptyMap();
 

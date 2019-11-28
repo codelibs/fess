@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.DataStoreException;
@@ -33,11 +35,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.DocumentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
-    private static final Logger logger = LoggerFactory.getLogger(IndexUpdateCallbackImpl.class);
+    private static final Logger logger = LogManager.getLogger(IndexUpdateCallbackImpl.class);
 
     protected AtomicLong documentSize = new AtomicLong(0);
 

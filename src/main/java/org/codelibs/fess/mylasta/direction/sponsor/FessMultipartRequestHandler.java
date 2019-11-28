@@ -32,6 +32,8 @@ import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dbflute.helper.message.ExceptionMessageBuilder;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.LastaWebKey;
@@ -42,8 +44,6 @@ import org.lastaflute.web.ruts.multipart.MultipartRequestHandler;
 import org.lastaflute.web.ruts.multipart.MultipartRequestWrapper;
 import org.lastaflute.web.ruts.multipart.exception.MultipartExceededException;
 import org.lastaflute.web.util.LaServletContextUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author modified by jflute (originated in Seasar)
@@ -53,7 +53,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // ===================================================================================
     //                                                                          Definition
     //                                                                          ==========
-    private static final Logger logger = LoggerFactory.getLogger(FessMultipartRequestHandler.class);
+    private static final Logger logger = LogManager.getLogger(FessMultipartRequestHandler.class);
     public static final long DEFAULT_SIZE_MAX = 250 * 1024 * 1024L; // 250MB
     public static final int DEFAULT_SIZE_THRESHOLD = 256 * 1024; // 250KB
     protected static final String CONTEXT_TEMPDIR_KEY = "javax.servlet.context.tempdir";
