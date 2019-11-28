@@ -44,6 +44,7 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
     protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
     protected EntityModifiedProperties __specifiedProperties;
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                            Doc Meta
@@ -164,18 +165,6 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
     }
 
     // ===================================================================================
-    //                                                                     Birthplace Mark
-    //                                                                     ===============
-    @Override
-    public void markAsSelect() {
-    }
-
-    @Override
-    public boolean createdBySelect() {
-        return false;
-    }
-
-    // ===================================================================================
     //                                                                      Classification
     //                                                                      ==============
     @Override
@@ -185,6 +174,23 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
     @Override
     public boolean myundefinedClassificationAccessAllowed() {
         return false;
+    }
+
+    // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    public void clearMarkAsSelect() {
+        __createdBySelect = false;
     }
 
     // ===================================================================================
