@@ -404,6 +404,21 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {0} should be date. */
     public static final String ERRORS_property_type_date = "{errors.property_type_date}";
 
+    /** The key of the message: Failed to upload {0}. */
+    public static final String ERRORS_storage_file_upload_failure = "{errors.storage_file_upload_failure}";
+
+    /** The key of the message: The target file is not found in Storage. */
+    public static final String ERRORS_storage_file_not_found = "{errors.storage_file_not_found}";
+
+    /** The key of the message: Failed to download {0}. */
+    public static final String ERRORS_storage_file_download_failure = "{errors.storage_file_download_failure}";
+
+    /** The key of the message: Storage access error: {0} */
+    public static final String ERRORS_storage_access_error = "{errors.storage_access_error}";
+
+    /** The key of the message: Upload file is required. */
+    public static final String ERRORS_storage_no_upload_file = "{errors.storage_no_upload_file}";
+
     /** The key of the message: Updated parameters. */
     public static final String SUCCESS_update_crawler_params = "{success.update_crawler_params}";
 
@@ -487,6 +502,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Deleting {0} plugin. */
     public static final String SUCCESS_delete_plugin = "{success.delete_plugin}";
+
+    /** The key of the message: Uploaded {0} */
+    public static final String SUCCESS_upload_file_to_storage = "{success.upload_file_to_storage}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -2324,6 +2342,79 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.storage_file_upload_failure' with parameters.
+     * <pre>
+     * message: Failed to upload {0}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageFileUploadFailure(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_file_upload_failure, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.storage_file_not_found' with parameters.
+     * <pre>
+     * message: The target file is not found in Storage.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageFileNotFound(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_file_not_found));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.storage_file_download_failure' with parameters.
+     * <pre>
+     * message: Failed to download {0}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageFileDownloadFailure(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_file_download_failure, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.storage_access_error' with parameters.
+     * <pre>
+     * message: Storage access error: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageAccessError(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_access_error, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.storage_no_upload_file' with parameters.
+     * <pre>
+     * message: Upload file is required.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageNoUploadFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_no_upload_file));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'success.update_crawler_params' with parameters.
      * <pre>
      * message: Updated parameters.
@@ -2720,6 +2811,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessDeletePlugin(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_delete_plugin, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.upload_file_to_storage' with parameters.
+     * <pre>
+     * message: Uploaded {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUploadFileToStorage(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_upload_file_to_storage, arg0));
         return this;
     }
 

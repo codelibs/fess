@@ -162,4 +162,16 @@ public class EditForm {
 
     @Size(max = 10)
     public String logLevel;
+
+    @Size(max = 1000)
+    public String storageEndpoint;
+
+    @Size(max = 1000)
+    public String storageAccessKey;
+
+    @Size(max = 1000)
+    public String storageSecretKey;
+
+    @Size(max = 1000)
+    public String storageBucket;
 }

@@ -574,6 +574,38 @@ public interface FessProp {
         setSystemProperty(Constants.LDAP_MEMBEROF_ATTRIBUTE, value);
     }
 
+    default void setStorageEndpoint(final String value) {
+        setSystemProperty(Constants.STORAGE_ENDPOINT, value);
+    }
+
+    default String getStorageEndpoint() {
+        return getSystemProperty(Constants.STORAGE_ENDPOINT, StringUtil.EMPTY);
+    }
+
+    default void setStorageAccessKey(final String value) {
+        setSystemProperty(Constants.STORAGE_ACCESS_KEY, value);
+    }
+
+    default String getStorageAccessKey() {
+        return getSystemProperty(Constants.STORAGE_ACCESS_KEY, StringUtil.EMPTY);
+    }
+
+    default void setStorageSecretKey(final String value) {
+        setSystemProperty(Constants.STORAGE_SECRET_KEY, value);
+    }
+
+    default String getStorageSecretKey() {
+        return getSystemProperty(Constants.STORAGE_SECRET_KEY, StringUtil.EMPTY);
+    }
+
+    default void setStorageBucket(final String value) {
+        setSystemProperty(Constants.STORAGE_BUCKET, value);
+    }
+
+    default String getStorageBucket() {
+        return getSystemProperty(Constants.STORAGE_BUCKET, StringUtil.EMPTY);
+    }
+
     Integer getLdapMaxUsernameLengthAsInteger();
 
     default String getLdapSecurityPrincipal(final String username) {

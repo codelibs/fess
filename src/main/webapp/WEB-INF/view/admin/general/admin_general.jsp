@@ -471,6 +471,48 @@
 												styleClass="form-control" />
 										</div>
 									</div>
+									<%-- Storage --%>
+									<h4><la:message key="labels.general_storage" /></h4>
+									<div class="form-group">
+										<label for="storageEndpoint"
+											class="col-sm-3 control-label"><la:message
+												key="labels.storage_endpoint" /></label>
+										<div class="col-sm-9">
+											<la:errors property="storageEndpoint" />
+											<la:text styleId="storageEndpoint" property="storageEndpoint"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="storageAccessKey"
+											class="col-sm-3 control-label"><la:message
+												key="labels.storage_access_key" /></label>
+										<div class="col-sm-9">
+											<la:errors property="storageAccessKey" />
+											<la:password styleId="storageAccessKey" property="storageAccessKey"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="storageSecretKey"
+											class="col-sm-3 control-label"><la:message
+												key="labels.storage_secret_key" /></label>
+										<div class="col-sm-9">
+											<la:errors property="storageSecretKey" />
+											<la:password styleId="storageSecretKey" property="storageSecretKey"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="storageBucket"
+											class="col-sm-3 control-label"><la:message
+												key="labels.storage_bucket" /></label>
+										<div class="col-sm-9">
+											<la:errors property="storageBucket" />
+											<la:text styleId="storageBucket" property="storageBucket"
+												styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

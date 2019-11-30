@@ -394,6 +394,14 @@ public class Constants extends CoreLibConstants {
 
     public static final String NOTIFICATION_ADVANCE_SEARCH = "notification.advance.search";
 
+    public static final String STORAGE_ENDPOINT = "storage.endpoint";
+
+    public static final String STORAGE_ACCESS_KEY = "storage.accesskey";
+
+    public static final String STORAGE_SECRET_KEY = "storage.secretkey";
+
+    public static final String STORAGE_BUCKET = "storage.bucket";
+
     public static final String MAPPING_TYPE_ARRAY = "array";
 
     public static final String MAPPING_TYPE_STRING = "string";

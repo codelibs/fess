@@ -82,6 +82,12 @@
 							<span><la:message key="labels.menu_plugin" /></span>
 						</la:link></li>
 
+					<c:if test="${storageEnabled.booleanValue()}"><li <c:if test="${param.menuType=='storage'}">class="active"</c:if>><la:link
+							href="/admin/storage/">
+							<em class='fa fa-genderless'></em>
+							<span><la:message key="labels.menu_storage" /></span>
+						</la:link></li></c:if>
+
 				</ul></li>
 			<li
 				class="treeview <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>"><a

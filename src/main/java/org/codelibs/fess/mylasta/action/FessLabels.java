@@ -605,6 +605,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Plugin */
     public static final String LABELS_menu_plugin = "{labels.menu_plugin}";
 
+    /** The key of the message: Storage */
+    public static final String LABELS_menu_storage = "{labels.menu_storage}";
+
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
@@ -2544,6 +2547,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Notification */
     public static final String LABELS_general_menu_notification = "{labels.general_menu_notification}";
 
+    /** The key of the message: Storage */
+    public static final String LABELS_general_storage = "{labels.general_storage}";
+
     /** The key of the message: LDAP URL */
     public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
 
@@ -2573,6 +2579,18 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Search top page */
     public static final String LABELS_notification_search_top = "{labels.notification_search_top}";
+
+    /** The key of the message: Endpoint */
+    public static final String LABELS_storage_endpoint = "{labels.storage_endpoint}";
+
+    /** The key of the message: Access Key */
+    public static final String LABELS_storage_access_key = "{labels.storage_access_key}";
+
+    /** The key of the message: Secret Key */
+    public static final String LABELS_storage_secret_key = "{labels.storage_secret_key}";
+
+    /** The key of the message: Bucket */
+    public static final String LABELS_storage_bucket = "{labels.storage_bucket}";
 
     /** The key of the message: Send TestMail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";
@@ -3089,6 +3107,24 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Install */
     public static final String LABELS_crud_button_install = "{labels.crud_button_install}";
+
+    /** The key of the message: Storage */
+    public static final String LABELS_storage_configuration = "{labels.storage_configuration}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_storage_name = "{labels.storage_name}";
+
+    /** The key of the message: Size */
+    public static final String LABELS_storage_size = "{labels.storage_size}";
+
+    /** The key of the message: Last Modified */
+    public static final String LABELS_storage_last_modified = "{labels.storage_last_modified}";
+
+    /** The key of the message: Upload File */
+    public static final String LABELS_storage_upload_file = "{labels.storage_upload_file}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_storage_button_upload = "{labels.storage_button_upload}";
 
     /**
      * Assert the property is not null.

@@ -166,6 +166,14 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute);
         fessConfig.setNotificationLogin(form.notificationLogin);
         fessConfig.setNotificationSearchTop(form.notificationSearchTop);
+        fessConfig.setStorageEndpoint(form.storageEndpoint);
+        if (form.storageAccessKey != null && StringUtil.isNotBlank(form.storageAccessKey.replace("*", " "))) {
+            fessConfig.setStorageAccessKey(form.storageAccessKey);
+        }
+        if (form.storageSecretKey != null && StringUtil.isNotBlank(form.storageSecretKey.replace("*", " "))) {
+            fessConfig.setStorageSecretKey(form.storageSecretKey);
+        }
+        fessConfig.setStorageBucket(form.storageBucket);
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
@@ -218,6 +226,10 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ldapMemberofAttribute = fessConfig.getLdapMemberofAttribute();
         form.notificationLogin = fessConfig.getNotificationLogin();
         form.notificationSearchTop = fessConfig.getNotificationSearchTop();
+        form.storageEndpoint = fessConfig.getStorageEndpoint();
+        form.storageAccessKey = StringUtil.isNotBlank(fessConfig.getStorageAccessKey()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
+        form.storageSecretKey = StringUtil.isNotBlank(fessConfig.getStorageSecretKey()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
+        form.storageBucket = fessConfig.getStorageBucket();
         form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
     }
 

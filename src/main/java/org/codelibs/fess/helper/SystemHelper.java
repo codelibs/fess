@@ -396,8 +396,11 @@ public class SystemHelper {
 
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
         runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
-        final String url = ComponentUtil.getFessConfig().getOnlineHelpInstallation();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String url = fessConfig.getOnlineHelpInstallation();
         runtime.registerData("installationLink", getHelpUrl(url));
+        runtime.registerData("storageEnabled",
+                StringUtil.isNotBlank(fessConfig.getStorageEndpoint()) && StringUtil.isNotBlank(fessConfig.getStorageBucket()));
     }
 
     public String getSearchRoleByUser(final String name) {

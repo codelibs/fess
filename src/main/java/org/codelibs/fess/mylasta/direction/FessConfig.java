@@ -1322,6 +1322,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. plugin */
     String ONLINE_HELP_NAME_PLUGIN = "online.help.name.plugin";
 
+    /** The key of the configuration. e.g. storage */
+    String ONLINE_HELP_NAME_STORAGE = "online.help.name.storage";
+
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
@@ -1552,6 +1555,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g.  */
     String PLUGIN_VERSION_FILTER = "plugin.version.filter";
+
+    /** The key of the configuration. e.g. 1000 */
+    String STORAGE_MAX_ITEMS_IN_PAGE = "storage.max.items.in.page";
 
     /**
      * Get the value of property as {@link String}.
@@ -5626,6 +5632,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNamePlugin();
 
     /**
+     * Get the value for the key 'online.help.name.storage'. <br>
+     * The value is, e.g. storage <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameStorage();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6352,6 +6365,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPluginVersionFilterAsInteger();
+
+    /**
+     * Get the value for the key 'storage.max.items.in.page'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getStorageMaxItemsInPage();
+
+    /**
+     * Get the value for the key 'storage.max.items.in.page' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getStorageMaxItemsInPageAsInteger();
 
     /**
      * The simple implementation for configuration.
@@ -8450,6 +8480,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_PLUGIN);
         }
 
+        public String getOnlineHelpNameStorage() {
+            return get(FessConfig.ONLINE_HELP_NAME_STORAGE);
+        }
+
         public String getOnlineHelpSupportedLangs() {
             return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
@@ -8854,6 +8888,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PLUGIN_VERSION_FILTER);
         }
 
+        public String getStorageMaxItemsInPage() {
+            return get(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE);
+        }
+
+        public Integer getStorageMaxItemsInPageAsInteger() {
+            return getAsInteger(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -9240,6 +9282,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEARCHLOG, "searchlog");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_MAINTENANCE, "maintenance");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_PLUGIN, "plugin");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_STORAGE, "storage");
             defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "ja");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_SEED, "0");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_TAGS, "");
@@ -9318,6 +9361,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PLUGIN_REPOSITORIES,
                     "https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://fess.codelibs.org/plugin/artifacts.yaml");
             defaultMap.put(FessConfig.PLUGIN_VERSION_FILTER, "");
+            defaultMap.put(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE, "1000");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "hot");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");
