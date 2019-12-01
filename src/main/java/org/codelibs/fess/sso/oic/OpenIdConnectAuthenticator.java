@@ -160,41 +160,42 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     }
 
     protected void parseJwtClaim(final String jwtClaim, final Map<String, Object> attributes) throws IOException {
-        final JsonParser jsonParser = jsonFactory.createJsonParser(jwtClaim);
-        while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-            final String name = jsonParser.getCurrentName();
-            if (name != null) {
-                jsonParser.nextToken();
+        try (final JsonParser jsonParser = jsonFactory.createJsonParser(jwtClaim)) {
+            while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+                final String name = jsonParser.getCurrentName();
+                if (name != null) {
+                    jsonParser.nextToken();
 
-                // TODO other parameters
-                switch (name) {
-                case "iss":
-                    attributes.put("iss", jsonParser.getText());
-                    break;
-                case "sub":
-                    attributes.put("sub", jsonParser.getText());
-                    break;
-                case "azp":
-                    attributes.put("azp", jsonParser.getText());
-                    break;
-                case "email":
-                    attributes.put("email", jsonParser.getText());
-                    break;
-                case "at_hash":
-                    attributes.put("at_hash", jsonParser.getText());
-                    break;
-                case "email_verified":
-                    attributes.put("email_verified", jsonParser.getText());
-                    break;
-                case "aud":
-                    attributes.put("aud", jsonParser.getText());
-                    break;
-                case "iat":
-                    attributes.put("iat", jsonParser.getText());
-                    break;
-                case "exp":
-                    attributes.put("exp", jsonParser.getText());
-                    break;
+                    // TODO other parameters
+                    switch (name) {
+                    case "iss":
+                        attributes.put("iss", jsonParser.getText());
+                        break;
+                    case "sub":
+                        attributes.put("sub", jsonParser.getText());
+                        break;
+                    case "azp":
+                        attributes.put("azp", jsonParser.getText());
+                        break;
+                    case "email":
+                        attributes.put("email", jsonParser.getText());
+                        break;
+                    case "at_hash":
+                        attributes.put("at_hash", jsonParser.getText());
+                        break;
+                    case "email_verified":
+                        attributes.put("email_verified", jsonParser.getText());
+                        break;
+                    case "aud":
+                        attributes.put("aud", jsonParser.getText());
+                        break;
+                    case "iat":
+                        attributes.put("iat", jsonParser.getText());
+                        break;
+                    case "exp":
+                        attributes.put("exp", jsonParser.getText());
+                        break;
+                    }
                 }
             }
         }
