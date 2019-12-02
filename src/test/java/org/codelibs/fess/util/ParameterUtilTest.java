@@ -17,9 +17,25 @@ package org.codelibs.fess.util;
 
 import java.util.Map;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class ParameterUtilTest extends UnitFessTestCase {
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*key";
+            }
+        };
+        ComponentUtil.setFessConfig(fessConfig);
+    }
+
     public void test_convertParameterMap() {
         String parameters;
         Map<String, String> parameterMap;
@@ -163,4 +179,40 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals(0, scriptMap.size());
     }
 
+    public void test_encryptParameter() {
+        String value;
+        String expect;
+
+        value = null;
+        expect = "";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "";
+        expect = "";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "\n";
+        expect = "";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "=";
+        expect = "unknown.1=";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "=1\n=";
+        expect = "unknown.1=1\nunknown.2=";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "a=b";
+        expect = "a=b";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "password=b";
+        expect = "password={cipher}5691346cc398a4450114883140fa84a7";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+
+        value = "aaa.password=b\naaa=c\nccc.key=d";
+        expect = "aaa.password={cipher}5691346cc398a4450114883140fa84a7\n" + "aaa=c\n" + "ccc.key={cipher}bf66204f1a59036869a684d61d337bd4";
+        assertEquals(expect, ParameterUtil.encrypt(value));
+    }
 }

@@ -26,6 +26,7 @@ import org.codelibs.fess.es.config.cbean.DataConfigCB;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -65,7 +66,7 @@ public class DataConfigService {
     }
 
     public void store(final DataConfig dataConfig) {
-
+        dataConfig.setHandlerParameter(ParameterUtil.encrypt(dataConfig.getHandlerParameter()));
         dataConfigBhv.insertOrUpdate(dataConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });

@@ -18,12 +18,16 @@ package org.codelibs.fess.util;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
-import org.codelibs.fess.exception.FessSystemException;
+import org.lastaflute.core.security.PrimaryCipher;
 
 public class ParameterUtil {
+    private static final String CIPHER_PREFIX = "{cipher}";
+
     protected static final String XPATH_PREFIX = "field.xpath.";
 
     protected static final String META_PREFIX = "field.meta.";
@@ -45,17 +49,26 @@ public class ParameterUtil {
     public static Map<String, String> parse(final String value) {
         final Map<String, String> paramMap = new LinkedHashMap<>();
         if (value != null) {
+            int unknownKey = 0;
+            final Pattern properyPattern = Pattern.compile(ComponentUtil.getFessConfig().getAppEncryptPropertyPattern());
+            final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
             final String[] lines = value.split("[\r\n]");
             for (final String line : lines) {
                 if (StringUtil.isNotBlank(line)) {
                     final int pos = line.indexOf('=');
                     if (pos == 0) {
-                        throw new FessSystemException("Invalid parameter. The key is null.");
+                        paramMap.put("unknown." + (unknownKey + 1), line.substring(pos + 1).trim());
+                        unknownKey++;
                     } else if (pos > 0) {
+                        final String key = line.substring(0, pos).trim();
                         if (pos < line.length()) {
-                            paramMap.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+                            String data = line.substring(pos + 1).trim();
+                            if (properyPattern.matcher(key).matches() && data.startsWith(CIPHER_PREFIX)) {
+                                data = cipher.decrypt(data.substring(CIPHER_PREFIX.length()));
+                            }
+                            paramMap.put(key, data);
                         } else {
-                            paramMap.put(line.substring(0, pos).trim(), StringUtil.EMPTY);
+                            paramMap.put(key, StringUtil.EMPTY);
                         }
                     } else {
                         paramMap.put(line.trim(), StringUtil.EMPTY);
@@ -64,6 +77,28 @@ public class ParameterUtil {
             }
         }
         return paramMap;
+    }
+
+    public static String encrypt(final String value) {
+        final StringBuilder buf = new StringBuilder();
+        final Pattern properyPattern = Pattern.compile(ComponentUtil.getFessConfig().getAppEncryptPropertyPattern());
+        final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
+        ParameterUtil.parse(value).entrySet().stream().map(e -> {
+            final String k = e.getKey();
+            final String v = e.getValue();
+            if (properyPattern.matcher(k).matches() && !v.startsWith(CIPHER_PREFIX)) {
+                return new Pair<>(k, CIPHER_PREFIX + cipher.encrypt(v));
+            }
+            return new Pair<>(k, v);
+        }).forEach(e -> {
+            if (buf.length() > 0) {
+                buf.append('\n');
+            }
+            buf.append(e.getFirst());
+            buf.append('=');
+            buf.append(e.getSecond());
+        });
+        return buf.toString();
     }
 
     public static void loadConfigParams(final Map<String, Object> paramMap, final String configParam) {

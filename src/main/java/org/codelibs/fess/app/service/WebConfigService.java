@@ -28,6 +28,7 @@ import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -83,6 +84,7 @@ public class WebConfigService {
     }
 
     public void store(final WebConfig webConfig) {
+        webConfig.setConfigParameter(ParameterUtil.encrypt(webConfig.getConfigParameter()));
         webConfigBhv.insertOrUpdate(webConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });

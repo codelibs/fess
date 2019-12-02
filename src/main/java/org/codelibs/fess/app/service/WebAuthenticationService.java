@@ -26,6 +26,7 @@ import org.codelibs.fess.es.config.cbean.WebAuthenticationCB;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -58,7 +59,7 @@ public class WebAuthenticationService {
     }
 
     public void store(final WebAuthentication webAuthentication) {
-
+        webAuthentication.setParameters(ParameterUtil.encrypt(webAuthentication.getParameters()));
         webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });

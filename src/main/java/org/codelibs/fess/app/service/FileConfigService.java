@@ -27,6 +27,7 @@ import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -75,6 +76,7 @@ public class FileConfigService {
     }
 
     public void store(final FileConfig fileConfig) {
+        fileConfig.setConfigParameter(ParameterUtil.encrypt(fileConfig.getConfigParameter()));
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
