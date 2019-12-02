@@ -77,6 +77,7 @@
 														<td>..</td>
 														<td></td>
 														<td></td>
+														<td></td>
 													</tr></c:if>
 													<c:forEach var="data" varStatus="s" items="${fileItems}">
 														<c:if test="${not data.directory}">
@@ -85,15 +86,60 @@
 															<td>${f:h(data.name)}</td>
 															<td>${f:h(data.size)}</td>
 															<td>${f:h(data.lastModifed)}</td>
-														</tr>
 														</c:if><c:if test="${data.directory.booleanValue()}">
 														<tr
 															data-href="${contextPath}/admin/storage/list/${f:u(data.id)}/">
 															<td>${f:h(data.name)}</td>
 															<td></td>
 															<td></td>
-														</tr>
 														</c:if>
+														<td>
+															<button type="button" class="btn btn-danger btn-xs" name="delete" data-toggle="modal"
+																	data-target='#confirmToDelete-${f:h(data.id).replace(".", "\\.")}'
+																	value="<la:message key="labels.design_delete_button" />"
+															>
+																<em class="fa fa-trash"></em>
+																<la:message key="labels.design_delete_button" />
+															</button>
+															<div class="modal modal-danger fade" id='#confirmToDelete-${f:h(data.id).replace(".", "\\.")}'
+																 tabindex="-1" role="dialog"
+															>
+																<div class="modal-dialog">
+																	<div class="modal-content">
+																		<div class="modal-header">
+																			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																				<span aria-hidden="true">×</span>
+																			</button>
+																			<h4 class="modal-title">
+																				<la:message key="labels.crud_title_delete" />
+																			</h4>
+																		</div>
+																		<div class="modal-body">
+																			<p>
+																				<la:message key="labels.crud_delete_confirmation" />
+																			</p>
+																		</div>
+																		<div class="modal-footer">
+																			<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+																				<la:message key="labels.crud_button_cancel" />
+																			</button>
+																			<button type="button" class="btn btn-outline btn-danger" data-dismiss="modal" data-href="${contextPath}/admin/storage/download/${f:u(data.id)}/">
+																				<la:message key="labels.crud_button_cancel" />
+																			</button>
+																			<la:form action="${contextPath}/admin/storage/delete/${f:u(data.id)}/" styleClass="form-horizontal">
+																				<button type="submit" class="btn btn-outline btn-danger" name="delete"
+																						value="<la:message key="labels.crud_button_delete" />"
+																				>
+																					<em class="fa fa-trash"></em>
+																					<la:message key="labels.crud_button_delete" />
+																				</button>
+																			</la:form>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</td>
+														</tr>
 													</c:forEach>
 												</tbody>
 											</table>

@@ -112,6 +112,22 @@ public class AdminStorageAction extends FessAdminAction {
                 });
     }
 
+    @Execute
+    public HtmlResponse delete(final String id) {
+        final String[] values = decodeId(id);
+        if (StringUtil.isEmpty(values[1])) {
+            throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(values[0]));
+        }
+        try {
+            final MinioClient minioClient = createClient(fessConfig);
+            minioClient.removeObject(fessConfig.getStorageBucket(), values[0] + values[1]);
+        } catch (final Exception e) {
+            logger.debug("Failed to delete {}", values[0] + values[1], e);
+// TODO            throwValidationError(messages -> messages.addErrorsStorageAccessError(GLOBAL, e.getLocalizedMessage()), () -> asListHtml(values[0]));
+        }
+        return redirect(getClass()); // no-op
+    }
+
     public static List<Map<String, Object>> getFileItems(final String prefix) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final ArrayList<Map<String, Object>> list = new ArrayList<>();
