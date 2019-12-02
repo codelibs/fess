@@ -106,7 +106,7 @@ public class FileAuthTests extends CrudTestBase {
     @Override
     protected Map<String, Object> getUpdateMap() {
         final Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put("parameters", "new_parameters");
+        updateMap.put("parameters", "new_parameters=test");
         return updateMap;
     }
 
