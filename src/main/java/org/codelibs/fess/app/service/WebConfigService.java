@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebConfigPager;
 import org.codelibs.fess.es.config.cbean.WebConfigCB;
@@ -91,8 +92,11 @@ public class WebConfigService {
     }
 
     protected void setupListCondition(final WebConfigCB cb, final WebConfigPager webConfigPager) {
-        if (webConfigPager.id != null) {
+        if (StringUtil.isNotBlank(webConfigPager.id)) {
             cb.query().docMeta().setId_Equal(webConfigPager.id);
+        }
+        if (StringUtil.isNotBlank(webConfigPager.name)) {
+            cb.query().setName_Wildcard(webConfigPager.name);
         }
         // TODO Long, Integer, String supported only.
 

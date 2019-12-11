@@ -114,7 +114,7 @@ public class AdminWebconfigAction extends FessAdminAction {
         RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
 
         // restore from webConfigPager
-        copyBeanToBean(webConfigPager, form, op -> op.include("id"));
+        copyBeanToBean(webConfigPager, form, op -> op.include("id", "name"));
     }
 
     // ===================================================================================
@@ -346,7 +346,7 @@ public class AdminWebconfigAction extends FessAdminAction {
             RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(webConfigPager, form, op -> op.include("id"));
+                copyBeanToBean(webConfigPager, form, op -> op.include("id", "name"));
             });
         });
     }
