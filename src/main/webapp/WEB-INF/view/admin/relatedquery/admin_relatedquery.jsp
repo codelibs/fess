@@ -36,6 +36,37 @@
 									</la:info>
 									<la:errors />
 								</div>
+								<la:form action="/admin/relatedquery/"
+										 styleClass="form-horizontal">
+									<div class="form-group">
+										<label for="term" class="col-sm-2 control-label"><la:message
+												key="labels.related_query_term" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="term" property="term" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="queries" class="col-sm-2 control-label"><la:message
+												key="labels.related_query_queries" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="queries" property="queries" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<button type="submit" class="btn btn-primary" id="submit"
+													name="search"
+													value="<la:message key="labels.crud_button_search" />">
+												<em class="fa fa-search"></em>
+												<la:message key="labels.crud_button_search" />
+											</button>
+											<button type="submit" class="btn btn-default" name="reset"
+													value="<la:message key="labels.crud_button_reset" />">
+												<la:message key="labels.crud_button_reset" />
+											</button>
+										</div>
+									</div>
+								</la:form>
 								<%-- List --%>
 								<c:if test="${relatedQueryPager.allRecordCount == 0}">
 									<div class="row top10">

@@ -103,7 +103,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         RenderDataUtil.register(data, "relatedQueryItems", relatedQueryService.getRelatedQueryList(relatedQueryPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(relatedQueryPager, form, op -> op.include("id"));
+        copyBeanToBean(relatedQueryPager, form, op -> op.include("term", "queries"));
     }
 
     // ===================================================================================
@@ -311,7 +311,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
             RenderDataUtil.register(data, "relatedQueryItems", relatedQueryService.getRelatedQueryList(relatedQueryPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(relatedQueryPager, form, op -> op.include("id"));
+                copyBeanToBean(relatedQueryPager, form, op -> op.include("term", "queries"));
             });
         });
     }
