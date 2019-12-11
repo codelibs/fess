@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileConfigPager;
 import org.codelibs.fess.es.config.cbean.FileConfigCB;
@@ -83,8 +84,14 @@ public class FileConfigService {
     }
 
     protected void setupListCondition(final FileConfigCB cb, final FileConfigPager fileConfigPager) {
-        if (fileConfigPager.id != null) {
-            cb.query().docMeta().setId_Equal(fileConfigPager.id);
+        if (StringUtil.isNotBlank(fileConfigPager.name)) {
+            cb.query().setName_Wildcard(fileConfigPager.name);
+        }
+        if (StringUtil.isNotBlank(fileConfigPager.paths)) {
+            cb.query().setPaths_Wildcard(fileConfigPager.paths);
+        }
+        if (StringUtil.isNotBlank(fileConfigPager.description)) {
+            cb.query().setDescription_Wildcard(fileConfigPager.description);
         }
         // TODO Long, Integer, String supported only.
 
