@@ -98,6 +98,12 @@ public class WebConfigService {
         if (StringUtil.isNotBlank(webConfigPager.name)) {
             cb.query().setName_Wildcard(webConfigPager.name);
         }
+        if (StringUtil.isNotBlank(webConfigPager.urls)) {
+            cb.query().setUrls_Wildcard(webConfigPager.urls);
+        }
+        if (StringUtil.isNotBlank(webConfigPager.description)) {
+            cb.query().setDescription_Wildcard(webConfigPager.description);
+        }
         // TODO Long, Integer, String supported only.
 
         // setup condition

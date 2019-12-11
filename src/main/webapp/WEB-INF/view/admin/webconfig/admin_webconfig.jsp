@@ -46,6 +46,20 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="urls" class="col-sm-2 control-label"><la:message
+												key="labels.web_config_search_url" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="urls" property="urls" styleClass="form-control"></la:text>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="description" class="col-sm-2 control-label"><la:message
+												key="labels.web_config_search_description" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="description" property="description" styleClass="form-control"></la:text>
+										</div>
+									</div>
+									<div class="form-group">
 										<div class="col-sm-offset-2 col-sm-10">
 											<button type="submit" class="btn btn-primary" id="submit"
 												name="search"

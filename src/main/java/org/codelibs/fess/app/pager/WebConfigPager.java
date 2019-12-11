@@ -66,6 +66,8 @@ public class WebConfigPager implements Serializable {
 
     public String versionNo;
 
+    public String description;
+
     public void clear() {
         allRecordCount = 0;
         allPageCount = 0;
@@ -86,6 +88,7 @@ public class WebConfigPager implements Serializable {
         createdBy = null;
         createdTime = null;
         versionNo = null;
+        description = null;
 
     }
 

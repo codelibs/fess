@@ -26,4 +26,8 @@ public class SearchForm {
 
     public String name;
 
+    public String urls;
+
+    public String description;
+
 }
