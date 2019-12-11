@@ -21,6 +21,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.PathMapPager;
 import org.codelibs.fess.es.config.cbean.PathMappingCB;
@@ -87,8 +88,11 @@ public class PathMappingService {
     }
 
     protected void setupListCondition(final PathMappingCB cb, final PathMapPager pathMappingPager) {
-        if (pathMappingPager.id != null) {
-            cb.query().docMeta().setId_Equal(pathMappingPager.id);
+        if (StringUtil.isNotBlank(pathMappingPager.regex)) {
+            cb.query().setRegex_Wildcard(pathMappingPager.regex);
+        }
+        if (StringUtil.isNotBlank(pathMappingPager.replacement)) {
+            cb.query().setReplacement_Wildcard(pathMappingPager.replacement);
         }
         // TODO Long, Integer, String supported only.
 
