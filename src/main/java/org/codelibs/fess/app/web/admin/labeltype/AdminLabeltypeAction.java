@@ -108,7 +108,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
 
         // restore from pager
-        copyBeanToBean(labelTypePager, form, op -> op.include("id"));
+        copyBeanToBean(labelTypePager, form, op -> op.include("name", "value"));
     }
 
     // ===================================================================================
@@ -330,7 +330,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
             RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(labelTypePager, form, op -> op.include("id"));
+                copyBeanToBean(labelTypePager, form, op -> op.include("name", "value"));
             });
         });
     }

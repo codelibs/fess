@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KeyMatchPager;
 import org.codelibs.fess.es.config.cbean.KeyMatchCB;
@@ -74,8 +75,11 @@ public class KeyMatchService {
     }
 
     protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
-        if (keyMatchPager.id != null) {
-            cb.query().docMeta().setId_Equal(keyMatchPager.id);
+        if (StringUtil.isNotBlank(keyMatchPager.term)) {
+            cb.query().setTerm_Wildcard(keyMatchPager.term);
+        }
+        if (StringUtil.isNotBlank(keyMatchPager.query)) {
+            cb.query().setQuery_Wildcard(keyMatchPager.query);
         }
         // TODO Long, Integer, String supported only.
 

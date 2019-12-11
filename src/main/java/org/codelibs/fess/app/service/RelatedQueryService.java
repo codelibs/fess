@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RelatedQueryPager;
 import org.codelibs.fess.es.config.cbean.RelatedQueryCB;
@@ -70,8 +71,11 @@ public class RelatedQueryService {
     }
 
     protected void setupListCondition(final RelatedQueryCB cb, final RelatedQueryPager relatedQueryPager) {
-        if (relatedQueryPager.id != null) {
-            cb.query().docMeta().setId_Equal(relatedQueryPager.id);
+        if (StringUtil.isNotBlank(relatedQueryPager.term)) {
+            cb.query().setTerm_Wildcard(relatedQueryPager.term);
+        }
+        if (StringUtil.isNotBlank(relatedQueryPager.queries)) {
+            cb.query().setQueries_Wildcard(relatedQueryPager.queries);
         }
         // TODO Long, Integer, String supported only.
 

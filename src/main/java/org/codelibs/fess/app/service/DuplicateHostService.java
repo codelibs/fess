@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DuplicateHostPager;
 import org.codelibs.fess.es.config.cbean.DuplicateHostCB;
@@ -84,8 +85,11 @@ public class DuplicateHostService {
     }
 
     protected void setupListCondition(final DuplicateHostCB cb, final DuplicateHostPager duplicateHostPager) {
-        if (duplicateHostPager.id != null) {
-            cb.query().docMeta().setId_Equal(duplicateHostPager.id);
+        if (StringUtil.isNotBlank(duplicateHostPager.regularName)) {
+            cb.query().setRegularName_Wildcard(duplicateHostPager.regularName);
+        }
+        if (StringUtil.isNotBlank(duplicateHostPager.duplicateHostName)) {
+            cb.query().setDuplicateHostName_Wildcard(duplicateHostPager.duplicateHostName);
         }
         // TODO Long, Integer, String supported only.
 

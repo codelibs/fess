@@ -18,6 +18,11 @@ package org.codelibs.fess.app.web.api.admin.dataconfig;
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
 public class SearchBody extends BaseSearchBody {
-    public String id;
+
+    public String name;
+
+    public String handlerName;
+
+    public String description;
 
 }

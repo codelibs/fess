@@ -110,7 +110,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(fileConfigPager, form, op -> op.include("id"));
+        copyBeanToBean(fileConfigPager, form, op -> op.include("name", "paths", "description"));
     }
 
     // ===================================================================================
@@ -339,7 +339,7 @@ public class AdminFileconfigAction extends FessAdminAction {
             RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(fileConfigPager, form, op -> op.include("id"));
+                copyBeanToBean(fileConfigPager, form, op -> op.include("name", "paths", "description"));
             });
         });
     }

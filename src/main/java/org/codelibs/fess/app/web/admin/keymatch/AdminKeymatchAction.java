@@ -103,7 +103,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         RenderDataUtil.register(data, "keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(keyMatchPager, form, op -> op.include("id"));
+        copyBeanToBean(keyMatchPager, form, op -> op.include("term", "query"));
     }
 
     // ===================================================================================
@@ -293,7 +293,7 @@ public class AdminKeymatchAction extends FessAdminAction {
             RenderDataUtil.register(data, "keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(keyMatchPager, form, op -> op.include("id"));
+                copyBeanToBean(keyMatchPager, form, op -> op.include("term", "query"));
             });
         });
     }

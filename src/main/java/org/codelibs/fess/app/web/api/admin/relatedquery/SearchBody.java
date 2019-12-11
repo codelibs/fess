@@ -18,5 +18,9 @@ package org.codelibs.fess.app.web.api.admin.relatedquery;
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
 public class SearchBody extends BaseSearchBody {
-    public String id;
+
+    public String term;
+
+    public String queries;
+
 }

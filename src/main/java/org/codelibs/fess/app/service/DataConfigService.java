@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.es.config.cbean.DataConfigCB;
@@ -74,8 +75,14 @@ public class DataConfigService {
     }
 
     protected void setupListCondition(final DataConfigCB cb, final DataConfigPager dataConfigPager) {
-        if (dataConfigPager.id != null) {
-            cb.query().docMeta().setId_Equal(dataConfigPager.id);
+        if (StringUtil.isNotBlank(dataConfigPager.name)) {
+            cb.query().setName_Wildcard(dataConfigPager.name);
+        }
+        if (StringUtil.isNotBlank(dataConfigPager.handlerName)) {
+            cb.query().setHandlerName_Wildcard(dataConfigPager.handlerName);
+        }
+        if (StringUtil.isNotBlank(dataConfigPager.description)) {
+            cb.query().setDescription_Wildcard(dataConfigPager.description);
         }
         // TODO Long, Integer, String supported only.
 

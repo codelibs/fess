@@ -36,6 +36,37 @@
 									</la:info>
 									<la:errors />
 								</div>
+								<la:form action="/admin/duplicatehost/"
+										 styleClass="form-horizontal">
+									<div class="form-group">
+										<label for="regularName" class="col-sm-2 control-label"><la:message
+												key="labels.regular_name" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="regularName" property="regularName" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="duplicateHostName" class="col-sm-2 control-label"><la:message
+												key="labels.duplicate_name" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="duplicateHostName" property="duplicateHostName" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<button type="submit" class="btn btn-primary" id="submit"
+													name="search"
+													value="<la:message key="labels.crud_button_search" />">
+												<em class="fa fa-search"></em>
+												<la:message key="labels.crud_button_search" />
+											</button>
+											<button type="submit" class="btn btn-default" name="reset"
+													value="<la:message key="labels.crud_button_reset" />">
+												<la:message key="labels.crud_button_reset" />
+											</button>
+										</div>
+									</div>
+								</la:form>
 								<%-- List --%>
 								<c:if test="${duplicateHostPager.allRecordCount == 0}">
 									<div class="row top10">

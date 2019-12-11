@@ -20,6 +20,8 @@ package org.codelibs.fess.app.web.admin.relatedcontent;
  */
 public class SearchForm {
 
-    public String id;
+    public String term;
+
+    public String content;
 
 }

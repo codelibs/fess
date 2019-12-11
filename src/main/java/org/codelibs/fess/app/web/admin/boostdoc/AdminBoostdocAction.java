@@ -96,7 +96,7 @@ public class AdminBoostdocAction extends FessAdminAction {
         RenderDataUtil.register(data, "boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(boostDocPager, form, op -> op.include("id"));
+        copyBeanToBean(boostDocPager, form, op -> op.include("urlExpr", "boostExpr"));
     }
 
     // ===================================================================================
@@ -279,7 +279,7 @@ public class AdminBoostdocAction extends FessAdminAction {
             RenderDataUtil.register(data, "boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(boostDocPager, form, op -> op.include("id"));
+                copyBeanToBean(boostDocPager, form, op -> op.include("urlExpr", "boostExpr"));
             });
         });
     }

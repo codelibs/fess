@@ -21,5 +21,8 @@ package org.codelibs.fess.app.web.admin.pathmap;
  */
 public class SearchForm {
 
-    public String id;
+    public String regex;
+
+    public String replacement;
+
 }
