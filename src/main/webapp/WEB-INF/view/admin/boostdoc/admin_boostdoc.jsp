@@ -36,6 +36,37 @@
 									</la:info>
 									<la:errors />
 								</div>
+								<la:form action="/admin/boostdoc/"
+										 styleClass="form-horizontal">
+									<div class="form-group">
+										<label for="urlExpr" class="col-sm-2 control-label"><la:message
+												key="labels.boost_document_rule_url_expr" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="urlExpr" property="urlExpr" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="boostExpr" class="col-sm-2 control-label"><la:message
+												key="labels.boost_document_rule_boost_expr" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="boostExpr" property="boostExpr" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<button type="submit" class="btn btn-primary" id="submit"
+													name="search"
+													value="<la:message key="labels.crud_button_search" />">
+												<em class="fa fa-search"></em>
+												<la:message key="labels.crud_button_search" />
+											</button>
+											<button type="submit" class="btn btn-default" name="reset"
+													value="<la:message key="labels.crud_button_reset" />">
+												<la:message key="labels.crud_button_reset" />
+											</button>
+										</div>
+									</div>
+								</la:form>
 								<%-- List --%>
 								<c:if test="${boostDocPager.allRecordCount == 0}">
 									<div class="row top10">
