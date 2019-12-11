@@ -92,9 +92,6 @@ public class WebConfigService {
     }
 
     protected void setupListCondition(final WebConfigCB cb, final WebConfigPager webConfigPager) {
-        if (StringUtil.isNotBlank(webConfigPager.id)) {
-            cb.query().docMeta().setId_Equal(webConfigPager.id);
-        }
         if (StringUtil.isNotBlank(webConfigPager.name)) {
             cb.query().setName_Wildcard(webConfigPager.name);
         }

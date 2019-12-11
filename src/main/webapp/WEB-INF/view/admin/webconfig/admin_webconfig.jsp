@@ -40,23 +40,23 @@
 									styleClass="form-horizontal">
 									<div class="form-group">
 										<label for="name" class="col-sm-2 control-label"><la:message
-												key="labels.web_config_search_name" /></label>
+												key="labels.name" /></label>
 										<div class="col-sm-10">
-											<la:text styleId="name" property="name" styleClass="form-control"></la:text>
+											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="urls" class="col-sm-2 control-label"><la:message
-												key="labels.web_config_search_url" /></label>
+												key="labels.urls" /></label>
 										<div class="col-sm-10">
-											<la:text styleId="urls" property="urls" styleClass="form-control"></la:text>
+											<la:text styleId="urls" property="urls" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="description" class="col-sm-2 control-label"><la:message
-												key="labels.web_config_search_description" /></label>
+												key="labels.description" /></label>
 										<div class="col-sm-10">
-											<la:text styleId="description" property="description" styleClass="form-control"></la:text>
+											<la:text styleId="description" property="description" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
