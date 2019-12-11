@@ -21,5 +21,8 @@ package org.codelibs.fess.app.web.admin.duplicatehost;
  */
 public class SearchForm {
 
-    public String id;
+    public String regularName;
+
+    public String duplicateHostName;
+
 }

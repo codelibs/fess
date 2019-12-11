@@ -18,6 +18,9 @@ package org.codelibs.fess.app.web.api.admin.duplicatehost;
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
 public class SearchBody extends BaseSearchBody {
-    public String id;
+
+    public String regularName;
+
+    public String duplicateHostName;
 
 }

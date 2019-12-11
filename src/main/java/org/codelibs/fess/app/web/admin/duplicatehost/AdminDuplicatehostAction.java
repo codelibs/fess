@@ -96,7 +96,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         RenderDataUtil.register(data, "duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(duplicateHostPager, form, op -> op.include("id"));
+        copyBeanToBean(duplicateHostPager, form, op -> op.include("regularName", "duplicateHostName"));
     }
 
     // ===================================================================================
@@ -278,7 +278,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
             RenderDataUtil.register(data, "duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(duplicateHostPager, form, op -> op.include("id"));
+                copyBeanToBean(duplicateHostPager, form, op -> op.include("regularName", "duplicateHostName"));
             });
         });
     }
