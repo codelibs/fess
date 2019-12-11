@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.es.config.cbean.LabelTypeCB;
@@ -68,8 +69,11 @@ public class LabelTypeService {
     }
 
     protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
-        if (labelTypePager.id != null) {
-            cb.query().docMeta().setId_Equal(labelTypePager.id);
+        if (StringUtil.isNotBlank(labelTypePager.name)) {
+            cb.query().setName_Wildcard(labelTypePager.name);
+        }
+        if (StringUtil.isNotBlank(labelTypePager.value)) {
+            cb.query().setValue_Wildcard(labelTypePager.value);
         }
         // TODO Long, Integer, String supported only.
 
