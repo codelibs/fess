@@ -96,7 +96,7 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         RenderDataUtil.register(data, "relatedContentItems", relatedContentService.getRelatedContentList(relatedContentPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(relatedContentPager, form, op -> op.include("id"));
+        copyBeanToBean(relatedContentPager, form, op -> op.include("term", "content"));
     }
 
     // ===================================================================================
@@ -279,7 +279,7 @@ public class AdminRelatedcontentAction extends FessAdminAction {
             RenderDataUtil.register(data, "relatedContentItems", relatedContentService.getRelatedContentList(relatedContentPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(relatedContentPager, form, op -> op.include("id"));
+                copyBeanToBean(relatedContentPager, form, op -> op.include("term", "content"));
             });
         });
     }

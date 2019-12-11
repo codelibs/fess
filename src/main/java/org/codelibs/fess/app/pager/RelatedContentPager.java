@@ -44,7 +44,7 @@ public class RelatedContentPager implements Serializable {
 
     public String term;
 
-    public String queries;
+    public String content;
 
     public String createdBy;
 
@@ -62,7 +62,7 @@ public class RelatedContentPager implements Serializable {
 
         id = null;
         term = null;
-        queries = null;
+        content = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;
