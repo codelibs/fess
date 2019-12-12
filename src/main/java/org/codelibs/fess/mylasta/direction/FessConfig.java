@@ -298,7 +298,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. http,https */
     String CRAWLER_WEB_PROTOCOLS = "crawler.web.protocols";
 
-    /** The key of the configuration. e.g. file,smb,smb1,ftp */
+    /** The key of the configuration. e.g. file,smb,smb1,ftp,storage */
     String CRAWLER_FILE_PROTOCOLS = "crawler.file.protocols";
 
     /** The key of the configuration. e.g. false */
@@ -2291,7 +2291,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.file.protocols'. <br>
-     * The value is, e.g. file,smb,smb1,ftp <br>
+     * The value is, e.g. file,smb,smb1,ftp,storage <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFileProtocols();
@@ -8982,7 +8982,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FULLSTOP_CHARS, "u002eu06d4u2e3cu3002");
             defaultMap.put(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
-            defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,smb1,ftp");
+            defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,smb1,ftp,storage");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
