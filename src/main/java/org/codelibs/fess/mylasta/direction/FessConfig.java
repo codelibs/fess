@@ -37,6 +37,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. sha256 */
     String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
+    /** The key of the configuration. e.g. .*password|.*key */
+    String APP_ENCRYPT_PROPERTY_PATTERN = "app.encrypt.property.pattern";
+
     /** The key of the configuration. e.g. -Djava.awt.headless=true
     -Dfile.encoding=UTF-8
     -Djna.nosys=true
@@ -295,7 +298,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. http,https */
     String CRAWLER_WEB_PROTOCOLS = "crawler.web.protocols";
 
-    /** The key of the configuration. e.g. file,smb,smb1,ftp */
+    /** The key of the configuration. e.g. file,smb,smb1,ftp,storage */
     String CRAWLER_FILE_PROTOCOLS = "crawler.file.protocols";
 
     /** The key of the configuration. e.g. false */
@@ -1614,6 +1617,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getAppDigestAlgorism();
 
     /**
+     * Get the value for the key 'app.encrypt.property.pattern'. <br>
+     * The value is, e.g. .*password|.*key <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppEncryptPropertyPattern();
+
+    /**
      * Get the value for the key 'jvm.crawler.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
     -Dfile.encoding=UTF-8
@@ -2281,7 +2291,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.file.protocols'. <br>
-     * The value is, e.g. file,smb,smb1,ftp <br>
+     * The value is, e.g. file,smb,smb1,ftp,storage <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFileProtocols();
@@ -6412,6 +6422,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.APP_DIGEST_ALGORISM);
         }
 
+        public String getAppEncryptPropertyPattern() {
+            return get(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN);
+        }
+
         public String getJvmCrawlerOptions() {
             return get(FessConfig.JVM_CRAWLER_OPTIONS);
         }
@@ -8904,6 +8918,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
+            defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
                             "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
@@ -8967,7 +8982,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FULLSTOP_CHARS, "u002eu06d4u2e3cu3002");
             defaultMap.put(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
-            defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,smb1,ftp");
+            defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,smb1,ftp,storage");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");

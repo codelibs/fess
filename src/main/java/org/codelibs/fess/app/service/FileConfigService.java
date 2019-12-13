@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileConfigPager;
 import org.codelibs.fess.es.config.cbean.FileConfigCB;
@@ -27,6 +28,7 @@ import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -75,14 +77,21 @@ public class FileConfigService {
     }
 
     public void store(final FileConfig fileConfig) {
+        fileConfig.setConfigParameter(ParameterUtil.encrypt(fileConfig.getConfigParameter()));
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
     }
 
     protected void setupListCondition(final FileConfigCB cb, final FileConfigPager fileConfigPager) {
-        if (fileConfigPager.id != null) {
-            cb.query().docMeta().setId_Equal(fileConfigPager.id);
+        if (StringUtil.isNotBlank(fileConfigPager.name)) {
+            cb.query().setName_Wildcard(fileConfigPager.name);
+        }
+        if (StringUtil.isNotBlank(fileConfigPager.paths)) {
+            cb.query().setPaths_Wildcard(fileConfigPager.paths);
+        }
+        if (StringUtil.isNotBlank(fileConfigPager.description)) {
+            cb.query().setDescription_Wildcard(fileConfigPager.description);
         }
         // TODO Long, Integer, String supported only.
 

@@ -26,6 +26,7 @@ import org.codelibs.fess.es.config.cbean.FileAuthenticationCB;
 import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -58,7 +59,7 @@ public class FileAuthenticationService {
     }
 
     public void store(final FileAuthentication fileAuthentication) {
-
+        fileAuthentication.setParameters(ParameterUtil.encrypt(fileAuthentication.getParameters()));
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });

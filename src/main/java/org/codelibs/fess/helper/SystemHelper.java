@@ -443,7 +443,7 @@ public class SystemHelper {
             logger.debug("system.properties: {}", value);
         }
         if (StringUtil.isNotBlank(value)) {
-            ParameterUtil.parse(value).entrySet().stream().filter(e -> {
+            ParameterUtil.parse(ParameterUtil.encrypt(value)).entrySet().stream().filter(e -> {
                 final String key = e.getKey();
                 if (StringUtil.isBlank(key)) {
                     return false;

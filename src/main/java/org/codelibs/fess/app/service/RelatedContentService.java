@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RelatedContentPager;
 import org.codelibs.fess.es.config.cbean.RelatedContentCB;
@@ -70,8 +71,11 @@ public class RelatedContentService {
     }
 
     protected void setupListCondition(final RelatedContentCB cb, final RelatedContentPager relatedContentPager) {
-        if (relatedContentPager.id != null) {
-            cb.query().docMeta().setId_Equal(relatedContentPager.id);
+        if (StringUtil.isNotBlank(relatedContentPager.term)) {
+            cb.query().setTerm_Wildcard(relatedContentPager.term);
+        }
+        if (StringUtil.isNotBlank(relatedContentPager.content)) {
+            cb.query().setContent_Wildcard(relatedContentPager.content);
         }
         // TODO Long, Integer, String supported only.
 

@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BoostDocPager;
 import org.codelibs.fess.es.config.cbean.BoostDocumentRuleCB;
@@ -69,8 +70,11 @@ public class BoostDocumentRuleService {
     }
 
     protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocPager boostDocumentRulePager) {
-        if (boostDocumentRulePager.id != null) {
-            cb.query().docMeta().setId_Equal(boostDocumentRulePager.id);
+        if (StringUtil.isNotBlank(boostDocumentRulePager.urlExpr)) {
+            cb.query().setUrlExpr_Wildcard(boostDocumentRulePager.urlExpr);
+        }
+        if (StringUtil.isNotBlank(boostDocumentRulePager.boostExpr)) {
+            cb.query().setBoostExpr_Wildcard(boostDocumentRulePager.boostExpr);
         }
         // TODO Long, Integer, String supported only.
 

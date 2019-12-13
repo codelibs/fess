@@ -21,6 +21,8 @@ package org.codelibs.fess.app.web.admin.boostdoc;
  */
 public class SearchForm {
 
-    public String id;
+    public String urlExpr;
+
+    public String boostExpr;
 
 }

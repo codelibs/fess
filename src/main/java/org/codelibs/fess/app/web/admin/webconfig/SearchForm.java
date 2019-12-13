@@ -22,5 +22,10 @@ package org.codelibs.fess.app.web.admin.webconfig;
  */
 public class SearchForm {
 
-    public String id;
+    public String name;
+
+    public String urls;
+
+    public String description;
+
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebConfigPager;
 import org.codelibs.fess.es.config.cbean.WebConfigCB;
@@ -28,6 +29,7 @@ import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -83,14 +85,21 @@ public class WebConfigService {
     }
 
     public void store(final WebConfig webConfig) {
+        webConfig.setConfigParameter(ParameterUtil.encrypt(webConfig.getConfigParameter()));
         webConfigBhv.insertOrUpdate(webConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
     }
 
     protected void setupListCondition(final WebConfigCB cb, final WebConfigPager webConfigPager) {
-        if (webConfigPager.id != null) {
-            cb.query().docMeta().setId_Equal(webConfigPager.id);
+        if (StringUtil.isNotBlank(webConfigPager.name)) {
+            cb.query().setName_Wildcard(webConfigPager.name);
+        }
+        if (StringUtil.isNotBlank(webConfigPager.urls)) {
+            cb.query().setUrls_Wildcard(webConfigPager.urls);
+        }
+        if (StringUtil.isNotBlank(webConfigPager.description)) {
+            cb.query().setDescription_Wildcard(webConfigPager.description);
         }
         // TODO Long, Integer, String supported only.
 

@@ -70,7 +70,7 @@ public class GsaConfigParser extends DefaultHandler {
 
     protected String[] webProtocols = new String[] { "http:", "https:" };
 
-    protected String[] fileProtocols = new String[] { "file:", "smb:", "smb1:", "ftp:" };
+    protected String[] fileProtocols = new String[] { "file:", "smb:", "smb1:", "ftp:", "storage:" };
 
     protected LinkedList<String> tagQueue;
 

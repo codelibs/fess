@@ -36,6 +36,52 @@
 									</la:info>
 									<la:errors />
 								</div>
+								<la:form action="/admin/dataconfig/"
+										 styleClass="form-horizontal">
+									<div class="form-group">
+										<label for="name" class="col-sm-2 control-label"><la:message
+												key="labels.name" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="name" property="name" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="handlerName" class="col-sm-2 control-label"><la:message
+												key="labels.handler_name" /></label>
+										<div class="col-sm-10">
+											<la:errors property="handlerName" />
+											<la:select styleId="handlerName" property="handlerName" size="1"
+													   styleClass="form-control">
+												<la:option value="" />
+												<c:forEach var="hn" varStatus="s"
+														   items="${handlerNameItems}">
+													<la:option value="${f:u(hn.value)}">${f:h(hn.label)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="description" class="col-sm-2 control-label"><la:message
+												key="labels.description" /></label>
+										<div class="col-sm-10">
+											<la:text styleId="description" property="description" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<button type="submit" class="btn btn-primary" id="submit"
+													name="search"
+													value="<la:message key="labels.crud_button_search" />">
+												<em class="fa fa-search"></em>
+												<la:message key="labels.crud_button_search" />
+											</button>
+											<button type="submit" class="btn btn-default" name="reset"
+													value="<la:message key="labels.crud_button_reset" />">
+												<la:message key="labels.crud_button_reset" />
+											</button>
+										</div>
+									</div>
+								</la:form>
 								<%-- List --%>
 								<c:if test="${dataConfigPager.allRecordCount == 0}">
 									<div class="row top10">

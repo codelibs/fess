@@ -97,7 +97,7 @@ public class AdminPathmapAction extends FessAdminAction {
         RenderDataUtil.register(data, "pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(pathMapPager, form, op -> op.include("id"));
+        copyBeanToBean(pathMapPager, form, op -> op.include("regex", "replacement"));
     }
 
     // ===================================================================================
@@ -279,7 +279,7 @@ public class AdminPathmapAction extends FessAdminAction {
             RenderDataUtil.register(data, "pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(pathMapPager, form, op -> op.include("id"));
+                copyBeanToBean(pathMapPager, form, op -> op.include("regex", "replacement"));
             });
         });
     }

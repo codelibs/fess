@@ -20,12 +20,14 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.es.config.cbean.DataConfigCB;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -65,7 +67,7 @@ public class DataConfigService {
     }
 
     public void store(final DataConfig dataConfig) {
-
+        dataConfig.setHandlerParameter(ParameterUtil.encrypt(dataConfig.getHandlerParameter()));
         dataConfigBhv.insertOrUpdate(dataConfig, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
@@ -73,8 +75,14 @@ public class DataConfigService {
     }
 
     protected void setupListCondition(final DataConfigCB cb, final DataConfigPager dataConfigPager) {
-        if (dataConfigPager.id != null) {
-            cb.query().docMeta().setId_Equal(dataConfigPager.id);
+        if (StringUtil.isNotBlank(dataConfigPager.name)) {
+            cb.query().setName_Wildcard(dataConfigPager.name);
+        }
+        if (StringUtil.isNotBlank(dataConfigPager.handlerName)) {
+            cb.query().setHandlerName_Wildcard(dataConfigPager.handlerName);
+        }
+        if (StringUtil.isNotBlank(dataConfigPager.description)) {
+            cb.query().setDescription_Wildcard(dataConfigPager.description);
         }
         // TODO Long, Integer, String supported only.
 

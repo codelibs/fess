@@ -18,6 +18,9 @@ package org.codelibs.fess.app.web.api.admin.boostdoc;
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
 public class SearchBody extends BaseSearchBody {
-    public String id;
+
+    public String urlExpr;
+
+    public String boostExpr;
 
 }

@@ -112,9 +112,10 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
+        registerHandlerNames(data);
 
         // restore from pager
-        copyBeanToBean(dataConfigPager, form, op -> op.include("id"));
+        copyBeanToBean(dataConfigPager, form, op -> op.include("name", "handlerName", "description"));
     }
 
     // ===================================================================================
@@ -352,9 +353,10 @@ public class AdminDataconfigAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
             RenderDataUtil.register(data, "dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager));
+            registerHandlerNames(data);
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(dataConfigPager, form, op -> op.include("id"));
+                copyBeanToBean(dataConfigPager, form, op -> op.include("name", "handlerName", "description"));
             });
         });
     }
