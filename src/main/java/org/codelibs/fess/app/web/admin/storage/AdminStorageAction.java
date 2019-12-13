@@ -74,16 +74,30 @@ public class AdminStorageAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsStorageNoUploadFile(GLOBAL), () -> asListHtml(form.path));
         }
         verifyToken(() -> asListHtml(form.path));
-        final String fileName = form.uploadFile.getFileName();
+        final String objectName = getObjectName(form.path, form.uploadFile.getFileName());
         try (final InputStream in = form.uploadFile.getInputStream()) {
             final MinioClient minioClient = createClient(fessConfig);
-            minioClient.putObject(fessConfig.getStorageBucket(), form.uploadFile.getFileName(), in, (long) form.uploadFile.getFileSize(),
+            minioClient.putObject(fessConfig.getStorageBucket(), objectName, in, (long) form.uploadFile.getFileSize(),
                     null, null, "application/octet-stream");
         } catch (final Exception e) {
-            throwValidationError(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, fileName), () -> asListHtml(form.path));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to upload {}", objectName, e);
+            }
+            throwValidationError(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL,  e.getLocalizedMessage()), () -> asListHtml(form.path));
         }
-        saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, fileName));
-        return redirect(getClass()); // no-op
+        saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, form.uploadFile.getFileName()));
+        if (StringUtil.isEmpty(form.path)) {
+            return redirect(getClass());
+        }
+        return redirectWith(getClass(), moreUrl( "list/" + URLEncoder.encode(form.path, Constants.UTF_8_CHARSET)));
+    }
+
+    protected String getObjectName(final String path, final String name) {
+        return URLEncoder.encode((StringUtil.isEmpty(path) ? StringUtil.EMPTY : path + "/") + name, Constants.UTF_8_CHARSET);
+    }
+
+    protected String getId(final String objectName) {
+        return URLEncoder.encode(objectName, Constants.UTF_8_CHARSET);
     }
 
     @Execute
@@ -120,12 +134,22 @@ public class AdminStorageAction extends FessAdminAction {
         }
         try {
             final MinioClient minioClient = createClient(fessConfig);
-            minioClient.removeObject(fessConfig.getStorageBucket(), values[0] + values[1]);
+            minioClient.removeObject(fessConfig.getStorageBucket(), values[0] + "/" + values[1]);
         } catch (final Exception e) {
-            logger.debug("Failed to delete {}", values[0] + values[1], e);
-// TODO            throwValidationError(messages -> messages.addErrorsStorageAccessError(GLOBAL, e.getLocalizedMessage()), () -> asListHtml(values[0]));
+            logger.debug("Failed to delete {}", values[0] + "/" + values[1], e);
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, e.getLocalizedMessage()), () -> asListHtml(values[0]));
         }
-        return redirect(getClass()); // no-op
+        saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[0] + "/" + values[1]));
+        return redirectWith(getClass(), moreUrl("list/" + URLEncoder.encode(getObjectName(null, values[0]), Constants.UTF_8_CHARSET)));
+    }
+
+    @Execute
+    public HtmlResponse createDir(final ItemForm form) {
+        validate(form, messages -> {}, () -> asListHtml(form.path));
+        if (StringUtil.isBlank(form.name)) {
+            //TODO throwValidationError(messages -> messages.addErrorsStorageCreateDirNameBlank(GLOBAL), () -> asListHtml(form.path));
+        }
+        return redirectWith(getClass(), moreUrl("list/" +  URLEncoder.encode(getObjectName(form.path, form.name), Constants.UTF_8_CHARSET)));
     }
 
     public static List<Map<String, Object>> getFileItems(final String prefix) {

@@ -18,10 +18,9 @@ package org.codelibs.fess.app.web.admin.storage;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
-import org.lastaflute.web.validation.Required;
 
 public class ItemForm {
-    @Required
+
     public String path;
 
     @Size(max = 100)
