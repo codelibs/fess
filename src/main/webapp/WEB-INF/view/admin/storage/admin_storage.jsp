@@ -42,16 +42,17 @@
 								<div class="data-wrapper">
 									<div class="row">
 										<div class="col-sm-12">
-											<a  class="fa fa-home" aria-hidden="true" href="${contextPath}/admin/storage/">(Path: ${f:h(endpoint)}/${f:h(bucket)})</a>
+											<a  class="fa fa-home" aria-hidden="true" href="${contextPath}/admin/storage/">(Bucket: ${f:h(endpoint)}/${f:h(bucket)})</a>
 											<c:forEach var="item" varStatus="s" items="${pathItems}">
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
-												<a href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a>
+												<span><a href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
 											</c:forEach>
 											<i class="fa fa-chevron-right" aria-hidden="true"></i>
-											<button type="button" class="btn btn-success btn-xs" name="upload" data-toggle="modal"
+
+											<div type="button" class="btn btn-success btn-xs" name="createDir" data-toggle="modal"
 													data-target="#createDir">
-												<i class="fa fa-plus-square" aria-hidden="true"></i>
-											</button>
+												<i class="fa fa-plus" aria-hidden="true"></i>
+											</div>
 
 											<div class="modal modal-primary" id="createDir"
 												 tabindex="-1" role="dialog"
@@ -87,16 +88,17 @@
 												</div>
 											</div>
 										</div>
+									</div>
 
-											<a href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a>
-
-											<button type="button" class="btn btn-success pull-right" name="upload" data-toggle="modal"
+									<div class="row">
+										<div class="col-sm-12">
+											<div type="button" class="btn btn-success pull-right" name="upload" data-toggle="modal"
 													data-target="#uploadeFile"
 													value="<la:message key="labels.storage_button_upload" />"
 											>
 												<em class="fa fa-upload"></em>
 												<la:message key="labels.storage_button_upload" />
-											</button>
+											</div>
 											<div class="modal modal-primary" id="uploadeFile"
 												 tabindex="-1" role="dialog"
 											>
@@ -107,15 +109,12 @@
 																<span aria-hidden="true">×</span>
 															</button>
 															<h4 class="modal-title">
-																<!-- la:message key="labels.crud_title_delete" / -->
-																Upload
+																<la:message key="labels.storage_upload_file" />
 															</h4>
 														</div>
 														<div class="modal-body col-sm-12">
 															<la:form action="/admin/storage/upload/" enctype="multipart/form-data" styleClass="form-inline">
 																<div class="form-group">
-																	<label for="uploadFile"> <la:message key="labels.storage_upload_file" />
-																	</label>
 																	<input type="file" name="uploadFile" class="form-control" />
 																</div>
 																<input type="hidden" name="path" value="${path}" />
@@ -134,8 +133,9 @@
 												</div>
 											</div>
 										</div>
+									</div>
 
-
+									<div class="row">
 										<div class="col-sm-12">
 											<table class="table table-bordered table-striped dataTable">
 												<tbody>
@@ -167,7 +167,7 @@
 																	${f:h(data.name)}
 															</td>
 															<td>${f:h(data.size)}</td>
-															<td>${f:h(data.lastModifed)}</td>
+															<td>${f:h(data.lastModified)}</td>
 														</c:if>
 														<c:if test="${data.directory.booleanValue()}">
 														<tr
@@ -189,13 +189,13 @@
 																	<la:message key="labels.design_download_button" />
 																</a>
 																<button type="button" class="btn btn-danger btn-xs" name="delete" data-toggle="modal"
-																		data-target='#confirmToDelete-${f:h(data.name).replace(".", "\\.")}'
+																		data-target="#confirmToDelete-${f:h(data.hashCode)}"
 																		value="<la:message key="labels.design_delete_button" />"
 																>
 																	<em class="fa fa-times"></em>
 																	<la:message key="labels.design_delete_button" />
 																</button>
-																<div class="modal modal-danger fade" id='confirmToDelete-${f:h(data.name)}'
+																<div class="modal modal-danger fade" id="confirmToDelete-${f:h(data.hashCode)}"
 																	 tabindex="-1" role="dialog"
 																>
 																	<div class="modal-dialog">
@@ -252,4 +252,3 @@
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
 </html>
-

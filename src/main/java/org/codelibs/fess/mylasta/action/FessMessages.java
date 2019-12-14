@@ -419,6 +419,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Upload file is required. */
     public static final String ERRORS_storage_no_upload_file = "{errors.storage_no_upload_file}";
 
+    /** The key of the message: Directory name is invalid. */
+    public static final String ERRORS_storage_directory_name_is_invalid = "{errors.storage_directory_name_is_invalid}";
+
     /** The key of the message: Updated parameters. */
     public static final String SUCCESS_update_crawler_params = "{success.update_crawler_params}";
 
@@ -2411,6 +2414,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsStorageNoUploadFile(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_storage_no_upload_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.storage_directory_name_is_invalid' with parameters.
+     * <pre>
+     * message: Directory name is invalid.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageDirectoryNameIsInvalid(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_directory_name_is_invalid));
         return this;
     }
 
