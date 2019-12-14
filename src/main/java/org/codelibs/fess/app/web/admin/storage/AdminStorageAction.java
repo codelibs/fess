@@ -176,7 +176,9 @@ public class AdminStorageAction extends FessAdminAction {
                 }
             }
         } catch (final Exception e) {
-            throw new StorageException("Failed to access " + fessConfig.getStorageEndpoint(), e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to access " + fessConfig.getStorageEndpoint(), e);
+            }
         }
         return list;
     }

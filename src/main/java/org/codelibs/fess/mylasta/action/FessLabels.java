@@ -3126,6 +3126,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload */
     public static final String LABELS_storage_button_upload = "{labels.storage_button_upload}";
 
+    /** The key of the message: Bucket Name */
+    public static final String LABELS_storage_bucket_name = "{labels.storage_bucket_name}";
+
+    /** The key of the message: File */
+    public static final String LABELS_storage_file = "{labels.storage_file}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

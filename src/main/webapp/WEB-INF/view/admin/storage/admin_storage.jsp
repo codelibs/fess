@@ -26,8 +26,16 @@
 						<div class="box box-primary">
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<la:message key="labels.storage_configuration" />
+									<a aria-hidden="true" href="${contextPath}/admin/storage/"><i class="fas fa-database" aria-hidden="true"></i>${f:h(bucket)}</a>
+									<c:forEach var="item" varStatus="s" items="${pathItems}">
+										/ <span><a href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
+									</c:forEach>
+									/ <a data-toggle="modal" data-target="#createDir"> <i class="fas fa-folder" aria-hidden="true"></i></a>
 								</h3>
+								<span class="pull-right"> <a data-toggle="modal" data-target="#uploadeFile"><i class="fa fa-upload"
+										aria-hidden="true"
+									></i></a>
+								</span>
 							</div>
 							<!-- /.box-header -->
 							<div class="box-body">
@@ -40,97 +48,68 @@
 								</div>
 								<%-- List --%>
 								<div class="data-wrapper">
-									<div class="row">
-										<div class="col-sm-12">
-											<a  class="fa fa-home" aria-hidden="true" href="${contextPath}/admin/storage/">(Bucket: ${f:h(endpoint)}/${f:h(bucket)})</a>
-											<c:forEach var="item" varStatus="s" items="${pathItems}">
-												<i class="fa fa-chevron-right" aria-hidden="true"></i>
-												<span><a href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
-											</c:forEach>
-											<i class="fa fa-chevron-right" aria-hidden="true"></i>
-
-											<div type="button" class="btn btn-success btn-xs" name="createDir" data-toggle="modal"
-													data-target="#createDir">
-												<i class="fa fa-plus" aria-hidden="true"></i>
-											</div>
-
-											<div class="modal modal-primary" id="createDir"
-												 tabindex="-1" role="dialog"
-											>
-												<div class="modal-dialog">
-													<div class="modal-content">
-														<div class="modal-header">
-															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">×</span>
-															</button>
-															<h4 class="modal-title">
-																<la:message key="labels.crud_title_create" />
-															</h4>
-														</div>
-														<div class="modal-body col-sm-12">
-															<la:form action="/admin/storage/createDir/" enctype="multipart/form-data" styleClass="form-inline">
-																<div class="form-group">
-																	<input type="text" name="name" class="form-control" />
-																</div>
-																<input type="hidden" name="path" value="${path}" />
-																<button type="submit" class="btn btn-success" name="createDir">
-																	<em class="fa fa-make"></em>
-																	<la:message key="labels.crud_button_create" />
-																</button>
-															</la:form>
-														</div>
-														<div class="modal-footer">
-															<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
-																<la:message key="labels.crud_button_cancel" />
-															</button>
+									<div class="modal modal-primary" id="createDir" tabindex="-1" role="dialog">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<la:form action="/admin/storage/createDir/" enctype="multipart/form-data" styleClass="form-inline">
+													<input type="hidden" name="path" value="${path}" />
+													<div class="modal-header">
+														<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+															<span aria-hidden="true">&times;</span>
+														</button>
+														<h4 class="modal-title">
+															<la:message key="labels.crud_title_create" />
+														</h4>
+													</div>
+													<div class="modal-body">
+														<div class="form-group">
+															<label for="name" class="control-label"><la:message key="labels.storage_bucket_name" /></label>
+															<input type="text" name="name" class="form-control"/>
 														</div>
 													</div>
-												</div>
+													<div class="modal-footer">
+														<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+															<la:message key="labels.crud_button_cancel" />
+														</button>
+														<button type="submit" class="btn btn-success" name="createDir">
+															<em class="fa fa-make"></em>
+															<la:message key="labels.crud_button_create" />
+														</button>
+													</div>
+												</la:form>
 											</div>
 										</div>
 									</div>
 
-									<div class="row">
-										<div class="col-sm-12">
-											<div type="button" class="btn btn-success pull-right" name="upload" data-toggle="modal"
-													data-target="#uploadeFile"
-													value="<la:message key="labels.storage_button_upload" />"
-											>
-												<em class="fa fa-upload"></em>
-												<la:message key="labels.storage_button_upload" />
-											</div>
-											<div class="modal modal-primary" id="uploadeFile"
-												 tabindex="-1" role="dialog"
-											>
-												<div class="modal-dialog">
-													<div class="modal-content">
-														<div class="modal-header">
-															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">×</span>
-															</button>
-															<h4 class="modal-title">
-																<la:message key="labels.storage_upload_file" />
-															</h4>
-														</div>
-														<div class="modal-body col-sm-12">
-															<la:form action="/admin/storage/upload/" enctype="multipart/form-data" styleClass="form-inline">
-																<div class="form-group">
-																	<input type="file" name="uploadFile" class="form-control" />
-																</div>
-																<input type="hidden" name="path" value="${path}" />
-																<button type="submit" class="btn btn-success" name="upload">
-																	<em class="fa fa-upload"></em>
-																	<la:message key="labels.storage_button_upload" />
-																</button>
-															</la:form>
-														</div>
-														<div class="modal-footer">
-															<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
-																<la:message key="labels.crud_button_cancel" />
-															</button>
+									<div class="modal modal-primary" id="uploadeFile" tabindex="-1" role="dialog">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<la:form action="/admin/storage/upload/" enctype="multipart/form-data" styleClass="form-inline">
+													<input type="hidden" name="path" value="${path}" />
+													<div class="modal-header">
+														<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+															<span aria-hidden="true">&times;</span>
+														</button>
+														<h4 class="modal-title">
+															<la:message key="labels.storage_upload_file" />
+														</h4>
+													</div>
+													<div class="modal-body">
+														<div class="form-group">
+															<label for="uploadFile" class="control-label"><la:message key="labels.storage_file" /></label>
+															<input type="file" name="uploadFile" class="form-control" />
 														</div>
 													</div>
-												</div>
+													<div class="modal-footer">
+														<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+															<la:message key="labels.crud_button_cancel" />
+														</button>
+														<button type="submit" class="btn btn-success" name="upload">
+															<em class="fa fa-upload"></em>
+															<la:message key="labels.storage_button_upload" />
+														</button>
+													</div>
+												</la:form>
 											</div>
 										</div>
 									</div>
@@ -141,8 +120,9 @@
 												<tbody>
 													<tr>
 														<th><la:message key="labels.storage_name" /></th>
-														<th><la:message key="labels.storage_size" /></th>
-														<th><la:message key="labels.storage_last_modified" /></th>
+														<th class="col-md-1"><la:message key="labels.storage_size" /></th>
+														<th class="col-md-3"><la:message key="labels.storage_last_modified" /></th>
+														<th class="col-md-2"></th>
 													</tr>
 													<c:if test="${not empty path and not empty parentId}">
 													<tr
@@ -163,7 +143,7 @@
 														<c:if test="${not data.directory}">
 														<tr>
 															<td>
-																<em class="fa fa-file"></em>
+																<em class="far fa-file"></em>
 																	${f:h(data.name)}
 															</td>
 															<td>${f:h(data.size)}</td>
@@ -173,7 +153,7 @@
 														<tr
 															data-href="${contextPath}/admin/storage/list/${f:u(data.id)}/">
 															<td>
-																<em class="fa fa-folder-open"></em>
+																<em class="fa fa-folder-open" style="color:#F7C502;"></em>
 																	${f:h(data.name)}
 															</td>
 															<td></td>
