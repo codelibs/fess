@@ -361,4 +361,19 @@ public class ApiResult {
             return new ApiResult(this);
         }
     }
+
+    public static class ApiStorageResponse extends ApiResponse {
+        protected List<Map<String, Object>> items;
+
+        public ApiStorageResponse items(final List<Map<String, Object>> items) {
+            this.items = items;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
 }
