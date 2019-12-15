@@ -34,6 +34,7 @@ import org.codelibs.fess.exception.StorageException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -88,16 +89,16 @@ public class AdminStorageAction extends FessAdminAction {
                     () -> asListHtml(form.path));
         }
         saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, form.uploadFile.getFileName()));
-        if (StringUtil.isEmpty(form.path)) {
-            return redirect(getClass());
-        }
         return redirectWith(getClass(), moreUrl("list/" + encodeId(form.path)));
     }
 
     @Execute
-    public ActionResponse list(final String id) {
+    public ActionResponse list(final OptionalThing<String> id) {
         saveToken();
-        return asListHtml(decodePath(id));
+        if (id.isPresent() && id.get() != null) {
+            return asListHtml(decodePath(id.get()));
+        }
+        return redirect(getClass());
     }
 
     @Execute
@@ -126,7 +127,6 @@ public class AdminStorageAction extends FessAdminAction {
         if (StringUtil.isEmpty(values[1])) {
             throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(values[0])));
         }
-        logger.debug("values[0] = {}, values[1] = {}", values[0], values[1]);
         final String objectName = getObjectName(values[0], values[1]);
         try {
             final MinioClient minioClient = createClient(fessConfig);
@@ -137,9 +137,6 @@ public class AdminStorageAction extends FessAdminAction {
                     () -> asListHtml(encodeId(values[0])));
         }
         saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
-        if (StringUtil.isEmpty(values[0])) {
-            return redirect(getClass());
-        }
         return redirectWith(getClass(), moreUrl("list/" + encodeId(values[0])));
     }
 
@@ -275,13 +272,13 @@ public class AdminStorageAction extends FessAdminAction {
 
     protected static String urlEncode(final String str) {
         if (str == null) {
-            return null;
+            return StringUtil.EMPTY;
         }
         return URLEncoder.encode(str, Constants.UTF_8_CHARSET);
     }
 
-    protected static String encodeId(final String str) {
-        return urlEncode(urlEncode(str));
+    protected static String encodeId(final String objectName) {
+        return urlEncode(urlEncode(objectName));
     }
 
     private HtmlResponse asListHtml(final String prefix) {
