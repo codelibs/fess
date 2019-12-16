@@ -48,8 +48,8 @@
 		<jackson.version>2.10.1</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
 		<asm.version>7.2</asm.version>
-		<tika.version>1.22</tika.version>
-		<groovy.version>3.0.0-rc-1</groovy.version>
+		<tika.version>1.23</tika.version>
+		<groovy.version>3.0.0-rc-2</groovy.version>
 		<minio.version>6.0.11</minio.version>
 
 		<!-- Crawler -->
@@ -64,7 +64,7 @@
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.29</tomcat.version>
+		<tomcat.version>9.0.30</tomcat.version>
 		<tomcat.boot.version>0.7.3</tomcat.boot.version>
 
 		<!-- Testing -->
@@ -1174,6 +1174,11 @@
 					<artifactId>jsr305</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client</artifactId>
+			<version>1.33.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.http-client</groupId>
