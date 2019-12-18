@@ -59,7 +59,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
         return null;
     }
 
-    // GET /api/admin/storage/download/{id}
+    // GET /api/admin/storage/download/{id}/
     @Execute
     public StreamResponse get$download(final String id) {
         final String[] values = decodeId(id);
@@ -76,8 +76,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
                 });
     }
 
-    // TODO
-    // DELETE /api/admin/storage/delete/{id}
+    // DELETE /api/admin/storage/delete/{id}/
     @Execute
     public JsonResponse<ApiResult> delete$delete(final String id) {
         final String[] values = decodeId(id);
@@ -87,6 +86,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
         final String objectName = getObjectName(values[0], values[1]);
         try {
             deleteObject(objectName);
+            saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
             return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]));
@@ -94,8 +94,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
         return null;
     }
 
-    // TODO
-    // POST /api/admin/storage/upload/{pathId}
+    // POST /api/admin/storage/upload/{pathId}/
     @Execute
     public JsonResponse<ApiResult> post$upload(final String pathId, final UploadForm form) {
         validateApi(form, messages -> {});
@@ -104,6 +103,8 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
         }
         try {
             uploadObject(getObjectName(decodeId(pathId)[0], form.uploadFile.getFileName()), form.uploadFile);
+            saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, form.uploadFile.getFileName()));
+            return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
             throwValidationErrorApi(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, form.uploadFile.getFileName()));
         }
