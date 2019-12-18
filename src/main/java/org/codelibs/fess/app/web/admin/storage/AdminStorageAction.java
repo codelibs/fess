@@ -92,7 +92,8 @@ public class AdminStorageAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to upload {}", form.uploadFile.getFileName(), e);
             }
-            throwValidationError(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, form.uploadFile.getFileName()), () -> asListHtml(encodeId(form.path)));
+            throwValidationError(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, form.uploadFile.getFileName()),
+                    () -> asListHtml(encodeId(form.path)));
 
         }
         saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, form.uploadFile.getFileName()));
@@ -113,7 +114,8 @@ public class AdminStorageAction extends FessAdminAction {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Failed to download {}", values[1], e);
                         }
-                        throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]), () -> asListHtml(encodeId(values[0])));
+                        throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]),
+                                () -> asListHtml(encodeId(values[0])));
                     }
                 });
     }
@@ -129,13 +131,11 @@ public class AdminStorageAction extends FessAdminAction {
             deleteObject(objectName);
         } catch (final StorageException e) {
             logger.debug("Failed to delete {}", values[1], e);
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]),
-                    () -> asListHtml(encodeId(values[0])));
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]), () -> asListHtml(encodeId(values[0])));
         }
         saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
         return redirectWith(getClass(), moreUrl("list/" + encodeId(values[0])));
     }
-
 
     @Execute
     public HtmlResponse createDir(final ItemForm form) {
@@ -222,7 +222,6 @@ public class AdminStorageAction extends FessAdminAction {
         }
         return values[values.length - 1];
     }
-
 
     public static String decodePath(final String id) {
         final String[] values = decodeId(id);

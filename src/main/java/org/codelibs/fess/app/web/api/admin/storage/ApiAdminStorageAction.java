@@ -66,14 +66,13 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
         if (StringUtil.isEmpty(values[1])) {
             throwValidationErrorApi(messages -> messages.addErrorsStorageFileNotFound(GLOBAL));
         }
-        return asStream(values[1]).contentTypeOctetStream().stream(
-                out -> {
-                    try {
-                        downloadObject(getObjectName(values[0], values[1]), out);
-                    } catch (final StorageException e) {
-                        throwValidationErrorApi(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]));
-                    }
-                });
+        return asStream(values[1]).contentTypeOctetStream().stream(out -> {
+            try {
+                downloadObject(getObjectName(values[0], values[1]), out);
+            } catch (final StorageException e) {
+                throwValidationErrorApi(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]));
+            }
+        });
     }
 
     // DELETE /api/admin/storage/delete/{id}/
