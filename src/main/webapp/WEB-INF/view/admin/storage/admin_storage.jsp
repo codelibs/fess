@@ -151,7 +151,7 @@
 														</c:if>
 														<c:if test="${data.directory.booleanValue()}">
 														<tr
-															data-href="${contextPath}/admin/storage/list/${f:u(data.id)}/">
+															data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/">
 															<td>
 																<em class="fa fa-folder-open" style="color:#F7C502;"></em>
 																	${f:h(data.name)}
@@ -162,7 +162,7 @@
 														<td>
 															<c:if test="${not data.directory}">
 																<a class="btn btn-primary btn-xs" role="button" name="download" data-toggle="modal"
-																		href="${contextPath}/admin/storage/download/${f:u(data.id)}/" download="${f:u(data.name)}"
+																		href="${contextPath}/admin/storage/download/${f:h(data.id)}/" download="${f:u(data.name)}"
 																	value="<la:message key="labels.design_download_button" />"
 																	>
 																	<em class="fa fa-download"></em>
@@ -197,7 +197,7 @@
 																				<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
 																					<la:message key="labels.crud_button_cancel" />
 																				</button>
-																				<la:form action="${contextPath}/admin/storage/delete/${f:u(data.id)}/" styleClass="form-horizontal">
+																				<la:form action="${contextPath}/admin/storage/delete/${f:h(data.id)}/" styleClass="form-horizontal">
 																					<button type="submit" class="btn btn-outline btn-danger" name="delete"
 																							value="<la:message key="labels.crud_button_delete" />"
 																					>
