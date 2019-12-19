@@ -15,13 +15,14 @@
  */
 package org.codelibs.fess.app.web.api.admin.storage;
 
-import org.codelibs.fess.app.web.admin.storage.ItemForm;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
-public class UploadForm extends ItemForm {
+public class UploadForm {
+
+    public String path;
 
     @Required
-    public MultipartFormFile uploadFile;
+    public MultipartFormFile file;
 
 }

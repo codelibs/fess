@@ -70,6 +70,9 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
             try {
                 downloadObject(getObjectName(values[0], values[1]), out);
             } catch (final StorageException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to download " + id, e);
+                }
                 throwValidationErrorApi(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]));
             }
         });
@@ -88,24 +91,32 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
             saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
             return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to delete " + id, e);
+            }
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]));
         }
         return null;
     }
 
+    // curl -XPOST -H "Authorization: CHANGEME" localhost:8080/api/admin/storage/upload/ -F path=/ -F file=@...
     // POST /api/admin/storage/upload/{pathId}/
     @Execute
-    public JsonResponse<ApiResult> post$upload(final String pathId, final UploadForm form) {
+    public JsonResponse<ApiResult> post$upload(final UploadForm form) {
         validateApi(form, messages -> {});
-        if (form.uploadFile == null) {
+        if (form.file == null) {
             throwValidationErrorApi(messages -> messages.addErrorsStorageNoUploadFile(GLOBAL));
         }
+        final String fileName = form.file.getFileName();
         try {
-            uploadObject(getObjectName(decodeId(pathId)[0], form.uploadFile.getFileName()), form.uploadFile);
-            saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, form.uploadFile.getFileName()));
+            uploadObject(getObjectName(form.path, fileName), form.file);
+            saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, fileName));
             return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
-            throwValidationErrorApi(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, form.uploadFile.getFileName()));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to upload " + fileName, e);
+            }
+            throwValidationErrorApi(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, fileName));
         }
         return null;
     }
