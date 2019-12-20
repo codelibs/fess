@@ -53,10 +53,10 @@
 		<minio.version>6.0.11</minio.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.5.0-SNAPSHOT</crawler.version>
+		<crawler.version>3.5.0</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.5.0-SNAPSHOT</suggest.version>
+		<suggest.version>7.5.0</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.5.1</elasticsearch.version>
