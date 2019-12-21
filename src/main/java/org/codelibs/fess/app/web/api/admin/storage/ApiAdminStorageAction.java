@@ -17,9 +17,9 @@ package org.codelibs.fess.app.web.api.admin.storage;
 
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.decodeId;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.decodePath;
-import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.getFileItems;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.deleteObject;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.downloadObject;
+import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.getFileItems;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.getObjectName;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.uploadObject;
 
