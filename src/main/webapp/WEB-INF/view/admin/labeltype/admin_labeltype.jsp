@@ -36,6 +36,9 @@
 									</la:info>
 									<la:errors />
 								</div>
+								<a role="button" data-toggle="collapse" href="#listSearchForm" aria-expanded="false"
+									aria-controls="listSearchForm"><i class="fas fa-search" aria-hidden="true"></i></a>
+								<div class="collapse" id="listSearchForm">
 								<la:form action="/admin/labeltype/"
 										 styleClass="form-horizontal">
 									<div class="form-group">
@@ -67,6 +70,7 @@
 										</div>
 									</div>
 								</la:form>
+								</div>
 								<%-- List --%>
 								<c:if test="${labelTypePager.allRecordCount == 0}">
 									<div class="row top10">
