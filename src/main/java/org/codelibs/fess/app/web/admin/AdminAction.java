@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin;
 
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.admin.accesstoken.AdminAccesstokenAction;
 import org.codelibs.fess.app.web.admin.backup.AdminBackupAction;
 import org.codelibs.fess.app.web.admin.badword.AdminBadwordAction;
@@ -52,7 +53,6 @@ import org.codelibs.fess.app.web.admin.user.AdminUserAction;
 import org.codelibs.fess.app.web.admin.webauth.AdminWebauthAction;
 import org.codelibs.fess.app.web.admin.webconfig.AdminWebconfigAction;
 import org.codelibs.fess.app.web.admin.wizard.AdminWizardAction;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.Execute;

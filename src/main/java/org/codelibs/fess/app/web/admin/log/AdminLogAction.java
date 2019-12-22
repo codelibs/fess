@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.app.web.annotation.Secured;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;

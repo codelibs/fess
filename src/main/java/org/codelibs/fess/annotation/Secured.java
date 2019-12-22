@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.annotation;
+package org.codelibs.fess.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

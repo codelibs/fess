@@ -17,8 +17,8 @@ package org.codelibs.fess.app.web.admin.dashboard;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.api.es.EsApiManager;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;

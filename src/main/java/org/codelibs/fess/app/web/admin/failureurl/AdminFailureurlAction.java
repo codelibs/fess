@@ -18,10 +18,10 @@ package org.codelibs.fess.app.web.admin.failureurl;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;

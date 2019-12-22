@@ -19,10 +19,10 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.RelatedContentPager;
 import org.codelibs.fess.app.service.RelatedContentService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
 import org.codelibs.fess.helper.SystemHelper;

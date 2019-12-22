@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
-import org.codelibs.fess.app.web.annotation.Secured;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;

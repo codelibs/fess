@@ -53,7 +53,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.annotation.Secured;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;

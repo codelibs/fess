@@ -17,7 +17,7 @@ package org.codelibs.fess.app.web.admin.dict;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.app.web.annotation.Secured;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;

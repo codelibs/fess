@@ -36,7 +36,7 @@ import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.annotation.Secured;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;

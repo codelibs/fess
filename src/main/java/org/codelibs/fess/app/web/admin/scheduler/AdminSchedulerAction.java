@@ -21,10 +21,10 @@ import java.util.Base64;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.ProcessHelper;

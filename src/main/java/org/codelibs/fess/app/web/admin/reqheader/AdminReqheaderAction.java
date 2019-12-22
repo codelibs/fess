@@ -23,11 +23,11 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.ReqHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
 import org.codelibs.fess.es.config.exentity.WebConfig;

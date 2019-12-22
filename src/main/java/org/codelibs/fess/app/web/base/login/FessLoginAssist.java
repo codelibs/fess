@@ -20,8 +20,8 @@ import java.util.function.Function;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.RootAction;
-import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.FessUser;
