@@ -68,6 +68,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDictProtwords()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

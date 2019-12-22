@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.base;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.dbflute.optional.OptionalThing;
@@ -49,7 +50,15 @@ public abstract class FessAdminAction extends FessBaseAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         systemHelper.setupAdminHtmlData(this, runtime);
+
+        final Boolean editable =
+                getUserBean().map(user -> user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray()) || user.hasRole(getActionRole()))
+                        .orElse(false);
+        runtime.registerData("editable", editable);
+        runtime.registerData("editableClass", editable.booleanValue() ? StringUtil.EMPTY : "disabled");
     }
+
+    protected abstract String getActionRole();
 
     protected void write(final String path, final byte[] data) {
         LdiFileUtil.write(path, data);

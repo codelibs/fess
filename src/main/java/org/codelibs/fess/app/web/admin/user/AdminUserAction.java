@@ -77,6 +77,11 @@ public class AdminUserAction extends FessAdminAction {
         runtime.registerData("ldapAdminEnabled", fessConfig.isLdapAdminEnabled());
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

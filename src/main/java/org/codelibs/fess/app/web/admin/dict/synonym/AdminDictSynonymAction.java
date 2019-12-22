@@ -71,6 +71,11 @@ public class AdminDictSynonymAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDictSynonym()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

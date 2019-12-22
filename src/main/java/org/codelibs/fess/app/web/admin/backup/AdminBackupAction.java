@@ -109,6 +109,11 @@ public class AdminBackupAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameBackup()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {

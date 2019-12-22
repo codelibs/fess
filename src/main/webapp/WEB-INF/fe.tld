@@ -265,4 +265,12 @@
     <function-signature>java.lang.String getMessage(java.lang.String, java.lang.String)</function-signature>
     <example>${fe:message("labels.foobar", "default value")}</example>
   </function>
+
+  <function>
+    <description>Check if user has a permission.</description>
+    <name>permission</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>boolean hasActionRole(java.lang.String)</function-signature>
+    <example>${fe:permission("admin-dashboard")}</example>
+  </function>
 </taglib>

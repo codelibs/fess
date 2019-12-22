@@ -68,6 +68,11 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDictStemmeroverride()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

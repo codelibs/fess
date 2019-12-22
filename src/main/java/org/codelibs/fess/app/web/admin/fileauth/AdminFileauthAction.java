@@ -70,6 +70,11 @@ public class AdminFileauthAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameFileauth()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

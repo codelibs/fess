@@ -54,6 +54,11 @@ public class AdminPluginAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNamePlugin()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {

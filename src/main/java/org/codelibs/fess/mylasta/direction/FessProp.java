@@ -203,10 +203,6 @@ public interface FessProp {
         setSystemProperty(key, Integer.toString(value));
     }
 
-    default boolean isWebDesignEditorEnabled() {
-        return getSystemPropertyAsBoolean(Constants.WEB_DESIGN_EDITOR_PROPERTY, true);
-    }
-
     default boolean isSearchFileProxyEnabled() {
         return getSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, true);
     }

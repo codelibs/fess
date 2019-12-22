@@ -102,8 +102,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_POPULAR_WORD_PROPERTY = "web.api.popularword";
 
-    public static final String WEB_DESIGN_EDITOR_PROPERTY = "design.editor";
-
     public static final String APP_VALUE_PROPERTY = "system.properties";
 
     public static final String DEFAULT_LABEL_VALUE_PROPERTY = "label.value";

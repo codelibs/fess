@@ -50,6 +50,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.util.DateConverter;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -403,5 +405,18 @@ public class FessFunctions {
     public static String getMessage(final String key, final String defaultValue) {
         final Locale locale = LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ROOT);
         return ComponentUtil.getMessageManager().findMessage(locale, key).orElse(defaultValue);
+    }
+
+    public static boolean hasActionRole(final String role) {
+        final String[] roles;
+        if (role.endsWith(FessAdminAction.VIEW)) {
+            roles = new String[] { role, role.substring(0, role.length() - FessAdminAction.VIEW.length()) };
+        } else {
+            roles = new String[] { role };
+        }
+        final FessLoginAssist loginAssist = ComponentUtil.getComponent(FessLoginAssist.class);
+        return loginAssist.getSavedUserBean()
+                .map(user -> user.hasRoles(roles) || user.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray()))
+                .orElse(false);
     }
 }

@@ -37,7 +37,6 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -59,29 +58,18 @@ public class AdminDesignAction extends FessAdminAction {
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
-    @Override
-    public ActionResponse hookBefore(final ActionRuntime runtime) {
-        checkEditorStatus(runtime);
-        return super.hookBefore(runtime);
-    }
-
-    private void checkEditorStatus(final ActionRuntime runtime) {
-        if (!editable()) {
-            throwValidationError(messages -> messages.addErrorsDesignEditorDisabled(GLOBAL), () -> asListHtml());
-        }
-    }
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("editable", editable());
         runtime.registerData("fileNameItems", loadFileNameItems());
         runtime.registerData("jspFileNameItems", loadJspFileNameItems());
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDesign()));
     }
 
-    private boolean editable() {
-        return fessConfig.isWebDesignEditorEnabled();
+    @Override
+    protected String getActionRole() {
+        return ROLE;
     }
 
     private List<Pair<String, String>> loadJspFileNameItems() {

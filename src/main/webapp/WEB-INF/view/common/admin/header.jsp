@@ -23,9 +23,11 @@
 					<a href="${installationLink}" target="_olh"><em class="fa fa-exclamation-triangle"></em></a></li>
 				</c:if>
 				<li><a href="${contextPath}/"><em class="fa fa-list-alt"></em></a></li>
+				<c:if test="${fe:permission('admin-scheduler')}">
 				<li><a
 					href="${contextPath}/admin/scheduler/details/4/default_crawler"><em
 						class="fa fa-play-circle"></em></a></li>
+				</c:if>
 				<c:if test="${not empty helpLink}">
 				<li><a href="${helpLink}" target="_olh"><em
 						class="fa fa-question-circle"></em></a></li>

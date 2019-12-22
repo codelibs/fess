@@ -69,6 +69,11 @@ public class AdminGeneralAction extends FessAdminAction {
         runtime.registerData("dayItems", getDayItems());
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //
 

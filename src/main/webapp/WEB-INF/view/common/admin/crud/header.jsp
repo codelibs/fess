@@ -19,7 +19,7 @@
 <div class="btn-group pull-right">
 	<c:choose>
 		<c:when test="${crudMode == null}">
-			<la:link href="createnew" styleClass="btn btn-success btn-xs">
+			<la:link href="createnew" styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 				<em class="fa fa-plus"></em>
 				<la:message key="labels.crud_link_create" />
 			</la:link>

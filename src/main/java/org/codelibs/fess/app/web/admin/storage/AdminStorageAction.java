@@ -62,6 +62,11 @@ public class AdminStorageAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameStorage()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {

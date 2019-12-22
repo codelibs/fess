@@ -158,11 +158,11 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
-									<la:link styleClass="btn btn-success"
+									<c:if test="${editable}"><la:link styleClass="btn btn-success"
 										href="/admin/scheduler/createnewjob/web_crawling/${f:u(id)}/${fe:base64(name)}">
 										<em class="fa fa-plus-circle"></em>
 										<la:message key="labels.web_crawling_button_create_job" />
-									</la:link>
+									</la:link></c:if>
 								</div>
 								<!-- /.box-footer -->
 							</div>

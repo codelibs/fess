@@ -5,28 +5,33 @@
 		<em class="fa fa-arrow-circle-left"></em>
 		<la:message key="labels.crud_button_back" />
 	</button>
+	<c:if test="${editable}">
 	<button type="submit" class="btn btn-success" name="create"
 		value="<la:message key="labels.crud_button_create" />">
 		<em class="fa fa-plus"></em>
 		<la:message key="labels.crud_button_create" />
 	</button>
+	</c:if>
 </c:if>
 <c:if test="${crudMode == 2}">
 	<button type="submit" class="btn btn-default" name="edit" value="back">
 		<em class="fa fa-arrow-circle-left"></em>
 		<la:message key="labels.crud_button_back" />
 	</button>
+	<c:if test="${editable}">
 	<button type="submit" class="btn btn-warning" name="update"
 		value="<la:message key="labels.crud_button_update" />">
 		<em class="fa fa-pencil-alt"></em>
 		<la:message key="labels.crud_button_update" />
 	</button>
+	</c:if>
 </c:if>
 <c:if test="${crudMode == 4}">
 	<button type="submit" class="btn btn-default" name="list" value="back">
 		<em class="fa fa-arrow-circle-left"></em>
 		<la:message key="labels.crud_button_back" />
 	</button>
+	<c:if test="${editable}">
 	<button type="submit" class="btn btn-warning" name="edit"
 		value="<la:message key="labels.crud_button_edit" />">
 		<em class="fa fa-pencil-alt"></em>
@@ -71,4 +76,5 @@
 			</div>
 		</div>
 	</div>
+	</c:if>
 </c:if>

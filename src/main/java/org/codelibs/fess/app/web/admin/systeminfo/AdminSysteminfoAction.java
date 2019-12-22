@@ -64,6 +64,11 @@ public class AdminSysteminfoAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameSysteminfo()));
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                              Index
     //                                                                      ==============

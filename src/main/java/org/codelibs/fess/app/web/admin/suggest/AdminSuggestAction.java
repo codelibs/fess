@@ -49,6 +49,11 @@ public class AdminSuggestAction extends FessAdminAction {
         runtime.registerData("queryWordsNum", suggestHelper.getQueryWordsNum());
     }
 
+    @Override
+    protected String getActionRole() {
+        return ROLE;
+    }
+
     // ===================================================================================
     //                                                                             Execute
     //                                                                            ========

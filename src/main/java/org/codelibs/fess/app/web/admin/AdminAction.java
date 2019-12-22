@@ -60,13 +60,10 @@ import org.lastaflute.web.response.HtmlResponse;
 
 public class AdminAction extends FessAdminAction {
 
-    // ===================================================================================
-    //                                                                            Constant
-    //
-
-    // ===================================================================================
-    //                                                                           Attribute
-    //
+    @Override
+    protected String getActionRole() {
+        return "admin";
+    }
 
     // ===================================================================================
     //                                                                      Search Execute
