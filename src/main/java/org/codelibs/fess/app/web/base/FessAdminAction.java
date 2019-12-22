@@ -33,6 +33,8 @@ import org.lastaflute.web.util.LaServletContextUtil;
  */
 public abstract class FessAdminAction extends FessBaseAction {
 
+    public static final String VIEW = "-view";
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========

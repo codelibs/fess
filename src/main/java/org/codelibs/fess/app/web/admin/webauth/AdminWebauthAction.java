@@ -28,6 +28,7 @@ import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
 import org.codelibs.fess.es.config.exentity.WebConfig;
@@ -46,6 +47,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Shunji Makino
  */
 public class AdminWebauthAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-webauth";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -70,11 +73,13 @@ public class AdminWebauthAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             webAuthPager.setCurrentPageNumber(pageNumber.get());
@@ -87,6 +92,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, webAuthPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
@@ -95,6 +101,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         webAuthPager.clear();
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
@@ -116,6 +123,7 @@ public class AdminWebauthAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asHtml(path_AdminWebauth_AdminWebauthEditJsp).useForm(CreateForm.class, op -> {
@@ -130,6 +138,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -153,6 +162,7 @@ public class AdminWebauthAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -177,6 +187,7 @@ public class AdminWebauthAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -197,6 +208,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -217,6 +229,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());

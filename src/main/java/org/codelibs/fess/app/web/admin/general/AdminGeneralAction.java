@@ -30,6 +30,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -45,6 +46,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Shunji Makino
  */
 public class AdminGeneralAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-general";
 
     private static final String DUMMY_PASSWORD = "**********";
 
@@ -70,6 +73,7 @@ public class AdminGeneralAction extends FessAdminAction {
     //
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asHtml(path_AdminGeneral_AdminGeneralJsp).useForm(EditForm.class, setup -> {
@@ -80,6 +84,7 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse sendmail(final MailForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminGeneral_AdminGeneralJsp);
@@ -112,6 +117,7 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminGeneral_AdminGeneralJsp);

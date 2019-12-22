@@ -21,6 +21,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -33,6 +34,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminFailureurlAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-failureurl";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -55,12 +58,14 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         failureUrlPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
@@ -69,6 +74,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, failureUrlPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
@@ -77,6 +83,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         failureUrlPager.clear();
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
@@ -85,6 +92,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -102,6 +110,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         return asHtml(path_AdminFailureurl_AdminFailureurlDetailsJsp).useForm(EditForm.class, op -> {
@@ -123,6 +132,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                         -------------
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -136,6 +146,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
         failureUrlService.deleteAll(failureUrlPager);

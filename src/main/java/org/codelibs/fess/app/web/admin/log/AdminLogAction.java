@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
@@ -47,6 +48,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminLogAction extends FessAdminAction {
 
+    public static final String ROLE = "admin-log";
+
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
@@ -54,11 +57,13 @@ public class AdminLogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asIndexHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
         final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();

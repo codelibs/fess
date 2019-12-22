@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.dashboard;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.api.es.EsApiManager;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -29,6 +30,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminDashboardAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-dashboard";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -50,6 +53,7 @@ public class AdminDashboardAction extends FessAdminAction {
     //                                                                              Index
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse index() {
         esApiManager.saveToken();
         return asHtml(path_AdminDashboard_AdminDashboardJsp).renderWith(data -> {

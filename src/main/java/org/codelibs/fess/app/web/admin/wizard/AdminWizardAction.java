@@ -30,6 +30,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.config.exentity.FileConfig;
@@ -44,6 +45,8 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 public class AdminWizardAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-wizard";
 
     // ===================================================================================
     //                                                                            Constant
@@ -82,6 +85,7 @@ public class AdminWizardAction extends FessAdminAction {
     //                                                                      ==============
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asIndexHtml();
     }
@@ -91,12 +95,14 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse crawlingConfigForm() {
         saveToken();
         return asHtml(path_AdminWizard_AdminWizardConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_AdminWizardConfigJsp);
@@ -108,6 +114,7 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_AdminWizardConfigJsp);
@@ -272,12 +279,14 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse startCrawlingForm() {
         saveToken();
         return asHtml(path_AdminWizard_AdminWizardStartJsp).useForm(StartCrawlingForm.class);
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse startCrawling(final StartCrawlingForm form) {
         verifyToken(() -> asIndexHtml());
         if (!processHelper.isProcessRunning()) {

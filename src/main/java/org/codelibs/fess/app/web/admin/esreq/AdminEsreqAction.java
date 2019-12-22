@@ -30,6 +30,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.CurlHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -43,6 +44,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminEsreqAction extends FessAdminAction {
 
+    public static final String ROLE = "admin-esreq";
+
     private static final Logger logger = LogManager.getLogger(AdminEsreqAction.class);
 
     @Override
@@ -52,11 +55,13 @@ public class AdminEsreqAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml(() -> saveToken());
     }
 
     @Execute
+    @Secured({ ROLE })
     public ActionResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml(null));
         verifyToken(() -> asListHtml(() -> saveToken()));

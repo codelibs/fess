@@ -53,6 +53,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
@@ -82,6 +83,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class AdminBackupAction extends FessAdminAction {
 
+    public static final String ROLE = "admin-backup";
+
     private static final Logger logger = LogManager.getLogger(AdminBackupAction.class);
 
     public static final String NDJSON_EXTENTION = ".ndjson";
@@ -107,12 +110,14 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
@@ -285,6 +290,7 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
         if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
             if (id.equals("system.properties")) {

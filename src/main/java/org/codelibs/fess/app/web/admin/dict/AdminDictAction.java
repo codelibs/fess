@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.dict;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
@@ -30,6 +31,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminDictAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-dict";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -50,6 +53,7 @@ public class AdminDictAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asHtml(path_AdminDict_AdminDictJsp).renderWith(data -> {
             final DictionaryFile<? extends DictionaryItem>[] dictFiles = dictionaryManager.getDictionaryFiles();

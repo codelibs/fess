@@ -15,12 +15,14 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.RootAction;
+import org.codelibs.fess.app.web.annotation.Secured;
+import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.exbhv.UserBhv;
@@ -110,11 +112,17 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
 
     @Override
     protected void checkPermission(final LoginHandlingResource resource) throws LoginRequiredException {
-        if (resource.getActionClass().getName().startsWith(Constants.ADMIN_PACKAGE)) {
+        if (FessAdminAction.class.isAssignableFrom(resource.getActionClass())) {
             getSavedUserBean().ifPresent(user -> {
-                if (!user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
-                    throw new UserRoleLoginException(RootAction.class);
+                if (user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
+                    return;
                 }
+                final Method executeMethod = resource.getExecuteMethod();
+                final Secured secured = executeMethod.getAnnotation(Secured.class);
+                if (secured != null && user.hasRoles(secured.value())) {
+                    return;
+                }
+                throw new UserRoleLoginException(RootAction.class);
             });
         }
     }

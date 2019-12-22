@@ -31,6 +31,7 @@ import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
@@ -46,6 +47,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author jflute
  */
 public class AdminDesignAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-design";
 
     private static final Logger logger = LogManager.getLogger(AdminDesignAction.class);
 
@@ -112,18 +115,21 @@ public class AdminDesignAction extends FessAdminAction {
     //                                                                             Execute
     //                                                                             =======
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back() {
         saveToken();
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml(form));
         verifyToken(() -> asListHtml());
@@ -200,6 +206,7 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public StreamResponse download(final FileAccessForm form) {
         final File file = getTargetFile(form.fileName).get();
         if (file == null) {
@@ -216,6 +223,7 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final FileAccessForm form) {
         getTargetFile(form.fileName).ifPresent(file -> {
             if (!file.delete()) {
@@ -235,6 +243,7 @@ public class AdminDesignAction extends FessAdminAction {
     //                                                 Edit
     //                                                ------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
@@ -248,6 +257,7 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse editAsUseDefault(final EditForm form) {
         final String jspType = "orig/view";
         final File jspFile = getJspFile(form.fileName, jspType);
@@ -261,6 +271,7 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);

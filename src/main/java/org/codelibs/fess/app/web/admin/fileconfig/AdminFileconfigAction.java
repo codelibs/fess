@@ -30,6 +30,7 @@ import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -48,6 +49,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminFileconfigAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-fileconfig";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -74,11 +77,13 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             fileConfigPager.setCurrentPageNumber(pageNumber.get());
@@ -91,6 +96,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, fileConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
@@ -99,6 +105,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         fileConfigPager.clear();
         return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
@@ -120,6 +127,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).useForm(CreateForm.class, op -> {
@@ -133,6 +141,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
@@ -170,6 +179,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -205,6 +215,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -225,6 +236,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -245,6 +257,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());

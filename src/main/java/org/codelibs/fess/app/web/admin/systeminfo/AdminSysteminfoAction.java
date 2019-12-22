@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -39,6 +40,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminSysteminfoAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-systeminfo";
 
     private static final String MASKED_VALUE = "XXXXXXXX";
 
@@ -65,6 +68,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     //                                                                              Index
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asHtml(path_AdminSysteminfo_AdminSysteminfoJsp).renderWith(data -> {
             registerEnvItems(data);

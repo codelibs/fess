@@ -358,8 +358,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String ES_API_ACCESS_TOKEN = "esApiAccessToken";
 
-    public static final String ADMIN_PACKAGE = "org.codelibs.fess.app.web.admin";
-
     public static final String DEFAULT_FIELD = "_default";
 
     public static final Integer DEFAULT_DAY_FOR_CLEANUP = 3;

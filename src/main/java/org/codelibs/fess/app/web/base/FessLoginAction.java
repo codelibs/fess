@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import org.codelibs.fess.app.web.admin.AdminAction;
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.response.HtmlResponse;
@@ -25,9 +26,13 @@ public abstract class FessLoginAction extends FessSearchAction {
     }
 
     protected HtmlResponse redirectByUser(final FessUserBean user) {
-        if (!user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
-            return redirectToRoot();
+        if (user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
+            return redirect(AdminDashboardAction.class);
         }
-        return redirect(AdminDashboardAction.class);
+        final Class<? extends FessAdminAction> actionClass = AdminAction.getAdminActionClass(user);
+        if (actionClass != null) {
+            return redirect(actionClass);
+        }
+        return redirectToRoot();
     }
 }

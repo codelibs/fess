@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.suggest;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.lastaflute.web.Execute;
@@ -27,6 +28,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author yfujita
  */
 public class AdminSuggestAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-suggest";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -50,12 +53,14 @@ public class AdminSuggestAction extends FessAdminAction {
     //                                                                             Execute
     //                                                                            ========
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asHtml(path_AdminSuggest_AdminSuggestJsp).useForm(SuggestForm.class);
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse deleteAllWords() {
         if (!suggestHelper.deleteAllWords()) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),
@@ -67,6 +72,7 @@ public class AdminSuggestAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse deleteDocumentWords() {
         if (!suggestHelper.deleteDocumentWords()) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),
@@ -78,6 +84,7 @@ public class AdminSuggestAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse deleteQueryWords() {
         if (!suggestHelper.deleteQueryWords()) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),

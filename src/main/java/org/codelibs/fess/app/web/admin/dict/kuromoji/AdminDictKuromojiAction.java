@@ -28,6 +28,7 @@ import org.codelibs.fess.app.pager.KuromojiPager;
 import org.codelibs.fess.app.service.KuromojiService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
@@ -48,6 +49,8 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
  * @author Keiichi Watanabe
  */
 public class AdminDictKuromojiAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-dict";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -70,6 +73,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         kuromojiPager.clear();
@@ -79,6 +83,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         pageNumber.ifPresent(num -> {
@@ -92,6 +97,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         copyBeanToBean(form, kuromojiPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
@@ -101,6 +107,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         kuromojiPager.clear();
@@ -126,6 +133,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
         saveToken();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiEditJsp).useForm(CreateForm.class, op -> {
@@ -138,6 +146,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
         kuromojiService
@@ -164,6 +173,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
@@ -193,6 +203,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
         saveToken();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiDownloadJsp).useForm(DownloadForm.class, op -> {
@@ -209,6 +220,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
@@ -226,6 +238,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                Upload
     //                                               -------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiUploadJsp).useForm(UploadForm.class, op -> {
@@ -242,6 +255,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
@@ -266,6 +280,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -286,6 +301,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -306,6 +322,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         validate(form, messages -> {}, () -> asDetailsHtml());

@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.ScheduledJobService;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
@@ -37,6 +38,8 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 public class AdminUpgradeAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-upgrade";
 
     // ===================================================================================
     //                                                                            Constant
@@ -113,6 +116,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     //                                                                      ==============
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asIndexHtml();
@@ -123,6 +127,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upgradeFrom(final UpgradeForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);

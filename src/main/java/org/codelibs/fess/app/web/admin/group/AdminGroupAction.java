@@ -25,6 +25,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.util.ComponentUtil;
@@ -41,6 +42,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminGroupAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-group";
 
     private static final Logger logger = LogManager.getLogger(AdminGroupAction.class);
 
@@ -65,11 +68,13 @@ public class AdminGroupAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             groupPager.setCurrentPageNumber(pageNumber.get());
@@ -82,6 +87,7 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, groupPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
@@ -90,6 +96,7 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         groupPager.clear();
         return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
@@ -111,6 +118,7 @@ public class AdminGroupAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asHtml(path_AdminGroup_AdminGroupEditJsp).useForm(CreateForm.class, op -> {
@@ -122,6 +130,7 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -145,6 +154,7 @@ public class AdminGroupAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -166,6 +176,7 @@ public class AdminGroupAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -187,6 +198,7 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -208,6 +220,7 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());

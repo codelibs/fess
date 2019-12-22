@@ -36,6 +36,7 @@ import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
@@ -47,6 +48,8 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 public class AdminMaintenanceAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-maintenance";
 
     // ===================================================================================
     //                                                                            Constant
@@ -78,6 +81,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     //                                                                      ==============
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asIndexHtml();
@@ -91,6 +95,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse reindexOnly(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
@@ -102,6 +107,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse reloadDocIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
@@ -127,6 +133,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
@@ -145,6 +152,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse downloadLogs(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyTokenKeep(this::asIndexHtml);

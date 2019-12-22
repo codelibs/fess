@@ -33,6 +33,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
@@ -52,6 +53,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminBadwordAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-badword";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -76,11 +79,13 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             badWordPager.setCurrentPageNumber(pageNumber.get());
@@ -93,6 +98,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, badWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
@@ -101,6 +107,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         badWordPager.clear();
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
@@ -122,6 +129,7 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asEditHtml().useForm(CreateForm.class, op -> {
@@ -133,6 +141,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -156,6 +165,7 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -177,12 +187,14 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse downloadpage() {
         saveToken();
         return asDownloadHtml();
     }
 
     @Execute
+    @Secured({ ROLE })
     public ActionResponse download(final DownloadForm form) {
         verifyToken(() -> asDownloadHtml());
 
@@ -207,6 +219,7 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                Upload
     //                                               -------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse uploadpage() {
         saveToken();
         return asUploadHtml();
@@ -216,6 +229,7 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -237,6 +251,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -258,6 +273,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -283,6 +299,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());

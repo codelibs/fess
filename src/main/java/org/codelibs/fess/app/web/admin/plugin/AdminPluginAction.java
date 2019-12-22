@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
@@ -41,6 +42,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 
 public class AdminPluginAction extends FessAdminAction {
 
+    public static final String ROLE = "admin-plugin";
+
     private static final Logger logger = LogManager.getLogger(AdminPluginAction.class);
 
     private static final String UPLOAD = "upload";
@@ -52,12 +55,14 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final DeleteForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginJsp));
@@ -68,6 +73,7 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse install(final InstallForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
@@ -117,6 +123,7 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse installplugin() {
         saveToken();
         return asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp).renderWith(data -> {

@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.StorageException;
@@ -51,6 +52,8 @@ import io.minio.messages.Item;
  */
 public class AdminStorageAction extends FessAdminAction {
 
+    public static final String ROLE = "admin-storage";
+
     private static final Logger logger = LogManager.getLogger(AdminStorageAction.class);
 
     @Override
@@ -60,17 +63,14 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asListHtml(StringUtil.EMPTY);
     }
 
-    // TODO
-    //    @Execute
-    //    public HtmlResponse create() {
-    //    }
-
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse list(final OptionalThing<String> id) {
         saveToken();
         if (id.isPresent() && id.get() != null) {
@@ -80,6 +80,7 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final ItemForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.path));
         if (form.uploadFile == null) {
@@ -101,6 +102,7 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
         final String[] values = decodeId(id);
         if (StringUtil.isEmpty(values[1])) {
@@ -121,6 +123,7 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final String id) {
         final String[] values = decodeId(id);
         if (StringUtil.isEmpty(values[1])) {
@@ -138,6 +141,7 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createDir(final ItemForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.path));
         if (StringUtil.isBlank(form.name)) {

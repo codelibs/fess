@@ -24,6 +24,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.ProcessHelper;
@@ -43,6 +44,8 @@ import org.lastaflute.web.util.LaRequestUtil;
  * @author Keiichi Watanabe
  */
 public class AdminSchedulerAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-scheduler";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -67,11 +70,13 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             schedulerPager.setCurrentPageNumber(pageNumber.get());
@@ -84,6 +89,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, schedulerPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
@@ -92,6 +98,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         schedulerPager.clear();
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
@@ -114,6 +121,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                            ----------
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnewjob(final String type, final String id, final String name) {
         saveToken();
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(CreateForm.class, op -> {
@@ -140,6 +148,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(CreateForm.class, op -> {
@@ -151,6 +160,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -174,6 +184,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -199,6 +210,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -219,6 +231,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -239,6 +252,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         final String id = form.id;
@@ -263,6 +277,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse start(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         final String id = form.id;
@@ -291,6 +306,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse stop(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         final String id = form.id;

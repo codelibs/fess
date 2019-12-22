@@ -25,6 +25,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.util.ComponentUtil;
@@ -41,6 +42,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminRoleAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-role";
 
     private static final Logger logger = LogManager.getLogger(AdminRoleAction.class);
 
@@ -65,11 +68,13 @@ public class AdminRoleAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             rolePager.setCurrentPageNumber(pageNumber.get());
@@ -82,6 +87,7 @@ public class AdminRoleAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, rolePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminRole_AdminRoleJsp).renderWith(data -> {
@@ -90,6 +96,7 @@ public class AdminRoleAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         rolePager.clear();
         return asHtml(path_AdminRole_AdminRoleJsp).renderWith(data -> {
@@ -111,6 +118,7 @@ public class AdminRoleAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asHtml(path_AdminRole_AdminRoleEditJsp).useForm(CreateForm.class, op -> {
@@ -125,6 +133,7 @@ public class AdminRoleAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -146,6 +155,7 @@ public class AdminRoleAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -167,6 +177,7 @@ public class AdminRoleAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());

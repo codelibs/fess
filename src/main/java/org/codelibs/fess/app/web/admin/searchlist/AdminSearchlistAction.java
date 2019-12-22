@@ -29,6 +29,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -55,6 +56,8 @@ import org.lastaflute.web.validation.VaMessenger;
  * @author Keiichi Watanabe
  */
 public class AdminSearchlistAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-searchlist";
 
     // ===================================================================================
     // Constant
@@ -113,6 +116,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // Search Execute
     // ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final ListForm form) {
         saveToken();
         validate(form, messages -> {}, () -> asHtml(path_AdminError_AdminErrorJsp));
@@ -151,24 +155,28 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final ListForm form) {
         saveToken();
         return doSearch(form);
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse prev(final ListForm form) {
         saveToken();
         return doMove(form, -1);
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse next(final ListForm form) {
         saveToken();
         return doMove(form, 1);
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse move(final ListForm form) {
         saveToken();
         return doMove(form, 0);
@@ -192,6 +200,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // -------
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final DeleteForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
@@ -207,6 +216,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse deleteall(final ListForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
@@ -223,6 +233,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew(final CreateForm form) {
         saveToken();
         form.initialize();
@@ -234,6 +245,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         getDoc(form).ifPresent(entity -> {
@@ -249,6 +261,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -277,6 +290,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());

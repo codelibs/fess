@@ -23,6 +23,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -36,6 +37,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Shunji Makino
  */
 public class AdminCrawlinginfoAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-crawlinginfo";
 
     private static final Logger logger = LogManager.getLogger(AdminCrawlinginfoAction.class);
 
@@ -62,12 +65,14 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
         crawlingInfoPager.setCurrentPageNumber(pageNumber);
@@ -77,6 +82,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         saveToken();
         copyBeanToBean(form, crawlingInfoPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
@@ -86,6 +92,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         saveToken();
         crawlingInfoPager.clear();
@@ -95,6 +102,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
         saveToken();
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
@@ -117,6 +125,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -139,6 +148,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse threaddump(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -162,6 +172,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -175,6 +186,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
         crawlingInfoService.deleteOldSessions(processHelper.getRunningSessionIdSet());

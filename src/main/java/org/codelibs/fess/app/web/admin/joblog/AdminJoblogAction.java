@@ -24,6 +24,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -36,6 +37,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Shunji Makino
  */
 public class AdminJoblogAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-joblog";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -58,12 +61,14 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         saveToken();
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
         jobLogPager.setCurrentPageNumber(pageNumber);
@@ -73,6 +78,7 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         saveToken();
         copyBeanToBean(form, jobLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
@@ -82,6 +88,7 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         saveToken();
         jobLogPager.clear();
@@ -91,6 +98,7 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
         saveToken();
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
@@ -116,6 +124,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -137,6 +146,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -150,6 +160,7 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
         final List<String> jobStatusList = new ArrayList<>();

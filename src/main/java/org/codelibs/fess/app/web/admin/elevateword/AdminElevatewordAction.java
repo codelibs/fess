@@ -40,6 +40,7 @@ import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
@@ -60,6 +61,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminElevatewordAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-elevateword";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -86,11 +89,13 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
             elevateWordPager.setCurrentPageNumber(pageNumber.get());
@@ -103,6 +108,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, elevateWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
@@ -111,6 +117,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         elevateWordPager.clear();
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
@@ -132,6 +139,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew() {
         saveToken();
         return asHtml(path_AdminElevateword_AdminElevatewordEditJsp).useForm(CreateForm.class, op -> {
@@ -145,6 +153,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -179,6 +188,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -209,12 +219,14 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage() {
         saveToken();
         return asDownloadHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
         verifyToken(() -> asDownloadHtml());
 
@@ -239,6 +251,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                Upload
     //                                               -------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse uploadpage() {
         saveToken();
         return asUploadHtml();
@@ -248,6 +261,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -270,6 +284,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -292,6 +307,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -317,6 +333,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());

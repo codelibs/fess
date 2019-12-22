@@ -21,6 +21,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SearchLogPager;
 import org.codelibs.fess.app.service.SearchLogService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -32,6 +33,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author shinsuke
  */
 public class AdminSearchlogAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-searchlog";
 
     private static final String[] CONDITION_FIELDS =
             new String[] { "logType", "queryId", "userSessionId", "requestedTimeRange", "pageSize" };
@@ -57,12 +60,14 @@ public class AdminSearchlogAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         saveToken();
         return asListHtml();
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
         searchLogPager.setCurrentPageNumber(pageNumber);
@@ -72,6 +77,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         saveToken();
         searchLogPager.clear();
@@ -83,6 +89,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         saveToken();
         searchLogPager.clear();
@@ -92,6 +99,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
         saveToken();
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
@@ -114,6 +122,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String logType, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
@@ -132,6 +141,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
@@ -144,6 +154,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse deleteall() {
         verifyToken(this::asListHtml);
         searchLogPager.clear();

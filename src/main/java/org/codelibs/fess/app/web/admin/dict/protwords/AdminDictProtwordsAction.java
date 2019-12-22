@@ -28,6 +28,7 @@ import org.codelibs.fess.app.pager.ProtwordsPager;
 import org.codelibs.fess.app.service.ProtwordsService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
+import org.codelibs.fess.app.web.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.protwords.ProtwordsItem;
@@ -47,6 +48,8 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
  * @author ma2tani
  */
 public class AdminDictProtwordsAction extends FessAdminAction {
+
+    public static final String ROLE = "admin-dict";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -69,6 +72,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         protwordsPager.clear();
@@ -78,6 +82,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         pageNumber.ifPresent(num -> {
@@ -91,6 +96,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         copyBeanToBean(form, protwordsPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
@@ -100,6 +106,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         protwordsPager.clear();
@@ -125,6 +132,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
         saveToken();
         return asHtml(path_AdminDictProtwords_AdminDictProtwordsEditJsp).useForm(CreateForm.class, op -> {
@@ -137,6 +145,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
         protwordsService
@@ -163,6 +172,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                               Details
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
@@ -191,6 +201,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
         saveToken();
         return asHtml(path_AdminDictProtwords_AdminDictProtwordsDownloadJsp).useForm(DownloadForm.class, op -> {
@@ -207,6 +218,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
@@ -224,6 +236,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                                Upload
     //                                               -------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
         return asHtml(path_AdminDictProtwords_AdminDictProtwordsUploadJsp).useForm(UploadForm.class, op -> {
@@ -240,6 +253,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
@@ -264,6 +278,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -276,6 +291,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
@@ -290,6 +306,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     @Execute
+    @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         validate(form, messages -> {}, () -> asDetailsHtml());
