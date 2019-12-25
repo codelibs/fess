@@ -36,10 +36,10 @@
 	<properties>
 		<!-- Main Framework -->
 		<dbflute.version>1.2.1</dbflute.version>
-		<lastaflute.version>1.1.4</lastaflute.version>
-		<lasta.di.version>0.8.1</lasta.di.version>
+		<lastaflute.version>1.1.6</lastaflute.version>
+		<lasta.di.version>0.8.2</lasta.di.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
-		<lasta.job.version>0.5.3</lasta.job.version>
+		<lasta.job.version>0.5.4</lasta.job.version>
 		<mailflute.version>0.6.1</mailflute.version>
 
 		<!-- Partner Library -->
@@ -53,7 +53,7 @@
 		<minio.version>6.0.11</minio.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.5.0</crawler.version>
+		<crawler.version>3.6.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>7.5.0</suggest.version>
