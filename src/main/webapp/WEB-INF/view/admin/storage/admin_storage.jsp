@@ -63,7 +63,7 @@
 													</div>
 													<div class="modal-body">
 														<div class="form-group">
-															<label for="name" class="control-label"><la:message key="labels.storage_bucket_name" /></label>
+															<label for="name" class="control-label"><la:message key="labels.storage_folder_name" /></label>
 															<input type="text" name="name" class="form-control"/>
 														</div>
 													</div>
