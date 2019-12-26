@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -490,7 +491,7 @@ public class SystemHelper {
     public void setLogLevel(final String level) {
         final Level logLevel = Level.toLevel(level, Level.WARN);
         System.setProperty(Constants.FESS_LOG_LEVEL, logLevel.toString());
-        stream(ComponentUtil.getFessConfig().getLoggingAppPackages(), ",").of(
+        split(ComponentUtil.getFessConfig().getLoggingAppPackages(), ",").of(
                 stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> Configurator.setLevel(s, logLevel)));
     }
 
