@@ -42,16 +42,17 @@
 								<div class="data-wrapper">
 									<div class="row">
 										<div class="col-sm-12">
-											<la:form action="/admin/esreq/upload/" enctype="multipart/form-data" styleClass="form-inline">
-												<div class="form-group">
-													<label for="requestFile"> <la:message key="labels.esreq_request_file" />
-													</label> <input type="file" name="requestFile" class="form-control" />
-												</div>
-												<button type="submit" class="btn btn-success" name="upload">
-													<em class="fa fa-upload"></em>
-													<la:message key="labels.esreq_button_upload" />
-												</button>
-											</la:form>
+											<c:if test="${editable}">
+												<la:form action="/admin/esreq/upload/" enctype="multipart/form-data" styleClass="form-inline">
+													<div class="form-group">
+														<label for="requestFile"> <la:message key="labels.esreq_request_file" />
+														</label> <input type="file" name="requestFile" class="form-control" />
+													</div>
+													<button type="submit" class="btn btn-success" name="upload">
+														<em class="fa fa-upload"></em>
+														<la:message key="labels.esreq_button_upload" />
+													</button>
+												</la:form></c:if>
 										</div>
 									</div>
 								</div>

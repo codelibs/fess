@@ -30,12 +30,14 @@
 									<c:forEach var="item" varStatus="s" items="${pathItems}">
 										/ <span><a href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
 									</c:forEach>
-									/ <a data-toggle="modal" data-target="#createDir"> <i class="fas fa-folder" aria-hidden="true"></i></a>
+									/ <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir"> <i class="fas fa-folder" aria-hidden="true"></i></a></c:if>
 								</h3>
+								<c:if test="${editable}">
 								<span class="pull-right"> <a data-toggle="modal" data-target="#uploadeFile"><i class="fa fa-upload"
-										aria-hidden="true"
-									></i></a>
+																											   aria-hidden="true"
+								></i></a>
 								</span>
+								</c:if>
 							</div>
 							<!-- /.box-header -->
 							<div class="box-body">
@@ -48,71 +50,74 @@
 								</div>
 								<%-- List --%>
 								<div class="data-wrapper">
-									<div class="modal modal-primary" id="createDir" tabindex="-1" role="dialog">
-										<div class="modal-dialog">
-											<div class="modal-content">
-												<la:form action="/admin/storage/createDir/" enctype="multipart/form-data" styleClass="form-inline">
-													<input type="hidden" name="path" value="${path}" />
-													<div class="modal-header">
-														<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-															<span aria-hidden="true">&times;</span>
-														</button>
-														<h4 class="modal-title">
-															<la:message key="labels.crud_title_create" />
-														</h4>
-													</div>
-													<div class="modal-body">
-														<div class="form-group">
-															<label for="name" class="control-label"><la:message key="labels.storage_folder_name" /></label>
-															<input type="text" name="name" class="form-control"/>
-														</div>
-													</div>
-													<div class="modal-footer">
-														<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
-															<la:message key="labels.crud_button_cancel" />
-														</button>
-														<button type="submit" class="btn btn-success" name="createDir">
-															<em class="fa fa-make"></em>
-															<la:message key="labels.crud_button_create" />
-														</button>
-													</div>
-												</la:form>
-											</div>
-										</div>
-									</div>
 
-									<div class="modal modal-primary" id="uploadeFile" tabindex="-1" role="dialog">
-										<div class="modal-dialog">
-											<div class="modal-content">
-												<la:form action="/admin/storage/upload/" enctype="multipart/form-data" styleClass="form-inline">
-													<input type="hidden" name="path" value="${path}" />
-													<div class="modal-header">
-														<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-															<span aria-hidden="true">&times;</span>
-														</button>
-														<h4 class="modal-title">
-															<la:message key="labels.storage_upload_file" />
-														</h4>
-													</div>
-													<div class="modal-body">
-														<div class="form-group">
-															<label for="uploadFile" class="control-label"><la:message key="labels.storage_file" /></label>
-															<input type="file" name="uploadFile" class="form-control" />
+									<c:if test="${editable}">
+										<div class="modal modal-primary" id="createDir" tabindex="-1" role="dialog">
+											<div class="modal-dialog">
+												<div class="modal-content">
+													<la:form action="/admin/storage/createDir/" enctype="multipart/form-data" styleClass="form-inline">
+														<input type="hidden" name="path" value="${path}" />
+														<div class="modal-header">
+															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																<span aria-hidden="true">&times;</span>
+															</button>
+															<h4 class="modal-title">
+																<la:message key="labels.crud_title_create" />
+															</h4>
 														</div>
-													</div>
-													<div class="modal-footer">
-														<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
-															<la:message key="labels.crud_button_cancel" />
-														</button>
-														<button type="submit" class="btn btn-success" name="upload">
-															<em class="fa fa-upload"></em>
-															<la:message key="labels.storage_button_upload" />
-														</button>
-													</div>
-												</la:form>
+														<div class="modal-body">
+															<div class="form-group">
+																<label for="name" class="control-label"><la:message key="labels.storage_folder_name" /></label>
+																<input type="text" name="name" class="form-control"/>
+															</div>
+														</div>
+														<div class="modal-footer">
+															<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+																<la:message key="labels.crud_button_cancel" />
+															</button>
+															<button type="submit" class="btn btn-success" name="createDir">
+																<em class="fa fa-make"></em>
+																<la:message key="labels.crud_button_create" />
+															</button>
+														</div>
+													</la:form>
+												</div>
 											</div>
 										</div>
-									</div>
+
+										<div class="modal modal-primary" id="uploadeFile" tabindex="-1" role="dialog">
+											<div class="modal-dialog">
+												<div class="modal-content">
+													<la:form action="/admin/storage/upload/" enctype="multipart/form-data" styleClass="form-inline">
+														<input type="hidden" name="path" value="${path}" />
+														<div class="modal-header">
+															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																<span aria-hidden="true">&times;</span>
+															</button>
+															<h4 class="modal-title">
+																<la:message key="labels.storage_upload_file" />
+															</h4>
+														</div>
+														<div class="modal-body">
+															<div class="form-group">
+																<label for="uploadFile" class="control-label"><la:message key="labels.storage_file" /></label>
+																<input type="file" name="uploadFile" class="form-control" />
+															</div>
+														</div>
+														<div class="modal-footer">
+															<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+																<la:message key="labels.crud_button_cancel" />
+															</button>
+															<button type="submit" class="btn btn-success" name="upload">
+																<em class="fa fa-upload"></em>
+																<la:message key="labels.storage_button_upload" />
+															</button>
+														</div>
+													</la:form>
+												</div>
+											</div>
+										</div>
+									</c:if>
 
 									<div class="row">
 										<div class="col-sm-12">
@@ -168,47 +173,49 @@
 																	<em class="fa fa-download"></em>
 																	<la:message key="labels.design_download_button" />
 																</a>
-																<button type="button" class="btn btn-danger btn-xs" name="delete" data-toggle="modal"
-																		data-target="#confirmToDelete-${f:h(data.hashCode)}"
-																		value="<la:message key="labels.design_delete_button" />"
-																>
-																	<em class="fa fa-times"></em>
-																	<la:message key="labels.design_delete_button" />
-																</button>
-																<div class="modal modal-danger fade" id="confirmToDelete-${f:h(data.hashCode)}"
-																	 tabindex="-1" role="dialog"
-																>
-																	<div class="modal-dialog">
-																		<div class="modal-content">
-																			<div class="modal-header">
-																				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																					<span aria-hidden="true">×</span>
-																				</button>
-																				<h4 class="modal-title">
-																					<la:message key="labels.crud_title_delete" /> : ${f:h(data.name)}
-																				</h4>
-																			</div>
-																			<div class="modal-body">
-																				<p>
-																					<la:message key="labels.crud_delete_confirmation" />
-																				</p>
-																			</div>
-																			<div class="modal-footer">
-																				<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
-																					<la:message key="labels.crud_button_cancel" />
-																				</button>
-																				<la:form action="${contextPath}/admin/storage/delete/${f:h(data.id)}/" styleClass="form-horizontal">
-																					<button type="submit" class="btn btn-outline btn-danger" name="delete"
-																							value="<la:message key="labels.crud_button_delete" />"
-																					>
-																						<em class="fa fa-trash"></em>
-																						<la:message key="labels.crud_button_delete" />
+																<c:if test="${editable}">
+																	<button type="button" class="btn btn-danger btn-xs" name="delete" data-toggle="modal"
+																			data-target="#confirmToDelete-${f:h(data.hashCode)}"
+																			value="<la:message key="labels.design_delete_button" />"
+																	>
+																		<em class="fa fa-times"></em>
+																		<la:message key="labels.design_delete_button" />
+																	</button>
+																	<div class="modal modal-danger fade" id="confirmToDelete-${f:h(data.hashCode)}"
+																		 tabindex="-1" role="dialog"
+																	>
+																		<div class="modal-dialog">
+																			<div class="modal-content">
+																				<div class="modal-header">
+																					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																						<span aria-hidden="true">×</span>
 																					</button>
-																				</la:form>
+																					<h4 class="modal-title">
+																						<la:message key="labels.crud_title_delete" /> : ${f:h(data.name)}
+																					</h4>
+																				</div>
+																				<div class="modal-body">
+																					<p>
+																						<la:message key="labels.crud_delete_confirmation" />
+																					</p>
+																				</div>
+																				<div class="modal-footer">
+																					<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+																						<la:message key="labels.crud_button_cancel" />
+																					</button>
+																					<la:form action="${contextPath}/admin/storage/delete/${f:h(data.id)}/" styleClass="form-horizontal">
+																						<button type="submit" class="btn btn-outline btn-danger" name="delete"
+																								value="<la:message key="labels.crud_button_delete" />"
+																						>
+																							<em class="fa fa-trash"></em>
+																							<la:message key="labels.crud_button_delete" />
+																						</button>
+																					</la:form>
+																				</div>
 																			</div>
 																		</div>
 																	</div>
-																</div>
+																</c:if>
 															</c:if>
 														</td>
 														</tr>

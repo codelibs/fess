@@ -41,7 +41,7 @@
 										<la:message key="labels.bad_word_link_list" />
 									</la:link>
 									<la:link href="../createnew"
-										styleClass="btn btn-success btn-xs">
+										styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 										<em class="fa fa-plus"></em>
 										<la:message key="labels.bad_word_link_create" />
 									</la:link>
@@ -51,7 +51,7 @@
 										<la:message key="labels.bad_word_link_download" />
 									</la:link>
 									<la:link href="../uploadpage"
-										styleClass="btn btn-success btn-xs">
+										styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 										<em class="fa fa-upload"></em>
 										<la:message key="labels.bad_word_link_upload" />
 									</la:link>
@@ -66,6 +66,7 @@
 									</la:info>
 									<la:errors />
 								</div>
+								<c:if test="${editable}">
 								<la:form action="/admin/badword/upload/" enctype="multipart/form-data">
 									<table class="table table-bordered">
 										<tbody>
@@ -88,6 +89,7 @@
 										</tfoot>
 									</table>
 								</la:form>
+								</c:if>
 							</div>
 							<!-- /.box-body -->
 						</div>

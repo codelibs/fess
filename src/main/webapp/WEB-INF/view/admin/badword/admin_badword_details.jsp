@@ -64,7 +64,7 @@
 											<la:message key="labels.bad_word_link_list" />
 										</la:link>
 										<la:link href="../createnew"
-											styleClass="btn btn-success btn-xs">
+											styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 											<em class="fa fa-plus"></em>
 											<la:message
 												key="labels.bad_word_link_create" />
@@ -76,7 +76,7 @@
 												key="labels.bad_word_link_download" />
 										</la:link>
 										<la:link href="../uploadpage"
-											styleClass="btn btn-success btn-xs">
+											styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 											<em class="fa fa-upload"></em>
 											<la:message
 												key="labels.bad_word_link_upload" />

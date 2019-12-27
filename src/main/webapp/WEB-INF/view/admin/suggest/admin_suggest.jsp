@@ -48,135 +48,141 @@
 														<td><la:message key="labels.suggest_word_type_all" /></td>
 														<td class="text-right">${f:h(totalWordsNum)}</td>
 														<td class="text-center">
-															<button type="button" class="btn btn-danger btn-xs" name="deleteAllWords"
-																data-toggle="modal" data-target="#confirmToAllDelete"
-																value="<la:message key="labels.design_delete_button" />">
-																<em class="fa fa-trash"></em>
-																<la:message key="labels.design_delete_button" />
-															</button>
-															<div class="modal modal-danger fade" id="confirmToAllDelete"
-																tabindex="-1" role="dialog">
-																<div class="modal-dialog">
-																	<div class="modal-content">
-																		<div class="modal-header">
-																			<button type="button" class="close" data-dismiss="modal"
-																				aria-label="Close">
-																				<span aria-hidden="true">×</span>
-																			</button>
-																			<h4 class="modal-title">
-																				<la:message key="labels.crud_title_delete" />
-																			</h4>
-																		</div>
-																		<div class="modal-body">
-																			<p>
-																				<la:message key="labels.crud_delete_confirmation" />
-																			</p>
-																		</div>
-																		<div class="modal-footer">
-																			<button type="button" class="btn btn-outline pull-left"
-																				data-dismiss="modal">
-																				<la:message key="labels.crud_button_cancel" />
-																			</button>
-																			<button type="submit" class="btn btn-outline btn-danger"
-																				name="deleteAllWords"
-																				value="<la:message key="labels.crud_button_delete" />">
-																				<em class="fa fa-trash"></em>
-																				<la:message key="labels.crud_button_delete" />
-																			</button>
+															<c:if test="${editable}">
+																<button type="button" class="btn btn-danger btn-xs" name="deleteAllWords"
+																		data-toggle="modal" data-target="#confirmToAllDelete"
+																		value="<la:message key="labels.design_delete_button" />">
+																	<em class="fa fa-trash"></em>
+																	<la:message key="labels.design_delete_button" />
+																</button>
+																<div class="modal modal-danger fade" id="confirmToAllDelete"
+																	 tabindex="-1" role="dialog">
+																	<div class="modal-dialog">
+																		<div class="modal-content">
+																			<div class="modal-header">
+																				<button type="button" class="close" data-dismiss="modal"
+																						aria-label="Close">
+																					<span aria-hidden="true">×</span>
+																				</button>
+																				<h4 class="modal-title">
+																					<la:message key="labels.crud_title_delete" />
+																				</h4>
+																			</div>
+																			<div class="modal-body">
+																				<p>
+																					<la:message key="labels.crud_delete_confirmation" />
+																				</p>
+																			</div>
+																			<div class="modal-footer">
+																				<button type="button" class="btn btn-outline pull-left"
+																						data-dismiss="modal">
+																					<la:message key="labels.crud_button_cancel" />
+																				</button>
+																				<button type="submit" class="btn btn-outline btn-danger"
+																						name="deleteAllWords"
+																						value="<la:message key="labels.crud_button_delete" />">
+																					<em class="fa fa-trash"></em>
+																					<la:message key="labels.crud_button_delete" />
+																				</button>
+																			</div>
 																		</div>
 																	</div>
 																</div>
-															</div>
+															</c:if>
 														</td>
 													</tr>
 													<tr>
 														<td><la:message key="labels.suggest_word_type_document" /></td>
 														<td class="text-right">${f:h(documentWordsNum)}</td>
 														<td class="text-center">
-															<button type="button" class="btn btn-danger btn-xs" name="deleteDocumentWords"
-																data-toggle="modal" data-target="#confirmToDocumentDelete"
-																value="<la:message key="labels.design_delete_button" />">
-																<em class="fa fa-trash"></em>
-																<la:message key="labels.design_delete_button" />
-															</button>
-															<div class="modal modal-danger fade" id="confirmToDocumentDelete"
-																tabindex="-1" role="dialog">
-																<div class="modal-dialog">
-																	<div class="modal-content">
-																		<div class="modal-header">
-																			<button type="button" class="close" data-dismiss="modal"
-																				aria-label="Close">
-																				<span aria-hidden="true">×</span>
-																			</button>
-																			<h4 class="modal-title">
-																				<la:message key="labels.crud_title_delete" />
-																			</h4>
-																		</div>
-																		<div class="modal-body">
-																			<p>
-																				<la:message key="labels.crud_delete_confirmation" />
-																			</p>
-																		</div>
-																		<div class="modal-footer">
-																			<button type="button" class="btn btn-outline pull-left"
-																				data-dismiss="modal">
-																				<la:message key="labels.crud_button_cancel" />
-																			</button>
-																			<button type="submit" class="btn btn-outline btn-danger"
-																				name="deleteDocumentWords"
-																				value="<la:message key="labels.crud_button_delete" />">
-																				<em class="fa fa-trash"></em>
-																				<la:message key="labels.crud_button_delete" />
-																			</button>
+															<c:if test="${editable}">
+																<button type="button" class="btn btn-danger btn-xs" name="deleteDocumentWords"
+																		data-toggle="modal" data-target="#confirmToDocumentDelete"
+																		value="<la:message key="labels.design_delete_button" />">
+																	<em class="fa fa-trash"></em>
+																	<la:message key="labels.design_delete_button" />
+																</button>
+																<div class="modal modal-danger fade" id="confirmToDocumentDelete"
+																	 tabindex="-1" role="dialog">
+																	<div class="modal-dialog">
+																		<div class="modal-content">
+																			<div class="modal-header">
+																				<button type="button" class="close" data-dismiss="modal"
+																						aria-label="Close">
+																					<span aria-hidden="true">×</span>
+																				</button>
+																				<h4 class="modal-title">
+																					<la:message key="labels.crud_title_delete" />
+																				</h4>
+																			</div>
+																			<div class="modal-body">
+																				<p>
+																					<la:message key="labels.crud_delete_confirmation" />
+																				</p>
+																			</div>
+																			<div class="modal-footer">
+																				<button type="button" class="btn btn-outline pull-left"
+																						data-dismiss="modal">
+																					<la:message key="labels.crud_button_cancel" />
+																				</button>
+																				<button type="submit" class="btn btn-outline btn-danger"
+																						name="deleteDocumentWords"
+																						value="<la:message key="labels.crud_button_delete" />">
+																					<em class="fa fa-trash"></em>
+																					<la:message key="labels.crud_button_delete" />
+																				</button>
+																			</div>
 																		</div>
 																	</div>
 																</div>
-															</div>
+															</c:if>
 														</td>
 													</tr>
 													<tr>
 														<td><la:message key="labels.suggest_word_type_query" /></td>
 														<td class="text-right">${f:h(queryWordsNum)}</td>
 														<td class="text-center">
-															<button type="button" class="btn btn-danger btn-xs" name="deleteQueryWords"
-																data-toggle="modal" data-target="#confirmToQueryDelete"
-																value="<la:message key="labels.design_delete_button" />">
-																<em class="fa fa-trash"></em>
-																<la:message key="labels.design_delete_button" />
-															</button>
-															<div class="modal modal-danger fade" id="confirmToQueryDelete"
-																tabindex="-1" role="dialog">
-																<div class="modal-dialog">
-																	<div class="modal-content">
-																		<div class="modal-header">
-																			<button type="button" class="close" data-dismiss="modal"
-																				aria-label="Close">
-																				<span aria-hidden="true">×</span>
-																			</button>
-																			<h4 class="modal-title">
-																				<la:message key="labels.crud_title_delete" />
-																			</h4>
-																		</div>
-																		<div class="modal-body">
-																			<p>
-																				<la:message key="labels.crud_delete_confirmation" />
-																			</p>
-																		</div>
-																		<div class="modal-footer">
-																			<button type="button" class="btn btn-outline pull-left"
-																				data-dismiss="modal">
-																				<la:message key="labels.crud_button_cancel" />
-																			</button>
-																			<button type="submit" class="btn btn-outline btn-danger"
-																				name="deleteQueryWords"
-																				value="<la:message key="labels.crud_button_delete" />">
-																				<em class="fa fa-trash"></em>
-																				<la:message key="labels.crud_button_delete" />
-																			</button>
+															<c:if test="${editable}">
+																<button type="button" class="btn btn-danger btn-xs" name="deleteQueryWords"
+																		data-toggle="modal" data-target="#confirmToQueryDelete"
+																		value="<la:message key="labels.design_delete_button" />">
+																	<em class="fa fa-trash"></em>
+																	<la:message key="labels.design_delete_button" />
+																</button>
+																<div class="modal modal-danger fade" id="confirmToQueryDelete"
+																	 tabindex="-1" role="dialog">
+																	<div class="modal-dialog">
+																		<div class="modal-content">
+																			<div class="modal-header">
+																				<button type="button" class="close" data-dismiss="modal"
+																						aria-label="Close">
+																					<span aria-hidden="true">×</span>
+																				</button>
+																				<h4 class="modal-title">
+																					<la:message key="labels.crud_title_delete" />
+																				</h4>
+																			</div>
+																			<div class="modal-body">
+																				<p>
+																					<la:message key="labels.crud_delete_confirmation" />
+																				</p>
+																			</div>
+																			<div class="modal-footer">
+																				<button type="button" class="btn btn-outline pull-left"
+																						data-dismiss="modal">
+																					<la:message key="labels.crud_button_cancel" />
+																				</button>
+																				<button type="submit" class="btn btn-outline btn-danger"
+																						name="deleteQueryWords"
+																						value="<la:message key="labels.crud_button_delete" />">
+																					<em class="fa fa-trash"></em>
+																					<la:message key="labels.crud_button_delete" />
+																				</button>
+																			</div>
 																		</div>
 																	</div>
 																</div>
-															</div>
+															</c:if>
 														</td>
 													</tr>
 												</tbody>

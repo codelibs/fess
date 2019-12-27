@@ -28,7 +28,7 @@
 									<la:message key="labels.crud_title_list" />
 								</h3>
 								<div class="btn-group pull-right">
-									<la:link href="installplugin" styleClass="btn btn-success btn-xs">
+									<la:link href="installplugin" styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 										<em class="fa fa-plus"></em>
 										<la:message key="labels.plugin_install" />
 									</la:link>
@@ -61,49 +61,50 @@
 															<td>${f:h(artifact.name)}</td>
 															<td>${f:h(artifact.version)}</td>
 															<td>
-																<button type="button" class="btn btn-danger btn-xs" name="delete" data-toggle="modal"
-																	data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
-																	value="<la:message key="labels.design_delete_button" />"
-																>
-																	<em class="fa fa-trash"></em>
-																	<la:message key="labels.design_delete_button" />
-																</button>
-																<div class="modal modal-danger fade" id='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version)}'
-																	tabindex="-1" role="dialog"
-																>
-																	<div class="modal-dialog">
-																		<div class="modal-content">
-																			<div class="modal-header">
-																				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																					<span aria-hidden="true">×</span>
-																				</button>
-																				<h4 class="modal-title">
-																					<la:message key="labels.crud_title_delete" />
-																				</h4>
-																			</div>
-																			<div class="modal-body">
-																				<p>
-																					<la:message key="labels.crud_delete_confirmation" />
-																				</p>
-																			</div>
-																			<div class="modal-footer">
-																				<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
-																					<la:message key="labels.crud_button_cancel" />
-																				</button>
-																				<la:form action="/admin/plugin/" styleClass="form-horizontal">
-																					<input type="hidden" name="name" value="${f:h(artifact.name)}">
-																					<input type="hidden" name="version" value="${f:h(artifact.version)}">
-																					<button type="submit" class="btn btn-outline btn-danger" name="delete"
-																						value="<la:message key="labels.crud_button_delete" />"
-																					>
-																						<em class="fa fa-trash"></em>
-																						<la:message key="labels.crud_button_delete" />
+																<c:if test="${editable}">
+																	<button type="button" class="btn btn-danger btn-xs" name="delete" data-toggle="modal"
+																			data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
+																			value="<la:message key="labels.design_delete_button" />"
+																	>
+																		<em class="fa fa-trash"></em>
+																		<la:message key="labels.design_delete_button" />
+																	</button>
+																	<div class="modal modal-danger fade" id='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version)}'
+																		 tabindex="-1" role="dialog"
+																	>
+																		<div class="modal-dialog">
+																			<div class="modal-content">
+																				<div class="modal-header">
+																					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																						<span aria-hidden="true">×</span>
 																					</button>
-																				</la:form>
+																					<h4 class="modal-title">
+																						<la:message key="labels.crud_title_delete" />
+																					</h4>
+																				</div>
+																				<div class="modal-body">
+																					<p>
+																						<la:message key="labels.crud_delete_confirmation" />
+																					</p>
+																				</div>
+																				<div class="modal-footer">
+																					<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+																						<la:message key="labels.crud_button_cancel" />
+																					</button>
+																					<la:form action="/admin/plugin/" styleClass="form-horizontal">
+																						<input type="hidden" name="name" value="${f:h(artifact.name)}">
+																						<input type="hidden" name="version" value="${f:h(artifact.version)}">
+																						<button type="submit" class="btn btn-outline btn-danger" name="delete"
+																								value="<la:message key="labels.crud_button_delete" />"
+																						>
+																							<em class="fa fa-trash"></em>
+																							<la:message key="labels.crud_button_delete" />
+																						</button>
+																					</la:form>
+																				</div>
 																			</div>
 																		</div>
-																	</div>
-																</div>
+																	</div></c:if>
 															</td>
 														</tr>
 													</c:forEach>

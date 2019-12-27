@@ -50,7 +50,7 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary"
+									<button type="submit" class="btn btn-primary ${f:h(editableClass)}"
 										name="crawlingConfigForm"
 										value="<la:message key="labels.wizard_start_button"/>">
 										<em class="fa fa-arrow-circle-right"></em>

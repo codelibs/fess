@@ -63,7 +63,7 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary"
+									<button type="submit" class="btn btn-primary ${f:h(editableClass)}"
 										name="upgradeFrom"
 										value="<la:message key="labels.upgrade_start_button"/>">
 										<em class="fa fa-arrow-circle-right"></em>

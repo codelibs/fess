@@ -53,6 +53,7 @@
 										<em class="fa fa-download"></em>
 										<la:message key="labels.design_download_button" />
 									</button>
+									<c:if test="${editable}">
 									<button type="button" class="btn btn-danger" name="delete"
 										data-toggle="modal" data-target="#confirmToDelete"
 										value="<la:message key="labels.design_delete_button" />">
@@ -92,6 +93,7 @@
 											</div>
 										</div>
 									</div>
+									</c:if>
 								</div>
 								<!-- /.box-footer -->
 							</la:form>
@@ -117,17 +119,19 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-warning" name="edit"
-										value="<la:message key="labels.design_edit_button" />">
-										<em class="fa fa-pencil-alt"></em>
-										<la:message key="labels.design_edit_button" />
-									</button>
-									<button type="submit" class="btn btn-danger"
-										name="editAsUseDefault"
-										value="<la:message key="labels.design_use_default_button" />">
-										<em class="fa fa-recycle"></em>
-										<la:message key="labels.design_use_default_button" />
-									</button>
+									<c:if test="${editable}">
+										<button type="submit" class="btn btn-warning" name="edit"
+												value="<la:message key="labels.design_edit_button" />">
+											<em class="fa fa-pencil-alt"></em>
+											<la:message key="labels.design_edit_button" />
+										</button>
+										<button type="submit" class="btn btn-danger"
+												name="editAsUseDefault"
+												value="<la:message key="labels.design_use_default_button" />">
+											<em class="fa fa-recycle"></em>
+											<la:message key="labels.design_use_default_button" />
+										</button>
+									</c:if>
 								</div>
 								<!-- /.box-footer -->
 							</la:form>
@@ -135,9 +139,10 @@
 						<!-- /.box -->
 					</div>
 					<div class="col-md-6">
+						<c:if test="${editable}">
 						<div class="box box-primary">
-							<la:form action="/admin/design/upload/"
-								enctype="multipart/form-data">
+								<la:form action="/admin/design/upload/"
+															  enctype="multipart/form-data">
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<la:message key="labels.design_title_file_upload" />
@@ -165,14 +170,14 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<button type="submit" class="btn btn-success" name="upload"
-										value="<la:message key="labels.design_button_upload" />">
+											value="<la:message key="labels.design_button_upload" />">
 										<em class="fa fa-upload"></em>
 										<la:message key="labels.design_button_upload" />
 									</button>
 								</div>
 								<!-- /.box-footer -->
 							</la:form>
-						</div>
+						</div></c:if>
 						<!-- /.box -->
 					</div>
 				</div>
