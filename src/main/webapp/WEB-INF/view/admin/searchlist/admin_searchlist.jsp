@@ -34,7 +34,7 @@
 									<la:message key="labels.search_list_configuration" />
 								</h3>
 								<div class="btn-group pull-right">
-									<la:link href="/admin/searchlist/createnew?q=${f:u(q)}" styleClass="btn btn-success btn-xs">
+									<la:link href="/admin/searchlist/createnew?q=${f:u(q)}" styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 										<em class="fa fa-plus"></em>
 										<la:message key="labels.crud_link_create" />
 									</la:link>
