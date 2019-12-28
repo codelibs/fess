@@ -259,6 +259,14 @@
   </function>
 
   <function>
+    <description>Mask e-mail address.</description>
+    <name>maskEmail</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String maskEmail(java.lang.String)</function-signature>
+    <example>${fe:maskEmail(doc.content_description)}</example>
+  </function>
+
+  <function>
     <description>Get a message from properties files.</description>
     <name>message</name>
     <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
