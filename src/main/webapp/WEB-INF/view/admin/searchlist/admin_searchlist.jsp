@@ -100,20 +100,22 @@
 														</div>
 														<div class="body col-sm-2 text-right">
 															<la:message key="labels.doc_score" />${f:h(doc.score)}<br>
-															<la:link href="/admin/searchlist/edit?crudMode=2&amp;doc.doc_id=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
-																styleClass="btn btn-xs btn-warning">
-																<em class="fa fa-pencil-alt"></em>
-																<la:message key="labels.crud_button_update" />
-															</la:link>
-															<button type="button"
-																class="btn btn-xs btn-danger"
-																data-toggle="modal" data-target="#confirmToDelete"
-																data-docid="${f:u(doc.doc_id)}"
-																data-title="${fe:replace(doc.content_title, '<[^>]+>', '')}"
-																data-url="${f:h(doc.url_link)}">
-																<em class="fa fa-trash"></em>
-																<la:message key="labels.search_list_button_delete" />
-															</button>
+															<c:if test="${editable}">
+																<la:link href="/admin/searchlist/edit?crudMode=2&amp;doc.doc_id=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
+																		 styleClass="btn btn-xs btn-warning">
+																	<em class="fa fa-pencil-alt"></em>
+																	<la:message key="labels.crud_button_update" />
+																</la:link>
+																<button type="button"
+																		class="btn btn-xs btn-danger"
+																		data-toggle="modal" data-target="#confirmToDelete"
+																		data-docid="${f:u(doc.doc_id)}"
+																		data-title="${fe:replace(doc.content_title, '<[^>]+>', '')}"
+																		data-url="${f:h(doc.url_link)}">
+																	<em class="fa fa-trash"></em>
+																	<la:message key="labels.search_list_button_delete" />
+																</button>
+															</c:if>
 														</div>
 													</li>
 												</c:forEach>
@@ -167,51 +169,54 @@
 										</div>
 									</c:otherwise>
 								</c:choose>
-								<div class="modal modal-danger fade" id="confirmToDelete"
-									tabindex="-1" role="dialog">
-									<div class="modal-dialog">
-										<div class="modal-content">
-											<div class="modal-header">
-												<button type="button" class="close" data-dismiss="modal"
-													aria-label="Close">
-													<span aria-hidden="true">×</span>
-												</button>
-												<h4 class="modal-title">
-													<la:message key="labels.search_list_button_delete" />
-												</h4>
-											</div>
-											<div class="modal-body">
-												<p>
-													<la:message key="labels.search_list_delete_confirmation" />
-												</p>
-												<p>
-													<strong id="delete-doc-title"></strong><br /> <span
-														id="delete-doc-url"></span>
-												</p>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="btn btn-outline pull-left"
-													data-dismiss="modal">
-													<la:message key="labels.search_list_button_cancel" />
-												</button>
-												<la:form action="/admin/searchlist/delete">
-													<input type="hidden" name="docId" id="docId" />
-													<button type="submit" class="btn btn-outline btn-danger"
-														name="delete"
-														value="<la:message key="labels.search_list_button_delete" />">
-														<em class="fa fa-trash"></em>
-														<la:message key="labels.search_list_button_delete" />
+									<c:if test="${editable}">
+										<div class="modal modal-danger fade" id="confirmToDelete"
+																  tabindex="-1" role="dialog">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal"
+															aria-label="Close">
+														<span aria-hidden="true">×</span>
 													</button>
-												</la:form>
+													<h4 class="modal-title">
+														<la:message key="labels.search_list_button_delete" />
+													</h4>
+												</div>
+												<div class="modal-body">
+													<p>
+														<la:message key="labels.search_list_delete_confirmation" />
+													</p>
+													<p>
+														<strong id="delete-doc-title"></strong><br /> <span
+															id="delete-doc-url"></span>
+													</p>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-outline pull-left"
+															data-dismiss="modal">
+														<la:message key="labels.search_list_button_cancel" />
+													</button>
+													<la:form action="/admin/searchlist/delete">
+														<input type="hidden" name="docId" id="docId" />
+														<button type="submit" class="btn btn-outline btn-danger"
+																name="delete"
+																value="<la:message key="labels.search_list_button_delete" />">
+															<em class="fa fa-trash"></em>
+															<la:message key="labels.search_list_button_delete" />
+														</button>
+													</la:form>
+												</div>
 											</div>
 										</div>
 									</div>
-								</div>
+									</c:if>
 							</div>
 							<!-- /.box-body -->
 							<div class="box-footer">
 								<c:if test="${f:h(allRecordCount) > 0}">
 									<div class="row">
+									<c:if test="${editable}">
 										<div class="col-sm-12 center">
 											<button type="button" class="btn btn-danger"
 												data-toggle="modal" data-target="#confirmToDeleteAll">
@@ -219,43 +224,44 @@
 												<la:message key="labels.search_list_button_delete_all" />
 											</button>
 										</div>
-										<div class="modal modal-danger fade" id="confirmToDeleteAll"
-											tabindex="-1" role="dialog">
-											<div class="modal-dialog">
-												<div class="modal-content">
-													<div class="modal-header">
-														<button type="button" class="close" data-dismiss="modal"
-															aria-label="Close">
-															<span aria-hidden="true">×</span>
-														</button>
-														<h4 class="modal-title">
-															<la:message key="labels.search_list_button_delete_all" />
-														</h4>
-													</div>
-													<div class="modal-body">
-														<p>
-															<la:message
-																key="labels.search_list_delete_all_confirmation" />
-														</p>
-													</div>
-													<div class="modal-footer">
-														<la:form action="/admin/searchlist/deleteall">
-															<la:hidden property="q" />
-															<button type="button" class="btn btn-outline pull-left"
-																data-dismiss="modal">
-																<la:message key="labels.search_list_button_cancel" />
+											<div class="modal modal-danger fade" id="confirmToDeleteAll"
+												 tabindex="-1" role="dialog">
+												<div class="modal-dialog">
+													<div class="modal-content">
+														<div class="modal-header">
+															<button type="button" class="close" data-dismiss="modal"
+																	aria-label="Close">
+																<span aria-hidden="true">×</span>
 															</button>
-															<button type="submit" class="btn btn-outline btn-danger"
-																name="deleteall"
-																value="<la:message key="labels.search_list_button_delete_all" />">
-																<em class="fa fa-trash"></em>
+															<h4 class="modal-title">
 																<la:message key="labels.search_list_button_delete_all" />
-															</button>
-														</la:form>
+															</h4>
+														</div>
+														<div class="modal-body">
+															<p>
+																<la:message
+																		key="labels.search_list_delete_all_confirmation" />
+															</p>
+														</div>
+														<div class="modal-footer">
+															<la:form action="/admin/searchlist/deleteall">
+																<la:hidden property="q" />
+																<button type="button" class="btn btn-outline pull-left"
+																		data-dismiss="modal">
+																	<la:message key="labels.search_list_button_cancel" />
+																</button>
+																<button type="submit" class="btn btn-outline btn-danger"
+																		name="deleteall"
+																		value="<la:message key="labels.search_list_button_delete_all" />">
+																	<em class="fa fa-trash"></em>
+																	<la:message key="labels.search_list_button_delete_all" />
+																</button>
+															</la:form>
+														</div>
 													</div>
 												</div>
 											</div>
-										</div>
+										</c:if>
 									</div>
 								</c:if>
 							</div>
