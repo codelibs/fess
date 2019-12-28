@@ -115,6 +115,33 @@ public class FessFunctionsTest extends UnitFessTestCase {
         code = "aaa\nL10:\nL11:ccc";
         value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
         assertEquals("<pre class=\"prettyprint linenums:10\">\nccc</pre>", value);
+    }
 
+    public void test_maskEmail() {
+        String value;
+
+        value = FessFunctions.maskEmail(null);
+        assertEquals("", value);
+
+        value = FessFunctions.maskEmail("");
+        assertEquals("", value);
+
+        value = FessFunctions.maskEmail("aaa bbb ccc");
+        assertEquals("aaa bbb ccc", value);
+
+        value = FessFunctions.maskEmail("aaa@bbb.ccc");
+        assertEquals("******@****.***", value);
+
+        value = FessFunctions.maskEmail("111.aaa@bbb.ccc");
+        assertEquals("******@****.***", value);
+
+        value = FessFunctions.maskEmail("111 aaa+@bbb.ccc 222");
+        assertEquals("111 ******@****.*** 222", value);
+
+        value = FessFunctions.maskEmail("あaaa@bbb.ccc１");
+        assertEquals("あ******@****.***１", value);
+
+        value = FessFunctions.maskEmail("<aaa@bbb.ccc>");
+        assertEquals("<******@****.***>", value);
     }
 }

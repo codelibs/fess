@@ -72,6 +72,9 @@ public class FessFunctions {
 
     private static final String PDF_DATE = "pdf_date";
 
+    private static final Pattern EMAIL_ADDRESS_PATTERN = Pattern.compile("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}",
+            Pattern.CASE_INSENSITIVE);
+
     private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
                 @Override
@@ -403,5 +406,12 @@ public class FessFunctions {
     public static String getMessage(final String key, final String defaultValue) {
         final Locale locale = LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ROOT);
         return ComponentUtil.getMessageManager().findMessage(locale, key).orElse(defaultValue);
+    }
+
+    public static String maskEmail(final String value) {
+        if (value == null) {
+            return StringUtil.EMPTY;
+        }
+        return EMAIL_ADDRESS_PATTERN.matcher(value).replaceAll("******@****.***");
     }
 }
