@@ -43,6 +43,7 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import io.minio.MinioClient;
 import io.minio.Result;
+import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
@@ -206,6 +207,19 @@ public class AdminStorageAction extends FessAdminAction {
                 if (list.size() > fessConfig.getStorageMaxItemsInPageAsInteger()) {
                     break;
                 }
+            }
+        } catch (final ErrorResponseException e) {
+            final String code = e.errorResponse().code();
+            if ("NoSuchBucket".equals(code)) {
+                final MinioClient minioClient = createClient(fessConfig);
+                try {
+                    minioClient.makeBucket(fessConfig.getStorageBucket());
+                    logger.info("Created bucket: {}", fessConfig.getStorageBucket());
+                } catch (Exception e1) {
+                    logger.warn("Failed to create bucket:" + fessConfig.getStorageBucket(), e1);
+                }
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Failed to access " + fessConfig.getStorageEndpoint(), e);
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
