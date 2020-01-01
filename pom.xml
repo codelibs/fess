@@ -51,7 +51,7 @@
 		<tika.version>1.22</tika.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.4.4-SNAPSHOT</crawler.version>
+		<crawler.version>3.4.4</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>7.4.2</suggest.version>
