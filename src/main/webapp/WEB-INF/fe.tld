@@ -73,6 +73,18 @@
 
   <function>
     <description>
+      Returns formatted duration from a given value.
+    </description>
+    <name>formatDuration</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String formatDuration(long)</function-signature>
+    <example>
+      ${fe:formatDuration(1234)}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns formatted number as a file size from a given value.
     </description>
     <name>formatFileSize</name>

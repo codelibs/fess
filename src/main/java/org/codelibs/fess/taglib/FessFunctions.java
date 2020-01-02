@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -161,6 +162,11 @@ public class FessFunctions {
             return StringUtil.EMPTY;
         }
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
+    }
+
+    public static String formatDuration(final long durationMillis) {
+        return DurationFormatUtils.formatDuration(durationMillis, "d 'days' HH:mm:ss.SSS").replace("0 days", StringUtil.EMPTY).trim();
+
     }
 
     public static String formatNumber(final long value, final String pattern) {
