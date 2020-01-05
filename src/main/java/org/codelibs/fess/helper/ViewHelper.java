@@ -216,18 +216,19 @@ public class ViewHelper {
         if (!fessConfig.isResponseHighlightContentTitleEnabled()) {
             return value;
         }
-        return getQuerySet().map(
-                querySet -> {
-                    final Matcher matcher =
-                            Pattern.compile(querySet.stream().map(LaFunctions::h).map(Pattern::quote).collect(Collectors.joining("|")),
-                                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(value);
-                    final StringBuffer buf = new StringBuffer(value.length() + 100);
-                    while (matcher.find()) {
-                        matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
-                    }
-                    matcher.appendTail(buf);
-                    return buf.toString();
-                }).orElse(value);
+        return getQuerySet().map(querySet -> {
+            final String pattern = querySet.stream().map(LaFunctions::h).map(Pattern::quote).collect(Collectors.joining("|"));
+            if (StringUtil.isBlank(pattern)) {
+                return null;
+            }
+            final Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(value);
+            final StringBuffer buf = new StringBuffer(value.length() + 100);
+            while (matcher.find()) {
+                matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
+            }
+            matcher.appendTail(buf);
+            return buf.toString();
+        }).orElse(value);
     }
 
     protected OptionalThing<Set<String>> getQuerySet() {
