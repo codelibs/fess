@@ -439,4 +439,6 @@ public class Constants extends CoreLibConstants {
     public static final String FESS_LOG_LEVEL = "fess.log.level";
 
     public static final String TRACK_TOTAL_HITS = "track_total_hits";
+
+    public static final String SYSTEM_PROP_PREFIX = "fess.system.";
 }

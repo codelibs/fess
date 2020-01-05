@@ -164,11 +164,11 @@ public interface FessProp {
     }
 
     default String getSystemProperty(final String key) {
-        return ComponentUtil.getSystemProperties().getProperty(key);
+        return ComponentUtil.getSystemProperties().getProperty(key, System.getProperty(Constants.SYSTEM_PROP_PREFIX + key));
     }
 
     default String getSystemProperty(final String key, final String defaultValue) {
-        return ComponentUtil.getSystemProperties().getProperty(key, defaultValue);
+        return ComponentUtil.getSystemProperties().getProperty(key, System.getProperty(Constants.SYSTEM_PROP_PREFIX + key, defaultValue));
     }
 
     default void setSystemProperty(final String key, final String value) {
