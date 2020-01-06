@@ -58,6 +58,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.JvmUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -474,7 +475,7 @@ public interface FessProp {
     }
 
     default int getPurgeSearchLogDay() {
-        return getSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
+        return getSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, DfTypeUtil.toInteger(Constants.DEFAULT_PURGE_DAY));
     }
 
     default void setPurgeJobLogDay(final int value) {
@@ -482,7 +483,7 @@ public interface FessProp {
     }
 
     default int getPurgeJobLogDay() {
-        return getSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
+        return getSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, DfTypeUtil.toInteger(Constants.DEFAULT_PURGE_DAY));
     }
 
     default void setPurgeUserInfoDay(final int value) {
@@ -490,7 +491,7 @@ public interface FessProp {
     }
 
     default int getPurgeUserInfoDay() {
-        return getSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
+        return getSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, DfTypeUtil.toInteger(Constants.DEFAULT_PURGE_DAY));
     }
 
     default void setPurgeByBots(final String value) {
@@ -531,7 +532,7 @@ public interface FessProp {
 
     default int getPurgeSuggestSearchLogDay() {
         return getSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
-                Integer.parseInt(Constants.DEFAULT_SUGGEST_PURGE_DAY));
+                DfTypeUtil.toInteger(Constants.DEFAULT_SUGGEST_PURGE_DAY));
     }
 
     default void setLdapInitialContextFactory(final String value) {
@@ -843,11 +844,11 @@ public interface FessProp {
             params = split(getSmbAvailableSidTypes(), ",").get(stream -> stream.map(s -> {
                 final String[] v = s.split(":");
                 if (v.length == 1) {
-                    final int x = Integer.parseInt(v[0].trim());
+                    final int x = DfTypeUtil.toInteger(v[0].trim());
                     return new Pair<>(x, x);
                 } else if (v.length == 2) {
-                    final int x = Integer.parseInt(v[0].trim());
-                    final int y = Integer.parseInt(v[1].trim());
+                    final int x = DfTypeUtil.toInteger(v[0].trim());
+                    final int y = DfTypeUtil.toInteger(v[1].trim());
                     return new Pair<>(x, y);
                 }
                 return null;
@@ -1469,13 +1470,13 @@ public interface FessProp {
                         // TODO time zone
                         value = FessFunctions.parseDate(value.toString());
                     } else if (integerFieldSet.contains(key)) {
-                        value = Integer.parseInt(value.toString());
+                        value = DfTypeUtil.toInteger(value.toString());
                     } else if (longFieldSet.contains(key)) {
-                        value = Long.parseLong(value.toString());
+                        value = DfTypeUtil.toLong(value.toString());
                     } else if (floatFieldSet.contains(key)) {
-                        value = Float.parseFloat(value.toString());
+                        value = DfTypeUtil.toFloat(value.toString());
                     } else if (doubleFieldSet.contains(key)) {
-                        value = Double.parseDouble(value.toString());
+                        value = DfTypeUtil.toDouble(value.toString());
                     }
                     return new Pair<>(key, value);
                 }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
@@ -2034,7 +2035,7 @@ public interface FessProp {
                 value = Boolean.FALSE;
             } else {
                 try {
-                    value = Integer.valueOf(Integer.parseInt(v));
+                    value = Integer.valueOf(DfTypeUtil.toInteger(v));
                 } catch (final NumberFormatException e) {
                     value = StringUtil.EMPTY;
                 }
@@ -2083,4 +2084,17 @@ public interface FessProp {
         return getCrawlerDocumentCharsAsArray(QUERY_HIGHLIGHT_TERMINAL_CHARS, getQueryHighlightTerminalChars());
     }
 
+    String getHttpFileuploadMaxSize();
+
+    default Long getHttpFileuploadMaxSizeAsLong() {
+        String value = getHttpFileuploadMaxSize();
+        return value != null ? DfTypeUtil.toLong(value) : null;
+    }
+
+    String getHttpFileuploadThresholdSize();
+
+    default Long getHttpFileuploadThresholdSizeAsLong() {
+        String value = getHttpFileuploadThresholdSize();
+        return value != null ? DfTypeUtil.toLong(value) : null;
+    }
 }

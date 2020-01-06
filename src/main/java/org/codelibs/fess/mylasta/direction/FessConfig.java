@@ -262,6 +262,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String HTTP_PROXY_PASSWORD = "http.proxy.password";
 
+    /** The key of the configuration. e.g. 262144000 */
+    String HTTP_FILEUPLOAD_MAX_SIZE = "http.fileupload.max.size";
+
+    /** The key of the configuration. e.g. 262144 */
+    String HTTP_FILEUPLOAD_THRESHOLD_SIZE = "http.fileupload.threshold.size";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -2157,6 +2163,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getHttpProxyPasswordAsInteger();
+
+    /**
+     * Get the value for the key 'http.fileupload.max.size'. <br>
+     * The value is, e.g. 262144000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpFileuploadMaxSize();
+
+    /**
+     * Get the value for the key 'http.fileupload.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 262144000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpFileuploadMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'http.fileupload.threshold.size'. <br>
+     * The value is, e.g. 262144 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpFileuploadThresholdSize();
+
+    /**
+     * Get the value for the key 'http.fileupload.threshold.size' as {@link Integer}. <br>
+     * The value is, e.g. 262144 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpFileuploadThresholdSizeAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -6662,6 +6698,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.HTTP_PROXY_PASSWORD);
         }
 
+        public String getHttpFileuploadMaxSize() {
+            return get(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE);
+        }
+
+        public Integer getHttpFileuploadMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE);
+        }
+
+        public String getHttpFileuploadThresholdSize() {
+            return get(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE);
+        }
+
+        public Integer getHttpFileuploadThresholdSizeAsInteger() {
+            return getAsInteger(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE);
+        }
+
         public String getCrawlerDocumentMaxSiteLength() {
             return get(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH);
         }
@@ -8968,6 +9020,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");
             defaultMap.put(FessConfig.HTTP_PROXY_USERNAME, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PASSWORD, "");
+            defaultMap.put(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE, "262144000");
+            defaultMap.put(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE, "262144");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "50");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");
