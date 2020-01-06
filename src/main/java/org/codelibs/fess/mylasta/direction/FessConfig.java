@@ -15,7 +15,14 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.concurrent.ExecutionException;
+
+import org.dbflute.helper.jprop.ObjectiveProperties;
+import org.lastaflute.core.direction.PropertyFilter;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * @author FreeGen
@@ -6437,6 +6444,31 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         /** The serial version UID for object serialization. (Default) */
         private static final long serialVersionUID = 1L;
+
+        private static final String FESS_CONFIG = "fess.config.";
+
+        @Override
+        protected ObjectiveProperties newObjectiveProperties(String resourcePath, PropertyFilter propertyFilter) {
+            return new ObjectiveProperties(resourcePath) { // for e.g. checking existence and filtering value
+                Cache<String, String> cache = CacheBuilder.newBuilder().build();
+
+                @Override
+                public String get(String propertyKey) {
+                    final String plainValue = getFromCache(propertyKey);
+                    final String filteredValue = propertyFilter.filter(propertyKey, plainValue);
+                    verifyPropertyValue(propertyKey, filteredValue); // null checked
+                    return filterPropertyAsDefault(filteredValue); // not null here
+                }
+
+                private String getFromCache(String propertyKey) {
+                    try {
+                        return cache.get(propertyKey, () -> System.getProperty(FESS_CONFIG + propertyKey, super.get(propertyKey)));
+                    } catch (ExecutionException e) {
+                        return super.get(propertyKey);
+                    }
+                }
+            };
+        }
 
         public String getDomainTitle() {
             return get(FessConfig.DOMAIN_TITLE);
