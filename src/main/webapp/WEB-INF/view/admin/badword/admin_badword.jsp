@@ -34,11 +34,11 @@
 								</h3>
 								<div class="btn-group pull-right">
 									<la:link href="/admin/badword"
-										styleClass="btn btn-default btn-xs">
+										styleClass="btn btn-default btn-xs ">
 										<em class="fa fa-th-list"></em>
 										<la:message key="labels.bad_word_link_list" />
 									</la:link>
-									<la:link href="createnew" styleClass="btn btn-success btn-xs">
+									<la:link href="createnew" styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 										<em class="fa fa-plus"></em>
 										<la:message key="labels.bad_word_link_create" />
 									</la:link>
@@ -47,7 +47,7 @@
 										<em class="fa fa-download"></em>
 										<la:message key="labels.bad_word_link_download" />
 									</la:link>
-									<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
+									<la:link href="uploadpage" styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 										<em class="fa fa-upload"></em>
 										<la:message key="labels.bad_word_link_upload" />
 									</la:link>

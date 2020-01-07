@@ -42,6 +42,7 @@
 								<div class="data-wrapper">
 									<div class="row">
 										<div class="col-sm-12">
+											<c:if test="${editable}">
 											<la:form action="/admin/backup/upload/" enctype="multipart/form-data" styleClass="form-inline">
 												<div class="form-group">
 													<label for="bulkFile"> <la:message key="labels.backup_bulk_file" />
@@ -52,6 +53,7 @@
 													<la:message key="labels.backup_button_upload" />
 												</button>
 											</la:form>
+											</c:if>
 										</div>
 										<div class="col-sm-12">
 											<table class="table table-bordered table-striped dataTable">

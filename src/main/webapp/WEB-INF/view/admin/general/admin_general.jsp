@@ -170,7 +170,7 @@
 											<div class="input-group">
 												<la:text styleId="notificationTo" property="notificationTo" styleClass="form-control" />
 												<span class="input-group-btn">
-													<button type="submit" class="btn btn-default" name="sendmail" value="test">
+													<button type="submit" class="btn btn-default ${f:h(editableClass)}" name="sendmail" value="test">
 														<la:message key="labels.send_testmail" />
 													</button>
 												</span>
@@ -516,11 +516,13 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-warning" name="update"
-										value="<la:message key="labels.crawl_button_update" />">
-										<em class="fa fa-pencil-alt"></em>
-										<la:message key="labels.crawl_button_update" />
-									</button>
+									<c:if test="${editable}">
+										<button type="submit" class="btn btn-warning" name="update"
+												value="<la:message key="labels.crawl_button_update" />">
+											<em class="fa fa-pencil-alt"></em>
+											<la:message key="labels.crawl_button_update" />
+										</button>
+									</c:if>
 								</div>
 								<!-- /.box-footer -->
 							</div>

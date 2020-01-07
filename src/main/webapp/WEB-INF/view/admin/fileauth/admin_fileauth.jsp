@@ -24,7 +24,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
-							<la:link href="/admin/fileconfig/" styleClass="btn btn-primary">
+							<la:link href="/admin/fileconfig/" styleClass="btn btn-primary ${f:h(editableClass)}">
 								<em class="fa fa-arrow-circle-right"></em>
 								<la:message key="labels.file_auth_create_file_config" />
 							</la:link>

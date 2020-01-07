@@ -192,14 +192,14 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
-    @Secured({ ROLE })
+    @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage() {
         saveToken();
         return asDownloadHtml();
     }
 
     @Execute
-    @Secured({ ROLE })
+    @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
         verifyToken(() -> asDownloadHtml());
 

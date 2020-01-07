@@ -75,8 +75,8 @@
 											<tr>
 												<th><la:message
 														key="labels.crawling_info_session_id" /></th>
-												<td><a
-													href="${fe:url('/admin/searchlist/search')}?q=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
+												<td><a  <c:if test="${fe:permission('admin-searchlist-view')}">
+													href="${fe:url('/admin/searchlist/search')}?q=segment:${f:u(sessionId)}" </c:if> >${f:h(sessionId)}</a>
 													<la:hidden property="sessionId" /></td>
 											</tr>
 											<c:forEach var="info" items="${crawlingInfoParamItems}">
@@ -96,6 +96,7 @@
 											<em class="fa fa-arrow-circle-left"></em>
 											<la:message key="labels.crawling_info_button_back" />
 										</button>
+										<c:if test="${editable}">
 										<button type="button" class="btn btn-danger" name="delete"
 											data-toggle="modal" data-target="#confirmToDelete"
 											value="<la:message key="labels.crawling_info_button_delete" />">
@@ -135,6 +136,7 @@
 												</div>
 											</div>
 										</div>
+										</c:if>
 										<c:if test="${running}">
 										<button type="submit" class="btn btn-warning" name="threaddump"
 											value="<la:message key="labels.crawling_info_thread_dump" />">

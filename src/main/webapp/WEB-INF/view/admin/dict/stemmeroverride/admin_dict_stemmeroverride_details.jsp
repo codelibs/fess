@@ -68,7 +68,7 @@
 											<la:message key="labels.dict_stemmeroverride_list_link" />
 										</la:link>
 										<la:link href="../createnew/${f:u(dictId)}"
-											styleClass="btn btn-success btn-xs">
+											styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 											<em class="fa fa-plus"></em>
 											<la:message key="labels.dict_stemmeroverride_link_create" />
 										</la:link>
@@ -78,7 +78,7 @@
 											<la:message key="labels.dict_stemmeroverride_link_download" />
 										</la:link>
 										<la:link href="../uploadpage/${f:u(dictId)}"
-											styleClass="btn btn-success btn-xs">
+											styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
 											<em class="fa fa-upload"></em>
 											<la:message key="labels.dict_stemmeroverride_link_upload" />
 										</la:link>

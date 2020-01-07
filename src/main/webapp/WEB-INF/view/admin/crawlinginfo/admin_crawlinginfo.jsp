@@ -111,6 +111,7 @@
 										<script>location.href = "${contextPath}/admin/crawlinginfo/list/${pager.allPageCount}";</script>
 									</c:if>
 									<div class="row">
+									<c:if test="${editable}">
 										<la:form action="/admin/crawlinginfo/">
 											<div class="col-sm-12 center">
 												<button type="button" class="btn btn-danger"
@@ -157,6 +158,7 @@
 												</div>
 											</div>
 										</la:form>
+									</c:if>
 									</div>
 								</c:if>
 							</div>

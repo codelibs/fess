@@ -24,7 +24,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
-							<la:link href="../webconfig/" styleClass="btn btn-primary">
+							<la:link href="../webconfig/" styleClass="btn btn-primary ${f:h(editableClass)}">
 								<em class="fa fa-arrow-circle-right"></em>
 								<la:message key="labels.webauth_create_web_config" />
 							</la:link>

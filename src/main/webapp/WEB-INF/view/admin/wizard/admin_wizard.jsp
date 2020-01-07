@@ -50,12 +50,14 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary"
-										name="crawlingConfigForm"
-										value="<la:message key="labels.wizard_start_button"/>">
-										<em class="fa fa-arrow-circle-right"></em>
-										<la:message key="labels.wizard_start_button" />
-									</button>
+									<c:if test="${editable}">
+										<button type="submit" class="btn btn-primary"
+												name="crawlingConfigForm"
+												value="<la:message key="labels.wizard_start_button"/>">
+											<em class="fa fa-arrow-circle-right"></em>
+											<la:message key="labels.wizard_start_button" />
+										</button>
+									</c:if>
 								</div>
 								<!-- /.box-footer -->
 							</div>

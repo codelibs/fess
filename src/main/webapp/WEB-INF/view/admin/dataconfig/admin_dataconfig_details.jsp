@@ -112,11 +112,13 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
+									<c:if test="${fe:permission('admin-scheduler')}">
 									<la:link styleClass="btn btn-success"
 										href="/admin/scheduler/createnewjob/data_crawling/${f:u(id)}/${fe:base64(name)}">
 										<em class="fa fa-plus-circle"></em>
 										<la:message key="labels.data_crawling_button_create_job" />
 									</la:link>
+									</c:if>
 								</div>
 								<!-- /.box-footer -->
 							</div>
