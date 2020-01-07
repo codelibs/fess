@@ -15,7 +15,14 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.concurrent.ExecutionException;
+
+import org.dbflute.helper.jprop.ObjectiveProperties;
+import org.lastaflute.core.direction.PropertyFilter;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * @author FreeGen
@@ -261,6 +268,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g.  */
     String HTTP_PROXY_PASSWORD = "http.proxy.password";
+
+    /** The key of the configuration. e.g. 262144000 */
+    String HTTP_FILEUPLOAD_MAX_SIZE = "http.fileupload.max.size";
+
+    /** The key of the configuration. e.g. 262144 */
+    String HTTP_FILEUPLOAD_THRESHOLD_SIZE = "http.fileupload.threshold.size";
 
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
@@ -2157,6 +2170,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getHttpProxyPasswordAsInteger();
+
+    /**
+     * Get the value for the key 'http.fileupload.max.size'. <br>
+     * The value is, e.g. 262144000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpFileuploadMaxSize();
+
+    /**
+     * Get the value for the key 'http.fileupload.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 262144000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpFileuploadMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'http.fileupload.threshold.size'. <br>
+     * The value is, e.g. 262144 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getHttpFileuploadThresholdSize();
+
+    /**
+     * Get the value for the key 'http.fileupload.threshold.size' as {@link Integer}. <br>
+     * The value is, e.g. 262144 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getHttpFileuploadThresholdSizeAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -6402,6 +6445,31 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         /** The serial version UID for object serialization. (Default) */
         private static final long serialVersionUID = 1L;
 
+        private static final String FESS_CONFIG = "fess.config.";
+
+        @Override
+        protected ObjectiveProperties newObjectiveProperties(String resourcePath, PropertyFilter propertyFilter) {
+            return new ObjectiveProperties(resourcePath) { // for e.g. checking existence and filtering value
+                Cache<String, String> cache = CacheBuilder.newBuilder().build();
+
+                @Override
+                public String get(String propertyKey) {
+                    final String plainValue = getFromCache(propertyKey);
+                    final String filteredValue = propertyFilter.filter(propertyKey, plainValue);
+                    verifyPropertyValue(propertyKey, filteredValue); // null checked
+                    return filterPropertyAsDefault(filteredValue); // not null here
+                }
+
+                private String getFromCache(String propertyKey) {
+                    try {
+                        return cache.get(propertyKey, () -> System.getProperty(FESS_CONFIG + propertyKey, super.get(propertyKey)));
+                    } catch (ExecutionException e) {
+                        return super.get(propertyKey);
+                    }
+                }
+            };
+        }
+
         public String getDomainTitle() {
             return get(FessConfig.DOMAIN_TITLE);
         }
@@ -6660,6 +6728,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getHttpProxyPasswordAsInteger() {
             return getAsInteger(FessConfig.HTTP_PROXY_PASSWORD);
+        }
+
+        public String getHttpFileuploadMaxSize() {
+            return get(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE);
+        }
+
+        public Integer getHttpFileuploadMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE);
+        }
+
+        public String getHttpFileuploadThresholdSize() {
+            return get(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE);
+        }
+
+        public Integer getHttpFileuploadThresholdSizeAsInteger() {
+            return getAsInteger(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {
@@ -8968,6 +9052,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");
             defaultMap.put(FessConfig.HTTP_PROXY_USERNAME, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PASSWORD, "");
+            defaultMap.put(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE, "262144000");
+            defaultMap.put(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE, "262144");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "50");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");

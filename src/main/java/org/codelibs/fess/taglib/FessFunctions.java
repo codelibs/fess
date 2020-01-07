@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,6 +74,9 @@ public class FessFunctions {
     private static final String FACET_PREFIX = "facet.";
 
     private static final String PDF_DATE = "pdf_date";
+
+    private static final Pattern EMAIL_ADDRESS_PATTERN = Pattern.compile("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}",
+            Pattern.CASE_INSENSITIVE);
 
     private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
@@ -158,6 +162,11 @@ public class FessFunctions {
             return StringUtil.EMPTY;
         }
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
+    }
+
+    public static String formatDuration(final long durationMillis) {
+        return DurationFormatUtils.formatDuration(durationMillis, "d 'days' HH:mm:ss.SSS").replace("0 days", StringUtil.EMPTY).trim();
+
     }
 
     public static String formatNumber(final long value, final String pattern) {
@@ -418,5 +427,12 @@ public class FessFunctions {
         return loginAssist.getSavedUserBean()
                 .map(user -> user.hasRoles(roles) || user.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray()))
                 .orElse(false);
+    }
+
+    public static String maskEmail(final String value) {
+        if (value == null) {
+            return StringUtil.EMPTY;
+        }
+        return EMAIL_ADDRESS_PATTERN.matcher(value).replaceAll("******@****.***");
     }
 }
