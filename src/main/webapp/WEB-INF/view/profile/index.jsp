@@ -86,6 +86,7 @@
 	</div>
 	<!-- /.login-box -->
 	<input type="hidden" id="contextPath" value="${contextPath}" />
+	<script src="${fe:url('/js/admin/popper.min.js')}" type="text/javascript"></script>
 	<script type="text/javascript"
 		src="${fe:url('/js/admin/jquery-3.4.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/admin/bootstrap.min.js')}"></script>

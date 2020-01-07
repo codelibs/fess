@@ -23,12 +23,12 @@
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
+						<div class="card card-primary">
+							<div class="card-header with-border">
 								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
-							<!-- /.box-header -->
-							<div class="box-body">
+							<!-- /.card-header -->
+							<div class="card-body">
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
@@ -51,12 +51,12 @@
 											<table class="table table-bordered table-striped">
 												<thead>
 													<tr>
-														<th><la:message key="labels.scheduledjob_name" /></th>
+														<th class="col-md-2 text-center"><la:message key="labels.scheduledjob_name" /></th>
 														<th class="col-md-2 text-center"><la:message
 																key="labels.scheduledjob_status" /></th>
 														<th class="col-md-2 text-center"><la:message
 																key="labels.scheduledjob_target" /></th>
-														<th><la:message
+														<th class="col-md-2 text-center"><la:message
 																key="labels.scheduledjob_cronExpression" /></th>
 													</tr>
 												</thead>
@@ -94,9 +94,9 @@
 									</c:if>
 								</c:if>
 							</div>
-							<!-- /.box-body -->
+							<!-- /.card-body -->
 						</div>
-						<!-- /.box -->
+						<!-- /.card -->
 					</div>
 				</div>
 			</section>
