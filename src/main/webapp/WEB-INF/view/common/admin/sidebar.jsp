@@ -14,22 +14,6 @@
 	<!-- sidebar -->
 	<div class="sidebar sidebar-dark-primary">
 
-		<!-- SEARCH FORM -->
-		<c:if test="${fe:permission('admin-searchlist-view')}">
-			<p>
-			<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="GET" class="form-inline ml-3 mt-3 pb-3 mb-3 d-flex">
-				<div class="input-group input-group-sm">
-					<input class="form-control form-control-navbar" name="q" id="query"
-						   maxlength="1000"
-						   placeholder="<la:message key="labels.sidebar.placeholder_search" />">
-					<div class="input-group-append">
-						<button class="btn btn-nav" type="submit" name="search" id="search-btn">
-							<em class="fa fa-search"></em>
-						</button>
-					</div>
-				</div>
-			</form></p>
-		</c:if>
 
 		<!-- Sidebar Menu -->
 		<nav class="mt-2">
