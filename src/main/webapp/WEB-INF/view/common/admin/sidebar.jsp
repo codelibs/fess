@@ -150,14 +150,14 @@
 						</la:link></li></c:if>
 
 					<c:if test="${fe:permission('admin-relatedcontent-view')}">
-					<li <c:if test="${param.menuType=='relatedContentRule'}">class="active"</c:if>><la:link
+					<li <c:if test="${param.menuType=='relatedContent'}">class="active"</c:if>><la:link
 							href="/admin/relatedcontent/">
 							<em class='fa fa-genderless'></em>
 							<span><la:message key="labels.menu_related_content" /></span>
 						</la:link></li></c:if>
 
 					<c:if test="${fe:permission('admin-relatedquery-view')}">
-					<li <c:if test="${param.menuType=='relatedQueryRule'}">class="active"</c:if>><la:link
+					<li <c:if test="${param.menuType=='relatedQuery'}">class="active"</c:if>><la:link
 							href="/admin/relatedquery/">
 							<em class='fa fa-genderless'></em>
 							<span><la:message key="labels.menu_related_query" /></span>
