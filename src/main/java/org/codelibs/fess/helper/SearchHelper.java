@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +41,7 @@ import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
@@ -174,7 +174,7 @@ public class SearchHelper {
 
     }
 
-    public long scrollSearch(final SearchRequestParams params, final Function<Map<String, Object>, Boolean> cursor,
+    public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,
             final OptionalThing<FessUserBean> userBean) {
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
