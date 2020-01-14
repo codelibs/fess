@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -104,10 +106,18 @@ public class SystemHelper {
 
     protected String productVersion;
 
+    protected long eolTime;
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize " + this.getClass().getSimpleName());
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
+        }
+        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.set(2021, 1 - 1, 31); // EOL Date
+        eolTime = cal.getTimeInMillis();
+        if (isEoled()) {
+            logger.error("Your system is out of support. See https://fess.codelibs.org/eol.html");
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         filterPathEncoding = fessConfig.getPathEncoding();
@@ -398,8 +408,19 @@ public class SystemHelper {
 
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
         runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
-        final String url = ComponentUtil.getFessConfig().getOnlineHelpInstallation();
-        runtime.registerData("installationLink", getHelpUrl(url));
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String installationLink = fessConfig.getOnlineHelpInstallation();
+        runtime.registerData("installationLink", getHelpUrl(installationLink));
+        final boolean eoled = isEoled();
+        runtime.registerData("eoled", eoled);
+        if (eoled) {
+            final String eolLink = fessConfig.getOnlineHelpEol();
+            runtime.registerData("eolLink", getHelpUrl(eolLink));
+        }
+    }
+
+    protected boolean isEoled() {
+        return getCurrentTimeAsLong() > eolTime;
     }
 
     public String getSearchRoleByUser(final String name) {

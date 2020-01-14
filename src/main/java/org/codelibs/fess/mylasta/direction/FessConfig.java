@@ -1109,6 +1109,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. https://fess.codelibs.org/{lang}/{version}/install/install.html */
     String ONLINE_HELP_INSTALLATION = "online.help.installation";
 
+    /** The key of the configuration. e.g. https://fess.codelibs.org/{lang}/eol.html */
+    String ONLINE_HELP_EOL = "online.help.eol";
+
     /** The key of the configuration. e.g. failureurl */
     String ONLINE_HELP_NAME_FAILUREURL = "online.help.name.failureurl";
 
@@ -5098,6 +5101,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpInstallation();
 
     /**
+     * Get the value for the key 'online.help.eol'. <br>
+     * The value is, e.g. https://fess.codelibs.org/{lang}/eol.html <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpEol();
+
+    /**
      * Get the value for the key 'online.help.name.failureurl'. <br>
      * The value is, e.g. failureurl <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -8010,6 +8020,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_INSTALLATION);
         }
 
+        public String getOnlineHelpEol() {
+            return get(FessConfig.ONLINE_HELP_EOL);
+        }
+
         public String getOnlineHelpNameFailureurl() {
             return get(FessConfig.ONLINE_HELP_NAME_FAILUREURL);
         }
@@ -8920,6 +8934,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SCHEDULER_MONITOR_INTERVAL, "30");
             defaultMap.put(FessConfig.ONLINE_HELP_BASE_LINK, "https://fess.codelibs.org/{lang}/{version}/admin/");
             defaultMap.put(FessConfig.ONLINE_HELP_INSTALLATION, "https://fess.codelibs.org/{lang}/{version}/install/install.html");
+            defaultMap.put(FessConfig.ONLINE_HELP_EOL, "https://fess.codelibs.org/{lang}/eol.html");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_FAILUREURL, "failureurl");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ELEVATEWORD, "elevateword");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_REQHEADER, "reqheader");
