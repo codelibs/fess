@@ -17,10 +17,15 @@
 		<!-- Navbar Right Menu -->
 		<div class="navbar-custom-menu">
 			<ul class="nav navbar-nav">
+				<c:if test="${eoled}">
+				<li data-toggle="tooltip" data-placement="left" title="<la:message
+					key="labels.eol_error" />">
+					<a href="${eolLink}" target="_olh"><em class="fas fa-times-circle" style="color:yellow;"></em></a></li>
+				</c:if>
 				<c:if test="${developmentMode}">
 				<li data-toggle="tooltip" data-placement="left" title="<la:message
 					key="labels.development_mode_warning" />">
-					<a href="${installationLink}" target="_olh"><em class="fa fa-exclamation-triangle"></em></a></li>
+					<a href="${installationLink}" target="_olh"><em class="fa fa-exclamation-triangle" style="color:yellow;"></em></a></li>
 				</c:if>
 				<li><a href="${contextPath}/"><em class="fa fa-list-alt"></em></a></li>
 				<li><a
