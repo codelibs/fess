@@ -120,7 +120,7 @@ public class SystemHelper {
         cal.set(2021, 6 - 1, 2);
         eolTime = cal.getTimeInMillis();
         if (isEoled()) {
-            logger.error("Your system is out of service. See https://fess.codelibs.org/eol.html");
+            logger.error("Your system is out of support. See https://fess.codelibs.org/eol.html");
         }
         updateSystemProperties();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
