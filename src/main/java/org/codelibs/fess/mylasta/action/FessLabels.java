@@ -383,6 +383,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Bad Word File */
     public static final String LABELS_BAD_WORD_FILE = "{labels.badWordFile}";
 
+    /** The key of the message: Condition */
+    public static final String LABELS_URL_EXPR = "{labels.urlExpr}";
+
     /** The key of the message: Boost Expr */
     public static final String LABELS_BOOST_EXPR = "{labels.boostExpr}";
 
