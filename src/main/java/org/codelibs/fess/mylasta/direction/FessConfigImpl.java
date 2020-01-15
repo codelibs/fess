@@ -30,22 +30,22 @@ public class FessConfigImpl extends FessConfig.SimpleImpl {
     private static final String FESS_CONFIG = "fess.config.";
 
     @Override
-    protected ObjectiveProperties newObjectiveProperties(String resourcePath, PropertyFilter propertyFilter) {
+    protected ObjectiveProperties newObjectiveProperties(final String resourcePath, final PropertyFilter propertyFilter) {
         return new ObjectiveProperties(resourcePath) { // for e.g. checking existence and filtering value
             Cache<String, String> cache = CacheBuilder.newBuilder().build();
 
             @Override
-            public String get(String propertyKey) {
+            public String get(final String propertyKey) {
                 final String plainValue = getFromCache(propertyKey);
                 final String filteredValue = propertyFilter.filter(propertyKey, plainValue);
                 verifyPropertyValue(propertyKey, filteredValue); // null checked
                 return filterPropertyAsDefault(filteredValue); // not null here
             }
 
-            private String getFromCache(String propertyKey) {
+            private String getFromCache(final String propertyKey) {
                 try {
                     return cache.get(propertyKey, () -> System.getProperty(FESS_CONFIG + propertyKey, super.get(propertyKey)));
-                } catch (ExecutionException e) {
+                } catch (final ExecutionException e) {
                     return super.get(propertyKey);
                 }
             }

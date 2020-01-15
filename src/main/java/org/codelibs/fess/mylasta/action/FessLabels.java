@@ -2880,7 +2880,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Running as Development mode. For production use, please install a standalone elasticsearch server. */
     public static final String LABELS_development_mode_warning = "{labels.development_mode_warning}";
 
-    /** The key of the message: Your system is out of service. See EOL page. */
+    /** The key of the message: Your system is out of support. See EOL page. */
     public static final String LABELS_eol_error = "{labels.eol_error}";
 
     /** The key of the message: Advance */

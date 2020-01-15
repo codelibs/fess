@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  *
  * <p>
  * The <code>Secured</code> annotation is used to define a list of security configuration
- * attributes for business methods. 
+ * attributes for business methods.
  * <p>
  * For example:
  *

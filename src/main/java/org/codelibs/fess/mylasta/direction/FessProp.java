@@ -2087,14 +2087,14 @@ public interface FessProp {
     String getHttpFileuploadMaxSize();
 
     default Long getHttpFileuploadMaxSizeAsLong() {
-        String value = getHttpFileuploadMaxSize();
+        final String value = getHttpFileuploadMaxSize();
         return value != null ? DfTypeUtil.toLong(value) : null;
     }
 
     String getHttpFileuploadThresholdSize();
 
     default Long getHttpFileuploadThresholdSizeAsLong() {
-        String value = getHttpFileuploadThresholdSize();
+        final String value = getHttpFileuploadThresholdSize();
         return value != null ? DfTypeUtil.toLong(value) : null;
     }
 }
