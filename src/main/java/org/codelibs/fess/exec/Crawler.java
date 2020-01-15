@@ -392,6 +392,7 @@ public class Crawler {
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
 
+            final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
             final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
             CrawlerPostcard.droppedInto(postbox, postcard -> {
                 postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
@@ -418,6 +419,7 @@ public class Crawler {
                 } else {
                     postcard.setStatus(Constants.FAIL);
                 }
+                postcard.setJobname(systemProperties.getProperty("job.runtime.name", StringUtil.EMPTY));
             });
         }
     }

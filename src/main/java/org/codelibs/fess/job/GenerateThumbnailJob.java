@@ -18,10 +18,8 @@ package org.codelibs.fess.job;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
@@ -212,11 +210,7 @@ public class GenerateThumbnailJob extends ExecJob {
         try {
             cmdList.add("-p");
             cmdList.add(propFile.getAbsolutePath());
-            try (FileOutputStream out = new FileOutputStream(propFile)) {
-                final Properties prop = new Properties();
-                prop.putAll(ComponentUtil.getSystemProperties());
-                prop.store(out, cmdList.toString());
-            }
+            createSystemProperties(cmdList, propFile);
 
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
