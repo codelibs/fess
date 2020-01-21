@@ -1433,6 +1433,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LDAP_IGNORE_NETBIOS_NAME = "ldap.ignore.netbios.name";
 
+    /** The key of the configuration. e.g. false */
+    String LDAP_GROUP_NAME_WITH_UNDERSCORES = "ldap.group.name.with.underscores";
+
     /** The key of the configuration. e.g. true */
     String LDAP_ROLE_SEARCH_USER_ENABLED = "ldap.role.search.user.enabled";
 
@@ -6048,6 +6051,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapIgnoreNetbiosName();
 
     /**
+     * Get the value for the key 'ldap.group.name.with.underscores'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapGroupNameWithUnderscores();
+
+    /**
+     * Is the property for the key 'ldap.group.name.with.underscores' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapGroupNameWithUnderscores();
+
+    /**
      * Get the value for the key 'ldap.role.search.user.enabled'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -8688,6 +8705,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.LDAP_IGNORE_NETBIOS_NAME);
         }
 
+        public String getLdapGroupNameWithUnderscores() {
+            return get(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES);
+        }
+
+        public boolean isLdapGroupNameWithUnderscores() {
+            return is(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES);
+        }
+
         public String getLdapRoleSearchUserEnabled() {
             return get(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED);
         }
@@ -9291,6 +9316,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_AUTH_VALIDATION, "true");
             defaultMap.put(FessConfig.LDAP_MAX_USERNAME_LENGTH, "-1");
             defaultMap.put(FessConfig.LDAP_IGNORE_NETBIOS_NAME, "true");
+            defaultMap.put(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES, "false");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_GROUP_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED, "true");
