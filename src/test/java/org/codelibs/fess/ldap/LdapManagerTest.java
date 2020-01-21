@@ -27,6 +27,10 @@ public class LdapManagerTest extends UnitFessTestCase {
             public boolean isLdapIgnoreNetbiosName() {
                 return true;
             }
+
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
         });
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -45,4 +49,27 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertNull(ldapManager.getSearchRoleName("aaa"));
     }
 
+    public void test_replaceWithUnderscores() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        assertEquals("_", ldapManager.replaceWithUnderscores("/"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("\\"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("["));
+        assertEquals("_", ldapManager.replaceWithUnderscores("]"));
+        assertEquals("_", ldapManager.replaceWithUnderscores(":"));
+        assertEquals("_", ldapManager.replaceWithUnderscores(";"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("|"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("="));
+        assertEquals("_", ldapManager.replaceWithUnderscores(","));
+        assertEquals("_", ldapManager.replaceWithUnderscores("+"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("*"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("?"));
+        assertEquals("_", ldapManager.replaceWithUnderscores("<"));
+        assertEquals("_", ldapManager.replaceWithUnderscores(">"));
+
+        assertEquals("_a_", ldapManager.replaceWithUnderscores("/a/"));
+        assertEquals("___", ldapManager.replaceWithUnderscores("///"));
+        assertEquals("a_a", ldapManager.replaceWithUnderscores("a/a"));
+    }
 }

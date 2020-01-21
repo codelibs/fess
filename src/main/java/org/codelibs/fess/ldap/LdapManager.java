@@ -295,11 +295,15 @@ public class LdapManager {
         start += 3;
 
         final int end = entryDn.indexOf(',', start);
-        if (end == -1) {
-            return entryDn.substring(start);
-        } else {
-            return entryDn.substring(start, end);
+        final String value = end == -1 ? entryDn.substring(start) : entryDn.substring(start, end);
+        if (fessConfig.isLdapGroupNameWithUnderscores()) {
+            return replaceWithUnderscores(value);
         }
+        return value;
+    }
+
+    protected String replaceWithUnderscores(final String value) {
+        return value.replaceAll("[/\\\\\\[\\]:;|=,+\\*?<>]", "_");
     }
 
     protected void setAttributeValue(final List<SearchResult> result, final String name, final Consumer<Object> consumer) {
