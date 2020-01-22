@@ -10,7 +10,7 @@
 	</nav>
 
 	<div class="col-sm-10">
-		<ul class="pagination pagination-sm no-margin pull-right">
+		<ul class="pagination pagination-sm m-0 float-right">
 			<c:if test="${pager.existPrePage}">
 				<li class="page-item"><la:link
 						styleClass="page-link"
