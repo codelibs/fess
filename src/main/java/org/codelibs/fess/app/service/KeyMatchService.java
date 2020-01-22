@@ -30,7 +30,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class KeyMatchService {
+public class KeyMatchService extends FessAppService {
 
     @Resource
     protected KeyMatchBhv keyMatchBhv;
@@ -76,10 +76,10 @@ public class KeyMatchService {
 
     protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
         if (StringUtil.isNotBlank(keyMatchPager.term)) {
-            cb.query().setTerm_Wildcard(keyMatchPager.term);
+            cb.query().setTerm_Wildcard(wrapQuery(keyMatchPager.term));
         }
         if (StringUtil.isNotBlank(keyMatchPager.query)) {
-            cb.query().setQuery_Wildcard(keyMatchPager.query);
+            cb.query().setQuery_Wildcard(wrapQuery(keyMatchPager.query));
         }
         // TODO Long, Integer, String supported only.
 

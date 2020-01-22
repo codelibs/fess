@@ -30,7 +30,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class BoostDocumentRuleService {
+public class BoostDocumentRuleService extends FessAppService {
 
     @Resource
     protected BoostDocumentRuleBhv boostDocumentRuleBhv;
@@ -71,10 +71,10 @@ public class BoostDocumentRuleService {
 
     protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocPager boostDocumentRulePager) {
         if (StringUtil.isNotBlank(boostDocumentRulePager.urlExpr)) {
-            cb.query().setUrlExpr_Wildcard(boostDocumentRulePager.urlExpr);
+            cb.query().setUrlExpr_Wildcard(wrapQuery(boostDocumentRulePager.urlExpr));
         }
         if (StringUtil.isNotBlank(boostDocumentRulePager.boostExpr)) {
-            cb.query().setBoostExpr_Wildcard(boostDocumentRulePager.boostExpr);
+            cb.query().setBoostExpr_Wildcard(wrapQuery(boostDocumentRulePager.boostExpr));
         }
         // TODO Long, Integer, String supported only.
 

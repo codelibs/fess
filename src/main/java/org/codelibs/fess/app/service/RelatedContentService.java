@@ -31,7 +31,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class RelatedContentService {
+public class RelatedContentService extends FessAppService {
 
     @Resource
     protected RelatedContentBhv relatedContentBhv;
@@ -72,10 +72,10 @@ public class RelatedContentService {
 
     protected void setupListCondition(final RelatedContentCB cb, final RelatedContentPager relatedContentPager) {
         if (StringUtil.isNotBlank(relatedContentPager.term)) {
-            cb.query().setTerm_Wildcard(relatedContentPager.term);
+            cb.query().setTerm_Wildcard(wrapQuery(relatedContentPager.term));
         }
         if (StringUtil.isNotBlank(relatedContentPager.content)) {
-            cb.query().setContent_Wildcard(relatedContentPager.content);
+            cb.query().setContent_Wildcard(wrapQuery(relatedContentPager.content));
         }
         // TODO Long, Integer, String supported only.
 
