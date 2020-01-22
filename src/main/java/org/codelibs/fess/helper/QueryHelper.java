@@ -511,17 +511,21 @@ public class QueryHelper {
         final String field = getSearchField(context, prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text()))
-                    .boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f,
+                    toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
+            if (notAnalyzedFieldSet.contains(field)) {
+                return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
+            } else {
+                return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
+            }
         } else {
             final String query = prefixQuery.getPrefix().toString();
             final String origQuery = toLowercaseWildcard(query);
             context.addFieldLog(Constants.DEFAULT_FIELD, query);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost));
         }
     }
 
