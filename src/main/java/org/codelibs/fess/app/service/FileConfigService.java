@@ -32,7 +32,7 @@ import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class FileConfigService {
+public class FileConfigService extends FessAppService {
 
     @Resource
     protected FileConfigBhv fileConfigBhv;
@@ -85,13 +85,13 @@ public class FileConfigService {
 
     protected void setupListCondition(final FileConfigCB cb, final FileConfigPager fileConfigPager) {
         if (StringUtil.isNotBlank(fileConfigPager.name)) {
-            cb.query().setName_Wildcard(fileConfigPager.name);
+            cb.query().setName_Wildcard(wrapQuery(fileConfigPager.name));
         }
         if (StringUtil.isNotBlank(fileConfigPager.paths)) {
-            cb.query().setPaths_Wildcard(fileConfigPager.paths);
+            cb.query().setPaths_Wildcard(wrapQuery(fileConfigPager.paths));
         }
         if (StringUtil.isNotBlank(fileConfigPager.description)) {
-            cb.query().setDescription_Wildcard(fileConfigPager.description);
+            cb.query().setDescription_Wildcard(wrapQuery(fileConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 

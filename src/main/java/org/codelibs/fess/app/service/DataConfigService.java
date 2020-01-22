@@ -31,7 +31,7 @@ import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class DataConfigService {
+public class DataConfigService extends FessAppService {
 
     @Resource
     protected DataConfigBhv dataConfigBhv;
@@ -79,10 +79,10 @@ public class DataConfigService {
             cb.query().setName_Wildcard(dataConfigPager.name);
         }
         if (StringUtil.isNotBlank(dataConfigPager.handlerName)) {
-            cb.query().setHandlerName_Wildcard(dataConfigPager.handlerName);
+            cb.query().setHandlerName_Wildcard(wrapQuery(dataConfigPager.handlerName));
         }
         if (StringUtil.isNotBlank(dataConfigPager.description)) {
-            cb.query().setDescription_Wildcard(dataConfigPager.description);
+            cb.query().setDescription_Wildcard(wrapQuery(dataConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 

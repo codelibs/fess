@@ -32,7 +32,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class LabelTypeService {
+public class LabelTypeService extends FessAppService {
 
     @Resource
     protected LabelTypeBhv labelTypeBhv;
@@ -70,10 +70,10 @@ public class LabelTypeService {
 
     protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
         if (StringUtil.isNotBlank(labelTypePager.name)) {
-            cb.query().setName_Wildcard(labelTypePager.name);
+            cb.query().setName_Wildcard(wrapQuery(labelTypePager.name));
         }
         if (StringUtil.isNotBlank(labelTypePager.value)) {
-            cb.query().setValue_Wildcard(labelTypePager.value);
+            cb.query().setValue_Wildcard(wrapQuery(labelTypePager.value));
         }
         // TODO Long, Integer, String supported only.
 

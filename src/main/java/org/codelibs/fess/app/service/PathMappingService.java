@@ -32,7 +32,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class PathMappingService {
+public class PathMappingService extends FessAppService {
 
     @Resource
     protected PathMappingBhv pathMappingBhv;
@@ -89,10 +89,10 @@ public class PathMappingService {
 
     protected void setupListCondition(final PathMappingCB cb, final PathMapPager pathMappingPager) {
         if (StringUtil.isNotBlank(pathMappingPager.regex)) {
-            cb.query().setRegex_Wildcard(pathMappingPager.regex);
+            cb.query().setRegex_Wildcard(wrapQuery(pathMappingPager.regex));
         }
         if (StringUtil.isNotBlank(pathMappingPager.replacement)) {
-            cb.query().setReplacement_Wildcard(pathMappingPager.replacement);
+            cb.query().setReplacement_Wildcard(wrapQuery(pathMappingPager.replacement));
         }
         // TODO Long, Integer, String supported only.
 
