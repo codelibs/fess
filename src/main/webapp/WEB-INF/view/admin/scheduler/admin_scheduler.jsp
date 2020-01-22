@@ -14,17 +14,25 @@
 			<jsp:param name="menuType" value="scheduler" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.scheduledjob_configuration" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.scheduledjob_configuration" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
-						<div class="card card-primary">
-							<div class="card-header with-border">
+						<div class="card card-outline card-primary">
+							<div class="card-header">
 								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
 							<!-- /.card-header -->
@@ -48,15 +56,15 @@
 								<c:if test="${schedulerPager.allRecordCount > 0}">
 									<div class="row">
 										<div class="col-sm-12">
-											<table class="table table-bordered table-striped">
+											<table class="table table-bordered">
 												<thead>
 													<tr>
-														<th class="col-md-2 text-center"><la:message key="labels.scheduledjob_name" /></th>
-														<th class="col-md-2 text-center"><la:message
+														<th><la:message key="labels.scheduledjob_name" /></th>
+														<th class="text-center"><la:message
 																key="labels.scheduledjob_status" /></th>
-														<th class="col-md-2 text-center"><la:message
+														<th class="text-center"><la:message
 																key="labels.scheduledjob_target" /></th>
-														<th class="col-md-2 text-center"><la:message
+														<th><la:message
 																key="labels.scheduledjob_cronExpression" /></th>
 													</tr>
 												</thead>
@@ -67,15 +75,15 @@
 															data-href="${contextPath}/admin/scheduler/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
 															<td class="text-center"><c:if test="${data.running}">
-																	<span class="label label-success"><la:message
+																	<span class="badge bg-success"><la:message
 																			key="labels.scheduledjob_running" /></span>
 																</c:if> <c:if test="${!data.running}">
 																	<c:if test="${data.available}">
-																		<span class="label label-primary"><la:message
+																		<span class="badge bg-primary"><la:message
 																				key="labels.scheduledjob_active" /></span>
 																	</c:if>
 																	<c:if test="${!data.available}">
-																		<span class="label label-default"><la:message
+																		<span class="badge badge-secondary"><la:message
 																				key="labels.scheduledjob_nojob" /></span>
 																	</c:if>
 																</c:if></td>

@@ -14,12 +14,20 @@
 			<jsp:param name="menuType" value="scheduler" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.scheduledjob_title_details" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.scheduledjob_title_details" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/scheduler/" styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
@@ -32,52 +40,52 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<div class="box-header with-border">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+								<div class="card-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors property="_global" />
 									</div>
-									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="name" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
 											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="target" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="target" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_target" /></label>
 										<div class="col-sm-9">
 											<la:errors property="target" />
 											<la:text styleId="target" property="target" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="cronExpression" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="cronExpression" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_cronExpression" /></label>
 										<div class="col-sm-9">
 											<la:errors property="cronExpression" />
 											<la:text styleId="cronExpression" property="cronExpression" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="scriptType" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="scriptType" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_scriptType" /></label>
 										<div class="col-sm-9">
 											<la:errors property="scriptType" />
 											<la:text styleId="scriptType" property="scriptType" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="scriptData" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="scriptData" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_scriptData" /></label>
 										<div class="col-sm-9">
 											<la:errors property="scriptData" />
@@ -85,8 +93,8 @@
 												rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="jobLogging" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="jobLogging" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_jobLogging" /></label>
 										<div class="col-sm-9">
 											<la:errors property="jobLogging" />
@@ -97,8 +105,8 @@
 											</div>
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="crawler" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="crawler" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_crawler" /></label>
 										<div class="col-sm-9">
 											<la:errors property="crawler" />
@@ -109,8 +117,8 @@
 											</div>
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="available" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="available" class="col-sm-3 col-form-label"><la:message
 												key="labels.scheduledjob_status" /></label>
 										<div class="col-sm-9">
 											<la:errors property="available" />
@@ -121,8 +129,8 @@
 											</div>
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="sortOrder" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="sortOrder" class="col-sm-3 col-form-label"><la:message
 												key="labels.sortOrder" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="sortOrder" />
@@ -132,13 +140,13 @@
 										</div>
 									</div>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>
