@@ -61,7 +61,7 @@
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.5.2</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.5.0</elasticsearch.httpclient.version>
+		<elasticsearch.httpclient.version>7.5.1</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
