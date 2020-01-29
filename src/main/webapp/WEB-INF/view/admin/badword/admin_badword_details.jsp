@@ -14,18 +14,26 @@
 			<jsp:param name="menuType" value="badWord" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.bad_word_title_details" />
-				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="list">
-							<la:message key="labels.bad_word_link_list" />
-						</la:link></li>
-					<li class="active"><la:message
-							key="labels.bad_word_link_details" /></li>
-				</ol>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.bad_word_title_details" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><la:link href="/admin/badword">
+										<la:message key="labels.bad_word_link_list" />
+									</la:link></li>
+								<li class="breadcrumb-item active"><la:message
+										key="labels.bad_word_link_details" /></li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/badword/">
 					<la:hidden property="crudMode" />
@@ -38,9 +46,9 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
-								<div class="box-header with-border">
-									<h3 class="box-title">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
+								<div class="card-header">
+									<h3 class="card-title">
 										<c:if test="${crudMode == 1}">
 											<la:message
 												key="labels.bad_word_link_create" />
@@ -57,34 +65,36 @@
 												key="labels.bad_word_link_details" />
 										</c:if>
 									</h3>
-									<div class="btn-group pull-right">
-										<la:link href="/admin/badword"
-											styleClass="btn btn-default btn-xs">
-											<em class="fa fa-th-list"></em>
-											<la:message key="labels.bad_word_link_list" />
-										</la:link>
-										<la:link href="../createnew"
-											styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
-											<em class="fa fa-plus"></em>
-											<la:message
-												key="labels.bad_word_link_create" />
-										</la:link>
-										<la:link href="../downloadpage"
-											styleClass="btn btn-primary btn-xs">
-											<em class="fa fa-download"></em>
-											<la:message
-												key="labels.bad_word_link_download" />
-										</la:link>
-										<la:link href="../uploadpage"
-											styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
-											<em class="fa fa-upload"></em>
-											<la:message
-												key="labels.bad_word_link_upload" />
-										</la:link>
+									<div class="card-tools">
+										<div class="btn-group">
+											<la:link href="/admin/badword"
+												styleClass="btn btn-default btn-xs">
+												<em class="fa fa-th-list"></em>
+												<la:message key="labels.bad_word_link_list" />
+											</la:link>
+											<la:link href="../createnew"
+												styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
+												<em class="fa fa-plus"></em>
+												<la:message
+													key="labels.bad_word_link_create" />
+											</la:link>
+											<la:link href="../downloadpage"
+												styleClass="btn btn-primary btn-xs">
+												<em class="fa fa-download"></em>
+												<la:message
+													key="labels.bad_word_link_download" />
+											</la:link>
+											<la:link href="../uploadpage"
+												styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
+												<em class="fa fa-upload"></em>
+												<la:message
+													key="labels.bad_word_link_upload" />
+											</la:link>
+										</div>
 									</div>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
@@ -104,13 +114,13 @@
 										</tbody>
 									</table>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>
