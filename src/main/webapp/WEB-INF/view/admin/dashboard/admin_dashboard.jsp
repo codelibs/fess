@@ -13,13 +13,12 @@
 			<jsp:param name="menuType" value="dashboard" />
 		</jsp:include>
 
-		<div id="content" class="content-wrapper">
-			<iframe id="contentFrame" src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>" seamless></iframe>
+		<div class="content-wrapper position-relative">
+			<iframe class="w-100 h-100 position-absolute" frameborder="0" src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>" seamless></iframe>
 		</div>
 
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-	<script src="${fe:url('/js/admin/dashboard.js')}" type="text/javascript"></script>
 </body>
 </html>

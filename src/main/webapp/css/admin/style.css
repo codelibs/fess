@@ -51,11 +51,6 @@
 	margin-right: 0.2em;
 }
 
-.content-wrapper iframe {
-	border: 0;
-	width: 100%;
-}
-
 ul.has-error {
 	color: #dd4b39 !important;
 	list-style-type: none;
