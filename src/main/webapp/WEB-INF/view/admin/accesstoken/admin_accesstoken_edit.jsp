@@ -14,12 +14,20 @@
 			<jsp:param name="menuType" value="accessToken" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.access_token_title_details" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.access_token_title_details" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/accesstoken/" styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
@@ -32,20 +40,20 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<div class="box-header with-border">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+								<div class="card-header">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors property="_global" />
 									</div>
-									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="name" class="col-sm-3 col-form-label"><la:message
 												key="labels.access_token_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
@@ -53,16 +61,16 @@
 										</div>
 									</div>
 									<c:if test="${crudMode==2}">
-									<div class="form-group">
-										<label for="token" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="token" class="col-sm-3 col-form-label"><la:message
 												key="labels.access_token_token" /></label>
 										<div class="col-sm-9">
 											${f:h(token)}
 										</div>
 									</div>
 									</c:if>
-									<div class="form-group">
-										<label for="permissions" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="permissions" class="col-sm-3 col-form-label"><la:message
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
@@ -70,16 +78,16 @@
 												rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="name" class="col-sm-3 col-form-label"><la:message
 												key="labels.access_token_parameter_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="parameterName" />
 											<la:text styleId="parameterName" property="parameterName" styleClass="form-control"/>
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="name" class="col-sm-3 col-form-label"><la:message
 												key="labels.access_token_expires" /></label>
 										<div class="col-sm-9">
 											<la:errors property="expires" />
@@ -87,13 +95,13 @@
 										</div>
 									</div>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>
