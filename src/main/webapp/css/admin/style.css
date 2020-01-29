@@ -58,6 +58,10 @@ ul.has-error {
 	box-shadow: none;
 }
 
+.sidebar-mini.sidebar-collapse .sidebar-search {
+	display: none !important;
+}
+
 input[type="file"].form-control:not([type="file"]) {
 	height: 0% !important;
 }

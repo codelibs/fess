@@ -16,7 +16,7 @@
 
 		<!-- SEARCH FORM -->
 		<c:if test="${fe:permission('admin-searchlist-view')}">
-			<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="GET" class="form-inline mt-2">
+			<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="GET" class="form-inline mt-2 sidebar-search">
 				<div class="input-group">
 					<input class="form-control form-control-sidebar" name="q" id="query"
 						   maxlength="1000"
