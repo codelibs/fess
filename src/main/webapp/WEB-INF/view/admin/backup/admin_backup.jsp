@@ -14,23 +14,31 @@
 			<jsp:param name="menuType" value="backup" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.backup_configuration" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.backup_configuration" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">
+						<div class="card card-outline card-primary">
+							<div class="card-header">
+								<h3 class="card-title">
 									<la:message key="labels.backup_configuration" />
 								</h3>
 							</div>
-							<!-- /.box-header -->
-							<div class="box-body">
+							<!-- /.card-header -->
+							<div class="card-body">
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
@@ -44,17 +52,17 @@
 										<div class="col-sm-12">
 											<c:if test="${editable}">
 											<la:form action="/admin/backup/upload/" enctype="multipart/form-data" styleClass="form-inline">
-												<div class="form-group">
-													<label for="bulkFile"> <la:message key="labels.backup_bulk_file" />
-													</label> <input type="file" name="bulkFile" class="form-control" />
-												</div>
-												<button type="submit" class="btn btn-success" name="upload">
+												<label for="bulkFile" class="mb-2 mr-2"><la:message key="labels.backup_bulk_file" /></label>
+												<div class="mb-2 mr-sm-2"><input type="file" id="bulkFile" name="bulkFile" class="form-control-file" /></div>
+												<button type="submit" class="btn btn-success mb-2" name="upload">
 													<em class="fa fa-upload"></em>
 													<la:message key="labels.backup_button_upload" />
 												</button>
 											</la:form>
 											</c:if>
 										</div>
+									</div>
+									<div class="row">
 										<div class="col-sm-12">
 											<table class="table table-bordered table-striped dataTable">
 												<tbody>
@@ -75,9 +83,9 @@
 								</div>
 								<!-- /.data-wrapper -->
 							</div>
-							<!-- /.box-body -->
+							<!-- /.card-body -->
 						</div>
-						<!-- /.box -->
+						<!-- /.card -->
 					</div>
 				</div>
 			</section>
