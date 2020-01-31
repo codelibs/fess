@@ -14,20 +14,28 @@
 			<jsp:param name="menuType" value="crawlingInfo" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.crawling_info_title_confirm" />
-				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="/admin/crawlinginfo">
-							<la:message key="labels.crawling_info_link_top" />
-						</la:link></li>
-					<c:if test="${crudMode == 4}">
-						<li class="active"><la:message
-								key="labels.crawling_info_link_details" /></li>
-					</c:if>
-				</ol>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.crawling_info_title_confirm" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><la:link href="/admin/crawlinginfo">
+										<la:message key="labels.crawling_info_link_top" />
+									</la:link></li>
+								<c:if test="${crudMode == 4}">
+									<li  class="breadcrumb-item active"><la:message
+											key="labels.crawling_info_link_details" /></li>
+								</c:if>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/crawlinginfo/">
 					<la:hidden property="crudMode" />
@@ -37,9 +45,9 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
-								<div class="box-header with-border">
-									<h3 class="box-title">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
+								<div class="card-header">
+									<h3 class="card-title">
 										<c:if test="${crudMode == 1}">
 											<la:message key="labels.crawling_info_link_create" />
 										</c:if>
@@ -53,15 +61,17 @@
 											<la:message key="labels.crawling_info_link_details" />
 										</c:if>
 									</h3>
+									<div class="card-tools">
 									<div class="btn-group pull-right">
 										<la:link href="/admin/crawlinginfo"
 											styleClass="btn btn-primary btn-xs">
 											<la:message key="labels.crawling_info_link_top" />
 										</la:link>
 									</div>
+									</div>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
@@ -88,8 +98,8 @@
 										</tbody>
 									</table>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-footer">
+								<!-- /.card-header -->
+								<div class="card-footer">
 									<c:if test="${crudMode == 4}">
 										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.crawling_info_button_back" />">
@@ -103,39 +113,39 @@
 											<em class="fa fa-trash"></em>
 											<la:message key="labels.crawling_info_button_delete" />
 										</button>
-										<div class="modal modal-danger fade" id="confirmToDelete"
-											tabindex="-1" role="dialog">
-											<div class="modal-dialog">
-												<div class="modal-content">
-													<div class="modal-header">
-														<button type="button" class="close" data-dismiss="modal"
-															aria-label="Close">
-															<span aria-hidden="true">×</span>
-														</button>
-														<h4 class="modal-title">
-															<la:message key="labels.crud_title_delete" />
-														</h4>
-													</div>
-													<div class="modal-body">
-														<p>
-															<la:message key="labels.crud_delete_confirmation" />
-														</p>
-													</div>
-													<div class="modal-footer">
-														<button type="button" class="btn btn-outline pull-left"
-															data-dismiss="modal">
-															<la:message key="labels.crud_button_cancel" />
-														</button>
-														<button type="submit" class="btn btn-outline btn-danger"
-															name="delete"
-															value="<la:message key="labels.crud_button_delete" />">
-															<em class="fa fa-trash"></em>
-															<la:message key="labels.crud_button_delete" />
-														</button>
+											<div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
+												 role="dialog">
+												<div class="modal-dialog">
+													<div class="modal-content">
+														<div class="modal-header">
+															<h4 class="modal-title">
+																<la:message key="labels.crud_title_delete" />
+															</h4>
+															<button type="button" class="close" data-dismiss="modal"
+																	aria-label="Close">
+																<span aria-hidden="true">×</span>
+															</button>
+														</div>
+														<div class="modal-body">
+															<p>
+																<la:message key="labels.crud_delete_confirmation" />
+															</p>
+														</div>
+														<div class="modal-footer justify-content-between">
+															<button type="button" class="btn btn-default"
+																	data-dismiss="modal">
+																<la:message key="labels.crud_button_cancel" />
+															</button>
+															<button type="submit" class="btn btn-outline btn-danger"
+																	name="delete"
+																	value="<la:message key="labels.crud_button_delete" />">
+																<em class="fa fa-trash"></em>
+																<la:message key="labels.crud_button_delete" />
+															</button>
+														</div>
 													</div>
 												</div>
 											</div>
-										</div>
 										</c:if>
 										<c:if test="${running}">
 										<button type="submit" class="btn btn-warning" name="threaddump"
@@ -146,9 +156,9 @@
 										</c:if>
 									</c:if>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>

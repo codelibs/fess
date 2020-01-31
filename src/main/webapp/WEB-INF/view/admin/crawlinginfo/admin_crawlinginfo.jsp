@@ -14,27 +14,35 @@
 			<jsp:param name="menuType" value="crawlingInfo" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.crawling_info_configuration" />
-				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/crawlinginfo">
-							<la:message key="labels.crawling_info_title" />
-						</la:link></li>
-				</ol>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.crawling_info_configuration" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item active"><la:link href="/admin/crawlinginfo">
+									<la:message key="labels.crawling_info_title" />
+								</la:link></li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<div class="row">
-					<div class="col-xs-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">
+					<div class="col-sm-12">
+						<div class="card card-outline card-primary">
+							<div class="card-header">
+								<h3 class="card-title">
 									<la:message key="labels.crawling_info_title" />
 								</h3>
 							</div>
-							<!-- /.box-header -->
-							<div class="box-body">
+							<!-- /.card-header -->
+							<div class="card-body">
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
@@ -46,22 +54,22 @@
 									<div class="col-sm-12">
 										<la:form styleClass="form-inline"
 											action="/admin/crawlinginfo/">
-											<div class="form-group">
+											<div class="form-group row">
 												<c:set var="ph_session_id">
 													<la:message key="labels.crawling_info_session_id_search" />
 												</c:set>
 												<la:text styleId="sessionIdSearchBtn" property="sessionId"
 													styleClass="form-control" placeholder="${ph_session_id}"></la:text>
 											</div>
-											<div class="form-group">
+											<div class="form-group mx-sm-3">
 												<button type="submit" class="btn btn-primary" id="submit"
-													name="search"
-													value="<la:message key="labels.crawling_info_search" />">
+														name="search"
+														value="<la:message key="labels.crawling_info_search" />">
 													<em class="fa fa-search"></em>
 													<la:message key="labels.crawling_info_search" />
 												</button>
 												<button type="submit" class="btn btn-default" name="reset"
-													value="<la:message key="labels.crawling_info_reset" />">
+														value="<la:message key="labels.crawling_info_reset" />">
 													<la:message key="labels.crawling_info_reset" />
 												</button>
 											</div>
@@ -72,7 +80,7 @@
 								<c:if test="${crawlingInfoPager.allRecordCount == 0}">
 									<div class="row top20">
 										<div class="col-sm-12">
-											<em class="fa fa-info-circle text-light-blue"></em>
+											<em class="fa fa-info-circle text-primary"></em>
 											<la:message key="labels.list_could_not_find_crud_table" />
 										</div>
 									</div>
@@ -162,9 +170,9 @@
 									</div>
 								</c:if>
 							</div>
-							<!-- /.box-body -->
+							<!-- /.card-body -->
 						</div>
-						<!-- /.box -->
+						<!-- /.card -->
 					</div>
 				</div>
 			</section>
