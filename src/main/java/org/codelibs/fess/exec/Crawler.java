@@ -307,6 +307,8 @@ public class Crawler {
             // use a default session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             options.sessionId = sdf.format(new Date());
+        } else {
+            options.sessionId = options.sessionId.replace('-', '_');
         }
 
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
