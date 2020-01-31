@@ -14,27 +14,35 @@
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.dict_kuromoji_title" />
-				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="list">
-							<la:message key="labels.dict_list_link" />
-						</la:link></li>
-					<li><la:link href="list/0/?dictId=${f:u(dictId)}">
-							<la:message key="labels.dict_kuromoji_list_link" />
-						</la:link></li>
-					<c:if test="${crudMode == 1}">
-						<li class="active"><la:message
-								key="labels.dict_kuromoji_link_create" /></li>
-					</c:if>
-					<c:if test="${crudMode == 2}">
-						<li class="active"><la:message
-								key="labels.dict_kuromoji_link_edit" /></li>
-					</c:if>
-				</ol>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.dict_kuromoji_title" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><la:link href="list">
+										<la:message key="labels.dict_list_link" />
+									</la:link></li>
+								<li class="breadcrumb-item"><la:link href="list/0/?dictId=${f:u(dictId)}">
+										<la:message key="labels.dict_kuromoji_list_link" />
+									</la:link></li>
+								<c:if test="${crudMode == 1}">
+									<li class="breadcrumb-item active"><la:message
+											key="labels.dict_kuromoji_link_create" /></li>
+								</c:if>
+								<c:if test="${crudMode == 2}">
+									<li class="breadcrumb-item active"><la:message
+											key="labels.dict_kuromoji_link_edit" /></li>
+								</c:if>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/dict/kuromoji/" styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
@@ -45,9 +53,9 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<div class="box-header with-border">
-									<h3 class="box-title">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+								<div class="card-header">
+									<h3 class="card-title">
 										<c:if test="${crudMode == 1}">
 											<la:message key="labels.dict_kuromoji_link_create" />
 										</c:if>
@@ -55,7 +63,8 @@
 											<la:message key="labels.dict_kuromoji_link_edit" />
 										</c:if>
 									</h3>
-									<div class="btn-group pull-right">
+									<div class="card-tools">
+										<div class="btn-group">
 										<la:link href="/admin/dict"
 											styleClass="btn btn-default btn-xs">
 											<em class="fa fa-book"></em>
@@ -81,42 +90,43 @@
 											<em class="fa fa-upload"></em>
 											<la:message key="labels.dict_kuromoji_link_upload" />
 										</la:link>
+										</div>
 									</div>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors property="_global" />
 									</div>
-									<div class="form-group">
-										<label for="token" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="token" class="col-sm-3 col-form-label"><la:message
 												key="labels.dict_kuromoji_token" /></label>
 										<div class="col-sm-9">
 											<la:errors property="token" />
 											<la:text styleId="token" property="token" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="segmentation" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="segmentation" class="col-sm-3 col-form-label"><la:message
 												key="labels.dict_kuromoji_segmentation" /></label>
 										<div class="col-sm-9">
 											<la:errors property="segmentation" />
 											<la:text styleId="segmentation" property="segmentation" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="reading" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="reading" class="col-sm-3 col-form-label"><la:message
 												key="labels.dict_kuromoji_reading" /></label>
 										<div class="col-sm-9">
 											<la:errors property="reading" />
 											<la:text styleId="reading" property="reading" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="pos" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="pos" class="col-sm-3 col-form-label"><la:message
 												key="labels.dict_kuromoji_pos" /></label>
 										<div class="col-sm-9">
 											<la:errors property="pos" />
@@ -124,13 +134,13 @@
 										</div>
 									</div>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>

@@ -14,26 +14,35 @@
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.dict_kuromoji_title" />
-				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="list">
-							<la:message key="labels.dict_list_link" />
-						</la:link></li>
-					<li><la:message key="labels.dict_kuromoji_list_link" /></li>
-				</ol>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.dict_kuromoji_title" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><la:link href="list">
+										<la:message key="labels.dict_list_link" />
+									</la:link></li>
+								<li class="breadcrumb-item"><la:message key="labels.dict_kuromoji_list_link" /></li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">
+						<div class="card card-outline card-primary">
+							<div class="card-header">
+								<h3 class="card-title">
 									<la:message key="labels.dict_kuromoji_list_link" />
 								</h3>
-								<div class="btn-group pull-right">
+								<div class="card-tools">
+								<div class="btn-group">
 									<la:link href="/admin/dict" styleClass="btn btn-default btn-xs">
 										<em class="fa fa-book"></em>
 										<la:message key="labels.dict_list_link" />
@@ -59,9 +68,10 @@
 										<la:message key="labels.dict_kuromoji_link_upload" />
 									</la:link>
 								</div>
+								</div>
 							</div>
-							<!-- /.box-header -->
-							<div class="box-body">
+							<!-- /.card-header -->
+							<div class="card-body">
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
@@ -73,7 +83,7 @@
 								<c:if test="${kuromojiPager.allRecordCount == 0}">
 									<div class="row top10">
 										<div class="col-sm-12">
-											<em class="fa fa-info-circle text-light-blue"></em>
+											<em class="fa fa-info-circle text-primary"></em>
 											<la:message key="labels.list_could_not_find_crud_table" />
 										</div>
 									</div>
@@ -101,50 +111,18 @@
 											</table>
 										</div>
 									</div>
-									<c:set var="pager" value="${kuromojiPager}" scope="request" />
-									<div class="row">
-										<div class="col-sm-2">
-											<la:message key="labels.pagination_page_guide_msg"
-												arg0="${f:h(pager.currentPageNumber)}"
-												arg1="${f:h(pager.allPageCount)}"
-												arg2="${f:h(pager.allRecordCount)}" />
-										</div>
-										<div class="col-sm-10">
-											<ul class="pagination pagination-sm no-margin pull-right">
-												<c:if test="${pager.existPrePage}">
-													<li class="prev"><la:link
-															href="list/${pager.currentPageNumber - 1}?dictId=${f:u(dictId)}">
-															<la:message key="labels.prev_page" />
-														</la:link></li>
-												</c:if>
-												<c:if test="${!pager.existPrePage}">
-													<li class="prev disabled"><a href="#"><la:message
-																key="labels.prev_page" /></a></li>
-												</c:if>
-												<c:forEach var="p" varStatus="s"
-													items="${pager.pageNumberList}">
-													<li
-														<c:if test="${p == pager.currentPageNumber}">class="active"</c:if>><la:link
-															href="list/${p}?dictId=${f:u(dictId)}">${p}</la:link></li>
-												</c:forEach>
-												<c:if test="${pager.existNextPage}">
-													<li class="next"><la:link
-															href="list/${pager.currentPageNumber + 1}?dictId=${f:u(dictId)}">
-															<la:message key="labels.next_page" />
-														</la:link></li>
-												</c:if>
-												<c:if test="${!pager.existNextPage}">
-													<li class="next disabled"><a href="#"><la:message
-																key="labels.next_page" /></a></li>
-												</c:if>
-											</ul>
-										</div>
-									</div>
+									<c:set var="pager" value="${kuromojiPager}"
+										   scope="request" />
+									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+									<c:if test="${pager.currentPageNumber > pager.allPageCount}">
+										<script>location.href = "${contextPath}/admin/dict/kuromoji/list/${pager.allPageCount}";</script>
+									<c:set var="pager" value="${}" scope="request" />
+									</c:if>
 								</c:if>
 							</div>
-							<!-- /.box-body -->
+							<!-- /.card-body -->
 						</div>
-						<!-- /.box -->
+						<!-- /.card -->
 					</div>
 				</div>
 			</section>

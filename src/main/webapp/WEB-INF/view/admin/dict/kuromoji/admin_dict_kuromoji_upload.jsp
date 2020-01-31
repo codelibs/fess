@@ -14,33 +14,42 @@
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.dict_kuromoji_title" />
-				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="list">
-							<la:message key="labels.dict_list_link" />
-						</la:link></li>
-					<li><la:link href="list/0/?dictId=${f:u(dictId)}">
-							<la:message key="labels.dict_kuromoji_list_link" />
-						</la:link></li>
-					<li class="active"><la:message
-							key="labels.dict_kuromoji_link_upload" /></li>
-				</ol>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.dict_kuromoji_title" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><la:link href="list">
+										<la:message key="labels.dict_list_link" />
+									</la:link></li>
+								<li class="breadcrumb-item"><la:link href="list/0/?dictId=${f:u(dictId)}">
+										<la:message key="labels.dict_kuromoji_list_link" />
+									</la:link></li>
+								<li class="breadcrumb-item active"><la:message
+										key="labels.dict_kuromoji_link_upload" /></li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/dict/kuromoji/upload"
 					enctype="multipart/form-data">
 					<la:hidden property="dictId" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box box-primary">
-								<div class="box-header with-border">
-									<h3 class="box-title">
+							<div class="card card-outline card-primary">
+								<div class="card-header with-border">
+									<h3 class="card-title">
 										<la:message key="labels.dict_kuromoji_link_upload" />
 									</h3>
-									<div class="btn-group pull-right">
+									<div class="card-tools">
+										<div class="btn-group">
 										<la:link href="/admin/dict"
 											styleClass="btn btn-default btn-xs">
 											<em class="fa fa-book"></em>
@@ -66,10 +75,11 @@
 											<em class="fa fa-upload"></em>
 											<la:message key="labels.dict_kuromoji_link_upload" />
 										</la:link>
+										</div>
 									</div>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
@@ -78,24 +88,24 @@
 										<la:errors />
 									</div>
 									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+										<label for="name" class="col-sm-3 col-form-label"><la:message
 												key="labels.dict_kuromoji_file" /></label>
 										<div class="col-sm-9">
 											<input type="file" name="kuromojiFile" />
 										</div>
 									</div>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<button type="submit" class="btn btn-success"
 										value="<la:message key="labels.dict_kuromoji_button_upload" />">
 										<em class="fa fa-upload"></em>
 										<la:message key="labels.dict_kuromoji_button_upload" />
 									</button>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>

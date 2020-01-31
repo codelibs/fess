@@ -13,21 +13,32 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
-		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.dict_kuromoji_title" />
-				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="list">
-							<la:message key="labels.dict_list_link" />
-						</la:link></li>
-					<li><la:link href="list/0/?dictId=${f:u(dictId)}">
-							<la:message key="labels.dict_kuromoji_list_link" />
-						</la:link></li>
-					<li class="active"><la:message
-							key="labels.dict_kuromoji_link_details" /></li>
-				</ol>
+			<div class="content-wrapper">
+				<div class="content-header">
+					<div class="container-fluid">
+						<div class="row mb-2">
+							<div class="col-sm-6">
+								<h1>
+									<la:message key="labels.dict_kuromoji_title" />
+								</h1>
+							</div>
+							<div class="col-sm-6">
+							</div>
+							<div class="col-sm-6">
+								<ol class="breadcrumb float-sm-right">
+									<li class="breadcrumb-item"><la:link href="list">
+											<la:message key="labels.dict_list_link" />
+										</la:link></li>
+									<li class="breadcrumb-item"><la:link href="list/0/?dictId=${f:u(dictId)}">
+											<la:message key="labels.dict_kuromoji_list_link" />
+										</la:link></li>
+									<li class="breadcrumb-item active"><la:message
+											key="labels.dict_kuromoji_link_details" /></li>
+								</ol>
+							</div>
+						</div>
+					</div>
+				</div>
 			</section>
 			<section class="content">
 				<la:form action="/admin/dict/kuromoji/">
@@ -39,10 +50,10 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
 								<%-- Box Header --%>
-								<div class="box-header with-border">
-									<h3 class="box-title">
+								<div class="card-header">
+									<h3 class="card-title">
 										<c:if test="${crudMode == 1}">
 											<la:message key="labels.dict_kuromoji_link_create" />
 										</c:if>
@@ -56,7 +67,8 @@
 											<la:message key="labels.dict_kuromoji_link_details" />
 										</c:if>
 									</h3>
-									<div class="btn-group pull-right">
+									<div class="card-tools">
+										<div class="btn-group">
 										<la:link href="/admin/dict"
 											styleClass="btn btn-default btn-xs">
 											<em class="fa fa-book"></em>
@@ -82,10 +94,11 @@
 											<em class="fa fa-upload"></em>
 											<la:message key="labels.dict_kuromoji_link_upload" />
 										</la:link>
+										</div>
 									</div>
 								</div>
-								<%-- Box Body --%>
-								<div class="box-body">
+								<%-- Card Body --%>
+								<div class="card-body">
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
@@ -116,13 +129,13 @@
 										</tbody>
 									</table>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>

@@ -14,11 +14,17 @@
 			<jsp:param name="menuType" value="design" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.design_configuration" />
-				</h1>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.design_configuration" />
+							</h1>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
@@ -28,16 +34,16 @@
 							</la:info>
 							<la:errors property="_global" />
 						</div>
-						<div class="box box-primary">
+						<div class="card card-outline card-primary">
 							<c:if test="${editable}">
 								<la:form action="/admin/design/">
-									<div class="box-header with-border">
-										<h3 class="box-title">
+									<div class="card-header">
+										<h3 class="card-title">
 											<la:message key="labels.design_title_edit_content" />
 										</h3>
 									</div>
-									<!-- /.box-header -->
-									<div class="box-body">
+									<!-- /.card-header -->
+									<div class="card-body">
 										<h4>${f:h(displayFileName)}</h4>
 										<div>
 											<la:errors property="content" />
@@ -45,8 +51,8 @@
 												styleClass="form-control"></la:textarea>
 										</div>
 									</div>
-									<!-- /.box-body -->
-									<div class="box-footer">
+									<!-- /.card-body -->
+									<div class="card-footer">
 										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.design_button_back" />">
 											<em class="fa fa-arrow-circle-left"></em>
@@ -58,12 +64,12 @@
 											<la:message key="labels.design_button_update" />
 										</button>
 									</div>
-									<!-- /.box-footer -->
+									<!-- /.card-footer -->
 									<la:hidden property="fileName" />
 								</la:form>
 							</c:if>
 						</div>
-						<!-- /.box -->
+						<!-- /.card -->
 					</div>
 				</div>
 			</section>

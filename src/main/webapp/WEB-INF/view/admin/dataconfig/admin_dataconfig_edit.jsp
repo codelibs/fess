@@ -14,12 +14,20 @@
 			<jsp:param name="menuType" value="dataConfig" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.data_crawling_title_details" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.data_crawling_title_details" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/dataconfig/" styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
@@ -33,28 +41,28 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<div class="box-header with-border">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+								<div class="card-header">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<!-- /.box-header -->
-								<div class="box-body">
+								<!-- /.card-header -->
+								<div class="card-body">
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors property="_global" />
 									</div>
-									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="name" class="col-sm-3 col-form-label"><la:message
 												key="labels.name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
 											<la:text styleId="name" property="name" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="handlerName" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="handlerName" class="col-sm-3 col-form-label"><la:message
 												key="labels.handler_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="handlerName" />
@@ -67,8 +75,8 @@
 											</la:select>
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="handlerParameter" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="handlerParameter" class="col-sm-3 col-form-label"><la:message
 												key="labels.handler_parameter" /></label>
 										<div class="col-sm-9">
 											<la:errors property="handlerParameter" />
@@ -76,8 +84,8 @@
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="handlerScript" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="handlerScript" class="col-sm-3 col-form-label"><la:message
 												key="labels.handler_script" /></label>
 										<div class="col-sm-9">
 											<la:errors property="handlerScript" />
@@ -85,16 +93,16 @@
 												styleClass="form-control" rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="boost" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="boost" class="col-sm-3 col-form-label"><la:message
 												key="labels.boost" /></label>
 										<div class="col-sm-9">
 											<la:errors property="boost" />
 											<la:text styleId="boost" property="boost" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="permissions" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="permissions" class="col-sm-3 col-form-label"><la:message
 												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
@@ -102,8 +110,8 @@
 												rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="virtualHosts" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="virtualHosts" class="col-sm-3 col-form-label"><la:message
 												key="labels.virtual_hosts" /></label>
 										<div class="col-sm-9">
 											<la:errors property="virtualHosts" />
@@ -111,8 +119,8 @@
 												rows="5" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="available" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="available" class="col-sm-3 col-form-label"><la:message
 												key="labels.available" /></label>
 										<div class="col-sm-9">
 											<la:errors property="available" />
@@ -126,8 +134,8 @@
 											</la:select>
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="permissions" class="col-sm-3 control-label"><la:message
+									<div class="form-group row">
+										<label for="permissions" class="col-sm-3 col-form-label"><la:message
 												key="labels.description" /></label>
 										<div class="col-sm-9">
 											<la:errors property="description" />
@@ -136,13 +144,13 @@
 										</div>
 									</div>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>
