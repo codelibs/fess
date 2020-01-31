@@ -14,12 +14,20 @@
 			<jsp:param name="menuType" value="boostDocumentRule" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.boost_document_rule_title_details" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.boost_document_rule_title_details" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<la:form action="/admin/boostdoc/">
 					<la:hidden property="crudMode" />
@@ -32,13 +40,13 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div
-								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
-								<%-- Box Header --%>
-								<div class="box-header with-border">
+								class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
+								<%-- Card Header --%>
+								<div class="card-header">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
-								<div class="box-body">
+								<%-- Card Body --%>
+								<div class="card-body">
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
@@ -50,7 +58,7 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><la:message
+												<th><la:message
 														key="labels.boost_document_rule_url_expr" /></th>
 												<td>${f:h(urlExpr)}<la:hidden property="urlExpr" /></td>
 											</tr>
@@ -67,13 +75,13 @@
 										</tbody>
 									</table>
 								</div>
-								<!-- /.box-body -->
-								<div class="box-footer">
+								<!-- /.card-body -->
+								<div class="card-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
-								<!-- /.box-footer -->
+								<!-- /.card-footer -->
 							</div>
-							<!-- /.box -->
+							<!-- /.card -->
 						</div>
 					</div>
 				</la:form>

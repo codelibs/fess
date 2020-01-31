@@ -14,21 +14,29 @@
 			<jsp:param name="menuType" value="boostDocumentRule" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<section class="content-header">
-				<h1>
-					<la:message key="labels.boost_document_rule_configuration" />
-				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
-			</section>
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>
+								<la:message key="labels.boost_document_rule_configuration" />
+							</h1>
+						</div>
+						<div class="col-sm-6">
+							<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+						</div>
+					</div>
+				</div>
+			</div>
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
+						<div class="card card-outline card-primary">
+							<div class="card-header">
 								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
-							<!-- /.box-header -->
-							<div class="box-body">
+							<!-- /.card-header -->
+							<div class="card-body">
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
@@ -41,22 +49,22 @@
 								<div class="collapse" id="listSearchForm">
 								<la:form action="/admin/boostdoc/"
 										 styleClass="form-horizontal">
-									<div class="form-group">
-										<label for="urlExpr" class="col-sm-2 control-label"><la:message
+									<div class="form-group row">
+										<label for="urlExpr" class="col-sm-2 col-form-label"><la:message
 												key="labels.boost_document_rule_url_expr" /></label>
 										<div class="col-sm-10">
 											<la:text styleId="urlExpr" property="urlExpr" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<label for="boostExpr" class="col-sm-2 control-label"><la:message
+									<div class="form-group row">
+										<label for="boostExpr" class="col-sm-2 col-form-label"><la:message
 												key="labels.boost_document_rule_boost_expr" /></label>
 										<div class="col-sm-10">
 											<la:text styleId="boostExpr" property="boostExpr" styleClass="form-control" />
 										</div>
 									</div>
-									<div class="form-group">
-										<div class="col-sm-offset-2 col-sm-10">
+									<div class="form-group row">
+										<div class="offset-sm-2 col-sm-10">
 											<button type="submit" class="btn btn-primary" id="submit"
 													name="search"
 													value="<la:message key="labels.crud_button_search" />">
@@ -73,9 +81,9 @@
 								</div>
 								<%-- List --%>
 								<c:if test="${boostDocPager.allRecordCount == 0}">
-									<div class="row top10">
+									<div class="row">
 										<div class="col-sm-12">
-											<em class="fa fa-info-circle text-light-blue"></em>
+											<em class="fa fa-info-circle text-primary"></em>
 											<la:message key="labels.list_could_not_find_crud_table" />
 										</div>
 									</div>
@@ -110,9 +118,9 @@
 									</c:if>
 								</c:if>
 							</div>
-							<!-- /.box-body -->
+							<!-- /.card-body -->
 						</div>
-						<!-- /.box -->
+						<!-- /.card -->
 					</div>
 				</div>
 			</section>
