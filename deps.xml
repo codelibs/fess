@@ -10,7 +10,7 @@
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
-	<property name="maven.release.repo.url" value="http://central.maven.org/maven2" />
+	<property name="maven.release.repo.url" value="https://repo1.maven.org/maven2" />
 
 	<target name="install.jars">
 		<mkdir dir="${target.dir}" />
