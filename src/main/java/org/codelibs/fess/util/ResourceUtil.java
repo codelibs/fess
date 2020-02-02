@@ -131,6 +131,10 @@ public class ResourceUtil {
         return getPath(StringUtil.EMPTY, "js", names);
     }
 
+    public static Path getEnvPath(final String envName, final String... names) {
+        return getPath("WEB-INF/", "env/" + envName, names);
+    }
+
     protected static Path getPath(final String root, final String base, final String... names) {
 
         try {
