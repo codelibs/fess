@@ -61,7 +61,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th class="col-xs-3"><la:message
+                                        <th class="col-3"><la:message
                                                 key="labels.regular_name"/></th>
                                         <td>${f:h(regularName)}<la:hidden
                                                 property="regularName"/></td>

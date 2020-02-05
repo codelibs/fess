@@ -36,7 +36,7 @@
         </div>
         <section class="content">
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-12">
                     <div class="card card-outline card-primary">
                         <%-- Card Header --%>
                         <div class="card-header">
@@ -83,7 +83,7 @@
                                 </c:when>
                                 <c:when test="${f:h(allRecordCount) > 0}">
                                     <div id="subheader" class="row top10">
-                                        <div class="col-xs-12">
+                                        <div class="col-12">
                                             <c:if test="${allRecordCountRelation==null}">
                                                 <la:message key="labels.search_result_status"
                                                             arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
