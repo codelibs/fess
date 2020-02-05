@@ -105,6 +105,8 @@
                             <!-- /.card-footer -->
                         </la:form>
                     </div>
+                </div>
+                <div class="col-md-6">
                     <!-- /.card -->
                     <c:if test="${editable}">
                         <div class="card card-outline card-primary">
@@ -145,7 +147,7 @@
                     </c:if>
                     <!-- /.card -->
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <c:if test="${editable}">
                         <div class="card card-outline card-primary">
                             <la:form action="/admin/design/upload/"
