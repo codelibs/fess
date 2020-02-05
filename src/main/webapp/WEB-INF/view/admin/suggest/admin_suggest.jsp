@@ -30,6 +30,11 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <la:message key="labels.crud_title_list"/>
+                            </h3>
+                        </div>
                         <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
