@@ -45,7 +45,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/dict/kuromoji/" styleClass="form-horizontal">
+            <la:form action="/admin/dict/kuromoji/">
                 <la:hidden property="crudMode"/>
                 <la:hidden property="dictId"/>
                 <c:if test="${crudMode==2}">

@@ -49,8 +49,7 @@
                             <a role="button" data-toggle="collapse" href="#listSearchForm" aria-expanded="false"
                                aria-controls="listSearchForm"><i class="fas fa-search" aria-hidden="true"></i></a>
                             <div class="collapse" id="listSearchForm">
-                                <la:form action="/admin/pathmap/"
-                                         styleClass="form-horizontal">
+                                <la:form action="/admin/pathmap/">
                                     <div class="form-group row">
                                         <label for="regex" class="col-sm-2 col-form-label"><la:message
                                                 key="labels.regex"/></label>

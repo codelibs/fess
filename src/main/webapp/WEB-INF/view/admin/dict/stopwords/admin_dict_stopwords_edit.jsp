@@ -46,7 +46,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/dict/stopwords/" styleClass="form-horizontal">
+            <la:form action="/admin/dict/stopwords/">
                 <la:hidden property="crudMode"/>
                 <la:hidden property="dictId"/>
                 <c:if test="${crudMode==2}">

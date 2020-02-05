@@ -37,7 +37,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/wizard/" styleClass="form-horizontal">
+            <la:form action="/admin/wizard/">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">

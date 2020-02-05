@@ -30,7 +30,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/dataconfig/" styleClass="form-horizontal">
+            <la:form action="/admin/dataconfig/">
                 <la:hidden property="crudMode"/>
                 <c:if test="${crudMode==2}">
                     <la:hidden property="id"/>

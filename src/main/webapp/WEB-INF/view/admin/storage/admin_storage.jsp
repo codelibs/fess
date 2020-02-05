@@ -244,8 +244,7 @@
                                                                                         key="labels.crud_button_cancel"/>
                                                                             </button>
                                                                             <la:form
-                                                                                    action="${contextPath}/admin/storage/delete/${f:h(data.id)}/"
-                                                                                    styleClass="form-horizontal">
+                                                                                    action="${contextPath}/admin/storage/delete/${f:h(data.id)}/">
                                                                                 <button type="submit"
                                                                                         class="btn btn-outline btn-danger"
                                                                                         name="delete"

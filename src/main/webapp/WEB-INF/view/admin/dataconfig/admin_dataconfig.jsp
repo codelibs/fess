@@ -48,8 +48,7 @@
                             <a role="button" data-toggle="collapse" href="#listSearchForm" aria-expanded="false"
                                aria-controls="listSearchForm"><i class="fas fa-search" aria-hidden="true"></i></a>
                             <div class="collapse" id="listSearchForm">
-                                <la:form action="/admin/dataconfig/"
-                                         styleClass="form-horizontal">
+                                <la:form action="/admin/dataconfig/">
                                     <div class="form-group row">
                                         <label for="name" class="col-sm-2 col-form-label"><la:message
                                                 key="labels.name"/></label>

@@ -46,7 +46,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/dict/stemmeroverride/" styleClass="form-horizontal">
+            <la:form action="/admin/dict/stemmeroverride/">
                 <la:hidden property="crudMode"/>
                 <la:hidden property="dictId"/>
                 <c:if test="${crudMode==2}">

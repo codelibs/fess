@@ -48,8 +48,7 @@
                                 </la:info>
                                 <la:errors/>
                             </div>
-                            <la:form action="/admin/failureurl/"
-                                     styleClass="form-horizontal">
+                            <la:form action="/admin/failureurl/">
                                 <div class="form-group row">
                                     <label for="url" class="col-sm-2 col-form-label"><la:message
                                             key="labels.failure_url_search_url"/></label>

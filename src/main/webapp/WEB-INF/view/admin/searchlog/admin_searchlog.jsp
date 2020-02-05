@@ -52,8 +52,7 @@
                                 </la:info>
                                 <la:errors/>
                             </div>
-                            <la:form action="/admin/searchlog/"
-                                     styleClass="form-horizontal">
+                            <la:form action="/admin/searchlog/">
                                 <div class="form-group row">
                                     <label for="logTypeSearch" class="col-sm-2 col-form-label"><la:message
                                             key="labels.searchlog_log_type"/></label>

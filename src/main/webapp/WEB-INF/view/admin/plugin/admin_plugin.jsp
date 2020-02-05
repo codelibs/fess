@@ -112,8 +112,7 @@
                                                                                 <la:message
                                                                                         key="labels.crud_button_cancel"/>
                                                                             </button>
-                                                                            <la:form action="/admin/plugin/"
-                                                                                     styleClass="form-horizontal">
+                                                                            <la:form action="/admin/plugin/">
                                                                                 <input type="hidden" name="name"
                                                                                        value="${f:h(artifact.name)}">
                                                                                 <input type="hidden" name="version"

@@ -34,7 +34,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/searchlist/" styleClass="form-horizontal">
+            <la:form action="/admin/searchlist/">
                 <la:hidden property="crudMode"/>
                 <la:hidden property="q"/>
                 <c:if test="${crudMode==2}">

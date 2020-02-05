@@ -31,7 +31,7 @@
             </div>
         </div>
         <section class="content">
-            <la:form action="/admin/role/" styleClass="form-horizontal">
+            <la:form action="/admin/role/">
                 <la:hidden property="crudMode"/>
                 <c:if test="${crudMode==2}">
                     <la:hidden property="id"/>
