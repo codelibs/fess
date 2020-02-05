@@ -37,23 +37,22 @@
                         <div class="card-header">
                             <h3 class="card-title">
                                 <a aria-hidden="true" href="${contextPath}/admin/storage/">
-                                    <i class="fas fa-database"
+                                    <i class="fas fa-database fa-fw"
                                        aria-hidden="true"></i>${f:h(bucket)}
                                 </a>
                                 <c:forEach var="item" varStatus="s" items="${pathItems}">
                                     / <span><a
                                         href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
                                 </c:forEach>
-                                / <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir"> <i
-                                    class="fas fa-folder" aria-hidden="true"></i></a></c:if>
+                                / <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir" href="#"><i
+                                    class="fas fa-folder fa-fw" aria-hidden="true"></i></a></c:if>
                             </h3>
                             <c:if test="${editable}">
 								<div class="card-tools">
-                                    <span> <a data-toggle="modal" data-target="#uploadeFile"><i
+                                    <a data-toggle="modal" data-target="#uploadeFile" href="#"><i
                                             class="fa fa-upload"
                                             aria-hidden="true"
                                     ></i></a>
-                                    </span>
                                 </div>
                             </c:if>
                         </div>
