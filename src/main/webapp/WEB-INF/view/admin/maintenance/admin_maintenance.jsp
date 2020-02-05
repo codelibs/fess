@@ -51,12 +51,12 @@
                                     <div class="form-group row">
                                         <label for="replaceAliases" class="col-sm-3 col-form-label"><la:message
                                                 key="labels.replace_aliases"/></label>
-                                        <div class="col-sm-9">
+                                        <div class="form-inline col-sm-9">
                                             <la:errors property="replaceAliases"/>
-                                            <div class="checkbox">
-                                                <label> <la:checkbox styleId="replaceAliases"
-                                                                     property="replaceAliases"/> <la:message
-                                                        key="labels.enabled"/>
+                                            <div class="form-check">
+                                                <la:checkbox styleId="replaceAliases" styleClass="form-check-input" property="replaceAliases"/>
+                                                <label for="replaceAliases" class="form-check-label">
+                                                    <la:message key="labels.enabled"/>
                                                 </label>
                                             </div>
                                         </div>
@@ -64,12 +64,12 @@
                                     <div class="form-group row">
                                         <label for="resetDictionaries" class="col-sm-3 col-form-label"><la:message
                                                 key="labels.reset_dictionaries"/></label>
-                                        <div class="col-sm-9">
+                                        <div class="form-inline col-sm-9">
                                             <la:errors property="resetDictionaries"/>
-                                            <div class="checkbox">
-                                                <label> <la:checkbox styleId="resetDictionaries"
-                                                                     property="resetDictionaries"/> <la:message
-                                                        key="labels.enabled"/>
+                                            <div class="form-check">
+                                                <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries"/>
+                                                <label for="resetDictionaries" class="form-check-label">
+                                                    <la:message key="labels.enabled"/>
                                                 </label>
                                             </div>
                                         </div>

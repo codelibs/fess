@@ -44,12 +44,12 @@
                                 <div class="form-group row">
                                     <label for="webApiJson" class="col-sm-3 col-form-label"><la:message
                                             key="labels.web_api_json_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="webApiJson"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="webApiJson" property="webApiJson"/>
-                                                <la:message
-                                                        key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="webApiJson" styleClass="form-check-input" property="webApiJson"/>
+                                            <label class="form-check-label">
+                                                 <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -57,12 +57,12 @@
                                 <div class="form-group row">
                                     <label for="loginRequired" class="col-sm-3 col-form-label"><la:message
                                             key="labels.login_required"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="loginRequired"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="loginRequired" property="loginRequired"/>
-                                                <la:message
-                                                        key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="loginRequired" styleClass="form-check-input" property="loginRequired"/>
+                                            <label for="loginRequired" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -70,11 +70,12 @@
                                 <div class="form-group row">
                                     <label for="loginLink" class="col-sm-3 col-form-label"><la:message
                                             key="labels.login_link"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="loginLink"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="loginLink" property="loginLink"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="loginLink" styleClass="form-check-input" property="loginLink"/>
+                                            <label for="loginLink" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -82,12 +83,12 @@
                                 <div class="form-group row">
                                     <label for="resultCollapsed" class="col-sm-3 col-form-label"><la:message
                                             key="labels.result_collapsed"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="resultCollapsed"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="resultCollapsed" property="resultCollapsed"/>
-                                                <la:message
-                                                        key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="resultCollapsed" styleClass="form-check-input" property="resultCollapsed"/>
+                                            <label for="resultCollapsed" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -95,11 +96,12 @@
                                 <div class="form-group row">
                                     <label for="thumbnail" class="col-sm-3 col-form-label"><la:message
                                             key="labels.thumbnail"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="thumbnail"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="thumbnail" property="thumbnail"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="thumbnail" styleClass="form-check-input" property="thumbnail"/>
+                                            <label for="thumbnail" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -143,12 +145,12 @@
                                 <div class="form-group row">
                                     <label for="popularWord" class="col-sm-3 col-form-label"><la:message
                                             key="labels.popular_word_word_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="popularWord"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="popularWord" property="popularWord"/>
-                                                <la:message
-                                                        key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="popularWord" styleClass="form-check-input" property="popularWord"/>
+                                            <label for="popularWord" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -166,11 +168,12 @@
                                     <label for="appendQueryParameter"
                                            class="col-sm-3 col-form-label"><la:message
                                             key="labels.append_query_param_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="appendQueryParameter"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="appendQueryParameter"
+                                        <div class="form-check">
+                                            <la:checkbox styleId="appendQueryParameter" styleClass="form-check-input"
                                                                  property="appendQueryParameter"/>
+                                            <label for="appendQueryParameter" class="form-check-label">
                                                 <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
@@ -198,12 +201,13 @@
                                 <div class="form-group row">
                                     <label for="incrementalCrawling" class="col-sm-3 col-form-label"><la:message
                                             key="labels.incremental_crawling"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="incrementalCrawling"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="incrementalCrawling"
-                                                                 property="incrementalCrawling"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="incrementalCrawling" styleClass="form-check-input"
+                                                                 property="incrementalCrawling"/>
+                                            <label for="incrementalCrawling" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -255,11 +259,12 @@
                                 <div class="form-group row">
                                     <label for="searchLog" class="col-sm-3 col-form-label"><la:message
                                             key="labels.search_log_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="searchLog"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="searchLog" property="searchLog"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="searchLog" styleClass="form-check-input" property="searchLog"/>
+                                            <label for="searchLog" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -267,11 +272,12 @@
                                 <div class="form-group row">
                                     <label for="userInfo" class="col-sm-3 col-form-label"><la:message
                                             key="labels.user_info_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="userInfo"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="userInfo" property="userInfo"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="userInfo" styleClass="form-check-input" property="userInfo"/>
+                                            <label for="userInfo" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -279,12 +285,12 @@
                                 <div class="form-group row">
                                     <label for="userFavorite" class="col-sm-3 col-form-label"><la:message
                                             key="labels.user_favorite_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="userFavorite"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="userFavorite" property="userFavorite"/>
-                                                <la:message
-                                                        key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="userFavorite" styleClass="form-check-input" property="userFavorite"/>
+                                            <label for="userFavorite" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -353,11 +359,11 @@
                                 <div class="form-group row">
                                     <label for="suggestSearchLog" class="col-sm-3 col-form-label"><la:message
                                             key="labels.suggest_search_log_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="suggestSearchLog"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="suggestSearchLog"
-                                                                 property="suggestSearchLog"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="suggestSearchLog" styleClass="form-check-input" property="suggestSearchLog"/>
+                                            <label for="suggestSearchLog" class="form-check-label">
                                                 <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
@@ -366,11 +372,11 @@
                                 <div class="form-group row">
                                     <label for="suggestSearchLog" class="col-sm-3 col-form-label"><la:message
                                             key="labels.suggest_documents_enabled"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="suggestDocuments"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="suggestDocuments"
-                                                                 property="suggestDocuments"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="suggestDocuments" styleClass="form-check-input" property="suggestDocuments"/>
+                                            <label for="suggestDocuments" class="form-check-label">
                                                 <la:message key="labels.enabled"/>
                                             </label>
                                         </div>

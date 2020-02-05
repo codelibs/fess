@@ -99,12 +99,12 @@
                                 <div class="form-group row">
                                     <label for="jobLogging" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_jobLogging"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="jobLogging"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="jobLogging" property="jobLogging"/>
-                                                <la:message
-                                                        key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="jobLogging" styleClass="form-check-input" property="jobLogging"/>
+                                            <label for="jobLogging" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -112,11 +112,12 @@
                                 <div class="form-group row">
                                     <label for="crawler" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_crawler"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="crawler"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="crawler" property="crawler"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="crawler" styleClass="form-check-input" property="crawler"/>
+                                            <label for="crawler" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
@@ -124,11 +125,12 @@
                                 <div class="form-group row">
                                     <label for="available" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_status"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="available"/>
-                                        <div class="checkbox">
-                                            <label> <la:checkbox styleId="available" property="available"/> <la:message
-                                                    key="labels.enabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="available" styleClass="form-check-input" property="available"/>
+                                            <label for="available" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
