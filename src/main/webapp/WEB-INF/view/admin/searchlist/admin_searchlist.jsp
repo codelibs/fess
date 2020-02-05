@@ -63,13 +63,13 @@
                                 <la:errors/>
                             </div>
                             <la:form action="/admin/searchlist" styleClass="form-inline" method="GET">
-                                <div class="form-group row">
+                                <div class="form-group">
                                     <label class="sr-only" for="sessionIdSearchBtn"></label>
                                     <la:text styleClass="query form-control" property="q"
                                              title="Search" size="50" maxlength="1000"
                                              placeholder="Type a search query"/>
                                 </div>
-                                <div class="form-group row">
+                                <div class="form-group ml-sm-2">
                                     <button type="submit" class="btn btn-primary" id="submit"
                                             name="search" value="<la:message key="labels.search"/>">
                                         <em class="fa fa-search"></em>
