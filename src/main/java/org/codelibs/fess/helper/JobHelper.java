@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.job.LaCron;
+import org.lastaflute.job.LaJobRuntime;
 import org.lastaflute.job.LaScheduledJob;
 import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.job.subsidiary.CronParamsSupplier;
@@ -43,6 +44,8 @@ public class JobHelper {
     private static final Logger logger = LogManager.getLogger(JobHelper.class);
 
     protected int monitorInterval = 60 * 60;// 1hour
+
+    protected ThreadLocal<LaJobRuntime> jobRuntimeLocal = new ThreadLocal<>();
 
     public void register(final ScheduledJob scheduledJob) {
         final JobManager jobManager = ComponentUtil.getJobManager();
@@ -186,4 +189,11 @@ public class JobHelper {
 
     }
 
+    public void setJobRuntime(LaJobRuntime runtime) {
+        jobRuntimeLocal.set(runtime);
+    }
+
+    public LaJobRuntime getJobRuntime() {
+        return jobRuntimeLocal.get();
+    }
 }

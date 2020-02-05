@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class DataConfigService {
+public class DataConfigService extends FessAppService {
 
     @Resource
     protected DataConfigBhv dataConfigBhv;
@@ -79,10 +79,10 @@ public class DataConfigService {
             cb.query().setName_Wildcard(dataConfigPager.name);
         }
         if (StringUtil.isNotBlank(dataConfigPager.handlerName)) {
-            cb.query().setHandlerName_Wildcard(dataConfigPager.handlerName);
+            cb.query().setHandlerName_Wildcard(wrapQuery(dataConfigPager.handlerName));
         }
         if (StringUtil.isNotBlank(dataConfigPager.description)) {
-            cb.query().setDescription_Wildcard(dataConfigPager.description);
+            cb.query().setDescription_Wildcard(wrapQuery(dataConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 

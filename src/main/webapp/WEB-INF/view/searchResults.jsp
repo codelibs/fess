@@ -33,8 +33,8 @@
 	</div>
 </c:if>
 <div id="result" class="row">
-	<input type="hidden" id="queryId" value="${f:u(queryId)}" /> <input
-		type="hidden" id="rt" value="${f:u(requestedTime)}" />
+	<input type="hidden" id="queryId" value="${f:h(queryId)}" /> <input
+		type="hidden" id="rt" value="${f:h(requestedTime)}" />
 	<ol class="list-unstyled col-md-8">
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
 			<li id="result${s.index}">

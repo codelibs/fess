@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -296,7 +296,7 @@ public class AdminAction extends FessAdminAction {
     })
     public HtmlResponse index() {
         return redirect(getUserBean().map(user -> {
-            Class<? extends FessAdminAction> actionClass = getAdminActionClass(user);
+            final Class<? extends FessAdminAction> actionClass = getAdminActionClass(user);
             if (actionClass != null) {
                 return actionClass;
             }
@@ -304,7 +304,7 @@ public class AdminAction extends FessAdminAction {
         }).orElse(AdminDashboardAction.class));
     }
 
-    public static Class<? extends FessAdminAction> getAdminActionClass(FessUserBean user) {
+    public static Class<? extends FessAdminAction> getAdminActionClass(final FessUserBean user) {
         if (user.hasRoles(getActionRoles(AdminDashboardAction.ROLE))) {
             return AdminDashboardAction.class;
         } else if (user.hasRoles(getActionRoles(AdminWizardAction.ROLE))) {

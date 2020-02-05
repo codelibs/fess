@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class PathMappingService {
+public class PathMappingService extends FessAppService {
 
     @Resource
     protected PathMappingBhv pathMappingBhv;
@@ -89,10 +89,10 @@ public class PathMappingService {
 
     protected void setupListCondition(final PathMappingCB cb, final PathMapPager pathMappingPager) {
         if (StringUtil.isNotBlank(pathMappingPager.regex)) {
-            cb.query().setRegex_Wildcard(pathMappingPager.regex);
+            cb.query().setRegex_Wildcard(wrapQuery(pathMappingPager.regex));
         }
         if (StringUtil.isNotBlank(pathMappingPager.replacement)) {
-            cb.query().setReplacement_Wildcard(pathMappingPager.replacement);
+            cb.query().setReplacement_Wildcard(wrapQuery(pathMappingPager.replacement));
         }
         // TODO Long, Integer, String supported only.
 

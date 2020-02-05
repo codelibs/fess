@@ -12,7 +12,7 @@
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -60,8 +60,8 @@
 		<suggest.version>7.5.0</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.5.1</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.5.0</elasticsearch.httpclient.version>
+		<elasticsearch.version>7.5.2</elasticsearch.version>
+		<elasticsearch.httpclient.version>7.5.1</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -221,7 +221,7 @@
 				<configuration>
 					<header>https://www.codelibs.org/assets/license/header.txt</header>
 					<properties>
-						<year>2019</year>
+						<year>2020</year>
 					</properties>
 					<includes>
 						<include>src/**/*.java</include>

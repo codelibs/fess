@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,7 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
-import java.util.concurrent.ExecutionException;
-
-import org.dbflute.helper.jprop.ObjectiveProperties;
-import org.lastaflute.core.direction.PropertyFilter;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * @author FreeGen
@@ -46,6 +39,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. .*password|.*key */
     String APP_ENCRYPT_PROPERTY_PATTERN = "app.encrypt.property.pattern";
+
+    /** The key of the configuration. e.g.  */
+    String APP_EXTENSION_NAMES = "app.extension.names";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
     -Dfile.encoding=UTF-8
@@ -1206,6 +1202,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. https://fess.codelibs.org/{lang}/{version}/install/install.html */
     String ONLINE_HELP_INSTALLATION = "online.help.installation";
 
+    /** The key of the configuration. e.g. https://fess.codelibs.org/{lang}/eol.html */
+    String ONLINE_HELP_EOL = "online.help.eol";
+
     /** The key of the configuration. e.g. failureurl */
     String ONLINE_HELP_NAME_FAILUREURL = "online.help.name.failureurl";
 
@@ -1449,6 +1448,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LDAP_IGNORE_NETBIOS_NAME = "ldap.ignore.netbios.name";
 
+    /** The key of the configuration. e.g. false */
+    String LDAP_GROUP_NAME_WITH_UNDERSCORES = "ldap.group.name.with.underscores";
+
     /** The key of the configuration. e.g. true */
     String LDAP_ROLE_SEARCH_USER_ENABLED = "ldap.role.search.user.enabled";
 
@@ -1635,6 +1637,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppEncryptPropertyPattern();
+
+    /**
+     * Get the value for the key 'app.extension.names'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppExtensionNames();
+
+    /**
+     * Get the value for the key 'app.extension.names' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getAppExtensionNamesAsInteger();
 
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
@@ -5377,6 +5394,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpInstallation();
 
     /**
+     * Get the value for the key 'online.help.eol'. <br>
+     * The value is, e.g. https://fess.codelibs.org/{lang}/eol.html <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpEol();
+
+    /**
      * Get the value for the key 'online.help.name.failureurl'. <br>
      * The value is, e.g. failureurl <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6104,6 +6128,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapIgnoreNetbiosName();
 
     /**
+     * Get the value for the key 'ldap.group.name.with.underscores'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapGroupNameWithUnderscores();
+
+    /**
+     * Is the property for the key 'ldap.group.name.with.underscores' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapGroupNameWithUnderscores();
+
+    /**
      * Get the value for the key 'ldap.role.search.user.enabled'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -6445,31 +6483,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         /** The serial version UID for object serialization. (Default) */
         private static final long serialVersionUID = 1L;
 
-        private static final String FESS_CONFIG = "fess.config.";
-
-        @Override
-        protected ObjectiveProperties newObjectiveProperties(String resourcePath, PropertyFilter propertyFilter) {
-            return new ObjectiveProperties(resourcePath) { // for e.g. checking existence and filtering value
-                Cache<String, String> cache = CacheBuilder.newBuilder().build();
-
-                @Override
-                public String get(String propertyKey) {
-                    final String plainValue = getFromCache(propertyKey);
-                    final String filteredValue = propertyFilter.filter(propertyKey, plainValue);
-                    verifyPropertyValue(propertyKey, filteredValue); // null checked
-                    return filterPropertyAsDefault(filteredValue); // not null here
-                }
-
-                private String getFromCache(String propertyKey) {
-                    try {
-                        return cache.get(propertyKey, () -> System.getProperty(FESS_CONFIG + propertyKey, super.get(propertyKey)));
-                    } catch (ExecutionException e) {
-                        return super.get(propertyKey);
-                    }
-                }
-            };
-        }
-
         public String getDomainTitle() {
             return get(FessConfig.DOMAIN_TITLE);
         }
@@ -6492,6 +6505,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getAppEncryptPropertyPattern() {
             return get(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN);
+        }
+
+        public String getAppExtensionNames() {
+            return get(FessConfig.APP_EXTENSION_NAMES);
+        }
+
+        public Integer getAppExtensionNamesAsInteger() {
+            return getAsInteger(FessConfig.APP_EXTENSION_NAMES);
         }
 
         public String getJvmCrawlerOptions() {
@@ -8402,6 +8423,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_INSTALLATION);
         }
 
+        public String getOnlineHelpEol() {
+            return get(FessConfig.ONLINE_HELP_EOL);
+        }
+
         public String getOnlineHelpNameFailureurl() {
             return get(FessConfig.ONLINE_HELP_NAME_FAILUREURL);
         }
@@ -8806,6 +8831,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.LDAP_IGNORE_NETBIOS_NAME);
         }
 
+        public String getLdapGroupNameWithUnderscores() {
+            return get(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES);
+        }
+
+        public boolean isLdapGroupNameWithUnderscores() {
+            return is(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES);
+        }
+
         public String getLdapRoleSearchUserEnabled() {
             return get(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED);
         }
@@ -9003,6 +9036,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key");
+            defaultMap.put(FessConfig.APP_EXTENSION_NAMES, "");
             defaultMap
                     .put(FessConfig.JVM_CRAWLER_OPTIONS,
                             "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
@@ -9339,6 +9373,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SCHEDULER_MONITOR_INTERVAL, "30");
             defaultMap.put(FessConfig.ONLINE_HELP_BASE_LINK, "https://fess.codelibs.org/{lang}/{version}/admin/");
             defaultMap.put(FessConfig.ONLINE_HELP_INSTALLATION, "https://fess.codelibs.org/{lang}/{version}/install/install.html");
+            defaultMap.put(FessConfig.ONLINE_HELP_EOL, "https://fess.codelibs.org/{lang}/eol.html");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_FAILUREURL, "failureurl");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ELEVATEWORD, "elevateword");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_REQHEADER, "reqheader");
@@ -9420,6 +9455,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_AUTH_VALIDATION, "true");
             defaultMap.put(FessConfig.LDAP_MAX_USERNAME_LENGTH, "-1");
             defaultMap.put(FessConfig.LDAP_IGNORE_NETBIOS_NAME, "true");
+            defaultMap.put(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES, "false");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_GROUP_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED, "true");

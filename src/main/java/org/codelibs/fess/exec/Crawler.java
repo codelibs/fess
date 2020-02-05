@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,6 +307,8 @@ public class Crawler {
             // use a default session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             options.sessionId = sdf.format(new Date());
+        } else {
+            options.sessionId = options.sessionId.replace('-', '_');
         }
 
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
@@ -392,6 +394,7 @@ public class Crawler {
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
 
+            final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
             final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
             CrawlerPostcard.droppedInto(postbox, postcard -> {
                 postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
@@ -418,6 +421,7 @@ public class Crawler {
                 } else {
                     postcard.setStatus(Constants.FAIL);
                 }
+                postcard.setJobname(systemProperties.getProperty("job.runtime.name", StringUtil.EMPTY));
             });
         }
     }

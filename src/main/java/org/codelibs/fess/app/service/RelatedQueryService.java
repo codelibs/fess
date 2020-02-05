@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class RelatedQueryService {
+public class RelatedQueryService extends FessAppService {
 
     @Resource
     protected RelatedQueryBhv relatedQueryBhv;
@@ -72,10 +72,10 @@ public class RelatedQueryService {
 
     protected void setupListCondition(final RelatedQueryCB cb, final RelatedQueryPager relatedQueryPager) {
         if (StringUtil.isNotBlank(relatedQueryPager.term)) {
-            cb.query().setTerm_Wildcard(relatedQueryPager.term);
+            cb.query().setTerm_Wildcard(wrapQuery(relatedQueryPager.term));
         }
         if (StringUtil.isNotBlank(relatedQueryPager.queries)) {
-            cb.query().setQueries_Wildcard(relatedQueryPager.queries);
+            cb.query().setQueries_Wildcard(wrapQuery(relatedQueryPager.queries));
         }
         // TODO Long, Integer, String supported only.
 

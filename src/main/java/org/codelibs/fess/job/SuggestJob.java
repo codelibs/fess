@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package org.codelibs.fess.job;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
@@ -194,11 +192,7 @@ public class SuggestJob extends ExecJob {
         try {
             cmdList.add("-p");
             cmdList.add(propFile.getAbsolutePath());
-            try (FileOutputStream out = new FileOutputStream(propFile)) {
-                final Properties prop = new Properties();
-                prop.putAll(ComponentUtil.getSystemProperties());
-                prop.store(out, cmdList.toString());
-            }
+            createSystemProperties(cmdList, propFile);
 
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 

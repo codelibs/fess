@@ -3,5 +3,5 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="assistantDirector" class="org.codelibs.fess.mylasta.direction.FessFwAssistantDirector"/>
-	<component name="fessConfig" class="org.codelibs.fess.mylasta.direction.FessConfig$SimpleImpl"/>
+	<component name="fessConfig" class="org.codelibs.fess.mylasta.direction.FessConfigImpl"/>
 </components>

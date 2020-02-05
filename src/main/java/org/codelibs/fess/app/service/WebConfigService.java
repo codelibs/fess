@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class WebConfigService {
+public class WebConfigService extends FessAppService {
 
     @Resource
     protected WebConfigBhv webConfigBhv;
@@ -93,13 +93,13 @@ public class WebConfigService {
 
     protected void setupListCondition(final WebConfigCB cb, final WebConfigPager webConfigPager) {
         if (StringUtil.isNotBlank(webConfigPager.name)) {
-            cb.query().setName_Wildcard(webConfigPager.name);
+            cb.query().setName_Wildcard(wrapQuery(webConfigPager.name));
         }
         if (StringUtil.isNotBlank(webConfigPager.urls)) {
-            cb.query().setUrls_Wildcard(webConfigPager.urls);
+            cb.query().setUrls_Wildcard(wrapQuery(webConfigPager.urls));
         }
         if (StringUtil.isNotBlank(webConfigPager.description)) {
-            cb.query().setDescription_Wildcard(webConfigPager.description);
+            cb.query().setDescription_Wildcard(wrapQuery(webConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 

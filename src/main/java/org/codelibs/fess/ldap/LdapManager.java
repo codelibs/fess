@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -295,11 +295,15 @@ public class LdapManager {
         start += 3;
 
         final int end = entryDn.indexOf(',', start);
-        if (end == -1) {
-            return entryDn.substring(start);
-        } else {
-            return entryDn.substring(start, end);
+        final String value = end == -1 ? entryDn.substring(start) : entryDn.substring(start, end);
+        if (fessConfig.isLdapGroupNameWithUnderscores()) {
+            return replaceWithUnderscores(value);
         }
+        return value;
+    }
+
+    protected String replaceWithUnderscores(final String value) {
+        return value.replaceAll("[/\\\\\\[\\]:;|=,+\\*?<>]", "_");
     }
 
     protected void setAttributeValue(final List<SearchResult> result, final String name, final Consumer<Object> consumer) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ public class CrawlerPostcard extends LaTypicalPostcard {
 
     @Override
     protected String[] getPropertyNames() {
-        return new String[] { "hostname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime", "webFsIndexExecTime",
-                "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataIndexSize",
-                "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
+        return new String[] { "hostname", "jobname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime",
+                "webFsIndexExecTime", "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime",
+                "dataIndexSize", "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
     }
 
     // ===================================================================================
@@ -107,6 +107,15 @@ public class CrawlerPostcard extends LaTypicalPostcard {
      */
     public void setHostname(String hostname) {
         registerVariable("hostname", hostname);
+    }
+
+    /**
+     * Set the value of jobname, used in parameter comment. <br>
+     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
+     * @param jobname The parameter value of jobname. (NotNull)
+     */
+    public void setJobname(String jobname) {
+        registerVariable("jobname", jobname);
     }
 
     /**

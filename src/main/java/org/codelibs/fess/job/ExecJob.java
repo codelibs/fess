@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,23 @@
 package org.codelibs.fess.job;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.di.exception.IORuntimeException;
+import org.lastaflute.job.LaJobRuntime;
 
 public abstract class ExecJob {
 
@@ -156,5 +163,23 @@ public abstract class ExecJob {
             ComponentUtil.getProcessHelper().destroyProcess(sessionId);
             processTimeout = true;
         }, timeout, false);
+    }
+
+    protected void createSystemProperties(final List<String> cmdList, final File propFile) {
+        try (FileOutputStream out = new FileOutputStream(propFile)) {
+            final Properties prop = new Properties();
+            prop.putAll(ComponentUtil.getSystemProperties());
+            final LaJobRuntime jobRuntime = ComponentUtil.getJobHelper().getJobRuntime();
+            if (jobRuntime != null) {
+                final ScheduledJob job = (ScheduledJob) jobRuntime.getParameterMap().get(Constants.SCHEDULED_JOB);
+                if (job != null) {
+                    prop.setProperty("job.runtime.id", job.getId());
+                    prop.setProperty("job.runtime.name", job.getName());
+                }
+            }
+            prop.store(out, cmdList.toString());
+        } catch (final IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 }

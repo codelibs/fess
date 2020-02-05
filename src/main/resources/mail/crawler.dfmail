@@ -6,6 +6,7 @@ subject: [FESS] Crawler completed: /*pmb.hostname*/
 >>>
 --- Server Info ---
 Host Name: /*pmb.hostname:orElse('Unknown')*/
+Job Name: /*pmb.jobname:orElse('Unknown')*/
 
 --- Web/FileSystem Crawler ---
 Start Time: /*pmb.webFsCrawlStartTime:orElse('-')*/

@@ -14,10 +14,15 @@
 
 	<!-- Right navbar links -->
 	<ul class="navbar-nav ml-auto">
+		<c:if test="${eoled}">
+		<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message
+			key="labels.eol_error" />">
+			<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle" style="color:yellow;"></em></a></li>
+		</c:if>
 		<c:if test="${developmentMode}">
 			<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message
 				key="labels.development_mode_warning" />">
-				<a  class="nav-link active" href="${installationLink}" target="_olh"><em class="fa fa-exclamation-triangle"></em></a></li>
+				<a  class="nav-link active" href="${installationLink}" target="_olh"><em class="fa fa-exclamation-triangle" style="color:yellow;"></em></a></li>
 		</c:if>
 		<li class="nav-item" ><a class="nav-link" href="${contextPath}/"><em class="fa fa-list-alt"></em></a></li>
 		<c:if test="${fe:permission('admin-scheduler')}">

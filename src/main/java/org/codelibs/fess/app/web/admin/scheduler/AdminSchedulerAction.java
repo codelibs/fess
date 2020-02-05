@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,14 +140,15 @@ public class AdminSchedulerAction extends FessAdminAction {
                 final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
                 scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
                 final String[] ids = new String[] { "", "", "" };
+                final String configId = id.replace('-', '_');
                 if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
-                    ids[0] = "\"" + id + "\"";
+                    ids[0] = "\"" + configId + "\"";
                 } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
-                    ids[1] = "\"" + id + "\"";
+                    ids[1] = "\"" + configId + "\"";
                 } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
-                    ids[2] = "\"" + id + "\"";
+                    ids[2] = "\"" + configId + "\"";
                 }
-                scheduledJobForm.scriptData = MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], id);
+                scheduledJobForm.scriptData = MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], configId);
             });
         });
     }

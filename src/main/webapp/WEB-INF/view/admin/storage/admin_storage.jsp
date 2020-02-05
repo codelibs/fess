@@ -75,7 +75,7 @@
                                             <div class="modal-content">
                                                 <la:form action="/admin/storage/createDir/"
                                                          enctype="multipart/form-data" styleClass="form-inline">
-                                                    <input type="hidden" name="path" value="${path}"/>
+                                                    <input type="hidden" name="path" value="${f:h(path)}"/>
                                                     <div class="modal-header">
                                                         <h4 class="modal-title">
                                                             <la:message key="labels.crud_title_create"/>
@@ -112,7 +112,7 @@
                                             <div class="modal-content">
                                                 <la:form action="/admin/storage/upload/" enctype="multipart/form-data"
                                                          styleClass="form-inline">
-                                                    <input type="hidden" name="path" value="${path}"/>
+                                                    <input type="hidden" name="path" value="${f:h(path)}"/>
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal"
                                                                 aria-label="Close">

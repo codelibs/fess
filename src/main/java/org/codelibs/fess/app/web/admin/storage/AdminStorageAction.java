@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 CodeLibs Project and the Others.
+ * Copyright 2012-2020 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ public class AdminStorageAction extends FessAdminAction {
                 try {
                     minioClient.makeBucket(fessConfig.getStorageBucket());
                     logger.info("Created bucket: {}", fessConfig.getStorageBucket());
-                } catch (Exception e1) {
+                } catch (final Exception e1) {
                     logger.warn("Failed to create bucket:" + fessConfig.getStorageBucket(), e1);
                 }
             } else if (logger.isDebugEnabled()) {
