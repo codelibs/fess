@@ -102,7 +102,7 @@
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="token" class="col-sm-3 col-form-label"><la:message
                                             key="labels.dict_kuromoji_token"/></label>
                                     <div class="col-sm-9">
@@ -110,7 +110,7 @@
                                         <la:text styleId="token" property="token" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="segmentation" class="col-sm-3 col-form-label"><la:message
                                             key="labels.dict_kuromoji_segmentation"/></label>
                                     <div class="col-sm-9">
@@ -119,7 +119,7 @@
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="reading" class="col-sm-3 col-form-label"><la:message
                                             key="labels.dict_kuromoji_reading"/></label>
                                     <div class="col-sm-9">
@@ -127,7 +127,7 @@
                                         <la:text styleId="reading" property="reading" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="pos" class="col-sm-3 col-form-label"><la:message
                                             key="labels.dict_kuromoji_pos"/></label>
                                     <div class="col-sm-9">

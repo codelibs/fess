@@ -100,7 +100,7 @@
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="word" class="col-sm-3 col-form-label"><la:message
                                             key="labels.bad_word_suggest_word"/></label>
                                     <div class="col-sm-9">

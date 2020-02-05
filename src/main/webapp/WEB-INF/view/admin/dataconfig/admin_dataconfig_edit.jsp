@@ -54,7 +54,7 @@
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="name" class="col-sm-3 col-form-label"><la:message
                                             key="labels.name"/></label>
                                     <div class="col-sm-9">
@@ -62,7 +62,7 @@
                                         <la:text styleId="name" property="name" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="handlerName" class="col-sm-3 col-form-label"><la:message
                                             key="labels.handler_name"/></label>
                                     <div class="col-sm-9">
@@ -76,7 +76,7 @@
                                         </la:select>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="handlerParameter" class="col-sm-3 col-form-label"><la:message
                                             key="labels.handler_parameter"/></label>
                                     <div class="col-sm-9">
@@ -85,7 +85,7 @@
                                                      styleClass="form-control" rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="handlerScript" class="col-sm-3 col-form-label"><la:message
                                             key="labels.handler_script"/></label>
                                     <div class="col-sm-9">
@@ -94,7 +94,7 @@
                                                      styleClass="form-control" rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="boost" class="col-sm-3 col-form-label"><la:message
                                             key="labels.boost"/></label>
                                     <div class="col-sm-9">
@@ -102,7 +102,7 @@
                                         <la:text styleId="boost" property="boost" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="permissions" class="col-sm-3 col-form-label"><la:message
                                             key="labels.permissions"/></label>
                                     <div class="col-sm-9">
@@ -112,7 +112,7 @@
                                                      rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="virtualHosts" class="col-sm-3 col-form-label"><la:message
                                             key="labels.virtual_hosts"/></label>
                                     <div class="col-sm-9">
@@ -122,7 +122,7 @@
                                                      rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="available" class="col-sm-3 col-form-label"><la:message
                                             key="labels.available"/></label>
                                     <div class="col-sm-9">
@@ -137,7 +137,7 @@
                                         </la:select>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="permissions" class="col-sm-3 col-form-label"><la:message
                                             key="labels.description"/></label>
                                     <div class="col-sm-9">

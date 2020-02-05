@@ -50,14 +50,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/dataconfig/"
                                          styleClass="form-horizontal">
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <label for="name" class="col-sm-2 col-form-label"><la:message
                                                 key="labels.name"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="name" property="name" styleClass="form-control"/>
                                         </div>
                                     </div>
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <label for="handlerName" class="col-sm-2 col-form-label"><la:message
                                                 key="labels.handler_name"/></label>
                                         <div class="col-sm-10">
@@ -72,7 +72,7 @@
                                             </la:select>
                                         </div>
                                     </div>
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <label for="description" class="col-sm-2 col-form-label"><la:message
                                                 key="labels.description"/></label>
                                         <div class="col-sm-10">
@@ -80,7 +80,7 @@
                                                      styleClass="form-control"/>
                                         </div>
                                     </div>
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <div class="offset-sm-2 col-sm-10">
                                             <button type="submit" class="btn btn-primary" id="submit"
                                                     name="search"

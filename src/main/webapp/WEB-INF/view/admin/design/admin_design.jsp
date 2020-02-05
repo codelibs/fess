@@ -44,7 +44,7 @@
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <la:errors property="fileName"/>
                                     <la:select styleId="fileName" property="fileName" styleClass="form-control">
                                         <c:forEach var="item" varStatus="s" items="${fileNameItems}">
@@ -116,7 +116,7 @@
                                 </div>
                                 <!-- /.card-header -->
                                 <div class="card-body">
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <la:errors property="fileName"/>
                                         <la:select styleId="fileName" property="fileName" styleClass="form-control">
                                             <c:forEach var="item" items="${jspFileNameItems}">
@@ -157,7 +157,7 @@
                                 </div>
                                 <!-- /.card-header -->
                                 <div class="card-body">
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <label class="col-sm-3 col-form-label"><la:message
                                                 key="labels.design_file"/></label>
                                         <div class="col-sm-9">
@@ -165,7 +165,7 @@
                                             <input type="file" name="designFile" class="form-control"/>
                                         </div>
                                     </div>
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <label class="col-sm-3 col-form-label"><la:message
                                                 key="labels.design_file_name"/></label>
                                         <div class="col-sm-9">

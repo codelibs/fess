@@ -57,7 +57,7 @@
                                         <la:text styleId="url" property="url" styleClass="form-control"></la:text>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="errorCountMin" class="col-sm-2 col-form-label"><la:message
                                             key="labels.failure_url_search_error_count"/></label>
                                     <div>

@@ -53,7 +53,7 @@
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="name" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_name"/></label>
                                     <div class="col-sm-9">
@@ -61,7 +61,7 @@
                                         <la:text styleId="name" property="name" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="target" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_target"/></label>
                                     <div class="col-sm-9">
@@ -69,7 +69,7 @@
                                         <la:text styleId="target" property="target" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="cronExpression" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_cronExpression"/></label>
                                     <div class="col-sm-9">
@@ -78,7 +78,7 @@
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="scriptType" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_scriptType"/></label>
                                     <div class="col-sm-9">
@@ -86,7 +86,7 @@
                                         <la:text styleId="scriptType" property="scriptType" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="scriptData" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_scriptData"/></label>
                                     <div class="col-sm-9">
@@ -96,7 +96,7 @@
                                                      rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="jobLogging" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_jobLogging"/></label>
                                     <div class="col-sm-9">
@@ -109,7 +109,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="crawler" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_crawler"/></label>
                                     <div class="col-sm-9">
@@ -121,7 +121,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="available" class="col-sm-3 col-form-label"><la:message
                                             key="labels.scheduledjob_status"/></label>
                                     <div class="col-sm-9">
@@ -133,7 +133,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="sortOrder" class="col-sm-3 col-form-label"><la:message
                                             key="labels.sortOrder"/></label>
                                     <div class="form-inline col-sm-9">

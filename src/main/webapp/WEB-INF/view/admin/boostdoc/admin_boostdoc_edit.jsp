@@ -53,7 +53,7 @@
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="urlExpr" class="col-sm-3 col-form-label"><la:message
                                             key="labels.boost_document_rule_url_expr"/></label>
                                     <div class="col-sm-9">
@@ -62,7 +62,7 @@
                                                      rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="boostExpr" class="col-sm-3 col-form-label"><la:message
                                             key="labels.boost_document_rule_boost_expr"/></label>
                                     <div class="col-sm-9">
@@ -71,7 +71,7 @@
                                                      rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="sortOrder" class="col-sm-3 col-form-label"><la:message
                                             key="labels.boost_document_rule_sort_order"/></label>
                                     <div class="form-inline col-sm-9">

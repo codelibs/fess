@@ -53,7 +53,7 @@
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="name" class="col-sm-3 col-form-label"><la:message
                                             key="labels.access_token_name"/></label>
                                     <div class="col-sm-9">
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <c:if test="${crudMode==2}">
-                                    <div class="form-group row row">
+                                    <div class="form-group row">
                                         <label for="token" class="col-sm-3 col-form-label"><la:message
                                                 key="labels.access_token_token"/></label>
                                         <div class="col-sm-9">
@@ -70,7 +70,7 @@
                                         </div>
                                     </div>
                                 </c:if>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="permissions" class="col-sm-3 col-form-label"><la:message
                                             key="labels.permissions"/></label>
                                     <div class="col-sm-9">
@@ -80,7 +80,7 @@
                                                      rows="5"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="name" class="col-sm-3 col-form-label"><la:message
                                             key="labels.access_token_parameter_name"/></label>
                                     <div class="col-sm-9">
@@ -89,7 +89,7 @@
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <div class="form-group row row">
+                                <div class="form-group row">
                                     <label for="name" class="col-sm-3 col-form-label"><la:message
                                             key="labels.access_token_expires"/></label>
                                     <div class="col-sm-9">

@@ -55,7 +55,7 @@
                                 <div class="col-sm-12">
                                     <la:form styleClass="form-inline"
                                              action="/admin/crawlinginfo/">
-                                        <div class="form-group row row">
+                                        <div class="form-group row">
                                             <c:set var="ph_session_id">
                                                 <la:message key="labels.crawling_info_session_id_search"/>
                                             </c:set>
