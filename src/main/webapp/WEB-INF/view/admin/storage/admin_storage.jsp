@@ -106,40 +106,40 @@
                                         </div>
                                     </div>
 
-                                    <div class="modal modal-primary" id="uploadeFile" tabindex="-1" role="dialog">
+                                    <div class="modal" id="uploadeFile" tabindex="-1" role="dialog">
                                         <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <la:form action="/admin/storage/upload/" enctype="multipart/form-data"
-                                                         styleClass="form-inline">
-                                                    <input type="hidden" name="path" value="${f:h(path)}"/>
-                                                    <div class="modal-header">
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                                aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                        <h4 class="modal-title">
-                                                            <la:message key="labels.storage_upload_file"/>
-                                                        </h4>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="form-group row">
-                                                            <label for="uploadFile" class="col-form-label"><la:message
-                                                                    key="labels.storage_file"/></label>
-                                                            <input type="file" name="uploadFile" class="form-control"/>
+                                            <la:form action="/admin/storage/upload/" enctype="multipart/form-data"
+                                                     styleClass="modal-content">
+                                                <input type="hidden" name="path" value="${f:h(path)}"/>
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">
+                                                        <la:message key="labels.storage_upload_file"/>
+                                                    </h4>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group row">
+                                                        <label for="uploadFile" class="col-sm-3 col-form-label"><la:message
+                                                                key="labels.storage_file"/></label>
+                                                        <div class="form-inline col-sm-9">
+                                                            <input type="file" name="uploadFile" id="uploadFile"  class="form-control-file"/>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer justify-content-between">
-                                                        <button type="button" class="btn btn-default"
-                                                                data-dismiss="modal">
-                                                            <la:message key="labels.crud_button_cancel"/>
-                                                        </button>
-                                                        <button type="submit" class="btn btn-success" name="upload">
-                                                            <em class="fa fa-upload"></em>
-                                                            <la:message key="labels.storage_button_upload"/>
-                                                        </button>
-                                                    </div>
-                                                </la:form>
-                                            </div>
+                                                </div>
+                                                <div class="modal-footer justify-content-between">
+                                                    <button type="button" class="btn btn-default"
+                                                            data-dismiss="modal">
+                                                        <la:message key="labels.crud_button_cancel"/>
+                                                    </button>
+                                                    <button type="submit" class="btn btn-success" name="upload">
+                                                        <em class="fa fa-upload"></em>
+                                                        <la:message key="labels.storage_button_upload"/>
+                                                    </button>
+                                                </div>
+                                            </la:form>
                                         </div>
                                     </div>
                                 </c:if>
