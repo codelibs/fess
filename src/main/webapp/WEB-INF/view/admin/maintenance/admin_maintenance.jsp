@@ -28,148 +28,146 @@
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <la:form action="/admin/maintenance/">
-                    <%-- Message: BEGIN --%>
-                    <div class="col-md-12">
-                        <la:info id="msg" message="true">
-                            <div class="alert alert-info">${msg}</div>
-                        </la:info>
-                        <la:errors/>
-                    </div>
-                    <c:if test="${editable}">
-                        <%-- Message: END --%>
-                        <div class="col-md-12">
-                            <div class="card card-outline card-primary">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <la:message key="labels.upgrade_reindex"/>
-                                    </h3>
-                                </div>
-                                <!-- /.card-header -->
-                                <div class="card-body">
-                                    <div class="form-group row">
-                                        <label for="replaceAliases" class="col-sm-3 col-form-label"><la:message
-                                                key="labels.replace_aliases"/></label>
-                                        <div class="form-inline col-sm-9">
-                                            <la:errors property="replaceAliases"/>
-                                            <div class="form-check">
-                                                <la:checkbox styleId="replaceAliases" styleClass="form-check-input" property="replaceAliases"/>
-                                                <label for="replaceAliases" class="form-check-label">
-                                                    <la:message key="labels.enabled"/>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="resetDictionaries" class="col-sm-3 col-form-label"><la:message
-                                                key="labels.reset_dictionaries"/></label>
-                                        <div class="form-inline col-sm-9">
-                                            <la:errors property="resetDictionaries"/>
-                                            <div class="form-check">
-                                                <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries"/>
-                                                <label for="resetDictionaries" class="form-check-label">
-                                                    <la:message key="labels.enabled"/>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="numberOfShardsForDoc" class="col-sm-3 col-form-label"><la:message
-                                                key="labels.number_of_shards_for_doc"/></label>
-                                        <div class="col-sm-9">
-                                            <la:errors property="numberOfShardsForDoc"/>
-                                            <la:text styleId="numberOfShardsForDoc" property="numberOfShardsForDoc"
-                                                     styleClass="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="autoExpandReplicasForDoc"
-                                               class="col-sm-3 col-form-label"><la:message
-                                                key="labels.auto_expand_replicas_for_doc"/></label>
-                                        <div class="col-sm-9">
-                                            <la:errors property="autoExpandReplicasForDoc"/>
-                                            <la:text styleId="autoExpandReplicasForDoc"
-                                                     property="autoExpandReplicasForDoc" styleClass="form-control"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- /.card-body -->
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-primary ${f:h(editableClass)}"
-                                            name="reindexOnly"
-                                            value="<la:message key="labels.reindex_start_button"/>">
-                                        <em class="fa fa-arrow-circle-right"></em>
-                                        <la:message key="labels.reindex_start_button"/>
-                                    </button>
-                                </div>
-                                <!-- /.card-footer -->
-                            </div>
-                            <!-- /.card -->
-                        </div>
-                        <div class="col-md-12">
-                            <div class="card card-outline card-primary">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <la:message key="labels.reload_doc_index"/>
-                                    </h3>
-                                </div>
-                                <!-- /.card-header -->
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-primary"
-                                            name="reloadDocIndex"
-                                            value="<la:message key="labels.reload_doc_index_button"/>">
-                                        <em class="fa fa-arrow-circle-right"></em>
-                                        <la:message key="labels.reload_doc_index_button"/>
-                                    </button>
-                                </div>
-                                <!-- /.card-footer -->
-                            </div>
-                            <!-- /.card -->
-                        </div>
-                        <div class="col-md-12">
-                            <div class="card card-outline card-primary">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <la:message key="labels.clear_crawler_index"/>
-                                    </h3>
-                                </div>
-                                <!-- /.card-header -->
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-primary"
-                                            name="clearCrawlerIndex"
-                                            value="<la:message key="labels.clear_crawler_index_button"/>">
-                                        <em class="fa fa-arrow-circle-right"></em>
-                                        <la:message key="labels.clear_crawler_index_button"/>
-                                    </button>
-                                </div>
-                                <!-- /.card-footer -->
-                            </div>
-                            <!-- /.card -->
-                        </div>
-                    </c:if>
+            <la:form action="/admin/maintenance/" styleClass="row">
+                <%-- Message: BEGIN --%>
+                <div class="col-md-12">
+                    <la:info id="msg" message="true">
+                        <div class="alert alert-info">${msg}</div>
+                    </la:info>
+                    <la:errors/>
+                </div>
+                <c:if test="${editable}">
+                    <%-- Message: END --%>
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
                                 <h3 class="card-title">
-                                    <la:message key="labels.diagnostic_logs"/>
+                                    <la:message key="labels.upgrade_reindex"/>
                                 </h3>
                             </div>
                             <!-- /.card-header -->
+                            <div class="card-body">
+                                <div class="form-group row">
+                                    <label for="replaceAliases" class="col-sm-3 col-form-label"><la:message
+                                            key="labels.replace_aliases"/></label>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="replaceAliases"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="replaceAliases" styleClass="form-check-input" property="replaceAliases"/>
+                                            <label for="replaceAliases" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="resetDictionaries" class="col-sm-3 col-form-label"><la:message
+                                            key="labels.reset_dictionaries"/></label>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="resetDictionaries"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries"/>
+                                            <label for="resetDictionaries" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="numberOfShardsForDoc" class="col-sm-3 col-form-label"><la:message
+                                            key="labels.number_of_shards_for_doc"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="numberOfShardsForDoc"/>
+                                        <la:text styleId="numberOfShardsForDoc" property="numberOfShardsForDoc"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="autoExpandReplicasForDoc"
+                                           class="col-sm-3 col-form-label"><la:message
+                                            key="labels.auto_expand_replicas_for_doc"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="autoExpandReplicasForDoc"/>
+                                        <la:text styleId="autoExpandReplicasForDoc"
+                                                 property="autoExpandReplicasForDoc" styleClass="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary"
-                                        name="downloadLogs"
-                                        value="<la:message key="labels.download_diagnostic_logs_button"/>">
+                                <button type="submit" class="btn btn-primary ${f:h(editableClass)}"
+                                        name="reindexOnly"
+                                        value="<la:message key="labels.reindex_start_button"/>">
                                     <em class="fa fa-arrow-circle-right"></em>
-                                    <la:message key="labels.download_diagnostic_logs_button"/>
+                                    <la:message key="labels.reindex_start_button"/>
                                 </button>
                             </div>
                             <!-- /.card-footer -->
                         </div>
                         <!-- /.card -->
                     </div>
-                </la:form>
-            </div>
+                    <div class="col-md-12">
+                        <div class="card card-outline card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <la:message key="labels.reload_doc_index"/>
+                                </h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary"
+                                        name="reloadDocIndex"
+                                        value="<la:message key="labels.reload_doc_index_button"/>">
+                                    <em class="fa fa-arrow-circle-right"></em>
+                                    <la:message key="labels.reload_doc_index_button"/>
+                                </button>
+                            </div>
+                            <!-- /.card-footer -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card card-outline card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <la:message key="labels.clear_crawler_index"/>
+                                </h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary"
+                                        name="clearCrawlerIndex"
+                                        value="<la:message key="labels.clear_crawler_index_button"/>">
+                                    <em class="fa fa-arrow-circle-right"></em>
+                                    <la:message key="labels.clear_crawler_index_button"/>
+                                </button>
+                            </div>
+                            <!-- /.card-footer -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </c:if>
+                <div class="col-md-12">
+                    <div class="card card-outline card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <la:message key="labels.diagnostic_logs"/>
+                            </h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary"
+                                    name="downloadLogs"
+                                    value="<la:message key="labels.download_diagnostic_logs_button"/>">
+                                <em class="fa fa-arrow-circle-right"></em>
+                                <la:message key="labels.download_diagnostic_logs_button"/>
+                            </button>
+                        </div>
+                        <!-- /.card-footer -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </la:form>
         </section>
     </div>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
