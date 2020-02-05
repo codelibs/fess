@@ -81,7 +81,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th class="col-sm-3"><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.elevate_word_file"/></th>
                                         <td><input type="file" name="elevateWordFile"/></td>
                                     </tr>

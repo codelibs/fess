@@ -167,7 +167,7 @@
                                             <thead>
                                             <tr>
                                                 <c:if test="${!logType.endsWith('_agg')}">
-                                                    <th class="col-sm-3"><la:message
+                                                    <th style="width: 25%"><la:message
                                                             key="labels.searchlog_requested_time"/></th>
                                                     <th><la:message
                                                             key="labels.searchlog_log_message"/></th>
@@ -175,19 +175,19 @@
                                                 <c:if test="${logType.startsWith('search_count_') or logType.startsWith('search_user_')}">
                                                     <th><la:message
                                                             key="labels.searchlog_requested_time"/></th>
-                                                    <th class="col-sm-3"><la:message
+                                                    <th style="width: 25%"><la:message
                                                             key="labels.searchlog_count"/></th>
                                                 </c:if>
                                                 <c:if test="${logType.startsWith('search_reqtimeavg_')}">
                                                     <th><la:message
                                                             key="labels.searchlog_requested_time"/></th>
-                                                    <th class="col-sm-3"><la:message
+                                                    <th style="width: 25%"><la:message
                                                             key="labels.searchlog_value"/></th>
                                                 </c:if>
                                                 <c:if test="${logType.startsWith('search_keyword_') or logType.startsWith('search_zerohit_')} or logType.endsWith('_count_agg')}">
                                                     <th><la:message
                                                             key="labels.searchlog_value"/></th>
-                                                    <th class="col-sm-3"><la:message
+                                                    <th style="width: 25%"><la:message
                                                             key="labels.searchlog_count"/></th>
                                                 </c:if>
                                             </tr>

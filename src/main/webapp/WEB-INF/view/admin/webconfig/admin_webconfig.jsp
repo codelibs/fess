@@ -103,7 +103,7 @@
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.name"/></th>
-                                                <th class="text-center"><la:message
+                                                <th class="text-center" style="width: 20%"><la:message
                                                         key="labels.available"/></th>
                                             </tr>
                                             </thead>

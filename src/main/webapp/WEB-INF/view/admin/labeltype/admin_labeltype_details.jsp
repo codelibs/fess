@@ -60,7 +60,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th class="col-3"><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.labeltype_name"/></th>
                                         <td>${f:h(name)}<la:hidden property="name"/></td>
                                     </tr>

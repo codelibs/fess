@@ -79,12 +79,12 @@
                                         <tbody>
                                         <c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
                                             <tr>
-                                                <th class=""><la:message key="labels.failure_url_id"/></th>
+                                                <th style="width: 25%"><la:message key="labels.failure_url_id"/></th>
                                                 <td>${f:h(id)}<la:hidden property="id"/></td>
                                             </tr>
                                         </c:if>
                                         <tr>
-                                            <th class=""><la:message key="labels.failure_url_url"/></th>
+                                            <th style="width: 25%"><la:message key="labels.failure_url_url"/></th>
                                             <td>${f:h(url)}
                                                 <la:hidden property="url"/>
                                             </td>

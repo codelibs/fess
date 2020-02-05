@@ -61,9 +61,9 @@
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.scheduledjob_name"/></th>
-                                                <th class="text-center"><la:message
+                                                <th class="text-center" style="width: 15%"><la:message
                                                         key="labels.scheduledjob_status"/></th>
-                                                <th class="text-center"><la:message
+                                                <th class="text-center" style="width: 15%"><la:message
                                                         key="labels.scheduledjob_target"/></th>
                                                 <th><la:message
                                                         key="labels.scheduledjob_cronExpression"/></th>

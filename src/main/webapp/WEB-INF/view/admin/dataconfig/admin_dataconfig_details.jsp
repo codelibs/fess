@@ -60,12 +60,12 @@
                                     <tbody>
                                     <c:if test="${id != null}">
                                         <tr>
-                                            <th class="col-3"><la:message key="labels.id"/></th>
+                                            <th style="width: 25%"><la:message key="labels.id"/></th>
                                             <td>${f:h(id)}</td>
                                         </tr>
                                     </c:if>
                                     <tr>
-                                        <th class="col-3"><la:message key="labels.name"/></th>
+                                        <th style="width: 25%"><la:message key="labels.name"/></th>
                                         <td>${f:h(name)}<la:hidden property="name"/></td>
                                     </tr>
                                     <tr>

@@ -117,7 +117,7 @@
                                                     <th><la:message key="labels.failure_url_url"/></th>
                                                     <th><la:message
                                                             key="labels.failure_url_search_error_name"/></th>
-                                                    <th class=""><la:message
+                                                    <th style="width: 15%"><la:message
                                                             key="labels.failure_url_last_access_time"/></th>
                                                 </tr>
                                                 </thead>

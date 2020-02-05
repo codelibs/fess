@@ -68,11 +68,11 @@
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.joblog_jobName"/></th>
-                                                <th class="text-center"><la:message
+                                                <th class="text-center" style="width: 15%"><la:message
                                                         key="labels.joblog_jobStatus"/></th>
-                                                <th class=""><la:message
+                                                <th style="width: 25%"><la:message
                                                         key="labels.joblog_startTime"/></th>
-                                                <th class=""><la:message
+                                                <th style="width: 25%"><la:message
                                                         key="labels.joblog_endTime"/></th>
                                             </tr>
                                             </thead>

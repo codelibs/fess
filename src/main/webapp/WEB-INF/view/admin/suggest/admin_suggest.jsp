@@ -52,9 +52,9 @@
                                             <tbody>
                                             <tr>
                                                 <th><la:message key="labels.suggest_word_type"/></th>
-                                                <th class="text-center"><la:message
+                                                <th class="text-center" style="width: 25%"><la:message
                                                         key="labels.suggest_word_number"/></th>
-                                                <th class="text-center"></th>
+                                                <th class="text-center" style="width: 20%"></th>
                                             </tr>
                                             <tr>
                                                 <td><la:message key="labels.suggest_word_type_all"/></td>

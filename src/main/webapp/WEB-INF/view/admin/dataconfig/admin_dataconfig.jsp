@@ -110,8 +110,8 @@
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                             <tr>
-                                                <th class=""><la:message key="labels.name"/></th>
-                                                <th class="text-center"><la:message
+                                                <th><la:message key="labels.name"/></th>
+                                                <th class="text-center" style="width: 20%"><la:message
                                                         key="labels.available"/></th>
                                             </tr>
                                             </thead>

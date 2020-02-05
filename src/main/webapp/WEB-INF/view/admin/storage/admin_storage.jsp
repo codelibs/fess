@@ -150,10 +150,10 @@
                                             <tbody>
                                             <tr>
                                                 <th><la:message key="labels.storage_name"/></th>
-                                                <th class=""><la:message key="labels.storage_size"/></th>
-                                                <th class=""><la:message
+                                                <th style="width: 10%"><la:message key="labels.storage_size"/></th>
+                                                <th style="width: 15%"><la:message
                                                         key="labels.storage_last_modified"/></th>
-                                                <th class=""></th>
+                                                <th style="width: 20%"></th>
                                             </tr>
                                             <c:if test="${not empty path and not empty parentId}">
                                                 <tr
