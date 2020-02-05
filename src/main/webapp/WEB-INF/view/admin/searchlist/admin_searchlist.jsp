@@ -190,10 +190,10 @@
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${editable}">
-                                <div class="modal modal-danger fade" id="confirmToDelete"
+                                <div class="modal fade" id="confirmToDelete"
                                      tabindex="-1" role="dialog">
                                     <div class="modal-dialog">
-                                        <div class="modal-content">
+                                        <div class="modal-content bg-danger">
                                             <div class="modal-header">
                                                 <h4 class="modal-title">
                                                     <la:message key="labels.search_list_button_delete"/>
@@ -213,13 +213,13 @@
                                                 </p>
                                             </div>
                                             <div class="modal-footer justify-content-between">
-                                                <button type="button" class="btn btn-default"
+                                                <button type="button" class="btn btn-outline-light"
                                                         data-dismiss="modal">
                                                     <la:message key="labels.search_list_button_cancel"/>
                                                 </button>
                                                 <la:form action="/admin/searchlist/delete">
                                                     <input type="hidden" name="docId" id="docId"/>
-                                                    <button type="submit" class="btn btn-outline btn-danger"
+                                                    <button type="submit" class="btn btn-outline-light"
                                                             name="delete"
                                                             value="<la:message key="labels.search_list_button_delete" />">
                                                         <em class="fa fa-trash"></em>
@@ -244,10 +244,10 @@
                                                 <la:message key="labels.search_list_button_delete_all"/>
                                             </button>
                                         </div>
-                                        <div class="modal modal-danger fade" id="confirmToDeleteAll"
+                                        <div class="modal fade" id="confirmToDeleteAll"
                                              tabindex="-1" role="dialog">
                                             <div class="modal-dialog">
-                                                <div class="modal-content">
+                                                <div class="modal-content bg-danger">
                                                     <div class="modal-header">
                                                         <h4 class="modal-title">
                                                             <la:message key="labels.search_list_button_delete_all"/>
@@ -266,11 +266,11 @@
                                                     <div class="modal-footer justify-content-between">
                                                         <la:form action="/admin/searchlist/deleteall">
                                                             <la:hidden property="q"/>
-                                                            <button type="button" class="btn btn-default"
+                                                            <button type="button" class="btn btn-outline-light"
                                                                     data-dismiss="modal">
                                                                 <la:message key="labels.search_list_button_cancel"/>
                                                             </button>
-                                                            <button type="submit" class="btn btn-outline btn-danger"
+                                                            <button type="submit" class="btn btn-outline-light"
                                                                     name="deleteall"
                                                                     value="<la:message key="labels.search_list_button_delete_all" />">
                                                                 <em class="fa fa-trash"></em>

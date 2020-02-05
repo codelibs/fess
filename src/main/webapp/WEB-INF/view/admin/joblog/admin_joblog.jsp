@@ -128,10 +128,10 @@
                                                     <la:message key="labels.joblog_delete_all_link"/>
                                                 </button>
                                             </div>
-                                            <div class="modal modal-danger fade" id="confirmToDeleteAll"
+                                            <div class="modal fade" id="confirmToDeleteAll"
                                                  tabindex="-1" role="dialog">
                                                 <div class="modal-dialog">
-                                                    <div class="modal-content">
+                                                    <div class="modal-content bg-danger">
                                                         <div class="modal-header">
                                                             <h4 class="modal-title">
                                                                 <la:message
@@ -149,12 +149,12 @@
                                                             </p>
                                                         </div>
                                                         <div class="modal-footer justify-content-between">
-                                                            <button type="button" class="btn btn-default"
+                                                            <button type="button" class="btn btn-outline-light"
                                                                     data-dismiss="modal">
                                                                 <la:message
                                                                         key="labels.joblog_delete_all_cancel"/>
                                                             </button>
-                                                            <button type="submit" class="btn btn-outline btn-danger"
+                                                            <button type="submit" class="btn btn-outline-light"
                                                                     name="deleteall"
                                                                     value="<la:message key="labels.joblog_delete_all_link" />">
                                                                 <em class="fa fa-trash"></em>

@@ -82,12 +82,12 @@
                                                                 <em class="fa fa-trash"></em>
                                                                 <la:message key="labels.design_delete_button"/>
                                                             </button>
-                                                            <div class="modal modal-danger fade"
+                                                            <div class="modal fade"
                                                                  id='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version)}'
                                                                  tabindex="-1" role="dialog"
                                                             >
                                                                 <div class="modal-dialog">
-                                                                    <div class="modal-content">
+                                                                    <div class="modal-content bg-danger">
                                                                         <div class="modal-header">
                                                                             <h4 class="modal-title">
                                                                                 <la:message
@@ -107,7 +107,7 @@
                                                                         </div>
                                                                         <div class="modal-footer justify-content-between">
                                                                             <button type="button"
-                                                                                    class="btn btn-default"
+                                                                                    class="btn btn-outline-light"
                                                                                     data-dismiss="modal">
                                                                                 <la:message
                                                                                         key="labels.crud_button_cancel"/>
@@ -118,7 +118,7 @@
                                                                                 <input type="hidden" name="version"
                                                                                        value="${f:h(artifact.version)}">
                                                                                 <button type="submit"
-                                                                                        class="btn btn-outline btn-danger"
+                                                                                        class="btn btn-outline-light"
                                                                                         name="delete"
                                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                                 >

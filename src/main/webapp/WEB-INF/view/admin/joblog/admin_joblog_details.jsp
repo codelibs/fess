@@ -124,10 +124,10 @@
                                         <em class="fa fa-trash"></em>
                                         <la:message key="labels.joblog_button_delete"/>
                                     </button>
-                                    <div class="modal modal-danger fade" id="confirmToDelete"
+                                    <div class="modal fade" id="confirmToDelete"
                                          tabindex="-1" role="dialog">
                                         <div class="modal-dialog">
-                                            <div class="modal-content">
+                                            <div class="modal-content bg-danger">
                                                 <div class="modal-header">
                                                     <h4 class="modal-title">
                                                         <la:message key="labels.crud_title_delete"/>
@@ -143,11 +143,11 @@
                                                     </p>
                                                 </div>
                                                 <div class="modal-footer justify-content-between">
-                                                    <button type="button" class="btn btn-default"
+                                                    <button type="button" class="btn btn-outline-light"
                                                             data-dismiss="modal">
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
-                                                    <button type="submit" class="btn btn-outline btn-danger"
+                                                    <button type="submit" class="btn btn-outline-light"
                                                             name="delete"
                                                             value="<la:message key="labels.crud_button_delete" />">
                                                         <em class="fa fa-trash"></em>

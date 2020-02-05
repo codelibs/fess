@@ -69,9 +69,9 @@
                             <div class="data-wrapper">
 
                                 <c:if test="${editable}">
-                                    <div class="modal modal-primary" id="createDir" tabindex="-1" role="dialog">
+                                    <div class="modal" id="createDir" tabindex="-1" role="dialog">
                                         <div class="modal-dialog">
-                                            <div class="modal-content">
+                                            <div class="modal-content bg-primary">
                                                 <la:form action="/admin/storage/createDir/"
                                                          enctype="multipart/form-data" styleClass="form-inline">
                                                     <input type="hidden" name="path" value="${f:h(path)}"/>
@@ -92,11 +92,11 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer justify-content-between">
-                                                        <button type="button" class="btn btn-default"
+                                                        <button type="button" class="btn btn-outline-light"
                                                                 data-dismiss="modal">
                                                             <la:message key="labels.crud_button_cancel"/>
                                                         </button>
-                                                        <button type="submit" class="btn btn-success" name="createDir">
+                                                        <button type="submit" class="btn btn-outline-light" name="createDir">
                                                             <em class="fa fa-make"></em>
                                                             <la:message key="labels.crud_button_create"/>
                                                         </button>
@@ -212,12 +212,12 @@
                                                                 <em class="fa fa-times"></em>
                                                                 <la:message key="labels.design_delete_button"/>
                                                             </button>
-                                                            <div class="modal modal-danger fade"
+                                                            <div class="modal fade"
                                                                  id="confirmToDelete-${f:h(data.hashCode)}"
                                                                  tabindex="-1" role="dialog"
                                                             >
                                                                 <div class="modal-dialog">
-                                                                    <div class="modal-content">
+                                                                    <div class="modal-content bg-danger">
                                                                         <div class="modal-header">
                                                                             <h4 class="modal-title">
                                                                                 <la:message
@@ -238,7 +238,7 @@
                                                                         </div>
                                                                         <div class="modal-footer justify-content-between">
                                                                             <button type="button"
-                                                                                    class="btn btn-default"
+                                                                                    class="btn btn-outline-light"
                                                                                     data-dismiss="modal">
                                                                                 <la:message
                                                                                         key="labels.crud_button_cancel"/>
@@ -246,7 +246,7 @@
                                                                             <la:form
                                                                                     action="${contextPath}/admin/storage/delete/${f:h(data.id)}/">
                                                                                 <button type="submit"
-                                                                                        class="btn btn-outline btn-danger"
+                                                                                        class="btn btn-outline-light"
                                                                                         name="delete"
                                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                                 >
