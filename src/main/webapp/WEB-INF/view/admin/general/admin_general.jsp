@@ -187,12 +187,12 @@
                                         <div class="input-group">
                                             <la:text styleId="notificationTo" property="notificationTo"
                                                      styleClass="form-control"/>
-                                            <span class="input-group-btn">
-													<button type="submit" class="btn btn-default ${f:h(editableClass)}"
-                                                            name="sendmail" value="test">
-														<la:message key="labels.send_testmail"/>
-													</button>
-												</span>
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default ${f:h(editableClass)}"
+                                                        name="sendmail" value="test">
+                                                    <la:message key="labels.send_testmail"/>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
