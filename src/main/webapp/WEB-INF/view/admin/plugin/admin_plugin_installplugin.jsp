@@ -34,7 +34,7 @@
                     </la:info>
                     <la:errors property="_global"/>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="card card-outline card-primary">
                         <la:form action="/admin/plugin/install" enctype="multipart/form-data">
                             <div class="card-header">
@@ -45,11 +45,11 @@
                             <!-- /.card-header -->
                             <div class="card-body">
                                 <ul class="nav nav-tabs" role="tablist">
-                                    <li role="presentation" class="active"><a href="#remote" aria-controls="remote"
+                                    <li role="presentation" class="nav-item"><a href="#remote" aria-controls="remote" class="nav-link active"
                                                                               role="tab"
                                                                               data-toggle="tab"
                                     ><la:message key="labels.plugin_remote_install"/></a></li>
-                                    <li role="presentation"><a href="#local" aria-controls="local" role="tab"
+                                    <li role="presentation" class="nav-item"><a href="#local" aria-controls="local" class="nav-link" role="tab"
                                                                data-toggle="tab"><la:message
                                             key="labels.plugin_local_install"
                                     /></a></li>
@@ -74,8 +74,8 @@
                                             <div class="form-group row">
                                                 <label for="name" class="col-md-3 col-form-label"><la:message
                                                         key="labels.plugin_jar_file"/></label>
-                                                <div>
-                                                    <input type="file" name="jarFile"/>
+                                                <div class="col-md-9 col-form-label">
+                                                    <input type="file" name="jarFile" class="form-control-file"/>
                                                 </div>
                                             </div>
                                         </div>
