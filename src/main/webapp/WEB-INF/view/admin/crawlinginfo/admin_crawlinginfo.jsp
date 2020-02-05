@@ -55,20 +55,22 @@
                                 <div class="col-sm-12">
                                     <la:form styleClass="form-inline"
                                              action="/admin/crawlinginfo/">
-                                        <div class="form-group row">
+                                        <div class="form-group">
                                             <c:set var="ph_session_id">
                                                 <la:message key="labels.crawling_info_session_id_search"/>
                                             </c:set>
                                             <la:text styleId="sessionIdSearchBtn" property="sessionId"
                                                      styleClass="form-control" placeholder="${ph_session_id}"></la:text>
                                         </div>
-                                        <div class="form-group row mx-sm-3">
+                                        <div class="form-group ml-sm-2">
                                             <button type="submit" class="btn btn-primary" id="submit"
                                                     name="search"
                                                     value="<la:message key="labels.crawling_info_search" />">
                                                 <em class="fa fa-search"></em>
                                                 <la:message key="labels.crawling_info_search"/>
                                             </button>
+                                        </div>
+                                        <div class="form-group ml-sm-2">
                                             <button type="submit" class="btn btn-default" name="reset"
                                                     value="<la:message key="labels.crawling_info_reset" />">
                                                 <la:message key="labels.crawling_info_reset"/>
