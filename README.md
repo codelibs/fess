@@ -19,7 +19,7 @@ Fess also contains a Crawler, which can crawl documents on a [web server](https:
 
 ## Issues/Questions
 
-Please check existing [questions](https://github.com/codelibs/fess/issues?q=label%3Aquestion), and then file an [issue](https://github.com/codelibs/fess/issues "issue") if your question has not been addressed.
+[discuss.codelibs.org](https://discuss.codelibs.org/c/FessEN/8)
 
 ## Getting Started
 
