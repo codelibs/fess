@@ -71,38 +71,38 @@
                                 <c:if test="${editable}">
                                     <div class="modal" id="createDir" tabindex="-1" role="dialog">
                                         <div class="modal-dialog">
-                                            <div class="modal-content bg-primary">
-                                                <la:form action="/admin/storage/createDir/"
-                                                         enctype="multipart/form-data" styleClass="form-inline">
-                                                    <input type="hidden" name="path" value="${f:h(path)}"/>
-                                                    <div class="modal-header">
-                                                        <h4 class="modal-title">
-                                                            <la:message key="labels.crud_title_create"/>
-                                                        </h4>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                                aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="form-group row">
-                                                            <label for="name" class="col-form-label"><la:message
-                                                                    key="labels.storage_folder_name"/></label>
-                                                            <input type="text" name="name" class="form-control"/>
+                                            <la:form action="/admin/storage/createDir/"
+                                                     enctype="multipart/form-data" styleClass="modal-content">
+                                                <input type="hidden" name="path" value="${f:h(path)}"/>
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">
+                                                        <la:message key="labels.crud_title_create"/>
+                                                    </h4>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group row">
+                                                        <label for="name" class="col-sm-3 col-form-label"><la:message
+                                                                key="labels.storage_folder_name"/></label>
+                                                        <div class="form-inline col-sm-9">
+                                                           <input type="text" name="name" class="form-control"/>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer justify-content-between">
-                                                        <button type="button" class="btn btn-outline-light"
-                                                                data-dismiss="modal">
-                                                            <la:message key="labels.crud_button_cancel"/>
-                                                        </button>
-                                                        <button type="submit" class="btn btn-outline-light" name="createDir">
-                                                            <em class="fa fa-make"></em>
-                                                            <la:message key="labels.crud_button_create"/>
-                                                        </button>
-                                                    </div>
-                                                </la:form>
-                                            </div>
+                                                </div>
+                                                <div class="modal-footer justify-content-between">
+                                                    <button type="button" class="btn btn-default"
+                                                            data-dismiss="modal">
+                                                        <la:message key="labels.crud_button_cancel"/>
+                                                    </button>
+                                                    <button type="submit" class="btn btn-success" name="createDir">
+                                                        <em class="fa fa-make"></em>
+                                                        <la:message key="labels.crud_button_create"/>
+                                                    </button>
+                                                </div>
+                                            </la:form>
                                         </div>
                                     </div>
 

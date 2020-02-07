@@ -97,7 +97,7 @@
                             </div>
                             <%-- List --%>
                             <c:if test="${dataConfigPager.allRecordCount == 0}">
-                                <div class="row">
+                                <div class="row top10">
                                     <div class="col-sm-12">
                                         <em class="fa fa-info-circle text-primary"></em>
                                         <la:message key="labels.list_could_not_find_crud_table"/>

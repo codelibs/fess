@@ -505,7 +505,7 @@
                                 <h4><la:message key="labels.general_storage"/></h4>
                                 <div class="form-group row">
                                     <label for="storageEndpoint"
-                                           class="col-sm-3 col-form-label"><la:message
+                                           class="col-3 col-form-label"><la:message
                                             key="labels.storage_endpoint"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="storageEndpoint"/>

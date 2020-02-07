@@ -90,7 +90,7 @@
                                 </div>
                             </c:if>
                             <c:if test="${labelTypePager.allRecordCount > 0}">
-                                <div class="row">
+                                <div class="row top10">
                                     <div class="col-sm-12">
                                         <table class="table table-bordered table-striped">
                                             <thead>
