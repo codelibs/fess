@@ -2,7 +2,7 @@
 <!-- Main Footer -->
 <footer class="main-footer">
 	<!-- To the right -->
-	<div class="pull-right hidden-xs"></div>
+	<div class="float-right d-none d-sm-inline-block"></div>
 	<!-- Default to the left -->
 	<la:message key="labels.footer.copyright" />
 </footer>
