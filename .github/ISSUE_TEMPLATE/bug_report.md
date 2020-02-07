@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-Please see [discuss.codelibs.org](https://discuss.codelibs.org/c/FessEN/8) before filing a bug.
+(_Please see [discuss.codelibs.org](https://discuss.codelibs.org/c/FessEN/8) before filing a bug._)
 
 **Describe the bug**
 A clear and concise description of what the bug is.
