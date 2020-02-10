@@ -117,7 +117,7 @@
 																	<span class="badge bg-primary"><la:message
                                                                             key="labels.enabled"/></span>
                                                     </c:if> <c:if test="${data.available=='false'}">
-																	<span class="badge bg-default"><la:message
+																	<span class="badge bg-gray"><la:message
                                                                             key="labels.disabled"/></span>
                                                     </c:if></td>
                                                 </tr>

@@ -94,7 +94,7 @@
                                                                                 key="labels.joblog_status_running"/></span>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <span class="badge bg-default">${f:h(data.jobStatus)}</span>
+                                                            <span class="badge bg-gray">${f:h(data.jobStatus)}</span>
                                                         </c:otherwise>
                                                     </c:choose></td>
                                                     <td><fmt:formatDate
