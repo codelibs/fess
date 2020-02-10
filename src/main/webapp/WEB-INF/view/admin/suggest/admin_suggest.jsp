@@ -50,8 +50,8 @@
                                         <table class="table table-bordered table-striped">
                                             <tbody>
                                             <tr>
-                                                <th><la:message key="labels.suggest_word_type"/></th>
-                                                <th class="text-center" style="width: 25%"><la:message
+                                                <th style="width: 15%"><la:message key="labels.suggest_word_type"/></th>
+                                                <th class="text-center" style="width: 10%"><la:message
                                                         key="labels.suggest_word_number"/></th>
                                                 <th class="text-center" style="width: 20%"></th>
                                             </tr>

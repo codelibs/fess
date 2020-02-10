@@ -48,10 +48,9 @@
                             </h3>
                             <c:if test="${editable}">
 								<div class="card-tools">
-                                    <a data-toggle="modal" data-target="#uploadeFile" href="#"><i
-                                            class="fa fa-upload"
-                                            aria-hidden="true"
-                                    ></i></a>
+                                    <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
+                                        <em class="fa fa-upload" aria-hidden="true"></em>
+                                    </a>
                                 </div>
                             </c:if>
                         </div>
@@ -92,7 +91,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer justify-content-between">
-                                                    <button type="button" class="btn btn-default"
+                                                    <button type="button" class="btn btn-outline-secondary"
                                                             data-dismiss="modal">
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
@@ -129,7 +128,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer justify-content-between">
-                                                    <button type="button" class="btn btn-default"
+                                                    <button type="button" class="btn btn-outline-secondary"
                                                             data-dismiss="modal">
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>

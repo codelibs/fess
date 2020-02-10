@@ -91,7 +91,7 @@
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-default" name="index"
+                                <button type="submit" class="btn btn-outline-secondary" name="index"
                                         value="<la:message key="labels.wizard_button_cancel"/>">
                                     <la:message key="labels.wizard_button_cancel"/>
                                 </button>

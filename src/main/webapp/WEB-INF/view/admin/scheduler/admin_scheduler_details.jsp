@@ -58,7 +58,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message key="labels.scheduledjob_name"/></th>
+                                        <th style="width: 25%"><la:message key="labels.scheduledjob_name"/></th>
                                         <td>${f:h(name)}<la:hidden property="name"/></td>
                                     </tr>
                                     <tr>
@@ -118,7 +118,7 @@
                                     <la:message key="labels.crud_button_back"/>
                                 </button>
                                 <c:if test="${editable}">
-                                    <button type="submit" class="btn btn-warning" name="edit"
+                                    <button type="submit" class="btn btn-primary" name="edit"
                                             value="<la:message key="labels.crud_button_edit" />">
                                         <em class="fa fa-pencil-alt"></em>
                                         <la:message key="labels.crud_button_edit"/>

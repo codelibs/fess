@@ -88,7 +88,7 @@
                                     <em class="fa fa-arrow-circle-left"></em>
                                     <la:message key="labels.crud_button_back"/>
                                 </button>
-                                <button type="submit" class="btn btn-warning" name="install"
+                                <button type="submit" class="btn btn-success" name="install"
                                         value="<la:message key="labels.crud_button_install" />"
                                 >
                                     <em class="fa fa-plus"></em>

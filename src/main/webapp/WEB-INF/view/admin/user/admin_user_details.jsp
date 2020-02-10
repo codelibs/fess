@@ -56,7 +56,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message key="labels.user_name"/></th>
+                                        <th style="width: 25%"><la:message key="labels.user_name"/></th>
                                         <td>${f:h(name)}<la:hidden property="name"/></td>
                                     </tr>
                                     <tr>

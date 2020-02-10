@@ -58,7 +58,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.boost_document_rule_url_expr"/></th>
                                         <td>${f:h(urlExpr)}<la:hidden property="urlExpr"/></td>
                                     </tr>

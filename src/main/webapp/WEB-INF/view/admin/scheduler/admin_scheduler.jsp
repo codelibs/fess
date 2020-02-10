@@ -56,13 +56,13 @@
                             <c:if test="${schedulerPager.allRecordCount > 0}">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered">
+                                        <table class="table table-bordered table-striped">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.scheduledjob_name"/></th>
-                                                <th class="text-center" style="width: 15%"><la:message
+                                                <th class="text-center" style="width: 10%"><la:message
                                                         key="labels.scheduledjob_status"/></th>
-                                                <th class="text-center" style="width: 15%"><la:message
+                                                <th class="text-center" style="width: 10%"><la:message
                                                         key="labels.scheduledjob_target"/></th>
                                                 <th><la:message
                                                         key="labels.scheduledjob_cronExpression"/></th>

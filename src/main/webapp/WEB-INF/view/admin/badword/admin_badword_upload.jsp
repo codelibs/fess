@@ -35,6 +35,7 @@
             </div>
         </div>
         <section class="content">
+            <la:form action="/admin/badword/upload/" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
@@ -77,35 +78,29 @@
                                 <la:errors/>
                             </div>
                             <c:if test="${editable}">
-                                <la:form action="/admin/badword/upload/" enctype="multipart/form-data">
-                                    <table class="table table-bordered">
-                                        <tbody>
-                                        <tr>
-                                            <th><la:message
-                                                    key="labels.bad_word_file"/></th>
-                                            <td><input type="file" name="badWordFile" class="form-control-file"/></td>
-                                        </tr>
-                                        </tbody>
-                                        <tfoot>
-                                        <tr>
-                                            <td colspan="2">
-                                                <button type="submit" class="btn btn-success" name="upload"
-                                                        value="<la:message key="labels.bad_word_button_upload" />">
-                                                    <em class="fa fa-upload"></em>
-                                                    <la:message key="labels.bad_word_button_upload"/>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        </tfoot>
-                                    </table>
-                                </la:form>
+                            <div class="form-group row">
+                                <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    key="labels.bad_word_file"/></label>
+                                <div class="col-sm-9">
+                                    <input type="file" name="badWordFile" class="form-control-file"/>
+                                </div>
+                            </div>
                             </c:if>
                         </div>
                         <!-- /.card-body -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success" name="upload"
+                                    value="<la:message key="labels.bad_word_button_upload" />">
+                                <em class="fa fa-upload"></em>
+                                <la:message key="labels.bad_word_button_upload"/>
+                            </button>
+                        </div>
+                        <!-- /.card-footer -->
                     </div>
                     <!-- /.card -->
                 </div>
             </div>
+            </la:form>
         </section>
     </div>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>

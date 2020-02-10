@@ -59,7 +59,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message key="labels.regex"/></th>
+                                        <th style="width: 25%"><la:message key="labels.regex"/></th>
                                         <td>${f:h(regex)}<la:hidden property="regex"/></td>
                                     </tr>
                                     <tr>

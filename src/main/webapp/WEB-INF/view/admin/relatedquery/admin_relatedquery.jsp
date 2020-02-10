@@ -50,14 +50,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/relatedquery/">
                                     <div class="form-group row">
-                                        <label for="term" class="col-sm-2 col-form-label"><la:message
+                                        <label for="term" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.related_query_term"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="term" property="term" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="queries" class="col-sm-2 col-form-label"><la:message
+                                        <label for="queries" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.related_query_queries"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="queries" property="queries" styleClass="form-control"/>

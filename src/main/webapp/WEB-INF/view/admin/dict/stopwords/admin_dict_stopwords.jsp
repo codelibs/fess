@@ -25,10 +25,10 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><la:link href="list">
+                            <li class="breadcrumb-item"><la:link href="/admin/dict">
                                 <la:message key="labels.dict_list_link"/>
                             </la:link></li>
-                            <li><la:message key="labels.dict_stopwords_list_link"/></li>
+                            <li class="breadcrumb-item"><la:message key="labels.dict_stopwords_list_link"/></li>
                         </ol>
                     </div>
                 </div>

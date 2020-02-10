@@ -72,7 +72,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.joblog_jobName"/></th>
                                         <td>${f:h(jobName)}<la:hidden property="jobName"/></td>
                                     </tr>

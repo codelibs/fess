@@ -24,10 +24,10 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><la:link href="list">
+                            <li class="breadcrumb-item"><la:link href="/admin/dict">
                                 <la:message key="labels.dict_list_link"/>
                             </la:link></li>
-                            <li class="breadcrumb-item"><la:link href="list/0/?dictId=${f:u(dictId)}">
+                            <li class="breadcrumb-item"><la:link href="../list/1/?dictId=${f:u(dictId)}">
                                 <la:message key="labels.dict_kuromoji_list_link"/>
                             </la:link></li>
                             <li class="breadcrumb-item active"><la:message
@@ -107,7 +107,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message key="labels.dict_kuromoji_token"/></th>
+                                        <th style="width: 25%"><la:message key="labels.dict_kuromoji_token"/></th>
                                         <td>${f:h(token)}<la:hidden property="token"/></td>
                                     </tr>
                                     <tr>

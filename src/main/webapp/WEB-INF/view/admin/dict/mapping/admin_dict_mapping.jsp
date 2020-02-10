@@ -24,10 +24,10 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><la:link href="list">
+                            <li class="breadcrumb-item"><la:link href="/admin/dict">
                                 <la:message key="labels.dict_list_link"/>
                             </la:link></li>
-                            <li><la:message key="labels.dict_mapping_list_link"/></li>
+                            <li class="breadcrumb-item"><la:message key="labels.dict_mapping_list_link"/></li>
                         </ol>
                     </div>
                 </div>
@@ -113,7 +113,6 @@
                                 </div>
                                 <c:set var="pager" value="${charMappingPager}"
                                        scope="request"/>
-                                <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>
                                 <div class="row">
                                     <div class="col-sm-2">
                                         <la:message key="labels.pagination_page_guide_msg"

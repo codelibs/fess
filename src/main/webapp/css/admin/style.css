@@ -89,3 +89,7 @@ textarea.systemInfoData {
 	height: 22em;
 	line-height: 1.5em;
 }
+
+.login-box {
+	height: 500px;
+}

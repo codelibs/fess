@@ -52,21 +52,21 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/fileconfig/">
                                     <div class="form-group row">
-                                        <label for="name" class="col-sm-2 col-form-label"><la:message
+                                        <label for="name" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.name"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="name" property="name" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="paths" class="col-sm-2 col-form-label"><la:message
+                                        <label for="paths" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.paths"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="paths" property="paths" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="description" class="col-sm-2 col-form-label"><la:message
+                                        <label for="description" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.description"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="description" property="description"
@@ -120,7 +120,7 @@
 																	<span class="badge bg-primary"><la:message
                                                                             key="labels.enabled"/></span>
                                                     </c:if> <c:if test="${data.available=='false'}">
-																	<span class="badge bg-default"><la:message
+																	<span class="badge bg-gray"><la:message
                                                                             key="labels.disabled"/></span>
                                                     </c:if></td>
                                                 </tr>

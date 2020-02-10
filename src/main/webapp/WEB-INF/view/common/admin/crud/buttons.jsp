@@ -19,7 +19,7 @@
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
-	<button type="submit" class="btn btn-warning" name="update"
+	<button type="submit" class="btn btn-success" name="update"
 		value="<la:message key="labels.crud_button_update" />">
 		<em class="fa fa-pencil-alt"></em>
 		<la:message key="labels.crud_button_update" />
@@ -32,7 +32,7 @@
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
-	<button type="submit" class="btn btn-warning" name="edit"
+	<button type="submit" class="btn btn-primary" name="edit"
 		value="<la:message key="labels.crud_button_edit" />">
 		<em class="fa fa-pencil-alt"></em>
 		<la:message key="labels.crud_button_edit" />
