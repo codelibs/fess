@@ -28,7 +28,7 @@
                             <li class="breadcrumb-item"><la:link href="list">
                                 <la:message key="labels.dict_list_link"/>
                             </la:link></li>
-                            <li><la:message key="labels.dict_protwords_list_link"/></li>
+                            <li class="breadcrumb-item"><la:message key="labels.dict_protwords_list_link"/></li>
                         </ol>
                     </div>
                 </div>
