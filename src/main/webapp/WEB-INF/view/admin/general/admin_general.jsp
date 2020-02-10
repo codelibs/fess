@@ -546,7 +546,7 @@
                             <!-- /.card-body -->
                             <div class="card-footer">
                                 <c:if test="${editable}">
-                                    <button type="submit" class="btn btn-warning" name="update"
+                                    <button type="submit" class="btn btn-success" name="update"
                                             value="<la:message key="labels.crawl_button_update" />">
                                         <em class="fa fa-pencil-alt"></em>
                                         <la:message key="labels.crawl_button_update"/>

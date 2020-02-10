@@ -336,7 +336,7 @@
                                         <em class="fa fa-arrow-circle-left"></em>
                                         <la:message key="labels.crud_button_back"/>
                                     </la:link>
-                                    <button type="submit" class="btn btn-warning" name="update"
+                                    <button type="submit" class="btn btn-success" name="update"
                                             value="<la:message key="labels.crud_button_update" />">
                                         <em class="fa fa-pencil-alt"></em>
                                         <la:message key="labels.crud_button_update"/>

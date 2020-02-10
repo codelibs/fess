@@ -48,10 +48,9 @@
                             </h3>
                             <c:if test="${editable}">
 								<div class="card-tools">
-                                    <a data-toggle="modal" data-target="#uploadeFile" href="#"><i
-                                            class="fa fa-upload"
-                                            aria-hidden="true"
-                                    ></i></a>
+                                    <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
+                                        <em class="fa fa-upload" aria-hidden="true"></em>
+                                    </a>
                                 </div>
                             </c:if>
                         </div>

@@ -134,7 +134,7 @@
                             </div>
                             <!-- /.card-header -->
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary"
+                                <button type="submit" class="btn btn-danger"
                                         name="clearCrawlerIndex"
                                         value="<la:message key="labels.clear_crawler_index_button"/>">
                                     <em class="fa fa-arrow-circle-right"></em>
