@@ -50,14 +50,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/keymatch/">
                                     <div class="form-group row">
-                                        <label for="term" class="col-sm-2 col-form-label"><la:message
+                                        <label for="term" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.key_match_term"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="term" property="term" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="query" class="col-sm-2 col-form-label"><la:message
+                                        <label for="query" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.key_match_query"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="query" property="query" styleClass="form-control"/>
@@ -111,53 +111,10 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="row">
-                                        <%-- Paging Info --%>
-                                    <div class="col-sm-2">
-                                        <la:message key="labels.pagination_page_guide_msg"
-                                                    arg0="${f:h(keyMatchPager.currentPageNumber)}"
-                                                    arg1="${f:h(keyMatchPager.allPageCount)}"
-                                                    arg2="${f:h(keyMatchPager.allRecordCount)}"/>
-                                    </div>
-                                        <%-- Paging Navigation --%>
-                                    <div class="col-sm-10">
-                                        <ul class="pagination pagination-sm m-0 float-right">
-                                            <c:if test="${keyMatchPager.existPrePage}">
-                                                <li class="page-item"><la:link
-                                                        styleClass="page-link"
-                                                        href="list/${keyMatchPager.currentPageNumber - 1}">
-                                                    <la:message key="labels.prev_page"/>
-                                                </la:link></li>
-                                            </c:if>
-                                            <c:if test="${!keyMatchPager.existPrePage}">
-                                                <li class="page-item disabled"><a
-                                                        class="page-link" href="#"><la:message
-                                                        key="labels.prev_page"/></a></li>
-                                            </c:if>
-                                            <c:forEach var="p" varStatus="s"
-                                                       items="${keyMatchPager.pageNumberList}">
-                                                <li
-                                                        <c:if test="${p == keyMatchPager.currentPageNumber}">class="page-item active"</c:if>>
-                                                    <la:link
-                                                            href="list/${p}">${p}</la:link></li>
-                                            </c:forEach>
-                                            <c:if test="${keyMatchPager.existNextPage}">
-                                                <li class="page-item"><la:link
-                                                        styleClass="page-link"
-                                                        href="list/${keyMatchPager.currentPageNumber + 1}">
-                                                    <la:message key="labels.next_page"/>
-                                                </la:link></li>
-                                            </c:if>
-                                            <c:if test="${!keyMatchPager.existNextPage}">
-                                                <li class="page-item disabled"><a
-                                                        class="page-link" href="#"><la:message
-                                                        key="labels.next_page"/></a></li>
-                                            </c:if>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <c:if test="${keyMatchPager.currentPageNumber > keyMatchPager.allPageCount}">
-                                    <script>location.href = "${contextPath}/admin/keymatch/list/${keyMatchPager.allPageCount}";</script>
+                                <c:set var="pager" value="${keyMatchPager}" scope="request"/>
+                                <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>
+                                <c:if test="${pager.currentPageNumber > pager.allPageCount}">
+                                    <script>location.href = "${contextPath}/admin/keymatch/list/${pager.allPageCount}";</script>
                                 </c:if>
                             </c:if>
                         </div>

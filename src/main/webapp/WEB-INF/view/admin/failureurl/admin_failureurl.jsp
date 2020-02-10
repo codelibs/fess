@@ -49,14 +49,14 @@
                             </div>
                             <la:form action="/admin/failureurl/">
                                 <div class="form-group row">
-                                    <label for="url" class="col-sm-2 col-form-label"><la:message
+                                    <label for="url" class="col-sm-2 text-right col-form-label"><la:message
                                             key="labels.failure_url_search_url"/></label>
                                     <div class="col-sm-10">
                                         <la:text styleId="url" property="url" styleClass="form-control"></la:text>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="errorCountMin" class="col-sm-2 col-form-label"><la:message
+                                    <label for="errorCountMin" class="col-sm-2 text-right col-form-label"><la:message
                                             key="labels.failure_url_search_error_count"/></label>
                                     <div class="form-inline col-sm-10">
                                         <div>
@@ -75,7 +75,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="errorName" class="col-sm-2 col-form-label"><la:message
+                                    <label for="errorName" class="col-sm-2 text-right col-form-label"><la:message
                                             key="labels.failure_url_search_error_name"/></label>
                                     <div class="col-sm-10">
                                         <la:text styleId="errorName" property="errorName"

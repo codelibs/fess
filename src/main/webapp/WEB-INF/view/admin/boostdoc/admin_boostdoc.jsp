@@ -49,14 +49,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/boostdoc/">
                                     <div class="form-group row">
-                                        <label for="urlExpr" class="col-sm-2 col-form-label"><la:message
+                                        <label for="urlExpr" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.boost_document_rule_url_expr"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="urlExpr" property="urlExpr" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="boostExpr" class="col-sm-2 col-form-label"><la:message
+                                        <label for="boostExpr" class="col-sm-2 text-right col-form-label"><la:message
                                                 key="labels.boost_document_rule_boost_expr"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="boostExpr" property="boostExpr"

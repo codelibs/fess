@@ -128,7 +128,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer justify-content-between">
-                                                    <button type="button" class="btn btn-default"
+                                                    <button type="button" class="btn btn-outline-secondary"
                                                             data-dismiss="modal">
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
