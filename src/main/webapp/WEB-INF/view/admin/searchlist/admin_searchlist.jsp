@@ -212,11 +212,11 @@
                                                 </p>
                                             </div>
                                             <div class="modal-footer justify-content-between">
-                                                <button type="button" class="btn btn-outline-light"
-                                                        data-dismiss="modal">
-                                                    <la:message key="labels.search_list_button_cancel"/>
-                                                </button>
                                                 <la:form action="/admin/searchlist/delete">
+                                                    <button type="button" class="btn btn-outline-light"
+                                                            data-dismiss="modal">
+                                                        <la:message key="labels.search_list_button_cancel"/>
+                                                    </button>
                                                     <input type="hidden" name="docId" id="docId"/>
                                                     <button type="submit" class="btn btn-outline-light"
                                                             name="delete"
@@ -262,8 +262,8 @@
                                                                     key="labels.search_list_delete_all_confirmation"/>
                                                         </p>
                                                     </div>
+                                                    <la:form action="/admin/searchlist/deleteall">
                                                     <div class="modal-footer justify-content-between">
-                                                        <la:form action="/admin/searchlist/deleteall">
                                                             <la:hidden property="q"/>
                                                             <button type="button" class="btn btn-outline-light"
                                                                     data-dismiss="modal">
@@ -275,8 +275,8 @@
                                                                 <em class="fa fa-trash"></em>
                                                                 <la:message key="labels.search_list_button_delete_all"/>
                                                             </button>
-                                                        </la:form>
                                                     </div>
+                                                    </la:form>
                                                 </div>
                                             </div>
                                         </div>
