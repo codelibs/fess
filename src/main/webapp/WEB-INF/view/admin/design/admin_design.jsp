@@ -128,12 +128,12 @@
                                 </div>
                                 <!-- /.card-body -->
                                 <div class="card-footer">
-                                    <button type="submit" class="btn btn-warning" name="edit"
+                                    <button type="submit" class="btn btn-primary" name="edit"
                                             value="<la:message key="labels.design_edit_button" />">
                                         <em class="fa fa-pencil-alt"></em>
                                         <la:message key="labels.design_edit_button"/>
                                     </button>
-                                    <button type="submit" class="btn btn-danger"
+                                    <button type="submit" class="btn btn-warning"
                                             name="editAsUseDefault"
                                             value="<la:message key="labels.design_use_default_button" />">
                                         <em class="fa fa-recycle"></em>

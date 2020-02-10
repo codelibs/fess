@@ -115,7 +115,7 @@
                                                         <c:if test="${editable}">
                                                             <la:link
                                                                     href="/admin/searchlist/edit?crudMode=2&amp;doc.doc_id=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
-                                                                    styleClass="btn btn-xs btn-warning">
+                                                                    styleClass="btn btn-primary btn-xs">
                                                                 <em class="fa fa-pencil-alt"></em>
                                                                 <la:message key="labels.crud_button_update"/>
                                                             </la:link>
