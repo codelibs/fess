@@ -91,7 +91,7 @@
                                     <label for="name" class="col-sm-3 col-form-label"><la:message
                                             key="labels.dict_protwords_file"/></label>
                                     <div class="col-sm-9">
-                                        <input type="file" name="protwordsFile"/>
+                                        <input type="file" name="protwordsFile" class="form-control-file"/>
                                     </div>
                                 </div>
                             </div>

@@ -113,7 +113,6 @@
                                 </div>
                                 <c:set var="pager" value="${charMappingPager}"
                                        scope="request"/>
-                                <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>
                                 <div class="row">
                                     <div class="col-sm-2">
                                         <la:message key="labels.pagination_page_guide_msg"
