@@ -59,7 +59,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.related_content_term"/></th>
                                         <td>${f:h(term)}<la:hidden property="term"/></td>
                                     </tr>

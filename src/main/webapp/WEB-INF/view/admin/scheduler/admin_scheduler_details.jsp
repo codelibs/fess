@@ -58,7 +58,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message key="labels.scheduledjob_name"/></th>
+                                        <th style="width: 25%"><la:message key="labels.scheduledjob_name"/></th>
                                         <td>${f:h(name)}<la:hidden property="name"/></td>
                                     </tr>
                                     <tr>

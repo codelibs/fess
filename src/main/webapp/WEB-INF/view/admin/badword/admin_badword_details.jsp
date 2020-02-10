@@ -106,7 +106,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.bad_word_suggest_word"/></th>
                                         <td>${f:h(suggestWord)}<la:hidden
                                                 property="suggestWord"/></td>

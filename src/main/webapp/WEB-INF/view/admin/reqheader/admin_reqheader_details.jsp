@@ -59,7 +59,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.reqheader_name"/></th>
                                         <td>${f:h(name)}<la:hidden property="name"/></td>
                                     </tr>

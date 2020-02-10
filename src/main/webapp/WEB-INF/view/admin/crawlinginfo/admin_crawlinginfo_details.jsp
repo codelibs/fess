@@ -83,7 +83,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.crawling_info_session_id"/></th>
                                         <td><a  <c:if test="${fe:permission('admin-searchlist-view')}">
                                             href="${fe:url('/admin/searchlist/search')}?q=segment:${f:u(sessionId)}" </c:if> >${f:h(sessionId)}</a>

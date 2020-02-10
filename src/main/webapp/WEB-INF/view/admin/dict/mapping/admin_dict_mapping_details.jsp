@@ -108,7 +108,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.dict_mapping_source"/></th>
                                         <td>${f:br(f:h(inputs))}<la:hidden property="inputs"/></td>
                                     </tr>

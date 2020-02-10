@@ -107,7 +107,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message key="labels.dict_kuromoji_token"/></th>
+                                        <th style="width: 25%"><la:message key="labels.dict_kuromoji_token"/></th>
                                         <td>${f:h(token)}<la:hidden property="token"/></td>
                                     </tr>
                                     <tr>

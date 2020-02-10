@@ -59,7 +59,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.webauth_hostname"/></th>
                                         <td>${f:h(hostname)}<la:hidden property="hostname"/></td>
                                     </tr>

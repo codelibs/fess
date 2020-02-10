@@ -108,7 +108,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                     <tr>
-                                        <th><la:message
+                                        <th style="width: 25%"><la:message
                                                 key="labels.dict_stopwords_source"/></th>
                                         <td>${f:h(input)}<la:hidden property="input"/></td>
                                     </tr>

@@ -75,7 +75,7 @@
                                     <tbody>
                                     <c:forEach var="info" items="${logParamItems}">
                                         <tr>
-                                            <th>${f:h(info.key)}</th>
+                                            <th style="width: 25%">${f:h(info.key)}</th>
                                             <c:choose>
                                                 <c:when test="${info.key == 'Query ID'}">
                                                     <td><la:link
