@@ -39,7 +39,7 @@
             <la:form action="/admin/elevateword/upload/" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card card-outline card-primary">
+                    <div class="card card-outline card-success">
                         <div class="card-header">
                             <h3 class="card-title">
                                 <la:message key="labels.elevate_word_link_upload"/>

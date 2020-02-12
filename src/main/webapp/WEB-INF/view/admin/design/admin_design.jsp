@@ -148,7 +148,7 @@
                 </div>
                 <div class="col-md-12">
                     <c:if test="${editable}">
-                        <div class="card card-outline card-primary">
+                        <div class="card card-outline card-success">
                             <la:form action="/admin/design/upload/"
                                      enctype="multipart/form-data">
                                 <div class="card-header">

@@ -34,7 +34,7 @@
                     <la:errors property="_global"/>
                 </div>
                 <div class="col-md-12">
-                    <div class="card card-outline card-primary">
+                    <div class="card card-outline card-success">
                         <la:form action="/admin/plugin/install" enctype="multipart/form-data">
                             <div class="card-header">
                                 <h3 class="card-title">
