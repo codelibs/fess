@@ -266,6 +266,22 @@ public class SystemHelper {
         return p;
     }
 
+    public String getForumLink() {
+        final String url = ComponentUtil.getFessConfig().getForumLink();
+        if (StringUtil.isBlank(url)) {
+            return null;
+        }
+        String target = null;
+        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
+        if (locale != null) {
+            final String lang = locale.getLanguage();
+            if (ComponentUtil.getFessConfig().isOnlineHelpSupportedLang(lang)) {
+                target = lang.toUpperCase(Locale.ROOT);
+            }
+        }
+        return url.replaceFirst("\\{lang\\}", target == null ? "EN" : target);
+    }
+
     public String getHelpLink(final String name) {
         final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
         return getHelpUrl(url);

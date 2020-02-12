@@ -873,6 +873,15 @@ public interface FessProp {
         return split(getOnlineHelpSupportedLangs(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).anyMatch(s -> s.equals(lang)));
     }
 
+    String getForumSupportedLangs();
+
+    default boolean isForumSupportedLang(final String lang) {
+        if (StringUtil.isBlank(getForumSupportedLangs())) {
+            return false;
+        }
+        return split(getForumSupportedLangs(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).anyMatch(s -> s.equals(lang)));
+    }
+
     String getSupportedUploadedJsExtentions();
 
     default String[] getSupportedUploadedJsExtentionsAsArray() {

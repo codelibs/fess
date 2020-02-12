@@ -1343,6 +1343,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
+    /** The key of the configuration. e.g. https://discuss.codelibs.org/c/Fess{lang}/ */
+    String FORUM_LINK = "forum.link";
+
+    /** The key of the configuration. e.g. en,ja */
+    String FORUM_SUPPORTED_LANGS = "forum.supported.langs";
+
     /** The key of the configuration. e.g. 0 */
     String SUGGEST_POPULAR_WORD_SEED = "suggest.popular.word.seed";
 
@@ -5723,6 +5729,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpSupportedLangs();
 
     /**
+     * Get the value for the key 'forum.link'. <br>
+     * The value is, e.g. https://discuss.codelibs.org/c/Fess{lang}/ <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getForumLink();
+
+    /**
+     * Get the value for the key 'forum.supported.langs'. <br>
+     * The value is, e.g. en,ja <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getForumSupportedLangs();
+
+    /**
      * Get the value for the key 'suggest.popular.word.seed'. <br>
      * The value is, e.g. 0 <br>
      * comment: ------
@@ -8611,6 +8632,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
 
+        public String getForumLink() {
+            return get(FessConfig.FORUM_LINK);
+        }
+
+        public String getForumSupportedLangs() {
+            return get(FessConfig.FORUM_SUPPORTED_LANGS);
+        }
+
         public String getSuggestPopularWordSeed() {
             return get(FessConfig.SUGGEST_POPULAR_WORD_SEED);
         }
@@ -9420,6 +9449,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_PLUGIN, "plugin");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_STORAGE, "storage");
             defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "ja");
+            defaultMap.put(FessConfig.FORUM_LINK, "https://discuss.codelibs.org/c/Fess{lang}/");
+            defaultMap.put(FessConfig.FORUM_SUPPORTED_LANGS, "en,ja");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_SEED, "0");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_TAGS, "");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_FIELDS, "");
