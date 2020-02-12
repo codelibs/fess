@@ -52,7 +52,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.user_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>
@@ -66,7 +66,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="password" class="col-sm-3 col-form-label"><la:message
+                                    <label for="password" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.user_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="password"/>
@@ -74,7 +74,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="confirm_password" class="col-sm-3 col-form-label"><la:message
+                                    <label for="confirm_password" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.user_confirm_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="confirmPassword"/>
@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="surname" class="col-sm-3 col-form-label"><la:message
+                                    <label for="surname" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.user_surname"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="attributes.surname"/>
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="givenName" class="col-sm-3 col-form-label"><la:message
+                                    <label for="givenName" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.user_given_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="attributes.givenName"/>
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="mail" class="col-sm-3 col-form-label"><la:message
+                                    <label for="mail" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.user_mail"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="attributes.mail"/>
@@ -108,7 +108,7 @@
                                 </div>
                                 <c:if test="${ldapAdminEnabled}">
                                     <div class="form-group row">
-                                        <label for="employeeNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="employeeNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_employeeNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.employeeNumber"/>
@@ -116,7 +116,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="telephoneNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="telephoneNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_telephoneNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.telephoneNumber"/>
@@ -124,7 +124,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="homePhone" class="col-sm-3 col-form-label"><la:message
+                                        <label for="homePhone" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_homePhone"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.homePhone"/>
@@ -132,7 +132,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="homePostalAddress" class="col-sm-3 col-form-label"><la:message
+                                        <label for="homePostalAddress" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_homePostalAddress"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.homePostalAddress"/>
@@ -140,7 +140,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="labeledURI" class="col-sm-3 col-form-label"><la:message
+                                        <label for="labeledURI" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_labeledURI"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.labeledURI"/>
@@ -148,7 +148,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="roomNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="roomNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_roomNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.roomNumber"/>
@@ -156,7 +156,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="description" class="col-sm-3 col-form-label"><la:message
+                                        <label for="description" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_description"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.description"/>
@@ -164,7 +164,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="title" class="col-sm-3 col-form-label"><la:message
+                                        <label for="title" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_title"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.title"/>
@@ -172,7 +172,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="pager" class="col-sm-3 col-form-label"><la:message
+                                        <label for="pager" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_pager"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.pager"/>
@@ -180,7 +180,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="street" class="col-sm-3 col-form-label"><la:message
+                                        <label for="street" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_street"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.street"/>
@@ -188,7 +188,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="postalCode" class="col-sm-3 col-form-label"><la:message
+                                        <label for="postalCode" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_postalCode"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.postalCode"/>
@@ -197,7 +197,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <label for="physicalDeliveryOfficeName"
-                                               class="col-sm-3 col-form-label"><la:message
+                                               class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_physicalDeliveryOfficeName"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.physicalDeliveryOfficeName"/>
@@ -206,7 +206,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="destinationIndicator" class="col-sm-3 col-form-label"><la:message
+                                        <label for="destinationIndicator" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_destinationIndicator"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.destinationIndicator"/>
@@ -215,7 +215,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="internationaliSDNNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="internationaliSDNNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_internationaliSDNNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.internationaliSDNNumber"/>
@@ -224,7 +224,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="state" class="col-sm-3 col-form-label"><la:message
+                                        <label for="state" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_state"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.state"/>
@@ -232,7 +232,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="employeeType" class="col-sm-3 col-form-label"><la:message
+                                        <label for="employeeType" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_employeeType"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.employeeType"/>
@@ -241,7 +241,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <label for="facsimileTelephoneNumber"
-                                               class="col-sm-3 col-form-label"><la:message
+                                               class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_facsimileTelephoneNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.facsimileTelephoneNumber"/>
@@ -250,7 +250,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="postOfficeBox" class="col-sm-3 col-form-label"><la:message
+                                        <label for="postOfficeBox" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_postOfficeBox"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.postOfficeBox"/>
@@ -258,7 +258,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="initials" class="col-sm-3 col-form-label"><la:message
+                                        <label for="initials" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_initials"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.initials"/>
@@ -266,7 +266,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="carLicense" class="col-sm-3 col-form-label"><la:message
+                                        <label for="carLicense" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_carLicense"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.carLicense"/>
@@ -274,7 +274,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="mobile" class="col-sm-3 col-form-label"><la:message
+                                        <label for="mobile" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_mobile"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.mobile"/>
@@ -282,7 +282,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="postalAddress" class="col-sm-3 col-form-label"><la:message
+                                        <label for="postalAddress" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_postalAddress"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.postalAddress"/>
@@ -290,7 +290,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="city" class="col-sm-3 col-form-label"><la:message
+                                        <label for="city" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_city"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.city"/>
@@ -299,7 +299,7 @@
                                     </div>
                                     <div class="form-group row">
                                         <label for="teletexTerminalIdentifier"
-                                               class="col-sm-3 col-form-label"><la:message
+                                               class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_teletexTerminalIdentifier"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.teletexTerminalIdentifier"/>
@@ -308,7 +308,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="x121Address" class="col-sm-3 col-form-label"><la:message
+                                        <label for="x121Address" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_x121Address"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.x121Address"/>
@@ -316,7 +316,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="businessCategory" class="col-sm-3 col-form-label"><la:message
+                                        <label for="businessCategory" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_businessCategory"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.businessCategory"/>
@@ -324,7 +324,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="registeredAddress" class="col-sm-3 col-form-label"><la:message
+                                        <label for="registeredAddress" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_registeredAddress"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.registeredAddress"/>
@@ -332,7 +332,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="displayName" class="col-sm-3 col-form-label"><la:message
+                                        <label for="displayName" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_displayName"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.displayName"/>
@@ -340,7 +340,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="preferredLanguage" class="col-sm-3 col-form-label"><la:message
+                                        <label for="preferredLanguage" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_preferredLanguage"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.preferredLanguage"/>
@@ -348,7 +348,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="departmentNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="departmentNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_departmentNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.departmentNumber"/>
@@ -356,7 +356,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="uidNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="uidNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_uidNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.uidNumber"/>
@@ -364,7 +364,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="gidNumber" class="col-sm-3 col-form-label"><la:message
+                                        <label for="gidNumber" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_gidNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.gidNumber"/>
@@ -372,7 +372,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="homeDirectory" class="col-sm-3 col-form-label"><la:message
+                                        <label for="homeDirectory" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.user_homeDirectory"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.homeDirectory"/>
@@ -381,7 +381,7 @@
                                     </div>
                                 </c:if>
                                 <div class="form-group row">
-                                    <label for="roles" class="col-sm-3 col-form-label"><la:message
+                                    <label for="roles" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.roles"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="roles"/>
@@ -394,7 +394,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="groups" class="col-sm-3 col-form-label"><la:message
+                                    <label for="groups" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.groups"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="groups"/>

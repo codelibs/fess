@@ -78,7 +78,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-12 col-form-label"><la:message
+                                    <label for="name" class="col-sm-12 text-right col-form-label"><la:message
                                             key="labels.bad_word_file"/></label>
                                 </div>
                             </div>

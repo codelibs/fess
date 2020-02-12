@@ -52,7 +52,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.role_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>

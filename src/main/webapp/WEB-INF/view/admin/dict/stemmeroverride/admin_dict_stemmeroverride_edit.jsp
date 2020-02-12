@@ -103,7 +103,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="term" class="col-sm-3 col-form-label"><la:message
+                                    <label for="term" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_stemmeroverride_source"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="input"/>
@@ -111,7 +111,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="output" class="col-sm-3 col-form-label"><la:message
+                                    <label for="output" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_stemmeroverride_target"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="output"/>

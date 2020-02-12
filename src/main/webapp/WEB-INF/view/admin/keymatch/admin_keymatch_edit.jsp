@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="term" class="col-sm-3 col-form-label"><la:message
+                                    <label for="term" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_term"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="term"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="query" class="col-sm-3 col-form-label"><la:message
+                                    <label for="query" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_query"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="query"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="maxSize" class="col-sm-3 col-form-label"><la:message
+                                    <label for="maxSize" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_size"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="maxSize"/>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="boost" class="col-sm-3 col-form-label"><la:message
+                                    <label for="boost" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_boost"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="boost"/>
@@ -88,7 +88,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHost" class="col-sm-3 col-form-label"><la:message
+                                    <label for="virtualHost" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.virtual_host"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHost"/>
