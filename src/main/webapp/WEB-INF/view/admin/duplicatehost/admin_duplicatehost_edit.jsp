@@ -55,7 +55,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="regularName" class="col-sm-3 col-form-label"><la:message
+                                    <label for="regularName" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.regular_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="regularName"/>
@@ -64,7 +64,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="duplicateHostName" class="col-sm-3 col-form-label"><la:message
+                                    <label for="duplicateHostName" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.duplicate_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="duplicateHostName"/>

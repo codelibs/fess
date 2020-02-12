@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="term" class="col-sm-3 col-form-label"><la:message
+                                    <label for="term" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.related_query_term"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="term"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="queries" class="col-sm-3 col-form-label"><la:message
+                                    <label for="queries" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.related_query_queries"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="queries"/>
@@ -71,7 +71,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHost" class="col-sm-3 col-form-label"><la:message
+                                    <label for="virtualHost" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.virtual_host"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHost"/>

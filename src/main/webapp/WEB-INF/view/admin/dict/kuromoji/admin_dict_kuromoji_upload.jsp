@@ -88,7 +88,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_kuromoji_file"/></label>
                                     <div class="col-sm-9">
                                         <input type="file" name="kuromojiFile" class="form-control-file"/>

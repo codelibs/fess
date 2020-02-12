@@ -47,7 +47,7 @@
                             <!-- /.card-header -->
                             <div class="card-body">
                                 <div class="form-group row">
-                                    <label for="targetVersion" class="col-sm-3 col-form-label"><la:message
+                                    <label for="targetVersion" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.target_version"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="targetVersion"/>
