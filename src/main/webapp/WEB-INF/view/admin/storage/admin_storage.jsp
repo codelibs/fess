@@ -50,6 +50,7 @@
 								<div class="card-tools">
                                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
                                         <em class="fa fa-upload" aria-hidden="true"></em>
+                                        <la:message key="labels.storage_button_upload"/>
                                     </a>
                                 </div>
                             </c:if>
@@ -144,8 +145,8 @@
 
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped dataTable">
-                                            <tbody>
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
                                             <tr>
                                                 <th><la:message key="labels.storage_name"/></th>
                                                 <th style="width: 10%"><la:message key="labels.storage_size"/></th>
@@ -153,6 +154,8 @@
                                                         key="labels.storage_last_modified"/></th>
                                                 <th style="width: 20%"></th>
                                             </tr>
+                                            </thead>
+                                            <tbody>
                                             <c:if test="${not empty path and not empty parentId}">
                                                 <tr
                                                         data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/">
