@@ -83,7 +83,7 @@
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-default" name="back"
+                                <button type="submit" class="btn btn-default" name="back" formaction="/admin/plugin/"
                                         value="<la:message key="labels.crud_button_back" />">
                                     <em class="fa fa-arrow-circle-left"></em>
                                     <la:message key="labels.crud_button_back"/>
