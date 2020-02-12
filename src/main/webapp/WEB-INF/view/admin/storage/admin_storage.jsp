@@ -50,6 +50,7 @@
 								<div class="card-tools">
                                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
                                         <em class="fa fa-upload" aria-hidden="true"></em>
+                                        <la:message key="labels.storage_button_upload"/>
                                     </a>
                                 </div>
                             </c:if>
