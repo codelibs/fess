@@ -40,7 +40,6 @@
                                 <la:message key="labels.dict_list_link"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
                             <div>
@@ -77,9 +76,7 @@
                                 </table>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

@@ -98,7 +98,6 @@
 					<input class="form-control" type="text" id="as_q" name="as.q" value="${f:h(fe:join(as.q))}">
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -109,7 +108,6 @@
 					<input class="form-control" type="text" id="as_epq" name="as.epq" value="${f:h(fe:join(as.epq))}">
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -120,7 +118,6 @@
 					<input class="form-control" type="text" id="as_oq" name="as.oq" value="${f:h(fe:join(as.oq))}">
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -131,7 +128,6 @@
 					<input class="form-control" type="text" id="as_nq" name="as.nq" value="${f:h(fe:join(as.nq))}">
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -152,7 +148,6 @@
 					</la:select>
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -210,7 +205,6 @@
 					</la:select>
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -225,7 +219,6 @@
 					</la:select>
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<c:if test="${displayLabelTypeItems}">
@@ -241,7 +234,6 @@
 						</la:select>
 					</div>
 					<div class="col-lg-4 d-none d-lg-flex align-items-center">
-						<!-- TODO -->
 					</div>
 				</div>
 			</c:if>
@@ -267,7 +259,6 @@
 					</select>
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -295,7 +286,6 @@
 					</select>
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -314,7 +304,6 @@
 					</select>
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 			<div class="form-group row">
@@ -325,7 +314,6 @@
 					<input class="form-control" type="text" id="as_sitesearch" name="as.sitesearch" value="${f:h(fe:join(as.sitesearch))}">
 				</div>
 				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					<!-- TODO -->
 				</div>
 			</div>
 

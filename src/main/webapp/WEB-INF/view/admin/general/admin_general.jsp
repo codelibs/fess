@@ -543,7 +543,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <c:if test="${editable}">
                                     <button type="submit" class="btn btn-success" name="update"
@@ -553,9 +552,7 @@
                                     </button>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

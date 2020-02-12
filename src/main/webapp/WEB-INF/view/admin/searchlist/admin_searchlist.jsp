@@ -231,7 +231,6 @@
                                 </div>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                         <div class="card-footer">
                             <c:if test="${f:h(allRecordCount) > 0}">
                                 <div class="row">
@@ -284,9 +283,7 @@
                                 </div>
                             </c:if>
                         </div>
-                        <!-- /.card-footer -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

@@ -34,7 +34,6 @@
                                 <la:message key="labels.crud_title_list"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
                             <div>

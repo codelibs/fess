@@ -42,7 +42,6 @@
                                         <la:message key="labels.design_title_edit_content"/>
                                     </h3>
                                 </div>
-                                <!-- /.card-header -->
                                 <div class="card-body">
                                     <h4>${f:h(displayFileName)}</h4>
                                     <div>
@@ -51,7 +50,6 @@
                                                      styleClass="form-control"></la:textarea>
                                     </div>
                                 </div>
-                                <!-- /.card-body -->
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-default" name="back"
                                             value="<la:message key="labels.design_button_back" />">
@@ -64,12 +62,10 @@
                                         <la:message key="labels.design_button_update"/>
                                     </button>
                                 </div>
-                                <!-- /.card-footer -->
                                 <la:hidden property="fileName"/>
                             </la:form>
                         </c:if>
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

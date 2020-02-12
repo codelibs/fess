@@ -46,7 +46,6 @@
                                     <la:message key="labels.wizard_start_crawler_title"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">
@@ -58,7 +57,6 @@
                                     <la:message key="labels.wizard_start_crawling_desc"/>
                                 </p>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-success"
                                         name="startCrawling"
@@ -72,9 +70,7 @@
                                     <la:message key="labels.wizard_button_finish"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

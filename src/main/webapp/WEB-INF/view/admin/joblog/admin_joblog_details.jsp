@@ -59,7 +59,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message --%>
                                 <div>
@@ -109,7 +108,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-default" name="back"
                                         value="<la:message key="labels.joblog_button_back" />">
@@ -158,9 +156,7 @@
                                     </div>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

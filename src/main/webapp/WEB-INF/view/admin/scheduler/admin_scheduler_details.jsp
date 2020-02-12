@@ -111,7 +111,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-default" name="list" value="back">
                                     <em class="fa fa-arrow-circle-left"></em>
@@ -180,9 +179,7 @@
                                     </c:if>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

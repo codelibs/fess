@@ -43,7 +43,6 @@
 </c:forEach>
 								</textarea>
                         </div>
-                        <!-- /.card-body -->
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -53,7 +52,6 @@
                                 <la:message key="labels.system_info_prop_title"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
 								<textarea id="propData" class="systemInfoData form-control"
                                           readonly>
@@ -61,7 +59,6 @@
 </c:forEach>
 								</textarea>
                         </div>
-                        <!-- /.card-body -->
                     </div>
                 </div>
             </div>
@@ -73,7 +70,6 @@
                                 <la:message key="labels.system_info_fess_prop_title"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <c:if test="${empty fessPropItems}">
 									<textarea id="fessPropData" class="systemInfoData form-control"
@@ -88,7 +84,6 @@
 									</textarea>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -98,7 +93,6 @@
                                 <la:message key="labels.system_info_bug_report_title"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
 								<textarea id="bugReportData" class="systemInfoData form-control"
                                           readonly>
@@ -106,7 +100,6 @@
 </c:forEach>
 								</textarea>
                         </div>
-                        <!-- /.card-body -->
                     </div>
                 </div>
             </div>

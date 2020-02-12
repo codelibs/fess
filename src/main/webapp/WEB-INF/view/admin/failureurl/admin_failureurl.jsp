@@ -38,7 +38,6 @@
                                 <la:message key="labels.failure_url_configuration"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
                             <div>
@@ -192,11 +191,8 @@
                                     </div>
                                 </c:if>
                             </div>
-                            <!-- /.data-wrapper -->
                         </div>
-                        <!-- ./card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

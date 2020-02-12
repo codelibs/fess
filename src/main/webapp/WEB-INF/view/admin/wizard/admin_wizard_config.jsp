@@ -45,7 +45,6 @@
                                     <la:message key="labels.wizard_crawling_setting_title"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">
@@ -89,7 +88,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-outline-secondary" name="index"
                                         value="<la:message key="labels.wizard_button_cancel"/>">
@@ -108,9 +106,7 @@
                                     <la:message key="labels.wizard_button_register_next"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

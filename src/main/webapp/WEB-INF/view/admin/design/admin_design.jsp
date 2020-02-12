@@ -41,7 +41,6 @@
                                     <la:message key="labels.design_title_file"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div class="form-group row">
                                     <la:errors property="fileName"/>
@@ -52,7 +51,6 @@
                                     </la:select>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary" name="download"
                                         value="<la:message key="labels.design_download_button" />">
@@ -101,12 +99,10 @@
                                     </div>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </la:form>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <!-- /.card -->
                     <c:if test="${editable}">
                         <div class="card card-outline card-primary">
                             <la:form action="/admin/design/">
@@ -115,7 +111,6 @@
                                         <la:message key="labels.design_file_title_edit"/>
                                     </h3>
                                 </div>
-                                <!-- /.card-header -->
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <la:errors property="fileName"/>
@@ -126,7 +121,6 @@
                                         </la:select>
                                     </div>
                                 </div>
-                                <!-- /.card-body -->
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary" name="edit"
                                             value="<la:message key="labels.design_edit_button" />">
@@ -140,11 +134,9 @@
                                         <la:message key="labels.design_use_default_button"/>
                                     </button>
                                 </div>
-                                <!-- /.card-footer -->
                             </la:form>
                         </div>
                     </c:if>
-                    <!-- /.card -->
                 </div>
                 <div class="col-md-12">
                     <c:if test="${editable}">
@@ -156,7 +148,6 @@
                                         <la:message key="labels.design_title_file_upload"/>
                                     </h3>
                                 </div>
-                                <!-- /.card-header -->
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <label class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -176,7 +167,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- /.card-body -->
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-success" name="upload"
                                             value="<la:message key="labels.design_button_upload" />">
@@ -184,11 +174,9 @@
                                         <la:message key="labels.design_button_upload"/>
                                     </button>
                                 </div>
-                                <!-- /.card-footer -->
                             </la:form>
                         </div>
                     </c:if>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

@@ -43,7 +43,6 @@
                                     <la:message key="labels.wizard_start_title"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message: BEGIN --%>
                                 <div>
@@ -57,7 +56,6 @@
                                     <la:message key="labels.wizard_start_desc"/>
                                 </p>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <c:if test="${editable}">
                                     <button type="submit" class="btn btn-primary"
@@ -68,9 +66,7 @@
                                     </button>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

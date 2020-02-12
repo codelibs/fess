@@ -22,7 +22,6 @@
 					alt="<la:message key="labels.header_brand_name" />" />
 			</la:link>
 		</div>
-		<!-- /.login-logo -->
 		<div class="card">
 			<div class="card-body login-card-body">
 				<p class="login-box-msg">
@@ -81,11 +80,8 @@
 					</div>
 				</la:form>
 			</div>
-			<!-- /.login-card-body -->
 		</div>
-		<!-- /.card -->
 	</div>
-	<!-- /.login-box -->
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script src="${fe:url('/js/admin/popper.min.js')}" type="text/javascript"></script>
 	<script type="text/javascript"

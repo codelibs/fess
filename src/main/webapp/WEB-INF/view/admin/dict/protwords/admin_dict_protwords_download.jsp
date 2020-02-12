@@ -78,7 +78,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message --%>
                                 <div>
@@ -91,7 +90,6 @@
                                     <label for="name" class="col-sm-12 text-sm-right col-form-label">${f:h(path)}</label>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary" name="download"
                                         value="<la:message key="labels.dict_protwords_button_download" />">
@@ -99,9 +97,7 @@
                                     <la:message key="labels.dict_protwords_button_download"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

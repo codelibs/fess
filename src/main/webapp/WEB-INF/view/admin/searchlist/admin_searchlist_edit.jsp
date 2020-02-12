@@ -82,7 +82,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">
@@ -318,7 +317,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <c:if test="${crudMode == 1}">
                                     <la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
@@ -343,9 +341,7 @@
                                     </button>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

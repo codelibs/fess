@@ -68,7 +68,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
                             <div>
@@ -87,7 +86,6 @@
                             </div>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                         <div class="card-footer">
                             <button type="submit" class="btn btn-success" name="upload"
                                     value="<la:message key="labels.bad_word_button_upload" />">
@@ -95,9 +93,7 @@
                                 <la:message key="labels.bad_word_button_upload"/>
                             </button>
                         </div>
-                        <!-- /.card-footer -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
             </la:form>

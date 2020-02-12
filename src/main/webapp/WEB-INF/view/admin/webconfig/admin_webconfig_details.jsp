@@ -46,7 +46,6 @@
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message --%>
                                 <div>
@@ -165,7 +164,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
                                 <c:if test="${editable}"><la:link styleClass="btn btn-success"
@@ -174,9 +172,7 @@
                                     <la:message key="labels.web_crawling_button_create_job"/>
                                 </la:link></c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

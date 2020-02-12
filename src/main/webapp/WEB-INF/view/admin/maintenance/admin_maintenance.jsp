@@ -44,7 +44,6 @@
                                     <la:message key="labels.upgrade_reindex"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div class="form-group row">
                                     <label for="replaceAliases" class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -92,7 +91,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary ${f:h(editableClass)}"
                                         name="reindexOnly"
@@ -101,9 +99,7 @@
                                     <la:message key="labels.reindex_start_button"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
@@ -112,7 +108,6 @@
                                     <la:message key="labels.reload_doc_index"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary"
                                         name="reloadDocIndex"
@@ -121,9 +116,7 @@
                                     <la:message key="labels.reload_doc_index_button"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
@@ -132,7 +125,6 @@
                                     <la:message key="labels.clear_crawler_index"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-danger"
                                         name="clearCrawlerIndex"
@@ -141,9 +133,7 @@
                                     <la:message key="labels.clear_crawler_index_button"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </c:if>
                 <div class="col-md-12">
@@ -153,7 +143,6 @@
                                 <la:message key="labels.diagnostic_logs"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary"
                                     name="downloadLogs"
@@ -162,9 +151,7 @@
                                 <la:message key="labels.download_diagnostic_logs_button"/>
                             </button>
                         </div>
-                        <!-- /.card-footer -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </la:form>
         </section>

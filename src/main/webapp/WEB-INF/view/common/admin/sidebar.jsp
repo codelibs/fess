@@ -1,20 +1,12 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
-
-<!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar sidebar-dark-primary">
-
-	<!-- Brand Logo -->
 	<la:link href="/admin/" styleClass="brand-link text-center">
 		<span class="brand-text">
 		<img src="${fe:url('/images/logo-head.png')}"
 			 alt="<la:message key="labels.header_brand_name" />" />
 		</span>
 	</la:link>
-
-	<!-- sidebar -->
 	<div class="sidebar">
-
-		<!-- SEARCH FORM -->
 		<c:if test="${fe:permission('admin-searchlist-view')}">
 			<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="GET" class="form-inline mt-2 sidebar-search">
 				<div class="input-group">
@@ -29,8 +21,6 @@
 				</div>
 			</form>
 		</c:if>
-
-		<!-- Sidebar Menu -->
 		<nav class="mt-2">
 
 		<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
@@ -386,7 +376,5 @@
 			</c:if>
 		</ul>
 		</nav>
-		<!-- /.sidebar-menu -->
 	</div>
-	<!-- /.sidebar -->
 </aside>

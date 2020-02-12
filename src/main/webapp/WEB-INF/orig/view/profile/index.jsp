@@ -22,69 +22,68 @@
 					alt="<la:message key="labels.header_brand_name" />" />
 			</la:link>
 		</div>
-		<!-- /.login-logo -->
-		<div class="login-box-body">
-			<p class="login-box-msg">
-				<la:message key="labels.profile" />
-			</p>
-			<%-- Message --%>
-			<div>
-				<la:info id="msg" message="false">
-					<div class="alert alert-info">${msg}</div>
-				</la:info>
-				<la:errors />
-			</div>
-			<la:form styleId="login" method="post">
-				<div class="form-group has-feedback">
-					<div class="input-group">
-						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
+		<div class="card">
+			<div class="card-body login-card-body">
+				<p class="login-box-msg">
+					<la:message key="labels.profile" />
+				</p>
+				<%-- Message --%>
+				<div>
+					<la:info id="msg" message="false">
+						<div class="alert alert-info">${msg}</div>
+					</la:info>
+					<la:errors />
+				</div>
+				<la:form styleId="login" method="post">
+					<div class="input-group mb-3">
 						<c:set var="ph_old_password">
 							<la:message key="labels.profile.placeholder_old_password" />
 						</c:set>
 						<la:password property="oldPassword" class="form-control"
-							placeholder="${ph_old_password}" />
+									 placeholder="${ph_old_password}" />
+						<div class="input-group-append">
+							<span class="input-group-text"><em class="fa fa-lock fa-fw"></em></span>
+						</div>
 					</div>
-				</div>
-				<div class="form-group has-feedback">
-					<div class="input-group">
-						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
+					<div class="input-group mb-3">
 						<c:set var="ph_new_password">
 							<la:message key="labels.profile.placeholder_new_password" />
 						</c:set>
 						<la:password property="newPassword" class="form-control"
-							     placeholder="${ph_new_password}" />
+									 placeholder="${ph_new_password}" />
+						<div class="input-group-append">
+							<span class="input-group-text"><em class="fa fa-lock fa-fw"></em></span>
+						</div>
 					</div>
-				</div>
-				<div class="form-group has-feedback">
-					<div class="input-group">
-						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
+					<div class="input-group mb-3">
 						<c:set var="ph_confirm_password">
 							<la:message key="labels.profile.placeholder_confirm_new_password" />
 						</c:set>
 						<la:password property="confirmNewPassword" class="form-control"
-							     placeholder="${ph_confirm_password}" />
+									 placeholder="${ph_confirm_password}" />
+						<div class="input-group-append">
+							<span class="input-group-text"><em class="fa fa-lock fa-fw"></em></span>
+						</div>
 					</div>
-				</div>
-				<div class="text-center">
-					<la:link href="/"
-						styleClass="btn btn-default">
-						<em class="fa fa-arrow-circle-left"></em>
-						<la:message key="labels.profile.back" />
-					</la:link>
-					<button type="submit" name="changePassword"
-						class="btn btn-warning"
-						value="<la:message key="labels.profile.update"/>">
-						<em class="fa fa-pencil-alt"></em>
-						<la:message key="labels.profile.update" />
-					</button>
-				</div>
-			</la:form>
+					<div class="text-center">
+						<la:link href="/"
+							styleClass="btn btn-default">
+							<em class="fa fa-arrow-circle-left"></em>
+							<la:message key="labels.profile.back" />
+						</la:link>
+						<button type="submit" name="changePassword"
+							class="btn btn-success"
+							value="<la:message key="labels.profile.update"/>">
+							<em class="fa fa-pencil-alt"></em>
+							<la:message key="labels.profile.update" />
+						</button>
+					</div>
+				</la:form>
+			</div>
 		</div>
-		<!-- /.login-box-body -->
 	</div>
-	<!-- /.login-box -->
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script type="text/javascript" src="${fe:url('/js/admin/popper.min.js')}"></script>
+	<script src="${fe:url('/js/admin/popper.min.js')}" type="text/javascript"></script>
 	<script type="text/javascript"
 		src="${fe:url('/js/admin/jquery-3.4.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/admin/bootstrap.min.js')}"></script>

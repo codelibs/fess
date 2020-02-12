@@ -44,7 +44,6 @@
                                     <la:message key="labels.upgrade_data_migration"/>
                                 </h3>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div class="form-group row">
                                     <label for="targetVersion" class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -70,7 +69,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary ${f:h(editableClass)}"
                                         name="upgradeFrom"
@@ -79,9 +77,7 @@
                                     <la:message key="labels.upgrade_start_button"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </la:form>
             </div>

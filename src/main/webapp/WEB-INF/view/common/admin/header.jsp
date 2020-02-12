@@ -1,7 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-dark navbar-secondary">
-	<!-- Left navbar links -->
 	<ul class="navbar-nav">
 		<li class="nav-item">
 			<a class="nav-link" data-widget="pushmenu" href="#">
@@ -11,8 +9,6 @@
 			</a>
 		</li>
 	</ul>
-
-	<!-- Right navbar links -->
 	<ul class="navbar-nav ml-auto">
 		<c:if test="${eoled}">
 		<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message
@@ -42,4 +38,3 @@
 				class="fa fa-sign-out-alt"></em></a></li>
 	</ul>
 </nav>
-<!-- /.navbar -->

@@ -136,9 +136,7 @@
                                 </div>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

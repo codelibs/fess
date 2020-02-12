@@ -61,7 +61,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message --%>
                                 <div>
@@ -98,7 +97,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-footer">
                                 <c:if test="${crudMode == 4}">
                                     <button type="submit" class="btn btn-default" name="back"
@@ -149,9 +147,7 @@
                                     </c:if>
                                 </c:if>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

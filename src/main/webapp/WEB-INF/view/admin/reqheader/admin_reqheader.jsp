@@ -42,7 +42,6 @@
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message --%>
                                 <div>
@@ -88,9 +87,7 @@
                                     </c:if>
                                 </c:if>
                             </div>
-                            <!-- /.card-body -->
                         </div>
-                        <!-- /.card -->
                     </c:if>
                 </div>
             </div>

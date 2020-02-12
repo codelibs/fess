@@ -93,7 +93,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">
@@ -135,13 +134,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

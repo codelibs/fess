@@ -41,7 +41,6 @@
                                 <la:message key="labels.crawling_info_title"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
                             <div>
@@ -172,9 +171,7 @@
                                 </div>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

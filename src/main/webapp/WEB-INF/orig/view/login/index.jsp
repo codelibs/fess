@@ -22,53 +22,56 @@
 					alt="<la:message key="labels.header_brand_name" />" />
 			</la:link>
 		</div>
-		<!-- /.login-logo -->
 		<div class="notification">${notification}</div>
-		<div class="login-box-body">
-			<p class="login-box-msg">
-				<la:message key="labels.login" />
-			</p>
-			<%-- Message --%>
-			<div>
-				<la:info id="msg" message="false">
-					<div class="alert alert-info">${msg}</div>
-				</la:info>
-				<la:errors />
-			</div>
-			<la:form styleId="login" method="post">
-				<div class="form-group has-feedback">
-					<div class="input-group">
-						<span class="input-group-addon"><em class="fa fa-user fa-fw"></em></span>
+		<div class="card">
+			<div class="card-body login-card-body">
+				<p class="login-box-msg">
+					<la:message key="labels.login" />
+				</p>
+				<%-- Message --%>
+				<div>
+					<la:info id="msg" message="false">
+						<div class="alert alert-info">${msg}</div>
+					</la:info>
+					<la:errors />
+				</div>
+				<la:form styleId="login" method="post">
+					<div class="input-group mb-3">
 						<c:set var="ph_username">
 							<la:message key="labels.login.placeholder_username" />
 						</c:set>
 						<la:text property="username" styleId="username"
 							class="form-control" placeholder="${ph_username}" />
+						<div class="input-group-append">
+							<span class="input-group-text">
+								<em class="fa fa-user fa-fw"></em>
+            				</span>
+						</div>
 					</div>
-				</div>
-				<div class="form-group has-feedback">
-					<div class="input-group">
-						<span class="input-group-addon"><em class="fa fa-lock fa-fw"></em></span>
+					<div class="input-group mb-3">
 						<c:set var="ph_password">
 							<la:message key="labels.login.placeholder_password" />
 						</c:set>
 						<la:password property="password" class="form-control"
 							placeholder="${ph_password}" />
+						<div class="input-group-append">
+							<span class="input-group-text">
+								<em class="fa fa-lock fa-fw"></em>
+							</span>
+						</div>
 					</div>
-				</div>
-				<div class="text-center">
-					<button type="submit" name="login"
-						class="btn btn-primary btn-block btn-flat"
-						value="<la:message key="labels.login"/>">
-						<em class="fa fa-sign-in"></em>
-						<la:message key="labels.login" />
-					</button>
-				</div>
-			</la:form>
+					<div class="text-center">
+						<button type="submit" name="login"
+							class="btn btn-primary btn-block"
+							value="<la:message key="labels.login"/>">
+							<em class="fa fa-sign-in"></em>
+							<la:message key="labels.login" />
+						</button>
+					</div>
+				</la:form>
+			</div>
 		</div>
-		<!-- /.login-box-body -->
 	</div>
-	<!-- /.login-box -->
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/admin/popper.min.js')}"></script>
 	<script type="text/javascript"

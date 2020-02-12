@@ -68,7 +68,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-header -->
                             <div class="card-body">
                                     <%-- Message --%>
                                 <div>
@@ -82,7 +81,6 @@
                                             key="labels.bad_word_file"/></label>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary" name="download"
                                         value="<la:message key="labels.bad_word_button_download" />">
@@ -90,9 +88,7 @@
                                     <la:message key="labels.bad_word_button_download"/>
                                 </button>
                             </div>
-                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.card -->
                     </div>
                 </div>
             </la:form>

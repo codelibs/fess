@@ -40,7 +40,6 @@
                                 <la:message key="labels.plugin_install"/>
                             </h3>
                         </div>
-                        <!-- /.card-header -->
                         <la:form action="/admin/plugin/install" enctype="multipart/form-data">
                         <div class="card-body">
                             <ul class="nav nav-tabs" role="tablist">
@@ -87,7 +86,6 @@
                                 <la:message key="labels.crud_button_install"/>
                             </button>
                         </div>
-                        <!-- /.card-body -->
                         </la:form>
                         <div class="card-footer">
                             <la:form action="/admin/plugin/">
@@ -98,9 +96,7 @@
                             </button>
                             </la:form>
                         </div>
-                        <!-- /.card-footer -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>

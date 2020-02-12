@@ -65,7 +65,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /.card-header -->
                         <div class="card-body">
                             <%-- Message --%>
                             <div>
@@ -113,9 +112,7 @@
                                 </c:if>
                             </c:if>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
             </div>
         </section>
