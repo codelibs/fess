@@ -53,7 +53,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <h3 class="card-title">
                                     <c:if test="${crudMode == 1}">
@@ -102,7 +102,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="token" class="col-sm-3 col-form-label"><la:message
+                                    <label for="token" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_kuromoji_token"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="token"/>
@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="segmentation" class="col-sm-3 col-form-label"><la:message
+                                    <label for="segmentation" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_kuromoji_segmentation"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="segmentation"/>
@@ -119,7 +119,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="reading" class="col-sm-3 col-form-label"><la:message
+                                    <label for="reading" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_kuromoji_reading"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="reading"/>
@@ -127,7 +127,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="pos" class="col-sm-3 col-form-label"><la:message
+                                    <label for="pos" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_kuromoji_pos"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="pos"/>

@@ -28,7 +28,7 @@
                             <li class="breadcrumb-item"><la:link href="/admin/wizard/">
                                 <la:message key="labels.wizard_start_title"/>
                             </la:link></li>
-                            <li><la:message key="labels.wizard_crawling_config_title"/></li>
+                            <li class="breadcrumb-item"><la:message key="labels.wizard_crawling_config_title"/></li>
                             <li class="breadcrumb-item active"><la:message
                                     key="labels.wizard_start_crawling_title"/></li>
                         </ol>

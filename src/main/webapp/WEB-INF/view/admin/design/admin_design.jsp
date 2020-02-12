@@ -148,7 +148,7 @@
                 </div>
                 <div class="col-md-12">
                     <c:if test="${editable}">
-                        <div class="card card-outline card-primary">
+                        <div class="card card-outline card-success">
                             <la:form action="/admin/design/upload/"
                                      enctype="multipart/form-data">
                                 <div class="card-header">
@@ -159,7 +159,7 @@
                                 <!-- /.card-header -->
                                 <div class="card-body">
                                     <div class="form-group row">
-                                        <label class="col-sm-3 col-form-label"><la:message
+                                        <label class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.design_file"/></label>
                                         <div class="form-inline col-sm-9">
                                             <la:errors property="designFile"/>
@@ -167,7 +167,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label class="col-sm-3 col-form-label"><la:message
+                                        <label class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.design_file_name"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="designFileName"/>

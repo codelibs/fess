@@ -41,7 +41,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="regex" class="col-sm-3 col-form-label"><la:message
+                                    <label for="regex" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.regex"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="regex"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="replacement" class="col-sm-3 col-form-label"><la:message
+                                    <label for="replacement" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.replacement"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="replacement"/>
@@ -71,7 +71,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="processType" class="col-sm-3 col-form-label"><la:message
+                                    <label for="processType" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.processType"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="processType"/>
@@ -90,7 +90,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="sortOrder" class="col-sm-3 col-form-label"><la:message
+                                    <label for="sortOrder" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.sortOrder"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="sortOrder"/>
@@ -100,7 +100,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="userAgent" class="col-sm-3 col-form-label"><la:message
+                                    <label for="userAgent" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.userAgent"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="userAgent"/>

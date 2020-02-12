@@ -34,7 +34,7 @@
                         </la:info>
                         <la:errors property="_global"/>
                     </div>
-                    <div class="card card-outline card-primary">
+                    <div class="card card-outline card-success">
                         <c:if test="${editable}">
                             <la:form action="/admin/design/">
                                 <div class="card-header">

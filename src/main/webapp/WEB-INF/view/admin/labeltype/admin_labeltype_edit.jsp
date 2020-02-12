@@ -41,7 +41,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.labeltype_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="paths" class="col-sm-3 col-form-label"><la:message
+                                    <label for="paths" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.labeltype_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="value"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="includedPaths" class="col-sm-3 col-form-label"><la:message
+                                    <label for="includedPaths" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.labeltype_included_paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="includedPaths"/>
@@ -79,7 +79,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="excludedPaths" class="col-sm-3 col-form-label"><la:message
+                                    <label for="excludedPaths" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.labeltype_excluded_paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="excludedPaths"/>
@@ -88,7 +88,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="permissions" class="col-sm-3 col-form-label"><la:message
+                                    <label for="permissions" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.permissions"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="permissions"/>
@@ -98,7 +98,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHost" class="col-sm-3 col-form-label"><la:message
+                                    <label for="virtualHost" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.virtual_host"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHost"/>
@@ -107,7 +107,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="sortOrder" class="col-sm-3 col-form-label"><la:message
+                                    <label for="sortOrder" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.sortOrder"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="sortOrder"/>

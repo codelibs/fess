@@ -41,7 +41,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.reqheader_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="value" class="col-sm-3 col-form-label"><la:message
+                                    <label for="value" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.reqheader_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="value"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="webConfigId" class="col-sm-3 col-form-label"><la:message
+                                    <label for="webConfigId" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.reqheader_web_crawling_config"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="webConfigId"/>

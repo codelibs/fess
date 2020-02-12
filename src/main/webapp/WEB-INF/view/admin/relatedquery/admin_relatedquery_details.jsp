@@ -41,7 +41,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
                                 <%-- Card Header --%>
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>

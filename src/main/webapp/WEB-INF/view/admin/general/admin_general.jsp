@@ -30,7 +30,7 @@
             <la:form action="/admin/general/">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card card-outline card-warning">
+                        <div class="card card-outline card-success">
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">

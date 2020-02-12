@@ -40,7 +40,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
@@ -53,7 +53,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.access_token_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>
@@ -62,7 +62,7 @@
                                 </div>
                                 <c:if test="${crudMode==2}">
                                     <div class="form-group row">
-                                        <label for="token" class="col-sm-3 col-form-label"><la:message
+                                        <label for="token" class="col-sm-3 text-right col-form-label"><la:message
                                                 key="labels.access_token_token"/></label>
                                         <div class="col-sm-9">
                                                 ${f:h(token)}
@@ -70,7 +70,7 @@
                                     </div>
                                 </c:if>
                                 <div class="form-group row">
-                                    <label for="permissions" class="col-sm-3 col-form-label"><la:message
+                                    <label for="permissions" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.permissions"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="permissions"/>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.access_token_parameter_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="parameterName"/>
@@ -89,7 +89,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.access_token_expires"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="expires"/>

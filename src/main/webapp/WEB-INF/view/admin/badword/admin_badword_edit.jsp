@@ -52,7 +52,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <h3 class="card-title">
                                     <c:if test="${crudMode == 1}">
@@ -100,7 +100,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="word" class="col-sm-3 col-form-label"><la:message
+                                    <label for="word" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.bad_word_suggest_word"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="suggestWord"/>

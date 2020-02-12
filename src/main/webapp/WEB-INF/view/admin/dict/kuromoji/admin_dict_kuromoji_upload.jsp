@@ -43,8 +43,8 @@
                 <la:hidden property="dictId"/>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card card-outline card-primary">
-                            <div class="card-header with-border">
+                        <div class="card card-outline card-success">
+                            <div class="card-header">
                                 <h3 class="card-title">
                                     <la:message key="labels.dict_kuromoji_link_upload"/>
                                 </h3>
@@ -88,7 +88,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.dict_kuromoji_file"/></label>
                                     <div class="col-sm-9">
                                         <input type="file" name="kuromojiFile" class="form-control-file"/>

@@ -41,7 +41,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="term" class="col-sm-3 col-form-label"><la:message
+                                    <label for="term" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_term"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="term"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="query" class="col-sm-3 col-form-label"><la:message
+                                    <label for="query" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_query"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="query"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="maxSize" class="col-sm-3 col-form-label"><la:message
+                                    <label for="maxSize" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_size"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="maxSize"/>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="boost" class="col-sm-3 col-form-label"><la:message
+                                    <label for="boost" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.key_match_boost"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="boost"/>
@@ -88,7 +88,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHost" class="col-sm-3 col-form-label"><la:message
+                                    <label for="virtualHost" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.virtual_host"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHost"/>

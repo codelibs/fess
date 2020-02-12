@@ -47,7 +47,7 @@
                             <!-- /.card-header -->
                             <div class="card-body">
                                 <div class="form-group row">
-                                    <label for="replaceAliases" class="col-sm-3 col-form-label"><la:message
+                                    <label for="replaceAliases" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.replace_aliases"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="replaceAliases"/>
@@ -60,7 +60,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="resetDictionaries" class="col-sm-3 col-form-label"><la:message
+                                    <label for="resetDictionaries" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.reset_dictionaries"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resetDictionaries"/>
@@ -73,7 +73,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="numberOfShardsForDoc" class="col-sm-3 col-form-label"><la:message
+                                    <label for="numberOfShardsForDoc" class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.number_of_shards_for_doc"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="numberOfShardsForDoc"/>
@@ -83,7 +83,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="autoExpandReplicasForDoc"
-                                           class="col-sm-3 col-form-label"><la:message
+                                           class="col-sm-3 text-right col-form-label"><la:message
                                             key="labels.auto_expand_replicas_for_doc"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="autoExpandReplicasForDoc"/>
