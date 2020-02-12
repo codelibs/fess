@@ -60,7 +60,7 @@
                                                 key="labels.handler_name"/></label>
                                         <div class="col-sm-10">
                                             <la:errors property="handlerName"/>
-                                            <la:select styleId="handlerName" property="handlerName" size="1"
+                                            <la:select styleId="handlerName" property="handlerName"
                                                        styleClass="form-control">
                                                 <la:option value=""/>
                                                 <c:forEach var="hn" varStatus="s"
