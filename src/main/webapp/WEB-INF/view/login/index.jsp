@@ -8,7 +8,6 @@
 <link href="${fe:url('/css/admin/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/admin/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/skins/skin-blue.min.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/admin/style.css')}" rel="stylesheet" type="text/css" />
 <!--[if lt IE 9]>
 <script src="${fe:url('/css/admin/html5shiv.min.js')}"></script>
