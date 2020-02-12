@@ -90,7 +90,7 @@
                             <c:if test="${crawlingInfoPager.allRecordCount > 0}">
                                 <div class="row top10">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped dataTable">
+                                        <table class="table table-bordered table-striped">
                                             <thead>
                                             <tr>
                                                 <th><la:message
