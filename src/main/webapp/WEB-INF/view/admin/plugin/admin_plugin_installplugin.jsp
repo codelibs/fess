@@ -35,13 +35,13 @@
                 </div>
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
-                        <la:form action="/admin/plugin/install" enctype="multipart/form-data">
                             <div class="card-header">
                                 <h3 class="card-title">
                                     <la:message key="labels.plugin_install"/>
                                 </h3>
                             </div>
                             <!-- /.card-header -->
+                            <la:form action="/admin/plugin/install" enctype="multipart/form-data">
                             <div class="card-body">
                                 <ul class="nav nav-tabs" role="tablist">
                                     <li role="presentation" class="nav-item"><a href="#remote" aria-controls="remote" class="nav-link active"
@@ -80,14 +80,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- /.card-body -->
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-default" name="back" formaction="/admin/plugin/"
-                                        value="<la:message key="labels.crud_button_back" />">
-                                    <em class="fa fa-arrow-circle-left"></em>
-                                    <la:message key="labels.crud_button_back"/>
-                                </button>
                                 <button type="submit" class="btn btn-success" name="install"
                                         value="<la:message key="labels.crud_button_install" />"
                                 >
@@ -95,8 +87,18 @@
                                     <la:message key="labels.crud_button_install"/>
                                 </button>
                             </div>
+                            <!-- /.card-body -->
+                            </la:form>
+                            <div class="card-footer">
+                                <la:form action="/admin/plugin/">
+                                <button type="submit" class="btn btn-default" name="back"
+                                        value="<la:message key="labels.crud_button_back" />">
+                                    <em class="fa fa-arrow-circle-left"></em>
+                                    <la:message key="labels.crud_button_back"/>
+                                </button>
+                                </la:form>
+                            </div>
                             <!-- /.card-footer -->
-                        </la:form>
                     </div>
                     <!-- /.card -->
                 </div>
