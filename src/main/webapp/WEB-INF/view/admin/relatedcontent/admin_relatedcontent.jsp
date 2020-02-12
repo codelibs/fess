@@ -50,14 +50,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/relatedcontent/">
                                     <div class="form-group row">
-                                        <label for="term" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="term" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.related_content_term"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="term" property="term" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="content" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="content" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.related_content_content"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="content" property="content" styleClass="form-control"/>

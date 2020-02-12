@@ -41,7 +41,7 @@
                                     <%-- System --%>
                                 <h4><la:message key="labels.general_menu_system"/></h4>
                                 <div class="form-group row">
-                                    <label for="webApiJson" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="webApiJson" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.web_api_json_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="webApiJson"/>
@@ -54,7 +54,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="loginRequired" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="loginRequired" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.login_required"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="loginRequired"/>
@@ -67,7 +67,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="loginLink" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="loginLink" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.login_link"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="loginLink"/>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="resultCollapsed" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="resultCollapsed" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.result_collapsed"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resultCollapsed"/>
@@ -93,7 +93,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="thumbnail" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="thumbnail" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.thumbnail"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="thumbnail"/>
@@ -106,7 +106,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="appValue" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="appValue" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.app_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="appValue"/>
@@ -115,7 +115,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="defaultLabelValue" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="defaultLabelValue" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.default_label_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="defaultLabelValue"/>
@@ -124,7 +124,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="defaultSortValue" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="defaultSortValue" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.default_sort_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="defaultSortValue"/>
@@ -133,7 +133,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHostValue" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="virtualHostValue" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.virtual_host_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHostValue"/>
@@ -142,7 +142,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="popularWord" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="popularWord" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.popular_word_word_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="popularWord"/>
@@ -155,7 +155,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="csvFileEncoding" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="csvFileEncoding" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.csv_file_encoding"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="csvFileEncoding"/>
@@ -165,7 +165,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="appendQueryParameter"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.append_query_param_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="appendQueryParameter"/>
@@ -179,7 +179,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="notificationTo" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="notificationTo" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.notification_to"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="notificationTo"/>
@@ -198,7 +198,7 @@
                                     <%-- Crawler --%>
                                 <h4><la:message key="labels.general_menu_crawler"/></h4>
                                 <div class="form-group row">
-                                    <label for="incrementalCrawling" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="incrementalCrawling" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.incremental_crawling"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="incrementalCrawling"/>
@@ -213,7 +213,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="crawlingThreadCount"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.crawling_thread_count"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="crawlingThreadCount"/>
@@ -223,7 +223,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="dayForCleanup" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="dayForCleanup" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.day_for_cleanup"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="dayForCleanup"/>
@@ -234,7 +234,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="ignoreFailureType" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="ignoreFailureType" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ignore_failure_type"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ignoreFailureType"/>
@@ -244,7 +244,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="failureCountThreshold"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.failure_count_threshold"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="failureCountThreshold"/>
@@ -256,7 +256,7 @@
                                     <%-- Logging --%>
                                 <h4><la:message key="labels.general_menu_logging"/></h4>
                                 <div class="form-group row">
-                                    <label for="searchLog" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="searchLog" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.search_log_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="searchLog"/>
@@ -269,7 +269,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="userInfo" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="userInfo" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.user_info_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="userInfo"/>
@@ -282,7 +282,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="userFavorite" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="userFavorite" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.user_favorite_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="userFavorite"/>
@@ -295,7 +295,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="purgeSearchLogDay" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="purgeSearchLogDay" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.purge_search_log_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeSearchLogDay"/>
@@ -306,7 +306,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="purgeJobLogDay" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="purgeJobLogDay" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.purge_job_log_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeJobLogDay"/>
@@ -317,7 +317,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="purgeUserInfoDay" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="purgeUserInfoDay" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.purge_user_info_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeUserInfoDay"/>
@@ -328,7 +328,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="purgeByBots" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="purgeByBots" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.purge_by_bots"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="purgeByBots"/>
@@ -337,7 +337,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="logLevel" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="logLevel" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.log_level"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="logLevel"/>
@@ -356,7 +356,7 @@
                                     <%-- Suggest --%>
                                 <h4><la:message key="labels.general_menu_suggest"/></h4>
                                 <div class="form-group row">
-                                    <label for="suggestSearchLog" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="suggestSearchLog" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.suggest_search_log_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="suggestSearchLog"/>
@@ -369,7 +369,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="suggestSearchLog" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="suggestSearchLog" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.suggest_documents_enabled"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="suggestDocuments"/>
@@ -383,7 +383,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="purgeSuggestSearchLogDay"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.purge_suggest_search_log_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeSuggestSearchLogDay"/>
@@ -398,7 +398,7 @@
                                 <h4><la:message key="labels.general_menu_ldap"/></h4>
                                 <div class="form-group row">
                                     <label for="ldapProviderUrl"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_provider_url"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapProviderUrl"/>
@@ -408,7 +408,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapBaseDn"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_base_dn"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapBaseDn"/>
@@ -418,7 +418,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapSecurityPrincipal"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_admin_security_principal"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapAdminSecurityPrincipal"/>
@@ -429,7 +429,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapSecurityPrincipal"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_admin_security_credentials"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapAdminSecurityCredentials"/>
@@ -440,7 +440,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapSecurityPrincipal"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_security_principal"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapSecurityPrincipal"/>
@@ -450,7 +450,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapAccountFilter"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_account_filter"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapAccountFilter"/>
@@ -460,7 +460,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapGroupFilter"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_group_filter"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapGroupFilter"/>
@@ -470,7 +470,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="ldapMemberofAttribute"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_memberof_attribute"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="ldapMemberofAttribute"/>
@@ -482,7 +482,7 @@
                                 <h4><la:message key="labels.general_menu_notification"/></h4>
                                 <div class="form-group row">
                                     <label for="notificationLogin"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.notification_login"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="notificationLogin"/>
@@ -492,7 +492,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="notificationSearchTop"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.notification_search_top"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="notificationSearchTop"/>
@@ -504,7 +504,7 @@
                                 <h4><la:message key="labels.general_storage"/></h4>
                                 <div class="form-group row">
                                     <label for="storageEndpoint"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.storage_endpoint"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="storageEndpoint"/>
@@ -514,7 +514,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="storageAccessKey"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.storage_access_key"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="storageAccessKey"/>
@@ -524,7 +524,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="storageSecretKey"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.storage_secret_key"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="storageSecretKey"/>
@@ -534,7 +534,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <label for="storageBucket"
-                                           class="col-sm-3 text-right col-form-label"><la:message
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.storage_bucket"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="storageBucket"/>

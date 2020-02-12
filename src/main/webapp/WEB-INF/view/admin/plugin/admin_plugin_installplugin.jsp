@@ -71,9 +71,9 @@
                                 <div role="tabpanel" class="tab-pane" id="local">
                                     <div class="card-body">
                                         <div class="form-group row">
-                                            <label for="name" class="col-md-3 text-right col-form-label"><la:message
+                                            <label for="name" class="col-md-3 text-sm-right col-form-label"><la:message
                                                     key="labels.plugin_jar_file"/></label>
-                                            <div class="col-md-9 text-right col-form-label">
+                                            <div class="col-md-9 text-sm-right col-form-label">
                                                 <input type="file" name="jarFile" class="form-control-file"/>
                                             </div>
                                         </div>

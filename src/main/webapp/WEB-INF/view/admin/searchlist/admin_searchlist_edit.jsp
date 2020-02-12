@@ -92,11 +92,11 @@
                                 </div>
                                 <c:if test="${crudMode==2}">
                                     <div class="form-group row">
-                                        <label for="doc_id" class="col-sm-3 text-right col-form-label">_id</label>
+                                        <label for="doc_id" class="col-sm-3 text-sm-right col-form-label">_id</label>
                                         <div class="col-sm-9">${f:h(id)}</div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="doc_id" class="col-sm-3 text-right col-form-label">doc_id</label>
+                                        <label for="doc_id" class="col-sm-3 text-sm-right col-form-label">doc_id</label>
                                         <div class="col-sm-9">
                                                 ${f:h(doc.doc_id)}
                                             <la:hidden property="doc.doc_id"/>
@@ -104,7 +104,7 @@
                                     </div>
                                 </c:if>
                                 <div class="form-group row">
-                                    <label for="url" class="col-sm-3 text-right col-form-label">url</label>
+                                    <label for="url" class="col-sm-3 text-sm-right col-form-label">url</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.url"/>
                                         <la:text property="doc.url" styleClass="form-control"
@@ -112,7 +112,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="title" class="col-sm-3 text-right col-form-label">title</label>
+                                    <label for="title" class="col-sm-3 text-sm-right col-form-label">title</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.title"/>
                                         <la:text property="doc.title" styleClass="form-control"
@@ -120,7 +120,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="role" class="col-sm-3 text-right col-form-label">role</label>
+                                    <label for="role" class="col-sm-3 text-sm-right col-form-label">role</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.role"/>
                                         <la:textarea property="doc.role" styleClass="form-control"
@@ -128,7 +128,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="boost" class="col-sm-3 text-right col-form-label">boost</label>
+                                    <label for="boost" class="col-sm-3 text-sm-right col-form-label">boost</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.boost"/>
                                         <la:text property="doc.boost" styleClass="form-control"
@@ -139,105 +139,105 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="label" class="col-sm-3 text-right col-form-label">label</label>
+                                    <label for="label" class="col-sm-3 text-sm-right col-form-label">label</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.label"/>
                                         <la:textarea property="doc.label" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="lang" class="col-sm-3 text-right col-form-label">lang</label>
+                                    <label for="lang" class="col-sm-3 text-sm-right col-form-label">lang</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.lang"/>
                                         <la:textarea property="doc.lang" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="mimetype" class="col-sm-3 text-right col-form-label">mimetype</label>
+                                    <label for="mimetype" class="col-sm-3 text-sm-right col-form-label">mimetype</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.mimetype"/>
                                         <la:text property="doc.mimetype" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="filetype" class="col-sm-3 text-right col-form-label">filetype</label>
+                                    <label for="filetype" class="col-sm-3 text-sm-right col-form-label">filetype</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.filetype"/>
                                         <la:text property="doc.filetype" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="filename" class="col-sm-3 text-right col-form-label">filename</label>
+                                    <label for="filename" class="col-sm-3 text-sm-right col-form-label">filename</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.filename"/>
                                         <la:text property="doc.filename" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="content" class="col-sm-3 text-right col-form-label">content</label>
+                                    <label for="content" class="col-sm-3 text-sm-right col-form-label">content</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.content"/>
                                         <la:text property="doc.content" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="has_cache" class="col-sm-3 text-right col-form-label">has_cache</label>
+                                    <label for="has_cache" class="col-sm-3 text-sm-right col-form-label">has_cache</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.has_cache"/>
                                         <la:text property="doc.has_cache" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="cache" class="col-sm-3 text-right col-form-label">cache</label>
+                                    <label for="cache" class="col-sm-3 text-sm-right col-form-label">cache</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.cache"/>
                                         <la:text property="doc.cache" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="digest" class="col-sm-3 text-right col-form-label">digest</label>
+                                    <label for="digest" class="col-sm-3 text-sm-right col-form-label">digest</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.digest"/>
                                         <la:text property="doc.digest" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="host" class="col-sm-3 text-right col-form-label">host</label>
+                                    <label for="host" class="col-sm-3 text-sm-right col-form-label">host</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.host"/>
                                         <la:text property="doc.host" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="site" class="col-sm-3 text-right col-form-label">site</label>
+                                    <label for="site" class="col-sm-3 text-sm-right col-form-label">site</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.site"/>
                                         <la:text property="doc.site" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="segment" class="col-sm-3 text-right col-form-label">segment</label>
+                                    <label for="segment" class="col-sm-3 text-sm-right col-form-label">segment</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.segment"/>
                                         <la:text property="doc.segment" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="config_id" class="col-sm-3 text-right col-form-label">config_id</label>
+                                    <label for="config_id" class="col-sm-3 text-sm-right col-form-label">config_id</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.config_id"/>
                                         <la:text property="doc.config_id" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="parent_id" class="col-sm-3 text-right col-form-label">parent_id</label>
+                                    <label for="parent_id" class="col-sm-3 text-sm-right col-form-label">parent_id</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.parent_id"/>
                                         <la:text property="doc.parent_id" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="content_length" class="col-sm-3 text-right col-form-label">content_length</label>
+                                    <label for="content_length" class="col-sm-3 text-sm-right col-form-label">content_length</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.content_length"/>
                                         <la:text property="doc.content_length"
@@ -247,7 +247,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="favorite_count" class="col-sm-3 text-right col-form-label">favorite_count</label>
+                                    <label for="favorite_count" class="col-sm-3 text-sm-right col-form-label">favorite_count</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.favorite_count"/>
                                         <la:text property="doc.favorite_count"
@@ -257,7 +257,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="click_count" class="col-sm-3 text-right col-form-label">click_count</label>
+                                    <label for="click_count" class="col-sm-3 text-sm-right col-form-label">click_count</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.click_count"/>
                                         <la:text property="doc.click_count" styleClass="form-control"
@@ -267,7 +267,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="created" class="col-sm-3 text-right col-form-label">created</label>
+                                    <label for="created" class="col-sm-3 text-sm-right col-form-label">created</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.created"/>
                                         <la:text property="doc.created" styleClass="form-control"
@@ -278,7 +278,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="timestamp" class="col-sm-3 text-right col-form-label">timestamp</label>
+                                    <label for="timestamp" class="col-sm-3 text-sm-right col-form-label">timestamp</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.timestamp"/>
                                         <la:text property="doc.timestamp" styleClass="form-control"
@@ -289,7 +289,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="last_modified" class="col-sm-3 text-right col-form-label">last_modified</label>
+                                    <label for="last_modified" class="col-sm-3 text-sm-right col-form-label">last_modified</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.last_modified"/>
                                         <la:text property="doc.last_modified" styleClass="form-control"
@@ -300,7 +300,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="expires" class="col-sm-3 text-right col-form-label">expires</label>
+                                    <label for="expires" class="col-sm-3 text-sm-right col-form-label">expires</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.expires"/>
                                         <la:text property="doc.expires" styleClass="form-control"
@@ -311,7 +311,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtual_host" class="col-sm-3 text-right col-form-label">virtual_host</label>
+                                    <label for="virtual_host" class="col-sm-3 text-sm-right col-form-label">virtual_host</label>
                                     <div class="col-sm-9">
                                         <la:errors property="doc.virtual_host"/>
                                         <la:textarea property="doc.virtual_host" styleClass="form-control"/>

@@ -52,7 +52,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.group_name"/></label>
                                     <div class="col-sm-9">
                                         <c:if test="${crudMode == 1}">
@@ -64,7 +64,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="gidNumber" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="gidNumber" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.group_gidNumber"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="attributes.gidNumber"/>

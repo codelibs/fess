@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.reqheader_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="value" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="value" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.reqheader_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="value"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="webConfigId" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="webConfigId" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.reqheader_web_crawling_config"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="webConfigId"/>

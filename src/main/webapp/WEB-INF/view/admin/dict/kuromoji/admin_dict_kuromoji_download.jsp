@@ -87,7 +87,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-12 text-right col-form-label">${f:h(path)}</label>
+                                    <label for="name" class="col-sm-12 text-sm-right col-form-label">${f:h(path)}</label>
                                 </div>
                             </div>
                             <!-- /.card-body -->

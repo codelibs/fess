@@ -50,14 +50,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/labeltype/">
                                     <div class="form-group row">
-                                        <label for="name" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="name" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.labeltype_name"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="name" property="name" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="value" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="value" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.labeltype_value"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="value" property="value" styleClass="form-control"/>

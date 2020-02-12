@@ -50,7 +50,7 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/duplicatehost/">
                                     <div class="form-group row">
-                                        <label for="regularName" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="regularName" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.regular_name"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="regularName" property="regularName"
@@ -58,7 +58,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="duplicateHostName" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="duplicateHostName" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.duplicate_name"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="duplicateHostName" property="duplicateHostName"

@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="crawlingConfigName" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="crawlingConfigName" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.wizard_crawling_config_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="crawlingConfigName"/>
@@ -63,7 +63,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="crawlingConfigPath" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="crawlingConfigPath" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.wizard_crawling_config_path"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="crawlingConfigPath"/>
@@ -72,7 +72,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="maxAccessCount" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="maxAccessCount" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.maxAccessCount"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="maxAccessCount"/>
@@ -81,7 +81,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="depth" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="depth" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.depth"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="depth"/>

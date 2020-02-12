@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="hostname" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="hostname" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_hostname"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="hostname"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="port" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="port" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_port"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="port"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="protocolScheme" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="protocolScheme" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_scheme"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="protocolScheme"/>
@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="username" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="username" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_username"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="username"/>
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="password" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="password" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="password"/>
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="parameters" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="parameters" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_parameters"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="parameters"/>
@@ -109,7 +109,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="fileConfigId" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="fileConfigId" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.file_auth_file_crawling_config"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="fileConfigId"/>

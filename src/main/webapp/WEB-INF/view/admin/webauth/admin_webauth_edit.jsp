@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="hostname" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="hostname" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_hostname"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="hostname"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="port" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="port" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_port"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="port"/>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="authRealm" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="authRealm" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_realm"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="authRealm"/>
@@ -78,7 +78,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="protocolScheme" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="protocolScheme" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_scheme"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="protocolScheme"/>
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="username" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="username" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_username"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="username"/>
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="password" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="password" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="password"/>
@@ -107,7 +107,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="parameters" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="parameters" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_parameters"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="parameters"/>
@@ -117,7 +117,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="webConfigId" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="webConfigId" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.webauth_web_crawling_config"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="webConfigId"/>
