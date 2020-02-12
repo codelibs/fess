@@ -43,7 +43,7 @@
                 </c:if>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card card-outline <c:if test="${crudMode == 1}">card-success</c:if><c:if test="${crudMode == 2}">card-warning</c:if>">
+                        <div class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
                                 <h3 class="card-title">
                                     <c:if test="${crudMode == null}">

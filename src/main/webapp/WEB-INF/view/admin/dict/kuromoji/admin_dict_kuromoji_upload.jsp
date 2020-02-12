@@ -43,8 +43,8 @@
                 <la:hidden property="dictId"/>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card card-outline card-primary">
-                            <div class="card-header with-border">
+                        <div class="card card-outline card-success">
+                            <div class="card-header">
                                 <h3 class="card-title">
                                     <la:message key="labels.dict_kuromoji_link_upload"/>
                                 </h3>
