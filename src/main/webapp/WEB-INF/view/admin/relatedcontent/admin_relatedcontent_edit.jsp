@@ -54,7 +54,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="term" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="term" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.related_content_term"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="term"/>
@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="content" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="content" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.related_content_content"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="content"/>
@@ -71,7 +71,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="sortOrder" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="sortOrder" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.sortOrder"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="sortOrder"/>
@@ -79,7 +79,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHost" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="virtualHost" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.virtual_host"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHost"/>

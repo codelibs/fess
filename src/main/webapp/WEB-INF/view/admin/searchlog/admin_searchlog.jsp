@@ -53,7 +53,7 @@
                             </div>
                             <la:form action="/admin/searchlog/">
                                 <div class="form-group row">
-                                    <label for="logTypeSearch" class="col-sm-2 text-right col-form-label"><la:message
+                                    <label for="logTypeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_log_type"/></label>
                                     <div class="col-sm-4">
                                         <la:select styleId="logTypeSearch" property="logType"
@@ -89,14 +89,14 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="queryIdSearch" class="col-sm-2 text-right col-form-label"><la:message
+                                    <label for="queryIdSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_queryid"/></label>
                                     <div class="col-sm-4">
                                         <la:text styleId="queryIdSearch" property="queryId" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="userSessionIdSearch" class="col-sm-2 text-right col-form-label"><la:message
+                                    <label for="userSessionIdSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_usersessionid"/></label>
                                     <div class="col-sm-4">
                                         <la:text styleId="userSessionIdSearch" property="userSessionId"
@@ -105,7 +105,7 @@
                                 </div>
                                 <c:if test="${logType == 'search'}">
                                     <div class="form-group row">
-                                        <label for="accessTypeSearch" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="accessTypeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.searchlog_accesstype"/></label>
                                         <div class="col-sm-4">
                                             <la:text styleId="accessTypeSearch" property="accessType"
@@ -114,7 +114,7 @@
                                     </div>
                                 </c:if>
                                 <div class="form-group row">
-                                    <label for="requestedTimeRangeSearch" class="col-sm-2 text-right col-form-label"><la:message
+                                    <label for="requestedTimeRangeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_requestedtime"/></label>
                                     <div class="col-sm-4">
                                         <la:text styleId="requestedTimeRangeSearch" property="requestedTimeRange"
@@ -122,7 +122,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="logTypeSearch" class="col-sm-2 text-right col-form-label"><la:message
+                                    <label for="logTypeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_size"/></label>
                                     <div class="col-sm-4">
                                         <la:select styleId="size" property="size"

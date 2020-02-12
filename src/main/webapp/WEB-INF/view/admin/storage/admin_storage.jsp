@@ -83,7 +83,7 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group row">
-                                                        <label for="name" class="col-sm-3 text-right col-form-label"><la:message
+                                                        <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                                                 key="labels.storage_folder_name"/></label>
                                                         <div class="form-inline col-sm-9">
                                                            <input type="text" name="name" class="form-control"/>
@@ -120,7 +120,7 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group row">
-                                                        <label for="uploadFile" class="col-sm-3 text-right col-form-label"><la:message
+                                                        <label for="uploadFile" class="col-sm-3 text-sm-right col-form-label"><la:message
                                                                 key="labels.storage_file"/></label>
                                                         <div class="form-inline col-sm-9">
                                                             <input type="file" name="uploadFile" id="uploadFile"  class="form-control-file"/>

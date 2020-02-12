@@ -97,7 +97,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="word" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="word" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.elevate_word_suggest_word"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="suggestWord"/>
@@ -106,7 +106,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="reading" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="reading" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.elevate_word_reading"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="reading"/>
@@ -114,7 +114,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="permissions" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="permissions" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.elevate_word_permissions"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="permissions"/>
@@ -123,7 +123,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="labelTypeIds" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="labelTypeIds" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.label_type"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="labelTypeIds"/>
@@ -136,7 +136,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="boost" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="boost" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.elevate_word_boost"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="boost"/>

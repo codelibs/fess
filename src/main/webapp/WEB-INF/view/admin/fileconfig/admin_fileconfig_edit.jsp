@@ -55,7 +55,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="name"/>
@@ -63,7 +63,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="paths" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="paths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="paths"/>
@@ -72,7 +72,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="includedPaths" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="includedPaths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.included_paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="includedPaths"/>
@@ -81,7 +81,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="excludedPaths" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="excludedPaths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.excluded_paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="excludedPaths"/>
@@ -90,7 +90,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="includedDocPaths" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="includedDocPaths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.included_doc_paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="includedDocPaths"/>
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="excludedDocPaths" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="excludedDocPaths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.excluded_doc_paths"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="excludedDocPaths"/>
@@ -108,7 +108,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="configParameter" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="configParameter" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.config_parameter"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="configParameter"/>
@@ -117,7 +117,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="depth" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="depth" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.depth"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="depth"/>
@@ -127,7 +127,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="maxAccessCount" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="maxAccessCount" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.max_access_count"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="maxAccessCount"/>
@@ -137,7 +137,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="numOfThread" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="numOfThread" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.number_of_thread"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="numOfThread"/>
@@ -147,7 +147,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="intervalTime" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="intervalTime" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.interval_time"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="intervalTime"/>
@@ -158,7 +158,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="boost" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="boost" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.boost"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="boost"/>
@@ -166,7 +166,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="permissions" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="permissions" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.permissions"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="permissions"/>
@@ -176,7 +176,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="virtualHosts" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="virtualHosts" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.virtual_hosts"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="virtualHosts"/>
@@ -187,7 +187,7 @@
                                 </div>
                                 <div class="form-group row"<c:if
                                         test="${!labelSettingEnabled}"> style="display:none"</c:if>>
-                                    <label for="labelTypeIds" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="labelTypeIds" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.label_type"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="labelTypeIds"/>
@@ -200,7 +200,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="available" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="available" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.available"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="available"/>
@@ -215,7 +215,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="permissions" class="col-sm-3 text-right col-form-label"><la:message
+                                    <label for="permissions" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.description"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="description"/>

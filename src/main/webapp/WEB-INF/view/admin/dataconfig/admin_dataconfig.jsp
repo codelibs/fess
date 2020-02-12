@@ -49,14 +49,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/dataconfig/">
                                     <div class="form-group row">
-                                        <label for="name" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="name" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.name"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="name" property="name" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="handlerName" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="handlerName" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.handler_name"/></label>
                                         <div class="col-sm-10">
                                             <la:errors property="handlerName"/>
@@ -71,7 +71,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="description" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="description" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.description"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="description" property="description"

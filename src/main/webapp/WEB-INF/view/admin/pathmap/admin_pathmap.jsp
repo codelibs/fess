@@ -50,14 +50,14 @@
                             <div class="collapse" id="listSearchForm">
                                 <la:form action="/admin/pathmap/">
                                     <div class="form-group row">
-                                        <label for="regex" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="regex" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.regex"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="regex" property="regex" styleClass="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="replacement" class="col-sm-2 text-right col-form-label"><la:message
+                                        <label for="replacement" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.replacement"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="replacement" property="replacement"
