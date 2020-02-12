@@ -68,11 +68,13 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped dataTable">
-                                            <tbody>
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
                                             <tr>
                                                 <th><la:message key="labels.backup_name"/></th>
                                             </tr>
+                                            </thead>
+                                            <tbody>
                                             <c:forEach var="data" varStatus="s"
                                                        items="${backupItems}">
                                                 <tr

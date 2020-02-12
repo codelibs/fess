@@ -50,12 +50,14 @@
                             <div class="data-wrapper">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped dataTable">
-                                            <tbody>
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
                                             <tr>
                                                 <th><la:message key="labels.log_file_name"/></th>
                                                 <th><la:message key="labels.log_file_date"/></th>
                                             </tr>
+                                            </thead>
+                                            <tbody>
                                             <c:forEach var="logFile" varStatus="s"
                                                        items="${logFileItems}">
                                                 <tr

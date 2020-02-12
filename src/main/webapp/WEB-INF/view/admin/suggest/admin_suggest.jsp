@@ -48,13 +48,15 @@
                                 <div class="col-sm-12">
                                     <la:form action="/admin/suggest/">
                                         <table class="table table-bordered table-striped">
-                                            <tbody>
+                                            <thead>
                                             <tr>
                                                 <th style="width: 15%"><la:message key="labels.suggest_word_type"/></th>
                                                 <th class="text-center" style="width: 10%"><la:message
                                                         key="labels.suggest_word_number"/></th>
                                                 <th class="text-center" style="width: 20%"></th>
                                             </tr>
+                                            </thead>
+                                            <tbody>
                                             <tr>
                                                 <td><la:message key="labels.suggest_word_type_all"/></td>
                                                 <td class="text-right">${f:h(totalWordsNum)}</td>

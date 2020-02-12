@@ -58,14 +58,16 @@
                             <div class="data-wrapper">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped dataTable">
-                                            <tbody>
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
                                             <tr>
                                                 <th><la:message key="labels.plugin_type"/></th>
                                                 <th><la:message key="labels.plugin_name"/></th>
                                                 <th><la:message key="labels.plugin_version"/></th>
                                                 <th></th>
                                             </tr>
+                                            </thead>
+                                            <tbody>
                                             <c:forEach var="artifact" varStatus="s" items="${installedArtifactItems}">
                                                 <tr>
                                                     <td>${f:h(artifact.type)}</td>
