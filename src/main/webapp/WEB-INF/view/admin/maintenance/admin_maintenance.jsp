@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="maintenance"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
