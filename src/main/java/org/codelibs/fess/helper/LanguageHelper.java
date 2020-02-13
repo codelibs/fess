@@ -27,6 +27,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.elasticsearch.script.Script;
 
 public class LanguageHelper {
     private static final Logger logger = LogManager.getLogger(LanguageHelper.class);
@@ -118,6 +119,22 @@ public class LanguageHelper {
 
     public void setDetector(final LanguageDetector detector) {
         this.detector = detector;
+    }
+
+    public Script createScript(final Map<String, Object> doc, String code) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append(code);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String language = DocumentUtil.getValue(doc, fessConfig.getIndexFieldLang(), String.class);
+        if (StringUtil.isNotBlank(language)) {
+            for (final String f : langFields) {
+                buf.append(";ctx._source.").append(f).append('_').append(language).append("=ctx._source.").append(f);
+            }
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("update script: {}", buf);
+        }
+        return new Script(buf.toString());
     }
 
 }

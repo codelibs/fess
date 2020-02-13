@@ -349,15 +349,16 @@ public class SearchLogHelper {
                 searchHelper.bulkUpdate(builder -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     searchHelper.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                            new String[] { fessConfig.getIndexFieldDocId() }, OptionalThing.of(FessUserBean.empty()),
-                            SearchRequestType.ADMIN_SEARCH).forEach(
+                            new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
+                            OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH).forEach(
                             doc -> {
                                 final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                 final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                                 if (id != null && docId != null && clickCountMap.containsKey(docId)) {
                                     final Integer count = clickCountMap.get(docId);
                                     final Script script =
-                                            new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
+                                            ComponentUtil.getLanguageHelper().createScript(doc,
+                                                    "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
                                     final Map<String, Object> upsertMap = new HashMap<>();
                                     upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
                                     builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script).upsert(

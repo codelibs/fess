@@ -524,51 +524,58 @@ public class JsonApiManager extends BaseJsonApiManager {
                 throw new WebApiException(6, "No searched urls.");
             }
 
-            searchHelper.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl() }, OptionalThing.empty())
-                    .ifPresent(doc -> {
-                        final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-                        final String userCode = userInfoHelper.getUserCode();
+            searchHelper
+                    .getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() },
+                            OptionalThing.empty())
+                    .ifPresent(
+                            doc -> {
+                                final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+                                final String userCode = userInfoHelper.getUserCode();
 
-                        if (StringUtil.isBlank(userCode)) {
-                            throw new WebApiException(2, "No user session.");
-                        } else if (StringUtil.isBlank(favoriteUrl)) {
-                            throw new WebApiException(2, "URL is null.");
-                        }
+                                if (StringUtil.isBlank(userCode)) {
+                                    throw new WebApiException(2, "No user session.");
+                                } else if (StringUtil.isBlank(favoriteUrl)) {
+                                    throw new WebApiException(2, "URL is null.");
+                                }
 
-                        boolean found = false;
-                        for (final String id : docIds) {
-                            if (docId.equals(id)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            throw new WebApiException(5, "Not found: " + favoriteUrl);
-                        }
+                                boolean found = false;
+                                for (final String id : docIds) {
+                                    if (docId.equals(id)) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    throw new WebApiException(5, "Not found: " + favoriteUrl);
+                                }
 
-                        if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
-                            favoriteLog.setUserInfoId(userInfo.getId());
-                            favoriteLog.setUrl(favoriteUrl);
-                            favoriteLog.setDocId(docId);
-                            favoriteLog.setQueryId(queryId);
-                            favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-                        })) {
-                            throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
-                        }
+                                if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
+                                    favoriteLog.setUserInfoId(userInfo.getId());
+                                    favoriteLog.setUrl(favoriteUrl);
+                                    favoriteLog.setDocId(docId);
+                                    favoriteLog.setQueryId(queryId);
+                                    favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
+                                })) {
+                                    throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
+                                }
 
-                        final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
-                        searchHelper.update(id, builder -> {
-                            final Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
-                            builder.setScript(script);
-                            final Map<String, Object> upsertMap = new HashMap<>();
-                            upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
-                            builder.setUpsert(upsertMap);
-                            builder.setRefreshPolicy(Constants.TRUE);
-                        });
+                                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
+                                searchHelper.update(
+                                        id,
+                                        builder -> {
+                                            final Script script =
+                                                    ComponentUtil.getLanguageHelper().createScript(doc,
+                                                            "ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
+                                            builder.setScript(script);
+                                            final Map<String, Object> upsertMap = new HashMap<>();
+                                            upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
+                                            builder.setUpsert(upsertMap);
+                                            builder.setRefreshPolicy(Constants.TRUE);
+                                        });
 
-                        writeJsonResponse(0, "\"result\":\"ok\"", (String) null);
+                                writeJsonResponse(0, "\"result\":\"ok\"", (String) null);
 
-                    }).orElse(() -> {
+                            }).orElse(() -> {
                         throw new WebApiException(6, "Not found: " + docId);
                     });
 
