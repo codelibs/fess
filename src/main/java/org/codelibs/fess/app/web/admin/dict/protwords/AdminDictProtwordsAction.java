@@ -244,7 +244,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictProtwords_AdminDictProtwordsUploadJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
