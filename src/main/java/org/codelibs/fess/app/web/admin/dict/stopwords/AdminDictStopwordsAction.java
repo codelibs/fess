@@ -242,7 +242,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictStopwords_AdminDictStopwordsUploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictStopwords_AdminDictStopwordsJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });

@@ -252,7 +252,7 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictStemmeroverride_AdminDictStemmeroverrideUploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });

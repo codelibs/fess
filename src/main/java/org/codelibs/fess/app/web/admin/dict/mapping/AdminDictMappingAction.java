@@ -249,7 +249,7 @@ public class AdminDictMappingAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictMapping_AdminDictMappingUploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictMapping_AdminDictMappingJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });

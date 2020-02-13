@@ -249,7 +249,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictSynonym_AdminDictSynonymUploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
