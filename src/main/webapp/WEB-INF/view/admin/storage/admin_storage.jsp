@@ -194,9 +194,7 @@
                                                 <td>
                                                     <c:if test="${not data.directory}">
                                                         <a class="btn btn-primary btn-xs" role="button" name="download"
-                                                           data-toggle="modal"
                                                            href="${contextPath}/admin/storage/download/${f:h(data.id)}/"
-                                                           download="${f:u(data.name)}"
                                                            value="<la:message key="labels.storage_button_download" />"
                                                         >
                                                             <em class="fa fa-download"></em>
