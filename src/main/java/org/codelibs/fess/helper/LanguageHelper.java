@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -135,6 +137,18 @@ public class LanguageHelper {
             logger.debug("update script: {}", buf);
         }
         return new Script(buf.toString());
+    }
+
+    public String getReindexScriptSource() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        String langField = fessConfig.getIndexFieldLang();
+        String code =
+                Arrays.stream(langFields).map(s -> "ctx._source['" + s + "_'+ctx._source." + langField + "]=ctx._source." + s)
+                        .collect(Collectors.joining(";"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("reindex script: {}", code);
+        }
+        return "if(ctx._source." + langField + "!=null){" + code + "}";
     }
 
 }
