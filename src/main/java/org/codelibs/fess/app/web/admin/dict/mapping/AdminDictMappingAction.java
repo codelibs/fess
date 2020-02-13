@@ -276,7 +276,7 @@ public class AdminDictMappingAction extends FessAdminAction {
                 });
             }
             saveInfo(messages -> messages.addSuccessUploadMappingFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL), () -> uploadpage(form.dictId));
             return null;

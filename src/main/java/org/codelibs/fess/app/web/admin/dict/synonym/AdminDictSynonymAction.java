@@ -276,7 +276,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
                 });
             }
             saveInfo(messages -> messages.addSuccessUploadSynonymFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL), () -> uploadpage(form.dictId));
             return null;

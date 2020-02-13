@@ -273,7 +273,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                 });
             }
             saveInfo(messages -> messages.addSuccessUploadKuromojiFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> uploadpage(form.dictId));
             return null;

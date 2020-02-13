@@ -271,7 +271,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
                 });
             }
             saveInfo(messages -> messages.addSuccessUploadProtwordsFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL), () -> uploadpage(form.dictId));
             return null;
