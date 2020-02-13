@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="maintenance"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -126,12 +125,43 @@
                                 </h3>
                             </div>
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-danger"
-                                        name="clearCrawlerIndex"
-                                        value="<la:message key="labels.clear_crawler_index_button"/>">
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmToClearCrawlerIndex">
                                     <em class="fa fa-trash"></em>
                                     <la:message key="labels.clear_crawler_index_button"/>
                                 </button>
+                                <div class="modal fade" id="confirmToClearCrawlerIndex"
+                                     tabindex="-1" role="dialog">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content bg-danger">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">
+                                                    <la:message key="labels.clear_crawler_index_button"/>
+                                                </h4>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>
+                                                    <la:message key="labels.crud_delete_confirmation"/>
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer justify-content-between">
+                                                <button type="button" class="btn btn-outline-light"
+                                                        data-dismiss="modal">
+                                                    <la:message key="labels.crud_button_cancel"/>
+                                                </button>
+                                                <button type="submit" class="btn btn-outline-light"
+                                                        name="clearCrawlerIndex"
+                                                        value="<la:message key="labels.crud_button_delete" />">
+                                                    <em class="fa fa-trash"></em>
+                                                    <la:message key="labels.crud_button_delete"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -74,14 +74,16 @@
                                                     <td>${f:h(artifact.version)}</td>
                                                     <td>
                                                         <c:if test="${editable}">
-                                                            <button type="button" class="btn btn-danger btn-xs"
-                                                                    name="delete" data-toggle="modal"
-                                                                    data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
-                                                                    value="<la:message key="labels.design_delete_button" />"
-                                                            >
-                                                                <em class="fa fa-trash"></em>
-                                                                <la:message key="labels.design_delete_button"/>
-                                                            </button>
+                                                            <div class="text-center">
+                                                                <button type="button" class="btn btn-danger btn-xs"
+                                                                        name="delete" data-toggle="modal"
+                                                                        data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
+                                                                        value="<la:message key="labels.crud_button_delete" />"
+                                                                >
+                                                                    <em class="fa fa-trash"></em>
+                                                                    <la:message key="labels.crud_button_delete"/>
+                                                                </button>
+                                                            </div>
                                                             <div class="modal fade"
                                                                  id='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version)}'
                                                                  tabindex="-1" role="dialog"

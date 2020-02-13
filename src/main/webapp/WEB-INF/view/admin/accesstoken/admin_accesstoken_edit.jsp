@@ -61,7 +61,7 @@
                                 </div>
                                 <c:if test="${crudMode==2}">
                                     <div class="form-group row">
-                                        <label for="token" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                        <label class="col-sm-3 text-sm-right col-form-label"><la:message
                                                 key="labels.access_token_token"/></label>
                                         <div class="col-sm-9">
                                                 ${f:h(token)}

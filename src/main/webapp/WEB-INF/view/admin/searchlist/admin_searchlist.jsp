@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="searchList"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -63,7 +62,6 @@
                             </div>
                             <la:form action="/admin/searchlist" styleClass="form-inline" method="GET">
                                 <div class="form-group">
-                                    <label class="sr-only" for="sessionIdSearchBtn"></label>
                                     <la:text styleClass="query form-control" property="q"
                                              title="Search" size="50" maxlength="1000"
                                              placeholder="Type a search query"/>

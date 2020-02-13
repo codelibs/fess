@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="dict"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -87,7 +86,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-12 text-sm-right col-form-label">${f:h(path)}</label>
+                                    <label class="col-sm-12 text-sm-right col-form-label">${f:h(path)}</label>
                                 </div>
                             </div>
                             <div class="card-footer">

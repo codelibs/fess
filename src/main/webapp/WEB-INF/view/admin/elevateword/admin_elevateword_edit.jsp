@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="elevateWord"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -96,7 +95,7 @@
                                     <la:errors property="_global"/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="word" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="suggestWord" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.elevate_word_suggest_word"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="suggestWord"/>

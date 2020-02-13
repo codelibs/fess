@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="storage"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -195,22 +194,20 @@
                                                 <td>
                                                     <c:if test="${not data.directory}">
                                                         <a class="btn btn-primary btn-xs" role="button" name="download"
-                                                           data-toggle="modal"
                                                            href="${contextPath}/admin/storage/download/${f:h(data.id)}/"
-                                                           download="${f:u(data.name)}"
-                                                           value="<la:message key="labels.design_download_button" />"
+                                                           value="<la:message key="labels.storage_button_download" />"
                                                         >
                                                             <em class="fa fa-download"></em>
-                                                            <la:message key="labels.design_download_button"/>
+                                                            <la:message key="labels.storage_button_download"/>
                                                         </a>
                                                         <c:if test="${editable}">
                                                             <button type="button" class="btn btn-danger btn-xs"
                                                                     name="delete" data-toggle="modal"
                                                                     data-target="#confirmToDelete-${f:h(data.hashCode)}"
-                                                                    value="<la:message key="labels.design_delete_button" />"
+                                                                    value="<la:message key="labels.crud_button_delete" />"
                                                             >
                                                                 <em class="fa fa-times"></em>
-                                                                <la:message key="labels.design_delete_button"/>
+                                                                <la:message key="labels.crud_button_delete"/>
                                                             </button>
                                                             <div class="modal fade"
                                                                  id="confirmToDelete-${f:h(data.hashCode)}"

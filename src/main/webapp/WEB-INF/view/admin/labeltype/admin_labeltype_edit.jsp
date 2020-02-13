@@ -14,7 +14,6 @@
         <jsp:param name="menuType" value="labelType"/>
     </jsp:include>
     <div class="content-wrapper">
-
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -61,7 +60,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="paths" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="value" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.labeltype_value"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="value"/>
