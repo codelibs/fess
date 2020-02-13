@@ -78,10 +78,10 @@
                             </div>
                             <c:if test="${editable}">
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="elevateWordFile" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.elevate_word_file"/></th></label>
                                     <div class="col-sm-9">
-                                        <input type="file" name="elevateWordFile" class="form-control-file"/>
+                                        <input type="file" id="elevateWordFile" name="elevateWordFile" class="form-control-file"/>
                                     </div>
                                 </div>
                             </c:if>

@@ -86,10 +86,10 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="charMappingFile" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.dict_mapping_file"/></label>
                                     <div class="col-sm-9">
-                                        <input type="file" name="charMappingFile" class="form-control-file"/>
+                                        <input type="file" id="charMappingFile" name="charMappingFile" class="form-control-file"/>
                                     </div>
                                 </div>
                             </div>

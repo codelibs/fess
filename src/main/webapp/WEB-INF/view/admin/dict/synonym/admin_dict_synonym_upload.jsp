@@ -86,10 +86,10 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="synonymFile" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.dict_synonym_file"/></label>
                                     <div class="col-sm-9">
-                                        <input type="file" name="synonymFile" class="form-control-file"/>
+                                        <input type="file" id="synonymFile" name="synonymFile" class="form-control-file"/>
                                     </div>
                                 </div>
                             </div>
