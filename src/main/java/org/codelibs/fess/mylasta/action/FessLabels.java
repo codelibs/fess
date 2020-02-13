@@ -2883,6 +2883,21 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Your system is out of support. See EOL page. */
     public static final String LABELS_eol_error = "{labels.eol_error}";
 
+    /** The key of the message: Search View */
+    public static final String LABELS_tooltip_search_view = "{labels.tooltip_search_view}";
+
+    /** The key of the message: Run Crawler */
+    public static final String LABELS_tooltip_run_crawler = "{labels.tooltip_run_crawler}";
+
+    /** The key of the message: Forum */
+    public static final String LABELS_tooltip_forum = "{labels.tooltip_forum}";
+
+    /** The key of the message: Help */
+    public static final String LABELS_tooltip_onlinehelp = "{labels.tooltip_onlinehelp}";
+
+    /** The key of the message: Logout */
+    public static final String LABELS_tooltip_logout = "{labels.tooltip_logout}";
+
     /** The key of the message: Advance */
     public static final String LABELS_ADVANCE = "{labels.advance}";
 
