@@ -279,7 +279,7 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
                 });
             }
             saveInfo(messages -> messages.addSuccessUploadStemmeroverrideFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
         }).orElseGet(() -> {
             throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL), () -> uploadpage(form.dictId));
             return null;
