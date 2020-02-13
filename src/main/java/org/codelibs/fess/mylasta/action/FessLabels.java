@@ -3141,6 +3141,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Folder Name */
     public static final String LABELS_storage_folder_name = "{labels.storage_folder_name}";
 
+    /** The key of the message: Download */
+    public static final String LABELS_storage_button_download = "{labels.storage_button_download}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
