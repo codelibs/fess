@@ -389,16 +389,16 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
-    /** The key of the message: {0} should be numeric. */
+    /** The key of the message: {0} should be numeric(integer). */
     public static final String ERRORS_property_type_integer = "{errors.property_type_integer}";
 
-    /** The key of the message: {0} should be numeric. */
+    /** The key of the message: {0} should be numeric(long). */
     public static final String ERRORS_property_type_long = "{errors.property_type_long}";
 
-    /** The key of the message: {0} should be numeric. */
+    /** The key of the message: {0} should be numeric(float). */
     public static final String ERRORS_property_type_float = "{errors.property_type_float}";
 
-    /** The key of the message: {0} should be numeric. */
+    /** The key of the message: {0} should be numeric(double). */
     public static final String ERRORS_property_type_double = "{errors.property_type_double}";
 
     /** The key of the message: {0} should be date. */
@@ -2272,7 +2272,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.property_type_integer' with parameters.
      * <pre>
-     * message: {0} should be numeric.
+     * message: {0} should be numeric(integer).
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param arg0 The parameter arg0 for message. (NotNull)
@@ -2287,7 +2287,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.property_type_long' with parameters.
      * <pre>
-     * message: {0} should be numeric.
+     * message: {0} should be numeric(long).
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param arg0 The parameter arg0 for message. (NotNull)
@@ -2302,7 +2302,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.property_type_float' with parameters.
      * <pre>
-     * message: {0} should be numeric.
+     * message: {0} should be numeric(float).
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param arg0 The parameter arg0 for message. (NotNull)
@@ -2317,7 +2317,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.property_type_double' with parameters.
      * <pre>
-     * message: {0} should be numeric.
+     * message: {0} should be numeric(double).
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param arg0 The parameter arg0 for message. (NotNull)
