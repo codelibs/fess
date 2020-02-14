@@ -62,11 +62,11 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="gidNumber" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="attributes.gidNumber" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.group_gidNumber"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="attributes.gidNumber"/>
-                                        <la:text property="attributes.gidNumber" styleClass="form-control"/>
+                                        <input type="number" id="attributes.gidNumber" name="attributes.gidNumber" class="form-control"/>
                                     </div>
                                 </div>
                             </div>

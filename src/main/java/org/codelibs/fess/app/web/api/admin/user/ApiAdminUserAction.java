@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.user;
 
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.getUser;
+import static org.codelibs.fess.app.web.admin.user.AdminUserAction.validateAttributes;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,6 +83,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
+        validateAttributes(body.attributes, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.EDIT;
         final User entity = getUser(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {

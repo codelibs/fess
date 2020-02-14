@@ -24,11 +24,13 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
@@ -878,6 +880,25 @@ public class LdapManager {
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrHomeDirectory(), s)));
     }
 
+    public void validateUserAttributes(final Class<?> type, final Map<String, String> attributes, final Consumer<String> consumer) {
+        if (type == Long.class) {
+            // Long type attributes
+            final String attrUidNumber = fessConfig.getLdapAttrUidNumber();
+            final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
+
+            Stream.of(attrUidNumber, attrGidNumber).forEach(attrName ->
+                        OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                            try {
+                                DfTypeUtil.toLong(s);
+                            } catch (final NumberFormatException e) {
+                                consumer.accept(attrName);
+                            }
+                        }));
+        } else {
+            // do nothing
+        }
+    }
+
     public void delete(final User user) {
         if (!fessConfig.isLdapAdminEnabled(user.getName())) {
             return;
@@ -1017,6 +1038,24 @@ public class LdapManager {
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrGidNumber(), s)));
     }
 
+    public void validateGroupAttributes(final Class<?> type, final Map<String, String> attributes, final Consumer<String> consumer) {
+        if (type == Long.class) {
+            // Long type attributes
+            final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
+
+            Stream.of(attrGidNumber).forEach(attrName ->
+                OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                    try {
+                        DfTypeUtil.toLong(s);
+                    } catch (final NumberFormatException e) {
+                        consumer.accept(attrName);
+                    }
+                }));
+        } else {
+            // do nothing
+        }
+    }
+
     public void delete(final Group group) {
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
@@ -1071,7 +1110,7 @@ public class LdapManager {
     }
 
     protected void search(final String baseDn, final String filter, final String[] returningAttrs,
-            final Supplier<Hashtable<String, String>> envSupplier, final SearcConsumer consumer) {
+            final Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer) {
         try (DirContextHolder holder = getDirContext(envSupplier)) {
             final SearchControls controls = new SearchControls();
             controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -1114,7 +1153,7 @@ public class LdapManager {
         }
     }
 
-    interface SearcConsumer {
+    interface SearchConsumer {
         void accept(List<SearchResult> t) throws NamingException;
     }
 
