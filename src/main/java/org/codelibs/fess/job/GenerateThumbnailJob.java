@@ -56,12 +56,6 @@ public class GenerateThumbnailJob extends ExecJob {
         return this;
     }
 
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor) {
-        jobExecutor(jobExecutor);
-        return execute();
-    }
-
     @Override
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder();

@@ -60,6 +60,11 @@ public abstract class ExecJob {
 
     protected abstract String getExecuteType();
 
+    public String execute(final JobExecutor jobExecutor) {
+        jobExecutor(jobExecutor);
+        return execute();
+    }
+
     public ExecJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
         return this;

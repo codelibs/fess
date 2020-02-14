@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -77,11 +76,5 @@ public class CrawlingConfigWrapper implements CrawlingConfig {
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
         return crawlingConfig.getConfigParameterMap(name);
-    }
-
-    @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
-        initializeClientFactory(() -> crawlerClientFactory);
-        return Collections.emptyMap();
     }
 }

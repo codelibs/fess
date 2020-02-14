@@ -57,7 +57,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
@@ -395,11 +394,6 @@ public class SystemHelper {
             langItems.add(defaultMap);
             return langItems;
         }
-    }
-
-    @Deprecated
-    public void sleep(final int sec) {
-        ThreadUtil.sleepQuietly(sec * 1000L);
     }
 
     public void addShutdownHook(final Runnable hook) {

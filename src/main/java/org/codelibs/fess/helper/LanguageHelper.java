@@ -123,7 +123,7 @@ public class LanguageHelper {
         this.detector = detector;
     }
 
-    public Script createScript(final Map<String, Object> doc, String code) {
+    public Script createScript(final Map<String, Object> doc, final String code) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(code);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -141,8 +141,8 @@ public class LanguageHelper {
 
     public String getReindexScriptSource() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String langField = fessConfig.getIndexFieldLang();
-        String code =
+        final String langField = fessConfig.getIndexFieldLang();
+        final String code =
                 Arrays.stream(langFields).map(s -> "ctx._source['" + s + "_'+ctx._source." + langField + "]=ctx._source." + s)
                         .collect(Collectors.joining(";"));
         if (logger.isDebugEnabled()) {

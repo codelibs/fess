@@ -413,10 +413,4 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                 + ", name=" + name + ", permissions=" + Arrays.toString(permissions) + ", sortOrder=" + sortOrder + ", updatedBy="
                 + updatedBy + ", updatedTime=" + updatedTime + "]";
     }
-
-    @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
-        initializeClientFactory(() -> crawlerClientFactory);
-        return Collections.emptyMap();
-    }
 }

@@ -189,7 +189,7 @@ public class JobHelper {
 
     }
 
-    public void setJobRuntime(LaJobRuntime runtime) {
+    public void setJobRuntime(final LaJobRuntime runtime) {
         jobRuntimeLocal.set(runtime);
     }
 

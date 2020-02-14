@@ -244,10 +244,4 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 + ", numOfThread=" + numOfThread + ", paths=" + paths + ", permissions=" + Arrays.toString(permissions) + ", sortOrder="
                 + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + "]";
     }
-
-    @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
-        initializeClientFactory(() -> crawlerClientFactory);
-        return Collections.emptyMap();
-    }
 }

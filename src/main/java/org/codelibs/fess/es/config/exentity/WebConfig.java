@@ -250,10 +250,4 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
                 + ", numOfThread=" + numOfThread + ", permissions=" + Arrays.toString(permissions) + ", sortOrder=" + sortOrder
                 + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", urls=" + urls + ", userAgent=" + userAgent + "]";
     }
-
-    @Override
-    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
-        initializeClientFactory(() -> crawlerClientFactory);
-        return Collections.emptyMap();
-    }
 }

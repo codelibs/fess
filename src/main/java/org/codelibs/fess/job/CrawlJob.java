@@ -83,12 +83,6 @@ public class CrawlJob extends ExecJob {
         return this;
     }
 
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor) {
-        jobExecutor(jobExecutor);
-        return execute();
-    }
-
     @Override
     public String execute() {
         //   check # of crawler processes

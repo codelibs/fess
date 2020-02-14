@@ -43,12 +43,6 @@ public class SuggestJob extends ExecJob {
 
     private static final Logger logger = LogManager.getLogger(SuggestJob.class);
 
-    @Deprecated
-    public String execute(final JobExecutor jobExecutor) {
-        jobExecutor(jobExecutor);
-        return execute();
-    }
-
     @Override
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder();

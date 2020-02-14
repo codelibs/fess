@@ -45,9 +45,6 @@ public interface CrawlingConfig {
 
     Integer getTimeToLive();
 
-    @Deprecated
-    Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
-
     CrawlerClientFactory initializeClientFactory(Supplier<CrawlerClientFactory> creator);
 
     Map<String, String> getConfigParameterMap(ConfigName name);
@@ -71,7 +68,7 @@ public interface CrawlingConfig {
     public enum ConfigType {
         WEB("W"), FILE("F"), DATA("D");
 
-        private final String typePrefix;
+        private String typePrefix;
 
         ConfigType(final String typePrefix) {
             this.typePrefix = typePrefix;
