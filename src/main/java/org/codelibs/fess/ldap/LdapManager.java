@@ -886,14 +886,14 @@ public class LdapManager {
             final String attrUidNumber = fessConfig.getLdapAttrUidNumber();
             final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
 
-            Stream.of(attrUidNumber, attrGidNumber).forEach(attrName ->
-                        OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
-                            try {
-                                DfTypeUtil.toLong(s);
-                            } catch (final NumberFormatException e) {
-                                consumer.accept(attrName);
-                            }
-                        }));
+            Stream.of(attrUidNumber, attrGidNumber).forEach(
+                    attrName -> OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                        try {
+                            DfTypeUtil.toLong(s);
+                        } catch (final NumberFormatException e) {
+                            consumer.accept(attrName);
+                        }
+                    }));
         } else {
             // do nothing
         }
@@ -1043,14 +1043,14 @@ public class LdapManager {
             // Long type attributes
             final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
 
-            Stream.of(attrGidNumber).forEach(attrName ->
-                OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
-                    try {
-                        DfTypeUtil.toLong(s);
-                    } catch (final NumberFormatException e) {
-                        consumer.accept(attrName);
-                    }
-                }));
+            Stream.of(attrGidNumber).forEach(
+                    attrName -> OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                        try {
+                            DfTypeUtil.toLong(s);
+                        } catch (final NumberFormatException e) {
+                            consumer.accept(attrName);
+                        }
+                    }));
         } else {
             // do nothing
         }

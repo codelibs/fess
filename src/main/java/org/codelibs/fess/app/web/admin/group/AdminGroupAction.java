@@ -297,9 +297,8 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     public static void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
-        ComponentUtil.getLdapManager().validateGroupAttributes(Long.class, attributes, s ->
-                        throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s,
-                                "attributes." + s)));
+        ComponentUtil.getLdapManager().validateGroupAttributes(Long.class, attributes,
+                s -> throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s, "attributes." + s)));
     }
 
     // ===================================================================================
