@@ -16,11 +16,14 @@
 package org.codelibs.fess.app.web.admin.group;
 
 import java.util.Base64;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.GroupPager;
@@ -28,14 +31,19 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.OptionalUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
+import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.validation.VaMessenger;
 
 /**
  * @author shinsuke
@@ -185,6 +193,7 @@ public class AdminGroupAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
+        validateAttributes(form.attributes, v -> throwValidationError(v, () -> asEditHtml()));
         verifyToken(() -> asEditHtml());
         getGroup(form).ifPresent(
                 entity -> {
@@ -207,6 +216,7 @@ public class AdminGroupAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
+        validateAttributes(form.attributes, v -> throwValidationError(v, () -> asEditHtml()));
         verifyToken(() -> asEditHtml());
         getGroup(form).ifPresent(
                 entity -> {
@@ -288,6 +298,18 @@ public class AdminGroupAction extends FessAdminAction {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, () -> asListHtml());
         }
+    }
+
+    protected void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        OptionalUtil.ofNullable(attributes.get(fessConfig.getLdapAttrGidNumber())).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                    try {
+                        DfTypeUtil.toLong(s);
+                    } catch (final NumberFormatException e) {
+                        throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + fessConfig.getLdapAttrGidNumber(),
+                                "attributes." + fessConfig.getLdapAttrGidNumber()));
+                    }
+                });
     }
 
     // ===================================================================================
