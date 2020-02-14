@@ -15,20 +15,21 @@
  */
 package org.codelibs.fess.job;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.script.Script;
 
 public class UpdateLabelJob {
 
@@ -40,6 +41,7 @@ public class UpdateLabelJob {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
+        final LanguageHelper languageHelper = ComponentUtil.getLanguageHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 
@@ -51,7 +53,8 @@ public class UpdateLabelJob {
                                 if (queryBuilder != null) {
                                     option.setQuery(queryBuilder);
                                 }
-                                return option.setFetchSource(new String[] { fessConfig.getIndexFieldUrl() }, null);
+                                return option.setFetchSource(
+                                        new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() }, null);
                             },
                             (builder, hit) -> {
                                 try {
@@ -59,10 +62,17 @@ public class UpdateLabelJob {
                                     final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                                     if (StringUtil.isNotBlank(url)) {
                                         final Set<String> labelSet = labelTypeHelper.getMatchedLabelValueSet(url);
-                                        return builder.setDoc(XContentFactory.jsonBuilder().startObject()
-                                                .field(fessConfig.getIndexFieldLabel(), labelSet.toArray(n -> new String[n])).endObject());
+                                        final Script script =
+                                                languageHelper.createScript(
+                                                        doc,
+                                                        "ctx._source."
+                                                                + fessConfig.getIndexFieldLabel()
+                                                                + "=new String[]{"
+                                                                + labelSet.stream().map(s -> "\"" + s + "\"")
+                                                                        .collect(Collectors.joining(",")) + "}");
+                                        return builder.setScript(script);
                                     }
-                                } catch (final IOException e) {
+                                } catch (final Exception e) {
                                     logger.warn("Failed to process " + hit, e);
                                 }
                                 return null;
