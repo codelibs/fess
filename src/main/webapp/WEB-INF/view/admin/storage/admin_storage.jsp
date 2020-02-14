@@ -85,7 +85,7 @@
                                                         <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                                                 key="labels.storage_folder_name"/></label>
                                                         <div class="form-inline col-sm-9">
-                                                           <input type="text" name="name" class="form-control"/>
+                                                           <input id="name" type="text" name="name" class="form-control"/>
                                                         </div>
                                                     </div>
                                                 </div>

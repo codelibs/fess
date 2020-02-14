@@ -55,8 +55,9 @@
                                                 <div class="form-group row">
                                                     <label for="requestFile"> <la:message
                                                             key="labels.esreq_request_file"/>
-                                                    </label> <input type="file" name="requestFile"
-                                                                    class="form-control"/>
+                                                    </label>
+                                                    <input id="requestFile" type="file" name="requestFile"
+                                                                    class="form-control-file"/>
                                                 </div>
                                                 <button type="submit" class="btn btn-success" name="upload">
                                                     <em class="fa fa-upload"></em>
