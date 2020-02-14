@@ -3,7 +3,7 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<include path="convention.xml" />
-	<include path="lastaflute_director.xml"/>
+	<include path="lastaflute_core.xml"/>
 	<include path="fess.xml" />
 
 	<component name="fessSuggest" class="org.codelibs.fess.exec.SuggestCreator"
