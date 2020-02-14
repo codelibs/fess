@@ -1071,7 +1071,7 @@ public class LdapManager {
     }
 
     protected void search(final String baseDn, final String filter, final String[] returningAttrs,
-            final Supplier<Hashtable<String, String>> envSupplier, final SearcConsumer consumer) {
+            final Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer) {
         try (DirContextHolder holder = getDirContext(envSupplier)) {
             final SearchControls controls = new SearchControls();
             controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -1114,7 +1114,7 @@ public class LdapManager {
         }
     }
 
-    interface SearcConsumer {
+    interface SearchConsumer {
         void accept(List<SearchResult> t) throws NamingException;
     }
 
