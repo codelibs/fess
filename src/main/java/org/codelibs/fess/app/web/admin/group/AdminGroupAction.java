@@ -23,7 +23,6 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.GroupPager;
@@ -32,13 +31,10 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.mylasta.action.FessMessages;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.OptionalUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
-import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -300,16 +296,10 @@ public class AdminGroupAction extends FessAdminAction {
         }
     }
 
-    protected void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        OptionalUtil.ofNullable(attributes.get(fessConfig.getLdapAttrGidNumber())).filter(StringUtil::isNotBlank).ifPresent(s -> {
-                    try {
-                        DfTypeUtil.toLong(s);
-                    } catch (final NumberFormatException e) {
-                        throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + fessConfig.getLdapAttrGidNumber(),
-                                "attributes." + fessConfig.getLdapAttrGidNumber()));
-                    }
-                });
+    public static void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
+        ComponentUtil.getLdapManager().validateGroupAttributes(Long.class, attributes, s ->
+                        throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s,
+                                "attributes." + s)));
     }
 
     // ===================================================================================

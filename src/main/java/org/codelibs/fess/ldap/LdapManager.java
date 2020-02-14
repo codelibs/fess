@@ -24,11 +24,13 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
@@ -878,6 +880,25 @@ public class LdapManager {
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrHomeDirectory(), s)));
     }
 
+    public void validateUserAttributes(final Class<?> type, final Map<String, String> attributes, final Consumer<String> consumer) {
+        if (type == Long.class) {
+            // Long type attributes
+            final String attrUidNumber = fessConfig.getLdapAttrUidNumber();
+            final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
+
+            Stream.of(attrUidNumber, attrGidNumber).forEach(attrName ->
+                        OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                            try {
+                                DfTypeUtil.toLong(s);
+                            } catch (final NumberFormatException e) {
+                                consumer.accept(attrName);
+                            }
+                        }));
+        } else {
+            // do nothing
+        }
+    }
+
     public void delete(final User user) {
         if (!fessConfig.isLdapAdminEnabled(user.getName())) {
             return;
@@ -1015,6 +1036,24 @@ public class LdapManager {
     protected void addGroupAttributes(final BasicAttributes entry, final Group group) {
         OptionalUtil.ofNullable(group.getGidNumber()).filter(s -> StringUtil.isNotBlank(s.toString()))
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrGidNumber(), s)));
+    }
+
+    public void validateGroupAttributes(final Class<?> type, final Map<String, String> attributes, final Consumer<String> consumer) {
+        if (type == Long.class) {
+            // Long type attributes
+            final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
+
+            Stream.of(attrGidNumber).forEach(attrName ->
+                OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+                    try {
+                        DfTypeUtil.toLong(s);
+                    } catch (final NumberFormatException e) {
+                        consumer.accept(attrName);
+                    }
+                }));
+        } else {
+            // do nothing
+        }
     }
 
     public void delete(final Group group) {

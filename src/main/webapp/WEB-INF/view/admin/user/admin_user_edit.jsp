@@ -358,7 +358,7 @@
                                                 key="labels.user_uidNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.uidNumber"/>
-                                            <la:text styleId="attributes.uidNumber" property="attributes.uidNumber" styleClass="form-control"/>
+                                            <input type="number" id="attributes.uidNumber" name="attributes.uidNumber" class="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
@@ -366,7 +366,7 @@
                                                 key="labels.user_gidNumber"/></label>
                                         <div class="col-sm-9">
                                             <la:errors property="attributes.gidNumber"/>
-                                            <la:text styleId="attributes.gidNumber" property="attributes.gidNumber" styleClass="form-control"/>
+                                            <input type="number" id="attributes.gidNumber" name="attributes.gidNumber" class="form-control"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">

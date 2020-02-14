@@ -62,9 +62,9 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <div class="form-inline col-sm-9">
                                     <label for="attributes.gidNumber" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.group_gidNumber"/></label>
+                                    <div class="col-sm-9">
                                         <la:errors property="attributes.gidNumber"/>
                                         <input type="number" id="attributes.gidNumber" name="attributes.gidNumber" class="form-control"/>
                                     </div>

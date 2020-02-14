@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.group;
 
 import static org.codelibs.fess.app.web.admin.group.AdminGroupAction.getGroup;
+import static org.codelibs.fess.app.web.admin.group.AdminGroupAction.validateAttributes;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,6 +64,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
+        validateAttributes(body.attributes, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.CREATE;
         final Group entity = getGroup(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -83,6 +85,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
+        validateAttributes(body.attributes, v -> throwValidationErrorApi(v));
         body.crudMode = CrudMode.EDIT;
         final Group entity = getGroup(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
