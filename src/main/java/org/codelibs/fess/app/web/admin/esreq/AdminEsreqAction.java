@@ -69,7 +69,7 @@ public class AdminEsreqAction extends FessAdminAction {
     @Secured({ ROLE })
     public ActionResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml(null));
-        verifyToken(() -> asListHtml(() -> saveToken()));
+        verifyTokenKeep(() -> asListHtml(() -> saveToken()));
 
         String header = null;
         final StringBuilder buf = new StringBuilder(1000);
