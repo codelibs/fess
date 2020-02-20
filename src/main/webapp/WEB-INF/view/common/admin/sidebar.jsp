@@ -2,8 +2,8 @@
 <aside class="main-sidebar sidebar-dark-primary">
 	<la:link href="/admin/" styleClass="brand-link text-center">
 		<span class="brand-text">
-		<img src="${fe:url('/images/logo-head.png')}"
-			 alt="<la:message key="labels.header_brand_name" />" />
+		<c:if test="${empty param.brandName or empty param.logoPath}"><img src="${fe:url('/images/logo-head.png')}" alt="<la:message key="labels.header_brand_name" />" /></c:if
+		><c:if test="${not empty param.brandName and not empty param.logoPath}"><img src="${param.logoPath}" alt="${f:h(param.brandName)}" /></c:if>
 		</span>
 	</la:link>
 	<div class="sidebar">
