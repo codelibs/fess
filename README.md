@@ -57,10 +57,6 @@ You can register crawling targets in the Admin UI on the (Web, File, Data Store)
 
 Please see [MIGRATION.md](MIGRATION.md).
 
-## X-Pack Support
-
-Please see [fess-xpack](https://github.com/codelibs/fess-xpack).
-
 ## Data Store
 
 Currently, Fess supports crawling the following [storage locations and APIs](https://fess.codelibs.org/13.6/admin/dataconfig-guide.html):
