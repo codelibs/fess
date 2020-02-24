@@ -83,6 +83,14 @@ public class ResourceUtil {
         return getPath("WEB-INF/", "conf", names);
     }
 
+    public static Path getConfOrClassesPath(final String... names) {
+        Path confPath = getConfPath(names);
+        if (Files.exists(confPath)) {
+            return confPath;
+        }
+        return org.codelibs.core.io.ResourceUtil.getResourceAsFile(String.join("/", names)).toPath();
+    }
+
     public static Path getClassesPath(final String... names) {
         return getPath("WEB-INF/", "classes", names);
     }

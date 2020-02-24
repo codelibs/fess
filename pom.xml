@@ -453,7 +453,7 @@
 						<data>
 							<type>directory</type>
 							<src>${project.build.directory}/fess</src>
-							<excludes>**/fess_config.properties,**/fess_env*.properties</excludes>
+							<excludes>**/fess_config.properties,**/fess_env*.properties,**/tika.xml</excludes>
 							<mapper>
 								<type>perm</type>
 								<prefix>${packaging.fess.app.dir}</prefix>
@@ -515,6 +515,7 @@
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_suggest.properties</path>
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_thumbnail.properties</path>
 								<path>${project.build.directory}/fess/WEB-INF/classes/fess_env_web.properties</path>
+								<path>${project.build.directory}/fess/WEB-INF/classes/tika.xml</path>
 							</paths>
 							<dst>${packaging.fess.conf.dir}</dst>
 							<mapper>
@@ -727,6 +728,7 @@
 									<excludes>
 										<exclude>**/fess_config.properties</exclude>
 										<exclude>**/fess_env*.properties</exclude>
+										<exclude>**/tika.xml</exclude>
 									</excludes>
 								</source>
 							</sources>
@@ -771,6 +773,7 @@
 										<include>fess_env_suggest.properties</include>
 										<include>fess_env_thumbnail.properties</include>
 										<include>fess_env_web.properties</include>
+										<include>tika.xml</include>
 									</includes>
 								</source>
 							</sources>
