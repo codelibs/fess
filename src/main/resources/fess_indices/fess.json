@@ -681,6 +681,7 @@
           "n": "1",
           "synonyms_path": "${fess.dictionary.path}synonym.txt",
           "dynamic_reload": true,
+          "expand": false,
           "reload_interval": "1m"
         },
         "bigram_tokenizer": {
@@ -688,6 +689,7 @@
           "n": "2",
           "synonyms_path": "${fess.dictionary.path}synonym.txt",
           "dynamic_reload": true,
+          "expand": false,
           "reload_interval": "1m"
         }
       },
