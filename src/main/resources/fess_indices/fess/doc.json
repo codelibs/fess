@@ -498,6 +498,7 @@
       "content": {
         "type": "text",
         "analyzer": "standard_analyzer",
+        "search_analyzer": "standard_search_analyzer",
         "term_vector": "with_positions_offsets"
       },
       "content_minhash": {
@@ -576,6 +577,7 @@
       "title": {
         "type": "text",
         "analyzer": "standard_analyzer",
+        "search_analyzer": "standard_search_analyzer",
         "term_vector": "with_positions_offsets"
       },
       "thumbnail": {

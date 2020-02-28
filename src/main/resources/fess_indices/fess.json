@@ -685,6 +685,15 @@
           "expand_ngram": true,
           "reload_interval": "1m"
         },
+        "unigram_search_tokenizer": {
+          "type": "ngram_synonym",
+          "n": "1",
+          "synonyms_path": "${fess.dictionary.path}synonym.txt",
+          "dynamic_reload": true,
+          "expand": false,
+          "expand_ngram": false,
+          "reload_interval": "1m"
+        },
         "bigram_tokenizer": {
           "type": "ngram_synonym",
           "n": "2",
@@ -1145,6 +1154,23 @@
             "stemmer_en_filter"
           ]
         },
+        "standard_search_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "mapping_filter"
+          ],
+          "tokenizer": "unigram_search_tokenizer",
+          "filter": [
+            "disable_graph",
+            "alphanum_word_filter",
+            "cjk_bigram",
+            "lowercase",
+            "stopword_en_filter",
+            "english_keywords",
+            "english_override",
+            "stemmer_en_filter"
+          ]
+        },
         "empty_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
@@ -1157,7 +1183,7 @@
           "char_filter": [
             "mapping_ja_filter"
           ],
-          "tokenizer": "unigram_tokenizer",
+          "tokenizer": "unigram_search_tokenizer",
           "filter": [
             "alphanum_word_filter",
             "cjk_bigram",
