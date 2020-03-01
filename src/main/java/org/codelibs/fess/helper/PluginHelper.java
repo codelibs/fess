@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl;
+import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.PluginException;
@@ -184,7 +186,7 @@ public class PluginHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Loading {}", url);
         }
-        try (final CurlResponse response = Curl.get(url).execute()) {
+        try (final CurlResponse response = createCurlRequest(url).execute()) {
             return response.getContentAsString();
         } catch (final IOException e) {
             throw new IORuntimeException(e);
@@ -246,7 +248,7 @@ public class PluginHelper {
         if (StringUtil.isBlank(url)) {
             throw new PluginException("url is blank: " + artifact.getName());
         } else if (url.startsWith("http:") || url.startsWith("https:")) {
-            try (final CurlResponse response = Curl.get(url).execute()) {
+            try (final CurlResponse response = createCurlRequest(url).execute()) {
                 if (response.getHttpStatusCode() != 200) {
                     throw new PluginException("HTTP Status " + response.getHttpStatusCode() + " : failed to get the artifact from " + url);
                 }
@@ -273,6 +275,15 @@ public class PluginHelper {
         default:
             break;
         }
+    }
+
+    protected CurlRequest createCurlRequest(final String url) {
+        final CurlRequest request = Curl.get(url);
+        final Proxy proxy = ComponentUtil.getFessConfig().getHttpProxy();
+        if (proxy != null && !Proxy.NO_PROXY.equals(proxy)) {
+            request.proxy(proxy);
+        }
+        return request;
     }
 
     public void deleteInstalledArtifact(final Artifact artifact) {
