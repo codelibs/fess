@@ -129,28 +129,30 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse createnewjob(final String type, final String id, final String name) {
         saveToken();
-        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(CreateForm.class, op -> {
-            op.setup(scheduledJobForm -> {
-                scheduledJobForm.initialize();
-                scheduledJobForm.crudMode = CrudMode.CREATE;
-                scheduledJobForm.jobLogging = Constants.ON;
-                scheduledJobForm.crawler = Constants.ON;
-                scheduledJobForm.available = Constants.ON;
-                scheduledJobForm.cronExpression = null;
-                final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
-                scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
-                final String[] ids = new String[] { "", "", "" };
-                final String configId = id.replace('-', '_');
-                if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
-                    ids[0] = "\"" + configId + "\"";
-                } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
-                    ids[1] = "\"" + configId + "\"";
-                } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
-                    ids[2] = "\"" + configId + "\"";
-                }
-                scheduledJobForm.scriptData = MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], configId);
-            });
-        });
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
+                CreateForm.class,
+                op -> {
+                    op.setup(scheduledJobForm -> {
+                        scheduledJobForm.initialize();
+                        scheduledJobForm.crudMode = CrudMode.CREATE;
+                        scheduledJobForm.jobLogging = Constants.ON;
+                        scheduledJobForm.crawler = Constants.ON;
+                        scheduledJobForm.available = Constants.ON;
+                        scheduledJobForm.cronExpression = null;
+                        final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
+                        scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
+                        final String[] ids = new String[] { "", "", "" };
+                        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+                            ids[0] = "\"" + id + "\"";
+                        } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+                            ids[1] = "\"" + id + "\"";
+                        } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+                            ids[2] = "\"" + id + "\"";
+                        }
+                        scheduledJobForm.scriptData =
+                                MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], id.replace('-', '_'));
+                    });
+                });
     }
 
     @Execute
