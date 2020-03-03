@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.xerces.impl.Constants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.util.ResourceUtil;
@@ -87,6 +88,7 @@ public class DataStoreFactory {
                 try (InputStream is = Files.newInputStream(xmlPath)) {
                     final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                    factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
                     final DocumentBuilder builder = factory.newDocumentBuilder();
 
                     final Document doc = builder.parse(is);
