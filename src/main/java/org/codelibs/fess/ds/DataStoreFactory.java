@@ -72,9 +72,11 @@ public class DataStoreFactory {
     }
 
     public String[] getDataStoreNames() {
-        if (System.currentTimeMillis() - lastLoadedTime > 60000L) {
+        final long now = System.currentTimeMillis();
+        if (now - lastLoadedTime > 60000L) {
             final List<String> nameList = loadDataStoreNameList();
             dataStoreNames = nameList.toArray(n -> new String[nameList.size()]);
+            lastLoadedTime = now;
         }
         return dataStoreNames;
     }
