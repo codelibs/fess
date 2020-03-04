@@ -112,7 +112,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
             final Long contentLength = DocumentUtil.getValue(dataMap, fessConfig.getIndexFieldContentLength(), Long.class);
             if (contentLength != null) {
-                docList.addContentSize(contentLength.longValue());
+                docList.addContentSize(indexingHelper.calculateDocumentSize(dataMap, contentLength.longValue()));
                 if (docList.getContentSize() >= maxDocumentRequestSize) {
                     indexingHelper.sendDocuments(fessEsClient, docList);
                 }

@@ -15,6 +15,12 @@
  */
 package org.codelibs.fess.util;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.codelibs.core.lang.StringUtil;
 
@@ -41,5 +47,41 @@ public final class MemoryUtil {
         final long freeBytes = runtime.freeMemory();
         final long totalBytes = runtime.totalMemory();
         return totalBytes - freeBytes;
+    }
+
+    public static long sizeOf(final Object obj) {
+        if (obj == null) {
+            return 0L;
+        } else if (obj instanceof String) {
+            return ((String) obj).length() + 56L;
+        } else if (obj instanceof Number) {
+            return 24L;
+        } else if (obj instanceof Date) {
+            return 32L;
+        } else if (obj instanceof LocalDateTime) {
+            return 80L;
+        } else if (obj instanceof ZonedDateTime) {
+            return 2128L;
+        } else if (obj instanceof Object[]) {
+            long size = 0;
+            for (final Object value : (Object[]) obj) {
+                size += sizeOf(value);
+            }
+            return size;
+        } else if (obj instanceof Collection<?>) {
+            long size = 0;
+            for (final Object value : (Collection<?>) obj) {
+                size += sizeOf(value);
+            }
+            return size;
+        } else if (obj instanceof Map<?, ?>) {
+            long size = 0;
+            for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
+                size += sizeOf(entry.getKey());
+                size += sizeOf(entry.getValue());
+            }
+            return size;
+        }
+        return 16L;
     }
 }
