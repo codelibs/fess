@@ -35,6 +35,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.MemoryUtil;
 
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LogManager.getLogger(IndexUpdateCallbackImpl.class);
@@ -47,12 +48,15 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected long maxDocumentRequestSize;
 
+    protected int maxDocumentCacheSize;
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        maxDocumentRequestSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSizeAsInteger().longValue();
+        maxDocumentRequestSize = Long.parseLong(ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSize());
+        maxDocumentCacheSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentCacheSizeAsInteger();
     }
 
     /* (non-Javadoc)
@@ -106,20 +110,19 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         synchronized (docList) {
             docList.add(dataMap);
+            final long contentSize = indexingHelper.calculateDocumentSize(dataMap);
+            docList.addContentSize(contentSize);
+            final long processingTime = System.currentTimeMillis() - startTime;
+            docList.addProcessingTime(processingTime);
             if (logger.isDebugEnabled()) {
-                logger.debug("Added the document. The number of a document cache is {}.", docList.size());
+                logger.debug("Added the document({}, {}ms). The number of a document cache is {}.",
+                        MemoryUtil.byteCountToDisplaySize(contentSize), processingTime, docList.size());
             }
 
-            final Long contentLength = DocumentUtil.getValue(dataMap, fessConfig.getIndexFieldContentLength(), Long.class);
-            if (contentLength != null) {
-                docList.addContentSize(indexingHelper.calculateDocumentSize(dataMap, contentLength.longValue()));
-                if (docList.getContentSize() >= maxDocumentRequestSize) {
-                    indexingHelper.sendDocuments(fessEsClient, docList);
-                }
-            } else if (docList.size() >= fessConfig.getIndexerDataMaxDocumentCacheSizeAsInteger().intValue()) {
+            if (docList.getContentSize() >= maxDocumentRequestSize || docList.size() >= maxDocumentCacheSize) {
                 indexingHelper.sendDocuments(fessEsClient, docList);
             }
-            executeTime += System.currentTimeMillis() - startTime;
+            executeTime += processingTime;
         }
 
         documentSize.getAndIncrement();

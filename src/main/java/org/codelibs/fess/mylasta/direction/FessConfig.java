@@ -417,7 +417,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1048576 */
     String INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE = "indexer.webfs.max.document.request.size";
 
-    /** The key of the configuration. e.g. 5 */
+    /** The key of the configuration. e.g. 10000 */
     String INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE = "indexer.data.max.document.cache.size";
 
     /** The key of the configuration. e.g. 1048576 */
@@ -2809,14 +2809,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.data.max.document.cache.size'. <br>
-     * The value is, e.g. 5 <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxDocumentCacheSize();
 
     /**
      * Get the value for the key 'indexer.data.max.document.cache.size' as {@link Integer}. <br>
-     * The value is, e.g. 5 <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -9167,7 +9167,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_WEBFS_UPDATE_INTERVAL, "10000");
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE, "10");
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
-            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "5");
+            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "10000");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_FIELDS, "content,important_content,title");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH, "1000");

@@ -308,7 +308,7 @@ public class IndexUpdater extends Thread {
 
     private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList, final List<EsAccessResult> arList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final long maxDocumentRequestSize = fessConfig.getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
+        final long maxDocumentRequestSize = Long.parseLong(fessConfig.getIndexerWebfsMaxDocumentRequestSize());
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing {}", accessResult.getUrl());
@@ -355,20 +355,17 @@ public class IndexUpdater extends Thread {
                     updateDocument(map);
 
                     docList.add(map);
+                    final long contentSize = indexingHelper.calculateDocumentSize(map);
+                    docList.addContentSize(contentSize);
                     final long processingTime = System.currentTimeMillis() - startTime;
                     docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document({}, {}ms). " + "The number of a document cache is {}.",
-                                MemoryUtil.byteCountToDisplaySize(docList.getContentSize()), processingTime, docList.size());
+                        logger.debug("Added the document({}, {}ms). The number of a document cache is {}.",
+                                MemoryUtil.byteCountToDisplaySize(contentSize), processingTime, docList.size());
                     }
 
-                    if (accessResult.getContentLength() == null) {
+                    if (docList.getContentSize() >= maxDocumentRequestSize) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
-                    } else {
-                        docList.addContentSize(accessResult.getContentLength().longValue());
-                        if (docList.getContentSize() >= maxDocumentRequestSize) {
-                            indexingHelper.sendDocuments(fessEsClient, docList);
-                        }
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {

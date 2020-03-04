@@ -203,12 +203,8 @@ public class IndexingHelper {
 
     }
 
-    public long calculateDocumentSize(final Map<String, Object> dataMap, final long size) {
-        final long objSize = MemoryUtil.sizeOf(dataMap);
-        if (objSize > size) {
-            return objSize;
-        }
-        return size;
+    public long calculateDocumentSize(final Map<String, Object> dataMap) {
+        return MemoryUtil.sizeOf(dataMap);
     }
 
     public void setMaxRetryCount(final int maxRetryCount) {
