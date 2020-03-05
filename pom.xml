@@ -57,11 +57,11 @@
 		<crawler.version>3.6.1-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.6.0</suggest.version>
+		<suggest.version>7.6.1</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.6.1</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.6.0</elasticsearch.httpclient.version>
+		<elasticsearch.httpclient.version>7.6.1</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -1197,7 +1197,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.5.3-SNAPSHOT</version>
+			<version>0.5.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
