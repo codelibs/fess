@@ -27,6 +27,6 @@ jobs:
     - name: Set up Integration Test
       run: bash .travis/before_script.sh
     - name: Run Integration Test
-    - run: bash .travis/run.sh
+      run: bash .travis/run.sh
 
 
