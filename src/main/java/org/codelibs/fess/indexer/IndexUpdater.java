@@ -345,7 +345,7 @@ public class IndexUpdater extends Thread {
 
                     if (Constants.FALSE.equals(map.get(Constants.INDEXING_TARGET))) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Skipped. " + "This document is not a index target. ");
+                            logger.debug("Skipped. This document is not a index target. ");
                         }
                         continue;
                     } else {

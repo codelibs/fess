@@ -228,11 +228,11 @@ public class AdminStorageAction extends FessAdminAction {
                     logger.warn("Failed to create bucket:" + fessConfig.getStorageBucket(), e1);
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access " + fessConfig.getStorageEndpoint(), e);
+                logger.debug("Failed to access {}", fessConfig.getStorageEndpoint(), e);
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access " + fessConfig.getStorageEndpoint(), e);
+                logger.debug("Failed to access {}", fessConfig.getStorageEndpoint(), e);
             }
         }
         return list;
