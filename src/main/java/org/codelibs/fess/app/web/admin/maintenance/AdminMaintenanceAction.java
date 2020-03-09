@@ -95,7 +95,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     private HtmlResponse asIndexHtml() {
         return asHtml(path_AdminMaintenance_AdminMaintenanceJsp).useForm(ActionForm.class, op -> op.setup(f -> {
             f.replaceAliases = Constants.ON;
-            f.resetDictionaries = Constants.ON;
+            f.resetDictionaries = null;
         }));
     }
 
