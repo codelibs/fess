@@ -18,6 +18,7 @@ package org.codelibs.fess.dict.synonym;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.collection.ArrayUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.dict.DictionaryItem;
 
@@ -34,10 +35,6 @@ public class SynonymItem extends DictionaryItem {
         this.id = id;
         this.inputs = inputs;
         this.outputs = outputs;
-        Arrays.sort(inputs);
-        if (inputs != outputs) {
-            Arrays.sort(outputs);
-        }
 
         if (id == 0) {
             // create
@@ -92,21 +89,6 @@ public class SynonymItem extends DictionaryItem {
         return isUpdated() && newInputs.length == 0;
     }
 
-    public void sort() {
-        if (inputs != null) {
-            Arrays.sort(inputs);
-        }
-        if (outputs != null) {
-            Arrays.sort(outputs);
-        }
-        if (newInputs != null) {
-            Arrays.sort(newInputs);
-        }
-        if (newOutputs != null) {
-            Arrays.sort(newOutputs);
-        }
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -128,12 +110,10 @@ public class SynonymItem extends DictionaryItem {
             return false;
         }
         final SynonymItem other = (SynonymItem) obj;
-        sort();
-        other.sort();
-        if (!Arrays.equals(inputs, other.inputs)) {
+        if (!ArrayUtil.equalsIgnoreSequence(inputs, other.inputs)) {
             return false;
         }
-        if (!Arrays.equals(outputs, other.outputs)) {
+        if (!ArrayUtil.equalsIgnoreSequence(outputs, other.outputs)) {
             return false;
         }
         return true;
