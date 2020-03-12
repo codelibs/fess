@@ -56,7 +56,10 @@ public abstract class FessAdminAction extends FessBaseAction {
                         .orElse(false);
         runtime.registerData("editable", editable);
         runtime.registerData("editableClass", editable.booleanValue() ? StringUtil.EMPTY : "disabled");
-        runtime.registerData("forumLink", systemHelper.getForumLink());
+        final String forumLink = systemHelper.getForumLink();
+        if (StringUtil.isNotBlank(forumLink)) {
+            runtime.registerData("forumLink", forumLink);
+        }
     }
 
     protected abstract String getActionRole();
