@@ -23,11 +23,11 @@ public class SynonymItemTest extends UnitFessTestCase {
         final SynonymItem synonymItem = new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" });
         assertEquals(1, synonymItem.getId());
         assertEquals(2, synonymItem.getInputs().length);
-        assertEquals("A", synonymItem.getInputs()[0]);
-        assertEquals("a", synonymItem.getInputs()[1]);
+        assertEquals("a", synonymItem.getInputs()[0]);
+        assertEquals("A", synonymItem.getInputs()[1]);
         assertEquals(2, synonymItem.getOutputs().length);
-        assertEquals("B", synonymItem.getOutputs()[0]);
-        assertEquals("b", synonymItem.getOutputs()[1]);
+        assertEquals("b", synonymItem.getOutputs()[0]);
+        assertEquals("B", synonymItem.getOutputs()[1]);
         assertNull(synonymItem.getNewInputs());
         assertNull(synonymItem.getNewOutputs());
         assertFalse(synonymItem.isUpdated());
@@ -94,8 +94,8 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("a1,a2,a3=>b1,b2,b3",
                 new SynonymItem(1, new String[] { "a1", "a2", "a3" }, new String[] { "b1", "b2", "b3" }).toLineString());
         assertEquals("a=>b", new SynonymItem(1, new String[] { "a" }, new String[] { "b" }).toLineString());
-        assertEquals("A,a=>B,b", new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" }).toLineString());
-        assertEquals("A,a", new SynonymItem(1, new String[] { "a", "A" }, new String[] { "a", "A" }).toLineString());
+        assertEquals("A,a=>B,b", new SynonymItem(1, new String[] { "A", "a" }, new String[] { "B", "b" }).toLineString());
+        assertEquals("A,a", new SynonymItem(1, new String[] { "A", "a" }, new String[] { "A", "a" }).toLineString());
         assertEquals("a", new SynonymItem(1, new String[] { "a" }, new String[] { "a" }).toLineString());
     }
 }
