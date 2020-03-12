@@ -98,6 +98,9 @@ fi
 if [ "x$FESS_LOG_PATH" = "x" ]; then
   FESS_LOG_PATH=$FESS_HOME/logs
 fi
+if [ "x$FESS_LOG_LEVEL" = "x" ]; then
+  FESS_LOG_LEVEL=warn
+fi
 if [ "x$FESS_PORT" = "x" ]; then
   FESS_PORT=8080
 fi
@@ -111,7 +114,7 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webapp.path=$FESS_HOME/app"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_TEMP_PATH"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.name=$APP_NAME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_LOG_PATH"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=warn"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=$FESS_LOG_LEVEL"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=web"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dtomcat.config.path=tomcat_config.properties"
 if [ "x$FESS_CONF_PATH" != "x" ]; then
