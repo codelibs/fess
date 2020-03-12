@@ -13,12 +13,12 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-extension -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="7.6.1" />
-			<param name="plugin.zip.version" value="7.6.1" />
+			<param name="plugin.version" value="7.6.2-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.6.2-20200305.033537-1" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
