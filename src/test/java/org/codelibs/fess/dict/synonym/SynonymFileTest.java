@@ -99,19 +99,19 @@ public class SynonymFileTest extends UnitFessTestCase {
 
         assertEquals(2, itemList.get(3).getInputs().length);
         assertEquals(2, itemList.get(3).getOutputs().length);
-        assertEquals("X1", itemList.get(3).getInputs()[0]);
-        assertEquals("x1", itemList.get(3).getInputs()[1]);
-        assertEquals("X1", itemList.get(3).getOutputs()[0]);
-        assertEquals("x1", itemList.get(3).getOutputs()[1]);
+        assertEquals("x1", itemList.get(3).getInputs()[0]);
+        assertEquals("X1", itemList.get(3).getInputs()[1]);
+        assertEquals("x1", itemList.get(3).getOutputs()[0]);
+        assertEquals("X1", itemList.get(3).getOutputs()[1]);
         assertFalse(itemList.get(3).isUpdated());
 
         assertEquals(3, itemList.get(4).getInputs().length);
         assertEquals(3, itemList.get(4).getOutputs().length);
-        assertEquals("Y1", itemList.get(4).getInputs()[0]);
-        assertEquals("y1", itemList.get(4).getInputs()[1]);
+        assertEquals("y1", itemList.get(4).getInputs()[0]);
+        assertEquals("Y1", itemList.get(4).getInputs()[1]);
         assertEquals("y2", itemList.get(4).getInputs()[2]);
-        assertEquals("Y1", itemList.get(4).getOutputs()[0]);
-        assertEquals("y1", itemList.get(4).getOutputs()[1]);
+        assertEquals("y1", itemList.get(4).getOutputs()[0]);
+        assertEquals("Y1", itemList.get(4).getOutputs()[1]);
         assertEquals("y2", itemList.get(4).getOutputs()[2]);
         assertFalse(itemList.get(4).isUpdated());
     }
