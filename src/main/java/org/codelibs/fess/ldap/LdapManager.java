@@ -202,15 +202,20 @@ public class LdapManager {
         if (logger.isDebugEnabled()) {
             logger.debug("Account Filter: {}", filter);
         }
+        final Set<String> subRoleSet = new HashSet<>();
         search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
             processSearchRoles(result, entryDn -> {
                 updateSearchRoles(roleSet, entryDn);
 
                 if (StringUtil.isNotBlank(groupFilter)) {
-                    processSubRoles(ldapUser, bindDn, entryDn, groupFilter, roleSet);
+                    subRoleSet.add(entryDn);
                 }
             });
         });
+
+        if (!subRoleSet.isEmpty()) {
+            processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("role: {}", roleSet);
@@ -218,10 +223,17 @@ public class LdapManager {
         return roleSet.toArray(new String[roleSet.size()]);
     }
 
-    protected void processSubRoles(final LdapUser ldapUser, final String bindDn, final String dn, final String groupFilter,
+    protected void processSubRoles(final LdapUser ldapUser, final String bindDn, final Set<String> subRoleSet, final String groupFilter,
             final Set<String> roleSet) {
         // (member:1.2.840.113556.1.4.1941:=%s)
-        final String filter = String.format(groupFilter, dn);
+        if (subRoleSet.isEmpty()) {
+            return;
+        }
+        String filter = subRoleSet.stream().map(s -> String.format(groupFilter, s)).collect(Collectors.joining());
+        if (subRoleSet.size() > 1) {
+            filter = "(|" + filter + ")";
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("Group Filter: {}", filter);
         }
