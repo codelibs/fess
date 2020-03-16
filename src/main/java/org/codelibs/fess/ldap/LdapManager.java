@@ -1130,7 +1130,12 @@ public class LdapManager {
                 controls.setReturningAttributes(returningAttrs);
             }
 
-            consumer.accept(Collections.list(holder.get().search(baseDn, filter, controls)));
+            long startTime = System.currentTimeMillis();
+            final List<SearchResult> list = Collections.list(holder.get().search(baseDn, filter, controls));
+            if (logger.isDebugEnabled()) {
+                logger.debug("LDAP search[{}ms]: {} - {}", System.currentTimeMillis() - startTime, baseDn, filter);
+            }
+            consumer.accept(list);
         } catch (final NamingException e) {
             throw new LdapOperationException("Failed to search " + baseDn + " with " + filter, e);
         }
