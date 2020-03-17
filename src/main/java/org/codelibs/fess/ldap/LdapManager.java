@@ -48,6 +48,7 @@ import javax.naming.directory.SearchResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.exentity.Group;
@@ -188,7 +189,8 @@ public class LdapManager {
         return new LdapUser(env, username);
     }
 
-    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter, final String groupFilter) {
+    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter, final String groupFilter,
+            final Consumer<String[]> lazyLoading) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Set<String> roleSet = new HashSet<>();
 
@@ -213,14 +215,22 @@ public class LdapManager {
             });
         });
 
-        if (!subRoleSet.isEmpty()) {
-            processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
-        }
-
         if (logger.isDebugEnabled()) {
             logger.debug("role: {}", roleSet);
         }
-        return roleSet.toArray(new String[roleSet.size()]);
+        final String[] roles = roleSet.toArray(new String[roleSet.size()]);
+
+        if (!subRoleSet.isEmpty()) {
+            TimeoutManager.getInstance().addTimeoutTarget(() -> {
+                processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("role(lazy loading): {}", roleSet);
+                }
+                lazyLoading.accept(roleSet.toArray(new String[roleSet.size()]));
+            }, 0, false);
+        }
+
+        return roles;
     }
 
     protected void processSubRoles(final LdapUser ldapUser, final String bindDn, final Set<String> subRoleSet, final String groupFilter,

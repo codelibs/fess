@@ -54,8 +54,9 @@ public class LdapUser implements FessUser {
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 permissions =
-                        ArrayUtils.addAll(ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter),
-                                fessConfig.getRoleSearchUserPrefix() + getName());
+                        ArrayUtils.addAll(
+                                ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter,
+                                        roles -> permissions = roles), fessConfig.getRoleSearchUserPrefix() + getName());
             } else {
                 permissions = StringUtil.EMPTY_STRINGS;
             }
