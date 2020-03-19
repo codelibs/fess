@@ -22,8 +22,10 @@ import java.util.Hashtable;
 import org.apache.commons.lang3.ArrayUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 public class LdapUser implements FessUser {
 
@@ -54,9 +56,10 @@ public class LdapUser implements FessUser {
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 permissions =
-                        ArrayUtils.addAll(
-                                ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter,
-                                        roles -> permissions = roles), fessConfig.getRoleSearchUserPrefix() + getName());
+                        ArrayUtils.addAll(ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
+                            permissions = roles;
+                            ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
+                        }), fessConfig.getRoleSearchUserPrefix() + getName());
             } else {
                 permissions = StringUtil.EMPTY_STRINGS;
             }

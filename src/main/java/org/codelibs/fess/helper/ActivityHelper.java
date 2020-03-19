@@ -112,6 +112,20 @@ public class ActivityHelper {
         log(buf);
     }
 
+    public void permissionChanged(final OptionalThing<FessUserBean> user) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(Action.UPDATE_PERMISSION);
+        buf.append('\t');
+        buf.append("user:");
+        buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append('\t');
+        buf.append("permissions:");
+        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                .filter(StringUtil::isNotBlank).orElse("-"));
+        log(buf);
+    }
+
     private void log(final StringBuilder buf) {
         buf.append('\t');
         buf.append("ip:");
@@ -127,7 +141,7 @@ public class ActivityHelper {
     }
 
     protected enum Action {
-        LOGIN, LOGOUT, ACCESS, LOGIN_FAILURE;
+        LOGIN, LOGOUT, ACCESS, LOGIN_FAILURE, UPDATE_PERMISSION;
     }
 
     public void setLoggerName(final String loggerName) {
