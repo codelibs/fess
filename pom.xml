@@ -57,7 +57,7 @@
 		<crawler.version>3.6.1</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.6.1</suggest.version>
+		<suggest.version>7.6.2-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.6.1</elasticsearch.version>
