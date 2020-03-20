@@ -168,7 +168,7 @@ public class CrawlingInfoService {
     public List<CrawlingInfoParam> getCrawlingInfoParamList(final String id) {
         return crawlingInfoParamBhv.selectList(cb -> {
             cb.query().setCrawlingInfoId_Equal(id);
-            cb.query().addOrderBy_Id_Asc();
+            cb.query().addOrderBy_CreatedTime_Asc();
             cb.fetchFirst(fessConfig.getPageCrawlingInfoParamMaxFetchSizeAsInteger());
         });
     }
@@ -181,7 +181,7 @@ public class CrawlingInfoService {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return crawlingInfoParamBhv.selectList(cb -> {
             cb.query().setCrawlingInfoId_Equal(crawlingInfo.getId());
-            cb.query().addOrderBy_Id_Asc();
+            cb.query().addOrderBy_CreatedTime_Asc();
             cb.paging(fessConfig.getPageCrawlingInfoParamMaxFetchSizeAsInteger(), 1);
         });
     }
