@@ -88,7 +88,7 @@ public class LabelTypeService extends FessAppService {
         return labelTypeBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
+            cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger(), 1);
         });
     }
 

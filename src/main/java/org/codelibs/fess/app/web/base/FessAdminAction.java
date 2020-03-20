@@ -55,7 +55,7 @@ public abstract class FessAdminAction extends FessBaseAction {
                 getUserBean().map(user -> user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray()) || user.hasRole(getActionRole()))
                         .orElse(false);
         runtime.registerData("editable", editable);
-        runtime.registerData("editableClass", editable.booleanValue() ? StringUtil.EMPTY : "disabled");
+        runtime.registerData("editableClass", editable ? StringUtil.EMPTY : "disabled");
         final String forumLink = systemHelper.getForumLink();
         if (StringUtil.isNotBlank(forumLink)) {
             runtime.registerData("forumLink", forumLink);

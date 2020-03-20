@@ -50,7 +50,7 @@ public class LanguageHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         langFields = fessConfig.getIndexerLanguageFieldsAsArray();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
-        maxTextLength = fessConfig.getIndexerLanguageDetectLengthAsInteger().intValue();
+        maxTextLength = fessConfig.getIndexerLanguageDetectLengthAsInteger();
     }
 
     public void updateDocument(final Map<String, Object> doc) {

@@ -354,7 +354,7 @@ public class SystemHelper {
     }
 
     public String abbreviateLongText(final String str) {
-        return StringUtils.abbreviate(str, ComponentUtil.getFessConfig().getMaxLogOutputLengthAsInteger().intValue());
+        return StringUtils.abbreviate(str, ComponentUtil.getFessConfig().getMaxLogOutputLengthAsInteger());
     }
 
     public String normalizeHtmlLang(final String value) {

@@ -45,7 +45,7 @@ public class QueryStringBuilder {
 
     public String build() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
+        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger();
         final StringBuilder queryBuf = new StringBuilder(255);
 
         final String query = buildBaseQuery();
@@ -133,7 +133,7 @@ public class QueryStringBuilder {
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger().intValue();
+        final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger();
 
         stream(conditions.get(SearchRequestParams.AS_OCCURRENCE)).of(
                 stream -> stream.filter(q -> isOccurrence(q)).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));

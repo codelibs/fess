@@ -322,7 +322,7 @@ public class SearchLogHelper {
                     final String docId = clickLog.getDocId();
                     Integer countObj = clickCountMap.get(docId);
                     if (countObj == null) {
-                        countObj = Integer.valueOf(1);
+                        countObj = 1;
                     } else {
                         countObj = countObj.intValue() + 1;
                     }

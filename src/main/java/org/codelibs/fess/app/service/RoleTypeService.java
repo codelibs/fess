@@ -90,7 +90,7 @@ public class RoleTypeService {
         return roleTypeBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger().intValue(), 1);
+            cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger(), 1);
         });
     }
 

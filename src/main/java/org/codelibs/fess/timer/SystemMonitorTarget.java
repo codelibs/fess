@@ -53,9 +53,9 @@ public class SystemMonitorTarget implements TimeoutTarget {
             if (value == null) {
                 buf.append("null");
             } else if (value instanceof Integer) {
-                buf.append(((Integer) value).intValue());
+                buf.append(((Integer) value));
             } else if (value instanceof Long) {
-                buf.append(((Long) value).longValue());
+                buf.append(((Long) value));
             } else if (value instanceof Short) {
                 buf.append(((Short) value).shortValue());
             } else if (value instanceof double[]) {

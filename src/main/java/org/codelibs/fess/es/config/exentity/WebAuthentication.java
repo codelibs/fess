@@ -86,7 +86,7 @@ public class WebAuthentication extends BsWebAuthentication {
         if (getPort() == null) {
             p = AuthScope.ANY_PORT;
         } else {
-            p = getPort().intValue();
+            p = getPort();
         }
 
         String r = getAuthRealm();

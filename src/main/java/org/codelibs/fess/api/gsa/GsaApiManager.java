@@ -281,8 +281,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("<HAS>");
                     buf.append("<L/>");
                     buf.append("<C SZ=\"");
-                    buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldContentLength(), Long.class, Long.valueOf(0))
-                            .longValue() / 1000);
+                    buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldContentLength(), Long.class, (long) 0).longValue() / 1000);
                     document.remove(fessConfig.getIndexFieldContentLength());
                     buf.append("k\" CID=\"");
                     buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class));

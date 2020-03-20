@@ -1140,7 +1140,7 @@ public class LdapManager {
                 controls.setReturningAttributes(returningAttrs);
             }
 
-            long startTime = System.currentTimeMillis();
+            final long startTime = System.currentTimeMillis();
             final List<SearchResult> list = Collections.list(holder.get().search(baseDn, filter, controls));
             if (logger.isDebugEnabled()) {
                 logger.debug("LDAP search[{}ms]: {} - {}", System.currentTimeMillis() - startTime, baseDn, filter);

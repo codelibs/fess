@@ -540,8 +540,7 @@ public class ViewHelper {
         } else {
             createdStr = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        doc.put(CACHE_MSG, ComponentUtil.getMessageManager()
-                .getMessage(locale, "labels.search_cache_msg", new Object[] { url, createdStr }));
+        doc.put(CACHE_MSG, ComponentUtil.getMessageManager().getMessage(locale, "labels.search_cache_msg", url, createdStr));
 
         doc.put(QUERIES, queries);
 

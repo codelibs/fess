@@ -134,12 +134,12 @@ public class DocumentHelper {
 
     protected int getMaxAlphanumTermSize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessConfig.getCrawlerDocumentMaxAlphanumTermSizeAsInteger().intValue();
+        return fessConfig.getCrawlerDocumentMaxAlphanumTermSizeAsInteger();
     }
 
     protected int getMaxSymbolTermSize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessConfig.getCrawlerDocumentMaxSymbolTermSizeAsInteger().intValue();
+        return fessConfig.getCrawlerDocumentMaxSymbolTermSizeAsInteger();
     }
 
     protected boolean isDuplicateTermRemoved() {

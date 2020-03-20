@@ -30,8 +30,7 @@ public class AccessTokenHelper {
     protected Random random = new SecureRandom();
 
     public String generateAccessToken() {
-        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger().intValue(), 0, 0, true, true,
-                null, random);
+        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger(), 0, 0, true, true, null, random);
     }
 
     public String getAccessTokenFromRequest(final HttpServletRequest request) {

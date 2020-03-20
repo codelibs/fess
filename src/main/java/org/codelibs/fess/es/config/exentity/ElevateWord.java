@@ -62,7 +62,7 @@ public class ElevateWord extends BsElevateWord {
                     final ListResultBean<ElevateWordToLabel> mappingList = elevateWordToLabelBhv.selectList(cb -> {
                         cb.query().setElevateWordId_Equal(getId());
                         cb.specify().columnLabelTypeId();
-                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
+                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger(), 1);
                     });
                     final List<String> labelIdList = new ArrayList<>();
                     for (final ElevateWordToLabel mapping : mappingList) {

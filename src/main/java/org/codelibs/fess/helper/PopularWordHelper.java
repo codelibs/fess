@@ -73,10 +73,9 @@ public class PopularWordHelper {
                         final List<String> wordList = new ArrayList<>();
                         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
                         final PopularWordsRequestBuilder popularWordsRequestBuilder =
-                                suggestHelper.suggester().popularWords()
-                                        .setSize(fessConfig.getSuggestPopularWordSizeAsInteger().intValue())
-                                        .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger().intValue())
-                                        .setQueryFreqThreshold(fessConfig.getSuggestPopularWordQueryFreqAsInteger().intValue());
+                                suggestHelper.suggester().popularWords().setSize(fessConfig.getSuggestPopularWordSizeAsInteger())
+                                        .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger())
+                                        .setQueryFreqThreshold(fessConfig.getSuggestPopularWordQueryFreqAsInteger());
                         popularWordsRequestBuilder.setSeed(baseSeed);
                         stream(baseTags).of(stream -> stream.forEach(tag -> popularWordsRequestBuilder.addTag(tag)));
                         stream(baseRoles).of(stream -> stream.forEach(role -> popularWordsRequestBuilder.addRole(role)));

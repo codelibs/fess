@@ -607,7 +607,7 @@ public interface FessProp {
 
     default String getLdapSecurityPrincipal(final String username) {
         final String value;
-        final int maxLength = getLdapMaxUsernameLengthAsInteger().intValue();
+        final int maxLength = getLdapMaxUsernameLengthAsInteger();
         if (username == null) {
             value = StringUtil.EMPTY;
         } else if (maxLength >= 0 && username.length() > maxLength) {
@@ -2044,7 +2044,7 @@ public interface FessProp {
                 value = Boolean.FALSE;
             } else {
                 try {
-                    value = Integer.valueOf(DfTypeUtil.toInteger(v));
+                    value = DfTypeUtil.toInteger(v);
                 } catch (final NumberFormatException e) {
                     value = StringUtil.EMPTY;
                 }
@@ -2057,7 +2057,7 @@ public interface FessProp {
     Integer getProcessorsAsInteger();
 
     default int availableProcessors() {
-        final int num = getProcessorsAsInteger().intValue();
+        final int num = getProcessorsAsInteger();
         if (num > 0) {
             return num;
         }

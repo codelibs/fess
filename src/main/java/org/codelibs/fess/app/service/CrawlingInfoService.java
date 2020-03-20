@@ -182,7 +182,7 @@ public class CrawlingInfoService {
         return crawlingInfoParamBhv.selectList(cb -> {
             cb.query().setCrawlingInfoId_Equal(crawlingInfo.getId());
             cb.query().addOrderBy_Id_Asc();
-            cb.paging(fessConfig.getPageCrawlingInfoParamMaxFetchSizeAsInteger().intValue(), 1);
+            cb.paging(fessConfig.getPageCrawlingInfoParamMaxFetchSizeAsInteger(), 1);
         });
     }
 

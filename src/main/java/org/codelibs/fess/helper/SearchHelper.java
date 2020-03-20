@@ -318,7 +318,7 @@ public class SearchHelper {
                         }
                     }
                     builder.setQuery(boolQuery);
-                    builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
+                    builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger());
                     builder.setFetchSource(fields, null);
                     queryHelper.processSearchPreference(builder, userBean, String.join(StringUtil.EMPTY, docIds));
                     return true;

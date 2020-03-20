@@ -156,7 +156,7 @@ public class IndexUpdater extends Thread {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long updateInterval = fessConfig.getIndexerWebfsUpdateIntervalAsInteger().longValue();
-        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListCountAsInteger().intValue();
+        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListCountAsInteger();
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
             final Consumer<SearchRequestBuilder> cb =
@@ -169,7 +169,7 @@ public class IndexUpdater extends Thread {
                                                 org.codelibs.fess.crawler.Constants.OK_STATUS));
                         builder.setQuery(queryBuilder);
                         builder.setFrom(0);
-                        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger().intValue();
+                        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger();
                         builder.setSize(maxDocumentCacheSize <= 0 ? 1 : maxDocumentCacheSize);
                         builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
                     };

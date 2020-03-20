@@ -174,7 +174,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 final String domain = map.get("domain");
                 smbAuth.setDomain(domain == null ? StringUtil.EMPTY : domain);
                 smbAuth.setServer(fileAuth.getHostname());
-                smbAuth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort().intValue());
+                smbAuth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort());
                 smbAuth.setUsername(fileAuth.getUsername());
                 smbAuth.setPassword(fileAuth.getPassword());
                 smbAuthList.add(smbAuth);
@@ -183,7 +183,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                         new org.codelibs.fess.crawler.client.smb1.SmbAuthentication();
                 smb1Auth.setDomain(domain == null ? StringUtil.EMPTY : domain);
                 smb1Auth.setServer(fileAuth.getHostname());
-                smb1Auth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort().intValue());
+                smb1Auth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort());
                 smb1Auth.setUsername(fileAuth.getUsername());
                 smb1Auth.setPassword(fileAuth.getPassword());
                 smb1AuthList.add(smb1Auth);

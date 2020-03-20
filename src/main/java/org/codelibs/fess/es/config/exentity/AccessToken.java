@@ -47,7 +47,7 @@ public class AccessToken extends BsAccessToken {
         if (getExpiredTime() == null) {
             return null;
         }
-        return new Date(getExpiredTime().longValue());
+        return new Date(getExpiredTime());
     }
 
     public void setExpires(final Date date) {

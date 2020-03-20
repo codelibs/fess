@@ -84,7 +84,7 @@ public class ResourceUtil {
     }
 
     public static Path getConfOrClassesPath(final String... names) {
-        Path confPath = getConfPath(names);
+        final Path confPath = getConfPath(names);
         if (Files.exists(confPath)) {
             return confPath;
         }

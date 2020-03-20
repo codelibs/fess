@@ -123,7 +123,7 @@ public class FessFunctions {
         if (value == null) {
             return null;
         }
-        return new Date(value.longValue());
+        return new Date(value);
     }
 
     public static Date parseDate(final String value) {
