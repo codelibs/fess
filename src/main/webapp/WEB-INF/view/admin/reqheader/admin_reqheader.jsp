@@ -59,25 +59,30 @@
                                     </div>
                                 </c:if>
                                 <c:if test="${reqHeaderPager.allRecordCount > 0}">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                        <tr>
-                                            <th><la:message key="labels.reqheader_list_name"/></th>
-                                            <th><la:message
-                                                    key="labels.reqheader_list_web_crawling_config"/></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <c:forEach var="data" varStatus="s"
-                                                   items="${requestHeaderItems}">
-                                            <tr
-                                                    data-href="${contextPath}/admin/reqheader/details/4/${f:u(data.id)}">
-                                                <td>${f:h(data.name)}</td>
-                                                <td>${f:h(data.webConfig.name)}</td>
-                                            </tr>
-                                        </c:forEach>
-                                        </tbody>
-                                    </table>
+                                    <div class="row top10">
+                                        <div class="col-sm-12">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th><la:message key="labels.reqheader_list_name"/></th>
+                                                    <th><la:message
+                                                            key="labels.reqheader_list_web_crawling_config"/></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <c:forEach var="data" varStatus="s"
+                                                           items="${requestHeaderItems}">
+                                                    <tr
+                                                            data-href="${contextPath}/admin/reqheader/details/4/${f:u(data.id)}">
+                                                        <td>${f:h(data.name)}</td>
+                                                        <td>${f:h(data.webConfig.name)}</td>
+                                                    </tr>
+                                                </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
                                     <c:set var="pager" value="${reqHeaderPager}"
                                            scope="request"/>
                                     <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>

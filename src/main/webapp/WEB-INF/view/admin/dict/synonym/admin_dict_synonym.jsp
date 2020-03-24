@@ -135,7 +135,7 @@
                                             <c:forEach var="p" varStatus="s"
                                                        items="${pager.pageNumberList}">
                                                 <li
-                                                        <c:if test="${p == pager.currentPageNumber}">class="active"</c:if>>
+                                                        <c:if test="${p == pager.currentPageNumber}">class="page-item active"</c:if>>
                                                     <la:link
                                                             styleClass="page-link"
                                                             href="list/${p}?dictId=${f:u(dictId)}">${p}</la:link></li>

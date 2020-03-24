@@ -60,31 +60,35 @@
                                     </div>
                                 </c:if>
                                 <c:if test="${webAuthPager.allRecordCount > 0}">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                        <tr>
-                                            <th><la:message key="labels.webauth_list_hostname"/></th>
-                                            <th><la:message
-                                                    key="labels.webauth_list_web_crawling_config"/></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <c:forEach var="data" varStatus="s"
-                                                   items="${webAuthenticationItems}">
-                                            <tr
-                                                    data-href="${contextPath}/admin/webauth/details/4/${f:u(data.id)}">
-                                                <td><c:if
-                                                        test="${data.hostname==null||data.hostname==''}">
-                                                    <la:message key="labels.webauth_any"/>
-                                                </c:if> ${f:h(data.hostname)}: <c:if
-                                                        test="${data.port==null||data.port==''}">
-                                                    <la:message key="labels.webauth_any"/>
-                                                </c:if> ${f:h(data.port)}</td>
-                                                <td>${f:h(data.webConfig.name)}</td>
-                                            </tr>
-                                        </c:forEach>
-                                        </tbody>
-                                    </table>
+                                    <div class="row top10">
+                                        <div class="col-sm-12">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th><la:message key="labels.webauth_list_hostname"/></th>
+                                                    <th><la:message
+                                                            key="labels.webauth_list_web_crawling_config"/></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <c:forEach var="data" varStatus="s"
+                                                           items="${webAuthenticationItems}">
+                                                    <tr
+                                                            data-href="${contextPath}/admin/webauth/details/4/${f:u(data.id)}">
+                                                        <td><c:if
+                                                                test="${data.hostname==null||data.hostname==''}">
+                                                            <la:message key="labels.webauth_any"/>
+                                                        </c:if> ${f:h(data.hostname)}: <c:if
+                                                                test="${data.port==null||data.port==''}">
+                                                            <la:message key="labels.webauth_any"/>
+                                                        </c:if> ${f:h(data.port)}</td>
+                                                        <td>${f:h(data.webConfig.name)}</td>
+                                                    </tr>
+                                                </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                     <c:set var="pager" value="${webAuthPager}" scope="request"/>
                                     <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>
                                     <c:if test="${pager.currentPageNumber > pager.allPageCount}">
