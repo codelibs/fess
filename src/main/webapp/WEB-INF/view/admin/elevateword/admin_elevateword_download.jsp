@@ -78,7 +78,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="form-group row">
-                                    <label class="col-sm-12 text-sm-right col-form-label"><la:message
+                                    <label class="col-sm-12 col-form-label"><la:message
                                             key="labels.elevate_word_file"/></label>
                                 </div>
                             </div>
