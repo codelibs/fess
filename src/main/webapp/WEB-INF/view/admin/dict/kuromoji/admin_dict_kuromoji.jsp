@@ -112,7 +112,7 @@
                                 </div>
                                 <c:set var="pager" value="${kuromojiPager}" scope="request"/>
                                 <div class="row">
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-2">
                                         <la:message key="labels.pagination_page_guide_msg"
                                                     arg0="${f:h(pager.currentPageNumber)}"
                                                     arg1="${f:h(pager.allPageCount)}"
