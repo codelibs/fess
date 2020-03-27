@@ -2424,7 +2424,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Role */
     public static final String LABELS_role_title_details = "{labels.role_title_details}";
 
-    /** The key of the message: group */
+    /** The key of the message: Group */
     public static final String LABELS_group_configuration = "{labels.group_configuration}";
 
     /** The key of the message: Name */
