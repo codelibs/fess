@@ -45,7 +45,7 @@
                             </div>
                             <a role="button" data-toggle="collapse" href="#listSearchForm" aria-expanded="false"
                                aria-controls="listSearchForm"><i class="fas fa-search" aria-hidden="true"></i></a>
-                            <div class="collapse" id="listSearchForm">
+                            <div class="collapse <c:if test="${!empty regularName || !empty duplicateHostName}">show</c:if>" id="listSearchForm">
                                 <la:form action="/admin/duplicatehost/">
                                     <div class="form-group row">
                                         <label for="regularName" class="col-sm-2 text-sm-right col-form-label"><la:message
