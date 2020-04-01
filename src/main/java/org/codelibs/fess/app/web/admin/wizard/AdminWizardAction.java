@@ -109,9 +109,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
-        validate(form, messages -> {}, () -> {
-            return asHtml(path_AdminWizard_AdminWizardConfigJsp);
-        });
+        validate(form, messages -> {}, () -> asHtml(path_AdminWizard_AdminWizardConfigJsp));
         verifyTokenKeep(() -> asIndexHtml());
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
@@ -121,9 +119,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
-        validate(form, messages -> {}, () -> {
-            return asHtml(path_AdminWizard_AdminWizardConfigJsp);
-        });
+        validate(form, messages -> {}, () -> asHtml(path_AdminWizard_AdminWizardConfigJsp));
         verifyToken(() -> asIndexHtml());
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
@@ -220,9 +216,8 @@ public class AdminWizardAction extends FessAdminAction {
             return configName;
         } catch (final Exception e) {
             logger.error("Failed to create crawling config: " + form.crawlingConfigPath, e);
-            throwValidationError(messages -> messages.addErrorsFailedToCreateCrawlingConfigAtWizard(GLOBAL), () -> {
-                return asHtml(path_AdminWizard_AdminWizardConfigJsp);
-            });
+            throwValidationError(messages -> messages.addErrorsFailedToCreateCrawlingConfigAtWizard(GLOBAL),
+                    () -> asHtml(path_AdminWizard_AdminWizardConfigJsp));
             return null;
         }
     }

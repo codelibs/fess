@@ -134,22 +134,21 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return crawlingInfoService.getCrawlingInfo(id).map(entity -> {
-            return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
-                op.setup(form -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
+        return crawlingInfoService.getCrawlingInfo(id)
+                .map(entity -> asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
+                    op.setup(form -> {
+                        copyBeanToBean(entity, form, copyOp -> {
+                            copyOp.excludeNull();
+                        });
+                        form.crudMode = crudMode;
                     });
-                    form.crudMode = crudMode;
+                }).renderWith(data -> {
+                    RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
+                    RenderDataUtil.register(data, "running", processHelper.isProcessRunning(entity.getSessionId()));
+                })).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    return null;
                 });
-            }).renderWith(data -> {
-                RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
-                RenderDataUtil.register(data, "running", processHelper.isProcessRunning(entity.getSessionId()));
-            });
-        }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-            return null;
-        });
     }
 
     @Execute

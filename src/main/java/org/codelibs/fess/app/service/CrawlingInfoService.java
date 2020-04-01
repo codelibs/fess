@@ -193,7 +193,7 @@ public class CrawlingInfoService {
                     cb.fetchFirst(fessConfig.getPageCrawlingInfoMaxFetchSizeAsInteger());
                     cb.specify().columnId();
                 });
-        final List<String> idList = activeSessionList.stream().map(session -> session.getId()).collect(Collectors.toList());
+        final List<String> idList = activeSessionList.stream().map(CrawlingInfo::getId).collect(Collectors.toList());
         crawlingInfoParamBhv.queryDelete(cb1 -> cb1.query().filtered((cq, cf) -> {
             cq.matchAll();
             if (!idList.isEmpty()) {
@@ -300,7 +300,7 @@ public class CrawlingInfoService {
 
     public void deleteBefore(final long date) {
         crawlingInfoBhv.selectBulk(cb -> cb.query().setExpiredTime_LessThan(date), list -> {
-            final List<String> idList = list.stream().map(entity -> entity.getId()).collect(Collectors.toList());
+            final List<String> idList = list.stream().map(CrawlingInfo::getId).collect(Collectors.toList());
             crawlingInfoParamBhv.queryDelete(cb1 -> cb1.query().setCrawlingInfoId_InScope(idList));
             crawlingInfoBhv.queryDelete(cb2 -> cb2.query().setExpiredTime_LessThan(date));
         });

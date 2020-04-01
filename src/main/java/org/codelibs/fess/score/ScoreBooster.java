@@ -32,6 +32,7 @@ import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
+import org.elasticsearch.search.SearchHit;
 
 public abstract class ScoreBooster {
     private static final Logger logger = LogManager.getLogger(ScoreBooster.class);
@@ -59,7 +60,7 @@ public abstract class ScoreBooster {
         final SearchResponse response =
                 client.prepareSearch(index).setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url)).setFetchSource(false)
                         .setSize(fessConfig.getPageScoreBoosterMaxFetchSizeAsInteger()).execute().actionGet(requestTimeout);
-        return Arrays.stream(response.getHits().getHits()).map(hit -> hit.getId()).toArray(n -> new String[n]);
+        return Arrays.stream(response.getHits().getHits()).map(SearchHit::getId).toArray(n -> new String[n]);
     };
 
     protected Function<Map<String, Object>, Long> requestHandler = params -> {

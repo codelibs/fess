@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
@@ -341,9 +343,10 @@ public class ApiResult {
             final FessMessages messages = new FessMessages();
             validationMessagesLambda.message(messages);
             message =
-                    ComponentUtil.getMessageManager()
-                            .toMessageList(LaRequestUtil.getOptionalRequest().map(r -> r.getLocale()).orElse(Locale.ENGLISH), messages)
-                            .stream().collect(Collectors.joining(" "));
+                    ComponentUtil
+                            .getMessageManager()
+                            .toMessageList(LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ENGLISH),
+                                    messages).stream().collect(Collectors.joining(" "));
             return this;
         }
     }

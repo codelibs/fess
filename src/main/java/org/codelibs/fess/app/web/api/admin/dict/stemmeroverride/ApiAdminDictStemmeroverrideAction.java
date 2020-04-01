@@ -140,14 +140,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
     public StreamResponse get$download(final String dictId, final DownloadBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        return stemmerOverrideService.getStemmerOverrideFile(body.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                file.writeOut(out);
-            });
-        }).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
-            return null;
-        });
+        return stemmerOverrideService.getStemmerOverrideFile(body.dictId)
+                .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
+                    file.writeOut(out);
+                })).orElseGet(() -> {
+                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
+                    return null;
+                });
     }
 
     protected EditBody createEditBody(final StemmerOverrideItem entity, final String dictId) {

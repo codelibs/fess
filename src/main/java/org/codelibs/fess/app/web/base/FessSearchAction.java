@@ -40,6 +40,7 @@ import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -127,7 +128,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
         final String username = systemHelper.getUsername();
         runtime.registerData("username", username);
-        runtime.registerData("editableUser", fessLoginAssist.getSavedUserBean().map(user -> user.isEditable()).orElse(false));
+        runtime.registerData("editableUser", fessLoginAssist.getSavedUserBean().map(FessUserBean::isEditable).orElse(false));
         runtime.registerData("adminUser", fessConfig.isAdminUser(username));
 
         runtime.registerData("pageLoginLink", fessConfig.isLoginLinkEnabled());

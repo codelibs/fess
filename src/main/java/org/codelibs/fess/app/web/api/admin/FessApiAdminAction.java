@@ -27,9 +27,8 @@ public abstract class FessApiAdminAction extends FessApiAction {
     @Override
     protected boolean isAccessAllowed() {
         try {
-            return accessTokenService.getPermissions(request).map(permissions -> {
-                return fessConfig.isApiAdminAccessAllowed(permissions);
-            }).orElse(false);
+            return accessTokenService.getPermissions(request).map(permissions -> fessConfig.isApiAdminAccessAllowed(permissions))
+                    .orElse(false);
         } catch (final InvalidAccessTokenException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Invalid access token.", e);

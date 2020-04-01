@@ -56,8 +56,7 @@ public class UserBhv extends BsUserBhv {
             result.setGroups(toStringArray(source.get(GROUPS)));
             result.setRoles(toStringArray(source.get(ROLES)));
             result.setAttributes(source.entrySet().stream().filter(e -> isAttribute(e.getKey()))
-                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
-                    .collect(Collectors.toMap(t -> t.getFirst(), t -> t.getSecond())));
+                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue())).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

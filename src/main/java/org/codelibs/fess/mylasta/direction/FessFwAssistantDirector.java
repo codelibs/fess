@@ -157,7 +157,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directAdjustment(createActionAdjustmentProvider());
         direction.directMessage(createMessageNameList(), "fess_label");
         direction.directApiCall(createApiFailureHook());
-        direction.directMultipart(() -> new FessMultipartRequestHandler());
+        direction.directMultipart(FessMultipartRequestHandler::new);
         direction.directHtmlRendering(new JspHtmlRenderingProvider() {
             @Override
             protected String getShowErrorsForwardPath(final ActionRuntime runtime) {

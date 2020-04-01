@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.app.pager.BoostDocPager;
 import org.codelibs.fess.app.service.BoostDocumentRuleService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -129,7 +130,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
 
     protected EditBody createEditBody(final BoostDocumentRule entity) {
         final EditBody form = new EditBody();
-        copyBeanToBean(entity, form, copyOp -> copyOp.excludeNull());
+        copyBeanToBean(entity, form, CopyOptions::excludeNull);
         form.crudMode = null;
         return form;
     }

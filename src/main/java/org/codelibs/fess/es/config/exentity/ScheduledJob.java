@@ -20,6 +20,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.bsentity.BsScheduledJob;
 import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.job.LaScheduledJob;
 import org.lastaflute.job.key.LaJobUnique;
 
 /**
@@ -51,7 +52,7 @@ public class ScheduledJob extends BsScheduledJob {
     }
 
     public boolean isRunning() {
-        return ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).map(job -> job.isExecutingNow()).orElse(false);
+        return ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).map(LaScheduledJob::isExecutingNow).orElse(false);
     }
 
     public void start() {

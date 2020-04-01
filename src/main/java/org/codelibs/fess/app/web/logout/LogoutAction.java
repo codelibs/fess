@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.logout;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -40,7 +41,7 @@ public class LogoutAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
-        getUserBean().map(u -> u.getUserId()).orElse("-");
+        getUserBean().map(FessUserBean::getUserId).orElse("-");
         activityHelper.logout(getUserBean());
         fessLoginAssist.logout();
         userInfoHelper.deleteUserCodeFromCookie(request);

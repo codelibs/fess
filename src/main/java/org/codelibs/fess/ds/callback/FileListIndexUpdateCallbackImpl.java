@@ -33,6 +33,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
@@ -171,7 +172,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     } else {
                         ignoreFields = new String[] { Constants.INDEXING_TARGET, Constants.SESSION_ID };
                     }
-                    stream(ignoreFields).of(stream -> stream.map(s -> s.trim()).forEach(s -> dataMap.remove(s)));
+                    stream(ignoreFields).of(stream -> stream.map(String::trim).forEach(s -> dataMap.remove(s)));
 
                     indexUpdateCallback.store(paramMap, dataMap);
                 } else {
@@ -182,7 +183,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             return null;
         } catch (final ChildUrlsException e) {
             throw new DataStoreCrawlingException(url, "Redirected to "
-                    + e.getChildUrlList().stream().map(r -> r.getUrl()).collect(Collectors.joining(", ")), e);
+                    + e.getChildUrlList().stream().map(RequestData::getUrl).collect(Collectors.joining(", ")), e);
         } catch (final Exception e) {
             throw new DataStoreCrawlingException(url, "Failed to add: " + dataMap, e);
         }

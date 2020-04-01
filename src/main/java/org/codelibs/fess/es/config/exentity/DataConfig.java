@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -312,7 +313,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             final String prefix = CRAWLER_WEB_AUTH + "." + webAuthName + ".";
             final Map<String, String> parameterMap =
                     paramMap.entrySet().stream().filter(e -> e.getKey().startsWith(prefix))
-                            .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), e -> e.getValue()));
+                            .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), Entry::getValue));
             authScheme = new FormScheme(parameterMap);
         }
         return authScheme;

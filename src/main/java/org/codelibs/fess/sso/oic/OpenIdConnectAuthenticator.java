@@ -236,8 +236,6 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
-        resolver.resolve(OpenIdConnectCredential.class, credential -> {
-            return OptionalEntity.of(credential.getUser());
-        });
+        resolver.resolve(OpenIdConnectCredential.class, credential -> OptionalEntity.of(credential.getUser()));
     }
 }

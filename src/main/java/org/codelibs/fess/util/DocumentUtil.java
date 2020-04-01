@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.taglib.FessFunctions;
@@ -55,7 +57,7 @@ public final class DocumentUtil {
             if (clazz.isAssignableFrom(List.class)) {
                 return (T) value;
             } else if (clazz.isAssignableFrom(String[].class)) {
-                return (T) ((List<?>) value).stream().filter(s -> s != null).map(s -> s.toString()).toArray(n -> new String[n]);
+                return (T) ((List<?>) value).stream().filter(s -> s != null).map(Object::toString).toArray(n -> new String[n]);
             }
 
             if (((List<?>) value).isEmpty()) {
@@ -134,8 +136,8 @@ public final class DocumentUtil {
 
     public static String encodeUrl(final String url) {
         final String enc =
-                LaRequestUtil.getOptionalRequest().filter(req -> req.getCharacterEncoding() != null).map(req -> req.getCharacterEncoding())
-                        .orElse(Constants.UTF_8);
+                LaRequestUtil.getOptionalRequest().filter(req -> req.getCharacterEncoding() != null)
+                        .map(HttpServletRequest::getCharacterEncoding).orElse(Constants.UTF_8);
         final StringBuilder buf = new StringBuilder(url.length() + 100);
         for (final char c : url.toCharArray()) {
             if (CharUtil.isUrlChar(c)) {

@@ -91,9 +91,7 @@ public class FessBoot extends TomcatBoot {
             if (host instanceof StandardHost) {
                 ((StandardHost) host).setErrorReportValveClass(SuppressErrorReportValve.class.getName());
             }
-        }).useTldDetect(jarName -> {
-            return jarName.contains("jstl") || jarName.contains("lasta-taglib");
-        }).asDevelopment(isNoneEnv()).bootAwait();
+        }).useTldDetect(jarName -> (jarName.contains("jstl") || jarName.contains("lasta-taglib"))).asDevelopment(isNoneEnv()).bootAwait();
     }
 
     public static void shutdown(final String[] args) {

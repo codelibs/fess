@@ -133,14 +133,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
     public StreamResponse get$download(final String dictId, final DownloadBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        return stopwordsService.getStopwordsFile(body.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                file.writeOut(out);
-            });
-        }).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL));
-            return null;
-        });
+        return stopwordsService.getStopwordsFile(body.dictId)
+                .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
+                    file.writeOut(out);
+                })).orElseGet(() -> {
+                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL));
+                    return null;
+                });
     }
 
     protected EditBody createEditBody(final StopwordsItem entity, final String dictId) {

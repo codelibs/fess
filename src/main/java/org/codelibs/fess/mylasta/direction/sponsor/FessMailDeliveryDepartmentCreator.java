@@ -91,9 +91,7 @@ public class FessMailDeliveryDepartmentCreator {
             // override createConventionReceptionist() (see the method for the details)
             @Override
             protected SMailConventionReceptionist createConventionReceptionist() {
-                return super.createConventionReceptionist().asReceiverLocale(postcard -> {
-                    return OptionalThing.empty();
-                });
+                return super.createConventionReceptionist().asReceiverLocale(postcard -> OptionalThing.empty());
             }
 
             @Override

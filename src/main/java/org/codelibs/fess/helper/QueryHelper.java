@@ -321,7 +321,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldVersion()));
         }
         split(fessConfig.getQueryAdditionalAnalyzedFields(), ",").of(
-                stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
+                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
         split(fessConfig.getQueryAdditionalDefaultFields(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
             final Pair<String, Float> pair = new Pair<>();
             final String[] values = s.split(":");
@@ -667,7 +667,7 @@ public class QueryHelper {
                     "Unknown phrase query: " + query);
         }
         final String field = terms[0].field();
-        final String[] texts = stream(terms).get(stream -> stream.map(term -> term.text()).toArray(n -> new String[n]));
+        final String[] texts = stream(terms).get(stream -> stream.map(Term::text).toArray(n -> new String[n]));
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
         stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));

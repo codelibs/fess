@@ -55,7 +55,7 @@ public class ActivityHelper {
         buf.append(Action.LOGIN);
         buf.append('\t');
         buf.append("user:");
-        buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
         buf.append('\t');
         buf.append("permissions:");
         buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
@@ -88,7 +88,7 @@ public class ActivityHelper {
         buf.append(Action.LOGOUT);
         buf.append('\t');
         buf.append("user:");
-        buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
         buf.append('\t');
         buf.append("permissions:");
         buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
@@ -102,7 +102,7 @@ public class ActivityHelper {
         buf.append(Action.ACCESS);
         buf.append('\t');
         buf.append("user:");
-        buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
         buf.append('\t');
         buf.append("path:");
         buf.append(path);
@@ -118,7 +118,7 @@ public class ActivityHelper {
         buf.append(Action.UPDATE_PERMISSION);
         buf.append('\t');
         buf.append("user:");
-        buf.append(user.map(u -> u.getUserId()).orElse("-"));
+        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
         buf.append('\t');
         buf.append("permissions:");
         buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))

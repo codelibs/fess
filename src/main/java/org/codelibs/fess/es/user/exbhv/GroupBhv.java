@@ -47,8 +47,7 @@ public class GroupBhv extends BsGroupBhv {
             final RESULT result = entityType.newInstance();
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setAttributes(source.entrySet().stream().filter(e -> !"name".equals(e.getKey()))
-                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
-                    .collect(Collectors.toMap(t -> t.getFirst(), t -> t.getSecond())));
+                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue())).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -118,12 +118,12 @@ public class KeyMatchHelper {
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(),
-                searchRequestBuilder -> {
-                    return SearchConditionBuilder.builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL))
-                            .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
-                            .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
-                });
+        return fessEsClient.getDocumentList(
+                fessConfig.getIndexDocumentSearchIndex(),
+                searchRequestBuilder -> SearchConditionBuilder
+                        .builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL))
+                        .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
+                        .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build());
     }
 
     public long getReloadInterval() {

@@ -136,9 +136,7 @@ public class AdminBackupAction extends FessAdminAction {
             if (tempFile.exists() && !tempFile.delete()) {
                 logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
             }
-            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> {
-                return asListHtml();
-            });
+            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asListHtml());
         }
         saveInfo(messages -> messages.addSuccessBulkProcessStarted(GLOBAL));
         return redirect(getClass()); // no-op
@@ -157,9 +155,7 @@ public class AdminBackupAction extends FessAdminAction {
         } else if (fileName.startsWith("doc") && fileName.endsWith(".json")) {
             fileType = 5;
         } else {
-            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> {
-                return asListHtml();
-            });
+            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asListHtml());
             return;
         }
 

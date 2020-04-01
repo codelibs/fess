@@ -232,11 +232,9 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return stemmerOverrideService
                 .getStemmerOverrideFile(form.dictId)
-                .map(file -> {
-                    return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                        file.writeOut(out);
-                    });
-                })
+                .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
+                    file.writeOut(out);
+                }))
                 .orElseGet(
                         () -> {
                             throwValidationError(messages -> messages.addErrorsFailedToDownloadStemmeroverrideFile(GLOBAL),
@@ -270,20 +268,24 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return stemmerOverrideService.getStemmerOverrideFile(form.dictId).map(file -> {
-            try (InputStream inputStream = form.stemmerOverrideFile.getInputStream()) {
-                file.update(inputStream);
-            } catch (final IOException e) {
-                throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL), () -> {
-                    return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
-                });
-            }
-            saveInfo(messages -> messages.addSuccessUploadStemmeroverrideFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-        }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL), () -> uploadpage(form.dictId));
-            return null;
-        });
+        return stemmerOverrideService
+                .getStemmerOverrideFile(form.dictId)
+                .map(file -> {
+                    try (InputStream inputStream = form.stemmerOverrideFile.getInputStream()) {
+                        file.update(inputStream);
+                    } catch (final IOException e) {
+                        throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL),
+                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+                    }
+                    saveInfo(messages -> messages.addSuccessUploadStemmeroverrideFile(GLOBAL));
+                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+                })
+                .orElseGet(
+                        () -> {
+                            throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL),
+                                    () -> uploadpage(form.dictId));
+                            return null;
+                        });
 
     }
 

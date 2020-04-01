@@ -104,7 +104,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             final List<String> pathList = new ArrayList<>();
             pathList.add("/usr/share/fess/bin");
             if (path != null) {
-                stream(path.split(File.pathSeparator)).of(stream -> stream.map(s -> s.trim()).forEach(s -> pathList.add(s)));
+                stream(path.split(File.pathSeparator)).of(stream -> stream.map(String::trim).forEach(s -> pathList.add(s)));
             }
             available = generatorList.stream().map(s -> {
                 if (s.startsWith("${path}")) {

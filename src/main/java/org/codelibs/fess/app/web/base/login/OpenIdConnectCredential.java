@@ -55,7 +55,7 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
         }
     }
 
@@ -64,7 +64,7 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
         }
     }
 

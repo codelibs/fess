@@ -225,14 +225,17 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return stopwordsService.getStopwordsFile(form.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                file.writeOut(out);
-            });
-        }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL), () -> downloadpage(form.dictId));
-            return null;
-        });
+        return stopwordsService
+                .getStopwordsFile(form.dictId)
+                .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
+                    file.writeOut(out);
+                }))
+                .orElseGet(
+                        () -> {
+                            throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL),
+                                    () -> downloadpage(form.dictId));
+                            return null;
+                        });
     }
 
     // -----------------------------------------------------
@@ -260,20 +263,21 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return stopwordsService.getStopwordsFile(form.dictId).map(file -> {
-            try (InputStream inputStream = form.stopwordsFile.getInputStream()) {
-                file.update(inputStream);
-            } catch (final IOException e) {
-                throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL), () -> {
-                    return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+        return stopwordsService
+                .getStopwordsFile(form.dictId)
+                .map(file -> {
+                    try (InputStream inputStream = form.stopwordsFile.getInputStream()) {
+                        file.update(inputStream);
+                    } catch (final IOException e) {
+                        throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL),
+                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+                    }
+                    saveInfo(messages -> messages.addSuccessUploadStopwordsFile(GLOBAL));
+                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+                }).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL), () -> uploadpage(form.dictId));
+                    return null;
                 });
-            }
-            saveInfo(messages -> messages.addSuccessUploadStopwordsFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-        }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL), () -> uploadpage(form.dictId));
-            return null;
-        });
 
     }
 

@@ -506,7 +506,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                 return langs;
             }
             if (request.getHeader("Accept-Language") != null) {
-                return Collections.list(request.getLocales()).stream().map(l -> l.getLanguage()).toArray(n -> new String[n]);
+                return Collections.list(request.getLocales()).stream().map(Locale::getLanguage).toArray(n -> new String[n]);
             }
             return new String[] { fessConfig.getQueryGsaDefaultLang() };
         }

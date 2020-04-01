@@ -178,8 +178,7 @@ public class DocumentHelper {
             throw new CrawlingAccessException("sessionId is null.");
         }
 
-        final CrawlerClientFactory crawlerClientFactory =
-                crawlingConfig.initializeClientFactory(() -> ComponentUtil.getCrawlerClientFactory());
+        final CrawlerClientFactory crawlerClientFactory = crawlingConfig.initializeClientFactory(ComponentUtil::getCrawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
             throw new CrawlingAccessException("CrawlerClient is null for " + url);

@@ -552,18 +552,18 @@ public class FessEsClient implements Client {
                                 final Map<String, Map<String, String>> result =
                                         mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
                                         });
-                                if (result.keySet().contains("index")) {
+                                if (result.containsKey("index")) {
                                     return line;
-                                } else if (result.keySet().contains("update")) {
+                                } else if (result.containsKey("update")) {
                                     return line;
-                                } else if (result.keySet().contains("delete")) {
+                                } else if (result.containsKey("delete")) {
                                     return StringUtil.EMPTY;
                                 }
                             } else {
                                 final Map<String, Map<String, String>> result =
                                         mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
                                         });
-                                if (result.keySet().contains("index")) {
+                                if (result.containsKey("index")) {
                                     final IndexRequestBuilder requestBuilder =
                                             client.prepareIndex().setIndex(configIndex).setId(result.get("index").get("_id"))
                                                     .setSource(line, XContentType.JSON);

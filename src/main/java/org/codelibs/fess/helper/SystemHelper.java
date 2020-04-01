@@ -151,7 +151,7 @@ public class SystemHelper {
                             }
                         });
 
-        ComponentUtil.doInitProcesses(p -> p.run());
+        ComponentUtil.doInitProcesses(Runnable::run);
 
         parseProjectProperties();
     }
@@ -186,9 +186,7 @@ public class SystemHelper {
 
     public String getUsername() {
         final RequestManager requestManager = ComponentUtil.getRequestManager();
-        return requestManager.findUserBean(FessUserBean.class).map(user -> {
-            return user.getUserId();
-        }).orElse(Constants.GUEST_USER);
+        return requestManager.findUserBean(FessUserBean.class).map(user -> user.getUserId()).orElse(Constants.GUEST_USER);
     }
 
     public Date getCurrentTime() {

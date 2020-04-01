@@ -513,7 +513,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();
         } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toList()));
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
         }
     }
 
@@ -522,7 +522,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();
         } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toList()));
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
         }
     }
 
@@ -579,9 +579,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
-        resolver.resolve(AzureAdCredential.class, credential -> {
-            return OptionalEntity.of(credential.getUser());
-        });
+        resolver.resolve(AzureAdCredential.class, credential -> OptionalEntity.of(credential.getUser()));
     }
 
     public void setAcquisitionTimeout(final long acquisitionTimeout) {

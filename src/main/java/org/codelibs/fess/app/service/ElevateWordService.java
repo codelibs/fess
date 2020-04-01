@@ -40,6 +40,7 @@ import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.config.exentity.ElevateWordToLabel;
+import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -307,7 +308,7 @@ public class ElevateWordService {
                             elevateWordToLabelBhv
                                     .selectList(cb -> cb.query().setElevateWordId_Equal(entity.getId()))
                                     .stream()
-                                    .map(e -> labelTypeBhv.selectByPK(e.getLabelTypeId()).map(lt -> lt.getValue())
+                                    .map(e -> labelTypeBhv.selectByPK(e.getLabelTypeId()).map(LabelType::getValue)
                                             .filter(StringUtil::isNotBlank).orElse(null)).distinct().sorted()
                                     .collect(Collectors.joining(","));
                     addToList(list, entity.getSuggestWord());

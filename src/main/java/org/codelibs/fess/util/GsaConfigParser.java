@@ -230,20 +230,19 @@ public class GsaConfigParser extends DefaultHandler {
     }
 
     protected String parseFilterPaths(final String text, final boolean web, final boolean file) {
-        return split(text, "\n").get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(s -> {
-            return getFilterPath(s);
-        }).filter(s -> {
-            if (StringUtil.isBlank(s)) {
-                return false;
-            }
-            if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))) {
-                return web;
-            }
-            if (Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
-                return file;
-            }
-            return true;
-        }).collect(Collectors.joining("\n")));
+        return split(text, "\n").get(
+                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(s -> getFilterPath(s)).filter(s -> {
+                    if (StringUtil.isBlank(s)) {
+                        return false;
+                    }
+                    if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))) {
+                        return web;
+                    }
+                    if (Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
+                        return file;
+                    }
+                    return true;
+                }).collect(Collectors.joining("\n")));
     }
 
     protected String getFilterPath(final String s) {

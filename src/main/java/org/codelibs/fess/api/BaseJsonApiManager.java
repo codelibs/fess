@@ -154,13 +154,13 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
             }
             buf.append('}');
         } else if (obj instanceof Integer) {
-            buf.append(((Integer) obj));
+            buf.append((obj));
         } else if (obj instanceof Long) {
-            buf.append(((Long) obj));
+            buf.append((obj));
         } else if (obj instanceof Float) {
-            buf.append(((Float) obj));
+            buf.append((obj));
         } else if (obj instanceof Double) {
-            buf.append(((Double) obj));
+            buf.append((obj));
         } else if (obj instanceof Boolean) {
             buf.append(obj.toString());
         } else if (obj instanceof Date) {

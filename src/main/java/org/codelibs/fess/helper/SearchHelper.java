@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -207,7 +208,7 @@ public class SearchHelper {
                     final Map<String, DocumentField> fields = hit.getFields();
                     if (fields != null) {
                         docMap.putAll(fields.entrySet().stream()
-                                .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues())));
+                                .collect(Collectors.toMap(Entry::getKey, e -> (Object) e.getValue().getValues())));
                     }
 
                     final ViewHelper viewHelper = ComponentUtil.getViewHelper();

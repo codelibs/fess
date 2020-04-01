@@ -127,11 +127,11 @@ public class SuggestHelper {
     public void storeSearchLog() {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
 
-        searchLogBhv.selectBulk((cb) -> {
+        searchLogBhv.selectBulk(cb -> {
             final String from = LocalDateTime.now().minusDays(fessConfig.getPurgeSuggestSearchLogDay()).format(DateTimeFormatter.ISO_DATE);
             cb.query().addQuery(QueryBuilders.rangeQuery("requestedAt").gte(from));
             cb.query().addOrderBy_RequestedAt_Asc();
-        }, (searchLogsList) -> indexFromSearchLog(searchLogsList));
+        }, searchLogsList -> indexFromSearchLog(searchLogsList));
     }
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {

@@ -38,6 +38,7 @@ import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -137,7 +138,7 @@ public class RoleQueryHelper {
                         });
             } catch (final RuntimeException e) {
                 try {
-                    requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
+                    requestManager.findLoginManager(FessUserBean.class).ifPresent(LoginManager::logout);
                 } catch (final Exception e1) {
                     // ignore
                 }

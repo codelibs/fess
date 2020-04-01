@@ -115,28 +115,28 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
                 logger.debug("refresh user info: {}", result);
             }
         });
-        return viewHelper.getActionHook().godHandPrologue(runtime, r -> super.godHandPrologue(r));
+        return viewHelper.getActionHook().godHandPrologue(runtime, super::godHandPrologue);
     }
 
     @Override
     public final ActionResponse godHandMonologue(final ActionRuntime runtime) {
-        return viewHelper.getActionHook().godHandMonologue(runtime, r -> super.godHandMonologue(r));
+        return viewHelper.getActionHook().godHandMonologue(runtime, super::godHandMonologue);
     }
 
     @Override
     public final void godHandEpilogue(final ActionRuntime runtime) {
-        viewHelper.getActionHook().godHandEpilogue(runtime, r -> super.godHandEpilogue(r));
+        viewHelper.getActionHook().godHandEpilogue(runtime, super::godHandEpilogue);
     }
 
     // #app_customize you can customize the action hook
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
-        return viewHelper.getActionHook().hookBefore(runtime, r -> super.hookBefore(r));
+        return viewHelper.getActionHook().hookBefore(runtime, super::hookBefore);
     }
 
     @Override
     public void hookFinally(final ActionRuntime runtime) {
-        viewHelper.getActionHook().hookFinally(runtime, r -> super.hookFinally(r));
+        viewHelper.getActionHook().hookFinally(runtime, super::hookFinally);
     }
 
     // ===================================================================================

@@ -287,8 +287,7 @@ public interface FessProp {
                                         })
                                         .filter(o -> o != null && keySet.add(o.getFirst()))
                                         .collect(HashMap<String, List<String>>::new,
-                                                (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))),
-                                                (m, u) -> m.putAll(u)));
+                                                (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))), HashMap::putAll));
             }
             propMap.put(DEFAULT_LABEL_VALUES, map);
         }
@@ -823,7 +822,7 @@ public interface FessProp {
 
     default String[] getIndexBackupAllTargets() {
         return split(getIndexBackupTargets() + "," + getIndexBackupLogTargets(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
     String getJobSystemJobIds();
@@ -852,7 +851,7 @@ public interface FessProp {
                     return new Pair<>(x, y);
                 }
                 return null;
-            }).filter(v -> v != null).collect(Collectors.toMap(e -> e.getFirst(), e -> e.getSecond())));
+            }).filter(v -> v != null).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)));
             propMap.put(SMB_AVAILABLE_SID_TYPES, params);
         }
         return params.get(sidType);
@@ -1016,7 +1015,7 @@ public interface FessProp {
                     return new Pair<>(values[0], values[1]);
                 }
                 return null;
-            }).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond())));
+            }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)));
             propMap.put(QUERY_LANGUAGE_MAPPING, params);
         }
         final Map<String, String> mapping = params;
@@ -1041,7 +1040,7 @@ public interface FessProp {
         if (StringUtil.isNotBlank(getQueryDefaultLanguages())) {
             String[] langs = (String[]) propMap.get(QUERY_DEFAULT_LANGUAGES);
             if (langs == null) {
-                langs = split(getQueryDefaultLanguages(), ",").get(stream -> stream.map(s -> s.trim()).toArray(n -> new String[n]));
+                langs = split(getQueryDefaultLanguages(), ",").get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
                 propMap.put(QUERY_DEFAULT_LANGUAGES, langs);
 
             }
@@ -1215,7 +1214,7 @@ public interface FessProp {
 
     default String[] getQueryGeoFieldsAsArray() {
         return split(getQueryGeoFields(), ",").get(
-                stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
+                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
     }
 
     String getSuggestSearchLogPermissions();
@@ -1265,7 +1264,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getIndexAdminArrayFields(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(INDEX_ADMIN_ARRAY_FIELD_SET, fieldSet);
         }
         return fieldSet;
@@ -1278,7 +1277,7 @@ public interface FessProp {
     default List<String> invalidIndexArrayFields(final Map<String, Object> source) {
         // TODO always returns empty list
         return split(getIndexAdminArrayFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
                         .filter(s -> false) // TODO
                         .collect(Collectors.toList()));
     }
@@ -1291,7 +1290,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getIndexAdminDateFields(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(INDEX_ADMIN_DATE_FIELD_SET, fieldSet);
         }
         return fieldSet;
@@ -1303,7 +1302,7 @@ public interface FessProp {
 
     default List<String> invalidIndexDateFields(final Map<String, Object> source) {
         return split(getIndexAdminDateFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
                         .filter(s -> !validateDateTimeString(source.get(s))).collect(Collectors.toList()));
     }
 
@@ -1322,7 +1321,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getIndexAdminIntegerFields(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(INDEX_ADMIN_INTEGER_FIELD_SET, fieldSet);
         }
         return fieldSet;
@@ -1335,7 +1334,7 @@ public interface FessProp {
     default List<String> invalidIndexIntegerFields(final Map<String, Object> source) {
         final IntegerTypeValidator integerValidator = new IntegerTypeValidator();
         return split(getIndexAdminIntegerFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
                         .filter(s -> !integerValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
@@ -1347,7 +1346,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getIndexAdminLongFields(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(INDEX_ADMIN_LONG_FIELD_SET, fieldSet);
         }
         return fieldSet;
@@ -1360,7 +1359,7 @@ public interface FessProp {
     default List<String> invalidIndexLongFields(final Map<String, Object> source) {
         final LongTypeValidator longValidator = new LongTypeValidator();
         return split(getIndexAdminLongFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
                         .filter(s -> !longValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
@@ -1372,7 +1371,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getIndexAdminFloatFields(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(INDEX_ADMIN_FLOAT_FIELD_SET, fieldSet);
         }
         return fieldSet;
@@ -1385,7 +1384,7 @@ public interface FessProp {
     default List<String> invalidIndexFloatFields(final Map<String, Object> source) {
         final FloatTypeValidator floatValidator = new FloatTypeValidator();
         return split(getIndexAdminFloatFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
                         .filter(s -> !floatValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
@@ -1397,7 +1396,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getIndexAdminDoubleFields(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(INDEX_ADMIN_DOUBLE_FIELD_SET, fieldSet);
         }
         return fieldSet;
@@ -1410,7 +1409,7 @@ public interface FessProp {
     default List<String> invalidIndexDoubleFields(final Map<String, Object> source) {
         final DoubleTypeValidator doubleValidator = new DoubleTypeValidator();
         return split(getIndexAdminDoubleFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
                         .filter(s -> !doubleValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
     }
 
@@ -1474,7 +1473,7 @@ public interface FessProp {
                     if (arrayFieldSet.contains(key)) {
                         value =
                                 split(value.toString(), "\n").get(
-                                        stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toList()));
+                                        stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
                     } else if (dateFieldSet.contains(key)) {
                         // TODO time zone
                         value = FessFunctions.parseDate(value.toString());
@@ -1500,7 +1499,7 @@ public interface FessProp {
     default List<String> invalidIndexRequiredFields(final Map<String, Object> source) {
         final RequiredValidator requiredValidator = new RequiredValidator();
         return split(getIndexAdminRequiredFields(), ",").get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim())
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
                         .filter(s -> !requiredValidator.isValid(source.get(s), null)).collect(Collectors.toList()));
     }
 
@@ -1568,7 +1567,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalResponseFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1578,7 +1577,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalScrollResponseFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1588,7 +1587,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalCacheResponseFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1598,7 +1597,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalHighlightedFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1608,7 +1607,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalSearchFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1617,8 +1616,8 @@ public interface FessProp {
     default String[] getQueryAdditionalFacetFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
-        split(getQueryAdditionalFacetFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        split(getQueryAdditionalFacetFields(), ",")
+                .of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1627,8 +1626,7 @@ public interface FessProp {
     default String[] getQueryAdditionalSortFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
-        split(getQueryAdditionalSortFields(), ",")
-                .of(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        split(getQueryAdditionalSortFields(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1638,7 +1636,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalApiResponseFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1648,7 +1646,7 @@ public interface FessProp {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalNotAnalyzedFields(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
 
@@ -1667,7 +1665,7 @@ public interface FessProp {
         if (fieldSet == null) {
             fieldSet =
                     split(getApiAdminAccessPermissions(), ",").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
             propMap.put(API_ADMIN_ACCESS_PERMISSION_SET, fieldSet);
         }
         return fieldSet;

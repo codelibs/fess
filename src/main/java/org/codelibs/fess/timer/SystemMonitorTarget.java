@@ -53,9 +53,9 @@ public class SystemMonitorTarget implements TimeoutTarget {
             if (value == null) {
                 buf.append("null");
             } else if (value instanceof Integer) {
-                buf.append(((Integer) value));
+                buf.append((value));
             } else if (value instanceof Long) {
-                buf.append(((Long) value));
+                buf.append((value));
             } else if (value instanceof Short) {
                 buf.append(((Short) value).shortValue());
             } else if (value instanceof double[]) {
@@ -81,7 +81,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
         appendJvmStats(buf);
         appendElasticsearchStats(buf);
 
-        append(buf, "timestamp", () -> System.currentTimeMillis());
+        append(buf, "timestamp", System::currentTimeMillis);
         buf.append('}');
 
         logger.info(buf.toString());

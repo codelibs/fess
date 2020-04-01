@@ -36,7 +36,7 @@ public class RenderDataUtil {
                 // care performance for List that the most frequent pattern
                 final Object first = coll instanceof List<?> ? ((List<?>) coll).get(0) : coll.iterator().next();
                 if (first instanceof Entity) {
-                    data.register(key, coll.stream().map(e -> BeanUtil.copyBeanToNewMap(e)).collect(Collectors.toList()));
+                    data.register(key, coll.stream().map(BeanUtil::copyBeanToNewMap).collect(Collectors.toList()));
                     return;
                 }
             }

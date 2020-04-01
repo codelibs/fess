@@ -229,14 +229,17 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
-                file.writeOut(out);
-            });
-        }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> downloadpage(form.dictId));
-            return null;
-        });
+        return kuromojiService
+                .getKuromojiFile(form.dictId)
+                .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
+                    file.writeOut(out);
+                }))
+                .orElseGet(
+                        () -> {
+                            throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL),
+                                    () -> downloadpage(form.dictId));
+                            return null;
+                        });
     }
 
     // -----------------------------------------------------
@@ -264,20 +267,21 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
-            try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
-                file.update(inputStream);
-            } catch (final IOException e) {
-                throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> {
-                    return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+        return kuromojiService
+                .getKuromojiFile(form.dictId)
+                .map(file -> {
+                    try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
+                        file.update(inputStream);
+                    } catch (final IOException e) {
+                        throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL),
+                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+                    }
+                    saveInfo(messages -> messages.addSuccessUploadKuromojiFile(GLOBAL));
+                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+                }).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> uploadpage(form.dictId));
+                    return null;
                 });
-            }
-            saveInfo(messages -> messages.addSuccessUploadKuromojiFile(GLOBAL));
-            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-        }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> uploadpage(form.dictId));
-            return null;
-        });
 
     }
 
