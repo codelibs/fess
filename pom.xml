@@ -54,13 +54,13 @@
 		<okhttp.version>3.14.6</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.6.1</crawler.version>
+		<crawler.version>3.6.2-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>7.6.2-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.6.1</elasticsearch.version>
+		<elasticsearch.version>7.6.2</elasticsearch.version>
 		<elasticsearch.httpclient.version>7.6.2-SNAPSHOT</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
