@@ -204,7 +204,8 @@ public class SuggestHelper {
 
     public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final long interval =fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue();
+        final long interval = fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue();
+        final int docPerReq = fessConfig.getSuggestUpdateDocPerRequestAsInteger();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         suggester
                 .indexer()
@@ -227,7 +228,7 @@ public class SuggestHelper {
                             reader.addSort(SortBuilders.fieldSort(fessConfig.getIndexFieldClickCount()));
                             reader.addSort(SortBuilders.scoreSort());
                             return reader;
-                        }, 2, ()->{
+                        }, docPerReq, () -> {
                             systemHelper.calibrateCpuLoad();
                             ThreadUtil.sleep(interval);
                         }).then(response -> {
