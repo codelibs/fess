@@ -568,6 +568,9 @@ public class SystemHelper {
                     try {
                         final OsProbe osProbe = OsProbe.getInstance();
                         systemCpuPercent = osProbe.getSystemCpuPercent();
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("Updated System Cpu {}%", systemCpuPercent);
+                        }
                     } catch (Exception e) {
                         logger.warn("Failed to get SystemCpuPercent.", e);
                         return 0;

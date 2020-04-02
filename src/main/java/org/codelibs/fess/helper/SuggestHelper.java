@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -203,6 +204,8 @@ public class SuggestHelper {
 
     public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final long interval =fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         suggester
                 .indexer()
                 .indexFromDocument(
@@ -224,7 +227,10 @@ public class SuggestHelper {
                             reader.addSort(SortBuilders.fieldSort(fessConfig.getIndexFieldClickCount()));
                             reader.addSort(SortBuilders.scoreSort());
                             return reader;
-                        }, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue()).then(response -> {
+                        }, 2, ()->{
+                            systemHelper.calibrateCpuLoad();
+                            ThreadUtil.sleep(interval);
+                        }).then(response -> {
                     refresh();
                     success.accept(true);
                 }).error(t -> error.accept(t));
