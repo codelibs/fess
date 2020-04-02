@@ -55,6 +55,7 @@ public class FessIntervalController extends DefaultIntervalController {
 
     @Override
     protected void delayForWaitingNewUrl() {
+        ComponentUtil.getSystemHelper().calibrateCpuLoad();
         try {
             final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();

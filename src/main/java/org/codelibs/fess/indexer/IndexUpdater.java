@@ -194,6 +194,8 @@ public class IndexUpdater extends Thread {
                         ThreadUtil.sleep(interval); // 10 sec (default)
                     }
 
+                    systemHelper.calibrateCpuLoad();
+
                     docList.clear();
                     accessResultList.clear();
 

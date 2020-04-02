@@ -64,6 +64,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
      */
     @Override
     public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        systemHelper.calibrateCpuLoad();
+
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
@@ -102,7 +105,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (!dataMap.containsKey(fessConfig.getIndexFieldDocId())) {
-            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             dataMap.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(dataMap));
         }
 

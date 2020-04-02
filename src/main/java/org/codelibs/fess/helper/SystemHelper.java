@@ -57,6 +57,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
@@ -69,6 +70,7 @@ import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
+import org.elasticsearch.monitor.os.OsProbe;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.HtmlResponse;
@@ -109,6 +111,12 @@ public class SystemHelper {
     protected String productVersion;
 
     protected long eolTime;
+
+    private short systemCpuPercent;
+
+    private long systemCpuCheckTime;
+
+    private long systemCpuCheckInterval = 1000L;
 
     @PostConstruct
     public void init() {
@@ -539,6 +547,38 @@ public class SystemHelper {
         }
     }
 
+    public void calibrateCpuLoad() {
+        final int percent = ComponentUtil.getFessConfig().getAdaptiveLoadControlAsInteger();
+        if (percent <= 0) {
+            return;
+        }
+        while (getSystemCpuPercent() > percent) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Cpu Load {}% is greater than {}%.", getSystemCpuPercent(), percent);
+            }
+            ThreadUtil.sleep(systemCpuCheckInterval);
+        }
+    }
+
+    protected short getSystemCpuPercent() {
+        final long now = System.currentTimeMillis();
+        if (now - systemCpuCheckTime > systemCpuCheckInterval) {
+            synchronized (this) {
+                if (now - systemCpuCheckTime > systemCpuCheckInterval) {
+                    try {
+                        final OsProbe osProbe = OsProbe.getInstance();
+                        systemCpuPercent = osProbe.getSystemCpuPercent();
+                    } catch (Exception e) {
+                        logger.warn("Failed to get SystemCpuPercent.", e);
+                        return 0;
+                    }
+                    systemCpuCheckTime = now;
+                }
+            }
+        }
+        return systemCpuPercent;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -553,5 +593,9 @@ public class SystemHelper {
 
     public String getProductVersion() {
         return productVersion;
+    }
+
+    public void setSystemCpuCheckInterval(long systemCpuCheckInterval) {
+        this.systemCpuCheckInterval = systemCpuCheckInterval;
     }
 }

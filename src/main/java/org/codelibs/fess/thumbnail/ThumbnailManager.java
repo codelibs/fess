@@ -235,6 +235,8 @@ public class ThumbnailManager {
     }
 
     protected void process(final FessConfig fessConfig, final ThumbnailQueue entity) {
+        ComponentUtil.getSystemHelper().calibrateCpuLoad();
+
         if (logger.isDebugEnabled()) {
             logger.debug("Processing thumbnail: {}", entity);
         }
