@@ -54,14 +54,14 @@
 		<okhttp.version>3.14.6</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.6.2-SNAPSHOT</crawler.version>
+		<crawler.version>3.6.2</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.6.2-SNAPSHOT</suggest.version>
+		<suggest.version>7.6.2</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.6.2</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.6.2-SNAPSHOT</elasticsearch.httpclient.version>
+		<elasticsearch.httpclient.version>7.6.2</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -1197,7 +1197,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.5.4-SNAPSHOT</version>
+			<version>0.5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
