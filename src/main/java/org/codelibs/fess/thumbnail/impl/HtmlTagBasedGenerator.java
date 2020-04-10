@@ -74,7 +74,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             parentFile.mkdirs();
         }
         if (!parentFile.isDirectory()) {
-            logger.warn("Not found: " + parentFile.getAbsolutePath());
+            logger.warn("Not found: {}", parentFile.getAbsolutePath());
             return false;
         }
 
@@ -95,10 +95,10 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                             created = true;
                             break;
                         case FAILED:
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl());
+                            logger.warn("Failed to create thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
                             break;
                         case INVALID_SIZE:
-                            logger.info("Unmatched thumbnail size: " + thumbnailId + " -> " + responseData.getUrl());
+                            logger.info("Unmatched thumbnail size: {} -> {}", thumbnailId, responseData.getUrl());
                             break;
                         case NO_IMAGE:
                             if (logger.isDebugEnabled()) {
@@ -106,7 +106,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                             }
                             break;
                         default:
-                            logger.error("Unknown thumbnail result: " + thumbnailId + " -> " + responseData.getUrl());
+                            logger.error("Unknown thumbnail result: {} -> {}", thumbnailId, responseData.getUrl());
                             break;
                         }
                     } catch (final Throwable t) {
@@ -120,7 +120,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                         if (!created) {
                             updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                             if (outputFile.exists() && !outputFile.delete()) {
-                                logger.warn("Failed to delete " + outputFile.getAbsolutePath());
+                                logger.warn("Failed to delete {}", outputFile.getAbsolutePath());
                             }
                         }
                     }

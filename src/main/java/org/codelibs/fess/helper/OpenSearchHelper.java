@@ -56,7 +56,7 @@ public class OpenSearchHelper {
             osddFile = new File(path);
             if (!osddFile.isFile()) {
                 osddFile = null;
-                logger.warn(path + " was not found.");
+                logger.warn("{} was not found.", path);
             }
         } else {
             logger.info("OSDD file is not found.");

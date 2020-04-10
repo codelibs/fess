@@ -328,7 +328,7 @@ public class SearchLogHelper {
                     }
                     clickCountMap.put(docId, countObj);
                 }).orElse(() -> {
-                    logger.warn("Not Found for SearchLog: " + clickLog);
+                    logger.warn("Not Found for SearchLog: {}", clickLog);
                 });
             } catch (final Exception e) {
                 logger.warn("Failed to process: " + clickLog, e);

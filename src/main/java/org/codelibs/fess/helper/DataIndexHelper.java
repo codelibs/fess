@@ -161,7 +161,7 @@ public class DataIndexHelper {
         final long execTime = System.currentTimeMillis() - startTime;
         crawlingInfoHelper.putToInfoMap(Constants.DATA_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
-            logger.info("[EXEC TIME] crawling time: " + execTime + "ms");
+            logger.info("[EXEC TIME] crawling time: {}ms", execTime);
         }
 
         crawlingInfoHelper.putToInfoMap(Constants.DATA_INDEX_EXEC_TIME, Long.toString(indexUpdateCallback.getExecuteTime()));
@@ -210,7 +210,7 @@ public class DataIndexHelper {
             final DataStoreFactory dataStoreFactory = ComponentUtil.getDataStoreFactory();
             dataStore = dataStoreFactory.getDataStore(dataConfig.getHandlerName());
             if (dataStore == null) {
-                logger.error("DataStore(" + dataConfig.getHandlerName() + ") is not found.");
+                logger.error("DataStore({}) is not found.", dataConfig.getHandlerName());
             } else {
                 try {
                     dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
@@ -231,7 +231,7 @@ public class DataIndexHelper {
             }
             final String sessionId = initParamMap.get(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
-                logger.warn("Invalid sessionId at " + dataConfig);
+                logger.warn("Invalid sessionId at {}", dataConfig);
                 return;
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();

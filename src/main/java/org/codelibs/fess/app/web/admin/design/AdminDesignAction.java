@@ -166,7 +166,7 @@ public class AdminDesignAction extends FessAdminAction {
 
         final File parentFile = uploadFile.getParentFile();
         if (!parentFile.exists() && !parentFile.mkdirs()) {
-            logger.warn("Could not create " + parentFile.getAbsolutePath());
+            logger.warn("Could not create {}", parentFile.getAbsolutePath());
         }
 
         try {

@@ -235,14 +235,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     }
                 }
                 if (noindex && nofollow) {
-                    logger.info("META(robots=noindex,nofollow): " + responseData.getUrl());
+                    logger.info("META(robots=noindex,nofollow): {}", responseData.getUrl());
                     throw new ChildUrlsException(Collections.emptySet(), "#processMetaRobots");
                 } else if (noindex) {
-                    logger.info("META(robots=noindex): " + responseData.getUrl());
+                    logger.info("META(robots=noindex): {}", responseData.getUrl());
                     storeChildUrls(responseData, resultData);
                     throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots");
                 } else if (nofollow) {
-                    logger.info("META(robots=nofollow): " + responseData.getUrl());
+                    logger.info("META(robots=nofollow): {}", responseData.getUrl());
                     responseData.setNoFollow(true);
                 }
             }
@@ -281,14 +281,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                         }
                     }
                     if (noindex && nofollow) {
-                        logger.info("HEADER(robots=noindex,nofollow): " + responseData.getUrl());
+                        logger.info("HEADER(robots=noindex,nofollow): {}", responseData.getUrl());
                         throw new ChildUrlsException(Collections.emptySet(), "#processXRobotsTag");
                     } else if (noindex) {
-                        logger.info("HEADER(robots=noindex): " + responseData.getUrl());
+                        logger.info("HEADER(robots=noindex): {}", responseData.getUrl());
                         storeChildUrls(responseData, resultData);
                         throw new ChildUrlsException(resultData.getChildUrlSet(), "#processXRobotsTag");
                     } else if (nofollow) {
-                        logger.info("HEADER(robots=nofollow): " + responseData.getUrl());
+                        logger.info("HEADER(robots=nofollow): {}", responseData.getUrl());
                         responseData.setNoFollow(true);
                     }
                 });
@@ -345,7 +345,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
             final Set<RequestData> childUrlSet = new HashSet<>();
             childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
-            logger.info("CANONICAL: " + responseData.getUrl() + " -> " + canonicalUrl);
+            logger.info("CANONICAL: {} -> {}", responseData.getUrl(), canonicalUrl);
             throw new ChildUrlsException(childUrlSet, this.getClass().getName() + "#putAdditionalData");
         }
 
@@ -593,7 +593,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 parseTextContent(node, buf);
             }
         } catch (final Exception e) {
-            logger.warn("Could not parse a value of " + xpath);
+            logger.warn("Could not parse a value of {}", xpath);
         }
         if (buf == null) {
             return null;
@@ -781,7 +781,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         if (u == null) {
-            logger.warn("Ignored child URL: " + attrValue + " in " + url);
+            logger.warn("Ignored child URL: {} in {}", attrValue, url);
             return;
         }
 

@@ -72,7 +72,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
-            logger.info("Load " + this.getClass().getSimpleName());
+            logger.info("Load {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getWebApiManagerFactory().add(this);
     }

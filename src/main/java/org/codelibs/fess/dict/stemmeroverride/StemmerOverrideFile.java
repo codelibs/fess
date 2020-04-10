@@ -149,7 +149,7 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
                 final Matcher m = parsePattern.matcher(replacedLine);
 
                 if (!m.find()) {
-                    logger.warn("Failed to parse " + line + " in " + path);
+                    logger.warn("Failed to parse {} in {}", line, path);
                     if (updater != null) {
                         updater.write("# " + line);
                     }
@@ -160,7 +160,7 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
                 final String output = m.group(2).trim();
 
                 if (input == null || output == null) {
-                    logger.warn("Failed to parse " + line + " in " + path);
+                    logger.warn("Failed to parse {} to {}", line, path);
                     if (updater != null) {
                         updater.write("# " + line);
                     }

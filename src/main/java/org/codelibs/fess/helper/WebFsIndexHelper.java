@@ -144,7 +144,7 @@ public class WebFsIndexHelper {
                 try {
                     urlFilterService.delete(sid);
                 } catch (final Exception e) {
-                    logger.warn("Failed to delete url filters for " + sid);
+                    logger.warn("Failed to delete url filters for {}", sid);
                 }
             }
 
@@ -156,7 +156,7 @@ public class WebFsIndexHelper {
                     final String u = duplicateHostHelper.convert(urlValue);
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Target URL: " + u);
+                        logger.info("Target URL: {}", u);
                     }
                 }
             }));
@@ -166,7 +166,7 @@ public class WebFsIndexHelper {
                 if (!urlValue.startsWith("#")) {
                     crawler.addIncludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Included URL: " + urlValue);
+                        logger.info("Included URL: {}", urlValue);
                     }
                 }
             }));
@@ -176,7 +176,7 @@ public class WebFsIndexHelper {
                 if (!urlValue.startsWith("#")) {
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL: " + urlValue);
+                        logger.info("Excluded URL: {}", urlValue);
                     }
                 }
             }));
@@ -188,7 +188,7 @@ public class WebFsIndexHelper {
                     final String urlValue = Pattern.quote(u);
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL from failures: " + urlValue);
+                        logger.info("Excluded URL from failures: {}", urlValue);
                     }
                 });
             }
@@ -250,7 +250,7 @@ public class WebFsIndexHelper {
                 try {
                     urlFilterService.delete(sid);
                 } catch (final Exception e) {
-                    logger.warn("Failed to delete url filters for " + sid);
+                    logger.warn("Failed to delete url filters for {}", sid);
                 }
             }
 
@@ -269,7 +269,7 @@ public class WebFsIndexHelper {
                     }
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Target Path: " + u);
+                        logger.info("Target Path: {}", u);
                     }
                 }
             }));
@@ -287,7 +287,7 @@ public class WebFsIndexHelper {
                     }
                     crawler.addIncludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Included Path: " + urlValue);
+                        logger.info("Included Path: {}", urlValue);
                     }
                 } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
                     urlEncodeDisabled.set(true);
@@ -307,7 +307,7 @@ public class WebFsIndexHelper {
                     }
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded Path: " + urlValue);
+                        logger.info("Excluded Path: {}", urlValue);
                     }
                 } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
                     urlEncodeDisabled.set(true);
@@ -321,7 +321,7 @@ public class WebFsIndexHelper {
                     final String urlValue = Pattern.quote(u);
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded Path from failures: " + urlValue);
+                        logger.info("Excluded Path from failures: {}", urlValue);
                     }
                 });
             }
@@ -409,7 +409,7 @@ public class WebFsIndexHelper {
         final long execTime = System.currentTimeMillis() - startTime;
         crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
-            logger.info("[EXEC TIME] crawling time: " + execTime + "ms");
+            logger.info("[EXEC TIME] crawling time: {}ms", execTime);
         }
 
         indexUpdater.setFinishCrawling(true);

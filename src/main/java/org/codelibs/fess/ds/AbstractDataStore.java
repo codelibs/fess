@@ -131,7 +131,7 @@ public abstract class AbstractDataStore implements DataStore {
             try {
                 readInterval = Long.parseLong(value);
             } catch (final NumberFormatException e) {
-                logger.warn("Invalid read interval: " + value);
+                logger.warn("Invalid read interval: {}", value);
             }
         }
         return readInterval;

@@ -49,7 +49,7 @@ public class CrawlTestBase extends ITBase {
             final String schedulerId = getSchedulerIds(namePrefix).get(0);
             final Response response = checkMethodBase(requestBody).post("/api/admin/scheduler/" + schedulerId + "/start");
             if (response.getBody().jsonPath().getInt("response.status") == 0) {
-                logger.info("Start scheduler \"" + schedulerId + "\"");
+                logger.info("Start scheduler \"{}\"", schedulerId);
                 return;
             }
             try {

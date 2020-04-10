@@ -101,7 +101,7 @@ public class AdminEsreqAction extends FessAdminAction {
                     CopyUtil.copy(in, tempFile);
                 } catch (final Exception e1) {
                     if (tempFile != null && tempFile.exists() && !tempFile.delete()) {
-                        logger.warn("Failed to delete " + tempFile.getAbsolutePath());
+                        logger.warn("Failed to delete {}", tempFile.getAbsolutePath());
                     }
                     throw e1;
                 }
@@ -110,7 +110,7 @@ public class AdminEsreqAction extends FessAdminAction {
                         out.write(in);
                     } finally {
                         if (tempFile.exists() && !tempFile.delete()) {
-                            logger.warn("Failed to delete " + tempFile.getAbsolutePath());
+                            logger.warn("Failed to delete {}", tempFile.getAbsolutePath());
                         }
                     }
                 });

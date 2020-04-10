@@ -40,7 +40,7 @@ public class ITBase {
     public static String settingTestToken() {
         final String testToken = System.getProperty(TEST_TOKEN);
         if (testToken != null) {
-            logger.info("Token: " + testToken);
+            logger.info("Token: {}", testToken);
             return testToken;
         }
 
@@ -50,7 +50,7 @@ public class ITBase {
                         + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\",\"Rguest\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
                         + DEFAULT_TEST_TOKEN + "\"}\n").when().post(getEsUrl() + "/_bulk");
         given().contentType("application/json").when().post(getEsUrl() + "/_refresh");
-        logger.info("Created Token: " + DEFAULT_TEST_TOKEN);
+        logger.info("Created Token: {}", DEFAULT_TEST_TOKEN);
         return DEFAULT_TEST_TOKEN;
     }
 
