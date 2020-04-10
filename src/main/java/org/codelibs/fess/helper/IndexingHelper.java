@@ -79,10 +79,10 @@ public class IndexingHelper {
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {
                     logger.info("Sent {} docs (Doc:{process {}ms, send {}ms, size {}}, {})", docList.size(), docList.getProcessingTime(),
-                            (System.currentTimeMillis() - execTime),
-                            MemoryUtil.byteCountToDisplaySize(docList.getContentSize()), MemoryUtil.getMemoryUsageLog());
+                            (System.currentTimeMillis() - execTime), MemoryUtil.byteCountToDisplaySize(docList.getContentSize()),
+                            MemoryUtil.getMemoryUsageLog());
                 } else {
-                    logger.info("Sent {}  docs (Doc:{send {}ms}, {})", docList.size(),(System.currentTimeMillis() - execTime),
+                    logger.info("Sent {}  docs (Doc:{send {}ms}, {})", docList.size(), (System.currentTimeMillis() - execTime),
                             MemoryUtil.getMemoryUsageLog());
                 }
             }
