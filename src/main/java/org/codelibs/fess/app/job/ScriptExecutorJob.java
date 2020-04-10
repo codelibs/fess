@@ -58,13 +58,13 @@ public class ScriptExecutorJob implements LaJob {
         final String id = scheduledJob.getId();
         final String target = scheduledJob.getTarget();
         if (!ComponentUtil.getFessConfig().isSchedulerTarget(target)) {
-            logger.info("Ignore Job " + id + ":" + scheduledJob.getName() + " because of not target: " + scheduledJob.getTarget());
+            logger.info("Ignore Job {}:{} because of not target: {}", scheduledJob.getName(), id, scheduledJob.getTarget());
             return;
         }
 
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         if (!jobHelper.isAvailable(id)) {
-            logger.info("Job " + id + " is unavailable. Unregistering this job.");
+            logger.info("Job {} is unavailable. Unregistering this job.", id);
             jobHelper.unregister(scheduledJob);
             return;
         }
@@ -95,17 +95,17 @@ public class ScriptExecutorJob implements LaJob {
             if (logger.isDebugEnabled()) {
                 logger.debug("Starting Job {}. scriptType: {}, script: {}", id, scriptType, script);
             } else if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                logger.info("Starting Job " + id + ".");
+                logger.info("Starting Job {}.", id);
             }
 
             final Object ret = jobExecutor.execute(script);
             if (ret == null) {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                    logger.info("Finished Job " + id + ".");
+                    logger.info("Finished Job {}.", id);
                 }
             } else {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                    logger.info("Finished Job " + id + ". The return value is:\n" + ret);
+                    logger.info("Finished Job {}. The return value is:\n{}", id, ret);
                 }
                 jobLog.setScriptResult(ret.toString());
             }

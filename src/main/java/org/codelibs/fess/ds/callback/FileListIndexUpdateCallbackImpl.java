@@ -94,7 +94,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 // deleted file
                 deleteDocument(paramMap, dataMap);
             } else {
-                logger.warn("unknown event: " + eventType + ", data: " + dataMap);
+                logger.warn("unknown event: {}, data: {}", eventType, dataMap);
             }
         });
     }
@@ -108,14 +108,14 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         synchronized (indexUpdateCallback) {
             // required check
             if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
-                logger.warn("Could not add a doc. Invalid data: " + dataMap);
+                logger.warn("Could not add a doc. Invalid data: {}", dataMap);
                 return;
             }
 
             final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
             final CrawlerClient client = crawlerClientFactory.getClient(url);
             if (client == null) {
-                logger.warn("CrawlerClient is null. Data: " + dataMap);
+                logger.warn("CrawlerClient is null. Data: {}", dataMap);
                 return;
             }
 
@@ -147,7 +147,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
             final Rule rule = ruleManager.getRule(responseData);
             if (rule == null) {
-                logger.warn("No url rule. Data: " + dataMap);
+                logger.warn("No url rule. Data: {}", dataMap);
             } else {
                 responseData.setRuleId(rule.getRuleId());
                 final ResponseProcessor responseProcessor = rule.getResponseProcessor();
@@ -199,7 +199,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         // required check
         if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
-            logger.warn("Could not delete a doc. Invalid data: " + dataMap);
+            logger.warn("Could not delete a doc. Invalid data: {}", dataMap);
             return false;
         }
 

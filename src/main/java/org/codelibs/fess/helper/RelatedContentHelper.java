@@ -77,7 +77,7 @@ public class RelatedContentHelper {
             if (entity.getTerm().startsWith(regexPrefix)) {
                 final String regex = entity.getTerm().substring(regexPrefix.length());
                 if (StringUtil.isBlank(regex)) {
-                    logger.warn("Unknown regex pattern: " + entity.getTerm());
+                    logger.warn("Unknown regex pattern: {}", entity.getTerm());
                 } else {
                     pair.getSecond().add(new Pair<>(Pattern.compile(regex), entity.getContent()));
                 }

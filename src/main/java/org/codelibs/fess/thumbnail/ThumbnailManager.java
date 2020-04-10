@@ -104,7 +104,7 @@ public class ThumbnailManager {
             }
         }
         if (baseDir.mkdirs()) {
-            logger.info("Created: " + baseDir.getAbsolutePath());
+            logger.info("Created: {}", baseDir.getAbsolutePath());
         }
         if (!baseDir.isDirectory()) {
             throw new FessSystemException("Not found: " + baseDir.getAbsolutePath());
@@ -246,7 +246,7 @@ public class ThumbnailManager {
             final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
             if (!noImageFile.isFile() || System.currentTimeMillis() - noImageFile.lastModified() > noImageExpired) {
                 if (noImageFile.isFile() && !noImageFile.delete()) {
-                    logger.warn("Failed to delete " + noImageFile.getAbsolutePath());
+                    logger.warn("Failed to delete {}", noImageFile.getAbsolutePath());
                 }
                 final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
                 if (generator.isAvailable()) {
@@ -259,7 +259,7 @@ public class ThumbnailManager {
                         }
                     }
                 } else {
-                    logger.warn(generatorName + " is not available.");
+                    logger.warn("{} is not available.", generatorName);
                 }
             } else if (logger.isDebugEnabled()) {
                 logger.debug("No image file exists: {}", noImageFile.getAbsolutePath());
@@ -279,7 +279,7 @@ public class ThumbnailManager {
                         logger.debug("Add thumbnail task: {}", task);
                     }
                     if (!thumbnailTaskQueue.offer(task)) {
-                        logger.warn("Failed to add thumbnail task: " + task);
+                        logger.warn("Failed to add thumbnail task: {}", task);
                     }
                     return true;
                 }
@@ -507,7 +507,7 @@ public class ThumbnailManager {
                                 // ignore
                     }
                     Files.move(path, newPath);
-                    logger.info("Move " + path + " to " + newPath);
+                    logger.info("Move {} to {}", path, newPath);
                 } catch (final IOException e) {
                     logger.warn("Failed to move " + path, e);
                 }

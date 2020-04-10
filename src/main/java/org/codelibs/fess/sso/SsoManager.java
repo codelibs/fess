@@ -58,7 +58,7 @@ public class SsoManager {
 
     public void register(final SsoAuthenticator authenticator) {
         if (logger.isInfoEnabled()) {
-            logger.info("Load " + authenticator.getClass().getSimpleName());
+            logger.info("Load {}", authenticator.getClass().getSimpleName());
         }
         authenticatorList.add(authenticator);
     }

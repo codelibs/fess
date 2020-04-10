@@ -104,7 +104,7 @@ public abstract class ScoreBooster {
         if (bulkRequestBuilder != null) {
             final BulkResponse response = bulkRequestBuilder.execute().actionGet(requestTimeout);
             if (response.hasFailures()) {
-                logger.warn("Failed to update scores: " + response.buildFailureMessage());
+                logger.warn("Failed to update scores: {}", response.buildFailureMessage());
             }
             bulkRequestBuilder = null;
         }

@@ -259,7 +259,7 @@ public class IndexUpdater extends Thread {
 
                 if (emptyListCount >= maxEmptyListCount) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("Terminating indexUpdater. " + "emptyListCount is over " + maxEmptyListCount + ".");
+                        logger.info("Terminating indexUpdater. emptyListCount is over {}.", maxEmptyListCount);
                     }
                     // terminate crawling
                     finishCrawling = true;
@@ -303,7 +303,7 @@ public class IndexUpdater extends Thread {
         }
 
         if (logger.isInfoEnabled()) {
-            logger.info("[EXEC TIME] index update time: " + executeTime + "ms");
+            logger.info("[EXEC TIME] index update time: {}ms", executeTime);
         }
 
     }
@@ -334,14 +334,14 @@ public class IndexUpdater extends Thread {
                     final Transformer transformer = ComponentUtil.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
-                        logger.warn("No transformer: " + accessResultData.getTransformerName());
+                        logger.warn("No transformer: {}", accessResultData.getTransformerName());
                         continue;
                     }
                     @SuppressWarnings("unchecked")
                     final Map<String, Object> map = (Map<String, Object>) transformer.getData(accessResultData);
                     if (map.isEmpty()) {
                         // no transformer
-                        logger.warn("No data: " + accessResult.getUrl());
+                        logger.warn("No data: {}", accessResult.getUrl());
                         continue;
                     }
 
@@ -501,8 +501,7 @@ public class IndexUpdater extends Thread {
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         if (totalHits > unprocessedDocumentSize && intervalControlHelper.isCrawlerRunning()) {
             if (logger.isInfoEnabled()) {
-                logger.info("Stopped all crawler threads. " + " You have " + totalHits + " (>" + unprocessedDocumentSize + ") "
-                        + " unprocessed docs.");
+                logger.info("Stopped all crawler threads. You have {} (>{}) unprocessed docs.", totalHits, unprocessedDocumentSize);
             }
             intervalControlHelper.setCrawlerRunning(false);
         }
@@ -525,7 +524,7 @@ public class IndexUpdater extends Thread {
         finishedSessionIdList.clear();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Deleted completed document data. " + "The execution time is " + (System.currentTimeMillis() - execTime) + "ms.");
+            logger.info("Deleted completed document data. The execution time is {}ms.", (System.currentTimeMillis() - execTime));
         }
     }
 

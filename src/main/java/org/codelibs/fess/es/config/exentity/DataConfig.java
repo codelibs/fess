@@ -224,7 +224,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     final String password = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".password");
 
                     if (StringUtil.isEmpty(username)) {
-                        logger.warn("username is empty. fileAuth:" + fileAuthName);
+                        logger.warn("username is empty. fileAuth:{}", fileAuthName);
                         continue;
                     }
 
@@ -263,7 +263,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     final String password = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".password");
 
                     if (StringUtil.isEmpty(username)) {
-                        logger.warn("username is empty. fileAuth:" + fileAuthName);
+                        logger.warn("username is empty. fileAuth:{}", fileAuthName);
                         continue;
                     }
 

@@ -82,7 +82,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             parentFile.mkdirs();
         }
         if (!parentFile.isDirectory()) {
-            logger.warn("Not found: " + parentFile.getAbsolutePath());
+            logger.warn("Not found: {}", parentFile.getAbsolutePath());
             return false;
         }
 
@@ -101,9 +101,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 executeCommand(thumbnailId, cmdList);
 
                 if (outputFile.isFile() && outputFile.length() == 0) {
-                    logger.warn("Thumbnail File is empty. ID is " + thumbnailId);
+                    logger.warn("Thumbnail File is empty. ID is {}", thumbnailId);
                     if (outputFile.delete()) {
-                        logger.info("Deleted: " + outputFile.getAbsolutePath());
+                        logger.info("Deleted: {}", outputFile.getAbsolutePath());
                     }
                     updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                     return false;
@@ -188,7 +188,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
         @Override
         public void run() {
-            logger.warn("CommandGenerator is timed out: " + commandList);
+            logger.warn("CommandGenerator is timed out: {}", commandList);
             try {
                 p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS);
             } catch (final Exception e) {

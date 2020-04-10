@@ -201,7 +201,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                     }
 
                     if (logger.isInfoEnabled()) {
-                        logger.info("Generating Thumbnail: " + url);
+                        logger.info("Generating Thumbnail: {}", url);
                     }
 
                     final CrawlerClientFactory crawlerClientFactory =

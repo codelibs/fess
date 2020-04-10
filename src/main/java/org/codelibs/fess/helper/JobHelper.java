@@ -59,7 +59,7 @@ public class JobHelper {
 
         final String id = scheduledJob.getId();
         if (!Constants.T.equals(scheduledJob.getAvailable())) {
-            logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+            logger.info("Inactive Job {}:{}", id, scheduledJob.getName());
             try {
                 unregister(scheduledJob);
             } catch (final Exception e) {
@@ -76,35 +76,35 @@ public class JobHelper {
                     final Map<String, Object> params = new HashMap<>();
                     ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(scheduledJob.getId())
                             .ifPresent(e -> params.put(Constants.SCHEDULED_JOB, e)).orElse(() -> {
-                                logger.warn("Job " + scheduledJob.getId() + " is not found.");
+                                logger.warn("Job {} is not found.", scheduledJob.getId());
                             });
                     return params;
                 };
         findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
             if (!job.isUnscheduled()) {
                 if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
-                    logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+                    logger.info("Starting Job {}:{}", id, scheduledJob.getName());
                     final String cronExpression = scheduledJob.getCronExpression();
                     job.reschedule(cronExpression, op -> op.changeNoticeLogToDebug().params(paramsOp));
                 } else {
-                    logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+                    logger.info("Inactive Job {}:{}", id, scheduledJob.getName());
                     job.becomeNonCron();
                 }
             } else if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
-                logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+                logger.info("Starting Job {}:{}", id, scheduledJob.getName());
                 final String cronExpression = scheduledJob.getCronExpression();
                 job.reschedule(cronExpression, op -> op.changeNoticeLogToDebug().params(paramsOp));
             }
         }).orElse(
                 () -> {
                     if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
-                        logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+                        logger.info("Starting Job {}:{}", id, scheduledJob.getName());
                         final String cronExpression = scheduledJob.getCronExpression();
                         cron.register(cronExpression, fessConfig.getSchedulerJobClassAsClass(),
                                 fessConfig.getSchedulerConcurrentExecModeAsEnum(),
                                 op -> op.uniqueBy(id).changeNoticeLogToDebug().params(paramsOp));
                     } else {
-                        logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+                        logger.info("Inactive Job {}:{}", id, scheduledJob.getName());
                         cron.registerNonCron(fessConfig.getSchedulerJobClassAsClass(), fessConfig.getSchedulerConcurrentExecModeAsEnum(),
                                 op -> op.uniqueBy(id).changeNoticeLogToDebug().params(paramsOp));
                     }

@@ -47,11 +47,11 @@ public class ProcessHelper {
     public void destroy() {
         for (final String sessionId : runningProcessMap.keySet()) {
             if (logger.isInfoEnabled()) {
-                logger.info("Stopping process " + sessionId);
+                logger.info("Stopping process {}", sessionId);
             }
             if (destroyProcess(sessionId) == 0) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("Stopped process " + sessionId);
+                    logger.info("Stopped process {}", sessionId);
                 }
             }
         }

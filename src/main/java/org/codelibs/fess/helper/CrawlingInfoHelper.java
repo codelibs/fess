@@ -107,7 +107,7 @@ public class CrawlingInfoHelper {
     public void updateParams(final String sessionId, final String name, final int dayForCleanup) {
         final CrawlingInfo crawlingInfo = getCrawlingInfoService().getLast(sessionId);
         if (crawlingInfo == null) {
-            logger.warn("No crawling session: " + sessionId);
+            logger.warn("No crawling session: {}", sessionId);
             return;
         }
         if (StringUtil.isNotBlank(name)) {

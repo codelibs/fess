@@ -244,7 +244,7 @@ public class Crawler {
                             if (Constants.CRAWLER_PROCESS_COMMAND_THREAD_DUMP.equals(command)) {
                                 ThreadDumpUtil.printThreadDump();
                             } else {
-                                logger.warn("Unknown process command: " + command);
+                                logger.warn("Unknown process command: {}", command);
                             }
                             if (Thread.interrupted()) {
                                 return;
@@ -364,7 +364,7 @@ public class Crawler {
                 }
                 buf.append(entry.getKey()).append('=').append(entry.getValue());
             }
-            logger.info("[CRAWL INFO] " + buf.toString());
+            logger.info("[CRAWL INFO] {}", buf.toString());
 
             // notification
             try {
@@ -530,7 +530,7 @@ public class Crawler {
             try {
                 crawlerThread.join();
             } catch (final Exception e) {
-                logger.info("Interrupted a crawling process: " + crawlerThread.getName());
+                logger.info("Interrupted a crawling process: {}", crawlerThread.getName());
             }
         }
     }

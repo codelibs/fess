@@ -35,7 +35,7 @@ public class StopwordsCreator extends DictionaryCreator {
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
-            logger.info("Load " + this.getClass().getSimpleName());
+            logger.info("Load {}", this.getClass().getSimpleName());
         }
         dictionaryManager.addCreator(this);
     }

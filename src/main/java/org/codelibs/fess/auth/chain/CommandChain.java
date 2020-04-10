@@ -94,7 +94,7 @@ public class CommandChain implements AuthenticationChain {
         }
 
         if (logger.isInfoEnabled()) {
-            logger.info("Command: " + String.join(" ", commands));
+            logger.info("Command: {}", String.join(" ", commands));
         }
 
         final String[] cmds = stream(commands).get(stream -> stream.map(s -> {
@@ -134,7 +134,7 @@ public class CommandChain implements AuthenticationChain {
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("Exit Code: " + exitValue + " - Process Output:\n" + it.getOutput());
+                logger.info("Exit Code: {} - Process Output:\n{}", exitValue, it.getOutput());
             }
             if (exitValue == 143 && mt.isTeminated()) {
                 throw new CommandExecutionException("The command execution is timeout: " + String.join(" ", commands));

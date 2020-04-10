@@ -107,7 +107,7 @@ public abstract class CrudTestBase extends ITBase {
             checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true))
                     .body("response.status", equalTo(0));
 
-            //logger.info("create " + i + checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
+            //logger.info("create {}{}", i, checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
             refresh();
         }
 
