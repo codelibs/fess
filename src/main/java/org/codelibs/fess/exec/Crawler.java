@@ -53,6 +53,7 @@ import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
+import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -60,6 +61,7 @@ import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ThreadDumpUtil;
+import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.elasticsearch.monitor.jvm.JvmInfo;
 import org.elasticsearch.monitor.os.OsProbe;
 import org.elasticsearch.monitor.process.ProcessProbe;
@@ -378,9 +380,7 @@ public class Crawler {
 
     protected void sendMail(final Map<String, String> infoMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String toStrs = fessConfig.getNotificationTo();
-        if (StringUtil.isNotBlank(toStrs)) {
-            final String[] toAddresses = toStrs.split(",");
+        if (fessConfig.hasNotification()) {
             final Map<String, String> dataMap = new HashMap<>();
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
                 dataMap.put(StringUtil.decapitalize(entry.getKey()), entry.getValue());
@@ -395,34 +395,52 @@ public class Crawler {
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
 
             final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+            final String toStrs = fessConfig.getNotificationTo();
             final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
-            CrawlerPostcard.droppedInto(postbox, postcard -> {
-                postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
-                postcard.addReplyTo(fessConfig.getMailReturnPath());
-                stream(toAddresses).of(stream -> stream.forEach(address -> {
-                    postcard.addTo(address);
-                }));
-                postcard.setCrawlerEndTime(getValueFromMap(dataMap, "crawlerEndTime", StringUtil.EMPTY));
-                postcard.setCrawlerExecTime(getValueFromMap(dataMap, "crawlerExecTime", "0"));
-                postcard.setCrawlerStartTime(getValueFromMap(dataMap, "crawlerStartTime", StringUtil.EMPTY));
-                postcard.setDataCrawlEndTime(getValueFromMap(dataMap, "dataCrawlEndTime", StringUtil.EMPTY));
-                postcard.setDataCrawlExecTime(getValueFromMap(dataMap, "dataCrawlExecTime", "0"));
-                postcard.setDataCrawlStartTime(getValueFromMap(dataMap, "dataCrawlStartTime", StringUtil.EMPTY));
-                postcard.setDataIndexSize(getValueFromMap(dataMap, "dataIndexSize", "0"));
-                postcard.setDataIndexExecTime(getValueFromMap(dataMap, "dataIndexExecTime", "0"));
-                postcard.setHostname(getValueFromMap(dataMap, "hostname", StringUtil.EMPTY));
-                postcard.setWebFsCrawlEndTime(getValueFromMap(dataMap, "webFsCrawlEndTime", StringUtil.EMPTY));
-                postcard.setWebFsCrawlExecTime(getValueFromMap(dataMap, "webFsCrawlExecTime", "0"));
-                postcard.setWebFsCrawlStartTime(getValueFromMap(dataMap, "webFsCrawlStartTime", StringUtil.EMPTY));
-                postcard.setWebFsIndexExecTime(getValueFromMap(dataMap, "webFsIndexExecTime", "0"));
-                postcard.setWebFsIndexSize(getValueFromMap(dataMap, "webFsIndexSize", "0"));
-                if (Constants.TRUE.equalsIgnoreCase(infoMap.get(Constants.CRAWLER_STATUS))) {
-                    postcard.setStatus(Constants.OK);
+            try {
+                final String[] toAddresses;
+                if (StringUtil.isNotBlank(toStrs)) {
+                    toAddresses = toStrs.split(",");
                 } else {
-                    postcard.setStatus(Constants.FAIL);
+                    toAddresses = StringUtil.EMPTY_STRINGS;
                 }
-                postcard.setJobname(systemProperties.getProperty("job.runtime.name", StringUtil.EMPTY));
-            });
+                final NotificationHelper notificationHelper = ComponentUtil.getNotificationHelper();
+                SMailCallbackContext.setPreparedMessageHookOnThread(notificationHelper::send);
+                CrawlerPostcard.droppedInto(postbox, postcard -> {
+                    postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
+                    postcard.addReplyTo(fessConfig.getMailReturnPath());
+                    if (toAddresses.length > 0) {
+                        stream(toAddresses).of(stream -> stream.map(String::trim).forEach(address -> {
+                            postcard.addTo(address);
+                        }));
+                    } else {
+                        postcard.addTo(fessConfig.getMailFromAddress());
+                        postcard.dryrun();
+                    }
+                    postcard.setCrawlerEndTime(getValueFromMap(dataMap, "crawlerEndTime", StringUtil.EMPTY));
+                    postcard.setCrawlerExecTime(getValueFromMap(dataMap, "crawlerExecTime", "0"));
+                    postcard.setCrawlerStartTime(getValueFromMap(dataMap, "crawlerStartTime", StringUtil.EMPTY));
+                    postcard.setDataCrawlEndTime(getValueFromMap(dataMap, "dataCrawlEndTime", StringUtil.EMPTY));
+                    postcard.setDataCrawlExecTime(getValueFromMap(dataMap, "dataCrawlExecTime", "0"));
+                    postcard.setDataCrawlStartTime(getValueFromMap(dataMap, "dataCrawlStartTime", StringUtil.EMPTY));
+                    postcard.setDataIndexSize(getValueFromMap(dataMap, "dataIndexSize", "0"));
+                    postcard.setDataIndexExecTime(getValueFromMap(dataMap, "dataIndexExecTime", "0"));
+                    postcard.setHostname(getValueFromMap(dataMap, "hostname", StringUtil.EMPTY));
+                    postcard.setWebFsCrawlEndTime(getValueFromMap(dataMap, "webFsCrawlEndTime", StringUtil.EMPTY));
+                    postcard.setWebFsCrawlExecTime(getValueFromMap(dataMap, "webFsCrawlExecTime", "0"));
+                    postcard.setWebFsCrawlStartTime(getValueFromMap(dataMap, "webFsCrawlStartTime", StringUtil.EMPTY));
+                    postcard.setWebFsIndexExecTime(getValueFromMap(dataMap, "webFsIndexExecTime", "0"));
+                    postcard.setWebFsIndexSize(getValueFromMap(dataMap, "webFsIndexSize", "0"));
+                    if (Constants.TRUE.equalsIgnoreCase(infoMap.get(Constants.CRAWLER_STATUS))) {
+                        postcard.setStatus(Constants.OK);
+                    } else {
+                        postcard.setStatus(Constants.FAIL);
+                    }
+                    postcard.setJobname(systemProperties.getProperty("job.runtime.name", StringUtil.EMPTY));
+                });
+            } finally {
+                SMailCallbackContext.clearPreparedMessageHookOnThread();
+            }
         }
     }
 

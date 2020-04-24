@@ -82,7 +82,6 @@ public class FessMailDeliveryDepartmentCreator {
     }
 
     protected SMailDogmaticPostalPersonnel createDogmaticPostalPersonnel() { // #ext_point e.g. locale, database
-        final String testPrefix = fessConfig.getMailSubjectTestPrefix();
         final AsyncManager asyncManager = getAsyncManager();
         final MessageManager messageManager = getMessageManager();
         return new SMailDogmaticPostalPersonnel() {
@@ -96,7 +95,7 @@ public class FessMailDeliveryDepartmentCreator {
 
             @Override
             protected OptionalThing<SMailSubjectFilter> createSubjectFilter() {
-                return OptionalThing.of((view, subject) -> testPrefix + subject);
+                return OptionalThing.of((view, subject) -> subject);
             }
 
             @Override

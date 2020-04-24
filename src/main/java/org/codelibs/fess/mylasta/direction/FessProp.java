@@ -501,6 +501,18 @@ public interface FessProp {
         return getSystemProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
     }
 
+    default boolean hasNotification() {
+        return StringUtil.isNotBlank(getNotificationTo()) || StringUtil.isNotBlank(getSlackWebhookUrls());
+    }
+
+    default void getSlackWebhookUrls(final String value) {
+        setSystemProperty(Constants.SLACK_WEBHOOK_URLS_PROPERTY, value);
+    }
+
+    default String getSlackWebhookUrls() {
+        return getSystemProperty(Constants.SLACK_WEBHOOK_URLS_PROPERTY, StringUtil.EMPTY);
+    }
+
     default void setNotificationTo(final String value) {
         setSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, value);
     }

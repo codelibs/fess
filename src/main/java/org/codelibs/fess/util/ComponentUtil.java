@@ -51,6 +51,7 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.LanguageHelper;
+import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PluginHelper;
@@ -92,6 +93,8 @@ public final class ComponentUtil {
     private static final Logger logger = LogManager.getLogger(ComponentUtil.class);
 
     private static Map<String, Object> componentMap = new HashMap<>();
+
+    private static final String NOTIFICATION_HELPER = "notificationHelper";
 
     private static final String SEARCH_HELPER = "searchHelper";
 
@@ -465,6 +468,10 @@ public final class ComponentUtil {
 
     public static SearchHelper getSearchHelper() {
         return getComponent(SEARCH_HELPER);
+    }
+
+    public static NotificationHelper getNotificationHelper() {
+        return getComponent(NOTIFICATION_HELPER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

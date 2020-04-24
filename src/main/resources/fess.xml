@@ -31,6 +31,8 @@
 	</component>
 	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>
+	<component name="notificationHelper" class="org.codelibs.fess.helper.NotificationHelper">
+	</component>
 	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
 	</component>
 	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
