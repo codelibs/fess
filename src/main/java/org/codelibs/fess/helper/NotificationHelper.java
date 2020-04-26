@@ -32,10 +32,11 @@ import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
 public class NotificationHelper {
     private static final Logger logger = LogManager.getLogger(NotificationHelper.class);
 
-    protected static final String LF = "\n";
+    protected static final char LF = '\n';
 
     public void send(final CardView cardView, final SMailPostingDiscloser discloser) {
         sendToSlack(cardView, discloser);
+        sendToGoogleChat(cardView, discloser);
     }
 
     protected void sendToSlack(CardView cardView, SMailPostingDiscloser discloser) {
@@ -45,9 +46,7 @@ public class NotificationHelper {
         if (StringUtil.isBlank(slackWebhookUrls)) {
             return;
         }
-        final StringBuilder buf = new StringBuilder();
-        final String body =
-                buf.append("{\"text\":\"").append(StringEscapeUtils.escapeJson(toSlackMessage(discloser))).append("\"}").toString();
+        final String body = toSlackMessage(discloser);
         StreamUtil.split(slackWebhookUrls, "[,\\s]").of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(
                         url -> {
@@ -67,12 +66,50 @@ public class NotificationHelper {
     }
 
     protected String toSlackMessage(final SMailPostingDiscloser discloser) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(LF).append(discloser.getSavedSubject().orElse(StringUtil.EMPTY).trim());
-        sb.append(LF).append("```");
-        sb.append(LF).append(discloser.getSavedPlainText().orElse(StringUtil.EMPTY).trim());
-        sb.append(LF).append("```");
-        return sb.toString();
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("{\"text\":\"");
+        buf.append(LF);
+        buf.append(StringEscapeUtils.escapeJson(discloser.getSavedSubject().orElse(StringUtil.EMPTY).trim()));
+        buf.append(LF).append("```");
+        buf.append(LF).append(StringEscapeUtils.escapeJson(discloser.getSavedPlainText().orElse(StringUtil.EMPTY).trim()));
+        buf.append(LF).append("```\"}");
+        return buf.toString();
+    }
 
+    protected void sendToGoogleChat(CardView cardView, SMailPostingDiscloser discloser) {
+        // https://developers.google.com/hangouts/chat/how-tos/webhooks
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String googleChatWebhookUrls = fessConfig.getGoogleChatWebhookUrls();
+        if (StringUtil.isBlank(googleChatWebhookUrls)) {
+            return;
+        }
+        final String body = toGoogleChatMessage(discloser);
+        StreamUtil.split(googleChatWebhookUrls, "[,\\s]").of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                        url -> {
+                            try (CurlResponse response = Curl.post(url).header("Content-Type", "application/json").body(body).execute()) {
+                                if (response.getHttpStatusCode() == 200) {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug("Sent {} to {}.", body, url);
+                                    }
+                                } else {
+                                    logger.warn("Failed to send {} to {}. HTTP Status is {}. {}", body, url, response.getHttpStatusCode(),
+                                            response.getContentAsString());
+                                }
+                            } catch (final IOException e) {
+                                logger.warn("Failed to send {} to {}.", body, url, e);
+                            }
+                        }));
+    }
+
+    protected String toGoogleChatMessage(final SMailPostingDiscloser discloser) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("{\"text\":\"");
+        buf.append(LF);
+        buf.append(StringEscapeUtils.escapeJson(discloser.getSavedSubject().orElse(StringUtil.EMPTY).trim()));
+        buf.append(LF).append("```");
+        buf.append(LF).append(StringEscapeUtils.escapeJson(discloser.getSavedPlainText().orElse(StringUtil.EMPTY).trim()));
+        buf.append(LF).append("```\"}");
+        return buf.toString();
     }
 }

@@ -138,6 +138,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SLACK_WEBHOOK_URLS_PROPERTY = "slack.webhook.urls";
 
+    public static final String GOOGLE_CHAT_WEBHOOK_URLS_PROPERTY = "google.chat.webhook.urls";
+
     public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";
 
     public static final String SUGGEST_SEARCH_LOG_PROPERTY = "suggest.searchlog";

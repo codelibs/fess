@@ -505,12 +505,20 @@ public interface FessProp {
         return StringUtil.isNotBlank(getNotificationTo()) || StringUtil.isNotBlank(getSlackWebhookUrls());
     }
 
-    default void getSlackWebhookUrls(final String value) {
+    default void setSlackWebhookUrls(final String value) {
         setSystemProperty(Constants.SLACK_WEBHOOK_URLS_PROPERTY, value);
     }
 
     default String getSlackWebhookUrls() {
         return getSystemProperty(Constants.SLACK_WEBHOOK_URLS_PROPERTY, StringUtil.EMPTY);
+    }
+
+    default void setGoogleChatWebhookUrls(final String value) {
+        setSystemProperty(Constants.GOOGLE_CHAT_WEBHOOK_URLS_PROPERTY, value);
+    }
+
+    default String getGoogleChatWebhookUrls() {
+        return getSystemProperty(Constants.GOOGLE_CHAT_WEBHOOK_URLS_PROPERTY, StringUtil.EMPTY);
     }
 
     default void setNotificationTo(final String value) {
