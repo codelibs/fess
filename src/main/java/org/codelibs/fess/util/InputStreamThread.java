@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,13 +38,16 @@ public class InputStreamThread extends Thread {
 
     private final int bufferSize;
 
+    private final Consumer<String> outputCallback;
+
     public InputStreamThread(final InputStream is, final String charset) {
-        this(is, charset, MAX_BUFFER_SIZE);
+        this(is, charset, MAX_BUFFER_SIZE, null);
     }
 
-    public InputStreamThread(final InputStream is, final String charset, final int bufferSize) {
+    public InputStreamThread(final InputStream is, final String charset, final int bufferSize, final Consumer<String> outputCallback) {
         super("InputStreamThread");
         this.bufferSize = bufferSize;
+        this.outputCallback = outputCallback;
 
         try {
             br = new BufferedReader(new InputStreamReader(is, charset));
@@ -65,6 +69,9 @@ public class InputStreamThread extends Thread {
                         logger.debug(line);
                     }
                     list.add(line);
+                    if (outputCallback != null) {
+                        outputCallback.accept(line);
+                    }
                     if (list.size() > bufferSize) {
                         list.remove(0);
                     }
