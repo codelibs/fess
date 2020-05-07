@@ -35,8 +35,15 @@ public class InputStreamThread extends Thread {
 
     private final List<String> list = new LinkedList<>();
 
+    private final int bufferSize;
+
     public InputStreamThread(final InputStream is, final String charset) {
+        this(is, charset, MAX_BUFFER_SIZE);
+    }
+
+    public InputStreamThread(final InputStream is, final String charset, final int bufferSize) {
         super("InputStreamThread");
+        this.bufferSize = bufferSize;
 
         try {
             br = new BufferedReader(new InputStreamReader(is, charset));
@@ -58,7 +65,7 @@ public class InputStreamThread extends Thread {
                         logger.debug(line);
                     }
                     list.add(line);
-                    if (list.size() > MAX_BUFFER_SIZE) {
+                    if (list.size() > bufferSize) {
                         list.remove(0);
                     }
                 }
