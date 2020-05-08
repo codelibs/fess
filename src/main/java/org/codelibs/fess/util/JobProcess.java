@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.util;
 
+import java.util.function.Consumer;
+
 import org.codelibs.fess.Constants;
 
 public class JobProcess {
@@ -23,8 +25,12 @@ public class JobProcess {
     protected InputStreamThread inputStreamThread;
 
     public JobProcess(final Process process) {
+        this(process, InputStreamThread.MAX_BUFFER_SIZE, null);
+    }
+
+    public JobProcess(final Process process, final int bufferSize, final Consumer<String> outputCallback) {
         this.process = process;
-        inputStreamThread = new InputStreamThread(process.getInputStream(), Constants.UTF_8);
+        inputStreamThread = new InputStreamThread(process.getInputStream(), Constants.UTF_8, bufferSize, outputCallback);
     }
 
     public Process getProcess() {

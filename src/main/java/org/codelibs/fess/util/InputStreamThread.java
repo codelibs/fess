@@ -32,7 +32,7 @@ public class InputStreamThread extends Thread {
 
     private BufferedReader br;
 
-    private static final int MAX_BUFFER_SIZE = 1000;
+    public static final int MAX_BUFFER_SIZE = 1000;
 
     private final List<String> list = new LinkedList<>();
 

@@ -57,13 +57,18 @@ public class ProcessHelper {
         }
     }
 
-    public synchronized JobProcess startProcess(final String sessionId, final List<String> cmdList, final Consumer<ProcessBuilder> pbCall) {
+    public JobProcess startProcess(final String sessionId, final List<String> cmdList, final Consumer<ProcessBuilder> pbCall) {
+        return startProcess(sessionId, cmdList, pbCall, InputStreamThread.MAX_BUFFER_SIZE, null);
+    }
+
+    public synchronized JobProcess startProcess(final String sessionId, final List<String> cmdList, final Consumer<ProcessBuilder> pbCall,
+            final int bufferSize, final Consumer<String> outputCallback) {
         final ProcessBuilder pb = new ProcessBuilder(cmdList);
         pbCall.accept(pb);
         destroyProcess(sessionId);
         JobProcess jobProcess;
         try {
-            jobProcess = new JobProcess(pb.start());
+            jobProcess = new JobProcess(pb.start(), bufferSize, outputCallback);
             destroyProcess(sessionId, runningProcessMap.putIfAbsent(sessionId, jobProcess));
             return jobProcess;
         } catch (final IOException e) {
