@@ -155,16 +155,15 @@
                                             </thead>
                                             <tbody>
                                             <c:if test="${not empty path and not empty parentId}">
-                                                <tr
-                                                        data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/">
+                                                <tr　data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/">
                                                     <td>..</td>
+                                                    <td></td>
                                                     <td></td>
                                                     <td></td>
                                                 </tr>
                                             </c:if>
                                             <c:if test="${not empty path and empty parentId}">
-                                                <tr
-                                                        data-href="${contextPath}/admin/storage/">
+                                                <tr　data-href="${contextPath}/admin/storage/">
                                                     <td>..</td>
                                                     <td></td>
                                                     <td></td>
@@ -173,17 +172,16 @@
                                             </c:if>
                                             <c:forEach var="data" varStatus="s" items="${fileItems}">
                                                 <c:if test="${not data.directory}">
-                                                    <tr>
+                                                <tr>
                                                     <td>
                                                         <em class="far fa-file"></em>
                                                             ${f:h(data.name)}
                                                     </td>
                                                     <td>${f:h(data.size)}</td>
-                                                    <td>${f:h(data.lastModified)}</td>
+                                                    <td><fmt:formatDate value="${data.lastModified}" type="BOTH" pattern="yyyy-MM-dd HH:mm:ss" /></td>
                                                 </c:if>
                                                 <c:if test="${data.directory.booleanValue()}">
-                                                    <tr
-                                                    data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/">
+                                                <tr data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/">
                                                     <td>
                                                         <em class="fa fa-folder-open" style="color:#F7C502;"></em>
                                                             ${f:h(data.name)}
