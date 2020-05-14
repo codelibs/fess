@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>13.6.5-SNAPSHOT</version>
+	<version>13.7.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -54,14 +54,14 @@
 		<okhttp.version>3.14.6</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.6.3</crawler.version>
+		<crawler.version>3.7.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.6.3</suggest.version>
+		<suggest.version>7.7.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.6.2</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.6.2</elasticsearch.httpclient.version>
+		<elasticsearch.version>7.7.0</elasticsearch.version>
+		<elasticsearch.httpclient.version>7.7.0</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
