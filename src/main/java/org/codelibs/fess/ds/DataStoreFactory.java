@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -89,7 +88,7 @@ public class DataStoreFactory {
                 final Path xmlPath = fs.getPath("fess_ds++.xml");
                 try (InputStream is = Files.newInputStream(xmlPath)) {
                     final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                    factory.setFeature(org.codelibs.fess.crawler.Constants.FEATURE_SECURE_PROCESSING, true);
                     factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
                     final DocumentBuilder builder = factory.newDocumentBuilder();
 

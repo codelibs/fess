@@ -43,7 +43,9 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
+import io.minio.ErrorCode;
 import io.minio.MinioClient;
+import io.minio.PutObjectOptions;
 import io.minio.Result;
 import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
@@ -160,8 +162,7 @@ public class AdminStorageAction extends FessAdminAction {
         try (final InputStream in = uploadFile.getInputStream()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final MinioClient minioClient = createClient(fessConfig);
-            minioClient.putObject(fessConfig.getStorageBucket(), objectName, in, (long) uploadFile.getFileSize(), null, null,
-                    "application/octet-stream");
+            minioClient.putObject(fessConfig.getStorageBucket(), objectName, in, new PutObjectOptions((long) uploadFile.getFileSize(), -1));
         } catch (final Exception e) {
             throw new StorageException("Failed to upload " + objectName, e);
         }
@@ -207,7 +208,7 @@ public class AdminStorageAction extends FessAdminAction {
                 map.put("id", encodeId(objectName));
                 map.put("name", getName(objectName));
                 map.put("hashCode", item.hashCode());
-                map.put("size", item.objectSize());
+                map.put("size", item.size());
                 map.put("directory", item.isDir());
                 if (!item.isDir()) {
                     map.put("lastModified", item.lastModified());
@@ -218,8 +219,8 @@ public class AdminStorageAction extends FessAdminAction {
                 }
             }
         } catch (final ErrorResponseException e) {
-            final String code = e.errorResponse().code();
-            if ("NoSuchBucket".equals(code)) {
+            final ErrorCode code = e.errorResponse().errorCode();
+            if (code == ErrorCode.NO_SUCH_BUCKET) {
                 final MinioClient minioClient = createClient(fessConfig);
                 try {
                     minioClient.makeBucket(fessConfig.getStorageBucket());

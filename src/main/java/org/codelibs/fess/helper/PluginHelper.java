@@ -35,7 +35,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -123,7 +122,7 @@ public class PluginHelper {
             final String pluginMetaContent = getRepositoryContent(pluginUrl + "maven-metadata.xml");
             try (final InputStream is = new ByteArrayInputStream(pluginMetaContent.getBytes(Constants.UTF_8_CHARSET))) {
                 final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                factory.setFeature(Constants.FEATURE_SECURE_PROCESSING, true);
                 final DocumentBuilder builder = factory.newDocumentBuilder();
                 final Document document = builder.parse(is);
                 final NodeList nodeList = document.getElementsByTagName("version");
