@@ -27,7 +27,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
 			<param name="plugin.version" value="7.7.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="7.7.0-20200520.230847-3" />
+			<param name="plugin.zip.version" value="7.7.0-20200521.041224-4" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
