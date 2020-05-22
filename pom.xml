@@ -54,10 +54,10 @@
 		<okhttp.version>3.14.8</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.7.0-SNAPSHOT</crawler.version>
+		<crawler.version>3.7.0</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.7.0-SNAPSHOT</suggest.version>
+		<suggest.version>7.7.0</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>7.7.0</elasticsearch.version>
@@ -1213,7 +1213,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>xpp3</artifactId>
-			<version>1.1.4c.0-SNAPSHOT</version>
+			<version>1.1.4c.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
