@@ -66,7 +66,7 @@
 
 		<!-- Tomcat -->
 		<tomcat.version>9.0.35</tomcat.version>
-		<tomcat.boot.version>0.7.4</tomcat.boot.version>
+		<tomcat.boot.version>0.7.5</tomcat.boot.version>
 
 		<!-- Testing -->
 		<utflute.version>0.9.1</utflute.version>
