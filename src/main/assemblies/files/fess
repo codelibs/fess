@@ -106,10 +106,10 @@ launch_service()
 
     if [ "x$daemonized" = "x" ]; then
         fess_parms="$fess_parms -Dfess.foreground=yes"
-        exec "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
+        exec "$JAVA" $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
                 org.codelibs.fess.FessBoot $FESS_OPTS > /dev/null
     else
-        exec "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
+        exec "$JAVA" $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
                 org.codelibs.fess.FessBoot $FESS_OPTS <&- > /dev/null &
         if [ x"$pidfile" != "x" ] ; then
             echo $! > $pidfile
@@ -162,7 +162,7 @@ eval set -- "$args"
 while true; do
     case $1 in
         -v)
-            "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -cp "$FESS_CLASSPATH" $props \
+            "$JAVA" $FESS_JAVA_OPTS $fess_parms -cp "$FESS_CLASSPATH" $props \
                     org.codelibs.fess.Version
             exit 0
         ;;

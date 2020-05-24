@@ -43,6 +43,6 @@ IF ERRORLEVEL 1 (
 	EXIT /B %ERRORLEVEL%
 )
 
-"%JAVA_HOME%\bin\java" %JAVA_OPTS% %FESS_JAVA_OPTS% !newparams! -cp "%FESS_CLASSPATH%" "org.codelibs.fess.FessBoot"
+"%JAVA_HOME%\bin\java" %FESS_JAVA_OPTS% !newparams! -cp "%FESS_CLASSPATH%" "org.codelibs.fess.FessBoot"
 
 ENDLOCAL

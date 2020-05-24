@@ -2,6 +2,13 @@
 
 FESS_CLASSPATH=$FESS_HOME/lib/classes
 
+# JAVA_OPTS is not a built-in JVM mechanism but some people think it is so we
+# warn them that we are not observing the value of $JAVA_OPTS
+if [ ! -z "$JAVA_OPTS" ]; then
+  echo -n "warning: ignoring JAVA_OPTS=$JAVA_OPTS; "
+  echo "pass JVM parameters via FESS_JAVA_OPTS"
+fi
+
 if [ "x$FESS_MIN_MEM" = "x" ]; then
     FESS_MIN_MEM=256m
 fi
@@ -18,72 +25,72 @@ fi
 #FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
 
 # SSL truststore for certificate validation over https
-#JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks"
-#JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStorePassword=changeit"
+#FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks"
+#FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djavax.net.ssl.trustStorePassword=changeit"
 
 # min and max heap sizes should be set to the same value to avoid
 # stop-the-world GC pauses during resize, and so that we can lock the
 # heap in memory on startup to prevent any of it from being swapped
 # out.
-JAVA_OPTS="$JAVA_OPTS -Xms${FESS_MIN_MEM}"
-JAVA_OPTS="$JAVA_OPTS -Xmx${FESS_MAX_MEM}"
-JAVA_OPTS="$JAVA_OPTS -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=32m"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Xms${FESS_MIN_MEM}"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Xmx${FESS_MAX_MEM}"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=32m"
 
 # new generation
 if [ "x$FESS_HEAP_NEWSIZE" != "x" ]; then
-    JAVA_OPTS="$JAVA_OPTS -Xmn${FESS_HEAP_NEWSIZE}"
+    FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Xmn${FESS_HEAP_NEWSIZE}"
 fi
 
 # set to headless, just in case
-JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djava.awt.headless=true"
 
 # maximum # keep-alive connections to maintain at once
-JAVA_OPTS="$JAVA_OPTS -Dhttp.maxConnections=20"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttp.maxConnections=20"
 
 # Force the JVM to use IPv4 stack
 if [ "x$FESS_USE_IPV4" != "x" ]; then
-  JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djava.net.preferIPv4Stack=true"
 fi
 
-JAVA_OPTS="$JAVA_OPTS -Djna.nosys=true"
-JAVA_OPTS="$JAVA_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djna.nosys=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
 
-JAVA_OPTS="$JAVA_OPTS -XX:+UseG1GC"
-JAVA_OPTS="$JAVA_OPTS -XX:InitiatingHeapOccupancyPercent=75"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+UseG1GC"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:InitiatingHeapOccupancyPercent=75"
 
-JAVA_OPTS="$JAVA_OPTS -Dio.netty.noUnsafe=true"
-JAVA_OPTS="$JAVA_OPTS -Dio.netty.noKeySetOptimization=true"
-JAVA_OPTS="$JAVA_OPTS -Dio.netty.recycler.maxCapacityPerThread=0"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dio.netty.noUnsafe=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dio.netty.noKeySetOptimization=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dio.netty.recycler.maxCapacityPerThread=0"
 
-JAVA_OPTS="$JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
-JAVA_OPTS="$JAVA_OPTS -Dlog4j2.disable.jmx=true"
-JAVA_OPTS="$JAVA_OPTS -Dlog4j.skipJansi=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j2.disable.jmx=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j.skipJansi=true"
 
 # GC logging options
 if [ "x$FESS_USE_GC_LOGGING" != "x" ]; then
-  JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCDetails"
-  JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCTimeStamps"
-  JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCDateStamps"
-  JAVA_OPTS="$JAVA_OPTS -XX:+PrintClassHistogram"
-  JAVA_OPTS="$JAVA_OPTS -XX:+PrintTenuringDistribution"
-  JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCApplicationStoppedTime"
-  JAVA_OPTS="$JAVA_OPTS -Xloggc:/var/log/elasticsearch/gc.log"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCDetails"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCTimeStamps"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCDateStamps"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintClassHistogram"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintTenuringDistribution"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCApplicationStoppedTime"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Xloggc:/var/log/elasticsearch/gc.log"
 fi
 
 # Causes the JVM to dump its heap on OutOfMemory.
-#JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
+#FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
 # The path to the heap dump location, note directory must exists and have enough
 # space for a full heap dump.
-#JAVA_OPTS="$JAVA_OPTS -XX:HeapDumpPath=$FESS_HOME/logs/heapdump.hprof"
+#FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:HeapDumpPath=$FESS_HOME/logs/heapdump.hprof"
 
 # Disables explicit GC
-JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+DisableExplicitGC"
 
 # Ensure UTF-8 encoding by default (e.g. filenames)
-JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfile.encoding=UTF-8"
 
 # Use Groovy ClassValue
-JAVA_OPTS="$JAVA_OPTS -Dgroovy.use.classvalue=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dgroovy.use.classvalue=true"
 
 # Application Configuration
 if [ "x$APP_NAME" = "x" ]; then

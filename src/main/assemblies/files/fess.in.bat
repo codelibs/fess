@@ -30,70 +30,70 @@ REM min and max heap sizes should be set to the same value to avoid
 REM stop-the-world GC pauses during resize, and so that we can lock the
 REM heap in memory on startup to prevent any of it from being swapped
 REM out.
-set JAVA_OPTS=%JAVA_OPTS% -Xms%FESS_MIN_MEM% -Xmx%FESS_MAX_MEM%
-set JAVA_OPTS=%JAVA_OPTS% -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=32m
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xms%FESS_MIN_MEM% -Xmx%FESS_MAX_MEM%
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=32m
 
 REM new generation
 if NOT "%FESS_HEAP_NEWSIZE%" == "" (
-set JAVA_OPTS=%JAVA_OPTS% -Xmn%FESS_HEAP_NEWSIZE%
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xmn%FESS_HEAP_NEWSIZE%
 )
 
 REM max direct memory
 if NOT "%FESS_DIRECT_SIZE%" == "" (
-set JAVA_OPTS=%JAVA_OPTS% -XX:MaxDirectMemorySize=%FESS_DIRECT_SIZE%
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:MaxDirectMemorySize=%FESS_DIRECT_SIZE%
 )
 
 REM set to headless, just in case
-set JAVA_OPTS=%JAVA_OPTS% -Djava.awt.headless=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djava.awt.headless=true
 
 REM maximum # keep-alive connections to maintain at once
-set JAVA_OPTS=%JAVA_OPTS% -Dhttp.maxConnections=20
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dhttp.maxConnections=20
 
 REM Force the JVM to use IPv4 stack
 if NOT "%FESS_USE_IPV4%" == "" (
-set JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djava.net.preferIPv4Stack=true
 )
 
-set JAVA_OPTS=%JAVA_OPTS% -Djna.nosys=true
-set JAVA_OPTS=%JAVA_OPTS% -Djdk.io.permissionsUseCanonicalPath=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djna.nosys=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djdk.io.permissionsUseCanonicalPath=true
 
-set JAVA_OPTS=%JAVA_OPTS% -XX:+UseG1GC
-set JAVA_OPTS=%JAVA_OPTS% -XX:InitiatingHeapOccupancyPercent=75
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+UseG1GC
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:InitiatingHeapOccupancyPercent=75
 
-set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.noUnsafe=true
-set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.noKeySetOptimization=true
-set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.recycler.maxCapacityPerThread=0
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dio.netty.noUnsafe=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dio.netty.noKeySetOptimization=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dio.netty.recycler.maxCapacityPerThread=0
 
-set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.shutdownHookEnabled=false
-set JAVA_OPTS=%JAVA_OPTS% -Dlog4j2.disable.jmx=true
-set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.skipJansi=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j.shutdownHookEnabled=false
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j2.disable.jmx=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j.skipJansi=true
 
 REM SSL truststore for certificate validation over https
-REM JAVA_OPTS=%JAVA_OPTS% -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks
-REM JAVA_OPTS=%JAVA_OPTS% -Djavax.net.ssl.trustStorePassword=changeit
+REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks
+REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djavax.net.ssl.trustStorePassword=changeit
 
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDetails
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCTimeStamps
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDateStamps
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintClassHistogram
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintTenuringDistribution
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCApplicationStoppedTime
-if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -Xloggc:%FESS_HOME%/logs/gc.log
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCDetails
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCTimeStamps
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCDateStamps
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintClassHistogram
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintTenuringDistribution
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCApplicationStoppedTime
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xloggc:%FESS_HOME%/logs/gc.log
 
 REM Causes the JVM to dump its heap on OutOfMemory.
-REM set JAVA_OPTS=%JAVA_OPTS% -XX:+HeapDumpOnOutOfMemoryError
+REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+HeapDumpOnOutOfMemoryError
 REM The path to the heap dump location, note directory must exists and have enough
 REM space for a full heap dump.
-REM JAVA_OPTS=%JAVA_OPTS% -XX:HeapDumpPath=%FESS_HOME%/logs/heapdump.hprof
+REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:HeapDumpPath=%FESS_HOME%/logs/heapdump.hprof
 
 REM Disables explicit GC
-set JAVA_OPTS=%JAVA_OPTS% -XX:+DisableExplicitGC
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+DisableExplicitGC
 
 REM Ensure UTF-8 encoding by default (e.g. filenames)
-set JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfile.encoding=UTF-8
 
 REM Use Groovy ClassValue
-set JAVA_OPTS=%JAVA_OPTS% -Dgroovy.use.classvalue=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dgroovy.use.classvalue=true
 
 REM Application Configuration
 set APP_NAME=fess
