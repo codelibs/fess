@@ -55,7 +55,7 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.codelibs.fess" additivity="false" level="${log.level}">
+		<Logger name="org.codelibs" additivity="false" level="${log.level}">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
