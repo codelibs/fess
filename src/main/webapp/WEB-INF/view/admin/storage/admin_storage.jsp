@@ -178,7 +178,7 @@
                                                             ${f:h(data.name)}
                                                     </td>
                                                     <td>${f:h(data.size)}</td>
-                                                    <td><fmt:formatDate value="${data.lastModified}" type="BOTH" pattern="yyyy-MM-dd HH:mm:ss" /></td>
+                                                    <td>${fe:formatDate(data.lastModified, 'yyyy-MM-dd HH:mm:ss')}</td>
                                                 </c:if>
                                                 <c:if test="${data.directory.booleanValue()}">
                                                 <tr data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/">

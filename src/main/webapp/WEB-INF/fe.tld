@@ -85,6 +85,18 @@
 
   <function>
     <description>
+      Returns formatted date from a given value.
+    </description>
+    <name>formatDate</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String formatDate(java.time.ZonedDateTime, java.lang.String)</function-signature>
+    <example>
+      ${fe:formatDate(d, 'yyyy')}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns formatted number as a file size from a given value.
     </description>
     <name>formatFileSize</name>

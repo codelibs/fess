@@ -26,6 +26,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -162,6 +163,13 @@ public class FessFunctions {
             return StringUtil.EMPTY;
         }
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
+    }
+
+    public static String formatDate(final ZonedDateTime date, final String format) {
+        if (date == null) {
+            return StringUtil.EMPTY;
+        }
+        return date.format(DateTimeFormatter.ofPattern(format, Locale.ROOT));
     }
 
     public static String formatDuration(final long durationMillis) {
