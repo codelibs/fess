@@ -8,6 +8,7 @@
 
 	<include path="crawler_es.xml" />
 	<include path="fess_thumbnail.xml" />
+	<include path="fess_ingest.xml" />
 
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>

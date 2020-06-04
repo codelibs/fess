@@ -72,6 +72,7 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.indexer.IndexUpdater;
+import org.codelibs.fess.ingest.IngestFactory;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -93,6 +94,8 @@ public final class ComponentUtil {
     private static final Logger logger = LogManager.getLogger(ComponentUtil.class);
 
     private static Map<String, Object> componentMap = new HashMap<>();
+
+    private static final String INGEST_FACTORY = "ingestFactory";
 
     private static final String NOTIFICATION_HELPER = "notificationHelper";
 
@@ -472,6 +475,10 @@ public final class ComponentUtil {
 
     public static NotificationHelper getNotificationHelper() {
         return getComponent(NOTIFICATION_HELPER);
+    }
+
+    public static IngestFactory getIngestFactory() {
+        return getComponent(INGEST_FACTORY);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

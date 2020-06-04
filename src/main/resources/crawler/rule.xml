@@ -38,7 +38,7 @@
 	<component name="webHtmlRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"webHtmlRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.FessResponseProcessor">
 				<property name="transformer">fessXpathTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>
@@ -59,7 +59,7 @@
 	<component name="webFileRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"webFileRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.FessResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>
@@ -88,7 +88,7 @@
 	<component name="fsFileRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"fsFileRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.FessResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>
@@ -122,7 +122,7 @@
 	<component name="defaultRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"defaultRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.FessResponseProcessor">
 				<property name="transformer">fessStandardTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>

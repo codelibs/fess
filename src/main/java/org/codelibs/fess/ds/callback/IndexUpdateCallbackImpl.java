@@ -31,6 +31,8 @@ import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.ingest.IngestFactory;
+import org.codelibs.fess.ingest.Ingester;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
@@ -50,6 +52,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected int maxDocumentCacheSize;
 
+    private IngestFactory ingestFactory;
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -57,6 +61,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
         maxDocumentRequestSize = Long.parseLong(ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSize());
         maxDocumentCacheSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentCacheSizeAsInteger();
+        ingestFactory = ComponentUtil.getIngestFactory();
     }
 
     /* (non-Javadoc)
@@ -111,7 +116,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         ComponentUtil.getLanguageHelper().updateDocument(dataMap);
 
         synchronized (docList) {
-            docList.add(dataMap);
+            docList.add(ingest(paramMap, dataMap));
             final long contentSize = indexingHelper.calculateDocumentSize(dataMap);
             docList.addContentSize(contentSize);
             final long processingTime = System.currentTimeMillis() - startTime;
@@ -133,6 +138,18 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.debug("The number of an added document is {}.", documentSize.get());
         }
 
+    }
+
+    protected Map<String, Object> ingest(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+        Map<String, Object> target = dataMap;
+        for (final Ingester ingester : ingestFactory.getIngesters()) {
+            try {
+                target = ingester.process(target, paramMap);
+            } catch (Exception e) {
+                logger.warn("Failed to process Ingest[{}]", ingester.getClass().getSimpleName(), e);
+            }
+        }
+        return target;
     }
 
     @Override

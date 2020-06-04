@@ -363,7 +363,7 @@ public class PluginHelper {
     }
 
     public enum ArtifactType {
-        DATA_STORE("fess-ds"), THEME("fess-theme"), UNKNOWN("jar");
+        DATA_STORE("fess-ds"), THEME("fess-theme"), INGEST("fess-ingest"), UNKNOWN("jar");
 
         private final String id;
 
@@ -380,6 +380,8 @@ public class PluginHelper {
                 return DATA_STORE;
             } else if (name.startsWith(THEME.getId())) {
                 return THEME;
+            } else if (name.startsWith(INGEST.getId())) {
+                return INGEST;
             }
             return UNKNOWN;
         }
