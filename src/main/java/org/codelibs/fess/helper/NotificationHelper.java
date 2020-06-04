@@ -39,7 +39,7 @@ public class NotificationHelper {
         sendToGoogleChat(cardView, discloser);
     }
 
-    protected void sendToSlack(CardView cardView, SMailPostingDiscloser discloser) {
+    protected void sendToSlack(final CardView cardView, final SMailPostingDiscloser discloser) {
         // https://api.slack.com/messaging/webhooks#posting_with_webhooks
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String slackWebhookUrls = fessConfig.getSlackWebhookUrls();
@@ -76,7 +76,7 @@ public class NotificationHelper {
         return buf.toString();
     }
 
-    protected void sendToGoogleChat(CardView cardView, SMailPostingDiscloser discloser) {
+    protected void sendToGoogleChat(final CardView cardView, final SMailPostingDiscloser discloser) {
         // https://developers.google.com/hangouts/chat/how-tos/webhooks
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String googleChatWebhookUrls = fessConfig.getGoogleChatWebhookUrls();

@@ -194,7 +194,7 @@ public class SystemHelper {
 
     public String getUsername() {
         final RequestManager requestManager = ComponentUtil.getRequestManager();
-        return requestManager.findUserBean(FessUserBean.class).map(user -> user.getUserId()).orElse(Constants.GUEST_USER);
+        return requestManager.findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(Constants.GUEST_USER);
     }
 
     public Date getCurrentTime() {
@@ -571,7 +571,7 @@ public class SystemHelper {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Updated System Cpu {}%", systemCpuPercent);
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.warn("Failed to get SystemCpuPercent.", e);
                         return 0;
                     }
@@ -598,7 +598,7 @@ public class SystemHelper {
         return productVersion;
     }
 
-    public void setSystemCpuCheckInterval(long systemCpuCheckInterval) {
+    public void setSystemCpuCheckInterval(final long systemCpuCheckInterval) {
         this.systemCpuCheckInterval = systemCpuCheckInterval;
     }
 }

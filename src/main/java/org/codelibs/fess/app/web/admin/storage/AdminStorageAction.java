@@ -162,7 +162,7 @@ public class AdminStorageAction extends FessAdminAction {
         try (final InputStream in = uploadFile.getInputStream()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final MinioClient minioClient = createClient(fessConfig);
-            minioClient.putObject(fessConfig.getStorageBucket(), objectName, in, new PutObjectOptions((long) uploadFile.getFileSize(), -1));
+            minioClient.putObject(fessConfig.getStorageBucket(), objectName, in, new PutObjectOptions(uploadFile.getFileSize(), -1));
         } catch (final Exception e) {
             throw new StorageException("Failed to upload " + objectName, e);
         }
