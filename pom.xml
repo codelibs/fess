@@ -60,7 +60,7 @@
 		<suggest.version>7.7.0</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.7.0</elasticsearch.version>
+		<elasticsearch.version>7.7.1</elasticsearch.version>
 		<elasticsearch.httpclient.version>7.7.0</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
