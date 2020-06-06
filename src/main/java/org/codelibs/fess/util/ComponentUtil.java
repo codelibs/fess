@@ -528,6 +528,10 @@ public final class ComponentUtil {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(RELATED_QUERY_HELPER);
     }
 
+    public static boolean hasIngestFactory() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(INGEST_FACTORY);
+    }
+
     public static boolean available() {
         try {
             return SingletonLaContainer.getComponent(SYSTEM_HELPER) != null;

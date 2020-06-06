@@ -30,11 +30,13 @@ import org.codelibs.fess.util.ComponentUtil;
 public class FessResponseProcessor extends DefaultResponseProcessor {
     private static final Logger logger = LogManager.getLogger(FessResponseProcessor.class);
 
-    private IngestFactory ingestFactory;
+    private IngestFactory ingestFactory = null;
 
     @PostConstruct
     public void init() {
-        ingestFactory = ComponentUtil.getIngestFactory();
+        if (ComponentUtil.hasIngestFactory()) {
+            ingestFactory = ComponentUtil.getIngestFactory();
+        }
     }
 
     @Override
@@ -43,6 +45,9 @@ public class FessResponseProcessor extends DefaultResponseProcessor {
     }
 
     private ResultData ingest(final ResponseData responseData, final ResultData resultData) {
+        if (ingestFactory == null) {
+            return resultData;
+        }
         ResultData target = resultData;
         for (final Ingester ingester : ingestFactory.getIngesters()) {
             try {

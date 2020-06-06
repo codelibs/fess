@@ -52,7 +52,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected int maxDocumentCacheSize;
 
-    private IngestFactory ingestFactory;
+    private IngestFactory ingestFactory = null;
 
     @PostConstruct
     public void init() {
@@ -61,7 +61,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
         maxDocumentRequestSize = Long.parseLong(ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSize());
         maxDocumentCacheSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentCacheSizeAsInteger();
-        ingestFactory = ComponentUtil.getIngestFactory();
+        if (ComponentUtil.hasIngestFactory()) {
+            ingestFactory = ComponentUtil.getIngestFactory();
+        }
     }
 
     /* (non-Javadoc)
