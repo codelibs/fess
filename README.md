@@ -81,6 +81,10 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
  - [Simple](https://github.com/codelibs/fess-theme-simple)
  - [Classic](https://github.com/codelibs/fess-theme-classic)
 
+## Ingest
+
+ - [Logger](https://github.com/codelibs/fess-ingest-logger)
+
 ## Localization
 
 ### Japanese
