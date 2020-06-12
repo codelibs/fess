@@ -84,6 +84,7 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
 ## Ingest
 
  - [Logger](https://github.com/codelibs/fess-ingest-logger)
+ - [NDJSON](https://github.com/codelibs/fess-ingest-ndjson)
 
 ## Localization
 
