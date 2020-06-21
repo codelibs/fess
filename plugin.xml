@@ -13,48 +13,48 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-extension -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="7.7.0" />
-			<param name="plugin.zip.version" value="7.7.0" />
+			<param name="plugin.version" value="7.8.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.8.0-20200621.120633-2" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="7.7.0" />
-			<param name="plugin.zip.version" value="7.7.0" />
+			<param name="plugin.version" value="7.8.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.8.0-20200621.121626-1" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="7.7.0" />
-			<param name="plugin.zip.version" value="7.7.0" />
+			<param name="plugin.version" value="7.8.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.8.0-20200621.122210-1" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="7.7.0" />
-			<param name="plugin.zip.version" value="7.7.0" />
+			<param name="plugin.version" value="7.8.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.8.0-20200619.213931-1" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="7.7.0" />
-			<param name="plugin.zip.version" value="7.7.0" />
+			<param name="plugin.version" value="7.8.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="7.8.0-20200619.215156-1" />
 		</antcall>
 
 		<antcall target="remove.jars" />

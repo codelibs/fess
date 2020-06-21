@@ -181,10 +181,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
         String stats = null;
         try {
             final FessEsClient esClient = ComponentUtil.getFessEsClient();
-            final NodesStatsResponse response =
-                    esClient.admin().cluster().prepareNodesStats().setIngest(false).setBreaker(false).setDiscovery(false).setFs(true)
-                            .setHttp(true).setIndices(true).setJvm(true).setOs(true).setProcess(true).setScript(false).setThreadPool(true)
-                            .setTransport(true).execute().actionGet(10000L);
+            final NodesStatsResponse response = esClient.admin().cluster().prepareNodesStats().all().execute().actionGet(10000L);
             final XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
             response.toXContent(builder, ToXContent.EMPTY_PARAMS);

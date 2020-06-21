@@ -138,7 +138,7 @@ import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.settings.Settings;
@@ -412,7 +412,7 @@ public class FessEsClient implements Client {
 
         final GetMappingsResponse getMappingsResponse =
                 client.admin().indices().prepareGetMappings(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
-        final ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.mappings().get(indexName);
+        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings().get(indexName);
         if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
             final String mappingFile = indexConfigPath + "/" + index + "/" + docType + ".json";

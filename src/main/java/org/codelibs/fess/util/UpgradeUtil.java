@@ -27,14 +27,14 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetadata;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentType;
 
@@ -93,7 +93,7 @@ public final class UpgradeUtil {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final GetMappingsResponse getMappingsResponse =
                 indicesClient.prepareGetMappings(index).execute().actionGet(fessConfig.getIndexIndicesTimeout());
-        final ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.mappings().get(index);
+        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings().get(index);
         if (indexMappings == null || !indexMappings.containsKey(type)) {
             String source = null;
             final String mappingFile = indexResourcePath + "/" + type + ".json";
@@ -124,7 +124,7 @@ public final class UpgradeUtil {
             final String field, final String source) {
         final GetFieldMappingsResponse gfmResponse =
                 indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
-        final FieldMappingMetaData fieldMappings = gfmResponse.fieldMappings(index, type, field);
+        final FieldMappingMetadata fieldMappings = gfmResponse.fieldMappings(index, type, field);
         if (fieldMappings == null || fieldMappings.isNull()) {
             try {
                 final AcknowledgedResponse pmResponse =
