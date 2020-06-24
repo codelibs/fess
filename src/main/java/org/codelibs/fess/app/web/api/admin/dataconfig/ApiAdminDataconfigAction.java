@@ -63,18 +63,17 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         final DataConfigPager pager = copyBeanToNewBean(body, DataConfigPager.class);
         final List<DataConfig> list = dataConfigService.getDataConfigList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/dataconfig/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
-        return asJson(new ApiConfigResponse()
-                .setting(dataConfigService.getDataConfig(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(Status.OK).result());
+        return asJson(new ApiConfigResponse().setting(dataConfigService.getDataConfig(id).map(this::createEditBody).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(Status.OK).result());
     }
 
     // PUT /api/admin/dataconfig/setting

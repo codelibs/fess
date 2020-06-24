@@ -552,9 +552,7 @@ public class FessEsClient implements Client {
                                 final Map<String, Map<String, String>> result =
                                         mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
                                         });
-                                if (result.containsKey("index")) {
-                                    return line;
-                                } else if (result.containsKey("update")) {
+                                if (result.containsKey("index") || result.containsKey("update")) {
                                     return line;
                                 } else if (result.containsKey("delete")) {
                                     return StringUtil.EMPTY;

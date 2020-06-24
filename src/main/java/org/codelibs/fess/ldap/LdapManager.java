@@ -367,7 +367,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         search(fessConfig.getLdapAdminUserBaseDn(),
                 fessConfig.getLdapAdminUserFilter(user.getName()),
                 null,
@@ -446,7 +446,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
         // attributes
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, adminEnv, result -> {
@@ -926,7 +926,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
 
         stream(user.getGroupNames()).of(stream -> stream.forEach(name -> {
@@ -969,7 +969,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
                 logger.info("{} exists in LDAP server.", role.getName());
@@ -994,7 +994,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
                 final String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
@@ -1011,7 +1011,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
                 setAttributeValue(result, fessConfig.getLdapAttrGidNumber(), o -> group.setGidNumber(DfTypeUtil.toLong(o)));
@@ -1024,7 +1024,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
         search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
@@ -1083,7 +1083,7 @@ public class LdapManager {
             return;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
                 final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
@@ -1099,7 +1099,7 @@ public class LdapManager {
             return false;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(username);
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(username), null, adminEnv, result -> {
             if (!result.isEmpty()) {

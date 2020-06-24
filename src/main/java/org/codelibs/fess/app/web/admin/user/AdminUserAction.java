@@ -159,12 +159,12 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
         userService.getUser(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
         resetPassword(form);
         saveToken();
@@ -194,7 +194,7 @@ public class AdminUserAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
                 resetPassword(form);
             });
@@ -210,10 +210,10 @@ public class AdminUserAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, () -> asEditHtml());
-        validateAttributes(form.attributes, v -> throwValidationError(v, () -> asEditHtml()));
-        verifyPassword(form, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        validateAttributes(form.attributes, v -> throwValidationError(v, this::asEditHtml));
+        verifyPassword(form, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getUser(form).ifPresent(
                 entity -> {
                     try {
@@ -222,10 +222,10 @@ public class AdminUserAction extends FessAdminAction {
                     } catch (final Exception e) {
                         logger.error("Failed to add " + entity, e);
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -234,10 +234,10 @@ public class AdminUserAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        validateAttributes(form.attributes, v -> throwValidationError(v, () -> asEditHtml()));
-        verifyPassword(form, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        validateAttributes(form.attributes, v -> throwValidationError(v, this::asEditHtml));
+        verifyPassword(form, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getUser(form).ifPresent(
                 entity -> {
                     try {
@@ -246,10 +246,10 @@ public class AdminUserAction extends FessAdminAction {
                     } catch (final Exception e) {
                         logger.error("Failed to update " + entity, e);
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -258,13 +258,13 @@ public class AdminUserAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
         getUserBean().ifPresent(u -> {
             if (u.getFessUser() instanceof User && form.name.equals(u.getUserId())) {
-                throwValidationError(messages -> messages.addErrorsCouldNotDeleteLoggedInUser(GLOBAL), () -> asDetailsHtml());
+                throwValidationError(messages -> messages.addErrorsCouldNotDeleteLoggedInUser(GLOBAL), this::asDetailsHtml);
             }
         });
-        verifyToken(() -> asDetailsHtml());
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         userService
                 .getUser(id)
@@ -277,10 +277,10 @@ public class AdminUserAction extends FessAdminAction {
                                 logger.error("Failed to delete " + entity, e);
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        () -> asDetailsHtml());
+                                        this::asDetailsHtml);
                             }
                         }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
                 });
         return redirect(getClass());
     }
@@ -334,7 +334,7 @@ public class AdminUserAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

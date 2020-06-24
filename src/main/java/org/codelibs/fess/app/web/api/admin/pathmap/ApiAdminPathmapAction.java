@@ -45,15 +45,15 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
         final PathMapPager pager = copyBeanToNewBean(body, PathMapPager.class);
         final List<PathMapping> list = pathMappingService.getPathMappingList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/pathmap/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiResult.ApiConfigResponse()
-                .setting(pathMappingService.getPathMapping(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
+                .setting(pathMappingService.getPathMapping(id).map(this::createEditBody).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
                     return null;
                 })).status(ApiResult.Status.OK).result());

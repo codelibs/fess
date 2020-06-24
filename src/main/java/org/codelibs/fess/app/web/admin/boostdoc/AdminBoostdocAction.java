@@ -132,12 +132,12 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
         boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
@@ -166,7 +166,7 @@ public class AdminBoostdocAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });
@@ -179,8 +179,8 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getBoostDocumentRule(form).ifPresent(
                 entity -> {
                     try {
@@ -188,10 +188,10 @@ public class AdminBoostdocAction extends FessAdminAction {
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -200,8 +200,8 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getBoostDocumentRule(form).ifPresent(
                 entity -> {
                     try {
@@ -209,10 +209,10 @@ public class AdminBoostdocAction extends FessAdminAction {
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -221,8 +221,8 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         boostDocumentRuleService
                 .getBoostDocumentRule(id)
@@ -234,10 +234,10 @@ public class AdminBoostdocAction extends FessAdminAction {
                             } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        () -> asEditHtml());
+                                        this::asEditHtml);
                             }
                         }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
                 });
         return redirect(getClass());
     }
@@ -284,7 +284,7 @@ public class AdminBoostdocAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

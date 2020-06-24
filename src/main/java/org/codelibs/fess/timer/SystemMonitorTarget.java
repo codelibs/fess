@@ -52,9 +52,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
             final Object value = supplier.get();
             if (value == null) {
                 buf.append("null");
-            } else if (value instanceof Integer) {
-                buf.append((value));
-            } else if (value instanceof Long) {
+            } else if ((value instanceof Integer) || (value instanceof Long)) {
                 buf.append((value));
             } else if (value instanceof Short) {
                 buf.append(((Short) value).shortValue());

@@ -147,7 +147,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         for (final Ingester ingester : ingestFactory.getIngesters()) {
             try {
                 target = ingester.process(target, paramMap);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to process Ingest[{}]", ingester.getClass().getSimpleName(), e);
             }
         }

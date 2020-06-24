@@ -110,7 +110,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminWizard_AdminWizardConfigJsp));
-        verifyTokenKeep(() -> asIndexHtml());
+        verifyTokenKeep(this::asIndexHtml);
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
         return redirectWith(getClass(), moreUrl("crawlingConfigForm"));
@@ -120,7 +120,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminWizard_AdminWizardConfigJsp));
-        verifyToken(() -> asIndexHtml());
+        verifyToken(this::asIndexHtml);
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
         return redirectWith(getClass(), moreUrl("startCrawlingForm"));
@@ -288,7 +288,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse startCrawling(final StartCrawlingForm form) {
-        verifyToken(() -> asIndexHtml());
+        verifyToken(this::asIndexHtml);
         if (!processHelper.isProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();
             final JobManager jobManager = ComponentUtil.getJobManager();

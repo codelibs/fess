@@ -77,7 +77,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         stopwordsPager.clear();
         return asHtml(path_AdminDictStopwords_AdminDictStopwordsJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -87,7 +87,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         pageNumber.ifPresent(num -> {
             stopwordsPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
@@ -101,7 +101,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         copyBeanToBean(form, stopwordsPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminDictStopwords_AdminDictStopwordsJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -111,7 +111,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         stopwordsPager.clear();
         return asHtml(path_AdminDictStopwords_AdminDictStopwordsJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -215,7 +215,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
             stopwordsService.getStopwordsFile(dictId).ifPresent(file -> {
                 RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
-                throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL), () -> asDictIndexHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL), this::asDictIndexHtml);
             });
         });
     }
@@ -253,7 +253,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
             stopwordsService.getStopwordsFile(dictId).ifPresent(file -> {
                 RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
-                throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL), () -> asDictIndexHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL), this::asDictIndexHtml);
             });
         });
     }
@@ -288,12 +288,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        createStopwordsItem(form, () -> asEditHtml()).ifPresent(entity -> {
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
+        createStopwordsItem(form, this::asEditHtml).ifPresent(entity -> {
             stopwordsService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml()));
+        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -301,14 +301,14 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        createStopwordsItem(form, () -> asEditHtml()).ifPresent(entity -> {
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
+        createStopwordsItem(form, this::asEditHtml).ifPresent(entity -> {
             stopwordsService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(
                 () -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                        () -> asEditHtml()));
+                        this::asEditHtml));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -316,8 +316,8 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         stopwordsService
                 .getStopwordsItem(form.dictId, form.id)
                 .ifPresent(entity -> {
@@ -326,7 +326,7 @@ public class AdminDictStopwordsAction extends FessAdminAction {
                 })
                 .orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            () -> asDetailsHtml());
+                            this::asDetailsHtml);
                 });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }

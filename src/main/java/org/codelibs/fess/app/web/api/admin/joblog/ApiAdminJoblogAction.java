@@ -52,15 +52,14 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final JobLogPager pager = copyBeanToNewBean(body, JobLogPager.class);
         final List<JobLog> list = jobLogService.getJobLogList(pager);
-        return asJson(new ApiResult.ApiLogsResponse<EditBody>()
-                .logs(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiLogsResponse<EditBody>().logs(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/joblog/log/{id}
     @Execute
     public JsonResponse<ApiResult> get$log(final String id) {
-        return asJson(new ApiLogResponse().log(jobLogService.getJobLog(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
+        return asJson(new ApiLogResponse().log(jobLogService.getJobLog(id).map(this::createEditBody).orElseGet(() -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
             return null;
         })).status(Status.OK).result());

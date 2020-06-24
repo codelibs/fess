@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
-import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.util.ComponentUtil;
 
 public abstract class Ingester {

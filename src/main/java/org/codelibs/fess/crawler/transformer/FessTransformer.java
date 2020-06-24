@@ -110,36 +110,30 @@ public interface FessTransformer {
 
     default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (fessConfig.getIndexFieldUrl().equals(key)) {
+        if (fessConfig.getIndexFieldUrl().equals(key) || !dataMap.containsKey(key) || !getFessConfig().isCrawlerDocumentAppendData()) {
             dataMap.put(key, value);
-        } else if (dataMap.containsKey(key)) {
-            if (getFessConfig().isCrawlerDocumentAppendData()) {
-                final Object oldValue = dataMap.get(key);
-                final Object[] oldValues;
-                if (oldValue instanceof Object[]) {
-                    oldValues = (Object[]) oldValue;
-                } else if (oldValue instanceof Collection<?>) {
-                    oldValues = ((Collection<?>) oldValue).toArray();
-                } else {
-                    oldValues = new Object[] { oldValue };
-                }
-                if (value.getClass().isArray()) {
-                    final Object[] newValues = (Object[]) value;
-                    final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
-                    for (int i = 0; i < newValues.length; i++) {
-                        values[values.length - 1 + i] = newValues[i];
-                    }
-                    dataMap.put(key, values);
-                } else {
-                    final Object[] values = Arrays.copyOf(oldValues, oldValues.length + 1);
-                    values[values.length - 1] = value;
-                    dataMap.put(key, values);
-                }
-            } else {
-                dataMap.put(key, value);
-            }
         } else {
-            dataMap.put(key, value);
+            final Object oldValue = dataMap.get(key);
+            final Object[] oldValues;
+            if (oldValue instanceof Object[]) {
+                oldValues = (Object[]) oldValue;
+            } else if (oldValue instanceof Collection<?>) {
+                oldValues = ((Collection<?>) oldValue).toArray();
+            } else {
+                oldValues = new Object[] { oldValue };
+            }
+            if (value.getClass().isArray()) {
+                final Object[] newValues = (Object[]) value;
+                final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
+                for (int i = 0; i < newValues.length; i++) {
+                    values[values.length - 1 + i] = newValues[i];
+                }
+                dataMap.put(key, values);
+            } else {
+                final Object[] values = Arrays.copyOf(oldValues, oldValues.length + 1);
+                values[values.length - 1] = value;
+                dataMap.put(key, values);
+            }
         }
     }
 

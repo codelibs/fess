@@ -136,7 +136,7 @@ public class QueryStringBuilder {
         final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger();
 
         stream(conditions.get(SearchRequestParams.AS_OCCURRENCE)).of(
-                stream -> stream.filter(q -> isOccurrence(q)).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
+                stream -> stream.filter(this::isOccurrence).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
 
         stream(conditions.get(SearchRequestParams.AS_Q)).of(
                 stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(

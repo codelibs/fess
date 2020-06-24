@@ -132,7 +132,7 @@ public class SuggestHelper {
             final String from = LocalDateTime.now().minusDays(fessConfig.getPurgeSuggestSearchLogDay()).format(DateTimeFormatter.ISO_DATE);
             cb.query().addQuery(QueryBuilders.rangeQuery("requestedAt").gte(from));
             cb.query().addOrderBy_RequestedAt_Asc();
-        }, searchLogsList -> indexFromSearchLog(searchLogsList));
+        }, this::indexFromSearchLog);
     }
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {

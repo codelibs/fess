@@ -150,7 +150,7 @@ public class AdminRoleAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });
@@ -163,8 +163,8 @@ public class AdminRoleAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getRole(form).ifPresent(
                 entity -> {
                     try {
@@ -173,10 +173,10 @@ public class AdminRoleAction extends FessAdminAction {
                     } catch (final Exception e) {
                         logger.error("Failed to add " + entity, e);
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -185,8 +185,8 @@ public class AdminRoleAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         roleService.getRole(id).ifPresent(entity -> {
             try {
@@ -194,10 +194,10 @@ public class AdminRoleAction extends FessAdminAction {
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to delete " + entity, e);
-                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
             }
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
         });
         return redirect(getClass());
     }
@@ -238,7 +238,7 @@ public class AdminRoleAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

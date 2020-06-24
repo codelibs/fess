@@ -401,7 +401,7 @@ public class ThumbnailManager {
                     }
                 });
 
-                deleteFileMap.values().forEach(v -> deleteFile(v));
+                deleteFileMap.values().forEach(this::deleteFile);
                 count += deleteFileMap.size();
             }
         }

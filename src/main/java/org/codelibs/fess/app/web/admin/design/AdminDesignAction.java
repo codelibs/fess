@@ -120,7 +120,7 @@ public class AdminDesignAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml(form));
-        verifyToken(() -> asListHtml());
+        verifyToken(this::asListHtml);
         final String uploadedFileName = form.designFile.getFileName();
         String fileName = form.designFileName;
         if (StringUtil.isBlank(fileName)) {
@@ -135,11 +135,11 @@ public class AdminDesignAction extends FessAdminAction {
                     fileName = fileName.substring(pos + 1);
                 }
             } catch (final Exception e) {
-                throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid("designFile"), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid("designFile"), this::asListHtml);
             }
         }
         if (StringUtil.isBlank(fileName)) {
-            throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFile"), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFile"), this::asListHtml);
         }
 
         File uploadFile;
@@ -156,11 +156,11 @@ public class AdminDesignAction extends FessAdminAction {
         } else if (fessConfig.isSupportedUploadedFile(fileName) || fessConfig.isSupportedUploadedFile(uploadedFileName)) {
             uploadFile = ResourceUtil.getResourceAsFileNoException(fileName);
             if (uploadFile == null) {
-                throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFileName"), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFileName"), this::asListHtml);
                 return null;
             }
         } else {
-            throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), this::asListHtml);
             return null;
         }
 
@@ -175,7 +175,7 @@ public class AdminDesignAction extends FessAdminAction {
             saveInfo(messages -> messages.addSuccessUploadDesignFile(GLOBAL, currentFileName));
         } catch (final Exception e) {
             logger.error("Failed to write an image file: {}", fileName, e);
-            throwValidationError(messages -> messages.addErrorsFailedToWriteDesignImageFile(GLOBAL), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsFailedToWriteDesignImageFile(GLOBAL), this::asListHtml);
         }
         return redirect(getClass());
     }
@@ -198,11 +198,11 @@ public class AdminDesignAction extends FessAdminAction {
     public StreamResponse download(final FileAccessForm form) {
         final File file = getTargetFile(form.fileName).get();
         if (file == null) {
-            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), this::asListHtml);
             return null;
         }
-        validate(form, messages -> {}, () -> asListHtml());
-        verifyTokenKeep(() -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
+        verifyTokenKeep(this::asListHtml);
         return asStream(file.getName()).contentTypeOctetStream().stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
@@ -216,14 +216,14 @@ public class AdminDesignAction extends FessAdminAction {
         getTargetFile(form.fileName).ifPresent(file -> {
             if (!file.delete()) {
                 logger.error("Failed to delete {}", file.getAbsolutePath());
-                throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), this::asListHtml);
             }
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), this::asListHtml);
         });
         saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, form.fileName));
-        validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
+        verifyToken(this::asListHtml);
         return redirect(getClass());
     }
 
@@ -275,7 +275,7 @@ public class AdminDesignAction extends FessAdminAction {
             saveInfo(messages -> messages.addSuccessUpdateDesignJspFile(GLOBAL, jspFile.getAbsolutePath()));
         } catch (final Exception e) {
             logger.error("Failed to update {}", form.fileName, e);
-            throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), this::asListHtml);
         }
         return redirect(getClass());
     }
@@ -307,11 +307,11 @@ public class AdminDesignAction extends FessAdminAction {
         try {
             final String[] values = URLDecoder.decode(fileName, Constants.UTF_8).split(":");
             if (values.length != 2) {
-                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), this::asListHtml);
             }
             final String jspFileName = systemHelper.getDesignJspFileName(values[1]);
             if (jspFileName == null) {
-                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), this::asListHtml);
             }
             String path;
             if ("view".equals(jspType)) {
@@ -321,7 +321,7 @@ public class AdminDesignAction extends FessAdminAction {
             }
             final File jspFile = new File(getServletContext().getRealPath(path));
             if (!jspFile.exists()) {
-                throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), this::asListHtml);
             }
             return jspFile;
         } catch (final UnsupportedEncodingException e) {

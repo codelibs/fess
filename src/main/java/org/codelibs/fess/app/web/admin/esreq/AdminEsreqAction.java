@@ -62,14 +62,14 @@ public class AdminEsreqAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
-        return asListHtml(() -> saveToken());
+        return asListHtml(this::saveToken);
     }
 
     @Execute
     @Secured({ ROLE })
     public ActionResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asListHtml(null));
-        verifyTokenKeep(() -> asListHtml(() -> saveToken()));
+        verifyTokenKeep(() -> asListHtml(this::saveToken));
 
         String header = null;
         final StringBuilder buf = new StringBuilder(1000);
@@ -77,7 +77,7 @@ public class AdminEsreqAction extends FessAdminAction {
             header = ReaderUtil.readLine(reader);
             if (header == null) {
                 throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, "no header"),
-                        () -> asListHtml(() -> saveToken()));
+                        () -> asListHtml(this::saveToken));
                 return redirect(getClass()); // no-op
             }
             String line;
@@ -86,14 +86,13 @@ public class AdminEsreqAction extends FessAdminAction {
             }
         } catch (final Exception e) {
             throwValidationError(messages -> messages.addErrorsFailedToReadRequestFile(GLOBAL, e.getMessage()),
-                    () -> asListHtml(() -> saveToken()));
+                    () -> asListHtml(this::saveToken));
         }
 
         final CurlRequest curlRequest = getCurlRequest(header);
         if (curlRequest == null) {
             final String msg = header;
-            throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, msg),
-                    () -> asListHtml(() -> saveToken()));
+            throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, msg), () -> asListHtml(this::saveToken));
         } else {
             try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
                 final File tempFile = ComponentUtil.getSystemHelper().createTempFile("esreq_", ".json");
@@ -117,7 +116,7 @@ public class AdminEsreqAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to process request file: " + form.requestFile.getFileName(), e);
                 throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, e.getMessage()),
-                        () -> asListHtml(() -> saveToken()));
+                        () -> asListHtml(this::saveToken));
             }
         }
         return redirect(getClass()); // no-op

@@ -58,18 +58,17 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
         final DuplicateHostPager pager = copyBeanToNewBean(body, DuplicateHostPager.class);
         final List<DuplicateHost> list = duplicateHostService.getDuplicateHostList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/duplicatehost/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
-        return asJson(new ApiConfigResponse()
-                .setting(duplicateHostService.getDuplicateHost(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(Status.OK).result());
+        return asJson(new ApiConfigResponse().setting(duplicateHostService.getDuplicateHost(id).map(this::createEditBody).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(Status.OK).result());
     }
 
     // PUT /api/admin/duplicatehost/setting

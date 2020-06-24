@@ -59,19 +59,17 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final AccessTokenPager pager = copyBeanToNewBean(body, AccessTokenPager.class);
         final List<AccessToken> list = accessTokenService.getAccessTokenList(pager);
-        return asJson(new ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
+        return asJson(new ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
                 .total(pager.getAllRecordCount()).status(Status.OK).result());
     }
 
     // GET /api/admin/accesstoken/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
-        return asJson(new ApiConfigResponse()
-                .setting(accessTokenService.getAccessToken(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(Status.OK).result());
+        return asJson(new ApiConfigResponse().setting(accessTokenService.getAccessToken(id).map(this::createEditBody).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(Status.OK).result());
     }
 
     // PUT /api/admin/accesstoken/setting

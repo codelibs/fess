@@ -126,7 +126,7 @@ public class AdminFailureurlAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });
@@ -140,8 +140,8 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         failureUrlService.getFailureUrl(id).alwaysPresent(entity -> {
             failureUrlService.delete(entity);
@@ -153,7 +153,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteall() {
-        verifyToken(() -> asListHtml());
+        verifyToken(this::asListHtml);
         failureUrlService.deleteAll(failureUrlPager);
         failureUrlPager.clear();
         saveInfo(messages -> messages.addSuccessFailureUrlDeleteAll(GLOBAL));
@@ -167,7 +167,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

@@ -46,25 +46,24 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
         final GroupPager pager = copyBeanToNewBean(body, GroupPager.class);
         final List<Group> list = groupService.getGroupList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/group/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
-        return asJson(new ApiResult.ApiConfigResponse()
-                .setting(groupService.getGroup(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigResponse().setting(groupService.getGroup(id).map(this::createEditBody).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(ApiResult.Status.OK).result());
     }
 
     // PUT /api/admin/group/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final CreateBody body) {
         validateApi(body, messages -> {});
-        validateAttributes(body.attributes, v -> throwValidationErrorApi(v));
+        validateAttributes(body.attributes, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
         final Group entity = getGroup(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -85,7 +84,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final EditBody body) {
         validateApi(body, messages -> {});
-        validateAttributes(body.attributes, v -> throwValidationErrorApi(v));
+        validateAttributes(body.attributes, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;
         final Group entity = getGroup(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {

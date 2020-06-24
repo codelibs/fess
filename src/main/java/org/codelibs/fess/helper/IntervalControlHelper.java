@@ -120,9 +120,8 @@ public class IntervalControlHelper {
 
         public boolean isTarget(final int hours, final int minutes, final int day) {
             if (reverse) {
-                if (compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1)) {
-                    return true;
-                } else if (compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day)) {
+                if ((compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1))
+                        || (compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day))) {
                     return true;
                 }
                 return false;

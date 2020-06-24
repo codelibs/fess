@@ -80,7 +80,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         kuromojiPager.clear();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -90,7 +90,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         pageNumber.ifPresent(num -> {
             kuromojiPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
@@ -104,7 +104,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         copyBeanToBean(form, kuromojiPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -114,7 +114,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
-        validate(form, messages -> {}, () -> asDictIndexHtml());
+        validate(form, messages -> {}, this::asDictIndexHtml);
         kuromojiPager.clear();
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -219,7 +219,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             kuromojiService.getKuromojiFile(dictId).ifPresent(file -> {
                 RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
-                throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> asDictIndexHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), this::asDictIndexHtml);
             });
         });
     }
@@ -257,7 +257,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             kuromojiService.getKuromojiFile(dictId).ifPresent(file -> {
                 RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
-                throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> asDictIndexHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), this::asDictIndexHtml);
             });
         });
     }
@@ -292,19 +292,19 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        createKuromojiItem(form, () -> asEditHtml()).ifPresent(
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
+        createKuromojiItem(form, this::asEditHtml).ifPresent(
                 entity -> {
                     try {
                         kuromojiService.store(form.dictId, entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
@@ -313,19 +313,19 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        createKuromojiItem(form, () -> asEditHtml()).ifPresent(
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
+        createKuromojiItem(form, this::asEditHtml).ifPresent(
                 entity -> {
                     try {
                         kuromojiService.store(form.dictId, entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
@@ -334,8 +334,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         kuromojiService
                 .getKuromojiItem(form.dictId, form.id)
                 .ifPresent(
@@ -346,12 +346,12 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                             } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        () -> asEditHtml());
+                                        this::asEditHtml);
                             }
                         })
                 .orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            () -> asDetailsHtml());
+                            this::asDetailsHtml);
                 });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }

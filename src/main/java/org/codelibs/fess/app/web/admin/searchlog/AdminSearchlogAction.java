@@ -149,8 +149,8 @@ public class AdminSearchlogAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         searchLogService.getSearchLog(form.logType, form.id).alwaysPresent(e -> {
             searchLogService.deleteSearchLog(e);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));

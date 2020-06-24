@@ -170,12 +170,12 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             loadScheduledJob(form, entity);
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
@@ -208,7 +208,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                         request.setAttribute("enabled", entity.isEnabled());
                     });
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });
@@ -221,8 +221,8 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getScheduledJob(form).ifPresent(
                 entity -> {
                     try {
@@ -230,10 +230,10 @@ public class AdminSchedulerAction extends FessAdminAction {
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -242,8 +242,8 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getScheduledJob(form).ifPresent(
                 entity -> {
                     try {
@@ -251,10 +251,10 @@ public class AdminSchedulerAction extends FessAdminAction {
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -276,7 +276,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                             } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        () -> asEditHtml());
+                                        this::asEditHtml);
                             }
                         }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml(id));
@@ -388,7 +388,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

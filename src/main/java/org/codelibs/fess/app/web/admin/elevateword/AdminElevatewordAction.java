@@ -160,7 +160,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
         elevateWordService
                 .getElevateWord(id)
@@ -176,7 +176,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                                             stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
                                                     .collect(Collectors.joining("\n")));
                         }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
@@ -216,8 +216,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                                         form.crudMode = crudMode;
                                     })
                             .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                    () -> asListHtml()));
-                })).renderWith(data -> registerLabels(data));
+                                    this::asListHtml));
+                })).renderWith(this::registerLabels);
     }
 
     // -----------------------------------------------------
@@ -233,7 +233,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
-        verifyToken(() -> asDownloadHtml());
+        verifyToken(this::asDownloadHtml);
 
         return asStream("elevate.csv").contentTypeOctetStream().stream(out -> {
             final Path tempFile = ComponentUtil.getSystemHelper().createTempFile("fess-elevate-", ".csv").toPath();
@@ -241,7 +241,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     elevateWordService.exportCsv(writer);
                 } catch (final Exception e) {
-                    throwValidationError(messages -> messages.addErrorsFailedToDownloadElevateFile(GLOBAL), () -> asDownloadHtml());
+                    throwValidationError(messages -> messages.addErrorsFailedToDownloadElevateFile(GLOBAL), this::asDownloadHtml);
                 }
                 try (InputStream in = Files.newInputStream(tempFile)) {
                     out.write(in);
@@ -269,8 +269,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getElevateWord(form).ifPresent(
                 entity -> {
                     try {
@@ -280,10 +280,10 @@ public class AdminElevatewordAction extends FessAdminAction {
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -292,8 +292,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        verifyToken(this::asEditHtml);
         getElevateWord(form).ifPresent(
                 entity -> {
                     try {
@@ -303,10 +303,10 @@ public class AdminElevatewordAction extends FessAdminAction {
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -315,8 +315,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         elevateWordService
                 .getElevateWord(id)
@@ -329,19 +329,18 @@ public class AdminElevatewordAction extends FessAdminAction {
                             } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        () -> asEditHtml());
+                                        this::asEditHtml);
                             }
                         })
-                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                        () -> asDetailsHtml()));
+                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml));
         return redirect(getClass());
     }
 
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
-        validate(form, messages -> {}, () -> asUploadHtml());
-        verifyToken(() -> asUploadHtml());
+        validate(form, messages -> {}, this::asUploadHtml);
+        verifyToken(this::asUploadHtml);
         CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.elevateWordFile.getInputStream(), getCsvEncoding()))) {
                 elevateWordService.importCsv(reader);
@@ -407,7 +406,7 @@ public class AdminElevatewordAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

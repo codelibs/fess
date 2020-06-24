@@ -84,11 +84,10 @@ public class AdminPluginAction extends FessAdminAction {
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         if (UPLOAD.equals(form.id)) {
             if (form.jarFile == null) {
-                throwValidationError(messages -> messages.addErrorsPluginFileIsNotFound(GLOBAL, form.id), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsPluginFileIsNotFound(GLOBAL, form.id), this::asListHtml);
             }
             if (!form.jarFile.getFileName().endsWith(".jar")) {
-                throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()),
-                        () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()), this::asListHtml);
             }
             final String filename = form.jarFile.getFileName();
             final File tempFile = ComponentUtil.getSystemHelper().createTempFile("tmp-adminplugin-", ".jar");
@@ -99,7 +98,7 @@ public class AdminPluginAction extends FessAdminAction {
                     logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
                 }
                 logger.debug("Failed to copy {}", filename, e);
-                throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, filename), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, filename), this::asListHtml);
             }
             new Thread(() -> {
                 try {
@@ -119,7 +118,7 @@ public class AdminPluginAction extends FessAdminAction {
         } else {
             final Artifact artifact = getArtifactFromInstallForm(form);
             if (artifact == null) {
-                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asListHtml);
             }
             installArtifact(artifact);
             saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));

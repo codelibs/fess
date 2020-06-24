@@ -141,7 +141,7 @@ public class AdminJoblogAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });
@@ -154,8 +154,8 @@ public class AdminJoblogAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         jobLogService.getJobLog(id).alwaysPresent(entity -> {
             jobLogService.delete(entity);
@@ -167,7 +167,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteall() {
-        verifyToken(() -> asListHtml());
+        verifyToken(this::asListHtml);
         final List<String> jobStatusList = new ArrayList<>();
         jobStatusList.add(Constants.OK);
         jobStatusList.add(Constants.FAIL);
@@ -188,7 +188,7 @@ public class AdminJoblogAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

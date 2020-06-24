@@ -129,7 +129,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     protected HtmlResponse doSearch(final ListForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
 
         if (StringUtil.isBlank(form.q)) {
             // query matches on all documents.
@@ -147,15 +147,15 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(e.getMessageCode(), () -> asListHtml());
+            throwValidationError(e.getMessageCode(), this::asListHtml);
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(messages -> messages.addErrorsResultSizeExceeded(GLOBAL), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsResultSizeExceeded(GLOBAL), this::asListHtml);
         }
 
-        throwValidationError(messages -> messages.addErrorsInvalidQueryUnknown(GLOBAL), () -> asListHtml());
+        throwValidationError(messages -> messages.addErrorsInvalidQueryUnknown(GLOBAL), this::asListHtml);
         return null; // ignore
     }
 
@@ -207,15 +207,15 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final DeleteForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
+        verifyToken(this::asListHtml);
         final String docId = form.docId;
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
             fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), this::asListHtml);
         }
         return asListHtml();
     }
@@ -223,8 +223,8 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse deleteall(final ListForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
+        verifyToken(this::asListHtml);
         try {
             searchHelper.deleteByQuery(request, form);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
@@ -232,7 +232,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(e.getMessageCode(), () -> asListHtml());
+            throwValidationError(e.getMessageCode(), this::asListHtml);
         }
         return asListHtml();
     }
@@ -252,14 +252,14 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
         getDoc(form).ifPresent(entity -> {
             form.doc = fessConfig.convertToEditableDoc(entity);
             form.id = (String) entity.remove(fessConfig.getIndexFieldId());
             form.seqNo = (Long) entity.remove(fessConfig.getIndexFieldSeqNo());
             form.primaryTerm = (Long) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asListHtml);
         });
         saveToken();
         return asEditHtml();
@@ -269,9 +269,9 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, () -> asEditHtml());
-        validateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        validateFields(form, v -> throwValidationError(v, this::asEditHtml));
+        verifyToken(this::asEditHtml);
         getDoc(form).ifPresent(
                 entity -> {
                     try {
@@ -286,10 +286,10 @@ public class AdminSearchlistAction extends FessAdminAction {
                     } catch (final Exception e) {
                         logger.error("Failed to add " + entity, e);
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
     }
@@ -298,9 +298,9 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        validateFields(form, v -> throwValidationError(v, () -> asEditHtml()));
-        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, this::asEditHtml);
+        validateFields(form, v -> throwValidationError(v, this::asEditHtml));
+        verifyToken(this::asEditHtml);
         getDoc(form).ifPresent(
                 entity -> {
                     final String index = fessConfig.getIndexDocumentUpdateIndex();
@@ -324,10 +324,10 @@ public class AdminSearchlistAction extends FessAdminAction {
                     } catch (final Exception e) {
                         logger.error("Failed to update " + entity, e);
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                () -> asEditHtml());
+                                this::asEditHtml);
                     }
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("search").params("q", URLUtil.encode(form.q, Constants.UTF_8)));
     }
@@ -380,7 +380,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

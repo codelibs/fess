@@ -96,15 +96,15 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
         final SchedulerPager pager = copyBeanToNewBean(body, SchedulerPager.class);
         final List<ScheduledJob> list = scheduledJobService.getScheduledJobList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/scheduler/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiResult.ApiConfigResponse()
-                .setting(scheduledJobService.getScheduledJob(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
+                .setting(scheduledJobService.getScheduledJob(id).map(this::createEditBody).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
                     return null;
                 })).status(ApiResult.Status.OK).result());

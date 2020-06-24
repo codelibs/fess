@@ -146,7 +146,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                     RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
                     RenderDataUtil.register(data, "running", processHelper.isProcessRunning(entity.getSessionId()));
                 })).orElseGet(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                     return null;
                 });
     }
@@ -155,8 +155,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse threaddump(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         crawlingInfoService.getCrawlingInfo(id).ifPresent(entity -> {
             try {
@@ -164,10 +164,10 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                 saveInfo(messages -> messages.addSuccessPrintThreadDump(GLOBAL));
             } catch (final Exception e) {
                 logger.warn("Failed to print a thread dump.", e);
-                throwValidationError(messages -> messages.addErrorsFailedToPrintThreadDump(GLOBAL), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToPrintThreadDump(GLOBAL), this::asListHtml);
             }
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
         return redirect(getClass());
     }
@@ -179,8 +179,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, this::asDetailsHtml);
+        verifyToken(this::asDetailsHtml);
         final String id = form.id;
         crawlingInfoService.getCrawlingInfo(id).alwaysPresent(entity -> {
             crawlingInfoService.delete(entity);
@@ -192,7 +192,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse deleteall() {
-        verifyToken(() -> asListHtml());
+        verifyToken(this::asListHtml);
         crawlingInfoService.deleteOldSessions(processHelper.getRunningSessionIdSet());
         crawlingInfoPager.clear();
         saveInfo(messages -> messages.addSuccessCrawlingInfoDeleteAll(GLOBAL));
@@ -210,7 +210,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, () -> asListHtml());
+            }, this::asListHtml);
         }
     }
 

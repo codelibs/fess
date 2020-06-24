@@ -120,7 +120,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         if (body.doc == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
         }
-        validateFields(body, v -> throwValidationErrorApi(v));
+        validateFields(body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             try {
@@ -152,7 +152,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         if (body.doc == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
         }
-        validateFields(body, v -> throwValidationErrorApi(v));
+        validateFields(body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             final String index = fessConfig.getIndexDocumentUpdateIndex();

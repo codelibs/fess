@@ -80,7 +80,7 @@ public class AdminLogAction extends FessAdminAction {
                 }
             });
         }
-        throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), () -> asIndexHtml());
+        throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), this::asIndexHtml);
         return redirect(getClass()); // no-op
     }
 

@@ -59,12 +59,12 @@ public class User extends BsUser implements FessUser {
 
     @Override
     public String[] getRoleNames() {
-        return stream(getRoles()).get(stream -> stream.map(s -> decode(s)).toArray(n -> new String[n]));
+        return stream(getRoles()).get(stream -> stream.map(this::decode).toArray(n -> new String[n]));
     }
 
     @Override
     public String[] getGroupNames() {
-        return stream(getGroups()).get(stream -> stream.map(s -> decode(s)).toArray(n -> new String[n]));
+        return stream(getGroups()).get(stream -> stream.map(this::decode).toArray(n -> new String[n]));
     }
 
     private String decode(final String value) {

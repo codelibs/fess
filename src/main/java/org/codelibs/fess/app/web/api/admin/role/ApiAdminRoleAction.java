@@ -44,18 +44,17 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         final RolePager pager = copyBeanToNewBean(body, RolePager.class);
         final List<Role> list = roleService.getRoleList(pager);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(entity -> createEditBody(entity)).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/role/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
-        return asJson(new ApiResult.ApiConfigResponse()
-                .setting(roleService.getRole(id).map(entity -> createEditBody(entity)).orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
-                    return null;
-                })).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigResponse().setting(roleService.getRole(id).map(this::createEditBody).orElseGet(() -> {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+            return null;
+        })).status(ApiResult.Status.OK).result());
     }
 
     // PUT /api/admin/role/setting

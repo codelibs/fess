@@ -1442,36 +1442,34 @@ public interface FessProp {
         final Set<String> floatFieldSet = getIndexAdminFloatFieldSet();
         final Set<String> doubleFieldSet = getIndexAdminDoubleFieldSet();
 
-        return source.entrySet().stream().map(e -> {
-            final String key = e.getKey();
-            Object value = e.getValue();
-            if (value == null) {
-                value = StringUtil.EMPTY;
-            }
-            if (value instanceof String || value == null) {
-                return new Pair<>(key, value);
-            }
-            if (arrayFieldSet.contains(key)) {
-                if (value instanceof String[]) {
-                    value = stream((String[]) value).get(stream -> stream.collect(Collectors.joining("\n")));
-                } else if (value instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    final List<String> list = (List<String>) value;
-                    value = list.stream().collect(Collectors.joining("\n"));
-                }
-            } else if (dateFieldSet.contains(key)) {
-                value = FessFunctions.formatDate((Date) value);
-            } else if (integerFieldSet.contains(key)) {
-                value = value.toString();
-            } else if (longFieldSet.contains(key)) {
-                value = value.toString();
-            } else if (floatFieldSet.contains(key)) {
-                value = value.toString();
-            } else if (doubleFieldSet.contains(key)) {
-                value = value.toString();
-            }
-            return new Pair<>(key, value);
-        }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+        return source
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    final String key = e.getKey();
+                    Object value = e.getValue();
+                    if (value == null) {
+                        value = StringUtil.EMPTY;
+                    }
+                    if (value instanceof String || value == null) {
+                        return new Pair<>(key, value);
+                    }
+                    if (arrayFieldSet.contains(key)) {
+                        if (value instanceof String[]) {
+                            value = stream((String[]) value).get(stream -> stream.collect(Collectors.joining("\n")));
+                        } else if (value instanceof List) {
+                            @SuppressWarnings("unchecked")
+                            final List<String> list = (List<String>) value;
+                            value = list.stream().collect(Collectors.joining("\n"));
+                        }
+                    } else if (dateFieldSet.contains(key)) {
+                        value = FessFunctions.formatDate((Date) value);
+                    } else if (integerFieldSet.contains(key) || longFieldSet.contains(key) || floatFieldSet.contains(key)
+                            || doubleFieldSet.contains(key)) {
+                        value = value.toString();
+                    }
+                    return new Pair<>(key, value);
+                }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
     default Map<String, Object> convertToStorableDoc(final Map<String, Object> source) {

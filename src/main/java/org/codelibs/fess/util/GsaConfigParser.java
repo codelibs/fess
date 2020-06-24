@@ -230,7 +230,7 @@ public class GsaConfigParser extends DefaultHandler {
 
     protected String parseFilterPaths(final String text, final boolean web, final boolean file) {
         return split(text, "\n").get(
-                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(s -> getFilterPath(s)).filter(s -> {
+                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(this::getFilterPath).filter(s -> {
                     if (StringUtil.isBlank(s)) {
                         return false;
                     }
@@ -264,9 +264,8 @@ public class GsaConfigParser extends DefaultHandler {
             final String v = s.substring(REGEXP.length());
             final StringBuilder buf = new StringBuilder(100);
             return appendFileterPath(buf, unescape(v));
-        } else if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))) {
-            return escape(s) + ".*";
-        } else if (Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
+        } else if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))
+                || Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
             return escape(s) + ".*";
         } else {
             final StringBuilder buf = new StringBuilder(100);

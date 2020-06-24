@@ -52,7 +52,7 @@ public class FessResponseProcessor extends DefaultResponseProcessor {
         for (final Ingester ingester : ingestFactory.getIngesters()) {
             try {
                 target = ingester.process(target, responseData);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to process Ingest[{}]", ingester.getClass().getSimpleName(), e);
             }
         }

@@ -124,8 +124,8 @@ public class AdminBackupAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
+        validate(form, messages -> {}, this::asListHtml);
+        verifyToken(this::asListHtml);
         final String fileName = form.bulkFile.getFileName();
         final File tempFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".tmp");
         try (final InputStream in = form.bulkFile.getInputStream(); final OutputStream out = new FileOutputStream(tempFile)) {
@@ -136,7 +136,7 @@ public class AdminBackupAction extends FessAdminAction {
             if (tempFile.exists() && !tempFile.delete()) {
                 logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
             }
-            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), this::asListHtml);
         }
         saveInfo(messages -> messages.addSuccessBulkProcessStarted(GLOBAL));
         return redirect(getClass()); // no-op
@@ -155,7 +155,7 @@ public class AdminBackupAction extends FessAdminAction {
         } else if (fileName.startsWith("doc") && fileName.endsWith(".json")) {
             fileType = 5;
         } else {
-            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), this::asListHtml);
             return;
         }
 
@@ -348,7 +348,7 @@ public class AdminBackupAction extends FessAdminAction {
                         });
             }
         }
-        throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), () -> asListHtml());
+        throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), this::asListHtml);
         return redirect(getClass()); // no-op
     }
 
