@@ -48,16 +48,16 @@
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-csv" />
-			<param name="jar.version" value="13.7.0" />
-			<param name="file.version" value="13.7.0" />
+			<param name="jar.version" value="13.8.0" />
+			<param name="file.version" value="13.8.0" />
 		</antcall>
 		<!-- fess-ds-db -->
 		<antcall target="install.plugin.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-db" />
-			<param name="jar.version" value="13.7.0" />
-			<param name="file.version" value="13.7.0" />
+			<param name="jar.version" value="13.8.0" />
+			<param name="file.version" value="13.8.0" />
 		</antcall>
 	</target>
 
