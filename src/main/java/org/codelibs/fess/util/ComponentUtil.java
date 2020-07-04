@@ -512,24 +512,28 @@ public final class ComponentUtil {
         }
     }
 
+    public static boolean hasComponent(final String componentKey) {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(componentKey);
+    }
+
     public static boolean hasViewHelper() {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(VIEW_HELPER);
+        return hasComponent(VIEW_HELPER);
     }
 
     public static boolean hasQueryHelper() {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
+        return hasComponent(QUERY_HELPER);
     }
 
     public static boolean hasPopularWordHelper() {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(POPULAR_WORD_HELPER);
+        return hasComponent(POPULAR_WORD_HELPER);
     }
 
     public static boolean hasRelatedQueryHelper() {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(RELATED_QUERY_HELPER);
+        return hasComponent(RELATED_QUERY_HELPER);
     }
 
     public static boolean hasIngestFactory() {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(INGEST_FACTORY);
+        return hasComponent(INGEST_FACTORY);
     }
 
     public static boolean available() {

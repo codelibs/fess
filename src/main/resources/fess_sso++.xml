@@ -6,6 +6,8 @@
 	</component>
 	<component name="oicAuthenticator" class="org.codelibs.fess.sso.oic.OpenIdConnectAuthenticator">
 	</component>
+	<component name="samlAuthenticator" class="org.codelibs.fess.sso.saml.SamlAuthenticator">
+	</component>
 	<component name="spnegoAuthenticator" class="org.codelibs.fess.sso.spnego.SpnegoAuthenticator">
 	</component>
 </components>

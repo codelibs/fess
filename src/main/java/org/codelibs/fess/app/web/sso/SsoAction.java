@@ -21,7 +21,9 @@ import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoManager;
+import org.codelibs.fess.sso.saml.SamlAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -73,5 +75,18 @@ public class SsoAction extends FessLoginAction {
             activityHelper.loginFailure(OptionalThing.of(loginCredential));
             return redirect(LoginAction.class);
         }
+    }
+
+    @Execute
+    public ActionResponse metadata(final String name) {
+        String key = name + "Authenticator";
+        if (ComponentUtil.hasComponent(key)) {
+            throw responseManager.new400("Unknown request type: " + name);
+        }
+        final SsoAuthenticator authenticator = ComponentUtil.getComponent(key);
+        if (authenticator instanceof SamlAuthenticator) {
+            return ((SamlAuthenticator) authenticator).getMetadataResponse();
+        }
+        throw responseManager.new400("Unsupported request type: " + name);
     }
 }

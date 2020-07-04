@@ -1305,6 +1305,11 @@
 			<artifactId>okhttp</artifactId>
 			<version>${okhttp.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.onelogin</groupId>
+			<artifactId>java-saml</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 
 		<!-- suggest library -->
 		<dependency>

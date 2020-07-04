@@ -1,0 +1,139 @@
+package org.codelibs.fess.app.web.base.login;
+
+import static org.codelibs.core.stream.StreamUtil.split;
+import static org.codelibs.core.stream.StreamUtil.stream;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.login.credential.LoginCredential;
+
+import com.onelogin.saml2.Auth;
+
+public class SamlCredential implements LoginCredential, FessCredential {
+
+    private final Map<String, List<String>> attributes;
+
+    private final String nameId;
+
+    private final String nameIdFormat;
+
+    private final String sessionIndex;
+
+    private final String nameidNameQualifier;
+
+    private final String nameidSPNameQualifier;
+
+    public SamlCredential(final Auth auth) {
+        attributes = auth.getAttributes();
+        nameId = auth.getNameId();
+        nameIdFormat = auth.getNameIdFormat();
+        sessionIndex = auth.getSessionIndex();
+        nameidNameQualifier = auth.getNameIdNameQualifier();
+        nameidSPNameQualifier = auth.getNameIdSPNameQualifier();
+    }
+
+    @Override
+    public String toString() {
+        return "{" + getUserId() + "}";
+    }
+
+    @Override
+    public String getUserId() {
+        return nameId;
+    }
+
+    public SamlUser getUser() {
+        return new SamlUser(getUserId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
+    }
+
+    protected String[] getDefaultGroupsAsArray() {
+        final List<String> list = new ArrayList<>();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String key = fessConfig.getSystemProperty("saml.attribute.group.name", "memberOf");
+        if (StringUtil.isNotBlank(key)) {
+            final List<String> nameList = attributes.get(key);
+            if (nameList != null) {
+                list.addAll(nameList);
+            }
+        }
+        final String value = fessConfig.getSystemProperty("saml.default.groups");
+        if (StringUtil.isNotBlank(value)) {
+            split(value, ",").of(stream -> stream.forEach(list::add));
+        }
+        return list.stream().filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]);
+    }
+
+    protected String[] getDefaultRolesAsArray() {
+        final List<String> list = new ArrayList<>();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String key = fessConfig.getSystemProperty("saml.attribute.role.name");
+        if (StringUtil.isNotBlank(key)) {
+            final List<String> nameList = attributes.get(key);
+            if (nameList != null) {
+                list.addAll(nameList);
+            }
+        }
+        final String value = fessConfig.getSystemProperty("saml.default.roles");
+        if (StringUtil.isNotBlank(value)) {
+            split(value, ",").of(stream -> stream.forEach(list::add));
+        }
+        return list.stream().filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]);
+    }
+
+    public static class SamlUser implements FessUser {
+
+        private static final long serialVersionUID = 1L;
+
+        protected final String name;
+
+        protected String[] groups;
+
+        protected String[] roles;
+
+        protected String[] permissions;
+
+        protected SamlUser(final String name, final String[] groups, final String[] roles) {
+            this.name = name;
+            this.groups = groups;
+            this.roles = roles;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return roles;
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return groups;
+        }
+
+        @Override
+        public String[] getPermissions() {
+            if (permissions == null) {
+                final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+                final Set<String> permissionSet = new HashSet<>();
+                permissionSet.add(systemHelper.getSearchRoleByUser(name));
+                stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
+                stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
+                permissions = permissionSet.toArray(new String[permissionSet.size()]);
+            }
+            return permissions;
+        }
+
+    }
+}
