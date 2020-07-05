@@ -15,19 +15,6 @@
  */
 package org.codelibs.fess.sso;
 
-import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
-import org.codelibs.fess.mylasta.action.FessUserBean;
-import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.response.ActionResponse;
-
-public interface SsoAuthenticator {
-
-    LoginCredential getLoginCredential();
-
-    void resolveCredential(LoginCredentialResolver resolver);
-
-    ActionResponse getResponse(SsoResponseType responseType);
-
-    String logout(FessUserBean user);
-
+public enum SsoResponseType {
+    METADATA, LOGOUT;
 }

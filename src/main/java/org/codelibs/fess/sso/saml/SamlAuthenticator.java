@@ -1,3 +1,18 @@
+/*
+ * Copyright 2012-2020 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 package org.codelibs.fess.sso.saml;
 
 import java.io.OutputStreamWriter;
@@ -19,9 +34,12 @@ import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SamlCredential;
+import org.codelibs.fess.app.web.base.login.SamlCredential.SamlUser;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
+import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
@@ -55,10 +73,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
         defaultSettings = new HashMap<>();
         defaultSettings.put("onelogin.saml2.strict", "true");
         defaultSettings.put("onelogin.saml2.debug", "false");
-        defaultSettings.put("onelogin.saml2.sp.entityid", "http://localhost:8080/sso/metadata/saml");
+        defaultSettings.put("onelogin.saml2.sp.entityid", "http://localhost:8080/sso/metadata");
         defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.url", "http://localhost:8080/sso/");
         defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-        defaultSettings.put("onelogin.saml2.sp.single_logout_service.url", "http://localhost:8080/sso/logout/saml");
+        defaultSettings.put("onelogin.saml2.sp.single_logout_service.url", "http://localhost:8080/sso/logout");
         defaultSettings.put("onelogin.saml2.sp.single_logout_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
         defaultSettings.put("onelogin.saml2.sp.nameidformat", "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress");
         defaultSettings.put("onelogin.saml2.sp.x509cert", "");
@@ -167,12 +185,48 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
     }
 
-    public ActionResponse getMetadataResponse() {
+    @Override
+    public String logout(final FessUserBean user) {
+        if (user.getFessUser() instanceof SamlUser) {
+            return LaRequestUtil
+                    .getOptionalRequest()
+                    .map(request -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Logging out with SAML Authenticator");
+                        }
+                        final HttpServletResponse response = LaResponseUtil.getResponse();
+                        final SamlUser samlUser = (SamlUser) user.getFessUser();
+                        try {
+                            final Auth auth = new Auth(getSettings(), request, response);
+                            return auth.logout(null, samlUser.getName(), samlUser.getSessionIndex(), true, samlUser.getNameIdFormat(),
+                                    samlUser.getNameidNameQualifier(), samlUser.getNameidSPNameQualifier());
+                        } catch (final Exception e) {
+                            logger.warn("Failed to logout from IdP: {}", samlUser, e);
+                        }
+                        return null;
+                    }).orElse(null);
+        }
+        return null;
+    }
+
+    @Override
+    public ActionResponse getResponse(final SsoResponseType responseType) {
+        switch (responseType) {
+        case METADATA:
+            return getMetadataResponse();
+        case LOGOUT:
+            return getLogoutResponse();
+        default:
+            return null;
+        }
+    }
+
+    protected ActionResponse getMetadataResponse() {
         return LaRequestUtil
                 .getOptionalRequest()
                 .map(request -> {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Logging in with SAML Authenticator");
+                        logger.debug("Accessing metadata with SAML Authenticator");
                     }
                     final HttpServletResponse response = LaResponseUtil.getResponse();
                     try {
@@ -198,6 +252,31 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 }).orElseGet(() -> getStreamResponse("metadata", "text/html; charset=UTF-8", "Invalid state."));
     }
 
+    protected ActionResponse getLogoutResponse() {
+        return LaRequestUtil
+                .getOptionalRequest()
+                .map(request -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Logging out with SAML Authenticator");
+                    }
+                    final HttpServletResponse response = LaResponseUtil.getResponse();
+                    try {
+                        final Auth auth = new Auth(getSettings(), request, response);
+                        auth.processSLO();
+                        final List<String> errors = auth.getErrors();
+                        if (errors.isEmpty()) {
+                            return getStreamResponse("logout", "text/html; charset=UTF-8", "Logged out");
+                        } else {
+                            return getStreamResponse("logout", "text/html; charset=UTF-8", errors.stream().map(s -> "<p>" + s + "</p>")
+                                    .collect(Collectors.joining()));
+                        }
+                    } catch (final Exception e) {
+                        logger.warn("Failed to process logout.", e);
+                        return getStreamResponse("metadata", "text/html; charset=UTF-8", e.getMessage());
+                    }
+                }).orElseGet(() -> getStreamResponse("metadata", "text/html; charset=UTF-8", "Invalid state."));
+    }
+
     protected StreamResponse getStreamResponse(final String filename, final String contentType, final String content) {
         return new StreamResponse(filename).contentType(contentType).stream(out -> {
             try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
@@ -205,5 +284,4 @@ public class SamlAuthenticator implements SsoAuthenticator {
             }
         });
     }
-
 }

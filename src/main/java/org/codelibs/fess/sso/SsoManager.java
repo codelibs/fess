@@ -20,8 +20,10 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.response.ActionResponse;
 
 public class SsoManager {
     private static final Logger logger = LogManager.getLogger(SsoManager.class);
@@ -42,8 +44,38 @@ public class SsoManager {
 
     public LoginCredential getLoginCredential() {
         if (available()) {
-            final SsoAuthenticator authenticator = ComponentUtil.getComponent(getSsoType() + "Authenticator");
-            return authenticator.getLoginCredential();
+            final SsoAuthenticator authenticator = getAuthenticator();
+            if (authenticator != null) {
+                return authenticator.getLoginCredential();
+            }
+        }
+        return null;
+    }
+
+    public ActionResponse getResponse(final SsoResponseType responseType) {
+        if (available()) {
+            final SsoAuthenticator authenticator = getAuthenticator();
+            if (authenticator != null) {
+                return authenticator.getResponse(responseType);
+            }
+        }
+        return null;
+    }
+
+    public String logout(final FessUserBean user) {
+        if (available()) {
+            final SsoAuthenticator authenticator = getAuthenticator();
+            if (authenticator != null) {
+                return authenticator.logout(user);
+            }
+        }
+        return null;
+    }
+
+    protected SsoAuthenticator getAuthenticator() {
+        final String name = getSsoType() + "Authenticator";
+        if (ComponentUtil.hasComponent(name)) {
+            return ComponentUtil.getComponent(name);
         }
         return null;
     }

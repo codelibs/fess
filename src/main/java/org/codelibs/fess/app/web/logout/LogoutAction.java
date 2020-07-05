@@ -15,9 +15,12 @@
  */
 package org.codelibs.fess.app.web.logout;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -41,11 +44,16 @@ public class LogoutAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
-        getUserBean().map(FessUserBean::getUserId).orElse("-");
-        activityHelper.logout(getUserBean());
+        OptionalThing<FessUserBean> userBean = getUserBean();
+        activityHelper.logout(userBean);
+        final String redirectUrl = userBean.map(user -> ComponentUtil.getSsoManager().logout(user)).orElse(null);
         fessLoginAssist.logout();
         userInfoHelper.deleteUserCodeFromCookie(request);
-        return redirect(LoginAction.class);
+        if (StringUtil.isNotBlank(redirectUrl)) {
+            return HtmlResponse.fromRedirectPathAsIs(redirectUrl);
+        } else {
+            return redirect(LoginAction.class);
+        }
     }
 
 }

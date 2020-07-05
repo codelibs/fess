@@ -32,8 +32,10 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
+import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoFilterConfig;
 import org.codelibs.spnego.SpnegoHttpFilter;
@@ -42,6 +44,7 @@ import org.codelibs.spnego.SpnegoHttpServletResponse;
 import org.codelibs.spnego.SpnegoPrincipal;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -244,4 +247,15 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             return OptionalEntity.empty();
         });
     }
+
+    @Override
+    public ActionResponse getResponse(final SsoResponseType responseType) {
+        return null;
+    }
+
+    @Override
+    public String logout(final FessUserBean user) {
+        return null;
+    }
+
 }

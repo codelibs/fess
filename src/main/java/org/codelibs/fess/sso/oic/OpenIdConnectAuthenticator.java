@@ -32,10 +32,13 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.crawler.Constants;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
+import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -237,5 +240,15 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
         resolver.resolve(OpenIdConnectCredential.class, credential -> OptionalEntity.of(credential.getUser()));
+    }
+
+    @Override
+    public ActionResponse getResponse(final SsoResponseType responseType) {
+        return null;
+    }
+
+    @Override
+    public String logout(final FessUserBean user) {
+        return null;
     }
 }
