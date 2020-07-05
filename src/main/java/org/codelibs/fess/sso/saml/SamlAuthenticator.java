@@ -37,11 +37,14 @@ import org.codelibs.fess.app.web.base.login.SamlCredential;
 import org.codelibs.fess.app.web.base.login.SamlCredential.SamlUser;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.exception.SsoMessageException;
+import org.codelibs.fess.exception.SsoProcessException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
+import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -242,18 +245,25 @@ public class SamlAuthenticator implements SsoAuthenticator {
                                 }
                             });
                         } else {
-                            return getStreamResponse("metadata", "text/html; charset=UTF-8", errors.stream().map(s -> "<p>" + s + "</p>")
-                                    .collect(Collectors.joining()));
+                            final String msg = errors.stream().collect(Collectors.joining(", "));
+                            throw new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(
+                                    UserMessages.GLOBAL_PROPERTY_KEY, msg), "Failed to log out.", new SsoProcessException(msg));
                         }
+                    } catch (final SsoMessageException e) {
+                        throw e;
                     } catch (final Exception e) {
-                        logger.warn("Failed to process metadata.", e);
-                        return getStreamResponse("metadata", "text/html; charset=UTF-8", e.getMessage());
+                        throw new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(
+                                UserMessages.GLOBAL_PROPERTY_KEY, e.getMessage()), "Failed to process metadata.", e);
                     }
-                }).orElseGet(() -> getStreamResponse("metadata", "text/html; charset=UTF-8", "Invalid state."));
+                })
+                .orElseThrow(
+                        () -> new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(
+                                UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."), "Failed to process metadata.",
+                                new SsoProcessException("Invalid state.")));
     }
 
     protected ActionResponse getLogoutResponse() {
-        return LaRequestUtil
+        LaRequestUtil
                 .getOptionalRequest()
                 .map(request -> {
                     if (logger.isDebugEnabled()) {
@@ -265,23 +275,24 @@ public class SamlAuthenticator implements SsoAuthenticator {
                         auth.processSLO();
                         final List<String> errors = auth.getErrors();
                         if (errors.isEmpty()) {
-                            return getStreamResponse("logout", "text/html; charset=UTF-8", "Logged out");
+                            throw new SsoMessageException(messages -> messages.addSuccessSsoLogout(UserMessages.GLOBAL_PROPERTY_KEY),
+                                    "Logged out");
                         } else {
-                            return getStreamResponse("logout", "text/html; charset=UTF-8", errors.stream().map(s -> "<p>" + s + "</p>")
-                                    .collect(Collectors.joining()));
+                            final String msg = errors.stream().collect(Collectors.joining(", "));
+                            throw new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(
+                                    UserMessages.GLOBAL_PROPERTY_KEY, msg), "Failed to log out.", new SsoProcessException(msg));
                         }
+                    } catch (final SsoMessageException e) {
+                        throw e;
                     } catch (final Exception e) {
-                        logger.warn("Failed to process logout.", e);
-                        return getStreamResponse("metadata", "text/html; charset=UTF-8", e.getMessage());
+                        throw new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(
+                                UserMessages.GLOBAL_PROPERTY_KEY, e.getMessage()), "Failed to log out.", e);
                     }
-                }).orElseGet(() -> getStreamResponse("metadata", "text/html; charset=UTF-8", "Invalid state."));
-    }
-
-    protected StreamResponse getStreamResponse(final String filename, final String contentType, final String content) {
-        return new StreamResponse(filename).contentType(contentType).stream(out -> {
-            try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
-                writer.write(content);
-            }
-        });
+                })
+                .orElseThrow(
+                        () -> new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(
+                                UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."), "Failed to log out.", new SsoProcessException(
+                                "Invalid state.")));
+        return null;
     }
 }

@@ -353,6 +353,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to install {0}. */
     public static final String ERRORS_failed_to_install_plugin = "{errors.failed_to_install_plugin}";
 
+    /** The key of the message: Failed to process the request: {0} */
+    public static final String ERRORS_failed_to_process_sso_request = "{errors.failed_to_process_sso_request}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -508,6 +511,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Uploaded {0} */
     public static final String SUCCESS_upload_file_to_storage = "{success.upload_file_to_storage}";
+
+    /** The key of the message: Logged out. */
+    public static final String SUCCESS_sso_logout = "{success.sso_logout}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -2092,6 +2098,21 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_process_sso_request' with parameters.
+     * <pre>
+     * message: Failed to process the request: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToProcessSsoRequest(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_process_sso_request, arg0));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.invalid_query_unknown' with parameters.
      * <pre>
      * message: The given query has unknown condition.
@@ -2843,6 +2864,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUploadFileToStorage(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_upload_file_to_storage, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.sso_logout' with parameters.
+     * <pre>
+     * message: Logged out.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessSsoLogout(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_sso_logout));
         return this;
     }
 

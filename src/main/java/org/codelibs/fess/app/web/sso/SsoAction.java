@@ -21,6 +21,7 @@ import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -79,20 +80,46 @@ public class SsoAction extends FessLoginAction {
     @Execute
     public ActionResponse metadata() {
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
-        final ActionResponse actionResponse = ssoManager.getResponse(SsoResponseType.METADATA);
-        if (actionResponse == null) {
-            throw responseManager.new400("Unsupported request type.");
+        try {
+            final ActionResponse actionResponse = ssoManager.getResponse(SsoResponseType.METADATA);
+            if (actionResponse == null) {
+                throw responseManager.new400("Unsupported request type.");
+            }
+            return actionResponse;
+        } catch (final SsoMessageException e) {
+            if (e.getCause() == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Metadata response.", e);
+                }
+                saveInfo(e.getMessageCode());
+            } else {
+                logger.warn("Failed to process metadata.", e);
+                saveError(e.getMessageCode());
+            }
+            return redirect(LoginAction.class);
         }
-        return actionResponse;
     }
 
     @Execute
     public ActionResponse logout() {
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
-        final ActionResponse actionResponse = ssoManager.getResponse(SsoResponseType.LOGOUT);
-        if (actionResponse == null) {
-            throw responseManager.new400("Unsupported request type.");
+        try {
+            final ActionResponse actionResponse = ssoManager.getResponse(SsoResponseType.LOGOUT);
+            if (actionResponse == null) {
+                throw responseManager.new400("Unsupported request type.");
+            }
+            return actionResponse;
+        } catch (final SsoMessageException e) {
+            if (e.getCause() == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Logout response.", e);
+                }
+                saveInfo(e.getMessageCode());
+            } else {
+                logger.warn("Failed to log out.", e);
+                saveError(e.getMessageCode());
+            }
+            return redirect(LoginAction.class);
         }
-        return actionResponse;
     }
 }
