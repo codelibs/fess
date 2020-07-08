@@ -32,3 +32,5 @@ dbflute_fess/schema/project-lastadoc-fess.json
 src/main/resources/fess_indices/.fess_config.access_token/access_token.bulk
 src/main/resources/ga_client_secrets.p12
 src/main/webapp/WEB-INF/project.properties
+.factorypath
+.vscode/launch.json
