@@ -118,6 +118,22 @@
 									autocomplete="off" />
 							</div>
 						</div>
+						<div id="searchPath" class="control-search-path mx-auto col-10 col-sm-8 col-md-8 col-lg-6" style="margin-top:10px;">
+							<div class="container">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="basic-addon1"><i class="far fa-folder"></i></span>
+									</div>
+									<input type="text" class="form-control" placeholder="" aria-label="" aria-describedby="search path"
+										id="searchPathField" name="searchPath" value="${f:h(fe:join(searchPath))}">
+									<div class="input-group-append">
+										<button class="btn btn-outline-secondary" type="button" id="searchPathFieldClear">
+											<i class="fa fa-times-circle"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
 						<c:if test="${!empty popularWords}">
 							<div class="clearfix">
 								<p class="text-truncate">
@@ -142,6 +158,11 @@
 								<la:message key="labels.index_form_search_btn" />
 							</button>
 							<button type="button" class="btn btn-outline-secondary"
+								data-toggle="control-search-path" data-target="#searchPath" id="searchPathButton">
+								<i class="far fa-folder"></i>
+								<la:message key="labels.index_form_searchpath_btn" />
+							</button>
+							<button type="button" class="btn btn-outline-secondary"
 								data-toggle="control-options" data-target="#searchOptions"
 								id="searchOptionsButton">
 								<em class="fa fa-cog"></em>
@@ -160,5 +181,6 @@
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/index.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/searchpath.js')}"></script>
 </body>
 </html>

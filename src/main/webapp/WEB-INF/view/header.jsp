@@ -22,6 +22,14 @@
 								<em class="fa fa-search"></em>
 							</button>
 							<button type="button" class="btn btn-light"
+								data-toggle="control-search-path" data-target="#searchPath"
+								id="searchPathButton">
+								<i class="far fa-folder"></i> 
+								<span class="sr-only">
+									<la:message key="labels.index_form_searchpath_btn" />
+								</span>
+							</button>
+							<button type="button" class="btn btn-light"
 								data-toggle="control-options" data-target="#searchOptions"
 								id="searchOptionsButton">
 								<em class="fa fa-cog"></em> <span class="sr-only"><la:message
@@ -94,4 +102,22 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="searchPath" class="control-search-path">
+		<div class="container">
+				<div class="input-group mb-3">
+						<div class="input-group-prepend">
+								<span class="input-group-text" id="basic-addon1"><i class="far fa-folder"></i></span>
+						</div>
+						<input type="text" class="form-control" placeholder="" aria-label="" aria-describedby="search path"
+								id="searchPathField" name="searchPath" value="${f:h(fe:join(searchPath))}">
+						<div class="input-group-append">
+								<button class="btn btn-outline-secondary" type="button" id="searchPathFieldClear">
+										<i class="fa fa-times-circle"></i>
+								</button>
+						</div>
+				</div>
+		</div>
+</div>
+
 </la:form>

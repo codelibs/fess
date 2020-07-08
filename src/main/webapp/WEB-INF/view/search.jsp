@@ -153,5 +153,6 @@
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/search.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/searchpath.js')}"></script>
 </body>
 </html>

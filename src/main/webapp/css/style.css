@@ -160,3 +160,7 @@ legend{
 		white-space: nowrap;
 	}
 }
+
+/* searchPath extension */
+#searchPath {display: none;}
+#searchPath.active {display: block;}
