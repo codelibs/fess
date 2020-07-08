@@ -8,6 +8,12 @@
       "auto_expand_replicas": "${fess.index.auto_expand_replicas}"
     },
     "analysis": {
+      "normalizer": {
+        "useLowerCase": {
+          "type": "custom",
+          "filter": [ "lowercase" ]
+        }
+      },
       "char_filter": {
         "mapping_fa_filter": {
           "type": "mapping",

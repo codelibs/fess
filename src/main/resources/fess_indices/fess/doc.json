@@ -584,7 +584,8 @@
         "type": "keyword"
       },
       "url": {
-        "type": "keyword"
+        "type": "keyword",
+        "normalizer": "useLowerCase"
       }
     }
 }
