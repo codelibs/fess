@@ -1146,6 +1146,7 @@
             "alphanum_word_filter",
             "cjk_bigram",
             "lowercase",
+            "asciifolding",
             "stopword_en_filter",
             "english_keywords",
             "english_override",
