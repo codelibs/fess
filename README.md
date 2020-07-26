@@ -19,7 +19,7 @@ Fess also contains a Crawler, which can crawl documents on a [web server](https:
 
 ## Issues/Questions
 
-[discuss.codelibs.org](https://discuss.codelibs.org/c/FessEN/8)
+[discuss.codelibs.org](https://discuss.codelibs.org/c/FessEN/)
 
 ## Getting Started
 
@@ -94,7 +94,6 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
 
 ### Korean
 
- - [PDF](https://github.com/nocode2k/fess/releases/download/11.0.1-ko/Fess-ko_11.0.1_manual.pdf)
  - [Forum](https://github.com/nocode2k/fess-kr-forum)
 
 ## Development Information
