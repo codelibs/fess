@@ -54,7 +54,7 @@
 		<okhttp.version>3.14.9</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.8.2</crawler.version>
+		<crawler.version>3.8.3-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>7.8.0</suggest.version>
