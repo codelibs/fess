@@ -1298,6 +1298,10 @@
 					<groupId>xpp3</groupId>
 					<artifactId>xpp3</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>stax</groupId>
+					<artifactId>stax-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
