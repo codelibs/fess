@@ -34,8 +34,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.xerces.impl.Constants;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.util.ResourceUtil;
 import org.w3c.dom.Document;
