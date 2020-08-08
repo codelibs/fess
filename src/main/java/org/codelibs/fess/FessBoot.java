@@ -19,10 +19,12 @@ package org.codelibs.fess;
 
 import java.io.File;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.core.StandardHost;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
+import org.codelibs.fess.tomcat.webresources.FessWebResourceRoot;
 import org.dbflute.tomcat.TomcatBoot;
 
 public class FessBoot extends TomcatBoot {
@@ -124,5 +126,11 @@ public class FessBoot extends TomcatBoot {
 
     protected static String getTomcatConfigPath() {
         return System.getProperty(TOMCAT_CONFIG_PATH);
+    }
+
+    protected void setupWebappContext() {
+        super.setupWebappContext();
+        Context context = (Context) server.getHost().findChild(StringUtil.EMPTY);
+        context.setResources(new FessWebResourceRoot(context));
     }
 }

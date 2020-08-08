@@ -242,6 +242,18 @@ public class PluginHelper {
     }
 
     public void installArtifact(final Artifact artifact) {
+        switch (artifact.getType()) {
+        case THEME:
+            install(artifact);
+            ComponentUtil.getThemeHelper().install(artifact);
+            break;
+        default:
+            install(artifact);
+            break;
+        }
+    }
+
+    protected void install(final Artifact artifact) {
         final String fileName = artifact.getFileName();
         final String url = artifact.getUrl();
         if (StringUtil.isBlank(url)) {
@@ -264,16 +276,6 @@ public class PluginHelper {
                 throw new PluginException("Failed to install the artifact " + artifact.getName(), e);
             }
         }
-
-        switch (artifact.getType()) {
-        case DATA_STORE:
-            break;
-        case THEME:
-            ComponentUtil.getThemeHelper().install(artifact);
-            break;
-        default:
-            break;
-        }
     }
 
     protected CurlRequest createCurlRequest(final String url) {
@@ -293,15 +295,18 @@ public class PluginHelper {
         }
 
         switch (artifact.getType()) {
-        case DATA_STORE:
-            break;
         case THEME:
             ComponentUtil.getThemeHelper().uninstall(artifact);
+            uninstall(fileName, jarPath);
             break;
         default:
+            uninstall(fileName, jarPath);
             break;
         }
 
+    }
+
+    protected void uninstall(final String fileName, final Path jarPath) {
         try {
             Files.delete(jarPath);
         } catch (final IOException e) {
