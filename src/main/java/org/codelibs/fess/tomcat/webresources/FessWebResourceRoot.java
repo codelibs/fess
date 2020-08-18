@@ -25,7 +25,6 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResource;
 import org.apache.catalina.webresources.StandardRoot;
-import org.codelibs.core.jar.JarFileUtil;
 
 public class FessWebResourceRoot extends StandardRoot {
     private static final Logger logger = Logger.getLogger(FessWebResourceRoot.class.getName());
@@ -41,7 +40,7 @@ public class FessWebResourceRoot extends StandardRoot {
 
         for (WebResource possibleJar : possibleJars) {
             if (possibleJar.isFile() && possibleJar.getName().endsWith(".jar")) {
-                try (final JarFile jarFile = JarFileUtil.create(possibleJar.getCanonicalPath())) {
+                try (final JarFile jarFile = new JarFile(possibleJar.getCanonicalPath())) {
                     final Manifest manifest = jarFile.getManifest();
                     if (manifest != null && manifest.getEntries() != null) {
                         Attributes attributes = manifest.getMainAttributes();
