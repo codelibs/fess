@@ -45,12 +45,12 @@
 		<!-- Partner Library -->
 		<slf4j.version>1.7.30</slf4j.version>
 		<log4j.version>2.13.3</log4j.version>
-		<jackson.version>2.10.4</jackson.version>
+		<jackson.version>2.10.5</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
 		<asm.version>8.0.1</asm.version>
 		<tika.version>1.24.1</tika.version>
-		<groovy.version>3.0.4</groovy.version>
-		<minio.version>7.0.2</minio.version>
+		<groovy.version>3.0.5</groovy.version>
+		<minio.version>7.1.0</minio.version>
 		<okhttp.version>3.14.9</okhttp.version>
 
 		<!-- Crawler -->
@@ -65,7 +65,7 @@
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.36</tomcat.version>
+		<tomcat.version>9.0.37</tomcat.version>
 		<tomcat.boot.version>0.7.5</tomcat.boot.version>
 
 		<!-- Testing -->
@@ -1248,7 +1248,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.10</version>
+			<version>3.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
