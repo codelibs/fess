@@ -54,7 +54,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
 			<param name="plugin.version" value="7.9.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="7.9.0-20200830.093826-1" />
+			<param name="plugin.zip.version" value="7.9.0-20200831.220411-2" />
 		</antcall>
 
 		<antcall target="remove.jars" />
