@@ -44,8 +44,13 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
 import io.minio.ErrorCode;
+import io.minio.GetObjectArgs;
+import io.minio.ListObjectsArgs;
+import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.PutObjectOptions;
+import io.minio.RemoveObjectArgs;
 import io.minio.Result;
 import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
@@ -162,7 +167,12 @@ public class AdminStorageAction extends FessAdminAction {
         try (final InputStream in = uploadFile.getInputStream()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final MinioClient minioClient = createClient(fessConfig);
-            minioClient.putObject(fessConfig.getStorageBucket(), objectName, in, new PutObjectOptions(uploadFile.getFileSize(), -1));
+            final PutObjectOptions options = new PutObjectOptions(uploadFile.getFileSize(), -1);
+            final PutObjectArgs args =
+                    PutObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName)
+                            .stream(in, options.objectSize(), options.partSize()).contentType(options.contentType())
+                            .headers(options.headers()).sse(options.sse()).build();
+            minioClient.putObject(args);
         } catch (final Exception e) {
             throw new StorageException("Failed to upload " + objectName, e);
         }
@@ -170,7 +180,8 @@ public class AdminStorageAction extends FessAdminAction {
 
     public static void downloadObject(final String objectName, final WrittenStreamOut out) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        try (InputStream in = createClient(fessConfig).getObject(fessConfig.getStorageBucket(), objectName)) {
+        final GetObjectArgs args = GetObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).build();
+        try (InputStream in = createClient(fessConfig).getObject(args)) {
             out.write(in);
         } catch (final Exception e) {
             throw new StorageException("Failed to download " + objectName, e);
@@ -181,7 +192,8 @@ public class AdminStorageAction extends FessAdminAction {
         try {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final MinioClient minioClient = createClient(fessConfig);
-            minioClient.removeObject(fessConfig.getStorageBucket(), objectName);
+            final RemoveObjectArgs args = RemoveObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).build();
+            minioClient.removeObject(args);
         } catch (final Exception e) {
             throw new StorageException("Failed to delete " + objectName, e);
         }
@@ -189,7 +201,8 @@ public class AdminStorageAction extends FessAdminAction {
 
     protected static MinioClient createClient(final FessConfig fessConfig) {
         try {
-            return new MinioClient(fessConfig.getStorageEndpoint(), fessConfig.getStorageAccessKey(), fessConfig.getStorageSecretKey());
+            return MinioClient.builder().endpoint(fessConfig.getStorageEndpoint())
+                    .credentials(fessConfig.getStorageAccessKey(), fessConfig.getStorageSecretKey()).build();
         } catch (final Exception e) {
             throw new StorageException("Failed to create MinioClient: " + fessConfig.getStorageEndpoint(), e);
         }
@@ -200,8 +213,11 @@ public class AdminStorageAction extends FessAdminAction {
         final ArrayList<Map<String, Object>> list = new ArrayList<>();
         try {
             final MinioClient minioClient = createClient(fessConfig);
-            for (final Result<Item> result : minioClient.listObjects(fessConfig.getStorageBucket(),
-                    prefix != null && prefix.length() > 0 ? prefix + "/" : prefix, false)) {
+            final ListObjectsArgs args =
+                    ListObjectsArgs.builder().bucket(fessConfig.getStorageBucket())
+                            .prefix(prefix != null && prefix.length() > 0 ? prefix + "/" : prefix).recursive(false)
+                            .includeUserMetadata(false).useApiVersion1(false).build();
+            for (final Result<Item> result : minioClient.listObjects(args)) {
                 final Map<String, Object> map = new HashMap<>();
                 final Item item = result.get();
                 final String objectName = item.objectName();
@@ -223,7 +239,8 @@ public class AdminStorageAction extends FessAdminAction {
             if (code == ErrorCode.NO_SUCH_BUCKET) {
                 final MinioClient minioClient = createClient(fessConfig);
                 try {
-                    minioClient.makeBucket(fessConfig.getStorageBucket());
+                    final MakeBucketArgs args = MakeBucketArgs.builder().bucket(fessConfig.getStorageBucket()).build();
+                    minioClient.makeBucket(args);
                     logger.info("Created bucket: {}", fessConfig.getStorageBucket());
                 } catch (final Exception e1) {
                     logger.warn("Failed to create bucket:" + fessConfig.getStorageBucket(), e1);
