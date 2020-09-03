@@ -136,9 +136,6 @@ if NOT "%FESS_HEAP_SIZE%" == "" set FESS_MAX_MEM=%FESS_HEAP_SIZE%
 call:convertxm %FESS_MIN_MEM% JVM_XMS
 call:convertxm %FESS_MAX_MEM% JVM_XMX
 
-REM java_opts might be empty - init to avoid tripping commons daemon (if the command starts with ;)
-if "%JAVA_OPTS%" == "" set JAVA_OPTS=-XX:+UseG1GC
-
 CALL "%FESS_HOME%\bin\fess.in.bat"
 
 rem thread stack size
@@ -146,10 +143,7 @@ set JVM_SS=256
 
 set FESS_PARAMS=-Dfess;-Dfess.home="%FESS_HOME%";-Dfess.es.dir="%ES_HOME%";-Dfess.home="%FESS_HOME%";-Dfess.context.path="/";-Dfess.port=8080;-Dfess.webapp.path="%FESS_HOME%\app";-Dfess.temp.path="%FESS_HOME%\temp";-Dfess.log.name="%APP_NAME%";-Dfess.log.path="%FESS_HOME%\logs";-Dfess.log.level=warn;-Dlasta.env=web;-Dtomcat.config.path=tomcat_config.properties
 
-set JVM_OPTS=%JAVA_OPTS: =;%
-
-if not "%FESS_JAVA_OPTS%" == "" set JVM_FESS_JAVA_OPTS=%FESS_JAVA_OPTS: =#%
-if not "%FESS_JAVA_OPTS%" == "" set JVM_OPTS=%JVM_OPTS%;%JVM_FESS_JAVA_OPTS%;
+set JVM_OPTS=-XX:+UseG1GC%FESS_JAVA_OPTS: =;%
 
 if "%FESS_START_TYPE%" == "" set FESS_START_TYPE=manual
 if "%FESS_STOP_TIMEOUT%" == "" set FESS_STOP_TIMEOUT=0
