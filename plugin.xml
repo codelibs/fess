@@ -17,8 +17,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="7.9.0" />
-			<param name="plugin.zip.version" value="7.9.0" />
+			<param name="plugin.version" value="7.9.1" />
+			<param name="plugin.zip.version" value="7.9.1" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
@@ -53,8 +53,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="7.9.0" />
-			<param name="plugin.zip.version" value="7.9.0" />
+			<param name="plugin.version" value="7.9.1" />
+			<param name="plugin.zip.version" value="7.9.1" />
 		</antcall>
 
 		<antcall target="remove.jars" />
