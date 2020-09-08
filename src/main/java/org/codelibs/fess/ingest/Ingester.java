@@ -17,6 +17,7 @@ package org.codelibs.fess.ingest;
 
 import java.util.Map;
 
+import org.codelibs.fess.crawler.entity.AccessResult;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.util.ComponentUtil;
@@ -37,13 +38,22 @@ public abstract class Ingester {
         ComponentUtil.getIngestFactory().add(this);
     }
 
-    // datastore
-    public Map<String, Object> process(final Map<String, Object> target, final Map<String, String> params) {
+    // web/file
+    public ResultData process(final ResultData target, final ResponseData responseData) {
         return target;
     }
 
     // web/file
-    public ResultData process(final ResultData target, final ResponseData responseData) {
+    public Map<String, Object> process(final Map<String, Object> target, final AccessResult<String> accessResult) {
+        return process(target);
+    }
+
+    // datastore
+    public Map<String, Object> process(final Map<String, Object> target, final Map<String, String> params) {
+        return process(target);
+    }
+
+    protected Map<String, Object> process(final Map<String, Object> target) {
         return target;
     }
 

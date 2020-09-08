@@ -143,6 +143,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     protected Map<String, Object> ingest(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+        if (ingestFactory == null) {
+            return dataMap;
+        }
         Map<String, Object> target = dataMap;
         for (final Ingester ingester : ingestFactory.getIngesters()) {
             try {

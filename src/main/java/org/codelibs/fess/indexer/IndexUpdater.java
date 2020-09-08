@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
@@ -48,6 +49,8 @@ import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.ingest.IngestFactory;
+import org.codelibs.fess.ingest.Ingester;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
@@ -103,8 +106,20 @@ public class IndexUpdater extends Thread {
 
     private List<Crawler> crawlerList;
 
+    private IngestFactory ingestFactory = null;
+
     public IndexUpdater() {
         // nothing
+    }
+
+    @PostConstruct
+    public void init() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialize {}", this.getClass().getSimpleName());
+        }
+        if (ComponentUtil.hasIngestFactory()) {
+            ingestFactory = ComponentUtil.getIngestFactory();
+        }
     }
 
     @PreDestroy
@@ -356,7 +371,7 @@ public class IndexUpdater extends Thread {
 
                     updateDocument(map);
 
-                    docList.add(map);
+                    docList.add(ingest(accessResult, map));
                     final long contentSize = indexingHelper.calculateDocumentSize(map);
                     docList.addContentSize(contentSize);
                     final long processingTime = System.currentTimeMillis() - startTime;
@@ -383,6 +398,21 @@ public class IndexUpdater extends Thread {
             }
 
         }
+    }
+
+    protected Map<String, Object> ingest(final AccessResult<String> accessResult, final Map<String, Object> map) {
+        if (ingestFactory == null) {
+            return map;
+        }
+        Map<String, Object> target = map;
+        for (final Ingester ingester : ingestFactory.getIngesters()) {
+            try {
+                target = ingester.process(target, accessResult);
+            } catch (final Exception e) {
+                logger.warn("Failed to process Ingest[{}]", ingester.getClass().getSimpleName(), e);
+            }
+        }
+        return target;
     }
 
     protected void updateDocument(final Map<String, Object> map) {
