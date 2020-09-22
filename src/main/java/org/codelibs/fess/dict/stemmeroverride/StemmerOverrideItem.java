@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.dict.stemmeroverride;
 
+import java.util.Objects;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.dict.DictionaryItem;
 
@@ -92,18 +94,10 @@ public class StemmerOverrideItem extends DictionaryItem {
             return false;
         }
         final StemmerOverrideItem other = (StemmerOverrideItem) obj;
-        if (input == null) {
-            if (other.input != null) {
-                return false;
-            }
-        } else if (!input.equals(other.input)) {
+        if (!Objects.equals(input, other.input)) {
             return false;
         }
-        if (output == null) {
-            if (other.output != null) {
-                return false;
-            }
-        } else if (!output.equals(other.output)) {
+        if (!Objects.equals(output, other.output)) {
             return false;
         }
         return true;

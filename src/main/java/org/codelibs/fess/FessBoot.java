@@ -128,9 +128,10 @@ public class FessBoot extends TomcatBoot {
         return System.getProperty(TOMCAT_CONFIG_PATH);
     }
 
+    @Override
     protected void setupWebappContext() {
         super.setupWebappContext();
-        Context context = (Context) server.getHost().findChild(StringUtil.EMPTY);
+        final Context context = (Context) server.getHost().findChild(StringUtil.EMPTY);
         context.setResources(new FessWebResourceRoot(context));
     }
 }

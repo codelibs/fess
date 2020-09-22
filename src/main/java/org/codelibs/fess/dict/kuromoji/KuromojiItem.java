@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.dict.kuromoji;
 
+import java.util.Objects;
+
 import org.codelibs.fess.dict.DictionaryItem;
 
 public class KuromojiItem extends DictionaryItem {
@@ -129,32 +131,16 @@ public class KuromojiItem extends DictionaryItem {
             return false;
         }
         final KuromojiItem other = (KuromojiItem) obj;
-        if (pos == null) {
-            if (other.pos != null) {
-                return false;
-            }
-        } else if (!pos.equals(other.pos)) {
+        if (!Objects.equals(pos, other.pos)) {
             return false;
         }
-        if (reading == null) {
-            if (other.reading != null) {
-                return false;
-            }
-        } else if (!reading.equals(other.reading)) {
+        if (!Objects.equals(reading, other.reading)) {
             return false;
         }
-        if (segmentation == null) {
-            if (other.segmentation != null) {
-                return false;
-            }
-        } else if (!segmentation.equals(other.segmentation)) {
+        if (!Objects.equals(segmentation, other.segmentation)) {
             return false;
         }
-        if (token == null) {
-            if (other.token != null) {
-                return false;
-            }
-        } else if (!token.equals(other.token)) {
+        if (!Objects.equals(token, other.token)) {
             return false;
         }
         return true;

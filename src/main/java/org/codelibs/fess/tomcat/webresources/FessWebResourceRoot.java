@@ -29,21 +29,22 @@ import org.apache.catalina.webresources.StandardRoot;
 public class FessWebResourceRoot extends StandardRoot {
     private static final Logger logger = Logger.getLogger(FessWebResourceRoot.class.getName());
 
-    public FessWebResourceRoot(Context context) {
+    public FessWebResourceRoot(final Context context) {
         super(context);
     }
 
+    @Override
     protected void processWebInfLib() throws LifecycleException {
         super.processWebInfLib();
 
-        WebResource[] possibleJars = listResources("/WEB-INF/plugin", false);
+        final WebResource[] possibleJars = listResources("/WEB-INF/plugin", false);
 
-        for (WebResource possibleJar : possibleJars) {
+        for (final WebResource possibleJar : possibleJars) {
             if (possibleJar.isFile() && possibleJar.getName().endsWith(".jar")) {
                 try (final JarFile jarFile = new JarFile(possibleJar.getCanonicalPath())) {
                     final Manifest manifest = jarFile.getManifest();
                     if (manifest != null && manifest.getEntries() != null) {
-                        Attributes attributes = manifest.getMainAttributes();
+                        final Attributes attributes = manifest.getMainAttributes();
                         if (attributes != null && attributes.get("Fess-WebAppJar") != null) {
                             createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
                         }

@@ -44,7 +44,7 @@ public class LogoutAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
-        OptionalThing<FessUserBean> userBean = getUserBean();
+        final OptionalThing<FessUserBean> userBean = getUserBean();
         activityHelper.logout(userBean);
         final String redirectUrl = userBean.map(user -> ComponentUtil.getSsoManager().logout(user)).orElse(null);
         fessLoginAssist.logout();
