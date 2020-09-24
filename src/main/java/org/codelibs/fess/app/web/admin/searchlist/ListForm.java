@@ -159,4 +159,13 @@ public class ListForm extends SearchRequestParams {
     public String getSimilarDocHash() {
         return sdh;
     }
+
+    @Override
+    public String getTrackTotalHits() {
+        final String value = ComponentUtil.getFessConfig().getPageSearchlistTrackTotalHits();
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        }
+        return null;
+    }
 }

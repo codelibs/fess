@@ -1118,6 +1118,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10000 */
     String PAGE_SEARCHLOG_MAX_FETCH_SIZE = "page.searchlog.max.fetch.size";
 
+    /** The key of the configuration. e.g. true */
+    String PAGE_SEARCHLIST_TRACK_TOTAL_HITS = "page.searchlist.track.total.hits";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
@@ -5076,6 +5079,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageSearchlogMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.searchlist.track.total.hits'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageSearchlistTrackTotalHits();
+
+    /**
+     * Is the property for the key 'page.searchlist.track.total.hits' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPageSearchlistTrackTotalHits();
+
+    /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
      * comment: search page
@@ -8304,6 +8321,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_SEARCHLOG_MAX_FETCH_SIZE);
         }
 
+        public String getPageSearchlistTrackTotalHits() {
+            return get(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS);
+        }
+
+        public boolean isPageSearchlistTrackTotalHits() {
+            return is(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS);
+        }
+
         public String getPagingSearchPageStart() {
             return get(FessConfig.PAGING_SEARCH_PAGE_START);
         }
@@ -9426,6 +9451,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_THUMBNAIL_PURGE_MAX_FETCH_SIZE, "100");
             defaultMap.put(FessConfig.PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_SEARCHLOG_MAX_FETCH_SIZE, "10000");
+            defaultMap.put(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS, "true");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");

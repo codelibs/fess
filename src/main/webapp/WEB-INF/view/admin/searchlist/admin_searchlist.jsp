@@ -81,12 +81,12 @@
                                 <c:when test="${f:h(allRecordCount) > 0}">
                                     <div id="subheader" class="row top10">
                                         <div class="col-12">
-                                            <c:if test="${allRecordCountRelation==null}">
+                                            <c:if test="${allRecordCountRelation=='EQUAL_TO'}">
                                                 <la:message key="labels.search_result_status"
                                                             arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
                                                             arg2="${f:h(currentStartRecordNumber)}"
                                                             arg3="${f:h(currentEndRecordNumber)}"/>
-                                            </c:if><c:if test="${allRecordCountRelation!=null}">
+                                            </c:if><c:if test="${allRecordCountRelation!='EQUAL_TO'}">
                                             <la:message key="labels.search_result_status_over"
                                                         arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
                                                         arg2="${f:h(currentStartRecordNumber)}"

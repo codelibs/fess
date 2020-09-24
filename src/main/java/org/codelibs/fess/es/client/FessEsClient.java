@@ -1158,15 +1158,15 @@ public class FessEsClient implements Client {
 
         protected void buildTrackTotalHits(final FessConfig fessConfig) {
             if (StringUtil.isNotBlank(trackTotalHits)) {
+                if (Constants.TRUE.equalsIgnoreCase(trackTotalHits) || Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
+                    searchRequestBuilder.setTrackTotalHits(Boolean.valueOf(trackTotalHits));
+                    return;
+                }
                 try {
                     searchRequestBuilder.setTrackTotalHitsUpTo(Integer.valueOf(trackTotalHits));
                     return;
                 } catch (final NumberFormatException e) {
                     // ignore
-                }
-                if (Constants.TRUE.equalsIgnoreCase(trackTotalHits) || Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
-                    searchRequestBuilder.setTrackTotalHits(Boolean.valueOf(trackTotalHits));
-                    return;
                 }
             }
             final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
