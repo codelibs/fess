@@ -116,7 +116,7 @@
 	<component name="crawlingInfoHelper" class="org.codelibs.fess.helper.CrawlingInfoHelper">
 	</component>
 	<component name="roleQueryHelper" class="org.codelibs.fess.helper.RoleQueryHelper">
-		<!-- ex. parameter: fessRoles=123%0aadmin -->
+		<!-- ex. parameter: fessRoles=123%0aRadmin -->
 		<!-- 
 		<property name="parameterKey">"fessRoles"</property>
 		<property name="encryptedParameterValue">false</property>
