@@ -14,10 +14,10 @@
 
 	<Appenders>
 		<Routing name="Console">
-			<Script name="RoutingInit" language="JavaScript"><![CDATA[
-				java.lang.System.getProperty("lasta.env") == null ? "Output" : "NoOutput";]]>
-			</Script>
 			<Routes>
+				<Script name="RoutingInit" language="JavaScript"><![CDATA[
+					java.lang.System.getProperty("lasta.env") == null ? "Output" : "NoOutput";]]>
+				</Script>
 				<Route key="Output">
 					<Console name="OutputConsole" target="SYSTEM_OUT">
 						<PatternLayout pattern="${log.pattern}" />
