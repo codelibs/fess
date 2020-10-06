@@ -331,7 +331,7 @@ public class SearchLogHelper {
                     logger.warn("Not Found for SearchLog: {}", clickLog);
                 });
             } catch (final Exception e) {
-                logger.warn("Failed to process: " + clickLog, e);
+                logger.warn("Failed to process: {}", clickLog, e);
             }
         }
         if (!clickLogList.isEmpty()) {
@@ -339,33 +339,42 @@ public class SearchLogHelper {
                 final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
                 clickLogBhv.batchInsert(clickLogList);
             } catch (final Exception e) {
-                logger.warn("Failed to insert: " + clickLogList, e);
+                logger.warn("Failed to insert: {}", clickLogList, e);
             }
         }
 
         if (!clickCountMap.isEmpty()) {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             try {
-                searchHelper.bulkUpdate(builder -> {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    searchHelper.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                            new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
-                            OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH).forEach(
-                            doc -> {
-                                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
-                                final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
-                                if (id != null && docId != null && clickCountMap.containsKey(docId)) {
-                                    final Integer count = clickCountMap.get(docId);
-                                    final Script script =
-                                            ComponentUtil.getLanguageHelper().createScript(doc,
-                                                    "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
-                                    final Map<String, Object> upsertMap = new HashMap<>();
-                                    upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
-                                    builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script).upsert(
-                                            upsertMap));
-                                }
-                            });
-                });
+                final UpdateRequest[] updateRequests =
+                        searchHelper
+                                .getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
+                                        new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
+                                        OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH)
+                                .stream()
+                                .map(doc -> {
+                                    final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
+                                    final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                                    if (id != null && docId != null && clickCountMap.containsKey(docId)) {
+                                        final Integer count = clickCountMap.get(docId);
+                                        final Script script =
+                                                ComponentUtil.getLanguageHelper().createScript(doc,
+                                                        "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
+                                        final Map<String, Object> upsertMap = new HashMap<>();
+                                        upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
+                                        return new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script).upsert(
+                                                upsertMap);
+                                    }
+                                    return null;
+                                }).filter(req -> req != null).toArray(n -> new UpdateRequest[n]);
+                if (updateRequests.length > 0) {
+                    searchHelper.bulkUpdate(builder -> {
+                        for (final UpdateRequest req : updateRequests) {
+                            builder.add(req);
+                        }
+                    });
+                }
             } catch (final Exception e) {
                 logger.warn("Failed to update clickCounts", e);
             }
