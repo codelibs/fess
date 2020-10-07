@@ -426,6 +426,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1048576 */
     String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
 
+    /** The key of the configuration. e.g. 100 */
+    String INDEXER_DATA_MAX_DELETE_CACHE_SIZE = "indexer.data.max.delete.cache.size";
+
+    /** The key of the configuration. e.g. 10 */
+    String INDEXER_DATA_MAX_REDIRECT_COUNT = "indexer.data.max.redirect.count";
+
     /** The key of the configuration. e.g. content,important_content,title */
     String INDEXER_LANGUAGE_FIELDS = "indexer.language.fields";
 
@@ -2860,6 +2866,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerDataMaxDocumentRequestSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.data.max.delete.cache.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerDataMaxDeleteCacheSize();
+
+    /**
+     * Get the value for the key 'indexer.data.max.delete.cache.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerDataMaxDeleteCacheSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.data.max.redirect.count'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerDataMaxRedirectCount();
+
+    /**
+     * Get the value for the key 'indexer.data.max.redirect.count' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerDataMaxRedirectCountAsInteger();
 
     /**
      * Get the value for the key 'indexer.language.fields'. <br>
@@ -7181,6 +7217,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
         }
 
+        public String getIndexerDataMaxDeleteCacheSize() {
+            return get(FessConfig.INDEXER_DATA_MAX_DELETE_CACHE_SIZE);
+        }
+
+        public Integer getIndexerDataMaxDeleteCacheSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_DATA_MAX_DELETE_CACHE_SIZE);
+        }
+
+        public String getIndexerDataMaxRedirectCount() {
+            return get(FessConfig.INDEXER_DATA_MAX_REDIRECT_COUNT);
+        }
+
+        public Integer getIndexerDataMaxRedirectCountAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_DATA_MAX_REDIRECT_COUNT);
+        }
+
         public String getIndexerLanguageFields() {
             return get(FessConfig.INDEXER_LANGUAGE_FIELDS);
         }
@@ -9247,6 +9299,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE, "10000");
             defaultMap.put(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE, "1048576");
+            defaultMap.put(FessConfig.INDEXER_DATA_MAX_DELETE_CACHE_SIZE, "100");
+            defaultMap.put(FessConfig.INDEXER_DATA_MAX_REDIRECT_COUNT, "10");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_FIELDS, "content,important_content,title");
             defaultMap.put(FessConfig.INDEXER_LANGUAGE_DETECT_LENGTH, "1000");
             defaultMap.put(FessConfig.INDEX_CODEC, "default");

@@ -156,6 +156,11 @@ public class IndexingHelper {
                 QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
     }
 
+    public long deleteDocumentByQuery(final FessEsClient fessEsClient, final QueryBuilder queryBuilder) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryBuilder);
+    }
+
     public Map<String, Object> getDocument(final FessEsClient fessEsClient, final String id, final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
