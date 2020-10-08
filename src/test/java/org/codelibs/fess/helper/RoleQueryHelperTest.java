@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.exception.IllegalBlockSizeRuntimeException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class RoleQueryHelperTest extends UnitFessTestCase {
     public CachedCipher cipher;
@@ -60,7 +61,11 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_buildByParameter() {
-        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+        };
 
         Set<String> roleSet;
 
@@ -74,7 +79,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedParameterValue = false;
-        getMockRequest().setParameter("fess1", "xxx\nrole1,role2,role3");
+        getMockRequest().setParameter("fess1", System.currentTimeMillis() + "\nrole1,role2,role3");
         roleSet = buildByParameter(roleQueryHelperImpl, getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -85,7 +90,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedParameterValue = true;
-        getMockRequest().setParameter("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
+        getMockRequest().setParameter("fess2", cipher.encryptoText(System.currentTimeMillis() + "\nrole1,role2,role3"));
         roleSet = buildByParameter(roleQueryHelperImpl, getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -116,7 +121,11 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_buildByHeader() {
-        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+        };
 
         Set<String> roleSet;
 
@@ -134,7 +143,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedHeaderValue = false;
-        getMockRequest().addHeader("fess1", "xxx\nrole1,role2,role3");
+        getMockRequest().addHeader("fess1", System.currentTimeMillis() + "\nrole1,role2,role3");
         roleSet = buildByHeader(roleQueryHelperImpl, getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -145,7 +154,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedHeaderValue = true;
-        getMockRequest().addHeader("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
+        getMockRequest().addHeader("fess2", cipher.encryptoText(System.currentTimeMillis() + "\nrole1,role2,role3"));
         roleSet = buildByHeader(roleQueryHelperImpl, getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -176,7 +185,11 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_buildByCookie() {
-        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+        };
 
         Set<String> roleSet;
         Cookie cookie;
@@ -199,7 +212,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedCookieValue = false;
-        cookie = new Cookie("fess1", "xxx\nrole1,role2,role3");
+        cookie = new Cookie("fess1", System.currentTimeMillis() + "\nrole1,role2,role3");
         getMockRequest().addCookie(cookie);
         roleSet = buildByCookie(roleQueryHelperImpl, getMockRequest());
         assertEquals(3, roleSet.size());
@@ -211,7 +224,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
-        cookie = new Cookie("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
+        cookie = new Cookie("fess2", cipher.encryptoText(System.currentTimeMillis() + "\nrole1,role2,role3"));
         getMockRequest().addCookie(cookie);
         roleSet = buildByCookie(roleQueryHelperImpl, getMockRequest());
         assertEquals(3, roleSet.size());
@@ -247,8 +260,11 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_decodedRoleList() {
-
-        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+        };
 
         Set<String> roleSet;
         boolean encrypted;
@@ -270,13 +286,13 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
 
         encrypted = false;
-        value = "xxx\nrole1";
+        value = System.currentTimeMillis() + "\nrole1";
         roleSet = decodedRoleList(roleQueryHelperImpl, value, encrypted);
         assertEquals(1, roleSet.size());
         assertTrue(roleSet.contains("role1"));
 
         encrypted = false;
-        value = "xxx\nrole1,role2";
+        value = System.currentTimeMillis() + "\nrole1,role2";
         roleSet = decodedRoleList(roleQueryHelperImpl, value, encrypted);
         assertEquals(2, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -312,8 +328,11 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_decodedRoleList_withCipher() {
-
-        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+        };
         roleQueryHelperImpl.cipher = cipher;
 
         Set<String> roleSet;
@@ -336,13 +355,13 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
 
         encrypted = true;
-        value = cipher.encryptoText("xxx\nrole1");
+        value = cipher.encryptoText(System.currentTimeMillis() + "\nrole1");
         roleSet = decodedRoleList(roleQueryHelperImpl, value, encrypted);
         assertEquals(1, roleSet.size());
         assertTrue(roleSet.contains("role1"));
 
         encrypted = true;
-        value = cipher.encryptoText("xxx\nrole1,role2");
+        value = cipher.encryptoText(System.currentTimeMillis() + "\nrole1,role2");
         roleSet = decodedRoleList(roleQueryHelperImpl, value, encrypted);
         assertEquals(2, roleSet.size());
         assertTrue(roleSet.contains("role1"));

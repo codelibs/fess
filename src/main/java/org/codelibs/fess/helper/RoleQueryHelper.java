@@ -74,6 +74,8 @@ public class RoleQueryHelper {
 
     protected boolean encryptedCookieValue = true;
 
+    protected long maxAge = 30 * 60 * 1000L; // msec
+
     protected Map<String, String> cookieNameMap;
 
     protected final List<String> defaultRoleList = new ArrayList<>();
@@ -237,6 +239,20 @@ public class RoleQueryHelper {
 
         if (valueSeparator.length() > 0) {
             final String[] values = rolesStr.split(valueSeparator);
+            if (maxAge > 0) {
+                try {
+                    final long time = getCurrentTime() - Long.parseLong(values[0]);
+                    if (time > maxAge || time < 0) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("role info is expired: {} > {}", time, maxAge);
+                        }
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid role infor: {}", rolesStr, e);
+                    return;
+                }
+            }
             if (values.length > 1) {
                 final String[] roles = values[1].split(roleSeparator);
                 for (final String role : roles) {
@@ -253,6 +269,10 @@ public class RoleQueryHelper {
                 }
             }
         }
+    }
+
+    protected long getCurrentTime() {
+        return ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
     }
 
     public void addCookieNameMapping(final String cookieName, final String roleName) {
@@ -296,6 +316,10 @@ public class RoleQueryHelper {
 
     public void setEncryptedCookieValue(final boolean encryptedCookieValue) {
         this.encryptedCookieValue = encryptedCookieValue;
+    }
+
+    public void setMaxAge(long maxAge) {
+        this.maxAge = maxAge;
     }
 
 }
