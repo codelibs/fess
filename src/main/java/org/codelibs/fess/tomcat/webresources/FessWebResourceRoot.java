@@ -45,7 +45,8 @@ public class FessWebResourceRoot extends StandardRoot {
                     final Manifest manifest = jarFile.getManifest();
                     if (manifest != null && manifest.getEntries() != null) {
                         final Attributes attributes = manifest.getMainAttributes();
-                        if (attributes != null && attributes.get("Fess-WebAppJar") != null) {
+                        if (attributes != null
+                                && (attributes.get("Fess-WebAppJar") != null || attributes.getValue("Fess-WebAppJar") != null)) {
                             createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
                         }
                     }
