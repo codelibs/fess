@@ -162,7 +162,7 @@ public class PathMappingHelper {
         }
     }
 
-    private String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
+    protected String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
             if (matchUserAgent(pathMapping)) {
@@ -172,7 +172,7 @@ public class PathMappingHelper {
         return newUrl;
     }
 
-    private boolean matchUserAgent(final PathMapping pathMapping) {
+    protected boolean matchUserAgent(final PathMapping pathMapping) {
         if (!pathMapping.hasUAMathcer()) {
             return true;
         }
