@@ -130,21 +130,23 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final Deque<String> urlQueue = new LinkedList<>();
             urlQueue.offer(url);
             while (!urlQueue.isEmpty() && (maxAccessCount < 0 || counter < maxAccessCount)) {
+                final Map<String, Object> localDataMap =
+                        dataMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 String processingUrl = urlQueue.poll();
                 if (deleteUrlList.contains(processingUrl)) {
                     deleteDocuments(); // delete before indexing
                 }
                 try {
                     for (int i = 0; i < maxRedirectCount; i++) {
-                        processingUrl = processRequest(paramMap, dataMap, processingUrl, client);
+                        processingUrl = processRequest(paramMap, localDataMap, processingUrl, client);
                         if (processingUrl == null) {
                             break;
                         }
                         counter++;
-                        dataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
+                        localDataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
                     }
                 } catch (ChildUrlsException e) {
-                    e.getChildUrlList().stream().map(req -> req.getUrl()).forEach(urlQueue::offer);
+                    e.getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
                 } catch (DataStoreCrawlingException e) {
                     Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
