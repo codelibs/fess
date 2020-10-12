@@ -70,7 +70,7 @@
 
 		<!-- Testing -->
 		<utflute.version>0.9.1</utflute.version>
-		<junit.version>4.13</junit.version>
+		<junit.version>4.13.1</junit.version>
 		<junit.jupiter.version>5.6.0</junit.jupiter.version>
 		<junit.vintage.version>5.6.0</junit.vintage.version>
 
