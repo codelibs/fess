@@ -71,8 +71,8 @@
 		<!-- Testing -->
 		<utflute.version>0.9.1</utflute.version>
 		<junit.version>4.13.1</junit.version>
-		<junit.jupiter.version>5.6.0</junit.jupiter.version>
-		<junit.vintage.version>5.6.0</junit.vintage.version>
+		<junit.jupiter.version>5.7.0</junit.jupiter.version>
+		<junit.vintage.version>5.7.0</junit.vintage.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
