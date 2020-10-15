@@ -237,6 +237,10 @@ public class RoleQueryHelper {
             rolesStr = cipher.decryptoText(rolesStr);
         }
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("role: original: {}, decrypto: {}", value, rolesStr);
+        }
+
         if (valueSeparator.length() > 0) {
             final String[] values = rolesStr.split(valueSeparator);
             if (maxAge > 0) {
