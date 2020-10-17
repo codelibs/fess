@@ -234,7 +234,14 @@ public class RoleQueryHelper {
     protected void parseRoleSet(final String value, final boolean encrypted, final Set<String> roleSet) {
         String rolesStr = value;
         if (encrypted && cipher != null) {
-            rolesStr = cipher.decryptoText(rolesStr);
+            try {
+                rolesStr = cipher.decryptoText(rolesStr);
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to decrypt {}", rolesStr, e);
+                }
+                return;
+            }
         }
 
         if (logger.isDebugEnabled()) {
@@ -245,7 +252,7 @@ public class RoleQueryHelper {
             final String[] values = rolesStr.split(valueSeparator);
             if (maxAge > 0) {
                 try {
-                    final long time = getCurrentTime() - Long.parseLong(values[0]);
+                    final long time = getCurrentTime() / 1000 - Long.parseLong(values[0]);
                     if (time > maxAge || time < 0) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("role info is expired: {} > {}", time, maxAge);
@@ -253,7 +260,7 @@ public class RoleQueryHelper {
                         return;
                     }
                 } catch (NumberFormatException e) {
-                    logger.warn("Invalid role infor: {}", rolesStr, e);
+                    logger.warn("Invalid role info: {}", rolesStr, e);
                     return;
                 }
             }
