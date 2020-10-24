@@ -13,7 +13,7 @@
 		<c:if test="${eoled}">
 		<li class="nav-item" data-toggle="tooltip" data-placement="left"
 			title="<la:message key="labels.eol_error" />">
-			<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-warning"></em></a></li>
+			<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a></li>
 		</c:if>
 		<c:if test="${developmentMode}">
 			<li class="nav-item" data-toggle="tooltip" data-placement="left"

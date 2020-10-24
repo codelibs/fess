@@ -436,6 +436,19 @@ public class SystemHelper {
         }
     }
 
+    public void setupSearchHtmlData(final TypicalAction action, final ActionRuntime runtime) {
+        runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String installationLink = fessConfig.getOnlineHelpInstallation();
+        runtime.registerData("installationLink", getHelpUrl(installationLink));
+        final boolean eoled = isEoled();
+        runtime.registerData("eoled", eoled);
+        if (eoled) {
+            final String eolLink = fessConfig.getOnlineHelpEol();
+            runtime.registerData("eolLink", getHelpUrl(eolLink));
+        }
+    }
+
     protected boolean isEoled() {
         return getCurrentTimeAsLong() > eolTime;
     }

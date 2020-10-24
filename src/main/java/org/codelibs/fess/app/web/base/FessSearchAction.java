@@ -115,6 +115,8 @@ public abstract class FessSearchAction extends FessBaseAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
+        systemHelper.setupSearchHtmlData(this, runtime);
+
         runtime.registerData("osddLink", openSearchHelper.hasOpenSearchFile());
 
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);

@@ -31,6 +31,18 @@
 					</div>
 				</div>
 				<ul class="nav navbar-nav d-none d-md-flex">
+					<c:if test="${eoled}">
+						<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
+							<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a>
+						</li>
+					</c:if>
+					<c:if test="${developmentMode}">
+						<li class="nav-item" data-toggle="tooltip" data-placement="left"
+							title="<la:message key="labels.development_mode_warning" />"
+						><a class="nav-link active" href="${installationLink}" target="_olh"><em
+								class="fa fa-exclamation-triangle text-warning"
+							></em></a></li>
+					</c:if>
 					<c:choose>
 						<c:when test="${!empty username && username != 'guest'}">
 							<li class="nav-item">
