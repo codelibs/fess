@@ -34,7 +34,7 @@
 					</la:info>
 					<la:errors />
 				</div>
-				<la:form styleId="login" method="post">
+				<la:form styleId="/login" method="post">
 					<div class="input-group mb-3">
 						<c:set var="ph_old_password">
 							<la:message key="labels.profile.placeholder_old_password" />

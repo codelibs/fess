@@ -17,7 +17,7 @@
 	type="text/css" />
 </head>
 <body>
-	<la:form action="search" method="get" styleId="searchForm">
+	<la:form action="/search" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
 			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
