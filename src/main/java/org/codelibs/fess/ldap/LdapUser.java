@@ -55,11 +55,10 @@ public class LdapUser implements FessUser {
             final String accountFilter = fessConfig.getLdapAccountFilter();
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
-                permissions =
-                        ArrayUtils.addAll(ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
-                            permissions = roles;
-                            ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
-                        }), fessConfig.getRoleSearchUserPrefix() + getName());
+                permissions = ArrayUtils.addAll(ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
+                    permissions = roles;
+                    ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
+                }), fessConfig.getRoleSearchUserPrefix() + getName());
             } else {
                 permissions = StringUtil.EMPTY_STRINGS;
             }
@@ -70,17 +69,15 @@ public class LdapUser implements FessUser {
     @Override
     public String[] getRoleNames() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return stream(getPermissions()).get(
-                stream -> stream.filter(s -> s.startsWith(fessConfig.getRoleSearchRolePrefix())).map(s -> s.substring(1))
-                        .toArray(n -> new String[n]));
+        return stream(getPermissions()).get(stream -> stream.filter(s -> s.startsWith(fessConfig.getRoleSearchRolePrefix()))
+                .map(s -> s.substring(1)).toArray(n -> new String[n]));
     }
 
     @Override
     public String[] getGroupNames() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return stream(getPermissions()).get(
-                stream -> stream.filter(s -> s.startsWith(fessConfig.getRoleSearchGroupPrefix())).map(s -> s.substring(1))
-                        .toArray(n -> new String[n]));
+        return stream(getPermissions()).get(stream -> stream.filter(s -> s.startsWith(fessConfig.getRoleSearchGroupPrefix()))
+                .map(s -> s.substring(1)).toArray(n -> new String[n]));
     }
 
     public Hashtable<String, String> getEnvironment() {

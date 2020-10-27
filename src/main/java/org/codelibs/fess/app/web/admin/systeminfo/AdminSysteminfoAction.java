@@ -51,9 +51,9 @@ public class AdminSysteminfoAction extends FessAdminAction {
     @Resource
     protected DynamicProperties systemProperties;
 
-    private static final String[] bugReportLabels = { "file.separator", "file.encoding", "java.runtime.version", "java.vm.info",
-            "java.vm.name", "java.vm.vendor", "java.vm.version", "os.arch", "os.name", "os.version", "user.country", "user.language",
-            "user.timezone" };
+    private static final String[] bugReportLabels =
+            { "file.separator", "file.encoding", "java.runtime.version", "java.vm.info", "java.vm.name", "java.vm.vendor",
+                    "java.vm.version", "os.arch", "os.name", "os.version", "user.country", "user.language", "user.timezone" };
 
     // ===================================================================================
     //                                                                               Hook

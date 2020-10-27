@@ -50,8 +50,8 @@ public class CorsFilter implements Filter {
     protected static final String WILDCARD = "*";
 
     @Override
-    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) request;
         final String origin = httpRequest.getHeader("Origin");
         if (StringUtil.isBlank(origin)) {

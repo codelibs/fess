@@ -112,7 +112,8 @@ public class GsaConfigParser extends DefaultHandler {
     }
 
     @Override
-    public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) throws SAXException {
+    public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
+            throws SAXException {
         if (logger.isDebugEnabled()) {
             logger.debug("Start Element: {}", qName);
         }
@@ -159,13 +160,11 @@ public class GsaConfigParser extends DefaultHandler {
             final Object startUrls = globalParams.get(START_URLS);
             if (startUrls != null) {
                 final long now = System.currentTimeMillis();
-                final List<String> urlList =
-                        split(startUrls.toString(), "\n").get(
-                                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toList()));
+                final List<String> urlList = split(startUrls.toString(), "\n")
+                        .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toList()));
 
-                final String webUrls =
-                        urlList.stream().filter(s -> Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p)))
-                                .collect(Collectors.joining("\n"));
+                final String webUrls = urlList.stream().filter(s -> Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p)))
+                        .collect(Collectors.joining("\n"));
                 if (StringUtil.isNotBlank(webUrls)) {
                     webConfig = new WebConfig();
                     webConfig.setName("Default");
@@ -188,9 +187,8 @@ public class GsaConfigParser extends DefaultHandler {
                     webConfig.setUpdatedTime(now);
                 }
 
-                final String fileUrls =
-                        urlList.stream().filter(s -> Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p)))
-                                .collect(Collectors.joining("\n"));
+                final String fileUrls = urlList.stream().filter(s -> Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p)))
+                        .collect(Collectors.joining("\n"));
                 if (StringUtil.isNotBlank(fileUrls)) {
                     fileConfig = new FileConfig();
                     fileConfig.setName("Default");
@@ -229,8 +227,8 @@ public class GsaConfigParser extends DefaultHandler {
     }
 
     protected String parseFilterPaths(final String text, final boolean web, final boolean file) {
-        return split(text, "\n").get(
-                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(this::getFilterPath).filter(s -> {
+        return split(text, "\n")
+                .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).map(this::getFilterPath).filter(s -> {
                     if (StringUtil.isBlank(s)) {
                         return false;
                     }

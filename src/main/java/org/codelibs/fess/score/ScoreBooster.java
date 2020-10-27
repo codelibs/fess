@@ -57,9 +57,8 @@ public abstract class ScoreBooster {
         if (url == null) {
             return StringUtil.EMPTY_STRINGS;
         }
-        final SearchResponse response =
-                client.prepareSearch(index).setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url)).setFetchSource(false)
-                        .setSize(fessConfig.getPageScoreBoosterMaxFetchSizeAsInteger()).execute().actionGet(requestTimeout);
+        final SearchResponse response = client.prepareSearch(index).setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url))
+                .setFetchSource(false).setSize(fessConfig.getPageScoreBoosterMaxFetchSizeAsInteger()).execute().actionGet(requestTimeout);
         return Arrays.stream(response.getHits().getHits()).map(SearchHit::getId).toArray(n -> new String[n]);
     };
 

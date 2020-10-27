@@ -219,7 +219,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setAvailable_PercentileRanks("available", values, opLambda);
     }
 
-    public void setAvailable_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setAvailable_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -614,7 +615,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setConfigParameter_IpRange("configParameter", opLambda, null);
     }
 
-    public void setConfigParameter_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setConfigParameter_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setConfigParameter_IpRange("configParameter", opLambda, aggsLambda);
     }
 
@@ -669,7 +671,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setConfigParameter_Missing("configParameter", opLambda, null);
     }
 
-    public void setConfigParameter_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setConfigParameter_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setConfigParameter_Missing("configParameter", opLambda, aggsLambda);
     }
 
@@ -930,7 +933,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -945,7 +949,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
@@ -1380,7 +1385,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setExcludedDocUrls_IpRange("excludedDocUrls", opLambda, null);
     }
 
-    public void setExcludedDocUrls_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setExcludedDocUrls_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setExcludedDocUrls_IpRange("excludedDocUrls", opLambda, aggsLambda);
     }
 
@@ -1435,7 +1441,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setExcludedDocUrls_Missing("excludedDocUrls", opLambda, null);
     }
 
-    public void setExcludedDocUrls_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setExcludedDocUrls_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setExcludedDocUrls_Missing("excludedDocUrls", opLambda, aggsLambda);
     }
 
@@ -1642,7 +1649,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setIncludedDocUrls_IpRange("includedDocUrls", opLambda, null);
     }
 
-    public void setIncludedDocUrls_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setIncludedDocUrls_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setIncludedDocUrls_IpRange("includedDocUrls", opLambda, aggsLambda);
     }
 
@@ -1697,7 +1705,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setIncludedDocUrls_Missing("includedDocUrls", opLambda, null);
     }
 
-    public void setIncludedDocUrls_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setIncludedDocUrls_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setIncludedDocUrls_Missing("includedDocUrls", opLambda, aggsLambda);
     }
 
@@ -1974,7 +1983,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setIntervalTime_Histogram("intervalTime", opLambda, null);
     }
 
-    public void setIntervalTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setIntervalTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setIntervalTime_Histogram("intervalTime", opLambda, aggsLambda);
     }
 
@@ -2360,7 +2370,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setName_IpRange("name", opLambda, aggsLambda);
     }
 
-    public void setName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2414,7 +2425,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setName_Missing("name", opLambda, aggsLambda);
     }
 
-    public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2539,7 +2551,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setNumOfThread_PercentileRanks("numOfThread", values, opLambda);
     }
 
-    public void setNumOfThread_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setNumOfThread_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "numOfThread", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2554,7 +2567,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setNumOfThread_Histogram("numOfThread", opLambda, null);
     }
 
-    public void setNumOfThread_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setNumOfThread_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setNumOfThread_Histogram("numOfThread", opLambda, aggsLambda);
     }
 
@@ -2895,7 +2909,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3120,7 +3135,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setTimeToLive_PercentileRanks("timeToLive", values, opLambda);
     }
 
-    public void setTimeToLive_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setTimeToLive_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "timeToLive", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3476,7 +3492,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3491,7 +3508,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 
@@ -3650,7 +3668,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setUrls_IpRange("urls", opLambda, aggsLambda);
     }
 
-    public void setUrls_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setUrls_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "urls");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3704,7 +3723,8 @@ public abstract class BsWebConfigCA extends EsAbstractConditionAggregation {
         setUrls_Missing("urls", opLambda, aggsLambda);
     }
 
-    public void setUrls_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebConfigCA> aggsLambda) {
+    public void setUrls_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "urls");
         if (opLambda != null) {
             opLambda.callback(builder);

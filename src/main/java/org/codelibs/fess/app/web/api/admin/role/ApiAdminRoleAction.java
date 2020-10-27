@@ -43,9 +43,9 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final RolePager pager = copyBeanToNewBean(body, RolePager.class);
         final List<Role> list = roleService.getRoleList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/role/setting/{id}

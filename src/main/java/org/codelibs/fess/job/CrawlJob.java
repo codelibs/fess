@@ -90,8 +90,8 @@ public class CrawlJob extends ExecJob {
         if (maxCrawlerProcesses > 0) {
             final int runningJobCount = getRunningJobCount();
             if (runningJobCount > maxCrawlerProcesses) {
-                throw new JobProcessingException(runningJobCount + " crawler processes are running. Max processes are "
-                        + maxCrawlerProcesses + ".");
+                throw new JobProcessingException(
+                        runningJobCount + " crawler processes are running. Max processes are " + maxCrawlerProcesses + ".");
             }
         }
 
@@ -230,14 +230,14 @@ public class CrawlJob extends ExecJob {
             buf.append(targetClassesDir.getAbsolutePath());
         }
         // WEB-INF/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
-                + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")),
+                "WEB-INF" + File.separator + "lib" + File.separator);
         // WEB-INF/env/crawler/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")), "WEB-INF"
-                + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")),
+                "WEB-INF" + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
         // WEB-INF/plugin
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/plugin")), "WEB-INF" + File.separator + "plugin"
-                + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/plugin")),
+                "WEB-INF" + File.separator + "plugin" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -274,8 +274,8 @@ public class CrawlJob extends ExecJob {
                 cmdList.add("-Dorg.apache.tika.service.error.warn=true");
             }
         }
-        stream(fessConfig.getJvmCrawlerOptionsAsArray()).of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
+        stream(fessConfig.getJvmCrawlerOptionsAsArray())
+                .of(stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
 
         File ownTmpDir = null;
         final String tmpDir = System.getProperty("java.io.tmpdir");

@@ -151,22 +151,21 @@ public class SearchAction extends FessSearchAction {
             form.lang = searchHelper.getLanguages(request, form);
             final WebRenderData renderData = new WebRenderData();
             searchHelper.search(form, renderData, getUserBean());
-            return asHtml(virtualHost(path_SearchJsp)).renderWith(
-                    data -> {
-                        if (form.hasConditionQuery()) {
-                            form.q = renderData.getSearchQuery();
-                        }
-                        renderData.register(data);
-                        RenderDataUtil.register(data, "displayQuery",
-                                getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
-                        createPagingQuery(form);
-                        final String[] relatedContents = relatedContentHelper.getRelatedContents(form.getQuery());
-                        RenderDataUtil.register(data, "relatedContents", relatedContents);
-                        final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
-                        if (relatedQueries.length > 0) {
-                            RenderDataUtil.register(data, "relatedQueries", relatedQueries);
-                        }
-                    });
+            return asHtml(virtualHost(path_SearchJsp)).renderWith(data -> {
+                if (form.hasConditionQuery()) {
+                    form.q = renderData.getSearchQuery();
+                }
+                renderData.register(data);
+                RenderDataUtil.register(data, "displayQuery",
+                        getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
+                createPagingQuery(form);
+                final String[] relatedContents = relatedContentHelper.getRelatedContents(form.getQuery());
+                RenderDataUtil.register(data, "relatedContents", relatedContents);
+                final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(form.getQuery());
+                if (relatedQueries.length > 0) {
+                    RenderDataUtil.register(data, "relatedQueries", relatedQueries);
+                }
+            });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -228,9 +227,8 @@ public class SearchAction extends FessSearchAction {
     protected void createPagingQuery(final SearchForm form) {
         final List<String> pagingQueryList = new ArrayList<>();
         if (form.ex_q != null) {
-            stream(form.ex_q).of(
-                    stream -> stream.filter(StringUtil::isNotBlank).distinct()
-                            .forEach(q -> pagingQueryList.add("ex_q=" + LaFunctions.u(q))));
+            stream(form.ex_q).of(stream -> stream.filter(StringUtil::isNotBlank).distinct()
+                    .forEach(q -> pagingQueryList.add("ex_q=" + LaFunctions.u(q))));
         }
         if (StringUtil.isNotBlank(form.sort)) {
             pagingQueryList.add("sort=" + LaFunctions.u(form.sort));
@@ -255,27 +253,16 @@ public class SearchAction extends FessSearchAction {
                 }
             }
         }
-        form.fields
-                .entrySet()
-                .stream()
-                .filter(e -> e.getValue() != null)
-                .forEach(
-                        e -> {
-                            final String key = LaFunctions.u(e.getKey());
-                            stream(e.getValue()).of(
-                                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
-                                            s -> pagingQueryList.add("fields." + key + "=" + LaFunctions.u(s))));
-                        });
-        form.as.entrySet()
-                .stream()
-                .filter(e -> e.getValue() != null)
-                .forEach(
-                        e -> {
-                            final String key = LaFunctions.u(e.getKey());
-                            stream(e.getValue()).of(
-                                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
-                                            s -> pagingQueryList.add("as." + key + "=" + LaFunctions.u(s))));
-                        });
+        form.fields.entrySet().stream().filter(e -> e.getValue() != null).forEach(e -> {
+            final String key = LaFunctions.u(e.getKey());
+            stream(e.getValue()).of(stream -> stream.filter(StringUtil::isNotBlank)
+                    .forEach(s -> pagingQueryList.add("fields." + key + "=" + LaFunctions.u(s))));
+        });
+        form.as.entrySet().stream().filter(e -> e.getValue() != null).forEach(e -> {
+            final String key = LaFunctions.u(e.getKey());
+            stream(e.getValue()).of(stream -> stream.filter(StringUtil::isNotBlank)
+                    .forEach(s -> pagingQueryList.add("as." + key + "=" + LaFunctions.u(s))));
+        });
         request.setAttribute(Constants.PAGING_QUERY_LIST, pagingQueryList);
     }
 

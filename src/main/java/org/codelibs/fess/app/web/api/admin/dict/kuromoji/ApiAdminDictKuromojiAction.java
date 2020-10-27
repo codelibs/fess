@@ -48,9 +48,8 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final KuromojiPager pager = copyBeanToNewBean(body, KuromojiPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(
-                        kuromojiService.getKuromojiList(body.dictId, pager).stream()
-                                .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
+                .settings(kuromojiService.getKuromojiList(body.dictId, pager).stream()
+                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
                 .status(ApiResult.Status.OK).result());
     }
 
@@ -78,8 +77,8 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
             return null;
         });
         kuromojiService.store(body.dictId, entity);
-        return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK)
-                .result());
+        return asJson(
+                new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
     // POST /api/admin/dict/kuromoji/setting/{dictId}
@@ -96,8 +95,8 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
             return null;
         });
         kuromojiService.store(body.dictId, entity);
-        return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK)
-                .result());
+        return asJson(
+                new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
     // DELETE /api/admin/dict/kuromoji/setting/{dictId}/{id}

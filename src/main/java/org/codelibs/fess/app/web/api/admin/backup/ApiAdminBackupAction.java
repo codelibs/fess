@@ -91,13 +91,12 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                     index = id;
                     filename = id + ".bulk";
                 }
-                return asStream(filename).contentTypeOctetStream().stream(
-                        out -> {
-                            try (CurlResponse response =
-                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
-                                out.write(response.getContentAsStream());
-                            }
-                        });
+                return asStream(filename).contentTypeOctetStream().stream(out -> {
+                    try (CurlResponse response =
+                            ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
+                        out.write(response.getContentAsStream());
+                    }
+                });
             }
         }
 

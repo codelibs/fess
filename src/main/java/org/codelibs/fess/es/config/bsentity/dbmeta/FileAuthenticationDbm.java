@@ -149,8 +149,8 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPort = cci("port", "port", null, null, Integer.class, "port", null, false, false, false, "Integer",
-            0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPort = cci("port", "port", null, null, Integer.class, "port", null, false, false, false, "Integer", 0,
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnProtocolScheme = cci("protocolScheme", "protocolScheme", null, null, String.class, "protocolScheme",
             null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,

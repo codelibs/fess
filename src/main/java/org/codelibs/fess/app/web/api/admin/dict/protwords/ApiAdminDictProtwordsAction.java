@@ -47,9 +47,8 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final ProtwordsPager pager = copyBeanToNewBean(body, ProtwordsPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(
-                        protwordsService.getProtwordsList(body.dictId, pager).stream()
-                                .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
+                .settings(protwordsService.getProtwordsList(body.dictId, pager).stream()
+                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
                 .status(ApiResult.Status.OK).result());
     }
 
@@ -77,8 +76,8 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
             return null;
         });
         protwordsService.store(body.dictId, entity);
-        return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK)
-                .result());
+        return asJson(
+                new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
     // POST /api/admin/dict/protwords/setting/{dictId}
@@ -95,8 +94,8 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
             return null;
         });
         protwordsService.store(body.dictId, entity);
-        return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK)
-                .result());
+        return asJson(
+                new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
     // DELETE /api/admin/dict/protwords/setting/{dictId}/{id}

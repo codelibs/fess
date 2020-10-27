@@ -76,8 +76,8 @@ public class CrawlingInfoService {
 
         // update pager
         BeanUtil.copyBeanToBean(crawlingInfoList, crawlingInfoPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        crawlingInfoPager.setPageNumberList(crawlingInfoList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger()))
-                .createPageNumberList());
+        crawlingInfoPager.setPageNumberList(
+                crawlingInfoList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
 
         return crawlingInfoList;
     }

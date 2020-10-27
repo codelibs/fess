@@ -719,8 +719,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         value = transformer.getCanonicalUrl(responseData, document);
         assertEquals("http://example.com/", value);
 
-        data =
-                "<html><head><link rel=\"canonical\" href=\"http://example1.com/\"><link rel=\"canonical\" href=\"http://example2.com/\"></head><body>aaa</body></html>";
+        data = "<html><head><link rel=\"canonical\" href=\"http://example1.com/\"><link rel=\"canonical\" href=\"http://example2.com/\"></head><body>aaa</body></html>";
         document = getDocument(data);
         value = transformer.getCanonicalUrl(responseData, document);
         assertEquals("http://example1.com/", value);

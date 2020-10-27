@@ -98,14 +98,10 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Searching indexed document: {}", id);
                 }
-                final Map<String, Object> document =
-                        indexingHelper.getDocument(
-                                fessEsClient,
-                                id,
-                                new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldLastModified(),
-                                        fessConfig.getIndexFieldAnchor(), fessConfig.getIndexFieldSegment(),
-                                        fessConfig.getIndexFieldExpires(), fessConfig.getIndexFieldClickCount(),
-                                        fessConfig.getIndexFieldFavoriteCount() });
+                final Map<String, Object> document = indexingHelper.getDocument(fessEsClient, id,
+                        new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldLastModified(),
+                                fessConfig.getIndexFieldAnchor(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldExpires(),
+                                fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() });
                 if (document == null) {
                     storeChildUrlsToQueue(urlQueue, getChildUrlSet(fessEsClient, id));
                     return true;
@@ -246,8 +242,8 @@ public class FessCrawlerThread extends CrawlerThread {
             final String url = urlQueue.getUrl();
 
             final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
-            failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url, new ContentNotFoundException(
-                    urlQueue.getParentUrl(), url));
+            failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url,
+                    new ContentNotFoundException(urlQueue.getParentUrl(), url));
         }
     }
 

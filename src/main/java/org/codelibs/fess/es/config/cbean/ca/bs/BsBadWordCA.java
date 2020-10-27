@@ -118,7 +118,8 @@ public abstract class BsBadWordCA extends EsAbstractConditionAggregation {
         setCreatedBy_Terms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsBadWordCA> aggsLambda) {
+    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsBadWordCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -349,7 +350,8 @@ public abstract class BsBadWordCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -735,7 +737,8 @@ public abstract class BsBadWordCA extends EsAbstractConditionAggregation {
         setTargetRole_Terms("targetRole", opLambda, aggsLambda);
     }
 
-    public void setTargetRole_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsBadWordCA> aggsLambda) {
+    public void setTargetRole_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsBadWordCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "targetRole");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -865,7 +868,8 @@ public abstract class BsBadWordCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Terms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsBadWordCA> aggsLambda) {
+    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsBadWordCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1096,7 +1100,8 @@ public abstract class BsBadWordCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);

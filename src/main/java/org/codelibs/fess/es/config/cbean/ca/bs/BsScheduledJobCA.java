@@ -219,7 +219,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setAvailable_PercentileRanks("available", values, opLambda);
     }
 
-    public void setAvailable_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setAvailable_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -234,7 +235,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setAvailable_Histogram("available", opLambda, null);
     }
 
-    public void setAvailable_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsScheduledJobCA> aggsLambda) {
+    public void setAvailable_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsScheduledJobCA> aggsLambda) {
         setAvailable_Histogram("available", opLambda, aggsLambda);
     }
 
@@ -800,7 +802,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -972,7 +975,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setCronExpression_IpRange("cronExpression", opLambda, null);
     }
 
-    public void setCronExpression_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsScheduledJobCA> aggsLambda) {
+    public void setCronExpression_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsScheduledJobCA> aggsLambda) {
         setCronExpression_IpRange("cronExpression", opLambda, aggsLambda);
     }
 
@@ -1027,7 +1031,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setCronExpression_Missing("cronExpression", opLambda, null);
     }
 
-    public void setCronExpression_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsScheduledJobCA> aggsLambda) {
+    public void setCronExpression_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsScheduledJobCA> aggsLambda) {
         setCronExpression_Missing("cronExpression", opLambda, aggsLambda);
     }
 
@@ -1157,7 +1162,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setJobLogging_PercentileRanks("jobLogging", values, opLambda);
     }
 
-    public void setJobLogging_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setJobLogging_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "jobLogging", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1172,7 +1178,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setJobLogging_Histogram("jobLogging", opLambda, null);
     }
 
-    public void setJobLogging_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsScheduledJobCA> aggsLambda) {
+    public void setJobLogging_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsScheduledJobCA> aggsLambda) {
         setJobLogging_Histogram("jobLogging", opLambda, aggsLambda);
     }
 
@@ -1281,7 +1288,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setName_Terms("name", opLambda, aggsLambda);
     }
 
-    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsScheduledJobCA> aggsLambda) {
+    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsScheduledJobCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1774,7 +1782,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1789,7 +1798,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setSortOrder_Histogram("sortOrder", opLambda, null);
     }
 
-    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsScheduledJobCA> aggsLambda) {
+    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsScheduledJobCA> aggsLambda) {
         setSortOrder_Histogram("sortOrder", opLambda, aggsLambda);
     }
 
@@ -2261,7 +2271,8 @@ public abstract class BsScheduledJobCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);

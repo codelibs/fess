@@ -69,14 +69,17 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), buildQuery("QUERY "));
 
         assertQuery(
-                functionScoreQuery(andQuery(simpleQuery("QUERY1", titleBoost, contentBoost),
-                        simpleQuery("QUERY2", titleBoost, contentBoost))), buildQuery("QUERY1 QUERY2"));
+                functionScoreQuery(
+                        andQuery(simpleQuery("QUERY1", titleBoost, contentBoost), simpleQuery("QUERY2", titleBoost, contentBoost))),
+                buildQuery("QUERY1 QUERY2"));
         assertQuery(
-                functionScoreQuery(andQuery(simpleQuery("QUERY1", titleBoost, contentBoost),
-                        simpleQuery("QUERY2", titleBoost, contentBoost))), buildQuery("QUERY1 AND QUERY2"));
+                functionScoreQuery(
+                        andQuery(simpleQuery("QUERY1", titleBoost, contentBoost), simpleQuery("QUERY2", titleBoost, contentBoost))),
+                buildQuery("QUERY1 AND QUERY2"));
 
         assertQuery(
-                functionScoreQuery(orQuery(simpleQuery("QUERY1", titleBoost, contentBoost), simpleQuery("QUERY2", titleBoost, contentBoost))),
+                functionScoreQuery(
+                        orQuery(simpleQuery("QUERY1", titleBoost, contentBoost), simpleQuery("QUERY2", titleBoost, contentBoost))),
                 buildQuery("QUERY1 OR QUERY2"));
 
         assertQueryBuilder("test", "", MatchPhraseQueryBuilder.class);

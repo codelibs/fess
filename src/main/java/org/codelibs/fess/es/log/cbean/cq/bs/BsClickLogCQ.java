@@ -109,9 +109,8 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         ClickLogCQ filterQuery = new ClickLogCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -1079,7 +1078,8 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         setQueryRequestedAt_Terms(queryRequestedAtList, null);
     }
 
-    public void setQueryRequestedAt_InScope(Collection<LocalDateTime> queryRequestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setQueryRequestedAt_InScope(Collection<LocalDateTime> queryRequestedAtList,
+            ConditionOptionCall<TermsQueryBuilder> opLambda) {
         setQueryRequestedAt_Terms(queryRequestedAtList, opLambda);
     }
 

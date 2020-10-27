@@ -350,7 +350,8 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -446,7 +447,8 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         setCreatedTime_Missing("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
         setCreatedTime_Missing("createdTime", opLambda, aggsLambda);
     }
 
@@ -915,7 +917,8 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         setThumbnailId_IpRange("thumbnail_id", opLambda, null);
     }
 
-    public void setThumbnailId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+    public void setThumbnailId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
         setThumbnailId_IpRange("thumbnail_id", opLambda, aggsLambda);
     }
 
@@ -970,7 +973,8 @@ public abstract class BsThumbnailQueueCA extends EsAbstractConditionAggregation 
         setThumbnailId_Missing("thumbnail_id", opLambda, null);
     }
 
-    public void setThumbnailId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsThumbnailQueueCA> aggsLambda) {
+    public void setThumbnailId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsThumbnailQueueCA> aggsLambda) {
         setThumbnailId_Missing("thumbnail_id", opLambda, aggsLambda);
     }
 

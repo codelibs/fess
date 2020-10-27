@@ -79,8 +79,8 @@ public class DuplicateHostDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getCreatedBy(),
-                (et, vl) -> ((DuplicateHost) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((DuplicateHost) et).getCreatedBy(), (et, vl) -> ((DuplicateHost) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
         setupEpg(_epgMap, et -> ((DuplicateHost) et).getCreatedTime(),
                 (et, vl) -> ((DuplicateHost) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((DuplicateHost) et).getDuplicateHostName(),
@@ -89,8 +89,8 @@ public class DuplicateHostDbm extends AbstractDBMeta {
                 (et, vl) -> ((DuplicateHost) et).setRegularName(DfTypeUtil.toString(vl)), "regularName");
         setupEpg(_epgMap, et -> ((DuplicateHost) et).getSortOrder(),
                 (et, vl) -> ((DuplicateHost) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getUpdatedBy(),
-                (et, vl) -> ((DuplicateHost) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((DuplicateHost) et).getUpdatedBy(), (et, vl) -> ((DuplicateHost) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
         setupEpg(_epgMap, et -> ((DuplicateHost) et).getUpdatedTime(),
                 (et, vl) -> ((DuplicateHost) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
     }

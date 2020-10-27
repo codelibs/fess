@@ -250,8 +250,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String FTP = "FTP";
 
-    public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":",
-            "/" };
+    public static final String[] RESERVED =
+            { "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
 
     public static final Pattern LUCENE_FIELD_RESERVED_PATTERN = Pattern.compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",
 
@@ -341,8 +341,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String GUEST_USER = "guest";
 
-    public static final String[] PAGER_CONVERSION_RULE = { "allRecordCount", "pageSize", "currentPageNumber", "allPageCount",
-            "existPrePage", "existNextPage" };
+    public static final String[] PAGER_CONVERSION_RULE =
+            { "allRecordCount", "pageSize", "currentPageNumber", "allPageCount", "existPrePage", "existNextPage" };
 
     // crawler types
     public static final String WEB_CRAWLER_TYPE = "web_crawling";

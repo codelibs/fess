@@ -68,7 +68,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -80,7 +81,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         }
     }
 
-    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         SamplerAggregationBuilder builder = regSamplerA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -165,7 +167,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setBoostExpr_IpRange("boostExpr", opLambda, null);
     }
 
-    public void setBoostExpr_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setBoostExpr_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setBoostExpr_IpRange("boostExpr", opLambda, aggsLambda);
     }
 
@@ -220,7 +223,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setBoostExpr_Missing("boostExpr", opLambda, null);
     }
 
-    public void setBoostExpr_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setBoostExpr_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setBoostExpr_Missing("boostExpr", opLambda, aggsLambda);
     }
 
@@ -296,7 +300,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setCreatedBy_IpRange("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setCreatedBy_IpRange("createdBy", opLambda, aggsLambda);
     }
 
@@ -351,7 +356,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setCreatedBy_Missing("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setCreatedBy_Missing("createdBy", opLambda, aggsLambda);
     }
 
@@ -481,7 +487,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -522,7 +529,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setCreatedTime_Range("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setCreatedTime_Range("createdTime", opLambda, aggsLambda);
     }
 
@@ -708,7 +716,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -804,7 +813,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setSortOrder_Missing("sortOrder", opLambda, null);
     }
 
-    public void setSortOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setSortOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setSortOrder_Missing("sortOrder", opLambda, aggsLambda);
     }
 
@@ -880,7 +890,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setUpdatedBy_IpRange("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setUpdatedBy_IpRange("updatedBy", opLambda, aggsLambda);
     }
 
@@ -935,7 +946,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setUpdatedBy_Missing("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setUpdatedBy_Missing("updatedBy", opLambda, aggsLambda);
     }
 
@@ -1065,7 +1077,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1106,7 +1119,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setUpdatedTime_Range("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, aggsLambda);
     }
 
@@ -1238,7 +1252,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setUrlExpr_IpRange("urlExpr", opLambda, null);
     }
 
-    public void setUrlExpr_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setUrlExpr_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setUrlExpr_IpRange("urlExpr", opLambda, aggsLambda);
     }
 
@@ -1293,7 +1308,8 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         setUrlExpr_Missing("urlExpr", opLambda, null);
     }
 
-    public void setUrlExpr_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+    public void setUrlExpr_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
         setUrlExpr_Missing("urlExpr", opLambda, aggsLambda);
     }
 

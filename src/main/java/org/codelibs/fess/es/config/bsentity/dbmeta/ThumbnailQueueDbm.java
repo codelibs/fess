@@ -85,7 +85,8 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getGenerator(),
                 (et, vl) -> ((ThumbnailQueue) et).setGenerator(DfTypeUtil.toString(vl)), "generator");
-        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)), "path");
+        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)),
+                "path");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getTarget(), (et, vl) -> ((ThumbnailQueue) et).setTarget(DfTypeUtil.toString(vl)),
                 "target");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getThumbnailId(),

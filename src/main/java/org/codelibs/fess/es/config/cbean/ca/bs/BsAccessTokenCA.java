@@ -350,7 +350,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -365,7 +366,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
@@ -575,7 +577,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setExpiredTime_PercentileRanks("expiredTime", values, opLambda);
     }
 
-    public void setExpiredTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setExpiredTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "expiredTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -590,7 +593,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setExpiredTime_Histogram("expiredTime", opLambda, null);
     }
 
-    public void setExpiredTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setExpiredTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         setExpiredTime_Histogram("expiredTime", opLambda, aggsLambda);
     }
 
@@ -699,7 +703,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setName_Terms("name", opLambda, aggsLambda);
     }
 
-    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -876,7 +881,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setParameterName_IpRange("parameter_name", opLambda, null);
     }
 
-    public void setParameterName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setParameterName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         setParameterName_IpRange("parameter_name", opLambda, aggsLambda);
     }
 
@@ -931,7 +937,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setParameterName_Missing("parameter_name", opLambda, null);
     }
 
-    public void setParameterName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setParameterName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         setParameterName_Missing("parameter_name", opLambda, aggsLambda);
     }
 
@@ -1091,7 +1098,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setToken_Terms("token", opLambda, aggsLambda);
     }
 
-    public void setToken_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setToken_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "token");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1453,7 +1461,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1468,7 +1477,8 @@ public abstract class BsAccessTokenCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsAccessTokenCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsAccessTokenCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 

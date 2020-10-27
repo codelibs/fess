@@ -62,8 +62,7 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void functionScore(OperatorCall<FileConfigCQ> queryLambda,
-            ScoreFunctionCall<ScoreFunctionCreator<FileConfigCQ>> functionsLambda,
+    public void functionScore(OperatorCall<FileConfigCQ> queryLambda, ScoreFunctionCall<ScoreFunctionCreator<FileConfigCQ>> functionsLambda,
             final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
         FileConfigCQ cq = new FileConfigCQ();
         queryLambda.callback(cq);
@@ -110,9 +109,8 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         FileConfigCQ filterQuery = new FileConfigCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -1634,7 +1632,8 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         setExcludedDocPaths_MatchPhrasePrefix(excludedDocPaths, null);
     }
 
-    public void setExcludedDocPaths_MatchPhrasePrefix(String excludedDocPaths, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setExcludedDocPaths_MatchPhrasePrefix(String excludedDocPaths,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("excludedDocPaths", excludedDocPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2078,7 +2077,8 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         setIncludedDocPaths_MatchPhrasePrefix(includedDocPaths, null);
     }
 
-    public void setIncludedDocPaths_MatchPhrasePrefix(String includedDocPaths, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setIncludedDocPaths_MatchPhrasePrefix(String includedDocPaths,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("includedDocPaths", includedDocPaths);
         if (opLambda != null) {
             opLambda.callback(builder);

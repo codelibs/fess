@@ -43,45 +43,42 @@ public class GeoInfo {
         final String[] geoFields = fessConfig.getQueryGeoFieldsAsArray();
         final Map<String, List<QueryBuilder>> geoMap = new HashMap<>();
 
-        stream(request.getParameterMap()).of(
-                stream -> stream.filter(e -> e.getKey().startsWith("geo.") && e.getKey().endsWith(".point")).forEach(
-                        e -> {
-                            final String key = e.getKey();
-                            for (final String geoField : geoFields) {
-                                if (key.startsWith("geo." + geoField + ".")) {
-                                    final String distanceKey = key.replaceFirst(".point$", ".distance");
-                                    final String distance = request.getParameter(distanceKey);
-                                    if (StringUtil.isNotBlank(distance)) {
-                                        stream(e.getValue()).of(
-                                                s -> s.forEach(pt -> {
-                                                    List<QueryBuilder> list = geoMap.get(geoField);
-                                                    if (list == null) {
-                                                        list = new ArrayList<>();
-                                                        geoMap.put(geoField, list);
-                                                    }
-                                                    final String[] values = pt.split(",");
-                                                    if (values.length == 2) {
-                                                        try {
-                                                            final double lat = Double.parseDouble(values[0]);
-                                                            final double lon = Double.parseDouble(values[1]);
-                                                            list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance)
-                                                                    .point(lat, lon));
-                                                        } catch (final Exception ex) {
-                                                            throw new InvalidQueryException(messages -> messages
-                                                                    .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), ex
-                                                                    .getLocalizedMessage(), ex);
-                                                        }
-                                                    } else {
-                                                        throw new InvalidQueryException(messages -> messages
-                                                                .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
-                                                                "Invalid geo point: " + pt);
-                                                    }
-                                                }));
+        stream(request.getParameterMap())
+                .of(stream -> stream.filter(e -> e.getKey().startsWith("geo.") && e.getKey().endsWith(".point")).forEach(e -> {
+                    final String key = e.getKey();
+                    for (final String geoField : geoFields) {
+                        if (key.startsWith("geo." + geoField + ".")) {
+                            final String distanceKey = key.replaceFirst(".point$", ".distance");
+                            final String distance = request.getParameter(distanceKey);
+                            if (StringUtil.isNotBlank(distance)) {
+                                stream(e.getValue()).of(s -> s.forEach(pt -> {
+                                    List<QueryBuilder> list = geoMap.get(geoField);
+                                    if (list == null) {
+                                        list = new ArrayList<>();
+                                        geoMap.put(geoField, list);
                                     }
-                                    break;
-                                }
+                                    final String[] values = pt.split(",");
+                                    if (values.length == 2) {
+                                        try {
+                                            final double lat = Double.parseDouble(values[0]);
+                                            final double lon = Double.parseDouble(values[1]);
+                                            list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance).point(lat, lon));
+                                        } catch (final Exception ex) {
+                                            throw new InvalidQueryException(
+                                                    messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                                                    ex.getLocalizedMessage(), ex);
+                                        }
+                                    } else {
+                                        throw new InvalidQueryException(
+                                                messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                                                "Invalid geo point: " + pt);
+                                    }
+                                }));
                             }
-                        }));
+                            break;
+                        }
+                    }
+                }));
 
         final QueryBuilder[] queryBuilders = geoMap.values().stream().map(list -> {
             if (list.size() == 1) {

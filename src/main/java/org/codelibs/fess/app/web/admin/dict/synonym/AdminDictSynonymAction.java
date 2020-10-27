@@ -156,16 +156,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-        synonymService
-                .getSynonymItem(form.dictId, form.id)
-                .ifPresent(entity -> {
-                    form.inputs = entity.getInputsValue();
-                    form.outputs = entity.getOutputsValue();
-                })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            () -> asListHtml(form.dictId));
-                });
+        synonymService.getSynonymItem(form.dictId, form.id).ifPresent(entity -> {
+            form.inputs = entity.getInputsValue();
+            form.outputs = entity.getOutputsValue();
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                    () -> asListHtml(form.dictId));
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -185,26 +182,20 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
-        return asDetailsHtml().useForm(
-                EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        synonymService
-                                .getSynonymItem(dictId, id)
-                                .ifPresent(entity -> {
-                                    form.inputs = entity.getInputsValue();
-                                    form.outputs = entity.getOutputsValue();
-                                })
-                                .orElse(() -> {
-                                    throwValidationError(
-                                            messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                                            () -> asListHtml(dictId));
-                                });
-                        form.id = id;
-                        form.crudMode = crudMode;
-                        form.dictId = dictId;
-                    });
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                synonymService.getSynonymItem(dictId, id).ifPresent(entity -> {
+                    form.inputs = entity.getInputsValue();
+                    form.outputs = entity.getOutputsValue();
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
+                            () -> asListHtml(dictId));
                 });
+                form.id = id;
+                form.crudMode = crudMode;
+                form.dictId = dictId;
+            });
+        });
     }
 
     // -----------------------------------------------------
@@ -232,17 +223,14 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return synonymService
-                .getSynonymFile(form.dictId)
+        return synonymService.getSynonymFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                }))
-                .orElseGet(
-                        () -> {
-                            throwValidationError(messages -> messages.addErrorsFailedToDownloadSynonymFile(GLOBAL),
-                                    () -> downloadpage(form.dictId));
-                            return null;
-                        });
+                })).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsFailedToDownloadSynonymFile(GLOBAL),
+                            () -> downloadpage(form.dictId));
+                    return null;
+                });
     }
 
     // -----------------------------------------------------
@@ -270,21 +258,19 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return synonymService
-                .getSynonymFile(form.dictId)
-                .map(file -> {
-                    try (InputStream inputStream = form.synonymFile.getInputStream()) {
-                        file.update(inputStream);
-                    } catch (final IOException e) {
-                        throwValidationError(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL),
-                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
-                    }
-                    saveInfo(messages -> messages.addSuccessUploadSynonymFile(GLOBAL));
-                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-                }).orElseGet(() -> {
-                    throwValidationError(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL), () -> uploadpage(form.dictId));
-                    return null;
-                });
+        return synonymService.getSynonymFile(form.dictId).map(file -> {
+            try (InputStream inputStream = form.synonymFile.getInputStream()) {
+                file.update(inputStream);
+            } catch (final IOException e) {
+                throwValidationError(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL),
+                        () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+            }
+            saveInfo(messages -> messages.addSuccessUploadSynonymFile(GLOBAL));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL), () -> uploadpage(form.dictId));
+            return null;
+        });
 
     }
 
@@ -297,16 +283,15 @@ public class AdminDictSynonymAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        createSynonymItem(form, this::asEditHtml).ifPresent(
-                entity -> {
-                    try {
-                        synonymService.store(form.dictId, entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        createSynonymItem(form, this::asEditHtml).ifPresent(entity -> {
+            try {
+                synonymService.store(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
@@ -318,16 +303,15 @@ public class AdminDictSynonymAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        createSynonymItem(form, this::asEditHtml).ifPresent(
-                entity -> {
-                    try {
-                        synonymService.store(form.dictId, entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        createSynonymItem(form, this::asEditHtml).ifPresent(entity -> {
+            try {
+                synonymService.store(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             saveToken();
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asEditHtml);
         });
@@ -340,23 +324,17 @@ public class AdminDictSynonymAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
-        synonymService
-                .getSynonymItem(form.dictId, form.id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                synonymService.delete(form.dictId, entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            this::asDetailsHtml);
-                });
+        synonymService.getSynonymItem(form.dictId, form.id).ifPresent(entity -> {
+            try {
+                synonymService.delete(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asDetailsHtml);
+        });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -389,7 +367,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
         }
     }
 
-    public static OptionalEntity<SynonymItem> createSynonymItem(final FessBaseAction action, final CreateForm form, final VaErrorHook hook) {
+    public static OptionalEntity<SynonymItem> createSynonymItem(final FessBaseAction action, final CreateForm form,
+            final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
             validateSynonymString(action, newInputs, "inputs", hook);

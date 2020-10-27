@@ -85,25 +85,25 @@ public class ScheduledJobDbm extends AbstractDBMeta {
                 "crawler");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getCreatedBy(), (et, vl) -> ((ScheduledJob) et).setCreatedBy(DfTypeUtil.toString(vl)),
                 "createdBy");
-        setupEpg(_epgMap, et -> ((ScheduledJob) et).getCreatedTime(),
-                (et, vl) -> ((ScheduledJob) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getCreatedTime(), (et, vl) -> ((ScheduledJob) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getCronExpression(),
                 (et, vl) -> ((ScheduledJob) et).setCronExpression(DfTypeUtil.toString(vl)), "cronExpression");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getJobLogging(),
                 (et, vl) -> ((ScheduledJob) et).setJobLogging(DfTypeUtil.toBoolean(vl)), "jobLogging");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getName(), (et, vl) -> ((ScheduledJob) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((ScheduledJob) et).getScriptData(),
-                (et, vl) -> ((ScheduledJob) et).setScriptData(DfTypeUtil.toString(vl)), "scriptData");
-        setupEpg(_epgMap, et -> ((ScheduledJob) et).getScriptType(),
-                (et, vl) -> ((ScheduledJob) et).setScriptType(DfTypeUtil.toString(vl)), "scriptType");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getScriptData(), (et, vl) -> ((ScheduledJob) et).setScriptData(DfTypeUtil.toString(vl)),
+                "scriptData");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getScriptType(), (et, vl) -> ((ScheduledJob) et).setScriptType(DfTypeUtil.toString(vl)),
+                "scriptType");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getSortOrder(), (et, vl) -> ((ScheduledJob) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getTarget(), (et, vl) -> ((ScheduledJob) et).setTarget(DfTypeUtil.toString(vl)),
                 "target");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getUpdatedBy(), (et, vl) -> ((ScheduledJob) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
-        setupEpg(_epgMap, et -> ((ScheduledJob) et).getUpdatedTime(),
-                (et, vl) -> ((ScheduledJob) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getUpdatedTime(), (et, vl) -> ((ScheduledJob) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
     }
 
     @Override

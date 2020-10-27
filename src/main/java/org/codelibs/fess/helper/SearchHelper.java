@@ -93,29 +93,27 @@ public class SearchHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
         final List<Map<String, Object>> documentItems =
-                ComponentUtil.getFessEsClient().search(
-                        fessConfig.getIndexDocumentSearchIndex(),
-                        searchRequestBuilder -> {
-                            queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
-                            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
-                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
-                                    .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
-                                    .searchRequestType(params.getType()).trackTotalHits(params.getTrackTotalHits()).build();
-                        }, (searchRequestBuilder, execTime, searchResponse) -> {
-                            searchResponse.ifPresent(r -> {
-                                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
-                                    // partial results
-                                    final StringBuilder buf = new StringBuilder(1000);
-                                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
-                                            .append(",\"request\":").append(searchRequestBuilder.toString())//
-                                            .append(",\"response\":").append(r.toString()).append('}');
-                                    logger.warn(buf.toString());
-                                }
-                            });
-                            final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
-                            queryResponseList.init(searchResponse, pageStart, pageSize);
-                            return queryResponseList;
-                        });
+                ComponentUtil.getFessEsClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+                    queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
+                    return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
+                            .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
+                            .similarDocHash(params.getSimilarDocHash()).responseFields(queryHelper.getResponseFields())
+                            .searchRequestType(params.getType()).trackTotalHits(params.getTrackTotalHits()).build();
+                }, (searchRequestBuilder, execTime, searchResponse) -> {
+                    searchResponse.ifPresent(r -> {
+                        if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
+                            // partial results
+                            final StringBuilder buf = new StringBuilder(1000);
+                            buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
+                                    .append(",\"request\":").append(searchRequestBuilder.toString())//
+                                    .append(",\"response\":").append(r.toString()).append('}');
+                            logger.warn(buf.toString());
+                        }
+                    });
+                    final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
+                    queryResponseList.init(searchResponse, pageStart, pageSize);
+                    return queryResponseList;
+                });
         data.setDocumentItems(documentItems);
 
         // search
@@ -191,15 +189,13 @@ public class SearchHelper {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().<Map<String, Object>> scrollSearch(
-                fessConfig.getIndexDocumentSearchIndex(),
+        return ComponentUtil.getFessEsClient().<Map<String, Object>> scrollSearch(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> {
                     final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                     return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
                             .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
-                },
-                (searchResponse, hit) -> {
+                }, (searchResponse, hit) -> {
                     final Map<String, Object> docMap = new HashMap<>();
                     final Map<String, Object> source = hit.getSourceAsMap();
                     if (source != null) {
@@ -285,45 +281,41 @@ public class SearchHelper {
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().getDocument(
-                fessConfig.getIndexDocumentSearchIndex(),
-                builder -> {
-                    final BoolQueryBuilder boolQuery =
-                            QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-                    final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
-                    final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-                    if (!roleSet.isEmpty()) {
-                        queryHelper.buildRoleQuery(roleSet, boolQuery);
-                    }
-                    builder.setQuery(boolQuery);
-                    builder.setFetchSource(fields, null);
-                    queryHelper.processSearchPreference(builder, userBean, docId);
-                    return true;
-                });
+        return ComponentUtil.getFessEsClient().getDocument(fessConfig.getIndexDocumentSearchIndex(), builder -> {
+            final BoolQueryBuilder boolQuery =
+                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+            final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            if (!roleSet.isEmpty()) {
+                queryHelper.buildRoleQuery(roleSet, boolQuery);
+            }
+            builder.setQuery(boolQuery);
+            builder.setFetchSource(fields, null);
+            queryHelper.processSearchPreference(builder, userBean, docId);
+            return true;
+        });
 
     }
 
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
             final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().getDocumentList(
-                fessConfig.getIndexDocumentSearchIndex(),
-                builder -> {
-                    final BoolQueryBuilder boolQuery =
-                            QueryBuilders.boolQuery().must(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
-                    final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-                    if (searchRequestType != SearchRequestType.ADMIN_SEARCH) {
-                        final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
-                        if (!roleSet.isEmpty()) {
-                            queryHelper.buildRoleQuery(roleSet, boolQuery);
-                        }
-                    }
-                    builder.setQuery(boolQuery);
-                    builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger());
-                    builder.setFetchSource(fields, null);
-                    queryHelper.processSearchPreference(builder, userBean, String.join(StringUtil.EMPTY, docIds));
-                    return true;
-                });
+        return ComponentUtil.getFessEsClient().getDocumentList(fessConfig.getIndexDocumentSearchIndex(), builder -> {
+            final BoolQueryBuilder boolQuery =
+                    QueryBuilders.boolQuery().must(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            if (searchRequestType != SearchRequestType.ADMIN_SEARCH) {
+                final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(searchRequestType);
+                if (!roleSet.isEmpty()) {
+                    queryHelper.buildRoleQuery(roleSet, boolQuery);
+                }
+            }
+            builder.setQuery(boolQuery);
+            builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger());
+            builder.setFetchSource(fields, null);
+            queryHelper.processSearchPreference(builder, userBean, String.join(StringUtil.EMPTY, docIds));
+            return true;
+        });
     }
 
     public boolean update(final String id, final String field, final Object value) {

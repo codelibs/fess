@@ -311,9 +311,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             authScheme = new NTLMScheme(new JcifsEngine(props));
         } else if (Constants.FORM.equals(scheme)) {
             final String prefix = CRAWLER_WEB_AUTH + "." + webAuthName + ".";
-            final Map<String, String> parameterMap =
-                    paramMap.entrySet().stream().filter(e -> e.getKey().startsWith(prefix))
-                            .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), Entry::getValue));
+            final Map<String, String> parameterMap = paramMap.entrySet().stream().filter(e -> e.getKey().startsWith(prefix))
+                    .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), Entry::getValue));
             authScheme = new FormScheme(parameterMap);
         }
         return authScheme;
@@ -329,9 +328,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         if (Constants.NTLM.equals(scheme)) {
             final String workstation = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".workstation");
             final String domain = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".domain");
-            credentials =
-                    new NTCredentials(username, password == null ? StringUtil.EMPTY : password, workstation == null ? StringUtil.EMPTY
-                            : workstation, domain == null ? StringUtil.EMPTY : domain);
+            credentials = new NTCredentials(username, password == null ? StringUtil.EMPTY : password,
+                    workstation == null ? StringUtil.EMPTY : workstation, domain == null ? StringUtil.EMPTY : domain);
         } else {
             credentials = new UsernamePasswordCredentials(username, password == null ? StringUtil.EMPTY : password);
         }
@@ -410,8 +408,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     @Override
     public String toString() {
         return "DataConfig [available=" + available + ", boost=" + boost + ", createdBy=" + createdBy + ", createdTime=" + createdTime
-                + ", handlerName=" + handlerName + ", handlerParameter=" + handlerParameter + ", handlerScript=" + handlerScript
-                + ", name=" + name + ", permissions=" + Arrays.toString(permissions) + ", sortOrder=" + sortOrder + ", updatedBy="
-                + updatedBy + ", updatedTime=" + updatedTime + "]";
+                + ", handlerName=" + handlerName + ", handlerParameter=" + handlerParameter + ", handlerScript=" + handlerScript + ", name="
+                + name + ", permissions=" + Arrays.toString(permissions) + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy
+                + ", updatedTime=" + updatedTime + "]";
     }
 }

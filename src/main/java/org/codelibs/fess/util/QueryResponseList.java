@@ -103,43 +103,40 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
 
             // build highlighting fields
-                final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-                final String hlPrefix = queryHelper.getHighlightPrefix();
-                for (final SearchHit searchHit : searchHits.getHits()) {
-                    final Map<String, Object> docMap = parseSearchHit(fessConfig, hlPrefix, searchHit);
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            final String hlPrefix = queryHelper.getHighlightPrefix();
+            for (final SearchHit searchHit : searchHits.getHits()) {
+                final Map<String, Object> docMap = parseSearchHit(fessConfig, hlPrefix, searchHit);
 
-                    if (fessConfig.isResultCollapsed()) {
-                        final Map<String, SearchHits> innerHits = searchHit.getInnerHits();
-                        if (innerHits != null) {
-                            final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
-                            if (innerSearchHits != null) {
-                                final long totalHits = innerSearchHits.getTotalHits().value;
-                                if (totalHits > 1) {
-                                    docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
-                                    final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
-                                    if (bitsField != null && !bitsField.getValues().isEmpty()) {
-                                        docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
-                                    }
-                                    docMap.put(
-                                            fessConfig.getQueryCollapseInnerHitsName(),
-                                            StreamUtil.stream(innerSearchHits.getHits()).get(
-                                                    stream -> stream.map(v -> parseSearchHit(fessConfig, hlPrefix, v)).toArray(
-                                                            n -> new Map[n])));
+                if (fessConfig.isResultCollapsed()) {
+                    final Map<String, SearchHits> innerHits = searchHit.getInnerHits();
+                    if (innerHits != null) {
+                        final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
+                        if (innerSearchHits != null) {
+                            final long totalHits = innerSearchHits.getTotalHits().value;
+                            if (totalHits > 1) {
+                                docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
+                                final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
+                                if (bitsField != null && !bitsField.getValues().isEmpty()) {
+                                    docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
                                 }
+                                docMap.put(fessConfig.getQueryCollapseInnerHitsName(), StreamUtil.stream(innerSearchHits.getHits())
+                                        .get(stream -> stream.map(v -> parseSearchHit(fessConfig, hlPrefix, v)).toArray(n -> new Map[n])));
                             }
                         }
                     }
-
-                    parent.add(docMap);
                 }
 
-                // facet
-                final Aggregations aggregations = searchResponse.getAggregations();
-                if (aggregations != null) {
-                    facetResponse = new FacetResponse(aggregations);
-                }
+                parent.add(docMap);
+            }
 
-            });
+            // facet
+            final Aggregations aggregations = searchResponse.getAggregations();
+            if (aggregations != null) {
+                facetResponse = new FacetResponse(aggregations);
+            }
+
+        });
 
         if (pageSize > 0) {
             calculatePageInfo(start, pageSize);

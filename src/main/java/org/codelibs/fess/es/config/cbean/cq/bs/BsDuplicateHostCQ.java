@@ -110,9 +110,8 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         DuplicateHostCQ filterQuery = new DuplicateHostCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -666,7 +665,8 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         setDuplicateHostName_MatchPhrasePrefix(duplicateHostName, null);
     }
 
-    public void setDuplicateHostName_MatchPhrasePrefix(String duplicateHostName, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setDuplicateHostName_MatchPhrasePrefix(String duplicateHostName,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("duplicateHostName", duplicateHostName);
         if (opLambda != null) {
             opLambda.callback(builder);

@@ -57,16 +57,15 @@ public class IndexingHelper {
         try {
             if (fessConfig.isThumbnailCrawlerEnabled()) {
                 final ThumbnailManager thumbnailManager = ComponentUtil.getThumbnailManager();
-                docList.stream().forEach(
-                        doc -> {
-                            if (!thumbnailManager.offer(doc)) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("Removing {} from {}", doc.get(fessConfig.getIndexFieldThumbnail()),
-                                            doc.get(fessConfig.getIndexFieldUrl()));
-                                }
-                                doc.remove(fessConfig.getIndexFieldThumbnail());
-                            }
-                        });
+                docList.stream().forEach(doc -> {
+                    if (!thumbnailManager.offer(doc)) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Removing {} from {}", doc.get(fessConfig.getIndexFieldThumbnail()),
+                                    doc.get(fessConfig.getIndexFieldUrl()));
+                        }
+                        doc.remove(fessConfig.getIndexFieldThumbnail());
+                    }
+                });
             }
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             synchronized (fessEsClient) {
@@ -106,14 +105,12 @@ public class IndexingHelper {
                 continue;
             }
 
-            final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery()
-                            .must(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), inputDoc.get(fessConfig.getIndexFieldUrl())))
-                            .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configIdValue));
+            final QueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), inputDoc.get(fessConfig.getIndexFieldUrl())))
+                    .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configIdValue));
 
-            final List<Map<String, Object>> docs =
-                    getDocumentListByQuery(fessEsClient, queryBuilder,
-                            new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId() });
+            final List<Map<String, Object>> docs = getDocumentListByQuery(fessEsClient, queryBuilder,
+                    new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId() });
             for (final Map<String, Object> doc : docs) {
                 final Object oldIdValue = doc.get(fessConfig.getIndexFieldId());
                 if (!idValue.equals(oldIdValue) && oldIdValue != null) {
@@ -192,9 +189,8 @@ public class IndexingHelper {
             final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        final SearchResponse countResponse =
-                fessEsClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex()).setQuery(queryBuilder).setSize(0).execute()
-                        .actionGet(fessConfig.getIndexSearchTimeout());
+        final SearchResponse countResponse = fessEsClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex()).setQuery(queryBuilder)
+                .setSize(0).execute().actionGet(fessConfig.getIndexSearchTimeout());
         final long numFound = countResponse.getHits().getTotalHits().value;
         // TODO max threshold
 

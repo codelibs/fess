@@ -79,13 +79,13 @@ public class RequestHeaderDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedBy(),
-                (et, vl) -> ((RequestHeader) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedBy(), (et, vl) -> ((RequestHeader) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedTime(),
                 (et, vl) -> ((RequestHeader) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getName(), (et, vl) -> ((RequestHeader) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedBy(),
-                (et, vl) -> ((RequestHeader) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedBy(), (et, vl) -> ((RequestHeader) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedTime(),
                 (et, vl) -> ((RequestHeader) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getValue(), (et, vl) -> ((RequestHeader) et).setValue(DfTypeUtil.toString(vl)),
@@ -138,8 +138,8 @@ public class RequestHeaderDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 

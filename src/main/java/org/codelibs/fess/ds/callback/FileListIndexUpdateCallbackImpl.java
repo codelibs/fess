@@ -229,8 +229,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             }
             return null;
         } catch (final ChildUrlsException e) {
-            throw new DataStoreCrawlingException(url, "Redirected to "
-                    + e.getChildUrlList().stream().map(RequestData::getUrl).collect(Collectors.joining(", ")), e);
+            throw new DataStoreCrawlingException(url,
+                    "Redirected to " + e.getChildUrlList().stream().map(RequestData::getUrl).collect(Collectors.joining(", ")), e);
         } catch (final Exception e) {
             throw new DataStoreCrawlingException(url, "Failed to add: " + dataMap, e);
         }

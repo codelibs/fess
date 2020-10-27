@@ -251,7 +251,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setClientIp_Terms("clientIp", opLambda, aggsLambda);
     }
 
-    public void setClientIp_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setClientIp_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "clientIp");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -526,7 +527,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setHitCount_Range("hitCount", opLambda, aggsLambda);
     }
 
-    public void setHitCount_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setHitCount_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "hitCount");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -652,7 +654,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setHitCountRelation_IpRange("hitCountRelation", opLambda, null);
     }
 
-    public void setHitCountRelation_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setHitCountRelation_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         setHitCountRelation_IpRange("hitCountRelation", opLambda, aggsLambda);
     }
 
@@ -707,7 +710,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setHitCountRelation_Missing("hitCountRelation", opLambda, null);
     }
 
-    public void setHitCountRelation_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setHitCountRelation_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         setHitCountRelation_Missing("hitCountRelation", opLambda, aggsLambda);
     }
 
@@ -867,7 +871,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setQueryId_Terms("queryId", opLambda, aggsLambda);
     }
 
-    public void setQueryId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setQueryId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "queryId");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1098,7 +1103,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setQueryOffset_PercentileRanks("queryOffset", values, opLambda);
     }
 
-    public void setQueryOffset_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setQueryOffset_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "queryOffset", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1113,7 +1119,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setQueryOffset_Histogram("queryOffset", opLambda, null);
     }
 
-    public void setQueryOffset_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setQueryOffset_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         setQueryOffset_Histogram("queryOffset", opLambda, aggsLambda);
     }
 
@@ -1339,7 +1346,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setQueryPageSize_Histogram("queryPageSize", opLambda, null);
     }
 
-    public void setQueryPageSize_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setQueryPageSize_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         setQueryPageSize_Histogram("queryPageSize", opLambda, aggsLambda);
     }
 
@@ -1549,7 +1557,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setQueryTime_PercentileRanks("queryTime", values, opLambda);
     }
 
-    public void setQueryTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setQueryTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "queryTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1673,7 +1682,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setReferer_Terms("referer", opLambda, aggsLambda);
     }
 
-    public void setReferer_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setReferer_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "referer");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1799,7 +1809,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setRequestedAt_DateRange("requestedAt", opLambda, null);
     }
 
-    public void setRequestedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setRequestedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         setRequestedAt_DateRange("requestedAt", opLambda, aggsLambda);
     }
 
@@ -2026,7 +2037,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setResponseTime_Histogram("responseTime", opLambda, null);
     }
 
-    public void setResponseTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setResponseTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         setResponseTime_Histogram("responseTime", opLambda, aggsLambda);
     }
 
@@ -2446,7 +2458,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setUser_IpRange("user", opLambda, aggsLambda);
     }
 
-    public void setUser_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setUser_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "user");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2500,7 +2513,8 @@ public abstract class BsSearchLogCA extends EsAbstractConditionAggregation {
         setUser_Missing("user", opLambda, aggsLambda);
     }
 
-    public void setUser_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsSearchLogCA> aggsLambda) {
+    public void setUser_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsSearchLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "user");
         if (opLambda != null) {
             opLambda.callback(builder);

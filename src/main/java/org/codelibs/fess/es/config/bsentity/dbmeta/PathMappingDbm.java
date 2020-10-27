@@ -83,11 +83,11 @@ public class PathMappingDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((PathMapping) et).getCreatedTime(), (et, vl) -> ((PathMapping) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((PathMapping) et).getProcessType(),
-                (et, vl) -> ((PathMapping) et).setProcessType(DfTypeUtil.toString(vl)), "processType");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getProcessType(), (et, vl) -> ((PathMapping) et).setProcessType(DfTypeUtil.toString(vl)),
+                "processType");
         setupEpg(_epgMap, et -> ((PathMapping) et).getRegex(), (et, vl) -> ((PathMapping) et).setRegex(DfTypeUtil.toString(vl)), "regex");
-        setupEpg(_epgMap, et -> ((PathMapping) et).getReplacement(),
-                (et, vl) -> ((PathMapping) et).setReplacement(DfTypeUtil.toString(vl)), "replacement");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getReplacement(), (et, vl) -> ((PathMapping) et).setReplacement(DfTypeUtil.toString(vl)),
+                "replacement");
         setupEpg(_epgMap, et -> ((PathMapping) et).getSortOrder(), (et, vl) -> ((PathMapping) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
         setupEpg(_epgMap, et -> ((PathMapping) et).getUpdatedBy(), (et, vl) -> ((PathMapping) et).setUpdatedBy(DfTypeUtil.toString(vl)),
@@ -138,8 +138,8 @@ public class PathMappingDbm extends AbstractDBMeta {
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnProcessType = cci("processType", "processType", null, null, String.class, "processType", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRegex = cci("regex", "regex", null, null, String.class, "regex", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRegex = cci("regex", "regex", null, null, String.class, "regex", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnReplacement = cci("replacement", "replacement", null, null, String.class, "replacement", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,

@@ -103,61 +103,59 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      */
     @Override
     public LoginCredential getLoginCredential() {
-        return LaRequestUtil
-                .getOptionalRequest()
-                .map(request -> {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Logging in with SPNEGO Authenticator");
-                    }
-                    final HttpServletResponse response = LaResponseUtil.getResponse();
-                    final SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(response);
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logging in with SPNEGO Authenticator");
+            }
+            final HttpServletResponse response = LaResponseUtil.getResponse();
+            final SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(response);
 
-                    // client/caller principal
-                    final SpnegoPrincipal principal;
-                    try {
-                        principal = getAuthenticator().authenticate(request, spnegoResponse);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("principal: {}", principal);
-                        }
-                    } catch (final Exception e) {
-                        final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(msg);
-                        }
-                        throw new SsoLoginException(msg, e);
-                    }
+            // client/caller principal
+            final SpnegoPrincipal principal;
+            try {
+                principal = getAuthenticator().authenticate(request, spnegoResponse);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("principal: {}", principal);
+                }
+            } catch (final Exception e) {
+                final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(msg);
+                }
+                throw new SsoLoginException(msg, e);
+            }
 
-                    // context/auth loop not yet complete
-                    final boolean status = spnegoResponse.isStatusSet();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("isStatusSet: {}", status);
-                    }
-                    if (status) {
-                        return new ActionResponseCredential(() -> {
-                            throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.",
-                                    "401 Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
-                        });
-                    }
+            // context/auth loop not yet complete
+            final boolean status = spnegoResponse.isStatusSet();
+            if (logger.isDebugEnabled()) {
+                logger.debug("isStatusSet: {}", status);
+            }
+            if (status) {
+                return new ActionResponseCredential(() -> {
+                    throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.", "401 Unauthorized",
+                            HttpServletResponse.SC_UNAUTHORIZED);
+                });
+            }
 
-                    // assert
-                    if (null == principal) {
-                        final String msg = "Principal was null.";
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(msg);
-                        }
-                        throw new SsoLoginException(msg);
-                    }
+            // assert
+            if (null == principal) {
+                final String msg = "Principal was null.";
+                if (logger.isDebugEnabled()) {
+                    logger.debug(msg);
+                }
+                throw new SsoLoginException(msg);
+            }
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("principal={}", principal);
-                    }
+            if (logger.isDebugEnabled()) {
+                logger.debug("principal={}", principal);
+            }
 
-                    final String[] username = principal.getName().split("@", 2);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("username: {}", Arrays.toString(username));
-                    }
-                    return new SpnegoCredential(username[0]);
-                }).orElseGet(() -> null);
+            final String[] username = principal.getName().split("@", 2);
+            if (logger.isDebugEnabled()) {
+                logger.debug("username: {}", Arrays.toString(username));
+            }
+            return new SpnegoCredential(username[0]);
+        }).orElseGet(() -> null);
 
     }
 

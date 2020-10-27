@@ -88,8 +88,8 @@ public class ElevateWordDbm extends AbstractDBMeta {
                 "permissions");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getReading(), (et, vl) -> ((ElevateWord) et).setReading(DfTypeUtil.toString(vl)),
                 "reading");
-        setupEpg(_epgMap, et -> ((ElevateWord) et).getSuggestWord(),
-                (et, vl) -> ((ElevateWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
+        setupEpg(_epgMap, et -> ((ElevateWord) et).getSuggestWord(), (et, vl) -> ((ElevateWord) et).setSuggestWord(DfTypeUtil.toString(vl)),
+                "suggestWord");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getUpdatedBy(), (et, vl) -> ((ElevateWord) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getUpdatedTime(), (et, vl) -> ((ElevateWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
@@ -130,8 +130,8 @@ public class ElevateWordDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float",
-            0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float", 0,
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,

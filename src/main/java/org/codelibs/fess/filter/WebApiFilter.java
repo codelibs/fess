@@ -43,8 +43,8 @@ public class WebApiFilter implements Filter {
     }
 
     @Override
-    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         final WebApiManagerFactory webApiManagerFactory = ComponentUtil.getWebApiManagerFactory();
         final WebApiManager webApiManager = webApiManagerFactory.get((HttpServletRequest) request);
         if (webApiManager == null) {

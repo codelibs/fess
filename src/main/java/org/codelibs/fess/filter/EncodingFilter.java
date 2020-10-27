@@ -72,8 +72,8 @@ public class EncodingFilter implements Filter {
     }
 
     @Override
-    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final String servletPath = req.getServletPath();
         for (final Map.Entry<String, String> entry : encodingMap.entrySet()) {

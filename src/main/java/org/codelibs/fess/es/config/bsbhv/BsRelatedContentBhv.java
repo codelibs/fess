@@ -107,7 +107,8 @@ public abstract class BsRelatedContentBhv extends EsAbstractBehavior<RelatedCont
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends RelatedContent> OptionalEntity<ENTITY> doSelectOptionalEntity(RelatedContentCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends RelatedContent> OptionalEntity<ENTITY> doSelectOptionalEntity(RelatedContentCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 

@@ -57,9 +57,9 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final DuplicateHostPager pager = copyBeanToNewBean(body, DuplicateHostPager.class);
         final List<DuplicateHost> list = duplicateHostService.getDuplicateHostList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/duplicatehost/setting/{id}

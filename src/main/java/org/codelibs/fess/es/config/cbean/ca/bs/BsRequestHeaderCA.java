@@ -350,7 +350,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -446,7 +447,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setCreatedTime_Missing("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRequestHeaderCA> aggsLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRequestHeaderCA> aggsLambda) {
         setCreatedTime_Missing("createdTime", opLambda, aggsLambda);
     }
 
@@ -475,7 +477,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setName_Terms("name", opLambda, aggsLambda);
     }
 
-    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRequestHeaderCA> aggsLambda) {
+    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsRequestHeaderCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -837,7 +840,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -933,7 +937,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Missing("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRequestHeaderCA> aggsLambda) {
+    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRequestHeaderCA> aggsLambda) {
         setUpdatedTime_Missing("updatedTime", opLambda, aggsLambda);
     }
 
@@ -1140,7 +1145,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setWebConfigId_IpRange("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRequestHeaderCA> aggsLambda) {
+    public void setWebConfigId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsRequestHeaderCA> aggsLambda) {
         setWebConfigId_IpRange("webConfigId", opLambda, aggsLambda);
     }
 
@@ -1195,7 +1201,8 @@ public abstract class BsRequestHeaderCA extends EsAbstractConditionAggregation {
         setWebConfigId_Missing("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRequestHeaderCA> aggsLambda) {
+    public void setWebConfigId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRequestHeaderCA> aggsLambda) {
         setWebConfigId_Missing("webConfigId", opLambda, aggsLambda);
     }
 

@@ -368,55 +368,50 @@ public class LdapManager {
         }
 
         final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
-        search(fessConfig.getLdapAdminUserBaseDn(),
-                fessConfig.getLdapAdminUserFilter(user.getName()),
-                null,
-                adminEnv,
-                result -> {
-                    if (!result.isEmpty()) {
-                        setAttributeValue(result, fessConfig.getLdapAttrSurname(), o -> user.setSurname(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrGivenName(), o -> user.setGivenName(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrMail(), o -> user.setMail(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrEmployeeNumber(), o -> user.setEmployeeNumber(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrTelephoneNumber(), o -> user.setTelephoneNumber(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrHomePhone(), o -> user.setHomePhone(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrHomePostalAddress(), o -> user.setHomePostalAddress(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrLabeleduri(), o -> user.setLabeledURI(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrRoomNumber(), o -> user.setRoomNumber(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrDescription(), o -> user.setDescription(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrTitle(), o -> user.setTitle(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrPager(), o -> user.setPager(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrStreet(), o -> user.setStreet(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrPostalCode(), o -> user.setPostalCode(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrPhysicalDeliveryOfficeName(),
-                                o -> user.setPhysicalDeliveryOfficeName(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrDestinationIndicator(),
-                                o -> user.setDestinationIndicator(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrInternationalisdnNumber(),
-                                o -> user.setInternationaliSDNNumber(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrState(), o -> user.setState(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrEmployeeType(), o -> user.setEmployeeType(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrFacsimileTelephoneNumber(),
-                                o -> user.setFacsimileTelephoneNumber(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrPostOfficeBox(), o -> user.setPostOfficeBox(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrInitials(), o -> user.setInitials(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrCarLicense(), o -> user.setCarLicense(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrMobile(), o -> user.setMobile(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrPostalAddress(), o -> user.setPostalAddress(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrCity(), o -> user.setCity(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrTeletexTerminalIdentifier(),
-                                o -> user.setTeletexTerminalIdentifier(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrX121Address(), o -> user.setX121Address(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrBusinessCategory(), o -> user.setBusinessCategory(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrRegisteredAddress(), o -> user.setRegisteredAddress(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrDisplayName(), o -> user.setDisplayName(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrPreferredLanguage(), o -> user.setPreferredLanguage(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrDepartmentNumber(), o -> user.setDepartmentNumber(o.toString()));
-                        setAttributeValue(result, fessConfig.getLdapAttrUidNumber(), o -> user.setUidNumber(DfTypeUtil.toLong(o)));
-                        setAttributeValue(result, fessConfig.getLdapAttrGidNumber(), o -> user.setGidNumber(DfTypeUtil.toLong(o)));
-                        setAttributeValue(result, fessConfig.getLdapAttrHomeDirectory(), o -> user.setHomeDirectory(o.toString()));
-                    }
-                });
+        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, adminEnv, result -> {
+            if (!result.isEmpty()) {
+                setAttributeValue(result, fessConfig.getLdapAttrSurname(), o -> user.setSurname(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrGivenName(), o -> user.setGivenName(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrMail(), o -> user.setMail(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrEmployeeNumber(), o -> user.setEmployeeNumber(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrTelephoneNumber(), o -> user.setTelephoneNumber(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrHomePhone(), o -> user.setHomePhone(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrHomePostalAddress(), o -> user.setHomePostalAddress(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrLabeleduri(), o -> user.setLabeledURI(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrRoomNumber(), o -> user.setRoomNumber(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrDescription(), o -> user.setDescription(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrTitle(), o -> user.setTitle(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrPager(), o -> user.setPager(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrStreet(), o -> user.setStreet(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrPostalCode(), o -> user.setPostalCode(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrPhysicalDeliveryOfficeName(),
+                        o -> user.setPhysicalDeliveryOfficeName(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrDestinationIndicator(), o -> user.setDestinationIndicator(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrInternationalisdnNumber(),
+                        o -> user.setInternationaliSDNNumber(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrState(), o -> user.setState(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrEmployeeType(), o -> user.setEmployeeType(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrFacsimileTelephoneNumber(),
+                        o -> user.setFacsimileTelephoneNumber(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrPostOfficeBox(), o -> user.setPostOfficeBox(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrInitials(), o -> user.setInitials(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrCarLicense(), o -> user.setCarLicense(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrMobile(), o -> user.setMobile(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrPostalAddress(), o -> user.setPostalAddress(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrCity(), o -> user.setCity(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrTeletexTerminalIdentifier(),
+                        o -> user.setTeletexTerminalIdentifier(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrX121Address(), o -> user.setX121Address(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrBusinessCategory(), o -> user.setBusinessCategory(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrRegisteredAddress(), o -> user.setRegisteredAddress(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrDisplayName(), o -> user.setDisplayName(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrPreferredLanguage(), o -> user.setPreferredLanguage(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrDepartmentNumber(), o -> user.setDepartmentNumber(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrUidNumber(), o -> user.setUidNumber(DfTypeUtil.toLong(o)));
+                setAttributeValue(result, fessConfig.getLdapAttrGidNumber(), o -> user.setGidNumber(DfTypeUtil.toLong(o)));
+                setAttributeValue(result, fessConfig.getLdapAttrHomeDirectory(), o -> user.setHomeDirectory(o.toString()));
+            }
+        });
 
         // groups and roles
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()),
@@ -462,11 +457,8 @@ public class LdapManager {
         });
 
         // groups and roles
-        search(fessConfig.getLdapAdminUserBaseDn(),
-                fessConfig.getLdapAdminUserFilter(user.getName()),
-                new String[] { fessConfig.getLdapMemberofAttribute() },
-                adminEnv,
-                result -> {
+        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()),
+                new String[] { fessConfig.getLdapMemberofAttribute() }, adminEnv, result -> {
                     if (!result.isEmpty()) {
                         final List<String> oldGroupList = new ArrayList<>();
                         final List<String> oldRoleList = new ArrayList<>();
@@ -487,31 +479,29 @@ public class LdapManager {
                                 newGroupList.remove(name);
                             }
                         }));
-                        oldGroupList.stream().forEach(
-                                name -> {
-                                    search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
-                                            subResult -> {
-                                                if (!subResult.isEmpty()) {
-                                                    final List<ModificationItem> modifyList = new ArrayList<>();
-                                                    modifyDeleteEntry(modifyList, "member", userDN);
-                                                    modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
-                                                }
-                                            });
-                                });
-                        newGroupList.stream().forEach(
-                                name -> {
-                                    search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
-                                            subResult -> {
-                                                if (subResult.isEmpty()) {
-                                                    final Group group = new Group();
-                                                    group.setName(name);
-                                                    insert(group);
-                                                }
-                                                final List<ModificationItem> modifyList = new ArrayList<>();
-                                                modifyAddEntry(modifyList, "member", userDN);
-                                                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
-                                            });
-                                });
+                        oldGroupList.stream().forEach(name -> {
+                            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
+                                    subResult -> {
+                                        if (!subResult.isEmpty()) {
+                                            final List<ModificationItem> modifyList = new ArrayList<>();
+                                            modifyDeleteEntry(modifyList, "member", userDN);
+                                            modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+                                        }
+                                    });
+                        });
+                        newGroupList.stream().forEach(name -> {
+                            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
+                                    subResult -> {
+                                        if (subResult.isEmpty()) {
+                                            final Group group = new Group();
+                                            group.setName(name);
+                                            insert(group);
+                                        }
+                                        final List<ModificationItem> modifyList = new ArrayList<>();
+                                        modifyAddEntry(modifyList, "member", userDN);
+                                        modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+                                    });
+                        });
 
                         final List<String> newRoleList = stream(user.getRoleNames()).get(stream -> stream.collect(Collectors.toList()));
                         stream(user.getRoleNames()).of(stream -> stream.forEach(name -> {
@@ -520,61 +510,57 @@ public class LdapManager {
                                 newRoleList.remove(name);
                             }
                         }));
-                        oldRoleList.stream().forEach(
-                                name -> {
-                                    search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
-                                            subResult -> {
-                                                if (!subResult.isEmpty()) {
-                                                    final List<ModificationItem> modifyList = new ArrayList<>();
-                                                    modifyDeleteEntry(modifyList, "member", userDN);
-                                                    modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
-                                                }
-                                            });
-                                });
-                        newRoleList.stream().forEach(
-                                name -> {
-                                    search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
-                                            subResult -> {
-                                                if (subResult.isEmpty()) {
-                                                    final Role role = new Role();
-                                                    role.setName(name);
-                                                    insert(role);
-                                                }
-                                                final List<ModificationItem> modifyList = new ArrayList<>();
-                                                modifyAddEntry(modifyList, "member", userDN);
-                                                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
-                                            });
-                                });
+                        oldRoleList.stream().forEach(name -> {
+                            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
+                                    subResult -> {
+                                        if (!subResult.isEmpty()) {
+                                            final List<ModificationItem> modifyList = new ArrayList<>();
+                                            modifyDeleteEntry(modifyList, "member", userDN);
+                                            modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+                                        }
+                                    });
+                        });
+                        newRoleList.stream().forEach(name -> {
+                            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
+                                    subResult -> {
+                                        if (subResult.isEmpty()) {
+                                            final Role role = new Role();
+                                            role.setName(name);
+                                            insert(role);
+                                        }
+                                        final List<ModificationItem> modifyList = new ArrayList<>();
+                                        modifyAddEntry(modifyList, "member", userDN);
+                                        modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+                                    });
+                        });
                     } else {
-                        stream(user.getGroupNames()).of(
-                                stream -> stream.forEach(name -> {
-                                    search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
-                                            subResult -> {
-                                                if (subResult.isEmpty()) {
-                                                    final Group group = new Group();
-                                                    group.setName(name);
-                                                    insert(group);
-                                                }
-                                                final List<ModificationItem> modifyList = new ArrayList<>();
-                                                modifyAddEntry(modifyList, "member", userDN);
-                                                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
-                                            });
-                                }));
+                        stream(user.getGroupNames()).of(stream -> stream.forEach(name -> {
+                            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
+                                    subResult -> {
+                                        if (subResult.isEmpty()) {
+                                            final Group group = new Group();
+                                            group.setName(name);
+                                            insert(group);
+                                        }
+                                        final List<ModificationItem> modifyList = new ArrayList<>();
+                                        modifyAddEntry(modifyList, "member", userDN);
+                                        modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+                                    });
+                        }));
 
-                        stream(user.getRoleNames()).of(
-                                stream -> stream.forEach(name -> {
-                                    search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
-                                            subResult -> {
-                                                if (subResult.isEmpty()) {
-                                                    final Role role = new Role();
-                                                    role.setName(name);
-                                                    insert(role);
-                                                }
-                                                final List<ModificationItem> modifyList = new ArrayList<>();
-                                                modifyAddEntry(modifyList, "member", userDN);
-                                                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
-                                            });
-                                }));
+                        stream(user.getRoleNames()).of(stream -> stream.forEach(name -> {
+                            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
+                                    subResult -> {
+                                        if (subResult.isEmpty()) {
+                                            final Role role = new Role();
+                                            role.setName(name);
+                                            insert(role);
+                                        }
+                                        final List<ModificationItem> modifyList = new ArrayList<>();
+                                        modifyAddEntry(modifyList, "member", userDN);
+                                        modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+                                    });
+                        }));
                     }
                 });
 
@@ -588,238 +574,169 @@ public class LdapManager {
         }
 
         final String attrSurname = fessConfig.getLdapAttrSurname();
-        OptionalUtil
-                .ofNullable(user.getSurname())
-                .filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrSurname, s))
-                .orElse(() -> getAttributeValueList(result, attrSurname).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrSurname, v)));
+        OptionalUtil.ofNullable(user.getSurname()).filter(StringUtil::isNotBlank)
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrSurname, s)).orElse(() -> getAttributeValueList(result, attrSurname)
+                        .stream().forEach(v -> modifyDeleteEntry(modifyList, attrSurname, v)));
         final String attrGivenName = fessConfig.getLdapAttrGivenName();
-        OptionalUtil
-                .ofNullable(user.getGivenName())
-                .filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrGivenName, s))
-                .orElse(() -> getAttributeValueList(result, attrGivenName).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrGivenName, v)));
+        OptionalUtil.ofNullable(user.getGivenName()).filter(StringUtil::isNotBlank)
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrGivenName, s)).orElse(() -> getAttributeValueList(result, attrGivenName)
+                        .stream().forEach(v -> modifyDeleteEntry(modifyList, attrGivenName, v)));
         final String attrMail = fessConfig.getLdapAttrMail();
         OptionalUtil.ofNullable(user.getMail()).filter(StringUtil::isNotBlank).ifPresent(s -> modifyReplaceEntry(modifyList, attrMail, s))
                 .orElse(() -> getAttributeValueList(result, attrMail).stream().forEach(v -> modifyDeleteEntry(modifyList, attrMail, v)));
         final String attrEmployeeNumber = fessConfig.getLdapAttrEmployeeNumber();
-        OptionalUtil
-                .ofNullable(user.getEmployeeNumber())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getEmployeeNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrEmployeeNumber, s))
-                .orElse(() -> getAttributeValueList(result, attrEmployeeNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrEmployeeNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrEmployeeNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrEmployeeNumber, v)));
         final String attrTelephoneNumber = fessConfig.getLdapAttrTelephoneNumber();
-        OptionalUtil
-                .ofNullable(user.getTelephoneNumber())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getTelephoneNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrTelephoneNumber, s))
-                .orElse(() -> getAttributeValueList(result, attrTelephoneNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrTelephoneNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrTelephoneNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrTelephoneNumber, v)));
         final String attrHomePhone = fessConfig.getLdapAttrHomePhone();
-        OptionalUtil
-                .ofNullable(user.getHomePhone())
-                .filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrHomePhone, s))
-                .orElse(() -> getAttributeValueList(result, attrHomePhone).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrHomePhone, v)));
+        OptionalUtil.ofNullable(user.getHomePhone()).filter(StringUtil::isNotBlank)
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrHomePhone, s)).orElse(() -> getAttributeValueList(result, attrHomePhone)
+                        .stream().forEach(v -> modifyDeleteEntry(modifyList, attrHomePhone, v)));
         final String attrHomePostalAddress = fessConfig.getLdapAttrHomePostalAddress();
-        OptionalUtil
-                .ofNullable(user.getHomePostalAddress())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getHomePostalAddress()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrHomePostalAddress, s))
-                .orElse(() -> getAttributeValueList(result, attrHomePostalAddress).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrHomePostalAddress, v)));
+                .orElse(() -> getAttributeValueList(result, attrHomePostalAddress).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrHomePostalAddress, v)));
         final String attrLabeledURI = fessConfig.getLdapAttrLabeleduri();
-        OptionalUtil
-                .ofNullable(user.getLabeledURI())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getLabeledURI()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrLabeledURI, s))
-                .orElse(() -> getAttributeValueList(result, attrLabeledURI).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrLabeledURI, v)));
+                .orElse(() -> getAttributeValueList(result, attrLabeledURI).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrLabeledURI, v)));
         final String attrRoomNumber = fessConfig.getLdapAttrRoomNumber();
-        OptionalUtil
-                .ofNullable(user.getRoomNumber())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getRoomNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrRoomNumber, s))
-                .orElse(() -> getAttributeValueList(result, attrRoomNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrRoomNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrRoomNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrRoomNumber, v)));
         final String attrDescription = fessConfig.getLdapAttrDescription();
-        OptionalUtil
-                .ofNullable(user.getDescription())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getDescription()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrDescription, s))
-                .orElse(() -> getAttributeValueList(result, attrDescription).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrDescription, v)));
+                .orElse(() -> getAttributeValueList(result, attrDescription).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrDescription, v)));
         final String attrTitle = fessConfig.getLdapAttrTitle();
-        OptionalUtil.ofNullable(user.getTitle()).filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrTitle, s))
+        OptionalUtil.ofNullable(user.getTitle()).filter(StringUtil::isNotBlank).ifPresent(s -> modifyReplaceEntry(modifyList, attrTitle, s))
                 .orElse(() -> getAttributeValueList(result, attrTitle).stream().forEach(v -> modifyDeleteEntry(modifyList, attrTitle, v)));
         final String attrPager = fessConfig.getLdapAttrPager();
-        OptionalUtil.ofNullable(user.getPager()).filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrPager, s))
+        OptionalUtil.ofNullable(user.getPager()).filter(StringUtil::isNotBlank).ifPresent(s -> modifyReplaceEntry(modifyList, attrPager, s))
                 .orElse(() -> getAttributeValueList(result, attrPager).stream().forEach(v -> modifyDeleteEntry(modifyList, attrPager, v)));
         final String attrStreet = fessConfig.getLdapAttrStreet();
-        OptionalUtil
-                .ofNullable(user.getStreet())
-                .filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrStreet, s))
-                .orElse(() -> getAttributeValueList(result, attrStreet).stream().forEach(v -> modifyDeleteEntry(modifyList, attrStreet, v)));
+        OptionalUtil.ofNullable(user.getStreet()).filter(StringUtil::isNotBlank)
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrStreet, s)).orElse(() -> getAttributeValueList(result, attrStreet)
+                        .stream().forEach(v -> modifyDeleteEntry(modifyList, attrStreet, v)));
         final String attrPostalCode = fessConfig.getLdapAttrPostalCode();
-        OptionalUtil
-                .ofNullable(user.getPostalCode())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getPostalCode()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrPostalCode, s))
-                .orElse(() -> getAttributeValueList(result, attrPostalCode).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrPostalCode, v)));
+                .orElse(() -> getAttributeValueList(result, attrPostalCode).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrPostalCode, v)));
         final String attrPhysicalDeliveryOfficeName = fessConfig.getLdapAttrPhysicalDeliveryOfficeName();
-        OptionalUtil
-                .ofNullable(user.getPhysicalDeliveryOfficeName())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getPhysicalDeliveryOfficeName()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrPhysicalDeliveryOfficeName, s))
-                .orElse(() -> getAttributeValueList(result, attrPhysicalDeliveryOfficeName).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrPhysicalDeliveryOfficeName, v)));
+                .orElse(() -> getAttributeValueList(result, attrPhysicalDeliveryOfficeName).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrPhysicalDeliveryOfficeName, v)));
         final String attrDestinationIndicator = fessConfig.getLdapAttrDestinationIndicator();
-        OptionalUtil
-                .ofNullable(user.getDestinationIndicator())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getDestinationIndicator()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrDestinationIndicator, s))
-                .orElse(() -> getAttributeValueList(result, attrDestinationIndicator).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrDestinationIndicator, v)));
+                .orElse(() -> getAttributeValueList(result, attrDestinationIndicator).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrDestinationIndicator, v)));
         final String attrInternationaliSDNNumber = fessConfig.getLdapAttrInternationalisdnNumber();
-        OptionalUtil
-                .ofNullable(user.getInternationaliSDNNumber())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getInternationaliSDNNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrInternationaliSDNNumber, s))
-                .orElse(() -> getAttributeValueList(result, attrInternationaliSDNNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrInternationaliSDNNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrInternationaliSDNNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrInternationaliSDNNumber, v)));
         final String attrState = fessConfig.getLdapAttrState();
-        OptionalUtil.ofNullable(user.getState()).filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrState, s))
+        OptionalUtil.ofNullable(user.getState()).filter(StringUtil::isNotBlank).ifPresent(s -> modifyReplaceEntry(modifyList, attrState, s))
                 .orElse(() -> getAttributeValueList(result, attrState).stream().forEach(v -> modifyDeleteEntry(modifyList, attrState, v)));
         final String attrEmployeeType = fessConfig.getLdapAttrEmployeeType();
-        OptionalUtil
-                .ofNullable(user.getEmployeeType())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getEmployeeType()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrEmployeeType, s))
-                .orElse(() -> getAttributeValueList(result, attrEmployeeType).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrEmployeeType, v)));
+                .orElse(() -> getAttributeValueList(result, attrEmployeeType).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrEmployeeType, v)));
         final String attrFacsimileTelephoneNumber = fessConfig.getLdapAttrFacsimileTelephoneNumber();
-        OptionalUtil
-                .ofNullable(user.getFacsimileTelephoneNumber())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getFacsimileTelephoneNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrFacsimileTelephoneNumber, s))
-                .orElse(() -> getAttributeValueList(result, attrFacsimileTelephoneNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrFacsimileTelephoneNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrFacsimileTelephoneNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrFacsimileTelephoneNumber, v)));
         final String attrPostOfficeBox = fessConfig.getLdapAttrPostOfficeBox();
-        OptionalUtil
-                .ofNullable(user.getPostOfficeBox())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getPostOfficeBox()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrPostOfficeBox, s))
-                .orElse(() -> getAttributeValueList(result, attrPostOfficeBox).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrPostOfficeBox, v)));
+                .orElse(() -> getAttributeValueList(result, attrPostOfficeBox).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrPostOfficeBox, v)));
         final String attrInitials = fessConfig.getLdapAttrInitials();
-        OptionalUtil
-                .ofNullable(user.getInitials())
-                .filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrInitials, s))
-                .orElse(() -> getAttributeValueList(result, attrInitials).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrInitials, v)));
+        OptionalUtil.ofNullable(user.getInitials()).filter(StringUtil::isNotBlank)
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrInitials, s)).orElse(() -> getAttributeValueList(result, attrInitials)
+                        .stream().forEach(v -> modifyDeleteEntry(modifyList, attrInitials, v)));
         final String attrCarLicense = fessConfig.getLdapAttrCarLicense();
-        OptionalUtil
-                .ofNullable(user.getCarLicense())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getCarLicense()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrCarLicense, s))
-                .orElse(() -> getAttributeValueList(result, attrCarLicense).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrCarLicense, v)));
+                .orElse(() -> getAttributeValueList(result, attrCarLicense).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrCarLicense, v)));
         final String attrMobile = fessConfig.getLdapAttrMobile();
-        OptionalUtil
-                .ofNullable(user.getMobile())
-                .filter(StringUtil::isNotBlank)
-                .ifPresent(s -> modifyReplaceEntry(modifyList, attrMobile, s))
-                .orElse(() -> getAttributeValueList(result, attrMobile).stream().forEach(v -> modifyDeleteEntry(modifyList, attrMobile, v)));
+        OptionalUtil.ofNullable(user.getMobile()).filter(StringUtil::isNotBlank)
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrMobile, s)).orElse(() -> getAttributeValueList(result, attrMobile)
+                        .stream().forEach(v -> modifyDeleteEntry(modifyList, attrMobile, v)));
         final String attrPostalAddress = fessConfig.getLdapAttrPostalAddress();
-        OptionalUtil
-                .ofNullable(user.getPostalAddress())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getPostalAddress()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrPostalAddress, s))
-                .orElse(() -> getAttributeValueList(result, attrPostalAddress).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrPostalAddress, v)));
+                .orElse(() -> getAttributeValueList(result, attrPostalAddress).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrPostalAddress, v)));
         final String attrCity = fessConfig.getLdapAttrCity();
         OptionalUtil.ofNullable(user.getCity()).filter(StringUtil::isNotBlank).ifPresent(s -> modifyReplaceEntry(modifyList, attrCity, s))
                 .orElse(() -> getAttributeValueList(result, attrCity).stream().forEach(v -> modifyDeleteEntry(modifyList, attrCity, v)));
         final String attrTeletexTerminalIdentifier = fessConfig.getLdapAttrTeletexTerminalIdentifier();
-        OptionalUtil
-                .ofNullable(user.getTeletexTerminalIdentifier())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getTeletexTerminalIdentifier()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrTeletexTerminalIdentifier, s))
-                .orElse(() -> getAttributeValueList(result, attrTeletexTerminalIdentifier).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrTeletexTerminalIdentifier, v)));
+                .orElse(() -> getAttributeValueList(result, attrTeletexTerminalIdentifier).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrTeletexTerminalIdentifier, v)));
         final String attrX121Address = fessConfig.getLdapAttrX121Address();
-        OptionalUtil
-                .ofNullable(user.getX121Address())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getX121Address()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrX121Address, s))
-                .orElse(() -> getAttributeValueList(result, attrX121Address).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrX121Address, v)));
+                .orElse(() -> getAttributeValueList(result, attrX121Address).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrX121Address, v)));
         final String attrBusinessCategory = fessConfig.getLdapAttrBusinessCategory();
-        OptionalUtil
-                .ofNullable(user.getBusinessCategory())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getBusinessCategory()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrBusinessCategory, s))
-                .orElse(() -> getAttributeValueList(result, attrBusinessCategory).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrBusinessCategory, v)));
+                .orElse(() -> getAttributeValueList(result, attrBusinessCategory).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrBusinessCategory, v)));
         final String attrRegisteredAddress = fessConfig.getLdapAttrRegisteredAddress();
-        OptionalUtil
-                .ofNullable(user.getRegisteredAddress())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getRegisteredAddress()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrRegisteredAddress, s))
-                .orElse(() -> getAttributeValueList(result, attrRegisteredAddress).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrRegisteredAddress, v)));
+                .orElse(() -> getAttributeValueList(result, attrRegisteredAddress).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrRegisteredAddress, v)));
         final String attrDisplayName = fessConfig.getLdapAttrDisplayName();
-        OptionalUtil
-                .ofNullable(user.getDisplayName())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getDisplayName()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrDisplayName, s))
-                .orElse(() -> getAttributeValueList(result, attrDisplayName).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrDisplayName, v)));
+                .orElse(() -> getAttributeValueList(result, attrDisplayName).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrDisplayName, v)));
         final String attrPreferredLanguage = fessConfig.getLdapAttrPreferredLanguage();
-        OptionalUtil
-                .ofNullable(user.getPreferredLanguage())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getPreferredLanguage()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrPreferredLanguage, s))
-                .orElse(() -> getAttributeValueList(result, attrPreferredLanguage).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrPreferredLanguage, v)));
+                .orElse(() -> getAttributeValueList(result, attrPreferredLanguage).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrPreferredLanguage, v)));
         final String attrDepartmentNumber = fessConfig.getLdapAttrDepartmentNumber();
-        OptionalUtil
-                .ofNullable(user.getDepartmentNumber())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getDepartmentNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrDepartmentNumber, s))
-                .orElse(() -> getAttributeValueList(result, attrDepartmentNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrDepartmentNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrDepartmentNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrDepartmentNumber, v)));
         final String attrUidNumber = fessConfig.getLdapAttrUidNumber();
-        OptionalUtil
-                .ofNullable(user.getUidNumber())
-                .filter(s -> StringUtil.isNotBlank(s.toString()))
+        OptionalUtil.ofNullable(user.getUidNumber()).filter(s -> StringUtil.isNotBlank(s.toString()))
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrUidNumber, s.toString()))
-                .orElse(() -> getAttributeValueList(result, attrUidNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrUidNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrUidNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrUidNumber, v)));
         final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
-        OptionalUtil
-                .ofNullable(user.getGidNumber())
-                .filter(s -> StringUtil.isNotBlank(s.toString()))
+        OptionalUtil.ofNullable(user.getGidNumber()).filter(s -> StringUtil.isNotBlank(s.toString()))
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrGidNumber, s.toString()))
-                .orElse(() -> getAttributeValueList(result, attrGidNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrGidNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrGidNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrGidNumber, v)));
         final String attrHomeDirectory = fessConfig.getLdapAttrHomeDirectory();
-        OptionalUtil
-                .ofNullable(user.getHomeDirectory())
-                .filter(StringUtil::isNotBlank)
+        OptionalUtil.ofNullable(user.getHomeDirectory()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrHomeDirectory, s))
-                .orElse(() -> getAttributeValueList(result, attrHomeDirectory).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrHomeDirectory, v)));
+                .orElse(() -> getAttributeValueList(result, attrHomeDirectory).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrHomeDirectory, v)));
 
         modify(userDN, modifyList, adminEnv);
     }
@@ -908,8 +825,8 @@ public class LdapManager {
             final String attrUidNumber = fessConfig.getLdapAttrUidNumber();
             final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
 
-            Stream.of(attrUidNumber, attrGidNumber).forEach(
-                    attrName -> OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+            Stream.of(attrUidNumber, attrGidNumber)
+                    .forEach(attrName -> OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
                         try {
                             DfTypeUtil.toLong(s);
                         } catch (final NumberFormatException e) {
@@ -1045,12 +962,10 @@ public class LdapManager {
         final List<ModificationItem> modifyList = new ArrayList<>();
 
         final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
-        OptionalUtil
-                .ofNullable(group.getGidNumber())
-                .filter(s -> StringUtil.isNotBlank(s.toString()))
+        OptionalUtil.ofNullable(group.getGidNumber()).filter(s -> StringUtil.isNotBlank(s.toString()))
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrGidNumber, s.toString()))
-                .orElse(() -> getAttributeValueList(result, attrGidNumber).stream().forEach(
-                        v -> modifyDeleteEntry(modifyList, attrGidNumber, v)));
+                .orElse(() -> getAttributeValueList(result, attrGidNumber).stream()
+                        .forEach(v -> modifyDeleteEntry(modifyList, attrGidNumber, v)));
 
         modify(entryDN, modifyList, adminEnv);
     }
@@ -1065,8 +980,8 @@ public class LdapManager {
             // Long type attributes
             final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
 
-            Stream.of(attrGidNumber).forEach(
-                    attrName -> OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
+            Stream.of(attrGidNumber)
+                    .forEach(attrName -> OptionalUtil.ofNullable(attributes.get(attrName)).filter(StringUtil::isNotBlank).ifPresent(s -> {
                         try {
                             DfTypeUtil.toLong(s);
                         } catch (final NumberFormatException e) {

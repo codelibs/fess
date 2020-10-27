@@ -85,9 +85,8 @@ public class UserInfoHelper {
 
     protected String getUserCodeFromUserBean(final HttpServletRequest request) {
         final SessionManager sessionManager = ComponentUtil.getComponent(SessionManager.class);
-        String userCode =
-                sessionManager.getAttribute(USER_BEAN, TypicalUserBean.class).filter(u -> !Constants.EMPTY_USER_ID.equals(u.getUserId()))
-                        .map(u -> u.getUserId().toString()).orElse(StringUtil.EMPTY);
+        String userCode = sessionManager.getAttribute(USER_BEAN, TypicalUserBean.class)
+                .filter(u -> !Constants.EMPTY_USER_ID.equals(u.getUserId())).map(u -> u.getUserId().toString()).orElse(StringUtil.EMPTY);
         if (StringUtil.isBlank(userCode)) {
             return null;
         }

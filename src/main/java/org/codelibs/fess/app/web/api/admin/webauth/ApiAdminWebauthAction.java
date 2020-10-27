@@ -61,9 +61,9 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final WebAuthPager pager = copyBeanToNewBean(body, WebAuthPager.class);
         final List<WebAuthentication> list = webAuthService.getWebAuthenticationList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/webauth/setting/{id}

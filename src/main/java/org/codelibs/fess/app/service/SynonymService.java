@@ -43,12 +43,12 @@ public class SynonymService {
             final PagingList<SynonymItem> synonymList = file.selectList((synonymPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
             // update pager
-                BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                synonymList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
-                synonymPager.setPageNumberList(synonymList.createPageNumberList());
+            BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+            synonymList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
+            synonymPager.setPageNumberList(synonymList.createPageNumberList());
 
-                return (List<SynonymItem>) synonymList;
-            }).orElse(Collections.emptyList());
+            return (List<SynonymItem>) synonymList;
+        }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<SynonymFile> getSynonymFile(final String dictId) {

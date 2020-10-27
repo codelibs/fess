@@ -57,9 +57,9 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final RelatedQueryPager pager = copyBeanToNewBean(body, RelatedQueryPager.class);
         final List<RelatedQuery> list = relatedQueryService.getRelatedQueryList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/relatedquery/setting/{id}

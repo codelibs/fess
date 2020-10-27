@@ -89,9 +89,9 @@ public class ScheduledJob extends BsScheduledJob {
 
     @Override
     public String toString() {
-        return "ScheduledJob [available=" + available + ", crawler=" + crawler + ", createdBy=" + createdBy + ", createdTime="
-                + createdTime + ", cronExpression=" + cronExpression + ", jobLogging=" + jobLogging + ", name=" + name + ", scriptData="
-                + scriptData + ", scriptType=" + scriptType + ", sortOrder=" + sortOrder + ", target=" + target + ", updatedBy="
-                + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
+        return "ScheduledJob [available=" + available + ", crawler=" + crawler + ", createdBy=" + createdBy + ", createdTime=" + createdTime
+                + ", cronExpression=" + cronExpression + ", jobLogging=" + jobLogging + ", name=" + name + ", scriptData=" + scriptData
+                + ", scriptType=" + scriptType + ", sortOrder=" + sortOrder + ", target=" + target + ", updatedBy=" + updatedBy
+                + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
     }
 }

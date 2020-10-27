@@ -81,14 +81,14 @@ public class RelatedQueryDbm extends AbstractDBMeta {
     {
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getCreatedBy(), (et, vl) -> ((RelatedQuery) et).setCreatedBy(DfTypeUtil.toString(vl)),
                 "createdBy");
-        setupEpg(_epgMap, et -> ((RelatedQuery) et).getCreatedTime(),
-                (et, vl) -> ((RelatedQuery) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((RelatedQuery) et).getCreatedTime(), (et, vl) -> ((RelatedQuery) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getQueries(), (et, vl) -> ((RelatedQuery) et).setQueries((String[]) vl), "queries");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getTerm(), (et, vl) -> ((RelatedQuery) et).setTerm(DfTypeUtil.toString(vl)), "term");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getUpdatedBy(), (et, vl) -> ((RelatedQuery) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
-        setupEpg(_epgMap, et -> ((RelatedQuery) et).getUpdatedTime(),
-                (et, vl) -> ((RelatedQuery) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((RelatedQuery) et).getUpdatedTime(), (et, vl) -> ((RelatedQuery) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
         setupEpg(_epgMap, et -> ((RelatedQuery) et).getVirtualHost(),
                 (et, vl) -> ((RelatedQuery) et).setVirtualHost(DfTypeUtil.toString(vl)), "virtualHost");
     }

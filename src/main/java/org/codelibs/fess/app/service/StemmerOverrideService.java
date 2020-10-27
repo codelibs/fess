@@ -38,20 +38,18 @@ public class StemmerOverrideService {
     protected FessConfig fessConfig;
 
     public List<StemmerOverrideItem> getStemmerOverrideList(final String dictId, final StemmerOverridePager stemmerOvberridePager) {
-        return getStemmerOverrideFile(dictId).map(
-                file -> {
-                    final int pageSize = stemmerOvberridePager.getPageSize();
-                    final PagingList<StemmerOverrideItem> stemmerOvberrideList =
-                            file.selectList((stemmerOvberridePager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+        return getStemmerOverrideFile(dictId).map(file -> {
+            final int pageSize = stemmerOvberridePager.getPageSize();
+            final PagingList<StemmerOverrideItem> stemmerOvberrideList =
+                    file.selectList((stemmerOvberridePager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
-                    // update pager
-                    BeanUtil.copyBeanToBean(stemmerOvberrideList, stemmerOvberridePager,
-                            option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                    stemmerOvberrideList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
-                    stemmerOvberridePager.setPageNumberList(stemmerOvberrideList.createPageNumberList());
+            // update pager
+            BeanUtil.copyBeanToBean(stemmerOvberrideList, stemmerOvberridePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+            stemmerOvberrideList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
+            stemmerOvberridePager.setPageNumberList(stemmerOvberrideList.createPageNumberList());
 
-                    return (List<StemmerOverrideItem>) stemmerOvberrideList;
-                }).orElse(Collections.emptyList());
+            return (List<StemmerOverrideItem>) stemmerOvberrideList;
+        }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<StemmerOverrideFile> getStemmerOverrideFile(final String dictId) {

@@ -40,6 +40,7 @@ public class ApiResult {
 
     public enum Status {
         OK(0), BAD_REQUEST(1), SYSTEM_ERROR(2), UNAUTHORIZED(3);
+
         private final int id;
 
         private Status(final int id) {
@@ -342,11 +343,9 @@ public class ApiResult {
         public ApiErrorResponse message(final VaMessenger<FessMessages> validationMessagesLambda) {
             final FessMessages messages = new FessMessages();
             validationMessagesLambda.message(messages);
-            message =
-                    ComponentUtil
-                            .getMessageManager()
-                            .toMessageList(LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ENGLISH),
-                                    messages).stream().collect(Collectors.joining(" "));
+            message = ComponentUtil.getMessageManager()
+                    .toMessageList(LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ENGLISH), messages)
+                    .stream().collect(Collectors.joining(" "));
             return this;
         }
     }

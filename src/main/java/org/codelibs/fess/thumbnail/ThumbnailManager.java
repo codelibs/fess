@@ -384,14 +384,12 @@ public class ThumbnailManager {
 
             if (!deleteFileMap.isEmpty()) {
                 final String docIdField = fessConfig.getIndexFieldDocId();
-                fessEsClient.getDocumentList(
-                        fessConfig.getIndexDocumentSearchIndex(),
-                        searchRequestBuilder -> {
-                            searchRequestBuilder.setQuery(QueryBuilders.termsQuery(docIdField,
-                                    deleteFileMap.keySet().toArray(new String[deleteFileMap.size()])));
-                            searchRequestBuilder.setFetchSource(new String[] { docIdField }, StringUtil.EMPTY_STRINGS);
-                            return true;
-                        }).forEach(m -> {
+                fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+                    searchRequestBuilder.setQuery(
+                            QueryBuilders.termsQuery(docIdField, deleteFileMap.keySet().toArray(new String[deleteFileMap.size()])));
+                    searchRequestBuilder.setFetchSource(new String[] { docIdField }, StringUtil.EMPTY_STRINGS);
+                    return true;
+                }).forEach(m -> {
                     final Object docId = m.get(docIdField);
                     if (docId != null) {
                         deleteFileMap.remove(docId);
@@ -505,14 +503,14 @@ public class ThumbnailManager {
                                 Files.createDirectories(newPath.getParent());
                             } catch (final FileAlreadyExistsException e) {
                                 // ignore
+                            }
+                            Files.move(path, newPath);
+                            logger.info("Move {} to {}", path, newPath);
+                        } catch (final IOException e) {
+                            logger.warn("Failed to move " + path, e);
+                        }
                     }
-                    Files.move(path, newPath);
-                    logger.info("Move {} to {}", path, newPath);
-                } catch (final IOException e) {
-                    logger.warn("Failed to move " + path, e);
-                }
-            }
-        }       );
+                });
             } catch (final IOException e) {
                 logger.warn("Failed to migrate thumbnail images.", e);
             }

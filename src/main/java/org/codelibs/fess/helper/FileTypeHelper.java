@@ -36,8 +36,8 @@ public class FileTypeHelper {
 
     @PostConstruct
     public void init() {
-        StreamUtil.split(ComponentUtil.getFessConfig().getIndexFiletype(), "\n").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> {
+        StreamUtil.split(ComponentUtil.getFessConfig().getIndexFiletype(), "\n")
+                .of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> {
                     final String[] values = StringUtils.split(s, "=", 2);
                     if (values.length == 2) {
                         mimetypeMap.put(values[0], values[1]);

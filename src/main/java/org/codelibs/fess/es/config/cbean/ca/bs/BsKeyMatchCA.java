@@ -317,7 +317,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Missing("boost", opLambda, aggsLambda);
     }
 
-    public void setBoost_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setBoost_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -341,7 +342,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedBy_Terms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -572,7 +574,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -841,7 +844,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Range("maxSize", opLambda, aggsLambda);
     }
 
-    public void setMaxSize_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setMaxSize_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -970,7 +974,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_IpRange("query", opLambda, aggsLambda);
     }
 
-    public void setQuery_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setQuery_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1024,7 +1029,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_Missing("query", opLambda, aggsLambda);
     }
 
-    public void setQuery_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setQuery_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1098,7 +1104,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_IpRange("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setTerm_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1152,7 +1159,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_Missing("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setTerm_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1176,7 +1184,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Terms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1407,7 +1416,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);

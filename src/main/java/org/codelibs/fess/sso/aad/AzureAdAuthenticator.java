@@ -149,11 +149,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String state = UuidUtil.create();
         final String nonce = UuidUtil.create();
         storeStateInSession(request.getSession(), state, nonce);
-        final String authUrl =
-                getAuthority() + getTenant()
-                        + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                        + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
-                        + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+        final String authUrl = getAuthority() + getTenant()
+                + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
+                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
+                + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {}", authUrl);
         }
@@ -369,9 +368,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("url: {}", url);
         }
-        try (CurlResponse response =
-                Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
-                        .header("Accept", "application/json").execute()) {
+        try (CurlResponse response = Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Accept", "application/json").execute()) {
             final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);
@@ -441,44 +439,42 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     protected Pair<String[], String[]> getParentGroup(final AzureAdUser user, final String id) {
         try {
-            return groupCache.get(
-                    id,
-                    () -> {
-                        final List<String> groupList = new ArrayList<>();
-                        final List<String> roleList = new ArrayList<>();
-                        final String url = "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups";
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("url: {}", url);
-                        }
-                        try (CurlResponse response =
-                                Curl.post(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
-                                        .header("Accept", "application/json").header("Content-type", "application/json")
-                                        .body("{\"securityEnabledOnly\":false}").execute()) {
-                            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("response: {}", contentMap);
-                            }
-                            if (contentMap.containsKey("value")) {
-                                final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
-                                if (values != null) {
-                                    for (final String value : values) {
-                                        processGroup(user, groupList, roleList, value);
-                                        if (!groupList.contains(value) && !roleList.contains(value)) {
-                                            final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value);
-                                            StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
-                                            StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
-                                        }
-                                    }
+            return groupCache.get(id, () -> {
+                final List<String> groupList = new ArrayList<>();
+                final List<String> roleList = new ArrayList<>();
+                final String url = "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups";
+                if (logger.isDebugEnabled()) {
+                    logger.debug("url: {}", url);
+                }
+                try (CurlResponse response =
+                        Curl.post(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                                .header("Accept", "application/json").header("Content-type", "application/json")
+                                .body("{\"securityEnabledOnly\":false}").execute()) {
+                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("response: {}", contentMap);
+                    }
+                    if (contentMap.containsKey("value")) {
+                        final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
+                        if (values != null) {
+                            for (final String value : values) {
+                                processGroup(user, groupList, roleList, value);
+                                if (!groupList.contains(value) && !roleList.contains(value)) {
+                                    final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value);
+                                    StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
+                                    StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
                                 }
-                            } else if (contentMap.containsKey("error")) {
-                                logger.warn("Failed to access parent groups: {}", contentMap);
                             }
-                        } catch (final IOException e) {
-                            logger.warn("Failed to access groups/roles in AzureAD.", e);
                         }
-                        return new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]), roleList.stream().distinct()
-                                .toArray(n2 -> new String[n2]));
-                    });
+                    } else if (contentMap.containsKey("error")) {
+                        logger.warn("Failed to access parent groups: {}", contentMap);
+                    }
+                } catch (final IOException e) {
+                    logger.warn("Failed to access groups/roles in AzureAD.", e);
+                }
+                return new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
+                        roleList.stream().distinct().toArray(n2 -> new String[n2]));
+            });
         } catch (final ExecutionException e) {
             logger.warn("Failed to process a group cache.", e);
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
@@ -490,9 +486,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("url: {}", url);
         }
-        try (CurlResponse response =
-                Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
-                        .header("Accept", "application/json").execute()) {
+        try (CurlResponse response = Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Accept", "application/json").execute()) {
             final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);

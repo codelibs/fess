@@ -38,19 +38,18 @@ public class StopwordsService {
     protected FessConfig fessConfig;
 
     public List<StopwordsItem> getStopwordsList(final String dictId, final StopwordsPager stopwordsPager) {
-        return getStopwordsFile(dictId).map(
-                file -> {
-                    final int pageSize = stopwordsPager.getPageSize();
-                    final PagingList<StopwordsItem> stopwordsList =
-                            file.selectList((stopwordsPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+        return getStopwordsFile(dictId).map(file -> {
+            final int pageSize = stopwordsPager.getPageSize();
+            final PagingList<StopwordsItem> stopwordsList =
+                    file.selectList((stopwordsPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
-                    // update pager
-                    BeanUtil.copyBeanToBean(stopwordsList, stopwordsPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                    stopwordsList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
-                    stopwordsPager.setPageNumberList(stopwordsList.createPageNumberList());
+            // update pager
+            BeanUtil.copyBeanToBean(stopwordsList, stopwordsPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+            stopwordsList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
+            stopwordsPager.setPageNumberList(stopwordsList.createPageNumberList());
 
-                    return (List<StopwordsItem>) stopwordsList;
-                }).orElse(Collections.emptyList());
+            return (List<StopwordsItem>) stopwordsList;
+        }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<StopwordsFile> getStopwordsFile(final String dictId) {

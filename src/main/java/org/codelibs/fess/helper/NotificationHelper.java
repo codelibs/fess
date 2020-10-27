@@ -47,22 +47,20 @@ public class NotificationHelper {
             return;
         }
         final String body = toSlackMessage(discloser);
-        StreamUtil.split(slackWebhookUrls, "[,\\s]").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(
-                        url -> {
-                            try (CurlResponse response = Curl.post(url).header("Content-Type", "application/json").body(body).execute()) {
-                                if (response.getHttpStatusCode() == 200) {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("Sent {} to {}.", body, url);
-                                    }
-                                } else {
-                                    logger.warn("Failed to send {} to {}. HTTP Status is {}. {}", body, url, response.getHttpStatusCode(),
-                                            response.getContentAsString());
-                                }
-                            } catch (final IOException e) {
-                                logger.warn("Failed to send {} to {}.", body, url, e);
-                            }
-                        }));
+        StreamUtil.split(slackWebhookUrls, "[,\\s]").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(url -> {
+            try (CurlResponse response = Curl.post(url).header("Content-Type", "application/json").body(body).execute()) {
+                if (response.getHttpStatusCode() == 200) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Sent {} to {}.", body, url);
+                    }
+                } else {
+                    logger.warn("Failed to send {} to {}. HTTP Status is {}. {}", body, url, response.getHttpStatusCode(),
+                            response.getContentAsString());
+                }
+            } catch (final IOException e) {
+                logger.warn("Failed to send {} to {}.", body, url, e);
+            }
+        }));
     }
 
     protected String toSlackMessage(final SMailPostingDiscloser discloser) {
@@ -84,22 +82,20 @@ public class NotificationHelper {
             return;
         }
         final String body = toGoogleChatMessage(discloser);
-        StreamUtil.split(googleChatWebhookUrls, "[,\\s]").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(
-                        url -> {
-                            try (CurlResponse response = Curl.post(url).header("Content-Type", "application/json").body(body).execute()) {
-                                if (response.getHttpStatusCode() == 200) {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("Sent {} to {}.", body, url);
-                                    }
-                                } else {
-                                    logger.warn("Failed to send {} to {}. HTTP Status is {}. {}", body, url, response.getHttpStatusCode(),
-                                            response.getContentAsString());
-                                }
-                            } catch (final IOException e) {
-                                logger.warn("Failed to send {} to {}.", body, url, e);
-                            }
-                        }));
+        StreamUtil.split(googleChatWebhookUrls, "[,\\s]").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(url -> {
+            try (CurlResponse response = Curl.post(url).header("Content-Type", "application/json").body(body).execute()) {
+                if (response.getHttpStatusCode() == 200) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Sent {} to {}.", body, url);
+                    }
+                } else {
+                    logger.warn("Failed to send {} to {}. HTTP Status is {}. {}", body, url, response.getHttpStatusCode(),
+                            response.getContentAsString());
+                }
+            } catch (final IOException e) {
+                logger.warn("Failed to send {} to {}.", body, url, e);
+            }
+        }));
     }
 
     protected String toGoogleChatMessage(final SMailPostingDiscloser discloser) {

@@ -141,8 +141,8 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
             return null;
         });
-        return asJson(new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(true).status(Status.OK)
-                .result());
+        return asJson(
+                new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(true).status(Status.OK).result());
     }
 
     // POST /api/admin/searchlist/doc
@@ -182,8 +182,8 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.doc.toString()));
             return null;
         });
-        return asJson(new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(false).status(Status.OK)
-                .result());
+        return asJson(
+                new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(false).status(Status.OK).result());
     }
 
     // DELETE /api/admin/searchlist/doc/{doc_id}

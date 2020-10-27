@@ -48,7 +48,8 @@ public final class UpgradeUtil {
         final String filePath = indexConfigPath + "/" + indexName + "/" + path;
         try {
             final String source = FileUtil.readUTF8(filePath);
-            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
+            try (CurlResponse response =
+                    ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                 if (response.getHttpStatusCode() == 200) {
                     logger.info("Register {} to {}", path, indexName);
                     return true;
@@ -70,9 +71,8 @@ public final class UpgradeUtil {
             final File aliasConfigFile = org.codelibs.core.io.ResourceUtil.getResourceAsFile(aliasConfigPath);
             if (aliasConfigFile.exists()) {
                 final String source = FileUtil.readUTF8(aliasConfigFile);
-                final AcknowledgedResponse response =
-                        indicesClient.prepareAliases().addAlias(indexName, aliasName, source).execute()
-                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                final AcknowledgedResponse response = indicesClient.prepareAliases().addAlias(indexName, aliasName, source).execute()
+                        .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (response.isAcknowledged()) {
                     logger.info("Created {} alias for {}", aliasName, indexName);
                     return true;
@@ -103,9 +103,8 @@ public final class UpgradeUtil {
                 logger.warn(mappingFile + " is not found.", e);
             }
             try {
-                final AcknowledgedResponse putMappingResponse =
-                        indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON).execute()
-                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                final AcknowledgedResponse putMappingResponse = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON)
+                        .execute().actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created {}/{} mapping.", index, type);
                     return true;
@@ -120,8 +119,8 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static boolean addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type,
-            final String field, final String source) {
+    public static boolean addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String field,
+            final String source) {
         final GetFieldMappingsResponse gfmResponse =
                 indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
         final FieldMappingMetadata fieldMappings = gfmResponse.fieldMappings(index, type, field);
@@ -176,9 +175,8 @@ public final class UpgradeUtil {
             final boolean expandWildcardsClosed) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
-            final IndicesExistsResponse response =
-                    indicesClient.prepareExists(index).setExpandWildcardsClosed(expandWildcardsClosed)
-                            .setExpandWildcardsOpen(expandWildcardsOpen).execute().actionGet(fessConfig.getIndexSearchTimeout());
+            final IndicesExistsResponse response = indicesClient.prepareExists(index).setExpandWildcardsClosed(expandWildcardsClosed)
+                    .setExpandWildcardsOpen(expandWildcardsOpen).execute().actionGet(fessConfig.getIndexSearchTimeout());
             return response.isExists();
         } catch (final Exception e) {
             // ignore
@@ -186,7 +184,8 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static void deleteIndex(final IndicesAdminClient indicesClient, final String index, final Consumer<AcknowledgedResponse> comsumer) {
+    public static void deleteIndex(final IndicesAdminClient indicesClient, final String index,
+            final Consumer<AcknowledgedResponse> comsumer) {
         indicesClient.prepareDelete(index).execute(new ActionListener<AcknowledgedResponse>() {
 
             @Override

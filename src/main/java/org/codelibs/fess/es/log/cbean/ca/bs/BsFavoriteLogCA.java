@@ -106,7 +106,8 @@ public abstract class BsFavoriteLogCA extends EsAbstractConditionAggregation {
         setCreatedAt_DateRange("createdAt", opLambda, null);
     }
 
-    public void setCreatedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
+    public void setCreatedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFavoriteLogCA> aggsLambda) {
         setCreatedAt_DateRange("createdAt", opLambda, aggsLambda);
     }
 
@@ -216,7 +217,8 @@ public abstract class BsFavoriteLogCA extends EsAbstractConditionAggregation {
         setDocId_Terms("docId", opLambda, aggsLambda);
     }
 
-    public void setDocId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFavoriteLogCA> aggsLambda) {
+    public void setDocId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFavoriteLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "docId");
         if (opLambda != null) {
             opLambda.callback(builder);

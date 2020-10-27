@@ -83,10 +83,10 @@ public class LabelTypeDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((LabelType) et).getCreatedTime(), (et, vl) -> ((LabelType) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((LabelType) et).getExcludedPaths(),
-                (et, vl) -> ((LabelType) et).setExcludedPaths(DfTypeUtil.toString(vl)), "excludedPaths");
-        setupEpg(_epgMap, et -> ((LabelType) et).getIncludedPaths(),
-                (et, vl) -> ((LabelType) et).setIncludedPaths(DfTypeUtil.toString(vl)), "includedPaths");
+        setupEpg(_epgMap, et -> ((LabelType) et).getExcludedPaths(), (et, vl) -> ((LabelType) et).setExcludedPaths(DfTypeUtil.toString(vl)),
+                "excludedPaths");
+        setupEpg(_epgMap, et -> ((LabelType) et).getIncludedPaths(), (et, vl) -> ((LabelType) et).setIncludedPaths(DfTypeUtil.toString(vl)),
+                "includedPaths");
         setupEpg(_epgMap, et -> ((LabelType) et).getName(), (et, vl) -> ((LabelType) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((LabelType) et).getPermissions(), (et, vl) -> ((LabelType) et).setPermissions((String[]) vl),
                 "permissions");
@@ -139,10 +139,10 @@ public class LabelTypeDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnExcludedPaths = cci("excludedPaths", "excludedPaths", null, null, String.class, "excludedPaths",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnExcludedPaths = cci("excludedPaths", "excludedPaths", null, null, String.class, "excludedPaths", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
             0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
@@ -153,8 +153,8 @@ public class LabelTypeDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 

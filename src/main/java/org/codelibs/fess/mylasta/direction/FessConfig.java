@@ -9195,22 +9195,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key");
             defaultMap.put(FessConfig.APP_EXTENSION_NAMES, "");
-            defaultMap
-                    .put(FessConfig.JVM_CRAWLER_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
-            defaultMap
-                    .put(FessConfig.JVM_SUGGEST_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
-            defaultMap
-                    .put(FessConfig.JVM_THUMBNAIL_OPTIONS,
-                            "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+            defaultMap.put(FessConfig.JVM_CRAWLER_OPTIONS,
+                    "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
+            defaultMap.put(FessConfig.JVM_SUGGEST_OPTIONS,
+                    "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n");
+            defaultMap.put(FessConfig.JVM_THUMBNAIL_OPTIONS,
+                    "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dgroovy.use.classvalue=true\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_WEB, "Web Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_DATA, "Data Crawler - {0}");
-            defaultMap
-                    .put(FessConfig.JOB_TEMPLATE_SCRIPT,
-                            "return container.getComponent(\"crawlJob\").logLevel(\"info\").sessionId(\"{3}\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
+            defaultMap.put(FessConfig.JOB_TEMPLATE_SCRIPT,
+                    "return container.getComponent(\"crawlJob\").logLevel(\"info\").sessionId(\"{3}\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
             defaultMap.put(FessConfig.JOB_MAX_CRAWLER_PROCESSES, "0");
             defaultMap.put(FessConfig.PROCESSORS, "0");
             defaultMap.put(FessConfig.JAVA_COMMAND_PATH, "java");
@@ -9222,9 +9218,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_CSS_EXTENTIONS, "css");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS, "jpg,jpeg,gif,png,swf");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_FILES, "license.properties");
-            defaultMap
-                    .put(FessConfig.SUPPORTED_LANGUAGES,
-                            "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
+            defaultMap.put(FessConfig.SUPPORTED_LANGUAGES,
+                    "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_LENGTH, "60");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUIRED, "false");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER, "");
@@ -9255,9 +9250,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE, "20");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE, "10");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED, "false");
-            defaultMap
-                    .put(FessConfig.CRAWLER_DOCUMENT_SPACE_CHARS,
-                            "u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu200Cu202Fu205Fu3000uFEFFuFFFDu00B6");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SPACE_CHARS,
+                    "u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu200Cu202Fu205Fu3000uFEFFuFFFDu00B6");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FULLSTOP_CHARS, "u002eu06d4u2e3cu3002");
             defaultMap.put(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
@@ -9377,9 +9371,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_DELETE_TIMEOUT, "3m");
             defaultMap.put(FessConfig.INDEX_HEALTH_TIMEOUT, "10m");
             defaultMap.put(FessConfig.INDEX_INDICES_TIMEOUT, "1m");
-            defaultMap
-                    .put(FessConfig.INDEX_FILETYPE,
-                            "text/html=html\napplication/msword=word\napplication/vnd.openxmlformats-officedocument.wordprocessingml.document=word\napplication/vnd.ms-excel=excel\napplication/vnd.ms-excel.sheet.2=excel\napplication/vnd.ms-excel.sheet.3=excel\napplication/vnd.ms-excel.sheet.4=excel\napplication/vnd.ms-excel.workspace.3=excel\napplication/vnd.ms-excel.workspace.4=excel\napplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel\napplication/vnd.ms-powerpoint=powerpoint\napplication/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint\napplication/vnd.oasis.opendocument.text=odt\napplication/vnd.oasis.opendocument.spreadsheet=ods\napplication/vnd.oasis.opendocument.presentation=odp\napplication/pdf=pdf\napplication/x-fictionbook+xml=fb2\napplication/e-pub+zip=epub\napplication/x-ibooks+zip=ibooks\ntext/plain=txt\napplication/rtf=rtf\napplication/vnd.ms-htmlhelp=chm\napplication/zip=zip\napplication/x-7z-comressed=7z\napplication/x-bzip=bz\napplication/x-bzip2=bz2\napplication/x-tar=tar\napplication/x-rar-compressed=rar\nvideo/3gp=3gp\nvideo/3g2=3g2\nvideo/x-msvideo=avi\nvideo/x-flv=flv\nvideo/mpeg=mpeg\nvideo/mp4=mp4\nvideo/ogv=ogv\nvideo/quicktime=qt\nvideo/x-m4v=m4v\naudio/x-aif=aif\naudio/midi=midi\naudio/mpga=mpga\naudio/mp4=mp4a\naudio/ogg=oga\naudio/x-wav=wav\nimage/webp=webp\nimage/bmp=bmp\nimage/x-icon=ico\nimage/x-icon=ico\nimage/png=png\nimage/svg+xml=svg\nimage/tiff=tiff\nimage/jpeg=jpg\n");
+            defaultMap.put(FessConfig.INDEX_FILETYPE,
+                    "text/html=html\napplication/msword=word\napplication/vnd.openxmlformats-officedocument.wordprocessingml.document=word\napplication/vnd.ms-excel=excel\napplication/vnd.ms-excel.sheet.2=excel\napplication/vnd.ms-excel.sheet.3=excel\napplication/vnd.ms-excel.sheet.4=excel\napplication/vnd.ms-excel.workspace.3=excel\napplication/vnd.ms-excel.workspace.4=excel\napplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel\napplication/vnd.ms-powerpoint=powerpoint\napplication/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint\napplication/vnd.oasis.opendocument.text=odt\napplication/vnd.oasis.opendocument.spreadsheet=ods\napplication/vnd.oasis.opendocument.presentation=odp\napplication/pdf=pdf\napplication/x-fictionbook+xml=fb2\napplication/e-pub+zip=epub\napplication/x-ibooks+zip=ibooks\ntext/plain=txt\napplication/rtf=rtf\napplication/vnd.ms-htmlhelp=chm\napplication/zip=zip\napplication/x-7z-comressed=7z\napplication/x-bzip=bz\napplication/x-bzip2=bz2\napplication/x-tar=tar\napplication/x-rar-compressed=rar\nvideo/3gp=3gp\nvideo/3g2=3g2\nvideo/x-msvideo=avi\nvideo/x-flv=flv\nvideo/mpeg=mpeg\nvideo/mp4=mp4\nvideo/ogv=ogv\nvideo/quicktime=qt\nvideo/x-m4v=m4v\naudio/x-aif=aif\naudio/midi=midi\naudio/mpga=mpga\naudio/mp4=mp4a\naudio/ogg=oga\naudio/x-wav=wav\nimage/webp=webp\nimage/bmp=bmp\nimage/x-icon=ico\nimage/x-icon=ico\nimage/png=png\nimage/svg+xml=svg\nimage/tiff=tiff\nimage/jpeg=jpg\n");
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");
@@ -9387,9 +9380,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
-            defaultMap
-                    .put(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS,
-                            "u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS,
+                    "u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "60");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "2");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TYPE, "fvh");
@@ -9432,9 +9424,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_DEFAULT_LANGUAGES, "");
             defaultMap.put(FessConfig.QUERY_JSON_DEFAULT_PREFERENCE, "_query");
             defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_PREFERENCE, "_query");
-            defaultMap
-                    .put(FessConfig.QUERY_LANGUAGE_MAPPING,
-                            "ar=ar\nbg=bg\nbn=bn\nca=ca\nckb-iq=ckb-iq\nckb_IQ=ckb-iq\ncs=cs\nda=da\nde=de\nel=el\nen=en\nen-ie=en-ie\nen_IE=en-ie\nes=es\net=et\neu=eu\nfa=fa\nfi=fi\nfr=fr\ngl=gl\ngu=gu\nhe=he\nhi=hi\nhr=hr\nhu=hu\nhy=hy\nid=id\nit=it\nja=ja\nko=ko\nlt=lt\nlv=lv\nmk=mk\nml=ml\nnl=nl\nno=no\npa=pa\npl=pl\npt=pt\npt-br=pt-br\npt_BR=pt-br\nro=ro\nru=ru\nsi=si\nsq=sq\nsv=sv\nta=ta\nte=te\nth=th\ntl=tl\ntr=tr\nuk=uk\nur=ur\nvi=vi\nzh-cn=zh-cn\nzh_CN=zh-cn\nzh-tw=zh-tw\nzh_TW=zh-tw\nzh=zh\n");
+            defaultMap.put(FessConfig.QUERY_LANGUAGE_MAPPING,
+                    "ar=ar\nbg=bg\nbn=bn\nca=ca\nckb-iq=ckb-iq\nckb_IQ=ckb-iq\ncs=cs\nda=da\nde=de\nel=el\nen=en\nen-ie=en-ie\nen_IE=en-ie\nes=es\net=et\neu=eu\nfa=fa\nfi=fi\nfr=fr\ngl=gl\ngu=gu\nhe=he\nhi=hi\nhr=hr\nhu=hu\nhy=hy\nid=id\nit=it\nja=ja\nko=ko\nlt=lt\nlv=lv\nmk=mk\nml=ml\nnl=nl\nno=no\npa=pa\npl=pl\npt=pt\npt-br=pt-br\npt_BR=pt-br\nro=ro\nru=ru\nsi=si\nsq=sq\nsv=sv\nta=ta\nte=te\nth=th\ntl=tl\ntr=tr\nuk=uk\nur=ur\nvi=vi\nzh-cn=zh-cn\nzh_CN=zh-cn\nzh-tw=zh-tw\nzh_TW=zh-tw\nzh=zh\n");
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE, "0.01");
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE_LANG, "1.0");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.005");
@@ -9444,9 +9435,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SORT, "count.desc");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_MISSING, "");
-            defaultMap
-                    .put(FessConfig.QUERY_FACET_QUERIES,
-                            "labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]\tlabels.facet_timestamp_1week=timestamp:[now/d-7d TO *]\tlabels.facet_timestamp_1month=timestamp:[now/d-1M TO *]\tlabels.facet_timestamp_1year=timestamp:[now/d-1y TO *]\nlabels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]\tlabels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]\tlabels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]\tlabels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]\tlabels.facet_contentLength_1m=content_length:[1000000 TO *]\nlabels.facet_filetype_title:labels.facet_filetype_html=filetype:html\tlabels.facet_filetype_word=filetype:word\tlabels.facet_filetype_excel=filetype:excel\tlabels.facet_filetype_powerpoint=filetype:powerpoint\tlabels.facet_filetype_odt=filetype:odt\tlabels.facet_filetype_ods=filetype:ods\tlabels.facet_filetype_odp=filetype:odp\tlabels.facet_filetype_pdf=filetype:pdf\tlabels.facet_filetype_txt=filetype:txt\tlabels.facet_filetype_others=filetype:others\n");
+            defaultMap.put(FessConfig.QUERY_FACET_QUERIES,
+                    "labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]\tlabels.facet_timestamp_1week=timestamp:[now/d-7d TO *]\tlabels.facet_timestamp_1month=timestamp:[now/d-1M TO *]\tlabels.facet_timestamp_1year=timestamp:[now/d-1y TO *]\nlabels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]\tlabels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]\tlabels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]\tlabels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]\tlabels.facet_contentLength_1m=content_length:[1000000 TO *]\nlabels.facet_filetype_title:labels.facet_filetype_html=filetype:html\tlabels.facet_filetype_word=filetype:word\tlabels.facet_filetype_excel=filetype:excel\tlabels.facet_filetype_powerpoint=filetype:powerpoint\tlabels.facet_filetype_odt=filetype:odt\tlabels.facet_filetype_ods=filetype:ods\tlabels.facet_filetype_odp=filetype:odp\tlabels.facet_filetype_pdf=filetype:pdf\tlabels.facet_filetype_txt=filetype:txt\tlabels.facet_filetype_others=filetype:others\n");
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2,4:2");
             defaultMap.put(FessConfig.FILE_ROLE_FROM_FILE, "true");
@@ -9455,9 +9445,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
-            defaultMap
-                    .put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,
-                            "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
+            defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,
+                    "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
             defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");

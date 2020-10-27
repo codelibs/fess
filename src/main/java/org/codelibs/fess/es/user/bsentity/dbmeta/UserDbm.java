@@ -192,26 +192,26 @@ public class UserDbm extends AbstractDBMeta {
             null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnEmployeeType = cci("employeeType", "employeeType", null, null, String.class, "employeeType", null,
             false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnFacsimileTelephoneNumber = cci("facsimileTelephoneNumber", "facsimileTelephoneNumber", null, null,
-            String.class, "facsimileTelephoneNumber", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null,
-            null, null, false);
+    protected final ColumnInfo _columnFacsimileTelephoneNumber =
+            cci("facsimileTelephoneNumber", "facsimileTelephoneNumber", null, null, String.class, "facsimileTelephoneNumber", null, false,
+                    false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGidNumber = cci("gidNumber", "gidNumber", null, null, Long.class, "gidNumber", null, false, false,
             false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGivenName = cci("givenName", "givenName", null, null, String.class, "givenName", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGroups = cci("groups", "groups", null, null, String[].class, "groups", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnHomeDirectory = cci("homeDirectory", "homeDirectory", null, null, String.class, "homeDirectory",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnHomeDirectory = cci("homeDirectory", "homeDirectory", null, null, String.class, "homeDirectory", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHomePhone = cci("homePhone", "homePhone", null, null, String.class, "homePhone", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHomePostalAddress = cci("homePostalAddress", "homePostalAddress", null, null, String.class,
             "homePostalAddress", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnInitials = cci("initials", "initials", null, null, String.class, "initials", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnInternationaliSDNNumber = cci("internationaliSDNNumber", "internationaliSDNNumber", null, null,
-            String.class, "internationaliSDNNumber", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null,
-            null, false);
+    protected final ColumnInfo _columnInternationaliSDNNumber =
+            cci("internationaliSDNNumber", "internationaliSDNNumber", null, null, String.class, "internationaliSDNNumber", null, false,
+                    false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLabeledURI = cci("labeledURI", "labeledURI", null, null, String.class, "labeledURI", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnMail = cci("mail", "mail", null, null, String.class, "mail", null, false, false, false, "keyword", 0,
@@ -220,17 +220,17 @@ public class UserDbm extends AbstractDBMeta {
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
             0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPager = cci("pager", "pager", null, null, String.class, "pager", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPager = cci("pager", "pager", null, null, String.class, "pager", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPhysicalDeliveryOfficeName = cci("physicalDeliveryOfficeName", "physicalDeliveryOfficeName", null,
-            null, String.class, "physicalDeliveryOfficeName", null, false, false, false, "keyword", 0, 0, null, null, false, null, null,
-            null, null, null, false);
-    protected final ColumnInfo _columnPostOfficeBox = cci("postOfficeBox", "postOfficeBox", null, null, String.class, "postOfficeBox",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPostalAddress = cci("postalAddress", "postalAddress", null, null, String.class, "postalAddress",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPhysicalDeliveryOfficeName =
+            cci("physicalDeliveryOfficeName", "physicalDeliveryOfficeName", null, null, String.class, "physicalDeliveryOfficeName", null,
+                    false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPostOfficeBox = cci("postOfficeBox", "postOfficeBox", null, null, String.class, "postOfficeBox", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPostalAddress = cci("postalAddress", "postalAddress", null, null, String.class, "postalAddress", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPostalCode = cci("postalCode", "postalCode", null, null, String.class, "postalCode", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPreferredLanguage = cci("preferredLanguage", "preferredLanguage", null, null, String.class,
@@ -241,19 +241,19 @@ public class UserDbm extends AbstractDBMeta {
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRoomNumber = cci("roomNumber", "roomNumber", null, null, String.class, "roomNumber", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnState = cci("state", "state", null, null, String.class, "state", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnState = cci("state", "state", null, null, String.class, "state", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnStreet = cci("street", "street", null, null, String.class, "street", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSurname = cci("surname", "surname", null, null, String.class, "surname", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTelephoneNumber = cci("telephoneNumber", "telephoneNumber", null, null, String.class,
             "telephoneNumber", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTeletexTerminalIdentifier = cci("teletexTerminalIdentifier", "teletexTerminalIdentifier", null, null,
-            String.class, "teletexTerminalIdentifier", null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null,
-            null, null, false);
-    protected final ColumnInfo _columnTitle = cci("title", "title", null, null, String.class, "title", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTeletexTerminalIdentifier =
+            cci("teletexTerminalIdentifier", "teletexTerminalIdentifier", null, null, String.class, "teletexTerminalIdentifier", null,
+                    false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTitle = cci("title", "title", null, null, String.class, "title", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUidNumber = cci("uidNumber", "uidNumber", null, null, Long.class, "uidNumber", null, false, false,
             false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnX121Address = cci("x121Address", "x121Address", null, null, String.class, "x121Address", null, false,

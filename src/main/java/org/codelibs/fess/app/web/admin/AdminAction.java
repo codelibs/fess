@@ -70,7 +70,7 @@ public class AdminAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     @Secured({ //
-    AdminDashboardAction.ROLE, //
+            AdminDashboardAction.ROLE, //
             AdminDashboardAction.ROLE + VIEW, //
             AdminWizardAction.ROLE, //
             AdminWizardAction.ROLE + VIEW, //

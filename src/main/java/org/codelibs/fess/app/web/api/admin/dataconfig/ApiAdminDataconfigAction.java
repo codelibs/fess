@@ -62,9 +62,9 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final DataConfigPager pager = copyBeanToNewBean(body, DataConfigPager.class);
         final List<DataConfig> list = dataConfigService.getDataConfigList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/dataconfig/setting/{id}
@@ -138,13 +138,10 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
             copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        body.permissions =
-                stream(entity.getPermissions()).get(
-                        stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
-                                .collect(Collectors.joining("\n")));
-        body.virtualHosts =
-                stream(entity.getVirtualHosts()).get(
-                        stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).collect(Collectors.joining("\n")));
+        body.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+        body.virtualHosts = stream(entity.getVirtualHosts())
+                .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).collect(Collectors.joining("\n")));
         return body;
     }
 }

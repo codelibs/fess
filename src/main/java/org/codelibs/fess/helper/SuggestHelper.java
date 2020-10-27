@@ -90,8 +90,8 @@ public class SuggestHelper {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
-        split(fessConfig.getSuggestFieldContents(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(contentFieldNameSet::add));
+        split(fessConfig.getSuggestFieldContents(), ",")
+                .of(stream -> stream.filter(StringUtil::isNotBlank).forEach(contentFieldNameSet::add));
         split(fessConfig.getSuggestFieldTags(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(tagFieldNameSet::add));
         split(fessConfig.getSuggestFieldRoles(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(roleFieldNameSet::add));
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
@@ -137,68 +137,67 @@ public class SuggestHelper {
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
         final Map<String, LocalDateTime> duplicateSessionMap = new HashMap<>();
-        searchLogList.stream().forEach(
-                searchLog -> {
-                    if (searchLog.getHitCount() == null
-                            || searchLog.getHitCount().longValue() < fessConfig.getSuggestMinHitCountAsInteger().longValue()) {
-                        return;
-                    }
+        searchLogList.stream().forEach(searchLog -> {
+            if (searchLog.getHitCount() == null
+                    || searchLog.getHitCount().longValue() < fessConfig.getSuggestMinHitCountAsInteger().longValue()) {
+                return;
+            }
 
-                    final String sessionId;
-                    if (searchLog.getUserSessionId() != null) {
-                        sessionId = searchLog.getUserSessionId();
-                    } else {
-                        if (Constants.SEARCH_LOG_ACCESS_TYPE_WEB.equals(searchLog.getAccessType())) {
-                            sessionId = searchLog.getClientIp();
-                        } else {
-                            sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
-                        }
-                    }
+            final String sessionId;
+            if (searchLog.getUserSessionId() != null) {
+                sessionId = searchLog.getUserSessionId();
+            } else {
+                if (Constants.SEARCH_LOG_ACCESS_TYPE_WEB.equals(searchLog.getAccessType())) {
+                    sessionId = searchLog.getClientIp();
+                } else {
+                    sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
+                }
+            }
 
-                    final LocalDateTime requestedAt = searchLog.getRequestedAt();
-                    if (sessionId == null) {
-                        return;
-                    } else if (duplicateSessionMap.containsKey(sessionId)) {
-                        if (duplicateSessionMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt)) {
-                            return;
-                        }
-                    }
+            final LocalDateTime requestedAt = searchLog.getRequestedAt();
+            if (sessionId == null) {
+                return;
+            } else if (duplicateSessionMap.containsKey(sessionId)) {
+                if (duplicateSessionMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt)) {
+                    return;
+                }
+            }
 
-                    final StringBuilder sb = new StringBuilder(100);
-                    final List<String> fields = new ArrayList<>();
-                    final List<String> tags = new ArrayList<>();
-                    final List<String> roles = new ArrayList<>();
+            final StringBuilder sb = new StringBuilder(100);
+            final List<String> fields = new ArrayList<>();
+            final List<String> tags = new ArrayList<>();
+            final List<String> roles = new ArrayList<>();
 
-                    for (final Pair<String, String> searchFieldLog : searchLog.getSearchFieldLogList()) {
-                        final String name = searchFieldLog.getFirst();
-                        if (contentFieldNameSet.contains(name)) {
-                            if (sb.length() > 0) {
-                                sb.append(TEXT_SEP);
-                            }
-                            sb.append(searchFieldLog.getSecond());
-                            fields.add(name);
-                        } else if (tagFieldNameSet.contains(name)) {
-                            tags.add(searchFieldLog.getSecond());
-                        } else if (roleFieldNameSet.contains(name)) {
-                            roles.add(searchFieldLog.getSecond());
-                        }
-                    }
-
-                    final String virtualHost = searchLog.getVirtualHost();
-                    if (virtualHost != null) {
-                        tags.add(virtualHost);
-                    }
-
+            for (final Pair<String, String> searchFieldLog : searchLog.getSearchFieldLogList()) {
+                final String name = searchFieldLog.getFirst();
+                if (contentFieldNameSet.contains(name)) {
                     if (sb.length() > 0) {
-                        final String[] langs = searchLog.getLanguages() == null ? new String[] {} : searchLog.getLanguages().split(",");
-                        stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
-                        if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
-                            suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
-                                    tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
-                            duplicateSessionMap.put(sessionId, requestedAt);
-                        }
+                        sb.append(TEXT_SEP);
                     }
-                });
+                    sb.append(searchFieldLog.getSecond());
+                    fields.add(name);
+                } else if (tagFieldNameSet.contains(name)) {
+                    tags.add(searchFieldLog.getSecond());
+                } else if (roleFieldNameSet.contains(name)) {
+                    roles.add(searchFieldLog.getSecond());
+                }
+            }
+
+            final String virtualHost = searchLog.getVirtualHost();
+            if (virtualHost != null) {
+                tags.add(virtualHost);
+            }
+
+            if (sb.length() > 0) {
+                final String[] langs = searchLog.getLanguages() == null ? new String[] {} : searchLog.getLanguages().split(",");
+                stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
+                if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
+                    suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
+                            tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
+                    duplicateSessionMap.put(sessionId, requestedAt);
+                }
+            }
+        });
         refresh();
     }
 
@@ -207,40 +206,37 @@ public class SuggestHelper {
         final long interval = fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue();
         final int docPerReq = fessConfig.getSuggestUpdateDocPerRequestAsInteger();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        suggester
-                .indexer()
-                .indexFromDocument(
-                        () -> {
-                            final ESSourceReader reader =
-                                    new ESSourceReader(ComponentUtil.getFessEsClient(), suggester.settings(),
-                                            fessConfig.getIndexDocumentSearchIndex(), "_doc"); // TODO remove type
-                            reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
-                            reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
-                            reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
-                            reader.setLimitOfDocumentSize(fessConfig.getSuggestUpdateContentsLimitDocSizeAsInteger());
+        suggester.indexer().indexFromDocument(() -> {
+            final ESSourceReader reader = new ESSourceReader(ComponentUtil.getFessEsClient(), suggester.settings(),
+                    fessConfig.getIndexDocumentSearchIndex(), "_doc"); // TODO remove type
+            reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
+            reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
+            reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
+            reader.setLimitOfDocumentSize(fessConfig.getSuggestUpdateContentsLimitDocSizeAsInteger());
 
-                            final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
-                            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
-                                    .seed(System.currentTimeMillis()).setField(fessConfig.getIndexFieldDocId())));
-                            reader.setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery(),
-                                    flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()])).boostMode(
-                                    CombineFunction.MULTIPLY));
-                            reader.addSort(SortBuilders.fieldSort(fessConfig.getIndexFieldClickCount()));
-                            reader.addSort(SortBuilders.scoreSort());
-                            return reader;
-                        }, docPerReq, () -> {
-                            systemHelper.calibrateCpuLoad();
-                            ThreadUtil.sleep(interval);
-                        }).then(response -> {
-                    refresh();
-                    success.accept(true);
-                }).error(t -> error.accept(t));
+            final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
+            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                    ScoreFunctionBuilders.randomFunction().seed(System.currentTimeMillis()).setField(fessConfig.getIndexFieldDocId())));
+            reader.setQuery(QueryBuilders
+                    .functionScoreQuery(QueryBuilders.matchAllQuery(),
+                            flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()]))
+                    .boostMode(CombineFunction.MULTIPLY));
+            reader.addSort(SortBuilders.fieldSort(fessConfig.getIndexFieldClickCount()));
+            reader.addSort(SortBuilders.scoreSort());
+            return reader;
+        }, docPerReq, () -> {
+            systemHelper.calibrateCpuLoad();
+            ThreadUtil.sleep(interval);
+        }).then(response -> {
+            refresh();
+            success.accept(true);
+        }).error(t -> error.accept(t));
     }
 
     public void purgeDocumentSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(
-                time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+        boolQueryBuilder
+                .must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
@@ -251,8 +247,8 @@ public class SuggestHelper {
 
     public void purgeSearchlogSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(
-                time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+        boolQueryBuilder
+                .must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
@@ -357,9 +353,8 @@ public class SuggestHelper {
             }
         }
 
-        suggester.indexer().addElevateWord(
-                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings), contentFieldList, labelList,
-                        roleList), apply);
+        suggester.indexer().addElevateWord(new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings),
+                contentFieldList, labelList, roleList), apply);
 
         refresh();
     }

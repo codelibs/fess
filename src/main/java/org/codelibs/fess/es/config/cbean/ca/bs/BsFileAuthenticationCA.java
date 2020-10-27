@@ -68,7 +68,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -353,7 +354,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -394,7 +396,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setCreatedTime_Range("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setCreatedTime_Range("createdTime", opLambda, aggsLambda);
     }
 
@@ -475,7 +478,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setFileConfigId_Terms("fileConfigId", opLambda, null);
     }
 
-    public void setFileConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setFileConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setFileConfigId_Terms("fileConfigId", opLambda, aggsLambda);
     }
 
@@ -659,7 +663,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setHostname_IpRange("hostname", opLambda, null);
     }
 
-    public void setHostname_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setHostname_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setHostname_IpRange("hostname", opLambda, aggsLambda);
     }
 
@@ -714,7 +719,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setHostname_Missing("hostname", opLambda, null);
     }
 
-    public void setHostname_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setHostname_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setHostname_Missing("hostname", opLambda, aggsLambda);
     }
 
@@ -739,7 +745,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setParameters_Terms("parameters", opLambda, null);
     }
 
-    public void setParameters_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setParameters_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setParameters_Terms("parameters", opLambda, aggsLambda);
     }
 
@@ -923,7 +930,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setPassword_IpRange("password", opLambda, null);
     }
 
-    public void setPassword_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setPassword_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setPassword_IpRange("password", opLambda, aggsLambda);
     }
 
@@ -978,7 +986,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setPassword_Missing("password", opLambda, null);
     }
 
-    public void setPassword_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setPassword_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setPassword_Missing("password", opLambda, aggsLambda);
     }
 
@@ -1123,7 +1132,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setPort_Histogram("port", opLambda, null);
     }
 
-    public void setPort_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setPort_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setPort_Histogram("port", opLambda, aggsLambda);
     }
 
@@ -1600,7 +1610,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1641,7 +1652,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setUpdatedTime_Range("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, aggsLambda);
     }
 
@@ -1773,7 +1785,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setUsername_IpRange("username", opLambda, null);
     }
 
-    public void setUsername_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setUsername_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setUsername_IpRange("username", opLambda, aggsLambda);
     }
 
@@ -1828,7 +1841,8 @@ public abstract class BsFileAuthenticationCA extends EsAbstractConditionAggregat
         setUsername_Missing("username", opLambda, null);
     }
 
-    public void setUsername_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileAuthenticationCA> aggsLambda) {
+    public void setUsername_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileAuthenticationCA> aggsLambda) {
         setUsername_Missing("username", opLambda, aggsLambda);
     }
 

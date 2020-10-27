@@ -56,9 +56,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
     //
     private static final Logger logger = LogManager.getLogger(AdminMaintenanceAction.class);
 
-    private static final String[] ES_CAT_NAMES = new String[] { "aliases", "allocation", "count", "fielddata", "health", "indices",
-            "master", "nodeattrs", "nodes", "pending_tasks", "plugins", "recovery", "repositories", "thread_pool", "shards", "segments",
-            "snapshots", "templates" };
+    private static final String[] ES_CAT_NAMES =
+            new String[] { "aliases", "allocation", "count", "fielddata", "health", "indices", "master", "nodeattrs", "nodes",
+                    "pending_tasks", "plugins", "recovery", "repositories", "thread_pool", "shards", "segments", "snapshots", "templates" };
 
     // ===================================================================================
     //                                                                           Attribute
@@ -117,22 +117,11 @@ public class AdminMaintenanceAction extends FessAdminAction {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
         final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
-        fessEsClient
-                .admin()
-                .indices()
-                .prepareClose(docIndex)
-                .execute(
-                        ActionListener.wrap(
-                                res -> {
-                                    logger.info("Close {}", docIndex);
-                                    fessEsClient
-                                            .admin()
-                                            .indices()
-                                            .prepareOpen(docIndex)
-                                            .execute(
-                                                    ActionListener.wrap(res2 -> logger.info("Open {}", docIndex),
-                                                            e -> logger.warn("Failed to open " + docIndex, e)));
-                                }, e -> logger.warn("Failed to close " + docIndex, e)));
+        fessEsClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
+            logger.info("Close {}", docIndex);
+            fessEsClient.admin().indices().prepareOpen(docIndex).execute(
+                    ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open " + docIndex, e)));
+        }, e -> logger.warn("Failed to close " + docIndex, e)));
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
@@ -142,16 +131,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        fessEsClient
-                .admin()
-                .indices()
-                .prepareDelete(//
-                        fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
-                        fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
-                        fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
-                .execute(
-                        ActionListener.wrap(res -> logger.info("Deleted .crawler indices."),
-                                e -> logger.warn("Failed to delete .crawler.* indices.", e)));
+        fessEsClient.admin().indices().prepareDelete(//
+                fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
+                fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
+                fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
+                .execute(ActionListener.wrap(res -> logger.info("Deleted .crawler indices."),
+                        e -> logger.warn("Failed to delete .crawler.* indices.", e)));
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
@@ -233,9 +218,8 @@ public class AdminMaintenanceAction extends FessAdminAction {
         final ZipEntry entry = new ZipEntry(id + "/fess_basic_config.bulk");
         try {
             zos.putNextEntry(entry);
-            try (CurlResponse response =
-                    ComponentUtil.getCurlHelper().get("/.fess_basic_config/_data").param("format", "json")
-                            .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
+            try (CurlResponse response = ComponentUtil.getCurlHelper().get("/.fess_basic_config/_data").param("format", "json")
+                    .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
                 CopyUtil.copy(response.getContentAsStream(), zos);
             }
         } catch (final IOException e) {

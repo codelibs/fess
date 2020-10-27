@@ -127,14 +127,14 @@ public class GenerateThumbnailJob extends ExecJob {
             buf.append(targetClassesDir.getAbsolutePath());
         }
         // WEB-INF/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF" + File.separator + "lib"
-                + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")),
+                "WEB-INF" + File.separator + "lib" + File.separator);
         // WEB-INF/env/thumbnail/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")), "WEB-INF"
-                + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/env/" + getExecuteType() + "/lib")),
+                "WEB-INF" + File.separator + "env" + File.separator + getExecuteType() + File.separator + "lib" + File.separator);
         // WEB-INF/plugin
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/plugin")), "WEB-INF" + File.separator + "plugin"
-                + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/plugin")),
+                "WEB-INF" + File.separator + "plugin" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
@@ -172,8 +172,8 @@ public class GenerateThumbnailJob extends ExecJob {
         if (logLevel != null) {
             cmdList.add("-Dfess.log.level=" + logLevel);
         }
-        stream(fessConfig.getJvmThumbnailOptionsAsArray()).of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
+        stream(fessConfig.getJvmThumbnailOptionsAsArray())
+                .of(stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
 
         File ownTmpDir = null;
         final String tmpDir = System.getProperty("java.io.tmpdir");

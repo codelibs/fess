@@ -71,8 +71,8 @@ public class SuggestApiManager extends BaseJsonApiManager {
     }
 
     @Override
-    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
-            ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
             writeJsonResponse(99, StringUtil.EMPTY, "Referer is invalid.");

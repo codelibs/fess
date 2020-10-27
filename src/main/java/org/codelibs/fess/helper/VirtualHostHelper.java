@@ -61,7 +61,7 @@ public class VirtualHostHelper {
     }
 
     public String[] getVirtualHostPaths() {
-        return stream(ComponentUtil.getFessConfig().getVirtualHosts()).get(
-                stream -> stream.map(h -> "/" + h.getValue3()).toArray(n -> new String[n]));
+        return stream(ComponentUtil.getFessConfig().getVirtualHosts())
+                .get(stream -> stream.map(h -> "/" + h.getValue3()).toArray(n -> new String[n]));
     }
 }

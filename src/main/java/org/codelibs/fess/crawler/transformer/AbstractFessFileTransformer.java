@@ -108,64 +108,60 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 getLogger().debug("ExtractData: {}", extractData);
             }
             // meta
-            extractData
-                    .getKeySet()
-                    .stream()
-                    .filter(k -> extractData.getValues(k) != null)
-                    .forEach(key -> {
-                        final String[] values = extractData.getValues(key);
-                        metaDataMap.put(key, values);
+            extractData.getKeySet().stream().filter(k -> extractData.getValues(k) != null).forEach(key -> {
+                final String[] values = extractData.getValues(key);
+                metaDataMap.put(key, values);
 
-                        // meta -> content
-                            if (fessConfig.isCrawlerMetadataContentIncluded(key)) {
-                                final String joinedValue = StringUtils.join(values, ' ');
-                                if (StringUtil.isNotBlank(joinedValue)) {
-                                    if (contentMetaBuf.length() > 0) {
-                                        contentMetaBuf.append(' ');
-                                    }
-                                    contentMetaBuf.append(joinedValue.trim());
+                // meta -> content
+                if (fessConfig.isCrawlerMetadataContentIncluded(key)) {
+                    final String joinedValue = StringUtils.join(values, ' ');
+                    if (StringUtil.isNotBlank(joinedValue)) {
+                        if (contentMetaBuf.length() > 0) {
+                            contentMetaBuf.append(' ');
+                        }
+                        contentMetaBuf.append(joinedValue.trim());
+                    }
+                }
+
+                final Tuple3<String, String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
+                if (mapping != null) {
+                    if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getValue2())) {
+                        dataMap.put(mapping.getValue1(), values);
+                    } else if (Constants.MAPPING_TYPE_STRING.equalsIgnoreCase(mapping.getValue2())) {
+                        final String joinedValue = StringUtils.join(values, ' ');
+                        dataMap.put(mapping.getValue1(), joinedValue.trim());
+                    } else if (values.length == 1) {
+                        try {
+                            if (Constants.MAPPING_TYPE_LONG.equalsIgnoreCase(mapping.getValue2())) {
+                                dataMap.put(mapping.getValue1(), Long.parseLong(values[0]));
+                            } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getValue2())) {
+                                dataMap.put(mapping.getValue1(), Double.parseDouble(values[0]));
+                            } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())
+                                    || Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
+                                final String dateFormate;
+                                if (StringUtil.isNotBlank(mapping.getValue3())) {
+                                    dateFormate = mapping.getValue3();
+                                } else if (Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
+                                    dateFormate = mapping.getValue2();
+                                } else {
+                                    dateFormate = Constants.DATE_OPTIONAL_TIME;
                                 }
-                            }
-
-                            final Tuple3<String, String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
-                            if (mapping != null) {
-                                if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getValue2())) {
-                                    dataMap.put(mapping.getValue1(), values);
-                                } else if (Constants.MAPPING_TYPE_STRING.equalsIgnoreCase(mapping.getValue2())) {
-                                    final String joinedValue = StringUtils.join(values, ' ');
-                                    dataMap.put(mapping.getValue1(), joinedValue.trim());
-                                } else if (values.length == 1) {
-                                    try {
-                                        if (Constants.MAPPING_TYPE_LONG.equalsIgnoreCase(mapping.getValue2())) {
-                                            dataMap.put(mapping.getValue1(), Long.parseLong(values[0]));
-                                        } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getValue2())) {
-                                            dataMap.put(mapping.getValue1(), Double.parseDouble(values[0]));
-                                        } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())
-                                                || Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
-                                            final String dateFormate;
-                                            if (StringUtil.isNotBlank(mapping.getValue3())) {
-                                                dateFormate = mapping.getValue3();
-                                            } else if (Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
-                                                dateFormate = mapping.getValue2();
-                                            } else {
-                                                dateFormate = Constants.DATE_OPTIONAL_TIME;
-                                            }
-                                            final Date dt = FessFunctions.parseDate(values[0], dateFormate);
-                                            if (dt != null) {
-                                                dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
-                                            } else {
-                                                logger.warn("Failed to parse {}", mapping.toString());
-                                            }
-                                        } else {
-                                            logger.warn("Unknown mapping type: {}={}", key, mapping);
-                                        }
-                                    } catch (final Exception e) {
-                                        logger.warn("Failed to parse " + values[0], e);
-                                    }
+                                final Date dt = FessFunctions.parseDate(values[0], dateFormate);
+                                if (dt != null) {
+                                    dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
+                                } else {
+                                    logger.warn("Failed to parse {}", mapping.toString());
                                 }
+                            } else {
+                                logger.warn("Unknown mapping type: {}={}", key, mapping);
                             }
+                        } catch (final Exception e) {
+                            logger.warn("Failed to parse " + values[0], e);
+                        }
+                    }
+                }
 
-                        });
+            });
         } catch (final Exception e) {
             final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from " + responseData.getUrl(), e);
             rcae.setLogLevel(CrawlingAccessException.WARN);
@@ -223,8 +219,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         responseData.addMetaData(Extractor.class.getSimpleName(), extractor);
         final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
-        if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
-                .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+        if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
+                || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
 
@@ -244,11 +240,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             dataMap.remove(titleField);
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
-                    putResultDataBody(
-                            dataMap,
-                            titleField,
-                            documentHelper.getDigest(responseData, body, dataMap,
-                                    fessConfig.getCrawlerDocumentFileMaxTitleLengthAsInteger()));
+                    putResultDataBody(dataMap, titleField, documentHelper.getDigest(responseData, body, dataMap,
+                            fessConfig.getCrawlerDocumentFileMaxTitleLengthAsInteger()));
                 } else {
                     putResultDataBody(dataMap, titleField, fessConfig.getCrawlerDocumentFileNoTitleLabel());
                 }
@@ -388,8 +381,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         if (configParam != null) {
             final String keepOriginalBody = configParam.get(Config.KEEP_ORIGINAL_BODY);
             if (StringUtil.isNotBlank(keepOriginalBody)) {
-                params.put(TikaExtractor.NORMALIZE_TEXT, Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE
-                        : Constants.TRUE);
+                params.put(TikaExtractor.NORMALIZE_TEXT,
+                        Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE : Constants.TRUE);
             }
         }
         return params;

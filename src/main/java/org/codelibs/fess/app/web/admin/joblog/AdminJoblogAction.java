@@ -199,7 +199,7 @@ public class AdminJoblogAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             RenderDataUtil.register(data, "jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(jobLogPager, form, op -> op.include("id"));
             });

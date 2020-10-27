@@ -272,23 +272,22 @@ public class AdminSearchlistAction extends FessAdminAction {
         validate(form, messages -> {}, this::asEditHtml);
         validateFields(form, v -> throwValidationError(v, this::asEditHtml));
         verifyToken(this::asEditHtml);
-        getDoc(form).ifPresent(
-                entity -> {
-                    try {
-                        entity.putAll(fessConfig.convertToStorableDoc(form.doc));
+        getDoc(form).ifPresent(entity -> {
+            try {
+                entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
-                        final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
-                        entity.put(fessConfig.getIndexFieldId(), newId);
+                final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
+                entity.put(fessConfig.getIndexFieldId(), newId);
 
-                        final String index = fessConfig.getIndexDocumentUpdateIndex();
-                        fessEsClient.store(index, entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        logger.error("Failed to add " + entity, e);
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+                final String index = fessConfig.getIndexDocumentUpdateIndex();
+                fessEsClient.store(index, entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to add " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -301,32 +300,31 @@ public class AdminSearchlistAction extends FessAdminAction {
         validate(form, messages -> {}, this::asEditHtml);
         validateFields(form, v -> throwValidationError(v, this::asEditHtml));
         verifyToken(this::asEditHtml);
-        getDoc(form).ifPresent(
-                entity -> {
-                    final String index = fessConfig.getIndexDocumentUpdateIndex();
-                    try {
-                        entity.putAll(fessConfig.convertToStorableDoc(form.doc));
+        getDoc(form).ifPresent(entity -> {
+            final String index = fessConfig.getIndexDocumentUpdateIndex();
+            try {
+                entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
-                        final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
-                        final String oldId = (String) entity.get(fessConfig.getIndexFieldId());
-                        if (!newId.equals(oldId)) {
-                            entity.put(fessConfig.getIndexFieldId(), newId);
-                            entity.remove(fessConfig.getIndexFieldVersion());
-                            final Long seqNo = (Long) entity.remove(fessConfig.getIndexFieldSeqNo());
-                            final Long primaryTerm = (Long) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
-                            if (seqNo != null && primaryTerm != null && oldId != null) {
-                                fessEsClient.delete(index, oldId, seqNo, primaryTerm);
-                            }
-                        }
-
-                        fessEsClient.store(index, entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        logger.error("Failed to update " + entity, e);
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
+                final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
+                final String oldId = (String) entity.get(fessConfig.getIndexFieldId());
+                if (!newId.equals(oldId)) {
+                    entity.put(fessConfig.getIndexFieldId(), newId);
+                    entity.remove(fessConfig.getIndexFieldVersion());
+                    final Long seqNo = (Long) entity.remove(fessConfig.getIndexFieldSeqNo());
+                    final Long primaryTerm = (Long) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
+                    if (seqNo != null && primaryTerm != null && oldId != null) {
+                        fessEsClient.delete(index, oldId, seqNo, primaryTerm);
                     }
-                }).orElse(() -> {
+                }
+
+                fessEsClient.store(index, entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to update " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("search").params("q", URLUtil.encode(form.q, Constants.UTF_8)));

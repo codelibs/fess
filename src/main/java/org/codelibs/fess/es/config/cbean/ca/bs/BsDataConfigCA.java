@@ -219,7 +219,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setAvailable_PercentileRanks("available", values, opLambda);
     }
 
-    public void setAvailable_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setAvailable_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -488,7 +489,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setBoost_Range("boost", opLambda, aggsLambda);
     }
 
-    public void setBoost_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsDataConfigCA> aggsLambda) {
+    public void setBoost_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsDataConfigCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -799,7 +801,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -814,7 +817,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsDataConfigCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsDataConfigCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
@@ -1156,7 +1160,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setHandlerParameter_IpRange("handlerParameter", opLambda, null);
     }
 
-    public void setHandlerParameter_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsDataConfigCA> aggsLambda) {
+    public void setHandlerParameter_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsDataConfigCA> aggsLambda) {
         setHandlerParameter_IpRange("handlerParameter", opLambda, aggsLambda);
     }
 
@@ -1211,7 +1216,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setHandlerParameter_Missing("handlerParameter", opLambda, null);
     }
 
-    public void setHandlerParameter_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsDataConfigCA> aggsLambda) {
+    public void setHandlerParameter_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsDataConfigCA> aggsLambda) {
         setHandlerParameter_Missing("handlerParameter", opLambda, aggsLambda);
     }
 
@@ -1733,7 +1739,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2089,7 +2096,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2104,7 +2112,8 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsDataConfigCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsDataConfigCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 

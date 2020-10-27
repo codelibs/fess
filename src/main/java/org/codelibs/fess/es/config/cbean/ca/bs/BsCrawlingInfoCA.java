@@ -219,7 +219,8 @@ public abstract class BsCrawlingInfoCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -445,7 +446,8 @@ public abstract class BsCrawlingInfoCA extends EsAbstractConditionAggregation {
         setExpiredTime_PercentileRanks("expiredTime", values, opLambda);
     }
 
-    public void setExpiredTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setExpiredTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "expiredTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -570,7 +572,8 @@ public abstract class BsCrawlingInfoCA extends EsAbstractConditionAggregation {
         setName_Terms("name", opLambda, aggsLambda);
     }
 
-    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsCrawlingInfoCA> aggsLambda) {
+    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsCrawlingInfoCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);

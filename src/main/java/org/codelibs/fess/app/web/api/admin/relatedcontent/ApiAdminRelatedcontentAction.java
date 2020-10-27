@@ -54,16 +54,16 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final RelatedContentPager pager = copyBeanToNewBean(body, RelatedContentPager.class);
         final List<RelatedContent> list = relatedContentService.getRelatedContentList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/relatedcontent/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
-        return asJson(new ApiConfigResponse()
-                .setting(relatedContentService.getRelatedContent(id).map(this::createEditBody).orElseGet(() -> {
+        return asJson(
+                new ApiConfigResponse().setting(relatedContentService.getRelatedContent(id).map(this::createEditBody).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
                     return null;
                 })).status(Status.OK).result());

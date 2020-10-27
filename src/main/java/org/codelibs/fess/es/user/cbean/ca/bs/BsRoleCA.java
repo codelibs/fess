@@ -128,7 +128,8 @@ public abstract class BsRoleCA extends EsAbstractConditionAggregation {
         setName_SignificantTerms("name", opLambda, null);
     }
 
-    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<BsRoleCA> aggsLambda) {
+    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleCA> aggsLambda) {
         setName_SignificantTerms("name", opLambda, aggsLambda);
     }
 

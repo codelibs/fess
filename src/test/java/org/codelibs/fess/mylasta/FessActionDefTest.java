@@ -49,7 +49,7 @@ public class FessActionDefTest extends UnitFessTestCase {
                 final String webPackageKeyword = getWebPackageKeyword();
                 if (!clazz.getName().contains(webPackageKeyword) ||
                 // exclude app.web.api.admin packages
-                        clazz.getName().contains(".app.web.api.admin.")) {
+                clazz.getName().contains(".app.web.api.admin.")) {
                     return;
                 }
                 check(srcFile, clazz, webPackageKeyword);

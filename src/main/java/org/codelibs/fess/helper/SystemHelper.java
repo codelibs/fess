@@ -133,31 +133,30 @@ public class SystemHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
-        langItemsCache =
-                CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
-                        .build(new CacheLoader<String, List<Map<String, String>>>() {
-                            @Override
-                            public List<Map<String, String>> load(final String key) throws Exception {
-                                final ULocale uLocale = new ULocale(key);
-                                final Locale displayLocale = uLocale.toLocale();
-                                final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-                                final String msg = ComponentUtil.getMessageManager().getMessage(displayLocale, "labels.allLanguages");
-                                final Map<String, String> defaultMap = new HashMap<>(2);
-                                defaultMap.put(Constants.ITEM_LABEL, msg);
-                                defaultMap.put(Constants.ITEM_VALUE, "all");
-                                langItems.add(defaultMap);
+        langItemsCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
+                .build(new CacheLoader<String, List<Map<String, String>>>() {
+                    @Override
+                    public List<Map<String, String>> load(final String key) throws Exception {
+                        final ULocale uLocale = new ULocale(key);
+                        final Locale displayLocale = uLocale.toLocale();
+                        final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
+                        final String msg = ComponentUtil.getMessageManager().getMessage(displayLocale, "labels.allLanguages");
+                        final Map<String, String> defaultMap = new HashMap<>(2);
+                        defaultMap.put(Constants.ITEM_LABEL, msg);
+                        defaultMap.put(Constants.ITEM_VALUE, "all");
+                        langItems.add(defaultMap);
 
-                                for (final String lang : supportedLanguages) {
-                                    final Locale locale = LocaleUtils.toLocale(lang);
-                                    final String label = locale.getDisplayName(displayLocale);
-                                    final Map<String, String> map = new HashMap<>(2);
-                                    map.put(Constants.ITEM_LABEL, label);
-                                    map.put(Constants.ITEM_VALUE, lang);
-                                    langItems.add(map);
-                                }
-                                return langItems;
-                            }
-                        });
+                        for (final String lang : supportedLanguages) {
+                            final Locale locale = LocaleUtils.toLocale(lang);
+                            final String label = locale.getDisplayName(displayLocale);
+                            final Map<String, String> map = new HashMap<>(2);
+                            map.put(Constants.ITEM_LABEL, label);
+                            map.put(Constants.ITEM_VALUE, lang);
+                            langItems.add(map);
+                        }
+                        return langItems;
+                    }
+                });
 
         ComponentUtil.doInitProcesses(Runnable::run);
 
@@ -322,29 +321,22 @@ public class SystemHelper {
 
     public void refreshDesignJspFiles() {
         final ServletContext servletContext = LaServletContextUtil.getServletContext();
-        stream(ComponentUtil.getVirtualHostHelper().getVirtualHostPaths()).of(
-                stream -> stream.filter(s -> s != null && !s.equals("/")).forEach(
-                        key -> {
-                            designJspFileNameMap
-                                    .entrySet()
-                                    .stream()
-                                    .forEach(
-                                            e -> {
-                                                final File jspFile =
-                                                        new File(servletContext.getRealPath("/WEB-INF/view" + key + "/" + e.getValue()));
-                                                if (!jspFile.exists()) {
-                                                    jspFile.getParentFile().mkdirs();
-                                                    final File baseJspFile =
-                                                            new File(servletContext.getRealPath("/WEB-INF/view/" + e.getValue()));
-                                                    try {
-                                                        Files.copy(baseJspFile.toPath(), jspFile.toPath());
-                                                    } catch (final IOException ex) {
-                                                        logger.warn("Could not copy from " + baseJspFile.getAbsolutePath() + " to "
-                                                                + jspFile.getAbsolutePath(), ex);
-                                                    }
-                                                }
-                                            });
-                        }));
+        stream(ComponentUtil.getVirtualHostHelper().getVirtualHostPaths())
+                .of(stream -> stream.filter(s -> s != null && !s.equals("/")).forEach(key -> {
+                    designJspFileNameMap.entrySet().stream().forEach(e -> {
+                        final File jspFile = new File(servletContext.getRealPath("/WEB-INF/view" + key + "/" + e.getValue()));
+                        if (!jspFile.exists()) {
+                            jspFile.getParentFile().mkdirs();
+                            final File baseJspFile = new File(servletContext.getRealPath("/WEB-INF/view/" + e.getValue()));
+                            try {
+                                Files.copy(baseJspFile.toPath(), jspFile.toPath());
+                            } catch (final IOException ex) {
+                                logger.warn("Could not copy from " + baseJspFile.getAbsolutePath() + " to " + jspFile.getAbsolutePath(),
+                                        ex);
+                            }
+                        }
+                    });
+                }));
     }
 
     public boolean isForceStop() {
@@ -540,8 +532,8 @@ public class SystemHelper {
     public void setLogLevel(final String level) {
         final Level logLevel = Level.toLevel(level, Level.WARN);
         System.setProperty(Constants.FESS_LOG_LEVEL, logLevel.toString());
-        split(ComponentUtil.getFessConfig().getLoggingAppPackages(), ",").of(
-                stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> Configurator.setLevel(s, logLevel)));
+        split(ComponentUtil.getFessConfig().getLoggingAppPackages(), ",")
+                .of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> Configurator.setLevel(s, logLevel)));
     }
 
     public String getLogLevel() {

@@ -55,8 +55,8 @@ public class AccessTokenService {
 
         // update pager
         BeanUtil.copyBeanToBean(accessTokenList, accessTokenPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        accessTokenPager.setPageNumberList(accessTokenList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger()))
-                .createPageNumberList());
+        accessTokenPager.setPageNumberList(
+                accessTokenList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
 
         return accessTokenList;
     }
@@ -94,24 +94,21 @@ public class AccessTokenService {
     public OptionalEntity<Set<String>> getPermissions(final HttpServletRequest request) {
         final String token = ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request);
         if (StringUtil.isNotBlank(token)) {
-            return accessTokenBhv
-                    .selectEntity(cb -> {
-                        cb.query().setToken_Term(token);
-                    })
-                    .map(accessToken -> {
-                        final Set<String> permissionSet = new HashSet<>();
-                        final Long expiredTime = accessToken.getExpiredTime();
-                        if (expiredTime != null && expiredTime.longValue() > 0
-                                && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
-                            throw new InvalidAccessTokenException("invalid_token", "The token is expired("
-                                    + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
-                        }
-                        stream(accessToken.getPermissions()).of(stream -> stream.forEach(permissionSet::add));
-                        final String name = accessToken.getParameterName();
-                        stream(request.getParameterValues(name)).of(
-                                stream -> stream.filter(StringUtil::isNotBlank).forEach(permissionSet::add));
-                        return OptionalEntity.of(permissionSet);
-                    }).orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "Invalid token: " + token));
+            return accessTokenBhv.selectEntity(cb -> {
+                cb.query().setToken_Term(token);
+            }).map(accessToken -> {
+                final Set<String> permissionSet = new HashSet<>();
+                final Long expiredTime = accessToken.getExpiredTime();
+                if (expiredTime != null && expiredTime.longValue() > 0
+                        && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
+                    throw new InvalidAccessTokenException("invalid_token",
+                            "The token is expired(" + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
+                }
+                stream(accessToken.getPermissions()).of(stream -> stream.forEach(permissionSet::add));
+                final String name = accessToken.getParameterName();
+                stream(request.getParameterValues(name)).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(permissionSet::add));
+                return OptionalEntity.of(permissionSet);
+            }).orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "Invalid token: " + token));
         }
         return OptionalEntity.empty();
     }

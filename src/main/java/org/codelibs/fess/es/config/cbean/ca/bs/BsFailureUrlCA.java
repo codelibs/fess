@@ -350,7 +350,8 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_PercentileRanks("errorCount", values, opLambda);
     }
 
-    public void setErrorCount_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setErrorCount_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "errorCount", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -365,7 +366,8 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Histogram("errorCount", opLambda, null);
     }
 
-    public void setErrorCount_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorCount_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorCount_Histogram("errorCount", opLambda, aggsLambda);
     }
 
@@ -934,7 +936,8 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Missing("lastAccessTime", opLambda, null);
     }
 
-    public void setLastAccessTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setLastAccessTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setLastAccessTime_Missing("lastAccessTime", opLambda, aggsLambda);
     }
 
@@ -1144,7 +1147,8 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_IpRange("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1198,7 +1202,8 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_Missing("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);

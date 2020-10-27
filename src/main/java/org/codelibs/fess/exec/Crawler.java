@@ -261,9 +261,8 @@ public class Crawler {
             }, "ProcessCommand");
             commandThread.start();
 
-            systemMonitorTask =
-                    TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
-                            ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
+            systemMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
+                    ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
 
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
@@ -481,8 +480,8 @@ public class Crawler {
             }
 
             // delete expired sessions
-            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name, ComponentUtil.getSystemHelper()
-                    .getCurrentTimeAsLong());
+            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name,
+                    ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
 
             final List<String> webConfigIdList = options.getWebConfigIdList();
             final List<String> fileConfigIdList = options.getFileConfigIdList();
@@ -495,20 +494,20 @@ public class Crawler {
             if (runAll || webConfigIdList != null || fileConfigIdList != null) {
                 webFsCrawlerThread = new Thread((Runnable) () -> {
                     // crawl web
-                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_START_TIME);
-                        webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList);
-                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_END_TIME);
-                    }, WEB_FS_CRAWLING_PROCESS);
+                    writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_START_TIME);
+                    webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList);
+                    writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_END_TIME);
+                }, WEB_FS_CRAWLING_PROCESS);
                 webFsCrawlerThread.start();
             }
 
             if (runAll || dataConfigIdList != null) {
                 dataCrawlerThread = new Thread((Runnable) () -> {
                     // crawl data system
-                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_START_TIME);
-                        dataIndexHelper.crawl(options.sessionId, dataConfigIdList);
-                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_END_TIME);
-                    }, DATA_CRAWLING_PROCESS);
+                    writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_START_TIME);
+                    dataIndexHelper.crawl(options.sessionId, dataConfigIdList);
+                    writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_END_TIME);
+                }, DATA_CRAWLING_PROCESS);
                 dataCrawlerThread.start();
             }
 
@@ -527,8 +526,8 @@ public class Crawler {
             pathMappingHelper.removePathMappingList(options.sessionId);
             crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_STATUS, errors.isEmpty() ? Constants.T.toString() : Constants.F.toString());
             if (!errors.isEmpty()) {
-                crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_ERRORS, errors.stream().map(s -> s.replace(" ", StringUtil.EMPTY))
-                        .collect(Collectors.joining(" ")));
+                crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_ERRORS,
+                        errors.stream().map(s -> s.replace(" ", StringUtil.EMPTY)).collect(Collectors.joining(" ")));
             }
             writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_END_TIME);
             crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));

@@ -153,26 +153,19 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
-        dataConfigService
-                .getDataConfig(id)
-                .ifPresent(
-                        entity -> {
-                            copyBeanToBean(entity, form, copyOp -> {
-                                copyOp.excludeNull();
-                                copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
-                            });
-                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                            form.permissions =
-                                    stream(entity.getPermissions()).get(
-                                            stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
-                                                    .collect(Collectors.joining("\n")));
-                            form.virtualHosts =
-                                    stream(entity.getVirtualHosts()).get(
-                                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
-                                                    .collect(Collectors.joining("\n")));
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
-                });
+        dataConfigService.getDataConfig(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, copyOp -> {
+                copyOp.excludeNull();
+                copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
+            });
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(permissionHelper::decode)
+                    .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+            form.virtualHosts = stream(entity.getVirtualHosts())
+                    .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -192,34 +185,23 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asDetailsHtml().useForm(
-                EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        dataConfigService
-                                .getDataConfig(id)
-                                .ifPresent(
-                                        entity -> {
-                                            copyBeanToBean(entity, form, copyOp -> {
-                                                copyOp.excludeNull();
-                                                copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
-                                            });
-                                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                                            form.permissions =
-                                                    stream(entity.getPermissions()).get(
-                                                            stream -> stream.map(s -> permissionHelper.decode(s))
-                                                                    .filter(StringUtil::isNotBlank).distinct()
-                                                                    .collect(Collectors.joining("\n")));
-                                            form.virtualHosts =
-                                                    stream(entity.getVirtualHosts()).get(
-                                                            stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
-                                                                    .collect(Collectors.joining("\n")));
-                                            form.crudMode = crudMode;
-                                        })
-                                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                        this::asListHtml));
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                        copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
                     });
-                });
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                    form.virtualHosts = stream(entity.getVirtualHosts())
+                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
+                    form.crudMode = crudMode;
+                }).orElse(
+                        () -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml));
+            });
+        });
     }
 
     // -----------------------------------------------------
@@ -231,16 +213,15 @@ public class AdminDataconfigAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getDataConfig(form).ifPresent(
-                entity -> {
-                    try {
-                        dataConfigService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getDataConfig(form).ifPresent(entity -> {
+            try {
+                dataConfigService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -252,16 +233,15 @@ public class AdminDataconfigAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getDataConfig(form).ifPresent(
-                entity -> {
-                    try {
-                        dataConfigService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getDataConfig(form).ifPresent(entity -> {
+            try {
+                dataConfigService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
@@ -274,20 +254,15 @@ public class AdminDataconfigAction extends FessAdminAction {
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
-        dataConfigService
-                .getDataConfig(id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                dataConfigService.delete(entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        })
-                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml));
+        dataConfigService.getDataConfig(id).ifPresent(entity -> {
+            try {
+                dataConfigService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml));
         return redirect(getClass());
     }
 
@@ -317,23 +292,20 @@ public class AdminDataconfigAction extends FessAdminAction {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        return getEntity(form, username, currentTime).map(
-                entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(
-                            form,
-                            entity,
-                            op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
-                                    Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS)).toArray(n -> new String[n])));
-                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setPermissions(split(form.permissions, "\n").get(
-                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
-                                    .toArray(n -> new String[n])));
-                    entity.setVirtualHosts(split(form.virtualHosts, "\n").get(
-                            stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).toArray(n -> new String[n])));
-                    return entity;
-                });
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            copyBeanToBean(form, entity,
+                    op -> op.exclude(Stream
+                            .concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS))
+                            .toArray(n -> new String[n])));
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            entity.setPermissions(split(form.permissions, "\n").get(stream -> stream.map(s -> permissionHelper.encode(s))
+                    .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));
+            entity.setVirtualHosts(split(form.virtualHosts, "\n")
+                    .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).toArray(n -> new String[n])));
+            return entity;
+        });
     }
 
     protected void registerRolesAndLabels(final RenderData data) {

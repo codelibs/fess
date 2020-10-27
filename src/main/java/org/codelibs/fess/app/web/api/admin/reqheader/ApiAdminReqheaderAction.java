@@ -61,9 +61,9 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final ReqHeaderPager pager = copyBeanToNewBean(body, ReqHeaderPager.class);
         final List<RequestHeader> list = reqHeaderService.getRequestHeaderList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/reqheader/setting/{id}

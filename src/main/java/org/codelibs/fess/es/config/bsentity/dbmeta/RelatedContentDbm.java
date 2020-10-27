@@ -87,7 +87,8 @@ public class RelatedContentDbm extends AbstractDBMeta {
                 (et, vl) -> ((RelatedContent) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getSortOrder(),
                 (et, vl) -> ((RelatedContent) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
-        setupEpg(_epgMap, et -> ((RelatedContent) et).getTerm(), (et, vl) -> ((RelatedContent) et).setTerm(DfTypeUtil.toString(vl)), "term");
+        setupEpg(_epgMap, et -> ((RelatedContent) et).getTerm(), (et, vl) -> ((RelatedContent) et).setTerm(DfTypeUtil.toString(vl)),
+                "term");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getUpdatedBy(),
                 (et, vl) -> ((RelatedContent) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
         setupEpg(_epgMap, et -> ((RelatedContent) et).getUpdatedTime(),

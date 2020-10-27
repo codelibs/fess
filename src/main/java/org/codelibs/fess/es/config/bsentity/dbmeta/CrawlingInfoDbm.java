@@ -79,10 +79,10 @@ public class CrawlingInfoDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((CrawlingInfo) et).getCreatedTime(),
-                (et, vl) -> ((CrawlingInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((CrawlingInfo) et).getExpiredTime(),
-                (et, vl) -> ((CrawlingInfo) et).setExpiredTime(DfTypeUtil.toLong(vl)), "expiredTime");
+        setupEpg(_epgMap, et -> ((CrawlingInfo) et).getCreatedTime(), (et, vl) -> ((CrawlingInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((CrawlingInfo) et).getExpiredTime(), (et, vl) -> ((CrawlingInfo) et).setExpiredTime(DfTypeUtil.toLong(vl)),
+                "expiredTime");
         setupEpg(_epgMap, et -> ((CrawlingInfo) et).getName(), (et, vl) -> ((CrawlingInfo) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((CrawlingInfo) et).getSessionId(), (et, vl) -> ((CrawlingInfo) et).setSessionId(DfTypeUtil.toString(vl)),
                 "sessionId");

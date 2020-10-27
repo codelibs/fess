@@ -170,7 +170,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setUrlId_IpRange("urlId", opLambda, aggsLambda);
     }
 
-    public void setUrlId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setUrlId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "urlId");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -224,7 +225,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setUrlId_Missing("urlId", opLambda, aggsLambda);
     }
 
-    public void setUrlId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setUrlId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "urlId");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -298,7 +300,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setDocId_IpRange("docId", opLambda, aggsLambda);
     }
 
-    public void setDocId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setDocId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "docId");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -352,7 +355,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setDocId_Missing("docId", opLambda, aggsLambda);
     }
 
-    public void setDocId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setDocId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "docId");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -575,7 +579,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setOrder_Missing("order", opLambda, aggsLambda);
     }
 
-    public void setOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "order");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -599,7 +604,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setQueryId_Terms("queryId", opLambda, aggsLambda);
     }
 
-    public void setQueryId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setQueryId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "queryId");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -807,7 +813,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setQueryRequestedAt_Missing("queryRequestedAt", opLambda, null);
     }
 
-    public void setQueryRequestedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setQueryRequestedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         setQueryRequestedAt_Missing("queryRequestedAt", opLambda, aggsLambda);
     }
 
@@ -992,7 +999,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setUrl_IpRange("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1046,7 +1054,8 @@ public abstract class BsClickLogCA extends EsAbstractConditionAggregation {
         setUrl_Missing("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsClickLogCA> aggsLambda) {
+    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsClickLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);

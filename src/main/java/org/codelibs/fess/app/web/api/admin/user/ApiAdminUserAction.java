@@ -44,9 +44,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final UserPager pager = copyBeanToNewBean(body, UserPager.class);
         final List<User> list = userService.getUserList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/user/setting/{id}

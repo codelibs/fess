@@ -83,7 +83,8 @@ public class SearchLogDbm extends AbstractDBMeta {
                 "accessType");
         setupEpg(_epgMap, et -> ((SearchLog) et).getClientIp(), (et, vl) -> ((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)),
                 "clientIp");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getHitCount(), (et, vl) -> ((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)), "hitCount");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getHitCount(), (et, vl) -> ((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)),
+                "hitCount");
         setupEpg(_epgMap, et -> ((SearchLog) et).getHitCountRelation(),
                 (et, vl) -> ((SearchLog) et).setHitCountRelation(DfTypeUtil.toString(vl)), "hitCountRelation");
         setupEpg(_epgMap, et -> ((SearchLog) et).getLanguages(), (et, vl) -> ((SearchLog) et).setLanguages(DfTypeUtil.toString(vl)),
@@ -108,8 +109,8 @@ public class SearchLogDbm extends AbstractDBMeta {
                 "userAgent");
         setupEpg(_epgMap, et -> ((SearchLog) et).getUserInfoId(), (et, vl) -> ((SearchLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
                 "userInfoId");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getUserSessionId(),
-                (et, vl) -> ((SearchLog) et).setUserSessionId(DfTypeUtil.toString(vl)), "userSessionId");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getUserSessionId(), (et, vl) -> ((SearchLog) et).setUserSessionId(DfTypeUtil.toString(vl)),
+                "userSessionId");
         setupEpg(_epgMap, et -> ((SearchLog) et).getVirtualHost(), (et, vl) -> ((SearchLog) et).setVirtualHost(DfTypeUtil.toString(vl)),
                 "virtualHost");
     }
@@ -160,8 +161,8 @@ public class SearchLogDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueryOffset = cci("queryOffset", "queryOffset", null, null, Integer.class, "queryOffset", null,
-            false, false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryOffset = cci("queryOffset", "queryOffset", null, null, Integer.class, "queryOffset", null, false,
+            false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryPageSize = cci("queryPageSize", "queryPageSize", null, null, Integer.class, "queryPageSize",
             null, false, false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryTime = cci("queryTime", "queryTime", null, null, Long.class, "queryTime", null, false, false,
@@ -182,8 +183,8 @@ public class SearchLogDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId",
-            null, false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId", null,
+            false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnVirtualHost = cci("virtualHost", "virtualHost", null, null, String.class, "virtualHost", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
 

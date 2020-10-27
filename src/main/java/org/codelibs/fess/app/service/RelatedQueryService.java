@@ -48,8 +48,8 @@ public class RelatedQueryService extends FessAppService {
 
         // update pager
         BeanUtil.copyBeanToBean(relatedQueryList, relatedQueryPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        relatedQueryPager.setPageNumberList(relatedQueryList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger()))
-                .createPageNumberList());
+        relatedQueryPager.setPageNumberList(
+                relatedQueryList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
 
         return relatedQueryList;
     }

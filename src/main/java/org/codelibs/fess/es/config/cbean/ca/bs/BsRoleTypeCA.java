@@ -118,7 +118,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedBy_Terms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -349,7 +350,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -523,7 +525,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_IpRange("name", opLambda, aggsLambda);
     }
 
-    public void setName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -577,7 +580,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_Missing("name", opLambda, aggsLambda);
     }
 
-    public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -702,7 +706,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -746,7 +751,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Range("sortOrder", opLambda, aggsLambda);
     }
 
-    public void setSortOrder_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setSortOrder_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -825,7 +831,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Terms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1056,7 +1063,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1230,7 +1238,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_IpRange("value", opLambda, aggsLambda);
     }
 
-    public void setValue_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setValue_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1284,7 +1293,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_Missing("value", opLambda, aggsLambda);
     }
 
-    public void setValue_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setValue_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);

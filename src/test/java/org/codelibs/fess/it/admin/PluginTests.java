@@ -141,12 +141,10 @@ public class PluginTests extends CrudTestBase {
 
             boolean done = false;
             for (int i = 0; i < 60; i++) {
-                final List<Map<String, Object>> installed =
-                        checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
-                                .get("response.plugins");
-                boolean exists =
-                        installed.stream().map(this::getArtifactFromMap)
-                                .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
+                final List<Map<String, Object>> installed = checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/")
+                        .body().jsonPath().get("response.plugins");
+                boolean exists = installed.stream().map(this::getArtifactFromMap)
+                        .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (!exists) {
                     Thread.sleep(500);
                     continue;
@@ -163,12 +161,10 @@ public class PluginTests extends CrudTestBase {
 
             boolean done = false;
             for (int i = 0; i < 60; i++) {
-                final List<Map<String, Object>> installed =
-                        checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/").body().jsonPath()
-                                .get("response.plugins");
-                boolean exists =
-                        installed.stream().map(this::getArtifactFromMap)
-                                .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
+                final List<Map<String, Object>> installed = checkGetMethod(Collections.emptyMap(), getInstalledEndpointSuffix() + "/")
+                        .body().jsonPath().get("response.plugins");
+                boolean exists = installed.stream().map(this::getArtifactFromMap)
+                        .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (exists) {
                     Thread.sleep(500);
                     continue;

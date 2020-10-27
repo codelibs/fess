@@ -320,8 +320,8 @@ public class QueryHelper {
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldVersion()));
         }
-        split(fessConfig.getQueryAdditionalAnalyzedFields(), ",").of(
-                stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
+        split(fessConfig.getQueryAdditionalAnalyzedFields(), ",")
+                .of(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).forEach(s -> notAnalyzedFieldSet.remove(s)));
         split(fessConfig.getQueryAdditionalDefaultFields(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
             final Pair<String, Float> pair = new Pair<>();
             final String[] values = s.split(":");
@@ -395,8 +395,8 @@ public class QueryHelper {
 
     protected void buildBoostQuery(final QueryContext queryContext) {
         queryContext.addFunctionScore(list -> {
-            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(ComponentUtil.getFessConfig()
-                    .getIndexFieldBoost())));
+            list.add(new FilterFunctionBuilder(
+                    ScoreFunctionBuilders.fieldValueFactorFunction(ComponentUtil.getFessConfig().getIndexFieldBoost())));
             ComponentUtil.getKeyMatchHelper().buildQuery(queryContext.getDefaultKeyword(), list);
             list.addAll(boostFunctionList);
         });
@@ -445,8 +445,8 @@ public class QueryHelper {
             final BoostQuery boostQuery = (BoostQuery) query;
             return convertQuery(context, boostQuery.getQuery(), boostQuery.getBoost());
         }
-        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), "Unknown q: "
-                + query.getClass() + " => " + query);
+        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                "Unknown q: " + query.getClass() + " => " + query);
     }
 
     protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery, final float boost) {
@@ -493,8 +493,8 @@ public class QueryHelper {
         final String field = getSearchField(context, wildcardQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text()))
-                    .boost(b * boost));
+            return buildDefaultQueryBuilder(
+                    (f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(boost);
@@ -511,8 +511,8 @@ public class QueryHelper {
         final String field = getSearchField(context, prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f,
-                    toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders
+                    .matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             if (notAnalyzedFieldSet.contains(field)) {
@@ -609,34 +609,35 @@ public class QueryHelper {
             context.addHighlightedQuery(text);
             return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         } else if ("sort".equals(field)) {
-            split(text, ",").of(
-                    stream -> stream.filter(StringUtil::isNotBlank).forEach(
-                            t -> {
-                                final String[] values = t.split("\\.");
-                                if (values.length > 2) {
-                                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySortValue(
-                                            UserMessages.GLOBAL_PROPERTY_KEY, text), "Invalid sort field: " + termQuery);
-                                }
-                                final String sortField = values[0];
-                                if (!isSortField(sortField)) {
-                                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
-                                            UserMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
-                                }
-                                SortOrder sortOrder;
-                                if (values.length == 2) {
-                                    sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
-                                    if (sortOrder == null) {
-                                        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
-                                                UserMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
-                                    }
-                                } else {
-                                    sortOrder = SortOrder.ASC;
-                                }
-                                context.addSorts(createFieldSortBuilder(sortField, sortOrder));
-                            }));
+            split(text, ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(t -> {
+                final String[] values = t.split("\\.");
+                if (values.length > 2) {
+                    throw new InvalidQueryException(
+                            messages -> messages.addErrorsInvalidQuerySortValue(UserMessages.GLOBAL_PROPERTY_KEY, text),
+                            "Invalid sort field: " + termQuery);
+                }
+                final String sortField = values[0];
+                if (!isSortField(sortField)) {
+                    throw new InvalidQueryException(
+                            messages -> messages.addErrorsInvalidQueryUnsupportedSortField(UserMessages.GLOBAL_PROPERTY_KEY, sortField),
+                            "Unsupported sort field: " + termQuery);
+                }
+                SortOrder sortOrder;
+                if (values.length == 2) {
+                    sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
+                    if (sortOrder == null) {
+                        throw new InvalidQueryException(
+                                messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(UserMessages.GLOBAL_PROPERTY_KEY, values[1]),
+                                "Invalid sort order: " + termQuery);
+                    }
+                } else {
+                    sortOrder = SortOrder.ASC;
+                }
+                context.addSorts(createFieldSortBuilder(sortField, sortOrder));
+            }));
             return null;
-        } else if (INURL_FIELD.equals(field)
-                || (StringUtil.equals(field, context.getDefaultField()) && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
+        } else if (INURL_FIELD.equals(field) || (StringUtil.equals(field, context.getDefaultField())
+                && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
         } else if (SITE_FIELD.equals(field)) {
             return convertSiteQuery(context, text, boost);
@@ -692,18 +693,14 @@ public class QueryHelper {
         final QueryBuilder contentQuery =
                 builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
-        getQueryLanguages().ifPresent(
-                langs -> stream(langs).of(
-                        stream -> stream.forEach(lang -> {
-                            final QueryBuilder titleLangQuery =
-                                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
-                                            .getQueryBoostTitleLangAsDecimal().floatValue());
-                            boolQuery.should(titleLangQuery);
-                            final QueryBuilder contentLangQuery =
-                                    builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
-                                            .getQueryBoostContentLangAsDecimal().floatValue());
-                            boolQuery.should(contentLangQuery);
-                        })));
+        getQueryLanguages().ifPresent(langs -> stream(langs).of(stream -> stream.forEach(lang -> {
+            final QueryBuilder titleLangQuery =
+                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal().floatValue());
+            boolQuery.should(titleLangQuery);
+            final QueryBuilder contentLangQuery = builder.apply(fessConfig.getIndexFieldContent() + "_" + lang,
+                    fessConfig.getQueryBoostContentLangAsDecimal().floatValue());
+            boolQuery.should(contentLangQuery);
+        })));
         additionalDefaultList.stream().forEach(f -> {
             final QueryBuilder query = builder.apply(f.getFirst(), f.getSecond());
             boolQuery.should(query);
@@ -716,9 +713,8 @@ public class QueryHelper {
     }
 
     protected OptionalThing<String[]> getQueryLanguages() {
-        return LaRequestUtil.getOptionalRequest().map(
-                request -> ComponentUtil.getFessConfig().getQueryLanguages(request.getLocales(),
-                        (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
+        return LaRequestUtil.getOptionalRequest().map(request -> ComponentUtil.getFessConfig().getQueryLanguages(request.getLocales(),
+                (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
     protected boolean isSortField(final String field) {

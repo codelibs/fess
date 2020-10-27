@@ -48,26 +48,19 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final StemmerOverridePager pager = copyBeanToNewBean(body, StemmerOverridePager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(
-                        stemmerOverrideService.getStemmerOverrideList(body.dictId, pager).stream()
-                                .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
+                .settings(stemmerOverrideService.getStemmerOverrideList(body.dictId, pager).stream()
+                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
                 .status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/dict/stemmerOverride/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String dictId, final long id) {
-        return asJson(new ApiResult.ApiConfigResponse()
-                .setting(
-                        stemmerOverrideService
-                                .getStemmerOverrideItem(dictId, id)
-                                .map(entity -> createEditBody(entity, dictId))
-                                .orElseGet(
-                                        () -> {
-                                            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL,
-                                                    String.valueOf(id)));
-                                            return null;
-                                        })).status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigResponse().setting(
+                stemmerOverrideService.getStemmerOverrideItem(dictId, id).map(entity -> createEditBody(entity, dictId)).orElseGet(() -> {
+                    throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(id)));
+                    return null;
+                })).status(ApiResult.Status.OK).result());
     }
 
     // PUT /api/admin/dict/stemmerOverride/setting/{dictId}
@@ -84,8 +77,8 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
             return null;
         });
         stemmerOverrideService.store(body.dictId, entity);
-        return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK)
-                .result());
+        return asJson(
+                new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
     // POST /api/admin/dict/stemmerOverride/setting/{dictId}
@@ -102,8 +95,8 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
             return null;
         });
         stemmerOverrideService.store(body.dictId, entity);
-        return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK)
-                .result());
+        return asJson(
+                new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
     // DELETE /api/admin/dict/stemmerOverride/setting/{dictId}/{id}

@@ -36,8 +36,8 @@ public class AdminSearchlogAction extends FessAdminAction {
 
     public static final String ROLE = "admin-searchlog";
 
-    private static final String[] CONDITION_FIELDS = new String[] { "logType", "queryId", "userSessionId", "accessType",
-            "requestedTimeRange", "pageSize" };
+    private static final String[] CONDITION_FIELDS =
+            new String[] { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize" };
 
     // ===================================================================================
     //                                                                           Attribute
@@ -190,7 +190,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             RenderDataUtil.register(data, "searchLogItems", searchLogService.getSearchLogList(searchLogPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(searchLogPager, form, op -> op.include(CONDITION_FIELDS));
             });

@@ -139,8 +139,8 @@ public class RoleTypeDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;

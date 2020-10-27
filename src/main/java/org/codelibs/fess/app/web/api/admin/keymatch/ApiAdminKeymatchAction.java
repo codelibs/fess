@@ -57,9 +57,9 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final KeyMatchPager pager = copyBeanToNewBean(body, KeyMatchPager.class);
         final List<KeyMatch> list = keyMatchService.getKeyMatchList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/keymatch/setting/{id}

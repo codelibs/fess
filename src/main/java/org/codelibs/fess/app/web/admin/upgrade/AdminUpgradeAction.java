@@ -470,9 +470,9 @@ public class AdminUpgradeAction extends FessAdminAction {
     private void upgradeFrom12_1() {
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
 
-        UpgradeUtil.putMapping(indicesClient, "fess_log.search_log", "search_log", "{\"dynamic_templates\": ["
-                + "{\"documents\": {\"path_match\": \"documents.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
-                + "]}");
+        UpgradeUtil.putMapping(indicesClient, "fess_log.search_log", "search_log",
+                "{\"dynamic_templates\": [" + "{\"documents\": {\"path_match\": \"documents.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
+                        + "]}");
         UpgradeUtil.addFieldMapping(indicesClient, "fess_log.click_log", "click_log", "urlId",
                 "{\"properties\":{\"urlId\":{\"type\":\"keyword\"}}}");
     }
@@ -504,12 +504,8 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom13_0() {
-        UpgradeUtil
-                .addData(
-                        fessEsClient,
-                        ".fess_config.scheduled_job",
-                        "label_updater",
-                        "{\"name\":\"Label Updater\",\"target\":\"all\",\"cronExpression\":\"\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"updateLabelJob\\\").execute();\",\"jobLogging\":false,\"crawler\":false,\"available\":true,\"sortOrder\":11,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
+        UpgradeUtil.addData(fessEsClient, ".fess_config.scheduled_job", "label_updater",
+                "{\"name\":\"Label Updater\",\"target\":\"all\",\"cronExpression\":\"\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"updateLabelJob\\\").execute();\",\"jobLogging\":false,\"crawler\":false,\"available\":true,\"sortOrder\":11,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
     }
 
     private void upgradeFrom13_1() {

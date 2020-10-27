@@ -135,9 +135,8 @@ public class ThumbnailGenerator {
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
-            systemMonitorTask =
-                    TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
-                            ComponentUtil.getFessConfig().getThumbnailSystemMonitorIntervalAsInteger(), true);
+            systemMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
+                    ComponentUtil.getFessConfig().getThumbnailSystemMonitorIntervalAsInteger(), true);
 
             final int totalCount = process(options);
             if (totalCount != 0) {

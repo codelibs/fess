@@ -88,8 +88,8 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     }
 
     @Override
-    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
-            ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         switch (getFormatType(request)) {
         case SEARCH:
             processSearchRequest(request, response, chain);
@@ -281,7 +281,8 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("<HAS>");
                     buf.append("<L/>");
                     buf.append("<C SZ=\"");
-                    buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldContentLength(), Long.class, (long) 0).longValue() / 1000);
+                    buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldContentLength(), Long.class, (long) 0).longValue()
+                            / 1000);
                     document.remove(fessConfig.getIndexFieldContentLength());
                     buf.append("k\" CID=\"");
                     buf.append(DocumentUtil.getValue(document, fessConfig.getIndexFieldDocId(), String.class));

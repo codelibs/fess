@@ -350,7 +350,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -365,7 +366,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
@@ -605,7 +607,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setRegex_Terms("regex", opLambda, aggsLambda);
     }
 
-    public void setRegex_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+    public void setRegex_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "regex");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -967,7 +970,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -982,7 +986,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setSortOrder_Histogram("sortOrder", opLambda, null);
     }
 
-    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
         setSortOrder_Histogram("sortOrder", opLambda, aggsLambda);
     }
 
@@ -1323,7 +1328,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1338,7 +1344,8 @@ public abstract class BsPathMappingCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsPathMappingCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsPathMappingCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 

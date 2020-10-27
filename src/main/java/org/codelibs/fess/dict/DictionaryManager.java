@@ -50,31 +50,27 @@ public class DictionaryManager {
     }
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
-        try (CurlResponse response =
-                ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
-                        .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
+        try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
+                .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
             final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
-            return fileList
-                    .stream()
-                    .map(fileMap -> {
-                        try {
-                            final String path = fileMap.get("path").toString();
-                            final Date timestamp =
-                                    new SimpleDateFormat(Constants.DATE_FORMAT_ISO_8601_EXTEND_UTC).parse(fileMap.get("@timestamp")
-                                            .toString());
-                            for (final DictionaryCreator creator : creatorList) {
-                                final DictionaryFile<? extends DictionaryItem> file = creator.create(path, timestamp);
-                                if (file != null) {
-                                    return file;
-                                }
-                            }
-                        } catch (final Exception e) {
-                            logger.warn("Failed to load " + fileMap, e);
+            return fileList.stream().map(fileMap -> {
+                try {
+                    final String path = fileMap.get("path").toString();
+                    final Date timestamp =
+                            new SimpleDateFormat(Constants.DATE_FORMAT_ISO_8601_EXTEND_UTC).parse(fileMap.get("@timestamp").toString());
+                    for (final DictionaryCreator creator : creatorList) {
+                        final DictionaryFile<? extends DictionaryItem> file = creator.create(path, timestamp);
+                        if (file != null) {
+                            return file;
                         }
-                        return null;
-                    }).filter(file -> file != null).toArray(n -> new DictionaryFile<?>[n]);
+                    }
+                } catch (final Exception e) {
+                    logger.warn("Failed to load " + fileMap, e);
+                }
+                return null;
+            }).filter(file -> file != null).toArray(n -> new DictionaryFile<?>[n]);
         } catch (final IOException e) {
             throw new DictionaryException("Failed to access dictionaries", e);
         }
@@ -96,18 +92,17 @@ public class DictionaryManager {
             }
 
             // TODO use stream
-                try (CurlResponse response =
-                        ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
-                                .body(FileUtil.readUTF8(file)).execute()) {
-                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
-                    if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
-                        throw new DictionaryException("Failed to update " + dictFile.getPath());
-                    }
-                } catch (final IOException e) {
-                    throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
+            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
+                    .body(FileUtil.readUTF8(file)).execute()) {
+                final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+                if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
+                    throw new DictionaryException("Failed to update " + dictFile.getPath());
                 }
+            } catch (final IOException e) {
+                throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
+            }
 
-            }).orElse(() -> {
+        }).orElse(() -> {
             throw new DictionaryException(dictFile.getPath() + " does not exist.");
         });
     }

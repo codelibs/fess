@@ -121,18 +121,17 @@ public class AdminStorageAction extends FessAdminAction {
         if (StringUtil.isEmpty(values[1])) {
             throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(values[0])));
         }
-        return asStream(values[1]).contentTypeOctetStream().stream(
-                out -> {
-                    try {
-                        downloadObject(getObjectName(values[0], values[1]), out);
-                    } catch (final StorageException e) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Failed to download {}", values[1], e);
-                        }
-                        throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]),
-                                () -> asListHtml(encodeId(values[0])));
-                    }
-                });
+        return asStream(values[1]).contentTypeOctetStream().stream(out -> {
+            try {
+                downloadObject(getObjectName(values[0], values[1]), out);
+            } catch (final StorageException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to download {}", values[1], e);
+                }
+                throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]),
+                        () -> asListHtml(encodeId(values[0])));
+            }
+        });
     }
 
     @Execute
@@ -147,7 +146,8 @@ public class AdminStorageAction extends FessAdminAction {
             deleteObject(objectName);
         } catch (final StorageException e) {
             logger.debug("Failed to delete {}", values[1], e);
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]), () -> asListHtml(encodeId(values[0])));
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]),
+                    () -> asListHtml(encodeId(values[0])));
         }
         saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
         return redirectWith(getClass(), moreUrl("list/" + encodeId(values[0])));
@@ -168,10 +168,9 @@ public class AdminStorageAction extends FessAdminAction {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final MinioClient minioClient = createClient(fessConfig);
             final PutObjectOptions options = new PutObjectOptions(uploadFile.getFileSize(), -1);
-            final PutObjectArgs args =
-                    PutObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName)
-                            .stream(in, options.objectSize(), options.partSize()).contentType(options.contentType())
-                            .headers(options.headers()).sse(options.sse()).build();
+            final PutObjectArgs args = PutObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName)
+                    .stream(in, options.objectSize(), options.partSize()).contentType(options.contentType()).headers(options.headers())
+                    .sse(options.sse()).build();
             minioClient.putObject(args);
         } catch (final Exception e) {
             throw new StorageException("Failed to upload " + objectName, e);
@@ -213,10 +212,9 @@ public class AdminStorageAction extends FessAdminAction {
         final ArrayList<Map<String, Object>> list = new ArrayList<>();
         try {
             final MinioClient minioClient = createClient(fessConfig);
-            final ListObjectsArgs args =
-                    ListObjectsArgs.builder().bucket(fessConfig.getStorageBucket())
-                            .prefix(prefix != null && prefix.length() > 0 ? prefix + "/" : prefix).recursive(false)
-                            .includeUserMetadata(false).useApiVersion1(false).build();
+            final ListObjectsArgs args = ListObjectsArgs.builder().bucket(fessConfig.getStorageBucket())
+                    .prefix(prefix != null && prefix.length() > 0 ? prefix + "/" : prefix).recursive(false).includeUserMetadata(false)
+                    .useApiVersion1(false).build();
             for (final Result<Item> result : minioClient.listObjects(args)) {
                 final Map<String, Object> map = new HashMap<>();
                 final Item item = result.get();

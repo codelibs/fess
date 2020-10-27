@@ -192,17 +192,16 @@ public class AdminKeymatchAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getKeyMatch(form).ifPresent(
-                entity -> {
-                    try {
-                        keyMatchService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                        ComponentUtil.getKeyMatchHelper().update();
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getKeyMatch(form).ifPresent(entity -> {
+            try {
+                keyMatchService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                ComponentUtil.getKeyMatchHelper().update();
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -214,17 +213,16 @@ public class AdminKeymatchAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getKeyMatch(form).ifPresent(
-                entity -> {
-                    try {
-                        keyMatchService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                        ComponentUtil.getKeyMatchHelper().update();
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getKeyMatch(form).ifPresent(entity -> {
+            try {
+                keyMatchService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                ComponentUtil.getKeyMatchHelper().update();
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
@@ -237,22 +235,18 @@ public class AdminKeymatchAction extends FessAdminAction {
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
-        keyMatchService
-                .getKeyMatch(id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                keyMatchService.delete(entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                                ComponentUtil.getKeyMatchHelper().update();
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
-                });
+        keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+            try {
+                keyMatchService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                ComponentUtil.getKeyMatchHelper().update();
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
+        });
         return redirect(getClass());
     }
 
@@ -309,7 +303,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
             RenderDataUtil.register(data, "keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(keyMatchPager, form, op -> op.include("term", "query"));
             });

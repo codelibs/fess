@@ -62,9 +62,9 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final WebConfigPager pager = copyBeanToNewBean(body, WebConfigPager.class);
         final List<WebConfig> list = webConfigService.getWebConfigList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/webconfig/setting/{id}
@@ -138,13 +138,10 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
             copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        body.permissions =
-                stream(entity.getPermissions()).get(
-                        stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
-                                .collect(Collectors.joining("\n")));
-        body.virtualHosts =
-                stream(entity.getVirtualHosts()).get(
-                        stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).collect(Collectors.joining("\n")));
+        body.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+        body.virtualHosts = stream(entity.getVirtualHosts())
+                .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).collect(Collectors.joining("\n")));
         return body;
     }
 }

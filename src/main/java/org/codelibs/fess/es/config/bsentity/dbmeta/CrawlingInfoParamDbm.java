@@ -85,8 +85,8 @@ public class CrawlingInfoParamDbm extends AbstractDBMeta {
                 (et, vl) -> ((CrawlingInfoParam) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getKey(), (et, vl) -> ((CrawlingInfoParam) et).setKey(DfTypeUtil.toString(vl)),
                 "key");
-        setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getValue(),
-                (et, vl) -> ((CrawlingInfoParam) et).setValue(DfTypeUtil.toString(vl)), "value");
+        setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getValue(), (et, vl) -> ((CrawlingInfoParam) et).setValue(DfTypeUtil.toString(vl)),
+                "value");
     }
 
     @Override
@@ -129,8 +129,8 @@ public class CrawlingInfoParamDbm extends AbstractDBMeta {
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "keyword", 0, 0,
             null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false,
-            "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "keyword",
+            0, 0, null, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCrawlingInfoId() {
         return _columnCrawlingInfoId;

@@ -68,7 +68,8 @@ public abstract class BsCrawlingInfoParamCA extends EsAbstractConditionAggregati
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsCrawlingInfoParamCA> aggsLambda) {
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda,
+            OperatorCall<BsCrawlingInfoParamCA> aggsLambda) {
         GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -80,7 +81,8 @@ public abstract class BsCrawlingInfoParamCA extends EsAbstractConditionAggregati
         }
     }
 
-    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda, OperatorCall<BsCrawlingInfoParamCA> aggsLambda) {
+    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda,
+            OperatorCall<BsCrawlingInfoParamCA> aggsLambda) {
         SamplerAggregationBuilder builder = regSamplerA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -353,7 +355,8 @@ public abstract class BsCrawlingInfoParamCA extends EsAbstractConditionAggregati
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -394,7 +397,8 @@ public abstract class BsCrawlingInfoParamCA extends EsAbstractConditionAggregati
         setCreatedTime_Range("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsCrawlingInfoParamCA> aggsLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsCrawlingInfoParamCA> aggsLambda) {
         setCreatedTime_Range("createdTime", opLambda, aggsLambda);
     }
 

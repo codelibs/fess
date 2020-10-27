@@ -62,8 +62,7 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void functionScore(OperatorCall<FailureUrlCQ> queryLambda,
-            ScoreFunctionCall<ScoreFunctionCreator<FailureUrlCQ>> functionsLambda,
+    public void functionScore(OperatorCall<FailureUrlCQ> queryLambda, ScoreFunctionCall<ScoreFunctionCreator<FailureUrlCQ>> functionsLambda,
             final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
         FailureUrlCQ cq = new FailureUrlCQ();
         queryLambda.callback(cq);
@@ -110,9 +109,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         FailureUrlCQ filterQuery = new FailureUrlCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }

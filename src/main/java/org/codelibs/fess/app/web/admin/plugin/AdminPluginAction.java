@@ -87,7 +87,8 @@ public class AdminPluginAction extends FessAdminAction {
                 throwValidationError(messages -> messages.addErrorsPluginFileIsNotFound(GLOBAL, form.id), this::asListHtml);
             }
             if (!form.jarFile.getFileName().endsWith(".jar")) {
-                throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()), this::asListHtml);
+                throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()),
+                        this::asListHtml);
             }
             final String filename = form.jarFile.getFileName();
             final File tempFile = ComponentUtil.getSystemHelper().createTempFile("tmp-adminplugin-", ".jar");
@@ -143,8 +144,8 @@ public class AdminPluginAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminPlugin_AdminPluginJsp).renderWith(
-                data -> data.register("installedArtifactItems", getAllInstalledArtifacts())).useForm(DeleteForm.class);
+        return asHtml(path_AdminPlugin_AdminPluginJsp)
+                .renderWith(data -> data.register("installedArtifactItems", getAllInstalledArtifacts())).useForm(DeleteForm.class);
     }
 
     public static List<Map<String, String>> getAllAvailableArtifacts() {

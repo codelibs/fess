@@ -221,7 +221,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             RenderDataUtil.register(data, "crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(crawlingInfoPager, form, op -> op.include("id"));
             });

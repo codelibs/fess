@@ -46,9 +46,8 @@ public class FacetInfo {
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (StringUtil.isNotBlank(fessConfig.getQueryFacetFields())) {
-            field =
-                    StreamUtil.split(fessConfig.getQueryFacetFields(), ",").get(
-                            stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).distinct().toArray(n -> new String[n]));
+            field = StreamUtil.split(fessConfig.getQueryFacetFields(), ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).distinct().toArray(n -> new String[n]));
         }
         if (StringUtil.isNotBlank(fessConfig.getQueryFacetFieldsSize())) {
             size = fessConfig.getQueryFacetFieldsSizeAsInteger();

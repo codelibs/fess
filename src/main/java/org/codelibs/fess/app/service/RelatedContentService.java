@@ -48,8 +48,8 @@ public class RelatedContentService extends FessAppService {
 
         // update pager
         BeanUtil.copyBeanToBean(relatedContentList, relatedContentPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        relatedContentPager.setPageNumberList(relatedContentList
-                .pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
+        relatedContentPager.setPageNumberList(
+                relatedContentList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
 
         return relatedContentList;
     }

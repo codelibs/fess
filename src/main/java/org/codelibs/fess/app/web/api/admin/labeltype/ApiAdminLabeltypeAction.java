@@ -62,9 +62,9 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final LabelTypePager pager = copyBeanToNewBean(body, LabelTypePager.class);
         final List<LabelType> list = labelTypeService.getLabelTypeList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/labeltype/setting/{id}
@@ -138,10 +138,8 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
             copyOp.exclude(Constants.PERMISSIONS);
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        body.permissions =
-                stream(entity.getPermissions()).get(
-                        stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
-                                .collect(Collectors.joining("\n")));
+        body.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
         return body;
     }
 }

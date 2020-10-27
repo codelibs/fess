@@ -198,10 +198,8 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
             // proxy credentials
             if (paramMap.get(Param.Client.PROXY_USERNAME) != null && paramMap.get(Param.Client.PROXY_PASSWORD) != null) {
-                paramMap.put(
-                        HcHttpClient.PROXY_CREDENTIALS_PROPERTY,
-                        new UsernamePasswordCredentials(paramMap.remove(Param.Client.PROXY_USERNAME).toString(), paramMap.remove(
-                                Param.Client.PROXY_PASSWORD).toString()));
+                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(
+                        paramMap.remove(Param.Client.PROXY_USERNAME).toString(), paramMap.remove(Param.Client.PROXY_PASSWORD).toString()));
             }
         } else {
             initializeDefaultHttpProxy(paramMap);

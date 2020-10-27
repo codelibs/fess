@@ -92,8 +92,8 @@ public class PluginHelper {
     }
 
     protected String[] getRepositories() {
-        return split(ComponentUtil.getFessConfig().getPluginRepositories(), ",").get(
-                stream -> stream.map(String::trim).toArray(n -> new String[n]));
+        return split(ComponentUtil.getFessConfig().getPluginRepositories(), ",")
+                .get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
     }
 
     protected List<Artifact> loadArtifactsFromRepository(final String url) {
@@ -133,7 +133,8 @@ public class PluginHelper {
                             final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
                             if (StringUtil.isNotBlank(snapshotVersion)) {
                                 final String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
-                                list.add(new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
+                                list.add(
+                                        new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
                             } else if (logger.isDebugEnabled()) {
                                 logger.debug("Snapshot name is not found: {}/{}", name, version);
                             }

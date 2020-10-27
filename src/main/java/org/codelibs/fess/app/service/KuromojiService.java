@@ -43,12 +43,12 @@ public class KuromojiService {
             final PagingList<KuromojiItem> kuromojiList = file.selectList((kuromojiPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
             // update pager
-                BeanUtil.copyBeanToBean(kuromojiList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                kuromojiList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
-                kuromojiPager.setPageNumberList(kuromojiList.createPageNumberList());
+            BeanUtil.copyBeanToBean(kuromojiList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+            kuromojiList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
+            kuromojiPager.setPageNumberList(kuromojiList.createPageNumberList());
 
-                return (List<KuromojiItem>) kuromojiList;
-            }).orElse(Collections.emptyList());
+            return (List<KuromojiItem>) kuromojiList;
+        }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<KuromojiFile> getKuromojiFile(final String dictId) {

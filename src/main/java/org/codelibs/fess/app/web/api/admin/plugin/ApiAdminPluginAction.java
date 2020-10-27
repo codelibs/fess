@@ -52,7 +52,8 @@ public class ApiAdminPluginAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final Artifact artifact = ComponentUtil.getPluginHelper().getArtifact(body.name, body.version);
         if (artifact == null) {
-            return asJson(new ApiResult.ApiErrorResponse().message("invalid name or version").status(ApiResult.Status.BAD_REQUEST).result());
+            return asJson(
+                    new ApiResult.ApiErrorResponse().message("invalid name or version").status(ApiResult.Status.BAD_REQUEST).result());
         }
         installArtifact(artifact);
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());

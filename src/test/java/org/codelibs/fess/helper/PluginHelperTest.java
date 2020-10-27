@@ -82,7 +82,8 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals(1, list.size());
         assertEquals("fess-ds-atlassian", list.get(0).getName());
         assertEquals("12.2.0-20180814.210714-10", list.get(0).getVersion());
-        assertEquals("plugin/repo2/fess-ds-atlassian/12.2.0-SNAPSHOT/fess-ds-atlassian-12.2.0-20180814.210714-10.jar", list.get(0).getUrl());
+        assertEquals("plugin/repo2/fess-ds-atlassian/12.2.0-SNAPSHOT/fess-ds-atlassian-12.2.0-20180814.210714-10.jar",
+                list.get(0).getUrl());
     }
 
     public void test_getArtifactFromFileName1() {

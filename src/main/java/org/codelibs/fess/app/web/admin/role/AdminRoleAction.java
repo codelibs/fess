@@ -165,17 +165,16 @@ public class AdminRoleAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getRole(form).ifPresent(
-                entity -> {
-                    try {
-                        roleService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        logger.error("Failed to add " + entity, e);
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getRole(form).ifPresent(entity -> {
+            try {
+                roleService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to add " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -249,7 +248,7 @@ public class AdminRoleAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminRole_AdminRoleJsp).renderWith(data -> {
             RenderDataUtil.register(data, "roleItems", roleService.getRoleList(rolePager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(rolePager, form, op -> op.include("id"));
             });

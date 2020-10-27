@@ -184,45 +184,38 @@ public class AdminBackupAction extends FessAdminAction {
 
     private void importBulk(final String fileName, final File tempFile) {
         final ObjectMapper mapper = new ObjectMapper();
-        try (CurlResponse response =
-                ComponentUtil
-                        .getCurlHelper()
-                        .post("/_bulk")
-                        .onConnect(
-                                (req, con) -> {
-                                    con.setDoOutput(true);
-                                    try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
-                                            final BufferedWriter bw =
-                                                    new BufferedWriter(new OutputStreamWriter(con.getOutputStream(),
-                                                            Constants.CHARSET_UTF_8))) {
-                                        String line;
-                                        while ((line = br.readLine()) != null) {
-                                            if (StringUtil.isNotBlank(line)) {
-                                                final Map<String, Map<String, String>> dataObj;
-                                                if (line.contains("_type")) {
-                                                    dataObj = parseObject(mapper, line);
-                                                } else {
-                                                    dataObj = null;
-                                                }
-                                                if (dataObj != null) {
-                                                    final Map<String, String> indexObj = dataObj.get("index");
-                                                    if (indexObj != null && indexObj.containsKey("_type")) {
-                                                        indexObj.remove("_type");
-                                                        bw.write(mapper.writeValueAsString(dataObj));
-                                                    } else {
-                                                        bw.write(line);
-                                                    }
-                                                } else {
-                                                    bw.write(line);
-                                                }
-                                            }
-                                            bw.write("\n");
-                                        }
-                                        bw.flush();
-                                    } catch (IOException e) {
-                                        throw new IORuntimeException(e);
-                                    }
-                                }).execute()) {
+        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
+            con.setDoOutput(true);
+            try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
+                    final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(), Constants.CHARSET_UTF_8))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (StringUtil.isNotBlank(line)) {
+                        final Map<String, Map<String, String>> dataObj;
+                        if (line.contains("_type")) {
+                            dataObj = parseObject(mapper, line);
+                        } else {
+                            dataObj = null;
+                        }
+                        if (dataObj != null) {
+                            final Map<String, String> indexObj = dataObj.get("index");
+                            if (indexObj != null && indexObj.containsKey("_type")) {
+                                indexObj.remove("_type");
+                                bw.write(mapper.writeValueAsString(dataObj));
+                            } else {
+                                bw.write(line);
+                            }
+                        } else {
+                            bw.write(line);
+                        }
+                    }
+                    bw.write("\n");
+                }
+                bw.flush();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }).execute()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Bulk Response:\n{}", response.getContentAsString());
             }
@@ -338,14 +331,12 @@ public class AdminBackupAction extends FessAdminAction {
                     index = id;
                     filename = id + ".bulk";
                 }
-                return asStream(filename).contentTypeOctetStream().stream(
-                        out -> {
-                            try (CurlResponse response =
-                                    ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json")
-                                            .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
-                                out.write(response.getContentAsStream());
-                            }
-                        });
+                return asStream(filename).contentTypeOctetStream().stream(out -> {
+                    try (CurlResponse response = ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json")
+                            .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
+                        out.write(response.getContentAsStream());
+                    }
+                });
             }
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), this::asListHtml);
@@ -385,14 +376,12 @@ public class AdminBackupAction extends FessAdminAction {
                     ((LocalDateTime) value).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).format(ISO_8601_FORMATTER);
             buf.append('"').append(StringEscapeUtils.escapeJson(format)).append('"');
         } else if (value instanceof String[]) {
-            final String json =
-                    Arrays.stream((String[]) value).map(s -> "\"" + StringEscapeUtils.escapeJson(s) + "\"")
-                            .collect(Collectors.joining(","));
+            final String json = Arrays.stream((String[]) value).map(s -> "\"" + StringEscapeUtils.escapeJson(s) + "\"")
+                    .collect(Collectors.joining(","));
             buf.append('[').append(json).append(']');
         } else if (value instanceof List) {
-            final String json =
-                    ((List<?>) value).stream().map(s -> "\"" + StringEscapeUtils.escapeJson(s.toString()) + "\"")
-                            .collect(Collectors.joining(","));
+            final String json = ((List<?>) value).stream().map(s -> "\"" + StringEscapeUtils.escapeJson(s.toString()) + "\"")
+                    .collect(Collectors.joining(","));
             buf.append('[').append(json).append(']');
         } else if (value instanceof Map) {
             buf.append('{');
@@ -416,47 +405,41 @@ public class AdminBackupAction extends FessAdminAction {
     public static Consumer<Writer> getSearchLogNdjsonWriteCall() {
         return writer -> {
             final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
-            bhv.selectCursor(
-                    cb -> {
-                        cb.query().matchAll();
-                        cb.query().addOrderBy_RequestedAt_Asc();
-                    },
-                    entity -> {
-                        final StringBuilder buf = new StringBuilder();
-                        buf.append('{');
-                        appendJson("id", entity.getId(), buf).append(',');
-                        appendJson("query-id", entity.getQueryId(), buf).append(',');
-                        appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
-                        appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
-                        appendJson("user", entity.getUser(), buf).append(',');
-                        appendJson("search-word", entity.getSearchWord(), buf).append(',');
-                        appendJson("hit-count", entity.getHitCount(), buf).append(',');
-                        appendJson("query-page-size", entity.getQueryPageSize(), buf).append(',');
-                        appendJson("query-offset", entity.getQueryOffset(), buf).append(',');
-                        appendJson("referer", entity.getReferer(), buf).append(',');
-                        appendJson("languages", entity.getLanguages(), buf).append(',');
-                        appendJson("roles", entity.getRoles(), buf).append(',');
-                        appendJson("user-agent", entity.getUserAgent(), buf).append(',');
-                        appendJson("client-ip", entity.getClientIp(), buf).append(',');
-                        appendJson("access-type", entity.getAccessType(), buf).append(',');
-                        appendJson("query-time", entity.getQueryTime(), buf).append(',');
-                        appendJson("response-time", entity.getResponseTime(), buf).append(',');
-                        appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
-                        final Map<String, List<String>> searchFieldMap =
-                                entity.getSearchFieldLogList()
-                                        .stream()
-                                        .collect(
-                                                Collectors.groupingBy(Pair::getFirst,
-                                                        Collectors.mapping(Pair::getSecond, Collectors.toList())));
-                        appendJson("search-field", searchFieldMap, buf);
-                        buf.append('}');
-                        buf.append('\n');
-                        try {
-                            writer.write(buf.toString());
-                        } catch (final IOException e) {
-                            throw new IORuntimeException(e);
-                        }
-                    });
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_RequestedAt_Asc();
+            }, entity -> {
+                final StringBuilder buf = new StringBuilder();
+                buf.append('{');
+                appendJson("id", entity.getId(), buf).append(',');
+                appendJson("query-id", entity.getQueryId(), buf).append(',');
+                appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
+                appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
+                appendJson("user", entity.getUser(), buf).append(',');
+                appendJson("search-word", entity.getSearchWord(), buf).append(',');
+                appendJson("hit-count", entity.getHitCount(), buf).append(',');
+                appendJson("query-page-size", entity.getQueryPageSize(), buf).append(',');
+                appendJson("query-offset", entity.getQueryOffset(), buf).append(',');
+                appendJson("referer", entity.getReferer(), buf).append(',');
+                appendJson("languages", entity.getLanguages(), buf).append(',');
+                appendJson("roles", entity.getRoles(), buf).append(',');
+                appendJson("user-agent", entity.getUserAgent(), buf).append(',');
+                appendJson("client-ip", entity.getClientIp(), buf).append(',');
+                appendJson("access-type", entity.getAccessType(), buf).append(',');
+                appendJson("query-time", entity.getQueryTime(), buf).append(',');
+                appendJson("response-time", entity.getResponseTime(), buf).append(',');
+                appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
+                final Map<String, List<String>> searchFieldMap = entity.getSearchFieldLogList().stream()
+                        .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+                appendJson("search-field", searchFieldMap, buf);
+                buf.append('}');
+                buf.append('\n');
+                try {
+                    writer.write(buf.toString());
+                } catch (final IOException e) {
+                    throw new IORuntimeException(e);
+                }
+            });
         };
     }
 
@@ -548,8 +531,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminBackup_AdminBackupJsp).useForm(UploadForm.class).renderWith(
-                data -> RenderDataUtil.register(data, "backupItems", getBackupItems()));
+        return asHtml(path_AdminBackup_AdminBackupJsp).useForm(UploadForm.class)
+                .renderWith(data -> RenderDataUtil.register(data, "backupItems", getBackupItems()));
     }
 
     private void deleteTempFile(final File tempFile) {

@@ -76,11 +76,11 @@ public class FessFunctions {
 
     private static final String PDF_DATE = "pdf_date";
 
-    private static final Pattern EMAIL_ADDRESS_PATTERN = Pattern.compile("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern EMAIL_ADDRESS_PATTERN =
+            Pattern.compile("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}", Pattern.CASE_INSENSITIVE);
 
-    private static LoadingCache<String, Long> resourceHashCache = CacheBuilder.newBuilder().maximumSize(1000)
-            .expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
+    private static LoadingCache<String, Long> resourceHashCache =
+            CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(10, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
                 @Override
                 public Long load(final String key) throws Exception {
                     try {

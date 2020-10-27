@@ -68,7 +68,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -80,7 +81,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         }
     }
 
-    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         SamplerAggregationBuilder builder = regSamplerA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -165,7 +167,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setAuthRealm_IpRange("authRealm", opLambda, null);
     }
 
-    public void setAuthRealm_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setAuthRealm_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setAuthRealm_IpRange("authRealm", opLambda, aggsLambda);
     }
 
@@ -220,7 +223,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setAuthRealm_Missing("authRealm", opLambda, null);
     }
 
-    public void setAuthRealm_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setAuthRealm_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setAuthRealm_Missing("authRealm", opLambda, aggsLambda);
     }
 
@@ -296,7 +300,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setCreatedBy_IpRange("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setCreatedBy_IpRange("createdBy", opLambda, aggsLambda);
     }
 
@@ -351,7 +356,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setCreatedBy_Missing("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setCreatedBy_Missing("createdBy", opLambda, aggsLambda);
     }
 
@@ -481,7 +487,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -522,7 +529,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setCreatedTime_Range("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setCreatedTime_Range("createdTime", opLambda, aggsLambda);
     }
 
@@ -654,7 +662,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setHostname_IpRange("hostname", opLambda, null);
     }
 
-    public void setHostname_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setHostname_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setHostname_IpRange("hostname", opLambda, aggsLambda);
     }
 
@@ -709,7 +718,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setHostname_Missing("hostname", opLambda, null);
     }
 
-    public void setHostname_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setHostname_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setHostname_Missing("hostname", opLambda, aggsLambda);
     }
 
@@ -918,7 +928,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setPassword_IpRange("password", opLambda, null);
     }
 
-    public void setPassword_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setPassword_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setPassword_IpRange("password", opLambda, aggsLambda);
     }
 
@@ -973,7 +984,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setPassword_Missing("password", opLambda, null);
     }
 
-    public void setPassword_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setPassword_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setPassword_Missing("password", opLambda, aggsLambda);
     }
 
@@ -1118,7 +1130,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setPort_Histogram("port", opLambda, null);
     }
 
-    public void setPort_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setPort_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setPort_Histogram("port", opLambda, aggsLambda);
     }
 
@@ -1408,7 +1421,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setUpdatedBy_IpRange("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setUpdatedBy_IpRange("updatedBy", opLambda, aggsLambda);
     }
 
@@ -1463,7 +1477,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setUpdatedBy_Missing("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setUpdatedBy_Missing("updatedBy", opLambda, aggsLambda);
     }
 
@@ -1593,7 +1608,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1634,7 +1650,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setUpdatedTime_Range("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, aggsLambda);
     }
 
@@ -1766,7 +1783,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setUsername_IpRange("username", opLambda, null);
     }
 
-    public void setUsername_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setUsername_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setUsername_IpRange("username", opLambda, aggsLambda);
     }
 
@@ -1821,7 +1839,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setUsername_Missing("username", opLambda, null);
     }
 
-    public void setUsername_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setUsername_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setUsername_Missing("username", opLambda, aggsLambda);
     }
 
@@ -1846,7 +1865,8 @@ public abstract class BsWebAuthenticationCA extends EsAbstractConditionAggregati
         setWebConfigId_Terms("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsWebAuthenticationCA> aggsLambda) {
+    public void setWebConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsWebAuthenticationCA> aggsLambda) {
         setWebConfigId_Terms("webConfigId", opLambda, aggsLambda);
     }
 

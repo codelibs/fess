@@ -75,8 +75,8 @@ public class EsApiManager extends BaseApiManager {
     }
 
     @Override
-    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
-            ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         final RequestManager requestManager = ComponentUtil.getRequestManager();
         if (!requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access: " + request.getServletPath());

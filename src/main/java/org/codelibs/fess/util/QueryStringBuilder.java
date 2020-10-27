@@ -53,8 +53,8 @@ public class QueryStringBuilder {
             queryBuf.append(query);
         }
 
-        stream(params.getExtraQueries()).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(q -> {
+        stream(params.getExtraQueries())
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(q -> {
                     appendQuery(queryBuf, q);
                 }));
 
@@ -135,39 +135,36 @@ public class QueryStringBuilder {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger();
 
-        stream(conditions.get(SearchRequestParams.AS_OCCURRENCE)).of(
-                stream -> stream.filter(this::isOccurrence).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
+        stream(conditions.get(SearchRequestParams.AS_OCCURRENCE))
+                .of(stream -> stream.filter(this::isOccurrence).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
 
-        stream(conditions.get(SearchRequestParams.AS_Q)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        q -> queryBuf.append(' ').append(q)));
-        stream(conditions.get(SearchRequestParams.AS_EPQ)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        q -> queryBuf.append(" \"").append(escape(q, "\"")).append('"')));
-        stream(conditions.get(SearchRequestParams.AS_OQ)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        oq -> split(oq, " ").get(
-                                s -> s.filter(StringUtil::isNotBlank).reduce((q1, q2) -> escape(q1, "(", ")") + OR + escape(q2, "(", ")")))
-                                .ifPresent(q -> {
-                                    appendQuery(queryBuf, q);
-                                })));
-        stream(conditions.get(SearchRequestParams.AS_NQ)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        eq -> {
-                            final String nq =
-                                    split(eq, " ").get(
-                                            s -> s.filter(StringUtil::isNotBlank).map(q -> "NOT " + q).collect(Collectors.joining(" ")));
-                            queryBuf.append(' ').append(nq);
-                        }));
-        stream(conditions.get(SearchRequestParams.AS_FILETYPE)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        q -> queryBuf.append(" filetype:\"").append(q.trim()).append('"')));
-        stream(conditions.get(SearchRequestParams.AS_SITESEARCH)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        q -> queryBuf.append(" site:").append(q.trim())));
-        stream(conditions.get(SearchRequestParams.AS_TIMESTAMP)).of(
-                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(
-                        q -> queryBuf.append(" timestamp:").append(q.trim())));
+        stream(conditions.get(SearchRequestParams.AS_Q)).of(stream -> stream
+                .filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(q -> queryBuf.append(' ').append(q)));
+        stream(conditions.get(SearchRequestParams.AS_EPQ))
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
+                        .forEach(q -> queryBuf.append(" \"").append(escape(q, "\"")).append('"')));
+        stream(conditions.get(SearchRequestParams.AS_OQ)).of(stream -> stream
+                .filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
+                .forEach(oq -> split(oq, " ")
+                        .get(s -> s.filter(StringUtil::isNotBlank).reduce((q1, q2) -> escape(q1, "(", ")") + OR + escape(q2, "(", ")")))
+                        .ifPresent(q -> {
+                            appendQuery(queryBuf, q);
+                        })));
+        stream(conditions.get(SearchRequestParams.AS_NQ))
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(eq -> {
+                    final String nq =
+                            split(eq, " ").get(s -> s.filter(StringUtil::isNotBlank).map(q -> "NOT " + q).collect(Collectors.joining(" ")));
+                    queryBuf.append(' ').append(nq);
+                }));
+        stream(conditions.get(SearchRequestParams.AS_FILETYPE))
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
+                        .forEach(q -> queryBuf.append(" filetype:\"").append(q.trim()).append('"')));
+        stream(conditions.get(SearchRequestParams.AS_SITESEARCH))
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
+                        .forEach(q -> queryBuf.append(" site:").append(q.trim())));
+        stream(conditions.get(SearchRequestParams.AS_TIMESTAMP))
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
+                        .forEach(q -> queryBuf.append(" timestamp:").append(q.trim())));
     }
 
     protected boolean isOccurrence(final String value) {

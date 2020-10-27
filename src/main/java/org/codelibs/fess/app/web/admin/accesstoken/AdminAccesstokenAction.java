@@ -150,29 +150,20 @@ public class AdminAccesstokenAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asDetailsHtml().useForm(
-                EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        accessTokenService
-                                .getAccessToken(id)
-                                .ifPresent(
-                                        entity -> {
-                                            copyBeanToBean(entity, form, copyOp -> copyOp.exclude(Constants.PERMISSIONS, EXPIRED_TIME)
-                                                    .excludeNull().dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
-                                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                                            form.permissions =
-                                                    stream(entity.getPermissions()).get(
-                                                            stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank)
-                                                                    .distinct().collect(Collectors.joining("\n")));
-                                            form.crudMode = crudMode;
-                                        })
-                                .orElse(() -> {
-                                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                            this::asListHtml);
-                                });
-                    });
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                accessTokenService.getAccessToken(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> copyOp.exclude(Constants.PERMISSIONS, EXPIRED_TIME).excludeNull()
+                            .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(permissionHelper::decode)
+                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
+            });
+        });
     }
 
     @Execute
@@ -180,23 +171,15 @@ public class AdminAccesstokenAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
-        accessTokenService
-                .getAccessToken(id)
-                .ifPresent(
-                        entity -> {
-                            copyBeanToBean(
-                                    entity,
-                                    form,
-                                    op -> op.exclude(Constants.PERMISSIONS, EXPIRED_TIME).dateConverter(Constants.DEFAULT_DATETIME_FORMAT,
-                                            EXPIRES));
-                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                            form.permissions =
-                                    stream(entity.getPermissions()).get(
-                                            stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
-                                                    .collect(Collectors.joining("\n")));
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
-                });
+        accessTokenService.getAccessToken(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form,
+                    op -> op.exclude(Constants.PERMISSIONS, EXPIRED_TIME).dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(permissionHelper::decode)
+                    .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -217,17 +200,16 @@ public class AdminAccesstokenAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getAccessToken(form).ifPresent(
-                entity -> {
-                    entity.setToken(accessTokenHelper.generateAccessToken());
-                    try {
-                        accessTokenService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getAccessToken(form).ifPresent(entity -> {
+            entity.setToken(accessTokenHelper.generateAccessToken());
+            try {
+                accessTokenService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -239,16 +221,15 @@ public class AdminAccesstokenAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getAccessToken(form).ifPresent(
-                entity -> {
-                    try {
-                        accessTokenService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getAccessToken(form).ifPresent(entity -> {
+            try {
+                accessTokenService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
@@ -261,21 +242,17 @@ public class AdminAccesstokenAction extends FessAdminAction {
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
-        accessTokenService
-                .getAccessToken(id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                accessTokenService.delete(entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
-                });
+        accessTokenService.getAccessToken(id).ifPresent(entity -> {
+            try {
+                accessTokenService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
+        });
         return redirect(getClass());
     }
 
@@ -306,19 +283,16 @@ public class AdminAccesstokenAction extends FessAdminAction {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        return getEntity(form, username, currentTime).map(
-                entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    BeanUtil.copyBeanToBean(form, entity,
-                            op -> op.exclude(Constants.COMMON_CONVERSION_RULE).exclude(TOKEN, Constants.PERMISSIONS, EXPIRED_TIME)
-                                    .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
-                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setPermissions(split(form.permissions, "\n").get(
-                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
-                                    .toArray(n -> new String[n])));
-                    return entity;
-                });
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE)
+                    .exclude(TOKEN, Constants.PERMISSIONS, EXPIRED_TIME).dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            entity.setPermissions(split(form.permissions, "\n").get(stream -> stream.map(s -> permissionHelper.encode(s))
+                    .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));
+            return entity;
+        });
     }
 
     // ===================================================================================

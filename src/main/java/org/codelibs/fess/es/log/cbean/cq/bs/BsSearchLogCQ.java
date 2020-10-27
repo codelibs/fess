@@ -109,9 +109,8 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         SearchLogCQ filterQuery = new SearchLogCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -887,7 +886,8 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         setHitCountRelation_MatchPhrasePrefix(hitCountRelation, null);
     }
 
-    public void setHitCountRelation_MatchPhrasePrefix(String hitCountRelation, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setHitCountRelation_MatchPhrasePrefix(String hitCountRelation,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("hitCountRelation", hitCountRelation);
         if (opLambda != null) {
             opLambda.callback(builder);

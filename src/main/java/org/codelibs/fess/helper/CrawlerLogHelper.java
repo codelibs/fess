@@ -90,7 +90,8 @@ public class CrawlerLogHelper extends LogHelperImpl {
         super.log(key, objs);
     }
 
-    private void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName, final Throwable e) {
+    private void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName,
+            final Throwable e) {
 
         final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
         final String url = urlQueue.getUrl();

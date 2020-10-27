@@ -180,29 +180,26 @@ public class CrawlingInfoHelper {
 
     public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.search(
-                fessConfig.getIndexDocumentSearchIndex(),
-                queryRequestBuilder -> {
-                    queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
-                    final TermsAggregationBuilder termsBuilder =
-                            AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
-                                    .size(maxSessionIdsInList).order(BucketOrder.key(false));
-                    queryRequestBuilder.addAggregation(termsBuilder);
-                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL);
-                    return true;
-                }, (queryRequestBuilder, execTime, searchResponse) -> {
-                    final List<Map<String, String>> sessionIdList = new ArrayList<>();
-                    searchResponse.ifPresent(response -> {
-                        final Terms terms = response.getAggregations().get(fessConfig.getIndexFieldSegment());
-                        for (final Bucket bucket : terms.getBuckets()) {
-                            final Map<String, String> map = new HashMap<>(2);
-                            map.put(fessConfig.getIndexFieldSegment(), bucket.getKey().toString());
-                            map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
-                            sessionIdList.add(map);
-                        }
-                    });
-                    return sessionIdList;
-                });
+        return fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(), queryRequestBuilder -> {
+            queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
+            final TermsAggregationBuilder termsBuilder = AggregationBuilders.terms(fessConfig.getIndexFieldSegment())
+                    .field(fessConfig.getIndexFieldSegment()).size(maxSessionIdsInList).order(BucketOrder.key(false));
+            queryRequestBuilder.addAggregation(termsBuilder);
+            queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL);
+            return true;
+        }, (queryRequestBuilder, execTime, searchResponse) -> {
+            final List<Map<String, String>> sessionIdList = new ArrayList<>();
+            searchResponse.ifPresent(response -> {
+                final Terms terms = response.getAggregations().get(fessConfig.getIndexFieldSegment());
+                for (final Bucket bucket : terms.getBuckets()) {
+                    final Map<String, String> map = new HashMap<>(2);
+                    map.put(fessConfig.getIndexFieldSegment(), bucket.getKey().toString());
+                    map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
+                    sessionIdList.add(map);
+                }
+            });
+            return sessionIdList;
+        });
     }
 
     protected String generateId(final String urlId) {

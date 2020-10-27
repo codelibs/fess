@@ -163,9 +163,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         try {
-            final Map<String, Object> doc =
-                    indexingHelper.getDocument(fessEsClient, id,
-                            new String[] { fessConfig.getIndexFieldThumbnail(), fessConfig.getIndexFieldConfigId() });
+            final Map<String, Object> doc = indexingHelper.getDocument(fessEsClient, id,
+                    new String[] { fessConfig.getIndexFieldThumbnail(), fessConfig.getIndexFieldConfigId() });
             if (doc == null) {
                 throw new ThumbnailGenerationException("Document is not found: " + id);
             }
@@ -191,49 +190,47 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     }
 
     protected boolean process(final String id, final Predicate<ResponseData> consumer) {
-        return process(
-                id,
-                (configId, url) -> {
-                    final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-                    final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
-                    if (config == null) {
-                        throw new ThumbnailGenerationException("No CrawlingConfig: " + configId);
-                    }
+        return process(id, (configId, url) -> {
+            final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+            final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
+            if (config == null) {
+                throw new ThumbnailGenerationException("No CrawlingConfig: " + configId);
+            }
 
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Generating Thumbnail: {}", url);
-                    }
+            if (logger.isInfoEnabled()) {
+                logger.info("Generating Thumbnail: {}", url);
+            }
 
-                    final CrawlerClientFactory crawlerClientFactory =
-                            config.initializeClientFactory(() -> ComponentUtil.getComponent(CrawlerClientFactory.class));
-                    final CrawlerClient client = crawlerClientFactory.getClient(url);
-                    if (client == null) {
-                        throw new ThumbnailGenerationException("No CrawlerClient: " + configId + ", url: " + url);
+            final CrawlerClientFactory crawlerClientFactory =
+                    config.initializeClientFactory(() -> ComponentUtil.getComponent(CrawlerClientFactory.class));
+            final CrawlerClient client = crawlerClientFactory.getClient(url);
+            if (client == null) {
+                throw new ThumbnailGenerationException("No CrawlerClient: " + configId + ", url: " + url);
+            }
+            String u = url;
+            for (int i = 0; i < maxRedirectCount; i++) {
+                try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(u).build())) {
+                    if (StringUtil.isNotBlank(responseData.getRedirectLocation())) {
+                        u = responseData.getRedirectLocation();
+                        continue;
                     }
-                    String u = url;
-                    for (int i = 0; i < maxRedirectCount; i++) {
-                        try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(u).build())) {
-                            if (StringUtil.isNotBlank(responseData.getRedirectLocation())) {
-                                u = responseData.getRedirectLocation();
-                                continue;
-                            }
-                            if (StringUtil.isBlank(responseData.getUrl())) {
-                                throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url
-                                        + " (Response URL is empty)");
-                            }
-                            return consumer.test(responseData);
-                        } catch (final CrawlingAccessException e) {
-                            if (logger.isDebugEnabled()) {
-                                throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
-                            } else {
-                                throw new ThumbnailGenerationException(e.getMessage());
-                            }
-                        } catch (final Exception e) {
-                            throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
-                        }
+                    if (StringUtil.isBlank(responseData.getUrl())) {
+                        throw new ThumbnailGenerationException(
+                                "Failed to process a thumbnail content: " + url + " (Response URL is empty)");
                     }
-                    throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url + " (Redirect Loop)");
-                });
+                    return consumer.test(responseData);
+                } catch (final CrawlingAccessException e) {
+                    if (logger.isDebugEnabled()) {
+                        throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
+                    } else {
+                        throw new ThumbnailGenerationException(e.getMessage());
+                    }
+                } catch (final Exception e) {
+                    throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
+                }
+            }
+            throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url + " (Redirect Loop)");
+        });
     }
 
     public void setGeneratorList(final List<String> generatorList) {

@@ -67,8 +67,8 @@ public class BadWordService {
 
         // update pager
         BeanUtil.copyBeanToBean(badWordList, badWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        badWordPager.setPageNumberList(badWordList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger()))
-                .createPageNumberList());
+        badWordPager.setPageNumberList(
+                badWordList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
 
         return badWordList;
     }

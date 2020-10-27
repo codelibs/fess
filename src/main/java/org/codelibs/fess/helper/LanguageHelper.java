@@ -142,9 +142,8 @@ public class LanguageHelper {
     public String getReindexScriptSource() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String langField = fessConfig.getIndexFieldLang();
-        final String code =
-                Arrays.stream(langFields).map(s -> "ctx._source['" + s + "_'+ctx._source." + langField + "]=ctx._source." + s)
-                        .collect(Collectors.joining(";"));
+        final String code = Arrays.stream(langFields).map(s -> "ctx._source['" + s + "_'+ctx._source." + langField + "]=ctx._source." + s)
+                .collect(Collectors.joining(";"));
         if (logger.isDebugEnabled()) {
             logger.debug("reindex script: {}", code);
         }

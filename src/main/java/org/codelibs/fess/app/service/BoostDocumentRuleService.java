@@ -47,8 +47,8 @@ public class BoostDocumentRuleService extends FessAppService {
 
         // update pager
         BeanUtil.copyBeanToBean(boostDocumentRuleList, boostDocumentRulePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(
-                op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
+        boostDocumentRulePager.setPageNumberList(
+                boostDocumentRuleList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger())).createPageNumberList());
 
         return boostDocumentRuleList;
     }

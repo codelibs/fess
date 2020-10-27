@@ -62,8 +62,7 @@ public abstract class BsDataConfigCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void functionScore(OperatorCall<DataConfigCQ> queryLambda,
-            ScoreFunctionCall<ScoreFunctionCreator<DataConfigCQ>> functionsLambda,
+    public void functionScore(OperatorCall<DataConfigCQ> queryLambda, ScoreFunctionCall<ScoreFunctionCreator<DataConfigCQ>> functionsLambda,
             final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
         DataConfigCQ cq = new DataConfigCQ();
         queryLambda.callback(cq);
@@ -110,9 +109,8 @@ public abstract class BsDataConfigCQ extends EsAbstractConditionQuery {
         DataConfigCQ filterQuery = new DataConfigCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -1456,7 +1454,8 @@ public abstract class BsDataConfigCQ extends EsAbstractConditionQuery {
         setHandlerParameter_MatchPhrasePrefix(handlerParameter, null);
     }
 
-    public void setHandlerParameter_MatchPhrasePrefix(String handlerParameter, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setHandlerParameter_MatchPhrasePrefix(String handlerParameter,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("handlerParameter", handlerParameter);
         if (opLambda != null) {
             opLambda.callback(builder);

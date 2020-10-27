@@ -80,13 +80,11 @@ public class RoleService {
             op.setRefreshPolicy(Constants.TRUE);
         });
 
-        userBhv.selectCursor(
-                cb -> cb.query().setRoles_Equal(role.getId()),
-                entity -> {
-                    entity.setRoles(stream(entity.getRoles()).get(
-                            stream -> stream.filter(s -> !s.equals(role.getId())).toArray(n -> new String[n])));
-                    userBhv.insertOrUpdate(entity);
-                });
+        userBhv.selectCursor(cb -> cb.query().setRoles_Equal(role.getId()), entity -> {
+            entity.setRoles(
+                    stream(entity.getRoles()).get(stream -> stream.filter(s -> !s.equals(role.getId())).toArray(n -> new String[n])));
+            userBhv.insertOrUpdate(entity);
+        });
     }
 
     protected void setupListCondition(final RoleCB cb, final RolePager rolePager) {

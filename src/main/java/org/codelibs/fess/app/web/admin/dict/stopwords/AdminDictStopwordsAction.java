@@ -151,15 +151,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-        stopwordsService
-                .getStopwordsItem(form.dictId, form.id)
-                .ifPresent(entity -> {
-                    form.input = entity.getInputValue();
-                })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            () -> asListHtml(form.dictId));
-                });
+        stopwordsService.getStopwordsItem(form.dictId, form.id).ifPresent(entity -> {
+            form.input = entity.getInputValue();
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                    () -> asListHtml(form.dictId));
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -179,25 +176,19 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
-        return asDetailsHtml().useForm(
-                EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        stopwordsService
-                                .getStopwordsItem(dictId, id)
-                                .ifPresent(entity -> {
-                                    form.input = entity.getInputValue();
-                                })
-                                .orElse(() -> {
-                                    throwValidationError(
-                                            messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                                            () -> asListHtml(dictId));
-                                });
-                        form.id = id;
-                        form.crudMode = crudMode;
-                        form.dictId = dictId;
-                    });
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                stopwordsService.getStopwordsItem(dictId, id).ifPresent(entity -> {
+                    form.input = entity.getInputValue();
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
+                            () -> asListHtml(dictId));
                 });
+                form.id = id;
+                form.crudMode = crudMode;
+                form.dictId = dictId;
+            });
+        });
     }
 
     // -----------------------------------------------------
@@ -225,17 +216,14 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return stopwordsService
-                .getStopwordsFile(form.dictId)
+        return stopwordsService.getStopwordsFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                }))
-                .orElseGet(
-                        () -> {
-                            throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL),
-                                    () -> downloadpage(form.dictId));
-                            return null;
-                        });
+                })).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL),
+                            () -> downloadpage(form.dictId));
+                    return null;
+                });
     }
 
     // -----------------------------------------------------
@@ -263,21 +251,19 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return stopwordsService
-                .getStopwordsFile(form.dictId)
-                .map(file -> {
-                    try (InputStream inputStream = form.stopwordsFile.getInputStream()) {
-                        file.update(inputStream);
-                    } catch (final IOException e) {
-                        throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL),
-                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
-                    }
-                    saveInfo(messages -> messages.addSuccessUploadStopwordsFile(GLOBAL));
-                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-                }).orElseGet(() -> {
-                    throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL), () -> uploadpage(form.dictId));
-                    return null;
-                });
+        return stopwordsService.getStopwordsFile(form.dictId).map(file -> {
+            try (InputStream inputStream = form.stopwordsFile.getInputStream()) {
+                file.update(inputStream);
+            } catch (final IOException e) {
+                throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL),
+                        () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+            }
+            saveInfo(messages -> messages.addSuccessUploadStopwordsFile(GLOBAL));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL), () -> uploadpage(form.dictId));
+            return null;
+        });
 
     }
 
@@ -306,9 +292,8 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         createStopwordsItem(form, this::asEditHtml).ifPresent(entity -> {
             stopwordsService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(
-                () -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                        this::asEditHtml));
+        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                this::asEditHtml));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -318,16 +303,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
-        stopwordsService
-                .getStopwordsItem(form.dictId, form.id)
-                .ifPresent(entity -> {
-                    stopwordsService.delete(form.dictId, entity);
-                    saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            this::asDetailsHtml);
-                });
+        stopwordsService.getStopwordsItem(form.dictId, form.id).ifPresent(entity -> {
+            stopwordsService.delete(form.dictId, entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asDetailsHtml);
+        });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 

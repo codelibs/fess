@@ -219,7 +219,8 @@ public abstract class BsGroupCA extends EsAbstractConditionAggregation {
         setGidNumber_PercentileRanks("gidNumber", values, opLambda);
     }
 
-    public void setGidNumber_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setGidNumber_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "gidNumber", values);
         if (opLambda != null) {
             opLambda.callback(builder);

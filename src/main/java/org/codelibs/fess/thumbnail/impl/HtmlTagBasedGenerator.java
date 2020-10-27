@@ -78,54 +78,52 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             return false;
         }
 
-        return process(
-                thumbnailId,
-                responseData -> {
-                    if (!isImageMimeType(responseData)) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Thumbnail is not image: {} : {}", thumbnailId, responseData.getUrl());
-                        }
-                        updateThumbnailField(thumbnailId, StringUtil.EMPTY);
-                        return false;
+        return process(thumbnailId, responseData -> {
+            if (!isImageMimeType(responseData)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Thumbnail is not image: {} : {}", thumbnailId, responseData.getUrl());
+                }
+                updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                return false;
+            }
+            boolean created = false;
+            try (ImageInputStream input = ImageIO.createImageInputStream(responseData.getResponseBody())) {
+                switch (saveImage(input, outputFile)) {
+                case OK:
+                    created = true;
+                    break;
+                case FAILED:
+                    logger.warn("Failed to create thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
+                    break;
+                case INVALID_SIZE:
+                    logger.info("Unmatched thumbnail size: {} -> {}", thumbnailId, responseData.getUrl());
+                    break;
+                case NO_IMAGE:
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
                     }
-                    boolean created = false;
-                    try (ImageInputStream input = ImageIO.createImageInputStream(responseData.getResponseBody())) {
-                        switch (saveImage(input, outputFile)) {
-                        case OK:
-                            created = true;
-                            break;
-                        case FAILED:
-                            logger.warn("Failed to create thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
-                            break;
-                        case INVALID_SIZE:
-                            logger.info("Unmatched thumbnail size: {} -> {}", thumbnailId, responseData.getUrl());
-                            break;
-                        case NO_IMAGE:
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("No thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
-                            }
-                            break;
-                        default:
-                            logger.error("Unknown thumbnail result: {} -> {}", thumbnailId, responseData.getUrl());
-                            break;
-                        }
-                    } catch (final Throwable t) {
-                        if (logger.isDebugEnabled()) {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl(), t);
-                        } else {
-                            logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl() + " ("
-                                    + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
-                        }
-                    } finally {
-                        if (!created) {
-                            updateThumbnailField(thumbnailId, StringUtil.EMPTY);
-                            if (outputFile.exists() && !outputFile.delete()) {
-                                logger.warn("Failed to delete {}", outputFile.getAbsolutePath());
-                            }
-                        }
+                    break;
+                default:
+                    logger.error("Unknown thumbnail result: {} -> {}", thumbnailId, responseData.getUrl());
+                    break;
+                }
+            } catch (final Throwable t) {
+                if (logger.isDebugEnabled()) {
+                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl(), t);
+                } else {
+                    logger.warn("Failed to create thumbnail: " + thumbnailId + " -> " + responseData.getUrl() + " ("
+                            + t.getClass().getCanonicalName() + ": " + t.getMessage() + ")");
+                }
+            } finally {
+                if (!created) {
+                    updateThumbnailField(thumbnailId, StringUtil.EMPTY);
+                    if (outputFile.exists() && !outputFile.delete()) {
+                        logger.warn("Failed to delete {}", outputFile.getAbsolutePath());
                     }
-                    return outputFile.exists();
-                });
+                }
+            }
+            return outputFile.exists();
+        });
 
     }
 
@@ -168,8 +166,8 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 param.setSourceRegion(new Rectangle(width, height > width ? width : height));
                 final BufferedImage image = reader.read(0, param);
                 final int thumbnailWidth = fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger();
-                final int thumbnailHeight =
-                        (int) ((height > width ? width : height) * fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger().floatValue() / width);
+                final int thumbnailHeight = (int) ((height > width ? width : height)
+                        * fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger().floatValue() / width);
                 final BufferedImage thumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
                 thumbnail.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_AREA_AVERAGING), 0,
                         0, thumbnailWidth, thumbnailHeight, null);

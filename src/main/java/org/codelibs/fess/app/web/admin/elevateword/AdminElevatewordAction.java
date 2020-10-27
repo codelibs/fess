@@ -162,22 +162,17 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
-        elevateWordService
-                .getElevateWord(id)
-                .ifPresent(
-                        entity -> {
-                            copyBeanToBean(entity, form, copyOp -> {
-                                copyOp.excludeNull();
-                                copyOp.exclude(Constants.PERMISSIONS);
-                            });
-                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                            form.permissions =
-                                    stream(entity.getPermissions()).get(
-                                            stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
-                                                    .collect(Collectors.joining("\n")));
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
-                });
+        elevateWordService.getElevateWord(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, copyOp -> {
+                copyOp.excludeNull();
+                copyOp.exclude(Constants.PERMISSIONS);
+            });
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                    .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -198,26 +193,17 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).useForm(
-                EditForm.class,
-                op -> op.setup(form -> {
-                    elevateWordService
-                            .getElevateWord(id)
-                            .ifPresent(
-                                    entity -> {
-                                        copyBeanToBean(entity, form, copyOp -> {
-                                            copyOp.excludeNull();
-                                            copyOp.exclude(Constants.PERMISSIONS);
-                                        });
-                                        form.permissions =
-                                                stream(entity.getPermissions()).get(
-                                                        stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank)
-                                                                .distinct().collect(Collectors.joining("\n")));
-                                        form.crudMode = crudMode;
-                                    })
-                            .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                    this::asListHtml));
-                })).renderWith(this::registerLabels);
+        return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).useForm(EditForm.class, op -> op.setup(form -> {
+            elevateWordService.getElevateWord(id).ifPresent(entity -> {
+                copyBeanToBean(entity, form, copyOp -> {
+                    copyOp.excludeNull();
+                    copyOp.exclude(Constants.PERMISSIONS);
+                });
+                form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(permissionHelper::decode)
+                        .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                form.crudMode = crudMode;
+            }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml));
+        })).renderWith(this::registerLabels);
     }
 
     // -----------------------------------------------------
@@ -271,18 +257,17 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getElevateWord(form).ifPresent(
-                entity -> {
-                    try {
-                        elevateWordService.store(entity);
-                        suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
-                                entity.getPermissions(), entity.getBoost(), false);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getElevateWord(form).ifPresent(entity -> {
+            try {
+                elevateWordService.store(entity);
+                suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
+                        entity.getPermissions(), entity.getBoost(), false);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -294,18 +279,17 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getElevateWord(form).ifPresent(
-                entity -> {
-                    try {
-                        elevateWordService.store(entity);
-                        suggestHelper.deleteAllElevateWord(false);
-                        suggestHelper.storeAllElevateWords(false);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getElevateWord(form).ifPresent(entity -> {
+            try {
+                elevateWordService.store(entity);
+                suggestHelper.deleteAllElevateWord(false);
+                suggestHelper.storeAllElevateWords(false);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
@@ -318,21 +302,16 @@ public class AdminElevatewordAction extends FessAdminAction {
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
-        elevateWordService
-                .getElevateWord(id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                elevateWordService.delete(entity);
-                                suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        })
-                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml));
+        elevateWordService.getElevateWord(id).ifPresent(entity -> {
+            try {
+                elevateWordService.delete(entity);
+                suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml));
         return redirect(getClass());
     }
 
@@ -381,18 +360,16 @@ public class AdminElevatewordAction extends FessAdminAction {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
 
-        return getEntity(form, username, currentTime).map(
-                entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
-                            Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
-                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setPermissions(split(form.permissions, "\n").get(
-                            stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct()
-                                    .toArray(n -> new String[n])));
-                    return entity;
-                });
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Stream
+                    .concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            entity.setPermissions(split(form.permissions, "\n").get(
+                    stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));
+            return entity;
+        });
     }
 
     protected void registerLabels(final RenderData data) {
@@ -420,7 +397,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
             RenderDataUtil.register(data, "elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(elevateWordPager, form, op -> op.include("id"));
             });

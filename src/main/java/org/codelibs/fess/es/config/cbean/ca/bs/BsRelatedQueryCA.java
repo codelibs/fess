@@ -350,7 +350,8 @@ public abstract class BsRelatedQueryCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -606,7 +607,8 @@ public abstract class BsRelatedQueryCA extends EsAbstractConditionAggregation {
         setTerm_Terms("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRelatedQueryCA> aggsLambda) {
+    public void setTerm_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedQueryCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -968,7 +970,8 @@ public abstract class BsRelatedQueryCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);

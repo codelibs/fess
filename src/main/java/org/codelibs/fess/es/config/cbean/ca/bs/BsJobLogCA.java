@@ -317,7 +317,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setEndTime_Missing("endTime", opLambda, aggsLambda);
     }
 
-    public void setEndTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setEndTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "endTime");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -391,7 +392,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setJobName_IpRange("jobName", opLambda, aggsLambda);
     }
 
-    public void setJobName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setJobName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "jobName");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -445,7 +447,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setJobName_Missing("jobName", opLambda, aggsLambda);
     }
 
-    public void setJobName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setJobName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "jobName");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -469,7 +472,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setJobStatus_Terms("jobStatus", opLambda, aggsLambda);
     }
 
-    public void setJobStatus_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setJobStatus_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "jobStatus");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -700,7 +704,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setLastUpdated_PercentileRanks("lastUpdated", values, opLambda);
     }
 
-    public void setLastUpdated_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setLastUpdated_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "lastUpdated", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -744,7 +749,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setLastUpdated_Range("lastUpdated", opLambda, aggsLambda);
     }
 
-    public void setLastUpdated_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setLastUpdated_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "lastUpdated");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -823,7 +829,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setScriptData_Terms("scriptData", opLambda, aggsLambda);
     }
 
-    public void setScriptData_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setScriptData_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "scriptData");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1084,7 +1091,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setScriptType_Terms("scriptType", opLambda, aggsLambda);
     }
 
-    public void setScriptType_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setScriptType_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "scriptType");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1315,7 +1323,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setStartTime_PercentileRanks("startTime", values, opLambda);
     }
 
-    public void setStartTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setStartTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "startTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1359,7 +1368,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setStartTime_Range("startTime", opLambda, aggsLambda);
     }
 
-    public void setStartTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setStartTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "startTime");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1488,7 +1498,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setTarget_IpRange("target", opLambda, aggsLambda);
     }
 
-    public void setTarget_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setTarget_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         IpRangeAggregationBuilder builder = regIpRangeA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1542,7 +1553,8 @@ public abstract class BsJobLogCA extends EsAbstractConditionAggregation {
         setTarget_Missing("target", opLambda, aggsLambda);
     }
 
-    public void setTarget_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsJobLogCA> aggsLambda) {
+    public void setTarget_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsJobLogCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "target");
         if (opLambda != null) {
             opLambda.callback(builder);

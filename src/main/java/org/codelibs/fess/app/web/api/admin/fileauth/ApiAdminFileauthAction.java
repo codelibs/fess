@@ -61,9 +61,9 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         final FileAuthPager pager = copyBeanToNewBean(body, FileAuthPager.class);
         final List<FileAuthentication> list = fileAuthService.getFileAuthenticationList(pager);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(list.stream().map(this::createEditBody).collect(Collectors.toList())).total(pager.getAllRecordCount())
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
+                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     // GET /api/admin/fileauth/setting/{id}

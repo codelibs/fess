@@ -33,7 +33,7 @@ public class LtrQueryRescorer implements QueryRescorer {
         if (StringUtil.isBlank(modelName)) {
             return null;
         }
-        return new QueryRescorerBuilder(new StoredLtrQueryBuilder().modelName(modelName).params(params)).windowSize(fessConfig
-                .getLtrWindowSize());
+        return new QueryRescorerBuilder(new StoredLtrQueryBuilder().modelName(modelName).params(params))
+                .windowSize(fessConfig.getLtrWindowSize());
     }
 }

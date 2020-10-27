@@ -481,7 +481,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -577,7 +578,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setCreatedTime_Missing("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRelatedContentCA> aggsLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
         setCreatedTime_Missing("createdTime", opLambda, aggsLambda);
     }
 
@@ -707,7 +709,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1195,7 +1198,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1291,7 +1295,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setUpdatedTime_Missing("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRelatedContentCA> aggsLambda) {
+    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
         setUpdatedTime_Missing("updatedTime", opLambda, aggsLambda);
     }
 
@@ -1367,7 +1372,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setVirtualHost_IpRange("virtualHost", opLambda, null);
     }
 
-    public void setVirtualHost_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRelatedContentCA> aggsLambda) {
+    public void setVirtualHost_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
         setVirtualHost_IpRange("virtualHost", opLambda, aggsLambda);
     }
 
@@ -1422,7 +1428,8 @@ public abstract class BsRelatedContentCA extends EsAbstractConditionAggregation 
         setVirtualHost_Missing("virtualHost", opLambda, null);
     }
 
-    public void setVirtualHost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRelatedContentCA> aggsLambda) {
+    public void setVirtualHost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRelatedContentCA> aggsLambda) {
         setVirtualHost_Missing("virtualHost", opLambda, aggsLambda);
     }
 

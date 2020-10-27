@@ -174,20 +174,16 @@ public class IndexUpdater extends Thread {
         final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListCountAsInteger();
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
-            final Consumer<SearchRequestBuilder> cb =
-                    builder -> {
-                        final QueryBuilder queryBuilder =
-                                QueryBuilders
-                                        .boolQuery()
-                                        .filter(QueryBuilders.termsQuery(EsAccessResult.SESSION_ID, sessionIdList))
-                                        .filter(QueryBuilders.termQuery(EsAccessResult.STATUS,
-                                                org.codelibs.fess.crawler.Constants.OK_STATUS));
-                        builder.setQuery(queryBuilder);
-                        builder.setFrom(0);
-                        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger();
-                        builder.setSize(maxDocumentCacheSize <= 0 ? 1 : maxDocumentCacheSize);
-                        builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
-                    };
+            final Consumer<SearchRequestBuilder> cb = builder -> {
+                final QueryBuilder queryBuilder =
+                        QueryBuilders.boolQuery().filter(QueryBuilders.termsQuery(EsAccessResult.SESSION_ID, sessionIdList))
+                                .filter(QueryBuilders.termQuery(EsAccessResult.STATUS, org.codelibs.fess.crawler.Constants.OK_STATUS));
+                builder.setQuery(queryBuilder);
+                builder.setFrom(0);
+                final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger();
+                builder.setSize(maxDocumentCacheSize <= 0 ? 1 : maxDocumentCacheSize);
+                builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
+            };
 
             final DocList docList = new DocList();
             final List<EsAccessResult> accessResultList = new ArrayList<>();
@@ -323,7 +319,8 @@ public class IndexUpdater extends Thread {
 
     }
 
-    private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList, final List<EsAccessResult> arList) {
+    private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList,
+            final List<EsAccessResult> arList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long maxDocumentRequestSize = Long.parseLong(fessConfig.getIndexerWebfsMaxDocumentRequestSize());
         for (final EsAccessResult accessResult : arList) {

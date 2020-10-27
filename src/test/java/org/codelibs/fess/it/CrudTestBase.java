@@ -104,8 +104,8 @@ public abstract class CrudTestBase extends ITBase {
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = createTestParam(i);
-            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true))
-                    .body("response.status", equalTo(0));
+            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true)).body("response.status",
+                    equalTo(0));
 
             //logger.info("create {}{}", i, checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
             refresh();

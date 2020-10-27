@@ -38,19 +38,18 @@ public class ProtwordsService {
     protected FessConfig fessConfig;
 
     public List<ProtwordsItem> getProtwordsList(final String dictId, final ProtwordsPager protwordsPager) {
-        return getProtwordsFile(dictId).map(
-                file -> {
-                    final int pageSize = protwordsPager.getPageSize();
-                    final PagingList<ProtwordsItem> protwordsList =
-                            file.selectList((protwordsPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+        return getProtwordsFile(dictId).map(file -> {
+            final int pageSize = protwordsPager.getPageSize();
+            final PagingList<ProtwordsItem> protwordsList =
+                    file.selectList((protwordsPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
-                    // update pager
-                    BeanUtil.copyBeanToBean(protwordsList, protwordsPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                    protwordsList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
-                    protwordsPager.setPageNumberList(protwordsList.createPageNumberList());
+            // update pager
+            BeanUtil.copyBeanToBean(protwordsList, protwordsPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+            protwordsList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
+            protwordsPager.setPageNumberList(protwordsList.createPageNumberList());
 
-                    return (List<ProtwordsItem>) protwordsList;
-                }).orElse(Collections.emptyList());
+            return (List<ProtwordsItem>) protwordsList;
+        }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<ProtwordsFile> getProtwordsFile(final String dictId) {

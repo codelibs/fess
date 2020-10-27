@@ -150,7 +150,7 @@ public class WebAuthentication extends BsWebAuthentication {
     public String toString() {
         return "WebAuthentication [webConfig=" + webConfig + ", authRealm=" + authRealm + ", createdBy=" + createdBy + ", createdTime="
                 + createdTime + ", hostname=" + hostname + ", parameters=" + parameters + ", port=" + port + ", protocolScheme="
-                + protocolScheme + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", username=" + username
-                + ", webConfigId=" + webConfigId + ", docMeta=" + docMeta + "]";
+                + protocolScheme + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", username=" + username + ", webConfigId="
+                + webConfigId + ", docMeta=" + docMeta + "]";
     }
 }

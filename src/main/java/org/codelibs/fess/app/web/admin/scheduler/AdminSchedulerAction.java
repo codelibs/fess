@@ -129,30 +129,28 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse createnewjob(final String type, final String id, final String name) {
         saveToken();
-        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
-                CreateForm.class,
-                op -> {
-                    op.setup(scheduledJobForm -> {
-                        scheduledJobForm.initialize();
-                        scheduledJobForm.crudMode = CrudMode.CREATE;
-                        scheduledJobForm.jobLogging = Constants.ON;
-                        scheduledJobForm.crawler = Constants.ON;
-                        scheduledJobForm.available = Constants.ON;
-                        scheduledJobForm.cronExpression = null;
-                        final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
-                        scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
-                        final String[] ids = new String[] { "", "", "" };
-                        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
-                            ids[0] = "\"" + id + "\"";
-                        } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
-                            ids[1] = "\"" + id + "\"";
-                        } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
-                            ids[2] = "\"" + id + "\"";
-                        }
-                        scheduledJobForm.scriptData =
-                                MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], id.replace('-', '_'));
-                    });
-                });
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(CreateForm.class, op -> {
+            op.setup(scheduledJobForm -> {
+                scheduledJobForm.initialize();
+                scheduledJobForm.crudMode = CrudMode.CREATE;
+                scheduledJobForm.jobLogging = Constants.ON;
+                scheduledJobForm.crawler = Constants.ON;
+                scheduledJobForm.available = Constants.ON;
+                scheduledJobForm.cronExpression = null;
+                final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
+                scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
+                final String[] ids = new String[] { "", "", "" };
+                if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+                    ids[0] = "\"" + id + "\"";
+                } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+                    ids[1] = "\"" + id + "\"";
+                } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+                    ids[2] = "\"" + id + "\"";
+                }
+                scheduledJobForm.scriptData =
+                        MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], id.replace('-', '_'));
+            });
+        });
     }
 
     @Execute
@@ -223,16 +221,15 @@ public class AdminSchedulerAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getScheduledJob(form).ifPresent(
-                entity -> {
-                    try {
-                        scheduledJobService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getScheduledJob(form).ifPresent(entity -> {
+            try {
+                scheduledJobService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -244,16 +241,15 @@ public class AdminSchedulerAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getScheduledJob(form).ifPresent(
-                entity -> {
-                    try {
-                        scheduledJobService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getScheduledJob(form).ifPresent(entity -> {
+            try {
+                scheduledJobService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
@@ -266,21 +262,17 @@ public class AdminSchedulerAction extends FessAdminAction {
         final String id = form.id;
         validate(form, messages -> {}, () -> asDetailsHtml(id));
         verifyToken(() -> asDetailsHtml(id));
-        scheduledJobService
-                .getScheduledJob(id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                scheduledJobService.delete(entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml(id));
-                });
+        scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            try {
+                scheduledJobService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml(id));
+        });
         return redirect(getClass());
     }
 
@@ -399,7 +391,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
             RenderDataUtil.register(data, "scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(schedulerPager, form, op -> op.include("id"));
             });

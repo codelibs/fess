@@ -196,16 +196,15 @@ public class AdminFileauthAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getFileAuthentication(form).ifPresent(
-                entity -> {
-                    try {
-                        fileAuthenticationService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getFileAuthentication(form).ifPresent(entity -> {
+            try {
+                fileAuthenticationService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirect(getClass());
@@ -217,16 +216,15 @@ public class AdminFileauthAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getFileAuthentication(form).ifPresent(
-                entity -> {
-                    try {
-                        fileAuthenticationService.store(entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        getFileAuthentication(form).ifPresent(entity -> {
+            try {
+                fileAuthenticationService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asEditHtml);
         });
         return redirect(getClass());
@@ -239,21 +237,17 @@ public class AdminFileauthAction extends FessAdminAction {
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
-        fileAuthenticationService
-                .getFileAuthentication(id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                fileAuthenticationService.delete(entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
-                });
+        fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+            try {
+                fileAuthenticationService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
+        });
         return redirect(getClass());
     }
 
@@ -331,13 +325,12 @@ public class AdminFileauthAction extends FessAdminAction {
     //                                                                           =========
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminFileauth_AdminFileauthJsp).renderWith(
-                data -> {
-                    RenderDataUtil.register(data, "fileAuthenticationItems",
-                            fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-                    RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper
-                            .getAllFileConfigList(false, false, false, null).isEmpty());
-                }).useForm(SearchForm.class, setup -> {
+        return asHtml(path_AdminFileauth_AdminFileauthJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "fileAuthenticationItems",
+                    fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
+            RenderDataUtil.register(data, "displayCreateLink",
+                    !crawlingConfigHelper.getAllFileConfigList(false, false, false, null).isEmpty());
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));
             });

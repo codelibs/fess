@@ -132,10 +132,8 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         copyBeanToBean(entity, body, copyOp -> copyOp.exclude(Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME).excludeNull()
                 .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, AdminAccesstokenAction.EXPIRES));
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        body.permissions =
-                stream(entity.getPermissions()).get(
-                        stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
-                                .collect(Collectors.joining("\n")));
+        body.permissions = stream(entity.getPermissions()).get(
+                stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
         body.crudMode = null;
         return body;
 

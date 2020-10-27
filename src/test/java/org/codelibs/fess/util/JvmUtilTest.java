@@ -40,15 +40,15 @@ public class JvmUtilTest extends UnitFessTestCase {
     public void test_filterJvmOptions() {
         final String[] args = new String[] { //
                 "-X111", //
-                        "8:-X222", //
-                        "10:-X333", //
-                        "11:-X444", //
-                        "8-:-X555", //
-                        "10-:-X666", //
-                        "11-:-X777", //
-                        "12-:-X888", //
-                        "-X999",//
-                };
+                "8:-X222", //
+                "10:-X333", //
+                "11:-X444", //
+                "8-:-X555", //
+                "10-:-X666", //
+                "11-:-X777", //
+                "12-:-X888", //
+                "-X999",//
+        };
 
         System.setProperty("java.version", "1.8.0_171");
         String[] values = JvmUtil.filterJvmOptions(args);

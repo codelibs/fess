@@ -154,16 +154,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-        stemmerOverrideService
-                .getStemmerOverrideItem(form.dictId, form.id)
-                .ifPresent(entity -> {
-                    form.input = entity.getInput();
-                    form.output = entity.getOutput();
-                })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            () -> asListHtml(form.dictId));
-                });
+        stemmerOverrideService.getStemmerOverrideItem(form.dictId, form.id).ifPresent(entity -> {
+            form.input = entity.getInput();
+            form.output = entity.getOutput();
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                    () -> asListHtml(form.dictId));
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -183,26 +180,20 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
-        return asDetailsHtml().useForm(
-                EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        stemmerOverrideService
-                                .getStemmerOverrideItem(dictId, id)
-                                .ifPresent(entity -> {
-                                    form.input = entity.getInput();
-                                    form.output = entity.getOutput();
-                                })
-                                .orElse(() -> {
-                                    throwValidationError(
-                                            messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                                            () -> asListHtml(dictId));
-                                });
-                        form.id = id;
-                        form.crudMode = crudMode;
-                        form.dictId = dictId;
-                    });
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                stemmerOverrideService.getStemmerOverrideItem(dictId, id).ifPresent(entity -> {
+                    form.input = entity.getInput();
+                    form.output = entity.getOutput();
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
+                            () -> asListHtml(dictId));
                 });
+                form.id = id;
+                form.crudMode = crudMode;
+                form.dictId = dictId;
+            });
+        });
     }
 
     // -----------------------------------------------------
@@ -230,17 +221,14 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return stemmerOverrideService
-                .getStemmerOverrideFile(form.dictId)
+        return stemmerOverrideService.getStemmerOverrideFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                }))
-                .orElseGet(
-                        () -> {
-                            throwValidationError(messages -> messages.addErrorsFailedToDownloadStemmeroverrideFile(GLOBAL),
-                                    () -> downloadpage(form.dictId));
-                            return null;
-                        });
+                })).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsFailedToDownloadStemmeroverrideFile(GLOBAL),
+                            () -> downloadpage(form.dictId));
+                    return null;
+                });
     }
 
     // -----------------------------------------------------
@@ -268,24 +256,19 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return stemmerOverrideService
-                .getStemmerOverrideFile(form.dictId)
-                .map(file -> {
-                    try (InputStream inputStream = form.stemmerOverrideFile.getInputStream()) {
-                        file.update(inputStream);
-                    } catch (final IOException e) {
-                        throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL),
-                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
-                    }
-                    saveInfo(messages -> messages.addSuccessUploadStemmeroverrideFile(GLOBAL));
-                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-                })
-                .orElseGet(
-                        () -> {
-                            throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL),
-                                    () -> uploadpage(form.dictId));
-                            return null;
-                        });
+        return stemmerOverrideService.getStemmerOverrideFile(form.dictId).map(file -> {
+            try (InputStream inputStream = form.stemmerOverrideFile.getInputStream()) {
+                file.update(inputStream);
+            } catch (final IOException e) {
+                throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL),
+                        () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+            }
+            saveInfo(messages -> messages.addSuccessUploadStemmeroverrideFile(GLOBAL));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL), () -> uploadpage(form.dictId));
+            return null;
+        });
 
     }
 
@@ -298,16 +281,15 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        createStemmerOverrideItem(form, this::asEditHtml).ifPresent(
-                entity -> {
-                    try {
-                        stemmerOverrideService.store(form.dictId, entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        createStemmerOverrideItem(form, this::asEditHtml).ifPresent(entity -> {
+            try {
+                stemmerOverrideService.store(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
@@ -319,16 +301,15 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        createStemmerOverrideItem(form, this::asEditHtml).ifPresent(
-                entity -> {
-                    try {
-                        stemmerOverrideService.store(form.dictId, entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        createStemmerOverrideItem(form, this::asEditHtml).ifPresent(entity -> {
+            try {
+                stemmerOverrideService.store(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             saveToken();
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asEditHtml);
         });
@@ -341,23 +322,17 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
-        stemmerOverrideService
-                .getStemmerOverrideItem(form.dictId, form.id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                stemmerOverrideService.delete(form.dictId, entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            this::asDetailsHtml);
-                });
+        stemmerOverrideService.getStemmerOverrideItem(form.dictId, form.id).ifPresent(entity -> {
+            try {
+                stemmerOverrideService.delete(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asDetailsHtml);
+        });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -419,11 +394,10 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml(final String dictId) {
-        return asHtml(path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp).renderWith(
-                data -> {
-                    RenderDataUtil.register(data, "stemmerOverrideItemItems",
-                            stemmerOverrideService.getStemmerOverrideList(dictId, stemmerOverridePager));
-                }).useForm(SearchForm.class, setup -> {
+        return asHtml(path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "stemmerOverrideItemItems",
+                    stemmerOverrideService.getStemmerOverrideList(dictId, stemmerOverridePager));
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(stemmerOverridePager, form, op -> op.include("id"));
             });

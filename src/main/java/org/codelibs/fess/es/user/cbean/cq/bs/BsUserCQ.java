@@ -109,9 +109,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         UserCQ filterQuery = new UserCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(),
+                    mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -265,7 +264,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setBusinessCategory_MatchPhrasePrefix(businessCategory, null);
     }
 
-    public void setBusinessCategory_MatchPhrasePrefix(String businessCategory, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setBusinessCategory_MatchPhrasePrefix(String businessCategory,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("businessCategory", businessCategory);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -931,7 +931,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDepartmentNumber_MatchPhrasePrefix(departmentNumber, null);
     }
 
-    public void setDepartmentNumber_MatchPhrasePrefix(String departmentNumber, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setDepartmentNumber_MatchPhrasePrefix(String departmentNumber,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("departmentNumber", departmentNumber);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1334,7 +1335,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDestinationIndicator_Terms(destinationIndicatorList, null);
     }
 
-    public void setDestinationIndicator_Terms(Collection<String> destinationIndicatorList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setDestinationIndicator_Terms(Collection<String> destinationIndicatorList,
+            ConditionOptionCall<TermsQueryBuilder> opLambda) {
         TermsQueryBuilder builder = regTermsQ("destinationIndicator", destinationIndicatorList);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1345,7 +1347,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDestinationIndicator_Terms(destinationIndicatorList, null);
     }
 
-    public void setDestinationIndicator_InScope(Collection<String> destinationIndicatorList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setDestinationIndicator_InScope(Collection<String> destinationIndicatorList,
+            ConditionOptionCall<TermsQueryBuilder> opLambda) {
         setDestinationIndicator_Terms(destinationIndicatorList, opLambda);
     }
 
@@ -3557,7 +3560,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setHomePostalAddress_MatchPhrasePrefix(homePostalAddress, null);
     }
 
-    public void setHomePostalAddress_MatchPhrasePrefix(String homePostalAddress, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setHomePostalAddress_MatchPhrasePrefix(String homePostalAddress,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("homePostalAddress", homePostalAddress);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3992,7 +3996,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setInternationaliSDNNumber_MatchPhrase(internationaliSDNNumber, null);
     }
 
-    public void setInternationaliSDNNumber_MatchPhrase(String internationaliSDNNumber, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+    public void setInternationaliSDNNumber_MatchPhrase(String internationaliSDNNumber,
+            ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
         MatchPhraseQueryBuilder builder = regMatchPhraseQ("internationaliSDNNumber", internationaliSDNNumber);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -4129,7 +4134,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setInternationaliSDNNumber_CommonTerms(internationaliSDNNumber, null);
     }
 
-    public void setInternationaliSDNNumber_CommonTerms(String internationaliSDNNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+    public void setInternationaliSDNNumber_CommonTerms(String internationaliSDNNumber,
+            ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("internationaliSDNNumber", internationaliSDNNumber);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -5595,7 +5601,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPhysicalDeliveryOfficeName_Wildcard(physicalDeliveryOfficeName, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Wildcard(String physicalDeliveryOfficeName, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_Wildcard(String physicalDeliveryOfficeName,
+            ConditionOptionCall<WildcardQueryBuilder> opLambda) {
         WildcardQueryBuilder builder = regWildcardQ("physicalDeliveryOfficeName", physicalDeliveryOfficeName);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -5617,7 +5624,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPhysicalDeliveryOfficeName_SpanTerm("physicalDeliveryOfficeName", null);
     }
 
-    public void setPhysicalDeliveryOfficeName_SpanTerm(String physicalDeliveryOfficeName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_SpanTerm(String physicalDeliveryOfficeName,
+            ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
         SpanTermQueryBuilder builder = regSpanTermQ("physicalDeliveryOfficeName", physicalDeliveryOfficeName);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -5628,7 +5636,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPhysicalDeliveryOfficeName_GreaterThan(physicalDeliveryOfficeName, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_GreaterThan(String physicalDeliveryOfficeName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_GreaterThan(String physicalDeliveryOfficeName,
+            ConditionOptionCall<RangeQueryBuilder> opLambda) {
         final Object _value = physicalDeliveryOfficeName;
         RangeQueryBuilder builder = regRangeQ("physicalDeliveryOfficeName", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
@@ -5665,7 +5674,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPhysicalDeliveryOfficeName_LessEqual(physicalDeliveryOfficeName, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_LessEqual(String physicalDeliveryOfficeName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_LessEqual(String physicalDeliveryOfficeName,
+            ConditionOptionCall<RangeQueryBuilder> opLambda) {
         final Object _value = physicalDeliveryOfficeName;
         RangeQueryBuilder builder = regRangeQ("physicalDeliveryOfficeName", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
@@ -6452,7 +6462,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPreferredLanguage_MatchPhrasePrefix(preferredLanguage, null);
     }
 
-    public void setPreferredLanguage_MatchPhrasePrefix(String preferredLanguage, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setPreferredLanguage_MatchPhrasePrefix(String preferredLanguage,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("preferredLanguage", preferredLanguage);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -6674,7 +6685,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setRegisteredAddress_MatchPhrasePrefix(registeredAddress, null);
     }
 
-    public void setRegisteredAddress_MatchPhrasePrefix(String registeredAddress, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+    public void setRegisteredAddress_MatchPhrasePrefix(String registeredAddress,
+            ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
         MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("registeredAddress", registeredAddress);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -8265,7 +8277,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTeletexTerminalIdentifier_Wildcard(teletexTerminalIdentifier, null);
     }
 
-    public void setTeletexTerminalIdentifier_Wildcard(String teletexTerminalIdentifier, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_Wildcard(String teletexTerminalIdentifier,
+            ConditionOptionCall<WildcardQueryBuilder> opLambda) {
         WildcardQueryBuilder builder = regWildcardQ("teletexTerminalIdentifier", teletexTerminalIdentifier);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -8287,7 +8300,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTeletexTerminalIdentifier_SpanTerm("teletexTerminalIdentifier", null);
     }
 
-    public void setTeletexTerminalIdentifier_SpanTerm(String teletexTerminalIdentifier, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_SpanTerm(String teletexTerminalIdentifier,
+            ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
         SpanTermQueryBuilder builder = regSpanTermQ("teletexTerminalIdentifier", teletexTerminalIdentifier);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -8298,7 +8312,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTeletexTerminalIdentifier_GreaterThan(teletexTerminalIdentifier, null);
     }
 
-    public void setTeletexTerminalIdentifier_GreaterThan(String teletexTerminalIdentifier, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_GreaterThan(String teletexTerminalIdentifier,
+            ConditionOptionCall<RangeQueryBuilder> opLambda) {
         final Object _value = teletexTerminalIdentifier;
         RangeQueryBuilder builder = regRangeQ("teletexTerminalIdentifier", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
@@ -8322,7 +8337,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTeletexTerminalIdentifier_GreaterEqual(teletexTerminalIdentifier, null);
     }
 
-    public void setTeletexTerminalIdentifier_GreaterEqual(String teletexTerminalIdentifier, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_GreaterEqual(String teletexTerminalIdentifier,
+            ConditionOptionCall<RangeQueryBuilder> opLambda) {
         final Object _value = teletexTerminalIdentifier;
         RangeQueryBuilder builder = regRangeQ("teletexTerminalIdentifier", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {

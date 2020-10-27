@@ -219,7 +219,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setAvailable_PercentileRanks("available", values, opLambda);
     }
 
-    public void setAvailable_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setAvailable_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "available", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -488,7 +489,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setBoost_Range("boost", opLambda, aggsLambda);
     }
 
-    public void setBoost_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setBoost_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -614,7 +616,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setConfigParameter_IpRange("configParameter", opLambda, null);
     }
 
-    public void setConfigParameter_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setConfigParameter_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setConfigParameter_IpRange("configParameter", opLambda, aggsLambda);
     }
 
@@ -669,7 +672,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setConfigParameter_Missing("configParameter", opLambda, null);
     }
 
-    public void setConfigParameter_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setConfigParameter_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setConfigParameter_Missing("configParameter", opLambda, aggsLambda);
     }
 
@@ -930,7 +934,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks("createdTime", values, opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -945,7 +950,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
@@ -1199,7 +1205,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setDepth_Range("depth", opLambda, aggsLambda);
     }
 
-    public void setDepth_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setDepth_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         RangeAggregationBuilder builder = regRangeA(name, "depth");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1380,7 +1387,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setExcludedDocPaths_IpRange("excludedDocPaths", opLambda, null);
     }
 
-    public void setExcludedDocPaths_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setExcludedDocPaths_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setExcludedDocPaths_IpRange("excludedDocPaths", opLambda, aggsLambda);
     }
 
@@ -1435,7 +1443,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setExcludedDocPaths_Missing("excludedDocPaths", opLambda, null);
     }
 
-    public void setExcludedDocPaths_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setExcludedDocPaths_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setExcludedDocPaths_Missing("excludedDocPaths", opLambda, aggsLambda);
     }
 
@@ -1642,7 +1651,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setIncludedDocPaths_IpRange("includedDocPaths", opLambda, null);
     }
 
-    public void setIncludedDocPaths_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setIncludedDocPaths_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setIncludedDocPaths_IpRange("includedDocPaths", opLambda, aggsLambda);
     }
 
@@ -1697,7 +1707,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setIncludedDocPaths_Missing("includedDocPaths", opLambda, null);
     }
 
-    public void setIncludedDocPaths_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setIncludedDocPaths_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setIncludedDocPaths_Missing("includedDocPaths", opLambda, aggsLambda);
     }
 
@@ -1974,7 +1985,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setIntervalTime_Histogram("intervalTime", opLambda, null);
     }
 
-    public void setIntervalTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setIntervalTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setIntervalTime_Histogram("intervalTime", opLambda, aggsLambda);
     }
 
@@ -2281,7 +2293,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setMaxAccessCount_Missing("maxAccessCount", opLambda, null);
     }
 
-    public void setMaxAccessCount_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setMaxAccessCount_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setMaxAccessCount_Missing("maxAccessCount", opLambda, aggsLambda);
     }
 
@@ -2541,7 +2554,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setNumOfThread_PercentileRanks("numOfThread", values, opLambda);
     }
 
-    public void setNumOfThread_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setNumOfThread_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "numOfThread", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -2556,7 +2570,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setNumOfThread_Histogram("numOfThread", opLambda, null);
     }
 
-    public void setNumOfThread_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setNumOfThread_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setNumOfThread_Histogram("numOfThread", opLambda, aggsLambda);
     }
 
@@ -2665,7 +2680,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setPaths_Terms("paths", opLambda, aggsLambda);
     }
 
-    public void setPaths_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setPaths_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         TermsAggregationBuilder builder = regTermsA(name, "paths");
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3027,7 +3043,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks("sortOrder", values, opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3252,7 +3269,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setTimeToLive_PercentileRanks("timeToLive", values, opLambda);
     }
 
-    public void setTimeToLive_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setTimeToLive_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "timeToLive", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3267,7 +3285,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setTimeToLive_Histogram("timeToLive", opLambda, null);
     }
 
-    public void setTimeToLive_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setTimeToLive_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setTimeToLive_Histogram("timeToLive", opLambda, aggsLambda);
     }
 
@@ -3608,7 +3627,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks("updatedTime", values, opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime", values);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -3623,7 +3643,8 @@ public abstract class BsFileConfigCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFileConfigCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFileConfigCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 

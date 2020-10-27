@@ -250,24 +250,22 @@ public class SearchLogHelper {
 
         final List<SearchLog> searchLogList = new ArrayList<>();
         final Map<String, UserInfo> userInfoMap = new HashMap<>();
-        queue.stream().forEach(
-                searchLog -> {
-                    final String userAgent = searchLog.getUserAgent();
-                    final boolean isBot =
-                            userAgent != null
-                                    && stream(botNames).get(stream -> stream.anyMatch(botName -> userAgent.indexOf(botName) >= 0));
-                    if (!isBot) {
-                        searchLog.getUserInfo().ifPresent(userInfo -> {
-                            final String code = userInfo.getId();
-                            final UserInfo oldUserInfo = userInfoMap.get(code);
-                            if (oldUserInfo != null) {
-                                userInfo.setCreatedAt(oldUserInfo.getCreatedAt());
-                            }
-                            userInfoMap.put(code, userInfo);
-                        });
-                        searchLogList.add(searchLog);
+        queue.stream().forEach(searchLog -> {
+            final String userAgent = searchLog.getUserAgent();
+            final boolean isBot =
+                    userAgent != null && stream(botNames).get(stream -> stream.anyMatch(botName -> userAgent.indexOf(botName) >= 0));
+            if (!isBot) {
+                searchLog.getUserInfo().ifPresent(userInfo -> {
+                    final String code = userInfo.getId();
+                    final UserInfo oldUserInfo = userInfoMap.get(code);
+                    if (oldUserInfo != null) {
+                        userInfo.setCreatedAt(oldUserInfo.getCreatedAt());
                     }
+                    userInfoMap.put(code, userInfo);
                 });
+                searchLogList.add(searchLog);
+            }
+        });
 
         if (!userInfoMap.isEmpty()) {
             final List<UserInfo> insertList = new ArrayList<>(userInfoMap.values());
@@ -348,23 +346,19 @@ public class SearchLogHelper {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             try {
                 final UpdateRequest[] updateRequests =
-                        searchHelper
-                                .getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                                        new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
-                                        OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH)
-                                .stream()
-                                .map(doc -> {
+                        searchHelper.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
+                                new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
+                                OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH).stream().map(doc -> {
                                     final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                     final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                                     if (id != null && docId != null && clickCountMap.containsKey(docId)) {
                                         final Integer count = clickCountMap.get(docId);
-                                        final Script script =
-                                                ComponentUtil.getLanguageHelper().createScript(doc,
-                                                        "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
+                                        final Script script = ComponentUtil.getLanguageHelper().createScript(doc,
+                                                "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
                                         final Map<String, Object> upsertMap = new HashMap<>();
                                         upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
-                                        return new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script).upsert(
-                                                upsertMap);
+                                        return new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script)
+                                                .upsert(upsertMap);
                                     }
                                     return null;
                                 }).filter(req -> req != null).toArray(n -> new UpdateRequest[n]);

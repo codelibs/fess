@@ -181,9 +181,8 @@ public class CrawlTestBase extends ITBase {
 
     protected static void deleteDocuments(final String queryString) {
         List<String> docIds = new ArrayList<>();
-        Response response =
-                given().contentType("application/json").param("scroll", "1m").param("q", queryString)
-                        .get(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/_search");
+        Response response = given().contentType("application/json").param("scroll", "1m").param("q", queryString)
+                .get(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/_search");
         JsonPath jsonPath = JsonPath.from(response.asString());
         String scrollId = jsonPath.getString("_scroll_id");
         while (true) {

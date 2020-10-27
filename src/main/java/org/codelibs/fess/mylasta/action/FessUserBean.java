@@ -77,8 +77,8 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     }
 
     public boolean hasRoles(final String[] acceptedRoles) {
-        return stream(user.getRoleNames()).get(
-                stream -> stream.anyMatch(s1 -> stream(acceptedRoles).get(s3 -> s3.anyMatch(s2 -> s2.equals(s1)))));
+        return stream(user.getRoleNames())
+                .get(stream -> stream.anyMatch(s1 -> stream(acceptedRoles).get(s3 -> s3.anyMatch(s2 -> s2.equals(s1)))));
     }
 
     public boolean hasGroup(final String group) {
@@ -86,8 +86,8 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     }
 
     public boolean hasGroups(final String[] acceptedGroups) {
-        return stream(user.getGroupNames()).get(
-                stream -> stream.anyMatch(s1 -> stream(acceptedGroups).get(s3 -> s3.anyMatch(s2 -> s2.equals(s1)))));
+        return stream(user.getGroupNames())
+                .get(stream -> stream.anyMatch(s1 -> stream(acceptedGroups).get(s3 -> s3.anyMatch(s2 -> s2.equals(s1)))));
     }
 
     public FessUser getFessUser() {

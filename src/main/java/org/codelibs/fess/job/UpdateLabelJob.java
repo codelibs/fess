@@ -46,37 +46,26 @@ public class UpdateLabelJob {
         final StringBuilder resultBuf = new StringBuilder();
 
         try {
-            final long count =
-                    fessEsClient.updateByQuery(
-                            fessConfig.getIndexDocumentUpdateIndex(),
-                            option -> {
-                                if (queryBuilder != null) {
-                                    option.setQuery(queryBuilder);
-                                }
-                                return option.setFetchSource(
-                                        new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() }, null);
-                            },
-                            (builder, hit) -> {
-                                try {
-                                    final Map<String, Object> doc = hit.getSourceAsMap();
-                                    final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-                                    if (StringUtil.isNotBlank(url)) {
-                                        final Set<String> labelSet = labelTypeHelper.getMatchedLabelValueSet(url);
-                                        final Script script =
-                                                languageHelper.createScript(
-                                                        doc,
-                                                        "ctx._source."
-                                                                + fessConfig.getIndexFieldLabel()
-                                                                + "=new String[]{"
-                                                                + labelSet.stream().map(s -> "\"" + s + "\"")
-                                                                        .collect(Collectors.joining(",")) + "}");
-                                        return builder.setScript(script);
-                                    }
-                                } catch (final Exception e) {
-                                    logger.warn("Failed to process " + hit, e);
-                                }
-                                return null;
-                            });
+            final long count = fessEsClient.updateByQuery(fessConfig.getIndexDocumentUpdateIndex(), option -> {
+                if (queryBuilder != null) {
+                    option.setQuery(queryBuilder);
+                }
+                return option.setFetchSource(new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() }, null);
+            }, (builder, hit) -> {
+                try {
+                    final Map<String, Object> doc = hit.getSourceAsMap();
+                    final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+                    if (StringUtil.isNotBlank(url)) {
+                        final Set<String> labelSet = labelTypeHelper.getMatchedLabelValueSet(url);
+                        final Script script = languageHelper.createScript(doc, "ctx._source." + fessConfig.getIndexFieldLabel()
+                                + "=new String[]{" + labelSet.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + "}");
+                        return builder.setScript(script);
+                    }
+                } catch (final Exception e) {
+                    logger.warn("Failed to process " + hit, e);
+                }
+                return null;
+            });
             resultBuf.append(count).append(" docs").append("\n");
         } catch (final Exception e) {
             logger.error("Could not update labels.", e);

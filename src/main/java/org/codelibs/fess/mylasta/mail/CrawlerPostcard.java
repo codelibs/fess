@@ -50,9 +50,9 @@ public class CrawlerPostcard extends LaTypicalPostcard {
 
     @Override
     protected String[] getPropertyNames() {
-        return new String[] { "hostname", "jobname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime",
-                "webFsIndexExecTime", "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime",
-                "dataIndexSize", "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
+        return new String[] { "hostname", "jobname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime", "webFsIndexExecTime",
+                "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataIndexSize",
+                "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
     }
 
     // ===================================================================================

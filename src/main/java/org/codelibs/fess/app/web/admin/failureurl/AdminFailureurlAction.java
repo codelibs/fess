@@ -178,7 +178,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             RenderDataUtil.register(data, "failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
-            }).useForm(SearchForm.class, setup -> {
+        }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(failureUrlPager, form, op -> op.include("url", "errorCountMin", "errorCountMax", "errorName"));
             });

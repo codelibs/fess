@@ -156,16 +156,13 @@ public class AdminDictMappingAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-        charMappingService
-                .getCharMappingItem(form.dictId, form.id)
-                .ifPresent(entity -> {
-                    form.inputs = entity.getInputsValue();
-                    form.output = entity.getOutput();
-                })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            () -> asListHtml(form.dictId));
-                });
+        charMappingService.getCharMappingItem(form.dictId, form.id).ifPresent(entity -> {
+            form.inputs = entity.getInputsValue();
+            form.output = entity.getOutput();
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                    () -> asListHtml(form.dictId));
+        });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -185,26 +182,20 @@ public class AdminDictMappingAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
-        return asDetailsHtml().useForm(
-                EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        charMappingService
-                                .getCharMappingItem(dictId, id)
-                                .ifPresent(entity -> {
-                                    form.inputs = entity.getInputsValue();
-                                    form.output = entity.getOutput();
-                                })
-                                .orElse(() -> {
-                                    throwValidationError(
-                                            messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                                            () -> asListHtml(dictId));
-                                });
-                        form.id = id;
-                        form.crudMode = crudMode;
-                        form.dictId = dictId;
-                    });
+        return asDetailsHtml().useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                charMappingService.getCharMappingItem(dictId, id).ifPresent(entity -> {
+                    form.inputs = entity.getInputsValue();
+                    form.output = entity.getOutput();
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
+                            () -> asListHtml(dictId));
                 });
+                form.id = id;
+                form.crudMode = crudMode;
+                form.dictId = dictId;
+            });
+        });
     }
 
     // -----------------------------------------------------
@@ -232,17 +223,14 @@ public class AdminDictMappingAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return charMappingService
-                .getCharMappingFile(form.dictId)
+        return charMappingService.getCharMappingFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                }))
-                .orElseGet(
-                        () -> {
-                            throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL),
-                                    () -> downloadpage(form.dictId));
-                            return null;
-                        });
+                })).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL),
+                            () -> downloadpage(form.dictId));
+                    return null;
+                });
     }
 
     // -----------------------------------------------------
@@ -270,21 +258,19 @@ public class AdminDictMappingAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return charMappingService
-                .getCharMappingFile(form.dictId)
-                .map(file -> {
-                    try (InputStream inputStream = form.charMappingFile.getInputStream()) {
-                        file.update(inputStream);
-                    } catch (final IOException e) {
-                        throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL),
-                                () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
-                    }
-                    saveInfo(messages -> messages.addSuccessUploadMappingFile(GLOBAL));
-                    return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
-                }).orElseGet(() -> {
-                    throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL), () -> uploadpage(form.dictId));
-                    return null;
-                });
+        return charMappingService.getCharMappingFile(form.dictId).map(file -> {
+            try (InputStream inputStream = form.charMappingFile.getInputStream()) {
+                file.update(inputStream);
+            } catch (final IOException e) {
+                throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL),
+                        () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
+            }
+            saveInfo(messages -> messages.addSuccessUploadMappingFile(GLOBAL));
+            return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL), () -> uploadpage(form.dictId));
+            return null;
+        });
 
     }
 
@@ -297,16 +283,15 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        createCharMappingItem(form, this::asEditHtml).ifPresent(
-                entity -> {
-                    try {
-                        charMappingService.store(form.dictId, entity);
-                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        createCharMappingItem(form, this::asEditHtml).ifPresent(entity -> {
+            try {
+                charMappingService.store(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
@@ -318,16 +303,15 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        createCharMappingItem(form, this::asEditHtml).ifPresent(
-                entity -> {
-                    try {
-                        charMappingService.store(form.dictId, entity);
-                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (final Exception e) {
-                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                this::asEditHtml);
-                    }
-                }).orElse(() -> {
+        createCharMappingItem(form, this::asEditHtml).ifPresent(entity -> {
+            try {
+                charMappingService.store(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asEditHtml);
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
@@ -339,23 +323,17 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
-        charMappingService
-                .getCharMappingItem(form.dictId, form.id)
-                .ifPresent(
-                        entity -> {
-                            try {
-                                charMappingService.delete(form.dictId, entity);
-                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (final Exception e) {
-                                throwValidationError(
-                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
-                                        this::asEditHtml);
-                            }
-                        })
-                .orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                            this::asDetailsHtml);
-                });
+        charMappingService.getCharMappingItem(form.dictId, form.id).ifPresent(entity -> {
+            try {
+                charMappingService.delete(form.dictId, entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        this::asEditHtml);
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), this::asDetailsHtml);
+        });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 

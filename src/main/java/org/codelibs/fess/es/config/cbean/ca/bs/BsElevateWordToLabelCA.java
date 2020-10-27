@@ -58,7 +58,8 @@ public abstract class BsElevateWordToLabelCA extends EsAbstractConditionAggregat
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsElevateWordToLabelCA> aggsLambda) {
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordToLabelCA> aggsLambda) {
         GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -239,7 +240,8 @@ public abstract class BsElevateWordToLabelCA extends EsAbstractConditionAggregat
         setLabelTypeId_Terms("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsElevateWordToLabelCA> aggsLambda) {
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsElevateWordToLabelCA> aggsLambda) {
         setLabelTypeId_Terms("labelTypeId", opLambda, aggsLambda);
     }
 

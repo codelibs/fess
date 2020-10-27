@@ -170,8 +170,8 @@ public class ViewHelper {
         }
         try {
             final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
-            servletContext.setSessionTrackingModes(fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf)
-                    .collect(Collectors.toSet()));
+            servletContext.setSessionTrackingModes(
+                    fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf).collect(Collectors.toSet()));
         } catch (final Throwable t) {
             logger.warn("Failed to set SessionTrackingMode.", t);
         }
@@ -746,10 +746,8 @@ public class ViewHelper {
 
     public FacetResponse getCachedFacetResponse(final String query) {
         final OptionalThing<FessUserBean> userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
-        final String permissionKey =
-                userBean.map(
-                        user -> StreamUtil.stream(user.getPermissions()).get(
-                                stream -> stream.sorted().distinct().collect(Collectors.joining("\n")))).orElse(StringUtil.EMPTY);
+        final String permissionKey = userBean.map(user -> StreamUtil.stream(user.getPermissions())
+                .get(stream -> stream.sorted().distinct().collect(Collectors.joining("\n")))).orElse(StringUtil.EMPTY);
 
         try {
             return facetCache.get(query + "\n" + permissionKey, () -> {

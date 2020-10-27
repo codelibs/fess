@@ -105,7 +105,8 @@ public abstract class BsThumbnailQueueBhv extends EsAbstractBehavior<ThumbnailQu
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends ThumbnailQueue> OptionalEntity<ENTITY> doSelectOptionalEntity(ThumbnailQueueCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ThumbnailQueue> OptionalEntity<ENTITY> doSelectOptionalEntity(ThumbnailQueueCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
