@@ -75,40 +75,44 @@ public class KeyMatchHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>>> keyMatchQueryMap = new HashMap<>();
         getAvailableKeyMatchList().stream().forEach(keyMatch -> {
-            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Loading KeyMatch Query: {}, Size: {}", keyMatch.getQuery(), keyMatch.getMaxSize());
-            }
-            getDocumentList(keyMatch).stream().map(doc -> {
+            try {
+                final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Loaded KeyMatch doc: {}", doc);
+                    logger.debug("Loading KeyMatch Query: {}, Size: {}", keyMatch.getQuery(), keyMatch.getMaxSize());
                 }
-                return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
-            }).forEach(docId -> {
-                boolQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-            });
+                getDocumentList(keyMatch).stream().map(doc -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Loaded KeyMatch doc: {}", doc);
+                    }
+                    return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                }).forEach(docId -> {
+                    boolQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+                });
 
-            if (boolQuery.hasClauses()) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Loaded KeyMatch Boost Query: {}", boolQuery);
+                if (boolQuery.hasClauses()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Loaded KeyMatch Boost Query: {}", boolQuery);
+                    }
+                    String virtualHost = keyMatch.getVirtualHost();
+                    if (StringUtil.isBlank(virtualHost)) {
+                        virtualHost = StringUtil.EMPTY;
+                    }
+                    Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> queryMap = keyMatchQueryMap.get(virtualHost);
+                    if (queryMap == null) {
+                        queryMap = new HashMap<>();
+                        keyMatchQueryMap.put(virtualHost, queryMap);
+                    }
+                    queryMap.put(toLowerCase(keyMatch.getTerm()),
+                            new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("No KeyMatch boost docs");
                 }
-                String virtualHost = keyMatch.getVirtualHost();
-                if (StringUtil.isBlank(virtualHost)) {
-                    virtualHost = StringUtil.EMPTY;
-                }
-                Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> queryMap = keyMatchQueryMap.get(virtualHost);
-                if (queryMap == null) {
-                    queryMap = new HashMap<>();
-                    keyMatchQueryMap.put(virtualHost, queryMap);
-                }
-                queryMap.put(toLowerCase(keyMatch.getTerm()),
-                        new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("No KeyMatch boost docs");
-            }
 
-            if (interval > 0) {
-                ThreadUtil.sleep(interval);
+                if (interval > 0) {
+                    ThreadUtil.sleep(interval);
+                }
+            } catch (final Exception e) {
+                logger.warn("Cannot load {}", keyMatch, e);
             }
         });
         this.keyMatchQueryMap = keyMatchQueryMap;
