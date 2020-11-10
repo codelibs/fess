@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.SearchLogEvent;
 import org.codelibs.fess.es.log.bsentity.BsSearchLog;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
@@ -36,7 +37,7 @@ import org.dbflute.optional.OptionalEntity;
 /**
  * @author FreeGen
  */
-public class SearchLog extends BsSearchLog {
+public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -147,4 +148,8 @@ public class SearchLog extends BsSearchLog {
                 + userSessionId + ", virtualHost=" + virtualHost + ", documents=" + documentList + "]";
     }
 
+    @Override
+    public String getEventType() {
+        return "log";
+    }
 }

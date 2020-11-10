@@ -28,6 +28,7 @@ import org.codelibs.fess.es.log.exentity.FavoriteLog;
 import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 
 public class FavoriteLogService {
@@ -48,6 +49,10 @@ public class FavoriteLogService {
             final FavoriteLog favoriteLog = new FavoriteLog();
             favoriteLogLambda.accept(userInfo, favoriteLog);
             favoriteLogBhv.insert(favoriteLog);
+            if (fessConfig.isLoggingSearchUseLogfile()) {
+                ComponentUtil.getSearchLogHelper().writeSearchLogEvent(favoriteLog);
+                ;
+            }
             return true;
         }).orElse(false);
     }

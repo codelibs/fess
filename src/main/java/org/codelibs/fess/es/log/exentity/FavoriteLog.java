@@ -21,12 +21,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import org.codelibs.fess.entity.SearchLogEvent;
 import org.codelibs.fess.es.log.bsentity.BsFavoriteLog;
 
 /**
  * @author FreeGen
  */
-public class FavoriteLog extends BsFavoriteLog {
+public class FavoriteLog extends BsFavoriteLog implements SearchLogEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -84,5 +85,10 @@ public class FavoriteLog extends BsFavoriteLog {
     public String toString() {
         return "FavoriteLog [createdAt=" + createdAt + ", url=" + url + ", docId=" + docId + ", queryId=" + queryId + ", userInfoId="
                 + userInfoId + ", docMeta=" + docMeta + "]";
+    }
+
+    @Override
+    public String getEventType() {
+        return "favorite";
     }
 }

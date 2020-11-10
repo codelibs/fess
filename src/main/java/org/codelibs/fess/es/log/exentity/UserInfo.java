@@ -21,12 +21,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import org.codelibs.fess.entity.SearchLogEvent;
 import org.codelibs.fess.es.log.bsentity.BsUserInfo;
 
 /**
  * @author FreeGen
  */
-public class UserInfo extends BsUserInfo {
+public class UserInfo extends BsUserInfo implements SearchLogEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -83,5 +84,10 @@ public class UserInfo extends BsUserInfo {
     @Override
     public String toString() {
         return "UserInfo [createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", docMeta=" + docMeta + "]";
+    }
+
+    @Override
+    public String getEventType() {
+        return "user";
     }
 }

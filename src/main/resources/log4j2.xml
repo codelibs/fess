@@ -10,6 +10,7 @@
 		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
 		<Property name="backup.max.history" value="90" />
 		<Property name="audit.log.pattern" value="%msg%n" />
+		<Property name="searchlog.log.pattern" value="%msg%n" />
 	</Properties>
 
 	<Appenders>
@@ -52,6 +53,18 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
+		<RollingFile name="SearchLogFile" fileName="${log.file.basedir}/searchlog.log"
+			filePattern="${log.file.basedir}/searchlog${backup.date.suffix}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>${searchlog.log.pattern}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy fileIndex="max" min="1"
+				max="${backup.max.history}" compressionLevel="9" />
+		</RollingFile>
 	</Appenders>
 
 	<Loggers>
@@ -70,6 +83,9 @@
 		<Logger name="fess.log.audit" additivity="false" level="info">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="AuditFile" />
+		</Logger>
+		<Logger name="fess.log.searchlog" additivity="false" level="info">
+			<AppenderRef ref="SearchLogFile" />
 		</Logger>
 		<Root level="${root.log.level}">
 			<AppenderRef ref="Console" />

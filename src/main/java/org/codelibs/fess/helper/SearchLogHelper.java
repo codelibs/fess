@@ -27,6 +27,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.SearchLogEvent;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
@@ -57,6 +59,9 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.CaseFormat;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -74,6 +79,12 @@ public class SearchLogHelper {
 
     protected LoadingCache<String, UserInfo> userInfoCache;
 
+    protected String loggerName = "fess.log.searchlog";
+
+    protected Logger searchLogLogger = null;
+
+    protected ObjectMapper objectMapper = new ObjectMapper();
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -88,6 +99,7 @@ public class SearchLogHelper {
                         return storeUserInfo(key);
                     }
                 });
+        searchLogLogger = LogManager.getLogger(loggerName);
     }
 
     public void addSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId, final String query,
@@ -267,7 +279,27 @@ public class SearchLogHelper {
             }
         });
 
+        processUserInfoLog(searchLogList, userInfoMap);
+        processSearchLog(searchLogList);
+    }
+
+    private void processSearchLog(final List<SearchLog> searchLogList) {
+        if (!searchLogList.isEmpty()) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            storeSearchLogList(searchLogList);
+            if (fessConfig.isSuggestSearchLog()) {
+                final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
+                suggestHelper.indexFromSearchLog(searchLogList);
+            }
+            if (fessConfig.isLoggingSearchUseLogfile()) {
+                searchLogList.forEach(this::writeSearchLogEvent);
+            }
+        }
+    }
+
+    protected void processUserInfoLog(final List<SearchLog> searchLogList, final Map<String, UserInfo> userInfoMap) {
         if (!userInfoMap.isEmpty()) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final List<UserInfo> insertList = new ArrayList<>(userInfoMap.values());
             final List<UserInfo> updateList = new ArrayList<>();
             final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
@@ -289,13 +321,9 @@ public class SearchLogHelper {
                     searchLog.setUserInfoId(userInfo.getId());
                 });
             });
-        }
-
-        if (!searchLogList.isEmpty()) {
-            storeSearchLogList(searchLogList);
-            if (fessConfig.isSuggestSearchLog()) {
-                final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-                suggestHelper.indexFromSearchLog(searchLogList);
+            if (fessConfig.isLoggingSearchUseLogfile()) {
+                insertList.forEach(this::writeSearchLogEvent);
+                updateList.forEach(this::writeSearchLogEvent);
             }
         }
     }
@@ -332,15 +360,12 @@ public class SearchLogHelper {
                 logger.warn("Failed to process: {}", clickLog, e);
             }
         }
-        if (!clickLogList.isEmpty()) {
-            try {
-                final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
-                clickLogBhv.batchInsert(clickLogList);
-            } catch (final Exception e) {
-                logger.warn("Failed to insert: {}", clickLogList, e);
-            }
-        }
+        processClickLog(clickLogList);
 
+        updateClickFieldInIndex(clickCountMap);
+    }
+
+    protected void updateClickFieldInIndex(final Map<String, Integer> clickCountMap) {
         if (!clickCountMap.isEmpty()) {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -375,11 +400,60 @@ public class SearchLogHelper {
         }
     }
 
+    protected void processClickLog(final List<ClickLog> clickLogList) {
+        if (!clickLogList.isEmpty()) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            try {
+                final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
+                clickLogBhv.batchInsert(clickLogList);
+            } catch (final Exception e) {
+                logger.warn("Failed to insert: {}", clickLogList, e);
+            }
+            if (fessConfig.isLoggingSearchUseLogfile()) {
+                clickLogList.forEach(this::writeSearchLogEvent);
+            }
+        }
+    }
+
+    public void writeSearchLogEvent(SearchLogEvent event) {
+        try {
+            final Map<String, Object> source = toSource(event);
+            searchLogLogger.info(objectMapper.writeValueAsString(source));
+        } catch (JsonProcessingException e) {
+            logger.warn("Failed to write {}", event, e);
+        }
+    }
+
+    protected Map<String, Object> toSource(SearchLogEvent searchLogEvent) {
+        final Map<String, Object> source = toLowerHyphen(searchLogEvent.toSource());
+        source.put("_id", searchLogEvent.getId());
+        // source.put("version_no", searchLogEvent.getVersionNo());
+        source.put("event_type", searchLogEvent.getEventType());
+        return source;
+    }
+
+    protected Map<String, Object> toLowerHyphen(Map<String, Object> source) {
+        return source.entrySet().stream()
+                .collect(Collectors.toMap(e -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, e.getKey()), e -> {
+                    final Object value = e.getValue();
+                    if (value instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Object> mapValue = (Map<String, Object>) value;
+                        return toLowerHyphen(mapValue);
+                    }
+                    return e.getValue();
+                }));
+    }
+
     public void setUserCheckInterval(final long userCheckInterval) {
         this.userCheckInterval = userCheckInterval;
     }
 
     public void setUserInfoCacheSize(final int userInfoCacheSize) {
         this.userInfoCacheSize = userInfoCacheSize;
+    }
+
+    public void setLoggerName(String loggerName) {
+        this.loggerName = loggerName;
     }
 }

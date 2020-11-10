@@ -983,6 +983,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp */
     String LOGGING_SEARCH_DOCS_FIELDS = "logging.search.docs.fields";
 
+    /** The key of the configuration. e.g. true */
+    String LOGGING_SEARCH_USE_LOGFILE = "logging.search.use.logfile";
+
     /** The key of the configuration. e.g. org.codelibs,org.dbflute,org.lastaflute */
     String LOGGING_APP_PACKAGES = "logging.app.packages";
 
@@ -4470,6 +4473,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingSearchDocsFields();
+
+    /**
+     * Get the value for the key 'logging.search.use.logfile'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLoggingSearchUseLogfile();
+
+    /**
+     * Is the property for the key 'logging.search.use.logfile' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLoggingSearchUseLogfile();
 
     /**
      * Get the value for the key 'logging.app.packages'. <br>
@@ -8033,6 +8050,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.LOGGING_SEARCH_DOCS_FIELDS);
         }
 
+        public String getLoggingSearchUseLogfile() {
+            return get(FessConfig.LOGGING_SEARCH_USE_LOGFILE);
+        }
+
+        public boolean isLoggingSearchUseLogfile() {
+            return is(FessConfig.LOGGING_SEARCH_USE_LOGFILE);
+        }
+
         public String getLoggingAppPackages() {
             return get(FessConfig.LOGGING_APP_PACKAGES);
         }
@@ -9447,6 +9472,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,
                     "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
+            defaultMap.put(FessConfig.LOGGING_SEARCH_USE_LOGFILE, "true");
             defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");

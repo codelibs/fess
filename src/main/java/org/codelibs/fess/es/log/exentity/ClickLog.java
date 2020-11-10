@@ -21,12 +21,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import org.codelibs.fess.entity.SearchLogEvent;
 import org.codelibs.fess.es.log.bsentity.BsClickLog;
 
 /**
  * @author FreeGen
  */
-public class ClickLog extends BsClickLog {
+public class ClickLog extends BsClickLog implements SearchLogEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,5 +81,10 @@ public class ClickLog extends BsClickLog {
     public String toString() {
         return "ClickLog [queryRequestedAt=" + queryRequestedAt + ", requestedAt=" + requestedAt + ", queryId=" + queryId + ", docId="
                 + docId + ", userSessionId=" + userSessionId + ", url=" + url + ", order=" + order + ", docMeta=" + docMeta + "]";
+    }
+
+    @Override
+    public String getEventType() {
+        return "click";
     }
 }
