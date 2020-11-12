@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>13.9.4-SNAPSHOT</version>
+	<version>13.10.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -36,32 +36,32 @@
 	<properties>
 		<!-- Main Framework -->
 		<dbflute.version>1.2.3</dbflute.version>
-		<lastaflute.version>1.1.7</lastaflute.version>
-		<lasta.di.version>0.8.2</lasta.di.version>
+		<lastaflute.version>1.1.8</lastaflute.version>
+		<lasta.di.version>0.8.3</lasta.di.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.4</lasta.job.version>
-		<mailflute.version>0.6.3</mailflute.version>
+		<mailflute.version>0.6.4</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.30</slf4j.version>
-		<log4j.version>2.13.3</log4j.version>
-		<jackson.version>2.10.5</jackson.version>
+		<log4j.version>2.14.0</log4j.version>
+		<jackson.version>2.11.3</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
-		<asm.version>8.0.1</asm.version>
+		<asm.version>9.0</asm.version>
 		<tika.version>1.24.1</tika.version>
-		<groovy.version>3.0.5</groovy.version>
-		<minio.version>7.1.0</minio.version>
+		<groovy.version>3.0.6</groovy.version>
+		<minio.version>7.1.4</minio.version>
 		<okhttp.version>3.14.9</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.9.2-SNAPSHOT</crawler.version>
+		<crawler.version>3.10.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.9.0</suggest.version>
+		<suggest.version>7.10.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>7.9.3</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.9.1</elasticsearch.httpclient.version>
+		<elasticsearch.version>7.10.0</elasticsearch.version>
+		<elasticsearch.httpclient.version>7.10.0</elasticsearch.httpclient.version>
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -217,7 +217,7 @@
 			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>3.0</version>
+				<version>4.0.rc2</version>
 				<configuration>
 					<header>https://www.codelibs.org/assets/license/header.txt</header>
 					<properties>
@@ -290,7 +290,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
+				<version>3.0.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.ant</groupId>
@@ -299,14 +299,14 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<tasks>
+					<target>
 						<ant antfile="${basedir}/dbflute.xml" target="download.dbflute" />
 						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
 							<property name="with.fess" value="true" />
 						</ant>
 						<ant antfile="deps.xml" target="install.jars" />
 						<echo message="fess.version=${project.version}" file="${basedir}/src/main/webapp/WEB-INF/project.properties" />
-					</tasks>
+					</target>
 				</configuration>
 				<goals>
 					<goal>run</goal>
@@ -1036,7 +1036,7 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-common</artifactId>
-			<version>2.31</version>
+			<version>2.32</version>
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.annotation</groupId>
@@ -1140,7 +1140,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>29.0-jre</version>
+			<version>30.0-jre</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1152,7 +1152,7 @@
 				</exclusion>
 				<exclusion>
 					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-compat-qual</artifactId>
+					<artifactId>checker-qual</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>com.google.code.findbugs</groupId>
@@ -1161,10 +1161,6 @@
 				<exclusion>
 					<groupId>com.google.errorprone</groupId>
 					<artifactId>error_prone_annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>listenablefuture</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -1238,12 +1234,12 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.14</version>
+			<version>1.15</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.7</version>
+			<version>2.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -1253,7 +1249,7 @@
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-			<version>67.1</version>
+			<version>68.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
@@ -1273,7 +1269,7 @@
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
 			<artifactId>adal4j</artifactId>
-			<version>1.6.5</version>
+			<version>1.6.6</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.stephenc.jcip</groupId>
@@ -1312,7 +1308,7 @@
 		<dependency>
 			<groupId>com.onelogin</groupId>
 			<artifactId>java-saml</artifactId>
-			<version>2.5.0</version>
+			<version>2.6.0</version>
 		</dependency>
 
 		<!-- suggest library -->
@@ -1516,7 +1512,7 @@
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
-			<version>4.1.2</version>
+			<version>4.3.2</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
