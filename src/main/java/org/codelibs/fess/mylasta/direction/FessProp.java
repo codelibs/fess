@@ -2067,4 +2067,11 @@ public interface FessProp {
         final String value = getHttpFileuploadThresholdSize();
         return value != null ? DfTypeUtil.toLong(value) : null;
     }
+
+    String getPasswordInvalidAdminPasswords();
+
+    default boolean isValidAdminPassword(final String password) {
+        return !split(getPasswordInvalidAdminPasswords(), "\n")
+                .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).anyMatch(s -> s.equals(password)));
+    }
 }

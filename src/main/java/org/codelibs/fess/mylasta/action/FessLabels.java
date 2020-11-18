@@ -3159,6 +3159,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Download */
     public static final String LABELS_storage_button_download = "{labels.storage_button_download}";
 
+    /** The key of the message: Your password needs to be updated. */
+    public static final String LABELS_LOGIN_NEWPASSWORD = "{labels.login.newpassword}";
+
+    /** The key of the message: New Password */
+    public static final String LABELS_LOGIN_placeholder_new_password = "{labels.login.placeholder_new_password}";
+
+    /** The key of the message: Confirm New Password */
+    public static final String LABELS_LOGIN_placeholder_confirm_new_password = "{labels.login.placeholder_confirm_new_password}";
+
+    /** The key of the message: Update */
+    public static final String LABELS_LOGIN_UPDATE = "{labels.login.update}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

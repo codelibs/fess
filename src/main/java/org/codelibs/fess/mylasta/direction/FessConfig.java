@@ -1601,6 +1601,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String STORAGE_MAX_ITEMS_IN_PAGE = "storage.max.items.in.page";
 
+    /** The key of the configuration. e.g. admin */
+    String PASSWORD_INVALID_ADMIN_PASSWORDS = "password.invalid.admin.passwords";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -6602,6 +6605,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getStorageMaxItemsInPageAsInteger();
 
     /**
+     * Get the value for the key 'password.invalid.admin.passwords'. <br>
+     * The value is, e.g. admin <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordInvalidAdminPasswords();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -9210,6 +9221,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE);
         }
 
+        public String getPasswordInvalidAdminPasswords() {
+            return get(FessConfig.PASSWORD_INVALID_ADMIN_PASSWORDS);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -9679,6 +9694,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     "https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://fess.codelibs.org/plugin/artifacts.yaml");
             defaultMap.put(FessConfig.PLUGIN_VERSION_FILTER, "");
             defaultMap.put(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE, "1000");
+            defaultMap.put(FessConfig.PASSWORD_INVALID_ADMIN_PASSWORDS, "admin");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "hot");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

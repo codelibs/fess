@@ -15,15 +15,37 @@
  */
 package org.codelibs.fess.app.web.login;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
+import org.codelibs.fess.app.web.profile.ProfileAction;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.validation.VaErrorHook;
 
 public class LoginAction extends FessLoginAction {
+
+    private static final Logger logger = LogManager.getLogger(LoginAction.class);
+
+    private static final String INVALID_OLD_PASSWORD = "LoginAction.invalidOldPassword";
+
+    // ===================================================================================
+    // Attribute
+    //
+    @Resource
+    private UserService userService;
 
     // ===================================================================================
     //                                                                       Login Execute
@@ -55,7 +77,11 @@ public class LoginAction extends FessLoginAction {
             return fessLoginAssist.loginRedirect(new LocalUserCredential(username, password), op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
-                return getHtmlResponse();
+                if (ComponentUtil.getFessConfig().isValidAdminPassword(password)) {
+                    return getHtmlResponse();
+                }
+                getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
+                return asHtml(virtualHost(path_Login_NewpasswordJsp));
             });
         } catch (final LoginFailureException lfe) {
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
@@ -64,4 +90,50 @@ public class LoginAction extends FessLoginAction {
         return redirect(getClass());
     }
 
+    @Execute
+    public HtmlResponse changePassword(final PasswordForm form) {
+        final VaErrorHook toIndexPage = () -> {
+            form.clearSecurityInfo();
+            return getUserBean().map(u -> asHtml(virtualHost(path_Login_NewpasswordJsp)).useForm(PasswordForm.class))
+                    .orElseGet(() -> redirect(LoginAction.class));
+        };
+        validatePasswordForm(form, toIndexPage);
+        final String username = getUserBean().map(FessUserBean::getUserId).get();
+        try {
+            userService.changePassword(username, form.password);
+            saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
+        } catch (final Exception e) {
+            logger.warn("Failed to change newPassword for " + username, e);
+            throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
+        }
+        getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
+        return redirect(ProfileAction.class);
+    }
+
+    private void validatePasswordForm(final PasswordForm form, final VaErrorHook validationErrorLambda) {
+        validate(form, messages -> {}, validationErrorLambda);
+
+        if (!form.password.equals(form.confirmPassword)) {
+            throwValidationError(messages -> {
+                messages.addErrorsInvalidConfirmPassword(GLOBAL);
+            }, validationErrorLambda);
+        }
+
+        final String oldPassword =
+                getSession().map(session -> (String) session.getAttribute(INVALID_OLD_PASSWORD)).orElse(StringUtil.EMPTY);
+        fessLoginAssist.findLoginUser(new LocalUserCredential(getUserBean().get().getUserId(), oldPassword)).orElseGet(() -> {
+            throwValidationError(messages -> {
+                messages.addErrorsNoUserForChangingPassword(GLOBAL);
+            }, validationErrorLambda);
+            return null;
+        });
+    }
+
+    private OptionalThing<HttpSession> getSession() {
+        final HttpSession session = request.getSession(false);
+        if (session != null) {
+            return OptionalEntity.of(session);
+        }
+        return OptionalEntity.empty();
+    }
 }

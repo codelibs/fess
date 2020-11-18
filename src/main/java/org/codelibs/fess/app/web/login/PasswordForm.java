@@ -17,14 +17,14 @@ package org.codelibs.fess.app.web.login;
 
 import javax.validation.constraints.NotBlank;
 
-public class LoginForm {
+public class PasswordForm {
 
-    @NotBlank
     public String username;
 
     @NotBlank
     public String password;
 
+    @NotBlank
     public String confirmPassword;
 
     public void clearSecurityInfo() {
