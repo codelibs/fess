@@ -109,6 +109,10 @@
 			<arg>"login/index.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
+			<arg>"newpassword"</arg>
+			<arg>"login/newpassword.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
 			<arg>"profile"</arg>
 			<arg>"profile/index.jsp"</arg>
 		</postConstruct>

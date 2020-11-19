@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><la:message key="labels.profile.title" /></title>
+<title><la:message key="labels.login.title" /></title>
 <link href="${fe:url('/css/admin/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/admin/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet" type="text/css" />
@@ -25,7 +25,7 @@
 		<div class="card">
 			<div class="card-body login-card-body">
 				<p class="login-box-msg">
-					<la:message key="labels.profile" />
+					<la:message key="labels.login.newpassword" />
 				</p>
 				<%-- Message --%>
 				<div>
@@ -34,48 +34,37 @@
 					</la:info>
 					<la:errors />
 				</div>
-				<la:form styleId="updatePassword" method="post">
-					<div class="input-group mb-3">
-						<c:set var="ph_old_password">
-							<la:message key="labels.profile.placeholder_old_password" />
-						</c:set>
-						<la:password property="oldPassword" class="form-control"
-									 placeholder="${ph_old_password}" />
-						<div class="input-group-append">
-							<span class="input-group-text"><em class="fa fa-lock fa-fw"></em></span>
-						</div>
-					</div>
+				<la:form styleId="newPassword" method="post">
 					<div class="input-group mb-3">
 						<c:set var="ph_new_password">
-							<la:message key="labels.profile.placeholder_new_password" />
+							<la:message key="labels.login.placeholder_new_password" />
 						</c:set>
-						<la:password property="newPassword" class="form-control"
-									 placeholder="${ph_new_password}" />
+						<la:password property="password" class="form-control"
+							placeholder="${ph_new_password}" />
 						<div class="input-group-append">
-							<span class="input-group-text"><em class="fa fa-lock fa-fw"></em></span>
+							<span class="input-group-text">
+								<em class="fa fa-lock fa-fw"></em>
+							</span>
 						</div>
 					</div>
 					<div class="input-group mb-3">
 						<c:set var="ph_confirm_password">
-							<la:message key="labels.profile.placeholder_confirm_new_password" />
+							<la:message key="labels.login.placeholder_confirm_new_password" />
 						</c:set>
-						<la:password property="confirmNewPassword" class="form-control"
-									 placeholder="${ph_confirm_password}" />
+						<la:password property="confirmPassword" class="form-control"
+							placeholder="${ph_confirm_password}" />
 						<div class="input-group-append">
-							<span class="input-group-text"><em class="fa fa-lock fa-fw"></em></span>
+							<span class="input-group-text">
+								<em class="fa fa-lock fa-fw"></em>
+							</span>
 						</div>
 					</div>
 					<div class="text-center">
-						<la:link href="/"
-							styleClass="btn btn-default">
-							<em class="fa fa-arrow-circle-left"></em>
-							<la:message key="labels.profile.back" />
-						</la:link>
 						<button type="submit" name="changePassword"
-							class="btn btn-success"
-							value="<la:message key="labels.profile.update"/>">
+							class="btn btn-primary btn-block"
+							value="<la:message key="labels.login.update"/>">
 							<em class="fa fa-pencil-alt"></em>
-							<la:message key="labels.profile.update" />
+							<la:message key="labels.login.update" />
 						</button>
 					</div>
 				</la:form>
@@ -83,10 +72,10 @@
 		</div>
 	</div>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script src="${fe:url('/js/admin/popper.min.js')}" type="text/javascript"></script>
+	<script type="text/javascript" src="${fe:url('/js/admin/popper.min.js')}"></script>
 	<script type="text/javascript"
 		src="${fe:url('/js/admin/jquery-3.4.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/admin/bootstrap.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/profile.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/login.js')}"></script>
 </body>
 </html>
