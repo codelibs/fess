@@ -53,6 +53,7 @@ public class LoginAction extends FessLoginAction {
 
     @Execute
     public HtmlResponse index() {
+        getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
         return asIndexPage(null).useForm(LoginForm.class);
     }
 
@@ -74,15 +75,16 @@ public class LoginAction extends FessLoginAction {
         final String password = form.password;
         form.clearSecurityInfo();
         try {
-            return fessLoginAssist.loginRedirect(new LocalUserCredential(username, password), op -> {}, () -> {
+            final HtmlResponse loginRedirect = fessLoginAssist.loginRedirect(new LocalUserCredential(username, password), op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
-                if (ComponentUtil.getFessConfig().isValidAdminPassword(password)) {
-                    return getHtmlResponse();
-                }
-                getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
-                return asHtml(virtualHost(path_Login_NewpasswordJsp));
+                return getHtmlResponse();
             });
+            if (ComponentUtil.getFessConfig().isValidAdminPassword(password)) {
+                return loginRedirect;
+            }
+            getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
+            return asHtml(virtualHost(path_Login_NewpasswordJsp));
         } catch (final LoginFailureException lfe) {
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
