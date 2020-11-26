@@ -33,6 +33,7 @@ import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -142,6 +143,19 @@ public class AdminWebconfigAction extends FessAdminAction {
         return asEditHtml().useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
+                ComponentUtil.getCrawlingConfigHelper().getDefaultConfig(ConfigType.WEB).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                        copyOp.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                                Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS)).toArray(n -> new String[n]));
+                    });
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                    form.virtualHosts = stream(entity.getVirtualHosts())
+                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
+                    form.name = null;
+                });
                 form.crudMode = CrudMode.CREATE;
             });
         });

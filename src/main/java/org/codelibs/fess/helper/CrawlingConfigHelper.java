@@ -48,6 +48,7 @@ import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 
 import com.google.common.cache.Cache;
@@ -176,6 +177,7 @@ public class CrawlingConfigHelper {
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.query().setName_NotEqual(ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName());
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger());
@@ -203,6 +205,7 @@ public class CrawlingConfigHelper {
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.query().setName_NotEqual(ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName());
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger());
@@ -230,6 +233,7 @@ public class CrawlingConfigHelper {
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.query().setName_NotEqual(ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName());
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
             cb.fetchFirst(ComponentUtil.getFessConfig().getPageDataConfigMaxFetchSizeAsInteger());
@@ -270,5 +274,23 @@ public class CrawlingConfigHelper {
             }
         }
         return urlList;
+    }
+
+    public OptionalEntity<CrawlingConfig> getDefaultConfig(ConfigType configType) {
+        String name = ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName();
+
+        switch (configType) {
+        case WEB:
+            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
+            return webConfigService.getWebConfigByName(name).map(o -> (CrawlingConfig) o);
+        case FILE:
+            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
+            return fileConfigService.getFileConfigByName(name).map(o -> (CrawlingConfig) o);
+        case DATA:
+            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
+            return dataConfigService.getDataConfigByName(name).map(o -> (CrawlingConfig) o);
+        default:
+            return OptionalEntity.empty();
+        }
     }
 }

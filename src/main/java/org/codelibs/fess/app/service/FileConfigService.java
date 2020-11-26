@@ -29,6 +29,7 @@ import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ParameterUtil;
+import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -74,6 +75,17 @@ public class FileConfigService extends FessAppService {
 
     public OptionalEntity<FileConfig> getFileConfig(final String id) {
         return fileConfigBhv.selectByPK(id);
+    }
+
+    public OptionalEntity<FileConfig> getFileConfigByName(final String name) {
+        final ListResultBean<FileConfig> list = fileConfigBhv.selectList(cb -> {
+            cb.query().setName_Equal(name);
+            cb.query().addOrderBy_SortOrder_Asc();
+        });
+        if (list.isEmpty()) {
+            return OptionalEntity.empty();
+        }
+        return OptionalEntity.of(list.get(0));
     }
 
     public void store(final FileConfig fileConfig) {

@@ -28,6 +28,7 @@ import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ParameterUtil;
+import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -64,6 +65,17 @@ public class DataConfigService extends FessAppService {
 
     public OptionalEntity<DataConfig> getDataConfig(final String id) {
         return dataConfigBhv.selectByPK(id);
+    }
+
+    public OptionalEntity<DataConfig> getDataConfigByName(final String name) {
+        final ListResultBean<DataConfig> list = dataConfigBhv.selectList(cb -> {
+            cb.query().setName_Equal(name);
+            cb.query().addOrderBy_SortOrder_Asc();
+        });
+        if (list.isEmpty()) {
+            return OptionalEntity.empty();
+        }
+        return OptionalEntity.of(list.get(0));
     }
 
     public void store(final DataConfig dataConfig) {

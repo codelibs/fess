@@ -30,6 +30,7 @@ import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ParameterUtil;
+import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -82,6 +83,17 @@ public class WebConfigService extends FessAppService {
 
     public OptionalEntity<WebConfig> getWebConfig(final String id) {
         return webConfigBhv.selectByPK(id);
+    }
+
+    public OptionalEntity<WebConfig> getWebConfigByName(final String name) {
+        final ListResultBean<WebConfig> list = webConfigBhv.selectList(cb -> {
+            cb.query().setName_Equal(name);
+            cb.query().addOrderBy_SortOrder_Asc();
+        });
+        if (list.isEmpty()) {
+            return OptionalEntity.empty();
+        }
+        return OptionalEntity.of(list.get(0));
     }
 
     public void store(final WebConfig webConfig) {

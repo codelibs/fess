@@ -32,6 +32,7 @@ import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -138,6 +139,19 @@ public class AdminFileconfigAction extends FessAdminAction {
         return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
+                ComponentUtil.getCrawlingConfigHelper().getDefaultConfig(ConfigType.FILE).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                        copyOp.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                                Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS)).toArray(n -> new String[n]));
+                    });
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                    form.virtualHosts = stream(entity.getVirtualHosts())
+                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
+                    form.name = null;
+                });
                 form.crudMode = CrudMode.CREATE;
             });
         }).renderWith(data -> {

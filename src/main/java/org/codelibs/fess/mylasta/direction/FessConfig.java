@@ -995,6 +995,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String FORM_ADMIN_LABEL_IN_CONFIG_ENABLED = "form.admin.label.in.config.enabled";
 
+    /** The key of the configuration. e.g. __TEMPLATE__ */
+    String FORM_ADMIN_DEFAULT_TEMPLATE_NAME = "form.admin.default.template.name";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
@@ -4526,6 +4529,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isFormAdminLabelInConfigEnabled();
+
+    /**
+     * Get the value for the key 'form.admin.default.template.name'. <br>
+     * The value is, e.g. __TEMPLATE__ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFormAdminDefaultTemplateName();
 
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
@@ -8089,6 +8099,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED);
         }
 
+        public String getFormAdminDefaultTemplateName() {
+            return get(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME);
+        }
+
         public String getAuthenticationAdminUsers() {
             return get(FessConfig.AUTHENTICATION_ADMIN_USERS);
         }
@@ -9491,6 +9505,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
+            defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
             defaultMap.put(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS, "");
