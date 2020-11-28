@@ -944,6 +944,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. -1.0 */
     String QUERY_BOOST_important_content_LANG = "query.boost.important_content.lang";
 
+    /** The key of the configuration. e.g. 4 */
+    String QUERY_BOOST_FUZZY_MIN_LENGTH = "query.boost.fuzzy.min.length";
+
+    /** The key of the configuration. e.g. 0.01 */
+    String QUERY_BOOST_FUZZY_TITLE = "query.boost.fuzzy.title";
+
+    /** The key of the configuration. e.g. AUTO */
+    String QUERY_BOOST_FUZZY_TITLE_FUZZINESS = "query.boost.fuzzy.title.fuzziness";
+
+    /** The key of the configuration. e.g. 10 */
+    String QUERY_BOOST_FUZZY_TITLE_EXPANSIONS = "query.boost.fuzzy.title.expansions";
+
+    /** The key of the configuration. e.g. 0.005 */
+    String QUERY_BOOST_FUZZY_CONTENT = "query.boost.fuzzy.content";
+
+    /** The key of the configuration. e.g. AUTO */
+    String QUERY_BOOST_FUZZY_CONTENT_FUZZINESS = "query.boost.fuzzy.content.fuzziness";
+
+    /** The key of the configuration. e.g. 10 */
+    String QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS = "query.boost.fuzzy.content.expansions";
+
     /** The key of the configuration. e.g. label */
     String QUERY_FACET_FIELDS = "query.facet.fields";
 
@@ -4356,6 +4377,95 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not decimal.
      */
     java.math.BigDecimal getQueryBoostImportantContentLangAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.min.length'. <br>
+     * The value is, e.g. 4 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyMinLength();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.min.length' as {@link Integer}. <br>
+     * The value is, e.g. 4 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryBoostFuzzyMinLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title'. <br>
+     * The value is, e.g. 0.01 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyTitle();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 0.01 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostFuzzyTitleAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title.fuzziness'. <br>
+     * The value is, e.g. AUTO <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyTitleFuzziness();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title.expansions'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyTitleExpansions();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title.expansions' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryBoostFuzzyTitleExpansionsAsInteger();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content'. <br>
+     * The value is, e.g. 0.005 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyContent();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 0.005 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostFuzzyContentAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content.fuzziness'. <br>
+     * The value is, e.g. AUTO <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyContentFuzziness();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content.expansions'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyContentExpansions();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content.expansions' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryBoostFuzzyContentExpansionsAsInteger();
 
     /**
      * Get the value for the key 'query.facet.fields'. <br>
@@ -8039,6 +8149,54 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsDecimal(FessConfig.QUERY_BOOST_important_content_LANG);
         }
 
+        public String getQueryBoostFuzzyMinLength() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_MIN_LENGTH);
+        }
+
+        public Integer getQueryBoostFuzzyMinLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_MIN_LENGTH);
+        }
+
+        public String getQueryBoostFuzzyTitle() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_TITLE);
+        }
+
+        public java.math.BigDecimal getQueryBoostFuzzyTitleAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_FUZZY_TITLE);
+        }
+
+        public String getQueryBoostFuzzyTitleFuzziness() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_TITLE_FUZZINESS);
+        }
+
+        public String getQueryBoostFuzzyTitleExpansions() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_TITLE_EXPANSIONS);
+        }
+
+        public Integer getQueryBoostFuzzyTitleExpansionsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_TITLE_EXPANSIONS);
+        }
+
+        public String getQueryBoostFuzzyContent() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_CONTENT);
+        }
+
+        public java.math.BigDecimal getQueryBoostFuzzyContentAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_FUZZY_CONTENT);
+        }
+
+        public String getQueryBoostFuzzyContentFuzziness() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_CONTENT_FUZZINESS);
+        }
+
+        public String getQueryBoostFuzzyContentExpansions() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS);
+        }
+
+        public Integer getQueryBoostFuzzyContentExpansionsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS);
+        }
+
         public String getQueryFacetFields() {
             return get(FessConfig.QUERY_FACET_FIELDS);
         }
@@ -9538,6 +9696,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.1");
             defaultMap.put(FessConfig.QUERY_BOOST_important_content, "-1.0");
             defaultMap.put(FessConfig.QUERY_BOOST_important_content_LANG, "-1.0");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_MIN_LENGTH, "4");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE, "0.01");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_FUZZINESS, "AUTO");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_EXPANSIONS, "10");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT, "0.005");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_FUZZINESS, "AUTO");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS, "10");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS, "label");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE, "100");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");

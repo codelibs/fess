@@ -61,8 +61,8 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build() {
-        float titleBoost = 0.01f;
-        float contentBoost = 0.005f;
+        float titleBoost = 0.5f;
+        float contentBoost = 0.05f;
 
         assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), buildQuery("QUERY"));
         assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), buildQuery(" QUERY"));
@@ -163,8 +163,12 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     private QueryBuilder simpleQuery(String query, float titleBoost, float contentBoost) {
-        return QueryBuilders.boolQuery().should(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))
-                .should(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost));
+        return QueryBuilders.boolQuery()//
+                .should(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))//
+                .should(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost))//
+                .should(QueryBuilders.fuzzyQuery("title", query).boost(0.01f).maxExpansions(10))//
+                .should(QueryBuilders.fuzzyQuery("content", query).boost(0.005f).maxExpansions(10))//
+        ;
     }
 
     private QueryBuilder functionScoreQuery(QueryBuilder queryBuilder) {

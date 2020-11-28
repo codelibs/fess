@@ -607,7 +607,7 @@ public class QueryHelper {
         } else if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+            return buildDefaultTermQueryBuilder(boost, text);
         } else if ("sort".equals(field)) {
             split(text, ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(t -> {
                 final String[] values = t.split("\\.");
@@ -684,7 +684,23 @@ public class QueryHelper {
         return false;
     }
 
-    protected QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
+    protected QueryBuilder buildDefaultTermQueryBuilder(final float boost, final String text) {
+        final BoolQueryBuilder boolQuery = buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (text.length() >= fessConfig.getQueryBoostFuzzyMinLengthAsInteger()) {
+            boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)
+                    .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())
+                    .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyTitleFuzziness()))
+                    .maxExpansions(fessConfig.getQueryBoostFuzzyTitleExpansionsAsInteger()));
+            boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldContent(), text)
+                    .boost(fessConfig.getQueryBoostFuzzyContentAsDecimal().floatValue())
+                    .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyContentFuzziness()))
+                    .maxExpansions(fessConfig.getQueryBoostFuzzyContentExpansionsAsInteger()));
+        }
+        return boolQuery;
+    }
+
+    protected BoolQueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         boolQuery.should(builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue()));
