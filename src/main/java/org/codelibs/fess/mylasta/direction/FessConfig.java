@@ -926,17 +926,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
-    /** The key of the configuration. e.g. 0.01 */
+    /** The key of the configuration. e.g. 0.5 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
     /** The key of the configuration. e.g. 1.0 */
     String QUERY_BOOST_TITLE_LANG = "query.boost.title.lang";
 
-    /** The key of the configuration. e.g. 0.005 */
+    /** The key of the configuration. e.g. 0.05 */
     String QUERY_BOOST_CONTENT = "query.boost.content";
 
-    /** The key of the configuration. e.g. 0.5 */
+    /** The key of the configuration. e.g. 0.1 */
     String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
+
+    /** The key of the configuration. e.g. -1.0 */
+    String QUERY_BOOST_important_content = "query.boost.important_content";
+
+    /** The key of the configuration. e.g. -1.0 */
+    String QUERY_BOOST_important_content_LANG = "query.boost.important_content.lang";
 
     /** The key of the configuration. e.g. label */
     String QUERY_FACET_FIELDS = "query.facet.fields";
@@ -4261,7 +4267,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title'. <br>
-     * The value is, e.g. 0.01 <br>
+     * The value is, e.g. 0.5 <br>
      * comment: boost
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -4269,7 +4275,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 0.01 <br>
+     * The value is, e.g. 0.5 <br>
      * comment: boost
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
@@ -4293,14 +4299,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.content'. <br>
-     * The value is, e.g. 0.005 <br>
+     * The value is, e.g. 0.05 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContent();
 
     /**
      * Get the value for the key 'query.boost.content' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 0.005 <br>
+     * The value is, e.g. 0.05 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -4308,18 +4314,48 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.content.lang'. <br>
-     * The value is, e.g. 0.5 <br>
+     * The value is, e.g. 0.1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContentLang();
 
     /**
      * Get the value for the key 'query.boost.content.lang' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 0.5 <br>
+     * The value is, e.g. 0.1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
     java.math.BigDecimal getQueryBoostContentLangAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.important_content'. <br>
+     * The value is, e.g. -1.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostImportantContent();
+
+    /**
+     * Get the value for the key 'query.boost.important_content' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. -1.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostImportantContentAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.important_content.lang'. <br>
+     * The value is, e.g. -1.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostImportantContentLang();
+
+    /**
+     * Get the value for the key 'query.boost.important_content.lang' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. -1.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostImportantContentLangAsDecimal();
 
     /**
      * Get the value for the key 'query.facet.fields'. <br>
@@ -7987,6 +8023,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsDecimal(FessConfig.QUERY_BOOST_CONTENT_LANG);
         }
 
+        public String getQueryBoostImportantContent() {
+            return get(FessConfig.QUERY_BOOST_important_content);
+        }
+
+        public java.math.BigDecimal getQueryBoostImportantContentAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_important_content);
+        }
+
+        public String getQueryBoostImportantContentLang() {
+            return get(FessConfig.QUERY_BOOST_important_content_LANG);
+        }
+
+        public java.math.BigDecimal getQueryBoostImportantContentLangAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_important_content_LANG);
+        }
+
         public String getQueryFacetFields() {
             return get(FessConfig.QUERY_FACET_FIELDS);
         }
@@ -9480,10 +9532,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GSA_DEFAULT_PREFERENCE, "_query");
             defaultMap.put(FessConfig.QUERY_LANGUAGE_MAPPING,
                     "ar=ar\nbg=bg\nbn=bn\nca=ca\nckb-iq=ckb-iq\nckb_IQ=ckb-iq\ncs=cs\nda=da\nde=de\nel=el\nen=en\nen-ie=en-ie\nen_IE=en-ie\nes=es\net=et\neu=eu\nfa=fa\nfi=fi\nfr=fr\ngl=gl\ngu=gu\nhe=he\nhi=hi\nhr=hr\nhu=hu\nhy=hy\nid=id\nit=it\nja=ja\nko=ko\nlt=lt\nlv=lv\nmk=mk\nml=ml\nnl=nl\nno=no\npa=pa\npl=pl\npt=pt\npt-br=pt-br\npt_BR=pt-br\nro=ro\nru=ru\nsi=si\nsq=sq\nsv=sv\nta=ta\nte=te\nth=th\ntl=tl\ntr=tr\nuk=uk\nur=ur\nvi=vi\nzh-cn=zh-cn\nzh_CN=zh-cn\nzh-tw=zh-tw\nzh_TW=zh-tw\nzh=zh\n");
-            defaultMap.put(FessConfig.QUERY_BOOST_TITLE, "0.01");
+            defaultMap.put(FessConfig.QUERY_BOOST_TITLE, "0.5");
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE_LANG, "1.0");
-            defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.005");
-            defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.5");
+            defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.05");
+            defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.1");
+            defaultMap.put(FessConfig.QUERY_BOOST_important_content, "-1.0");
+            defaultMap.put(FessConfig.QUERY_BOOST_important_content_LANG, "-1.0");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS, "label");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE, "100");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");

@@ -687,19 +687,21 @@ public class QueryHelper {
     protected QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final QueryBuilder titleQuery =
-                builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue());
-        boolQuery.should(titleQuery);
-        final QueryBuilder contentQuery =
-                builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
-        boolQuery.should(contentQuery);
+        boolQuery.should(builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue()));
+        boolQuery.should(builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue()));
+        final float importantContentBoost = fessConfig.getQueryBoostImportantContentAsDecimal().floatValue();
+        if (importantContentBoost >= 0.0f) {
+            boolQuery.should(builder.apply(fessConfig.getIndexFieldImportantContent(), importantContentBoost));
+        }
+        final float importantContantLangBoost = fessConfig.getQueryBoostImportantContentLangAsDecimal().floatValue();
         getQueryLanguages().ifPresent(langs -> stream(langs).of(stream -> stream.forEach(lang -> {
-            final QueryBuilder titleLangQuery =
-                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal().floatValue());
-            boolQuery.should(titleLangQuery);
-            final QueryBuilder contentLangQuery = builder.apply(fessConfig.getIndexFieldContent() + "_" + lang,
-                    fessConfig.getQueryBoostContentLangAsDecimal().floatValue());
-            boolQuery.should(contentLangQuery);
+            boolQuery.should(
+                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal().floatValue()));
+            boolQuery.should(builder.apply(fessConfig.getIndexFieldContent() + "_" + lang,
+                    fessConfig.getQueryBoostContentLangAsDecimal().floatValue()));
+            if (importantContantLangBoost >= 0.0f) {
+                boolQuery.should(builder.apply(fessConfig.getIndexFieldImportantContent() + "_" + lang, importantContantLangBoost));
+            }
         })));
         additionalDefaultList.stream().forEach(f -> {
             final QueryBuilder query = builder.apply(f.getFirst(), f.getSecond());
