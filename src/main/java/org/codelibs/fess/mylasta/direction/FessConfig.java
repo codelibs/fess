@@ -181,6 +181,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. java */
     String JAVA_COMMAND_PATH = "java.command.path";
 
+    /** The key of the configuration. e.g. python */
+    String PYTHON_COMMAND_PATH = "python.command.path";
+
     /** The key of the configuration. e.g. UTF-8 */
     String PATH_ENCODING = "path.encoding";
 
@@ -1909,6 +1912,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJavaCommandPath();
+
+    /**
+     * Get the value for the key 'python.command.path'. <br>
+     * The value is, e.g. python <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPythonCommandPath();
 
     /**
      * Get the value for the key 'path.encoding'. <br>
@@ -6861,6 +6871,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.JAVA_COMMAND_PATH);
         }
 
+        public String getPythonCommandPath() {
+            return get(FessConfig.PYTHON_COMMAND_PATH);
+        }
+
         public String getPathEncoding() {
             return get(FessConfig.PATH_ENCODING);
         }
@@ -9474,6 +9488,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.JOB_MAX_CRAWLER_PROCESSES, "0");
             defaultMap.put(FessConfig.PROCESSORS, "0");
             defaultMap.put(FessConfig.JAVA_COMMAND_PATH, "java");
+            defaultMap.put(FessConfig.PYTHON_COMMAND_PATH, "python");
             defaultMap.put(FessConfig.PATH_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.USE_OWN_TMP_DIR, "true");
             defaultMap.put(FessConfig.MAX_LOG_OUTPUT_LENGTH, "4000");
