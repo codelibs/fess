@@ -259,7 +259,7 @@ public class RoleQueryHelper {
                         }
                         return;
                     }
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     logger.warn("Invalid role info: {}", rolesStr, e);
                     return;
                 }
@@ -329,7 +329,7 @@ public class RoleQueryHelper {
         this.encryptedCookieValue = encryptedCookieValue;
     }
 
-    public void setMaxAge(long maxAge) {
+    public void setMaxAge(final long maxAge) {
         this.maxAge = maxAge;
     }
 

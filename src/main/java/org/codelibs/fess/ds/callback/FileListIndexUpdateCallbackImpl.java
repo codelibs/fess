@@ -145,10 +145,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                         counter++;
                         localDataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
                     }
-                } catch (ChildUrlsException e) {
+                } catch (final ChildUrlsException e) {
                     e.getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
-                } catch (DataStoreCrawlingException e) {
-                    Throwable cause = e.getCause();
+                } catch (final DataStoreCrawlingException e) {
+                    final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
                     } else {
@@ -172,7 +172,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
         try {
             return Long.parseLong(recursive.toString());
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return 1L;
         }
     }

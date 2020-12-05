@@ -51,7 +51,6 @@ public class FavoriteLogService {
             favoriteLogBhv.insert(favoriteLog);
             if (fessConfig.isLoggingSearchUseLogfile()) {
                 ComponentUtil.getSearchLogHelper().writeSearchLogEvent(favoriteLog);
-                ;
             }
             return true;
         }).orElse(false);

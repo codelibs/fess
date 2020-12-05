@@ -49,6 +49,7 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     private final List<Map<String, Object>> documentList = new ArrayList<>();
 
+    @Override
     public String getId() {
         return asDocMeta().id();
     }
@@ -57,6 +58,7 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
         asDocMeta().id(id);
     }
 
+    @Override
     public Long getVersionNo() {
         return asDocMeta().version();
     }

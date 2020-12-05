@@ -33,6 +33,7 @@ public class ClickLog extends BsClickLog implements SearchLogEvent {
 
     private Map<String, Object> fields;
 
+    @Override
     public String getId() {
         return asDocMeta().id();
     }
@@ -41,6 +42,7 @@ public class ClickLog extends BsClickLog implements SearchLogEvent {
         asDocMeta().id(id);
     }
 
+    @Override
     public Long getVersionNo() {
         return asDocMeta().version();
     }

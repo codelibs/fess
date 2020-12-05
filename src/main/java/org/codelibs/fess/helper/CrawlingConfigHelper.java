@@ -276,8 +276,8 @@ public class CrawlingConfigHelper {
         return urlList;
     }
 
-    public OptionalEntity<CrawlingConfig> getDefaultConfig(ConfigType configType) {
-        String name = ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName();
+    public OptionalEntity<CrawlingConfig> getDefaultConfig(final ConfigType configType) {
+        final String name = ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName();
 
         switch (configType) {
         case WEB:

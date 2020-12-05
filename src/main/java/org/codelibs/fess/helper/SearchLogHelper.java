@@ -415,16 +415,16 @@ public class SearchLogHelper {
         }
     }
 
-    public void writeSearchLogEvent(SearchLogEvent event) {
+    public void writeSearchLogEvent(final SearchLogEvent event) {
         try {
             final Map<String, Object> source = toSource(event);
             searchLogLogger.info(objectMapper.writeValueAsString(source));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             logger.warn("Failed to write {}", event, e);
         }
     }
 
-    protected Map<String, Object> toSource(SearchLogEvent searchLogEvent) {
+    protected Map<String, Object> toSource(final SearchLogEvent searchLogEvent) {
         final Map<String, Object> source = toLowerHyphen(searchLogEvent.toSource());
         source.put("_id", searchLogEvent.getId());
         // source.put("version_no", searchLogEvent.getVersionNo());
@@ -432,7 +432,7 @@ public class SearchLogHelper {
         return source;
     }
 
-    protected Map<String, Object> toLowerHyphen(Map<String, Object> source) {
+    protected Map<String, Object> toLowerHyphen(final Map<String, Object> source) {
         return source.entrySet().stream()
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, e.getKey()), e -> {
                     final Object value = e.getValue();
@@ -453,7 +453,7 @@ public class SearchLogHelper {
         this.userInfoCacheSize = userInfoCacheSize;
     }
 
-    public void setLoggerName(String loggerName) {
+    public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
     }
 }
