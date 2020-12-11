@@ -109,7 +109,7 @@ public abstract class ExecJob {
         }
         buf.append(File.separator);
         buf.append("gc-").append(getExecuteType()).append(".log");
-        buf.append(":utctime,pid,tags:filecount=32,filesize=64m");
+        buf.append(":utctime,pid,tags:filecount=5,filesize=64m");
         return jvmOptions(buf.toString());
     }
 

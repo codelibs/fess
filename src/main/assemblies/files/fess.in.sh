@@ -66,17 +66,6 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j2.disable.jmx=true"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j.skipJansi=true"
 
-# GC logging options
-if [ "x$FESS_USE_GC_LOGGING" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCDetails"
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCTimeStamps"
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCDateStamps"
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintClassHistogram"
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintTenuringDistribution"
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+PrintGCApplicationStoppedTime"
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Xloggc:/var/log/elasticsearch/gc.log"
-fi
-
 # Causes the JVM to dump its heap on OutOfMemory.
 #FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
 # The path to the heap dump location, note directory must exists and have enough
@@ -113,6 +102,9 @@ if [ "x$FESS_PORT" = "x" ]; then
 fi
 if [ "x$FESS_CONTEXT_PATH" = "x" ]; then
   FESS_CONTEXT_PATH=/
+fi
+if [ "x$FESS_USE_GC_LOGGING" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Xlog:gc*,gc+age=trace,safepoint:file=$FESS_LOG_PATH/gc-$APP_NAME.log:utctime,pid,tags:filecount=5,filesize=64m"
 fi
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.home=$FESS_HOME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=$FESS_CONTEXT_PATH"

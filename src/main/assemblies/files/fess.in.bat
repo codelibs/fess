@@ -72,14 +72,6 @@ REM SSL truststore for certificate validation over https
 REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks
 REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Djavax.net.ssl.trustStorePassword=changeit
 
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCDetails
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCTimeStamps
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCDateStamps
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintClassHistogram
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintTenuringDistribution
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+PrintGCApplicationStoppedTime
-if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xloggc:%FESS_HOME%/logs/gc.log
-
 REM Causes the JVM to dump its heap on OutOfMemory.
 REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+HeapDumpOnOutOfMemoryError
 REM The path to the heap dump location, note directory must exists and have enough
@@ -98,6 +90,8 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dgroovy.use.classvalue=true
 REM Application Configuration
 set APP_NAME=fess
 set ES_HOME=%FESS_HOME%/es
+
+if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xlog:gc*,gc+age=trace,safepoint:file=%FESS_HOME%/logs/gc-%APP_NAME%.log:utctime,pid,tags:filecount=5,filesize=64m
 
 set FESS_CLASSPATH=%FESS_HOME%\lib\classes
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess
