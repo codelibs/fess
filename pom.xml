@@ -65,8 +65,8 @@
 		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.37</tomcat.version>
-		<tomcat.boot.version>0.7.5</tomcat.boot.version>
+		<tomcat.version>9.0.41</tomcat.version>
+		<tomcat.boot.version>0.7.6</tomcat.boot.version>
 
 		<!-- Testing -->
 		<utflute.version>0.9.1</utflute.version>
@@ -1453,29 +1453,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency><!-- for jsp -->
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jasper</artifactId>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
 			<version>${tomcat.version}</version>
 			<!-- Disable scope at development on IDEA -->
 			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-juli</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-util-scan</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- test -->
