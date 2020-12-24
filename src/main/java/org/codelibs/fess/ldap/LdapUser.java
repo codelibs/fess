@@ -55,10 +55,11 @@ public class LdapUser implements FessUser {
             final String accountFilter = fessConfig.getLdapAccountFilter();
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
-                permissions = ArrayUtils.addAll(ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
+                final LdapManager ldapManager = ComponentUtil.getLdapManager();
+                permissions = ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
                     permissions = roles;
                     ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
-                }), fessConfig.getRoleSearchUserPrefix() + getName());
+                }), fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName()));
             } else {
                 permissions = StringUtil.EMPTY_STRINGS;
             }

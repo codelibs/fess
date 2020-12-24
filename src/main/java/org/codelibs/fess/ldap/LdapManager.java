@@ -268,11 +268,18 @@ public class LdapManager {
         final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
         if (isRole) {
             if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                roleSet.add(systemHelper.getSearchRoleByRole(name));
+                roleSet.add(systemHelper.getSearchRoleByRole(normalizePermissionName(name)));
             }
         } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-            roleSet.add(systemHelper.getSearchRoleByGroup(name));
+            roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(name)));
         }
+    }
+
+    public String normalizePermissionName(final String name) {
+        if (fessConfig.isLdapLowercasePermissionName()) {
+            return name.toLowerCase(Locale.ROOT);
+        }
+        return name;
     }
 
     protected void processSearchRoles(final List<SearchResult> result, final BiConsumer<String, String> consumer) throws NamingException {
