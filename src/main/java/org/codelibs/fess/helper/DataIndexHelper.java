@@ -215,7 +215,7 @@ public class DataIndexHelper {
                 try {
                     dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
                 } catch (final Throwable e) {
-                    logger.error("Failed to process a data crawling: " + dataConfig.getName(), e);
+                    logger.error("Failed to process a data crawling: {}", dataConfig.getName(), e);
                     ComponentUtil.getComponent(FailureUrlService.class).store(dataConfig, e.getClass().getCanonicalName(),
                             dataConfig.getConfigId() + ":" + dataConfig.getName(), e);
                 } finally {
@@ -247,7 +247,7 @@ public class DataIndexHelper {
                 final long numOfDeleted = fessEsClient.deleteByQuery(index, queryBuilder);
                 logger.info("Deleted {} old docs.", numOfDeleted);
             } catch (final Exception e) {
-                logger.error("Could not delete old docs at " + dataConfig, e);
+                logger.error("Could not delete old docs at {}", dataConfig, e);
             }
         }
 

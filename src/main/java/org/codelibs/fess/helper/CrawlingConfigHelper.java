@@ -120,7 +120,7 @@ public class CrawlingConfigHelper {
                 }
             });
         } catch (final ExecutionException e) {
-            logger.warn("Failed to access a crawling config cache: " + configId, e);
+            logger.warn("Failed to access a crawling config cache: {}", configId, e);
             return null;
         }
     }

@@ -62,7 +62,7 @@ public class UpdateLabelJob {
                         return builder.setScript(script);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to process " + hit, e);
+                    logger.warn("Failed to process {}", hit, e);
                 }
                 return null;
             });

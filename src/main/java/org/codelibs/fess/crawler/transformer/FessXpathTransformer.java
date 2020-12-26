@@ -182,7 +182,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     break;
                 }
             } catch (final TransformerException e) {
-                logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue(), e);
+                logger.warn("Could not parse a value of {}:{}", entry.getKey(), entry.getValue(), e);
             }
         }
 
@@ -247,7 +247,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             }
         } catch (final TransformerException e) {
-            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT, e);
+            logger.warn("Could not parse a value of {}", META_NAME_ROBOTS_CONTENT, e);
         }
 
     }
@@ -408,7 +408,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), new String(InputStreamUtil.getBytes(is), charSet));
                     putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
                 } catch (final Exception e) {
-                    logger.warn("Failed to write a cache: " + sessionId + ":" + responseData, e);
+                    logger.warn("Failed to write a cache: {}:{}", sessionId, responseData, e);
                 }
             } else {
                 logger.debug("Content size is too large({} > {}): {}", responseData.getContentLength(),
@@ -547,7 +547,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final URL u = new URL(baseUrl);
             return new URL(u, canonicalUrl.startsWith(":") ? u.getProtocol() + canonicalUrl : canonicalUrl).toString();
         } catch (final MalformedURLException e) {
-            logger.warn("Invalid canonical url: " + baseUrl + " : " + canonicalUrl, e);
+            logger.warn("Invalid canonical url: {} : {}", baseUrl, canonicalUrl, e);
         }
         return null;
     }
@@ -694,7 +694,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 buf.append("\n");
             }
         } catch (final Exception e) {
-            logger.warn("Could not parse a value of " + xpath, e);
+            logger.warn("Could not parse a value of {}", xpath, e);
         }
         return buf.toString().trim();
     }
@@ -865,7 +865,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 return firstThumbnailUrl;
             }
         } catch (final Exception e) {
-            logger.warn("Failed to retrieve thumbnail url from " + responseData.getUrl(), e);
+            logger.warn("Failed to retrieve thumbnail url from {}", responseData.getUrl(), e);
         }
         return null;
     }

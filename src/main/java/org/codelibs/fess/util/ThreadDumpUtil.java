@@ -58,7 +58,7 @@ public class ThreadDumpUtil {
                 }
             });
         } catch (final Exception e) {
-            logger.warn("Failed to write a thread dump to " + file, e);
+            logger.warn("Failed to write a thread dump to {}", file, e);
         }
     }
 

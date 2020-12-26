@@ -331,8 +331,7 @@ public class SystemHelper {
                             try {
                                 Files.copy(baseJspFile.toPath(), jspFile.toPath());
                             } catch (final IOException ex) {
-                                logger.warn("Could not copy from " + baseJspFile.getAbsolutePath() + " to " + jspFile.getAbsolutePath(),
-                                        ex);
+                                logger.warn("Could not copy from {} to {}", baseJspFile.getAbsolutePath(), jspFile.getAbsolutePath(), ex);
                             }
                         }
                     });

@@ -164,7 +164,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 p.destroy();
             }
         } catch (final Exception e) {
-            logger.warn("Failed to generate a thumbnail of " + thumbnailId, e);
+            logger.warn("Failed to generate a thumbnail of {}", thumbnailId, e);
         }
         if (task != null) {
             task.cancel();

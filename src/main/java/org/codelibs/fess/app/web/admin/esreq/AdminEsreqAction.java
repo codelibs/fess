@@ -114,7 +114,7 @@ public class AdminEsreqAction extends FessAdminAction {
                     }
                 });
             } catch (final Exception e) {
-                logger.warn("Failed to process request file: " + form.requestFile.getFileName(), e);
+                logger.warn("Failed to process request file: {}", form.requestFile.getFileName(), e);
                 throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, e.getMessage()),
                         () -> asListHtml(this::saveToken));
             }

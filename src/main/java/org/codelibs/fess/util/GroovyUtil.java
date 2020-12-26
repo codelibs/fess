@@ -43,7 +43,7 @@ public final class GroovyUtil {
         } catch (final JobProcessingException e) {
             throw e;
         } catch (final Exception e) {
-            logger.warn("Failed to evalue groovy script: " + template + " => " + paramMap, e);
+            logger.warn("Failed to evalue groovy script: {} => {}", template, paramMap, e);
             return null;
         } finally {
             final GroovyClassLoader loader = groovyShell.getClassLoader();

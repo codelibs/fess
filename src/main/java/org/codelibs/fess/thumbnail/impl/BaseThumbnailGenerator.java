@@ -154,7 +154,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             ComponentUtil.getIndexingHelper().updateDocument(ComponentUtil.getFessEsClient(), thumbnailId,
                     fessConfig.getIndexFieldThumbnail(), value);
         } catch (final Exception e) {
-            logger.warn("Failed to update thumbnail field at " + thumbnailId, e);
+            logger.warn("Failed to update thumbnail field at {}", thumbnailId, e);
         }
     }
 
@@ -181,10 +181,10 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             if (e.getCause() == null) {
                 logger.debug(e.getMessage());
             } else {
-                logger.warn("Failed to process " + id, e);
+                logger.warn("Failed to process {}", id, e);
             }
         } catch (final Exception e) {
-            logger.warn("Failed to process " + id, e);
+            logger.warn("Failed to process {}", id, e);
         }
         return false;
     }

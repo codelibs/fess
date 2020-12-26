@@ -117,12 +117,12 @@ public class ThemeHelper {
                 try {
                     Files.delete(f);
                 } catch (final IOException e) {
-                    logger.warn("Failed to delete " + f, e);
+                    logger.warn("Failed to delete {}", f, e);
                 }
             });
             Files.deleteIfExists(dir);
         } catch (final IOException e) {
-            logger.warn("Failed to delete " + dir, e);
+            logger.warn("Failed to delete {}", dir, e);
         }
     }
 

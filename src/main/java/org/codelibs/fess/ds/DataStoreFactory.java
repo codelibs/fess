@@ -110,7 +110,7 @@ public class DataStoreFactory {
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to load " + jarFile.getAbsolutePath(), e);
+                logger.warn("Failed to load {}", jarFile.getAbsolutePath(), e);
             }
         }
         return nameSet.stream().sorted().collect(Collectors.toList());

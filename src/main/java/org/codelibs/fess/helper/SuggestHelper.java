@@ -111,7 +111,7 @@ public class SuggestHelper {
             try {
                 suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
             } catch (final SuggestSettingsException e) {
-                logger.warn("Failed to add " + field, e);
+                logger.warn("Failed to add {}", field, e);
             }
         }));
         suggester.createIndexIfNothing();

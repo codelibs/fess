@@ -58,7 +58,7 @@ public final class UpgradeUtil {
                 }
             }
         } catch (final Exception e) {
-            logger.warn("Failed to register " + filePath, e);
+            logger.warn("Failed to register {}", filePath, e);
         }
         return false;
     }
@@ -83,7 +83,7 @@ public final class UpgradeUtil {
         } catch (final ResourceNotFoundRuntimeException e) {
             // ignore
         } catch (final Exception e) {
-            logger.warn(aliasConfigPath + " is not found.", e);
+            logger.warn("{} is not found.", aliasConfigPath, e);
         }
         return false;
     }
@@ -100,7 +100,7 @@ public final class UpgradeUtil {
             try {
                 source = FileUtil.readUTF8(mappingFile);
             } catch (final Exception e) {
-                logger.warn(mappingFile + " is not found.", e);
+                logger.warn("{} is not found.", mappingFile, e);
             }
             try {
                 final AcknowledgedResponse putMappingResponse = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON)
@@ -113,7 +113,7 @@ public final class UpgradeUtil {
                 }
                 // TODO bulk
             } catch (final Exception e) {
-                logger.warn("Failed to create " + index + "/" + type + " mapping.", e);
+                logger.warn("Failed to create {}/{} mapping.", index, type, e);
             }
         }
         return false;
@@ -134,7 +134,7 @@ public final class UpgradeUtil {
                     return true;
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
+                logger.warn("Failed to add {} to {}/{} ", field, index, type, e);
             }
         }
         return false;
@@ -154,7 +154,7 @@ public final class UpgradeUtil {
                 return true;
             }
         } catch (final Exception e) {
-            logger.warn("Failed to update " + index + " settings.", e);
+            logger.warn("Failed to update {} settings.", index, e);
         }
 
         return false;
@@ -166,7 +166,7 @@ public final class UpgradeUtil {
             fessEsClient.index(indexRequest).actionGet();
             return true;
         } catch (final Exception e) {
-            logger.warn("Failed to add " + id + " to " + index, e);
+            logger.warn("Failed to add {} to {}", id, index, e);
         }
         return false;
     }
@@ -196,7 +196,7 @@ public final class UpgradeUtil {
 
             @Override
             public void onFailure(final Exception e) {
-                logger.warn("Failed to delete " + index + " index.", e);
+                logger.warn("Failed to delete {} index.", index, e);
             }
         });
     }

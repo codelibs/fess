@@ -142,17 +142,17 @@ public class IndexUpdater extends Thread {
         try {
             urlFilterService.delete(sessionId);
         } catch (final Exception e) {
-            logger.warn("Failed to delete url filters: " + sessionId, e);
+            logger.warn("Failed to delete url filters: {}", sessionId, e);
         }
         try {
             urlQueueService.delete(sessionId);
         } catch (final Exception e) {
-            logger.warn("Failed to delete url queues: " + sessionId, e);
+            logger.warn("Failed to delete url queues: {}", sessionId, e);
         }
         try {
             dataService.delete(sessionId);
         } catch (final Exception e) {
-            logger.warn("Failed to delete data: " + sessionId, e);
+            logger.warn("Failed to delete data: {}", sessionId, e);
         }
     }
 
@@ -258,7 +258,7 @@ public class IndexUpdater extends Thread {
                         throw e;
                     }
                     errorCount++;
-                    logger.warn("Failed to access data. Retry to access.. " + errorCount, e);
+                    logger.warn("Failed to access data. Retry to access it {} times.", errorCount, e);
                 } finally {
                     if (systemHelper.isForceStop()) {
                         finishCrawling = true;
@@ -386,7 +386,7 @@ public class IndexUpdater extends Thread {
                         logger.debug("The number of an added document is {}.", documentSize);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Could not add a doc: " + accessResult.getUrl(), e);
+                    logger.warn("Could not add a doc: {}", accessResult.getUrl(), e);
                 }
             } else {
                 if (logger.isDebugEnabled()) {

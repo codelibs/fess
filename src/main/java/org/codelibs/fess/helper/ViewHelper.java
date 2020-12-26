@@ -361,7 +361,7 @@ public class ViewHelper {
                     url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
                 } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
-                        logger.warn("Failed to decode " + url, e);
+                        logger.warn("Failed to decode {}", url, e);
                     }
                 }
             }
@@ -712,7 +712,7 @@ public class ViewHelper {
             final String encodedName = URLEncoder.encode(name, Constants.UTF_8).replace("+", "%20");
             response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + name + "\"; filename*=utf-8''" + encodedName);
         } catch (final Exception e) {
-            logger.warn("Failed to write a filename: " + responseData, e);
+            logger.warn("Failed to write a filename: {}", responseData, e);
         }
     }
 

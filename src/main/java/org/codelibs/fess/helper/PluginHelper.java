@@ -146,7 +146,7 @@ public class PluginHelper {
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to parse " + pluginUrl + "maven-metadata.xml.", e);
+                logger.warn("Failed to parse {}maven-metadata.xml.", pluginUrl, e);
             }
         }
         return list;

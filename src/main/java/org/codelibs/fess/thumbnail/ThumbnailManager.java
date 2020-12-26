@@ -265,7 +265,7 @@ public class ThumbnailManager {
                 logger.debug("No image file exists: {}", noImageFile.getAbsolutePath());
             }
         } catch (final Exception e) {
-            logger.warn("Failed to create thumbnail for " + entity, e);
+            logger.warn("Failed to create thumbnail for {}", entity, e);
         }
     }
 
@@ -416,7 +416,7 @@ public class ThumbnailManager {
                     parent = parent.getParent();
                 }
             } catch (final IOException e) {
-                logger.warn("Failed to delete " + path, e);
+                logger.warn("Failed to delete {}", path, e);
             }
         }
 
@@ -456,7 +456,7 @@ public class ThumbnailManager {
         @Override
         public FileVisitResult visitFileFailed(final Path file, final IOException e) throws IOException {
             if (e != null) {
-                logger.warn("I/O exception on " + file, e);
+                logger.warn("I/O exception on {}", file, e);
             }
             return FileVisitResult.CONTINUE;
         }
@@ -464,7 +464,7 @@ public class ThumbnailManager {
         @Override
         public FileVisitResult postVisitDirectory(final Path dir, final IOException e) throws IOException {
             if (e != null) {
-                logger.warn("I/O exception on " + dir, e);
+                logger.warn("I/O exception on {}", dir, e);
             }
             deleteEmptyDirectory(dir);
             return FileVisitResult.CONTINUE;
@@ -507,7 +507,7 @@ public class ThumbnailManager {
                             Files.move(path, newPath);
                             logger.info("Move {} to {}", path, newPath);
                         } catch (final IOException e) {
-                            logger.warn("Failed to move " + path, e);
+                            logger.warn("Failed to move {}", path, e);
                         }
                     }
                 });

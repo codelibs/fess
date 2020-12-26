@@ -119,7 +119,7 @@ public class ScriptExecutorJob implements LaJob {
                 try {
                     task.stop();
                 } catch (final Exception e) {
-                    logger.warn("Failed to stop " + jobLog, e);
+                    logger.warn("Failed to stop {}", jobLog, e);
                 }
             }
             jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());

@@ -450,7 +450,7 @@ public class WebFsIndexHelper {
             // clear url filter
             urlFilterService.delete(sid);
         } catch (final Exception e) {
-            logger.warn("Failed to delete UrlFilter for " + sid, e);
+            logger.warn("Failed to delete UrlFilter for {}", sid, e);
         }
 
         try {
@@ -458,14 +458,14 @@ public class WebFsIndexHelper {
             urlQueueService.clearCache();
             urlQueueService.delete(sid);
         } catch (final Exception e) {
-            logger.warn("Failed to delete UrlQueue for " + sid, e);
+            logger.warn("Failed to delete UrlQueue for {}", sid, e);
         }
 
         try {
             // clear
             dataService.delete(sid);
         } catch (final Exception e) {
-            logger.warn("Failed to delete AccessResult for " + sid, e);
+            logger.warn("Failed to delete AccessResult for {}", sid, e);
         }
     }
 
