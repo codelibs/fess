@@ -137,7 +137,7 @@ public class BadWordService {
                         badWordBhv.update(badWord);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to read a sugget elevate word: " + list, e);
+                    logger.warn("Failed to read a sugget elevate word: {}", list, e);
                 }
             }
             fessEsClient.refresh("_all"); // TODO replace _all
@@ -165,7 +165,7 @@ public class BadWordService {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        logger.warn("Failed to write a sugget bad word: " + entity, e);
+                        logger.warn("Failed to write a sugget bad word: {}", entity, e);
                     }
                 }
 

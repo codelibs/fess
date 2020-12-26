@@ -47,7 +47,7 @@ public class ScriptExecutorJob implements LaJob {
 
     protected void process(final LaJobRuntime runtime) {
         if (!runtime.getParameterMap().containsKey(Constants.SCHEDULED_JOB)) {
-            logger.warn(Constants.SCHEDULED_JOB + " is empty.");
+            logger.warn("{} is empty.", Constants.SCHEDULED_JOB);
             return;
         }
         runtime.stopIfNeeds();
@@ -111,7 +111,7 @@ public class ScriptExecutorJob implements LaJob {
             }
             jobLog.setJobStatus(Constants.OK);
         } catch (final Throwable t) {
-            logger.warn("Failed to execute " + id + ": " + script, t);
+            logger.warn("Failed to execute {}: {}", id, script, t);
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {

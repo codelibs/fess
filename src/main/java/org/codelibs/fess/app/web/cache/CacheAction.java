@@ -56,7 +56,7 @@ public class CacheAction extends FessSearchAction {
         try {
             doc = searchHelper.getDocumentByDocId(form.docId, queryHelper.getCacheResponseFields(), getUserBean()).orElse(null);
         } catch (final Exception e) {
-            logger.warn("Failed to request: " + form.docId, e);
+            logger.warn("Failed to request: {}", form.docId, e);
         }
         if (doc == null) {
             saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));

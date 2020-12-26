@@ -108,7 +108,7 @@ public class AdminPluginAction extends FessAdminAction {
                             pluginHelper.getArtifactFromFileName(ArtifactType.UNKNOWN, filename, tempFile.getAbsolutePath());
                     pluginHelper.installArtifact(artifact);
                 } catch (final Exception e) {
-                    logger.warn("Failed to install " + filename, e);
+                    logger.warn("Failed to install {}", filename, e);
                 } finally {
                     if (tempFile.exists() && !tempFile.delete()) {
                         logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
@@ -190,14 +190,14 @@ public class AdminPluginAction extends FessAdminAction {
             try {
                 pluginHelper.installArtifact(artifact);
             } catch (final Exception e) {
-                logger.warn("Failed to install " + artifact.getFileName(), e);
+                logger.warn("Failed to install {}", artifact.getFileName(), e);
             }
             for (final Artifact a : artifacts) {
                 if (a.getName().equals(artifact.getName()) && !a.getVersion().equals(artifact.getVersion())) {
                     try {
                         pluginHelper.deleteInstalledArtifact(a);
                     } catch (final Exception e) {
-                        logger.warn("Failed to delete " + a.getFileName(), e);
+                        logger.warn("Failed to delete {}", a.getFileName(), e);
                     }
                 }
             }
@@ -209,7 +209,7 @@ public class AdminPluginAction extends FessAdminAction {
             try {
                 ComponentUtil.getPluginHelper().deleteInstalledArtifact(artifact);
             } catch (final Exception e) {
-                logger.warn("Failed to delete " + artifact.getFileName(), e);
+                logger.warn("Failed to delete {}", artifact.getFileName(), e);
             }
         }).start();
     }

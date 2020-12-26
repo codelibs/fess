@@ -221,7 +221,7 @@ public class AdminBackupAction extends FessAdminAction {
             }
             systemHelper.reloadConfiguration();
         } catch (final Exception e) {
-            logger.warn("Failed to process bulk file: " + fileName, e);
+            logger.warn("Failed to process bulk file: {}", fileName, e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -232,7 +232,7 @@ public class AdminBackupAction extends FessAdminAction {
         try (final InputStream in = new FileInputStream(tempFile)) {
             configParser.parse(new InputSource(in));
         } catch (final IOException e) {
-            logger.warn("Failed to process gsa.xml file: " + fileName, e);
+            logger.warn("Failed to process gsa.xml file: {}", fileName, e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -245,7 +245,7 @@ public class AdminBackupAction extends FessAdminAction {
         try (final InputStream in = new FileInputStream(tempFile)) {
             ComponentUtil.getSystemProperties().load(in);
         } catch (final IOException e) {
-            logger.warn("Failed to process system.properties file: " + fileName, e);
+            logger.warn("Failed to process system.properties file: {}", fileName, e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -255,7 +255,7 @@ public class AdminBackupAction extends FessAdminAction {
         try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getFessJsonPath())) {
             CopyUtil.copy(in, out);
         } catch (final IOException e) {
-            logger.warn("Failed to process fess.json file: " + fileName, e);
+            logger.warn("Failed to process fess.json file: {}", fileName, e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -265,7 +265,7 @@ public class AdminBackupAction extends FessAdminAction {
         try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getDocJsonPath())) {
             CopyUtil.copy(in, out);
         } catch (final IOException e) {
-            logger.warn("Failed to process doc.json file: " + fileName, e);
+            logger.warn("Failed to process doc.json file: {}", fileName, e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -362,7 +362,7 @@ public class AdminBackupAction extends FessAdminAction {
                         writeCall.accept(writer);
                         writer.flush();
                     } catch (final Exception e) {
-                        logger.warn("Failed to write " + id + " to response.", e);
+                        logger.warn("Failed to write {} to response.", id, e);
                     }
                 });
     }

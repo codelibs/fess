@@ -266,7 +266,7 @@ public class ElevateWordService {
                         }
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to read a sugget elevate word: " + list, e);
+                    logger.warn("Failed to read a sugget elevate word: {}", list, e);
                 }
             }
             elevateWordBhv.refresh();
@@ -309,7 +309,7 @@ public class ElevateWordService {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        logger.warn("Failed to write a sugget elevate word: " + entity, e);
+                        logger.warn("Failed to write a sugget elevate word: {}", entity, e);
                     }
                 }
 

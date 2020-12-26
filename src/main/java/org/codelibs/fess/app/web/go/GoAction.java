@@ -75,7 +75,7 @@ public class GoAction extends FessSearchAction {
             doc = searchHelper.getDocumentByDocId(form.docId,
                     new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId() }, getUserBean()).orElse(null);
         } catch (final Exception e) {
-            logger.warn("Failed to request: " + form.docId, e);
+            logger.warn("Failed to request: {}", form.docId, e);
         }
         if (doc == null) {
             saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
@@ -139,7 +139,7 @@ public class GoAction extends FessSearchAction {
                     }
                     return response;
                 } catch (final Exception e) {
-                    logger.warn("Failed to load: " + doc, e);
+                    logger.warn("Failed to load: {}", doc, e);
                     saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
                     return redirect(ErrorAction.class);
                 }

@@ -105,7 +105,7 @@ public class LoginAction extends FessLoginAction {
             userService.changePassword(username, form.password);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
         } catch (final Exception e) {
-            logger.warn("Failed to change newPassword for " + username, e);
+            logger.warn("Failed to change newPassword for {}", username, e);
             throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
         }
         getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));

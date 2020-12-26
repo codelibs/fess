@@ -283,7 +283,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 fessEsClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to add " + entity, e);
+                logger.error("Failed to add {}", entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -320,7 +320,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 fessEsClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to update " + entity, e);
+                logger.error("Failed to update {}", entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

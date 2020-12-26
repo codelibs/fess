@@ -235,7 +235,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                         try {
                             smbAuth.setPort(Integer.parseInt(port));
                         } catch (final NumberFormatException e) {
-                            logger.warn("Failed to parse " + port, e);
+                            logger.warn("Failed to parse {}", port, e);
                         }
                     }
                     smbAuth.setUsername(username);
@@ -250,7 +250,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                         try {
                             smb1Auth.setPort(Integer.parseInt(port));
                         } catch (final NumberFormatException e) {
-                            logger.warn("Failed to parse " + port, e);
+                            logger.warn("Failed to parse {}", port, e);
                         }
                     }
                     smb1Auth.setUsername(username);
@@ -273,7 +273,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                         try {
                             ftpAuth.setPort(Integer.parseInt(port));
                         } catch (final NumberFormatException e) {
-                            logger.warn("Failed to parse " + port, e);
+                            logger.warn("Failed to parse {}", port, e);
                         }
                     }
                     ftpAuth.setUsername(username);
@@ -349,7 +349,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                 try {
                     p = Integer.parseInt(port);
                 } catch (final NumberFormatException e) {
-                    logger.warn("Failed to parse " + port, e);
+                    logger.warn("Failed to parse {}", port, e);
                 }
             }
 

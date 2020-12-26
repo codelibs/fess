@@ -58,7 +58,7 @@ public class ScheduledJobBhv extends BsScheduledJobBhv {
                 ThreadUtil.sleep(RandomUtils.nextLong(500, 5000));
             }
         }
-        logger.warn("Failed to select a job by " + id, lastException);
+        logger.warn("Failed to select a job by {}", id, lastException);
         return OptionalEntity.empty();
     }
 }

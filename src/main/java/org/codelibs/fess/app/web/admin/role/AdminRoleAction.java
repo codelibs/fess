@@ -170,7 +170,7 @@ public class AdminRoleAction extends FessAdminAction {
                 roleService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to add " + entity, e);
+                logger.error("Failed to add {}", entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -192,7 +192,7 @@ public class AdminRoleAction extends FessAdminAction {
                 roleService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to delete " + entity, e);
+                logger.error("Failed to delete {}", entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
             }
         }).orElse(() -> {

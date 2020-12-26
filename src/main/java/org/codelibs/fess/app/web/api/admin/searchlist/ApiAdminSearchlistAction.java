@@ -133,7 +133,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 fessEsClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to add " + entity, e);
+                logger.error("Failed to add {}", entity, e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -174,7 +174,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 fessEsClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to update " + entity, e);
+                logger.error("Failed to update {}", entity, e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;

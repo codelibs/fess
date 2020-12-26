@@ -156,7 +156,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                 logger.warn("Unknown mapping type: {}={}", key, mapping);
                             }
                         } catch (final Exception e) {
-                            logger.warn("Failed to parse " + values[0], e);
+                            logger.warn("Failed to parse {}", values[0], e);
                         }
                     }
                 }

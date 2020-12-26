@@ -120,8 +120,8 @@ public class AdminMaintenanceAction extends FessAdminAction {
         fessEsClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
             logger.info("Close {}", docIndex);
             fessEsClient.admin().indices().prepareOpen(docIndex).execute(
-                    ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open " + docIndex, e)));
-        }, e -> logger.warn("Failed to close " + docIndex, e)));
+                    ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open {}", docIndex, e)));
+        }, e -> logger.warn("Failed to close {}", docIndex, e)));
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
@@ -181,7 +181,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                 CopyUtil.copy(response.getContentAsStream(), zos);
             }
         } catch (final Exception e) {
-            logger.warn("Failed to access /_" + v1 + "/" + v2, e);
+            logger.warn("Failed to access /_{}/{}", v1, v2, e);
         }
     }
 
@@ -194,7 +194,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                     CopyUtil.copy(response.getContentAsStream(), zos);
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to access /_cat/" + name, e);
+                logger.warn("Failed to access /_cat/{}", name, e);
             }
         });
     }
@@ -251,7 +251,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                             logger.debug("{}: {}", filePath.getFileName(), len);
                         }
                     } catch (final IOException e) {
-                        logger.warn("Failed to access " + filePath, e);
+                        logger.warn("Failed to access {}", filePath, e);
                     }
                 });
             } catch (final Exception e) {
@@ -297,7 +297,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                 if (replaceAliases && !fessEsClient.updateAlias(toIndex)) {
                     logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
                 }
-            }, e -> logger.warn("Failed to reindex from " + fromIndex + " to " + toIndex, e)));
+            }, e -> logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e)));
             return true;
         }
         saveError(messages -> messages.addErrorsFailedToReindex(GLOBAL, fromIndex, toIndex));

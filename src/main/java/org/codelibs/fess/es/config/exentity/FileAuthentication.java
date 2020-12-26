@@ -54,7 +54,7 @@ public class FileAuthentication extends BsFileAuthentication {
             try {
                 fileConfig = fileConfigService.getFileConfig(getFileConfigId()).get();
             } catch (final Exception e) {
-                logger.warn("File Config " + getFileConfigId() + " does not exist.", e);
+                logger.warn("File Config {} does not exist.", getFileConfigId(), e);
             }
         }
         return fileConfig;

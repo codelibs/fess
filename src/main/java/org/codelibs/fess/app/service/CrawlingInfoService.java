@@ -236,7 +236,7 @@ public class CrawlingInfoService {
                     entity.setCreatedTime(formatter.parse(list.get(4)).getTime());
                     crawlingInfoParamBhv.insert(entity, op -> op.setRefreshPolicy(Constants.TRUE));
                 } catch (final Exception e) {
-                    logger.warn("Failed to read a click log: " + list, e);
+                    logger.warn("Failed to read a click log: {}", list, e);
                 }
             }
         } catch (final IOException e) {
@@ -278,7 +278,7 @@ public class CrawlingInfoService {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        logger.warn("Failed to write a crawling session info: " + entity, e);
+                        logger.warn("Failed to write a crawling session info: {}", entity, e);
                     }
                 }
 
