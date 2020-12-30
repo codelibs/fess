@@ -687,12 +687,17 @@ public class QueryHelper {
     protected QueryBuilder buildDefaultTermQueryBuilder(final float boost, final String text) {
         final BoolQueryBuilder boolQuery = buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (text.length() >= fessConfig.getQueryBoostFuzzyMinLengthAsInteger()) {
+        final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
+        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength) {
             boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)
                     .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())
+                    .prefixLength(fessConfig.getQueryBoostFuzzyTitlePrefixLengthAsInteger())
+                    .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyTitleTranspositions()))
                     .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyTitleFuzziness()))
                     .maxExpansions(fessConfig.getQueryBoostFuzzyTitleExpansionsAsInteger()));
             boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldContent(), text)
+                    .prefixLength(fessConfig.getQueryBoostFuzzyContentPrefixLengthAsInteger())
+                    .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyContentTranspositions()))
                     .boost(fessConfig.getQueryBoostFuzzyContentAsDecimal().floatValue())
                     .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyContentFuzziness()))
                     .maxExpansions(fessConfig.getQueryBoostFuzzyContentExpansionsAsInteger()));

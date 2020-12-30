@@ -959,6 +959,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10 */
     String QUERY_BOOST_FUZZY_TITLE_EXPANSIONS = "query.boost.fuzzy.title.expansions";
 
+    /** The key of the configuration. e.g. 0 */
+    String QUERY_BOOST_FUZZY_TITLE_prefix_length = "query.boost.fuzzy.title.prefix_length";
+
+    /** The key of the configuration. e.g. true */
+    String QUERY_BOOST_FUZZY_TITLE_TRANSPOSITIONS = "query.boost.fuzzy.title.transpositions";
+
     /** The key of the configuration. e.g. 0.005 */
     String QUERY_BOOST_FUZZY_CONTENT = "query.boost.fuzzy.content";
 
@@ -967,6 +973,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 10 */
     String QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS = "query.boost.fuzzy.content.expansions";
+
+    /** The key of the configuration. e.g. 0 */
+    String QUERY_BOOST_FUZZY_CONTENT_prefix_length = "query.boost.fuzzy.content.prefix_length";
+
+    /** The key of the configuration. e.g. true */
+    String QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS = "query.boost.fuzzy.content.transpositions";
 
     /** The key of the configuration. e.g. label */
     String QUERY_FACET_FIELDS = "query.facet.fields";
@@ -4444,6 +4456,35 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getQueryBoostFuzzyTitleExpansionsAsInteger();
 
     /**
+     * Get the value for the key 'query.boost.fuzzy.title.prefix_length'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyTitlePrefixLength();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title.prefix_length' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryBoostFuzzyTitlePrefixLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.title.transpositions'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyTitleTranspositions();
+
+    /**
+     * Is the property for the key 'query.boost.fuzzy.title.transpositions' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryBoostFuzzyTitleTranspositions();
+
+    /**
      * Get the value for the key 'query.boost.fuzzy.content'. <br>
      * The value is, e.g. 0.005 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4479,6 +4520,35 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryBoostFuzzyContentExpansionsAsInteger();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content.prefix_length'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyContentPrefixLength();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content.prefix_length' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryBoostFuzzyContentPrefixLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.content.transpositions'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyContentTranspositions();
+
+    /**
+     * Is the property for the key 'query.boost.fuzzy.content.transpositions' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryBoostFuzzyContentTranspositions();
 
     /**
      * Get the value for the key 'query.facet.fields'. <br>
@@ -8208,6 +8278,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_TITLE_EXPANSIONS);
         }
 
+        public String getQueryBoostFuzzyTitlePrefixLength() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_TITLE_prefix_length);
+        }
+
+        public Integer getQueryBoostFuzzyTitlePrefixLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_TITLE_prefix_length);
+        }
+
+        public String getQueryBoostFuzzyTitleTranspositions() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_TITLE_TRANSPOSITIONS);
+        }
+
+        public boolean isQueryBoostFuzzyTitleTranspositions() {
+            return is(FessConfig.QUERY_BOOST_FUZZY_TITLE_TRANSPOSITIONS);
+        }
+
         public String getQueryBoostFuzzyContent() {
             return get(FessConfig.QUERY_BOOST_FUZZY_CONTENT);
         }
@@ -8226,6 +8312,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getQueryBoostFuzzyContentExpansionsAsInteger() {
             return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS);
+        }
+
+        public String getQueryBoostFuzzyContentPrefixLength() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_CONTENT_prefix_length);
+        }
+
+        public Integer getQueryBoostFuzzyContentPrefixLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_CONTENT_prefix_length);
+        }
+
+        public String getQueryBoostFuzzyContentTranspositions() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS);
+        }
+
+        public boolean isQueryBoostFuzzyContentTranspositions() {
+            return is(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS);
         }
 
         public String getQueryFacetFields() {
@@ -9740,9 +9842,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE, "0.01");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_FUZZINESS, "AUTO");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_EXPANSIONS, "10");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_prefix_length, "0");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_TRANSPOSITIONS, "true");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT, "0.005");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_FUZZINESS, "AUTO");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS, "10");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_prefix_length, "0");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS, "true");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS, "label");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE, "100");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");
