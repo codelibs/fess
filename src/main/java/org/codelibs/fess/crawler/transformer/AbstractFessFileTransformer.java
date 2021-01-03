@@ -472,6 +472,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 // Unix
                 return abbreviateSite(value);
             }
+        } else if (url.startsWith("smb:") || url.startsWith("smb1:")) {
+            final String value = url.replaceFirst("^smb.?:/+", StringUtil.EMPTY);
+            return abbreviateSite("\\\\" + value.replace('/', '\\'));
         }
 
         return getSite(url, encoding);

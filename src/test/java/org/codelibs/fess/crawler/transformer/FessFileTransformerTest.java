@@ -198,6 +198,18 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         url = "file:////server/user";
         exp = "\\\\server\\user";
         assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "smb://server/user";
+        exp = "\\\\server\\user";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "smb1://server/user";
+        exp = "\\\\server\\user";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "ftp://example.com/file";
+        exp = "example.com/file";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
     }
 
     public void test_getSite_ok_len10() {

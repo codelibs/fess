@@ -605,6 +605,16 @@ public class ViewHelper {
 
     public Object getSitePath(final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Object siteValue = docMap.get(fessConfig.getIndexFieldSite());
+        if (siteValue != null) {
+            final String site = siteValue.toString();
+            final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
+            if (size > -1) {
+                return StringUtils.abbreviate(site, size);
+            } else {
+                return site;
+            }
+        }
         final Object urlLink = docMap.get(fessConfig.getResponseFieldUrlLink());
         if (urlLink != null) {
             final String returnUrl;
