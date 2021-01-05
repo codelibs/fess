@@ -195,7 +195,7 @@ public class LdapManager {
         final Set<String> roleSet = new HashSet<>();
 
         if (fessConfig.isLdapRoleSearchUserEnabled()) {
-            roleSet.add(systemHelper.getSearchRoleByUser(ldapUser.getName()));
+            roleSet.add(normalizePermissionName(systemHelper.getSearchRoleByUser(ldapUser.getName())));
         }
 
         // LDAP: cn=%s
