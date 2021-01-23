@@ -303,6 +303,8 @@
 						<ant antfile="${basedir}/dbflute.xml" target="download.dbflute" />
 						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
 							<property name="with.fess" value="true" />
+							<property name="maven.release.repo.url" value="https://maven.codelibs.org" />
+							<property name="use.fesen" value="/fesen/relocated" />
 						</ant>
 						<ant antfile="deps.xml" target="install.jars" />
 						<echo message="fess.version=${project.version}" file="${basedir}/src/main/webapp/WEB-INF/project.properties" />
