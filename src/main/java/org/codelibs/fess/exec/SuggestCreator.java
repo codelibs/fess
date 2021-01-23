@@ -29,16 +29,16 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
+import org.codelibs.fesen.monitor.jvm.JvmInfo;
+import org.codelibs.fesen.monitor.os.OsProbe;
+import org.codelibs.fesen.monitor.process.ProcessProbe;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crawler.client.EsClient;
+import org.codelibs.fess.crawler.client.FesenClient;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.monitor.jvm.JvmInfo;
-import org.elasticsearch.monitor.os.OsProbe;
-import org.elasticsearch.monitor.process.ProcessProbe;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -105,7 +105,7 @@ public class SuggestCreator {
 
         final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
         if (StringUtil.isNotBlank(httpAddress)) {
-            System.setProperty(EsClient.HTTP_ADDRESS, httpAddress);
+            System.setProperty(FesenClient.HTTP_ADDRESS, httpAddress);
         }
 
         TimeoutTask systemMonitorTask = null;

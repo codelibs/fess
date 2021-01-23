@@ -37,6 +37,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.action.update.UpdateRequest;
+import org.codelibs.fesen.script.Script;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchLogEvent;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -55,8 +57,6 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

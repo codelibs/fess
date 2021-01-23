@@ -29,6 +29,12 @@ import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.fesen.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilders;
+import org.codelibs.fesen.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
+import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilder;
+import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilders;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -38,12 +44,6 @@ import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 
 public class KeyMatchHelper {
     private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);

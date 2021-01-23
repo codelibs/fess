@@ -27,6 +27,23 @@ import java.util.function.Function;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fesen.action.ActionListener;
+import org.codelibs.fesen.action.DocWriteResponse.Result;
+import org.codelibs.fesen.action.admin.indices.refresh.RefreshResponse;
+import org.codelibs.fesen.action.bulk.BulkItemResponse;
+import org.codelibs.fesen.action.bulk.BulkRequestBuilder;
+import org.codelibs.fesen.action.bulk.BulkResponse;
+import org.codelibs.fesen.action.delete.DeleteRequestBuilder;
+import org.codelibs.fesen.action.delete.DeleteResponse;
+import org.codelibs.fesen.action.index.IndexRequestBuilder;
+import org.codelibs.fesen.action.index.IndexResponse;
+import org.codelibs.fesen.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.action.search.SearchResponse;
+import org.codelibs.fesen.action.update.UpdateRequestBuilder;
+import org.codelibs.fesen.client.Client;
+import org.codelibs.fesen.index.seqno.SequenceNumbers;
+import org.codelibs.fesen.search.SearchHit;
+import org.codelibs.fesen.search.SearchHits;
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.DocMeta;
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.dbflute.Entity;
@@ -41,23 +58,6 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.bulk.BulkItemResponse;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.index.seqno.SequenceNumbers;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 
 /**
  * @param <ENTITY> The type of entity.
@@ -89,7 +89,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected abstract <RESULT extends ENTITY> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType);
 
     // ===================================================================================
-    //                                                                       Elasticsearch
+    //                                                                       Fesen
     //                                                                              ======
     public RefreshResponse refresh() {
         return client.admin().indices().prepareRefresh(asEsIndex()).execute().actionGet(refreshTimeout);

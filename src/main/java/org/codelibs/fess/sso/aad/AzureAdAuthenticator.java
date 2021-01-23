@@ -47,7 +47,7 @@ import org.codelibs.core.net.UuidUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
-import org.codelibs.elasticsearch.runner.net.EcrCurl;
+import org.codelibs.fesen.runner.net.EcrCurl;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.AzureAdCredential;
 import org.codelibs.fess.app.web.base.login.AzureAdCredential.AzureAdUser;

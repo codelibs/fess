@@ -34,6 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.script.Script;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.app.service.FavoriteLogService;
@@ -59,7 +60,6 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
-import org.elasticsearch.script.Script;
 
 public class JsonApiManager extends BaseJsonApiManager {
 

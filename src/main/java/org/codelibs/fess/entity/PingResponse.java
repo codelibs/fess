@@ -22,11 +22,11 @@ import java.util.Locale;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.action.admin.cluster.health.ClusterHealthResponse;
+import org.codelibs.fesen.cluster.health.ClusterHealthStatus;
+import org.codelibs.fesen.common.xcontent.XContentType;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.EsUtil;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.elasticsearch.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.common.xcontent.XContentType;
 
 public class PingResponse {
     private static final String CLUSTER_NAME = "cluster_name";

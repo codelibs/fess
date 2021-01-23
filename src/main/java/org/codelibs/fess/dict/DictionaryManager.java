@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.curl.CurlResponse;
-import org.codelibs.elasticsearch.runner.net.EcrCurl;
+import org.codelibs.fesen.runner.net.EcrCurl;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;

@@ -28,18 +28,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fesen.action.search.SearchResponse;
+import org.codelibs.fesen.common.document.DocumentField;
+import org.codelibs.fesen.common.text.Text;
+import org.codelibs.fesen.search.SearchHit;
+import org.codelibs.fesen.search.SearchHits;
+import org.codelibs.fesen.search.aggregations.Aggregations;
+import org.codelibs.fesen.search.fetch.subphase.highlight.HighlightField;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.document.DocumentField;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 
 public class QueryResponseList implements List<Map<String, Object>> {
 

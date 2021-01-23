@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>13.10.3-SNAPSHOT</version>
+	<version>13.11.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -54,15 +54,15 @@
 		<okhttp.version>3.14.9</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.10.1</crawler.version>
+		<crawler.version>3.11.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.10.0</suggest.version>
+		<suggest.version>7.11.0-SNAPSHOT</suggest.version>
 
-		<!-- Elasticsearch -->
-		<elasticsearch.version>7.10.1</elasticsearch.version>
-		<elasticsearch.httpclient.version>7.10.0</elasticsearch.httpclient.version>
-		<cluster.runner.version>${elasticsearch.version}.0</cluster.runner.version>
+		<!-- Fesen -->
+		<fesen.version>0.10.0-SNAPSHOT</fesen.version>
+		<fesen.httpclient.version>0.10.0-SNAPSHOT</fesen.httpclient.version>
+		<fesen.runner.version>0.10.0-SNAPSHOT</fesen.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>9.0.41</tomcat.version>
@@ -90,7 +90,7 @@
 		<packaging.fess.systemd.dir>/usr/lib/systemd/system</packaging.fess.systemd.dir>
 		<packaging.fess.systemd.sysctl.dir>/usr/lib/sysctl.d</packaging.fess.systemd.sysctl.dir>
 		<packaging.fess.tmpfilesd.dir>/usr/lib/tmpfiles.d</packaging.fess.tmpfilesd.dir>
-		<packaging.fess.dictionary.dir>/var/lib/elasticsearch/config</packaging.fess.dictionary.dir>
+		<packaging.fess.dictionary.dir>/var/lib/fesen/config</packaging.fess.dictionary.dir>
 
 	</properties>
 	<profiles>
@@ -1082,16 +1082,16 @@
 			<version>${log4j.version}</version>
 		</dependency>
 
-		<!-- elasticsearch -->
+		<!-- fesen -->
 		<dependency>
-			<groupId>org.elasticsearch</groupId>
-			<artifactId>elasticsearch</artifactId>
-			<version>${elasticsearch.version}</version>
+			<groupId>org.codelibs.fesen</groupId>
+			<artifactId>fesen-engine-server</artifactId>
+			<version>${fesen.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>elasticsearch-cluster-runner</artifactId>
-			<version>${cluster.runner.version}</version>
+			<groupId>org.codelibs.fesen</groupId>
+			<artifactId>fesen-runner</artifactId>
+			<version>${fesen.runner.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.ow2.asm</groupId>
@@ -1116,9 +1116,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>elasticsearch-httpclient</artifactId>
-			<version>${elasticsearch.httpclient.version}</version>
+			<groupId>org.codelibs.fesen.client</groupId>
+			<artifactId>fesen-httpclient</artifactId>
+			<version>${fesen.httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>

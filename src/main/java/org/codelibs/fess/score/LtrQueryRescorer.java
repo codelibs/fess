@@ -18,11 +18,11 @@ package org.codelibs.fess.score;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.search.rescore.QueryRescorerBuilder;
+import org.codelibs.fesen.search.rescore.RescorerBuilder;
 import org.codelibs.fess.es.query.StoredLtrQueryBuilder;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.search.rescore.QueryRescorerBuilder;
-import org.elasticsearch.search.rescore.RescorerBuilder;
 
 public class LtrQueryRescorer implements QueryRescorer {
 

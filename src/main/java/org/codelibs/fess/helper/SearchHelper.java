@@ -33,6 +33,15 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.FesenException;
+import org.codelibs.fesen.action.DocWriteResponse.Result;
+import org.codelibs.fesen.action.bulk.BulkRequestBuilder;
+import org.codelibs.fesen.action.bulk.BulkResponse;
+import org.codelibs.fesen.action.update.UpdateRequestBuilder;
+import org.codelibs.fesen.action.update.UpdateResponse;
+import org.codelibs.fesen.common.document.DocumentField;
+import org.codelibs.fesen.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilders;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -48,15 +57,6 @@ import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
-import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.common.document.DocumentField;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -330,7 +330,7 @@ public class SearchHelper {
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;
-        } catch (final ElasticsearchException e) {
+        } catch (final FesenException e) {
             throw new FessEsClientException("Failed to update doc  " + id, e);
         }
     }

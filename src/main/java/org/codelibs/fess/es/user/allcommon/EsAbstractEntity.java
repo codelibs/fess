@@ -19,13 +19,13 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import org.codelibs.fesen.action.delete.DeleteRequestBuilder;
+import org.codelibs.fesen.action.index.IndexRequestBuilder;
 import org.dbflute.Entity;
 import org.dbflute.FunCustodial;
 import org.dbflute.dbmeta.accessory.EntityModifiedProperties;
 import org.dbflute.dbmeta.accessory.EntityUniqueDrivenProperties;
 import org.dbflute.util.DfCollectionUtil;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

@@ -26,12 +26,12 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
-import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.codelibs.fesen.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.index.query.MatchPhraseQueryBuilder;
+import org.codelibs.fesen.index.query.PrefixQueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilders;
+import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilders;
 
 public class QueryHelperTest extends UnitFessTestCase {
 

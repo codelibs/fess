@@ -42,7 +42,7 @@ public abstract class ExecJob {
 
     protected String sessionId;
 
-    protected boolean useLocalElasticsearch = true;
+    protected boolean useLocalFesen = true;
 
     protected String logFilePath;
 
@@ -90,8 +90,8 @@ public abstract class ExecJob {
         return this;
     }
 
-    public ExecJob useLocalElasticsearch(final boolean useLocalElasticsearch) {
-        this.useLocalElasticsearch = useLocalElasticsearch;
+    public ExecJob useLocalFesen(final boolean useLocalFesen) {
+        this.useLocalFesen = useLocalFesen;
         return this;
     }
 

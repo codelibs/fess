@@ -26,22 +26,22 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.timer.TimeoutTarget;
+import org.codelibs.fesen.action.admin.cluster.node.stats.NodesStatsResponse;
+import org.codelibs.fesen.common.xcontent.ToXContent;
+import org.codelibs.fesen.common.xcontent.XContentBuilder;
+import org.codelibs.fesen.common.xcontent.XContentFactory;
+import org.codelibs.fesen.monitor.jvm.JvmStats;
+import org.codelibs.fesen.monitor.jvm.JvmStats.BufferPool;
+import org.codelibs.fesen.monitor.jvm.JvmStats.Classes;
+import org.codelibs.fesen.monitor.jvm.JvmStats.GarbageCollectors;
+import org.codelibs.fesen.monitor.jvm.JvmStats.Mem;
+import org.codelibs.fesen.monitor.jvm.JvmStats.Threads;
+import org.codelibs.fesen.monitor.os.OsProbe;
+import org.codelibs.fesen.monitor.os.OsStats;
+import org.codelibs.fesen.monitor.process.ProcessProbe;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.action.admin.cluster.node.stats.NodesStatsResponse;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.monitor.jvm.JvmStats;
-import org.elasticsearch.monitor.jvm.JvmStats.BufferPool;
-import org.elasticsearch.monitor.jvm.JvmStats.Classes;
-import org.elasticsearch.monitor.jvm.JvmStats.GarbageCollectors;
-import org.elasticsearch.monitor.jvm.JvmStats.Mem;
-import org.elasticsearch.monitor.jvm.JvmStats.Threads;
-import org.elasticsearch.monitor.os.OsProbe;
-import org.elasticsearch.monitor.os.OsStats;
-import org.elasticsearch.monitor.process.ProcessProbe;
 
 public class SystemMonitorTarget implements TimeoutTarget {
     private static final Logger logger = LogManager.getLogger(SystemMonitorTarget.class);
@@ -77,7 +77,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
         appendOsStats(buf);
         appendProcessStats(buf);
         appendJvmStats(buf);
-        appendElasticsearchStats(buf);
+        appendFesenStats(buf);
 
         append(buf, "timestamp", System::currentTimeMillis);
         buf.append('}');
@@ -175,7 +175,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
         buf.append("},");
     }
 
-    private void appendElasticsearchStats(final StringBuilder buf) {
+    private void appendFesenStats(final StringBuilder buf) {
         String stats = null;
         try {
             final FessEsClient esClient = ComponentUtil.getFessEsClient();
@@ -189,7 +189,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
                 stats = ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
             }
         } catch (final Exception e) {
-            logger.debug("Failed to access Elasticsearch stats.", e);
+            logger.debug("Failed to access Fesen stats.", e);
         }
         buf.append("\"elasticsearch\":").append(stats).append(',');
     }

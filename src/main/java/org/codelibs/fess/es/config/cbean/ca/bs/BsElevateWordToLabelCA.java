@@ -15,22 +15,22 @@
  */
 package org.codelibs.fess.es.config.cbean.ca.bs;
 
+import org.codelibs.fesen.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.range.IpRangeAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.metrics.ValueCountAggregationBuilder;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionAggregation;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.ca.ElevateWordToLabelCA;
 import org.codelibs.fess.es.config.cbean.cq.ElevateWordToLabelCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordToLabelCQ;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

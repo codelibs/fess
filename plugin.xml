@@ -5,7 +5,9 @@
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
-	<property name="maven.release.repo.url" value="https://oss.sonatype.org/content/repositories/releases" />
+	<!-- property name="maven.release.repo.url" value="https://oss.sonatype.org/content/repositories/releases" / -->
+	<!-- WORKAROUND -->
+	<property name="maven.release.repo.url" value="https://maven.codelibs.org" />
 
 	<target name="install.plugins">
 		<mkdir dir="${target.dir}" />
@@ -14,7 +16,7 @@
 		<!-- analysis-extension -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.groupId" value="org/codelibs/fesen/relocated" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-extension" />
 			<param name="plugin.version" value="7.10.0" />
@@ -23,7 +25,7 @@
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.groupId" value="org/codelibs/fesen/relocated" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
 			<param name="plugin.version" value="7.10.0" />
@@ -32,7 +34,7 @@
 		<!-- configsync -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.groupId" value="org/codelibs/fesen/relocated" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
 			<param name="plugin.version" value="7.10.0" />
@@ -41,7 +43,7 @@
 		<!-- dataformat -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.groupId" value="org/codelibs/fesen/relocated" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
 			<param name="plugin.version" value="7.10.0" />
@@ -50,7 +52,7 @@
 		<!-- minhash -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.groupId" value="org/codelibs/fesen/relocated" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="minhash" />
 			<param name="plugin.version" value="7.10.0" />

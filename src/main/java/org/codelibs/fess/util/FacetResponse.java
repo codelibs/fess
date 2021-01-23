@@ -21,10 +21,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fesen.search.aggregations.Aggregations;
+import org.codelibs.fesen.search.aggregations.bucket.filter.Filter;
+import org.codelibs.fesen.search.aggregations.bucket.terms.Terms;
 import org.codelibs.fess.Constants;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.filter.Filter;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
 import com.google.common.io.BaseEncoding;
 

@@ -42,13 +42,13 @@ public class ResourceUtil {
         // nothing
     }
 
-    public static String getElasticsearchHttpUrl() {
+    public static String getFesenHttpUrl() {
         final String url = System.getProperty("fess.es.http_address");
         if (url != null) {
             return url;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessConfig.getElasticsearchHttpUrl();
+        return fessConfig.getFesenHttpUrl();
     }
 
     public static String getAppType() {

@@ -19,25 +19,25 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.codelibs.fesen.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.index.query.CommonTermsQueryBuilder;
+import org.codelibs.fesen.index.query.ExistsQueryBuilder;
+import org.codelibs.fesen.index.query.IdsQueryBuilder;
+import org.codelibs.fesen.index.query.MatchPhrasePrefixQueryBuilder;
+import org.codelibs.fesen.index.query.MatchPhraseQueryBuilder;
+import org.codelibs.fesen.index.query.MatchQueryBuilder;
+import org.codelibs.fesen.index.query.PrefixQueryBuilder;
+import org.codelibs.fesen.index.query.RangeQueryBuilder;
+import org.codelibs.fesen.index.query.RegexpQueryBuilder;
+import org.codelibs.fesen.index.query.SpanTermQueryBuilder;
+import org.codelibs.fesen.index.query.TermQueryBuilder;
+import org.codelibs.fesen.index.query.TermsQueryBuilder;
+import org.codelibs.fesen.index.query.WildcardQueryBuilder;
+import org.codelibs.fesen.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.codelibs.fesen.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.codelibs.fess.es.user.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.user.cbean.cq.GroupCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.CommonTermsQueryBuilder;
-import org.elasticsearch.index.query.ExistsQueryBuilder;
-import org.elasticsearch.index.query.IdsQueryBuilder;
-import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
-import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.RegexpQueryBuilder;
-import org.elasticsearch.index.query.SpanTermQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
-import org.elasticsearch.index.query.TermsQueryBuilder;
-import org.elasticsearch.index.query.WildcardQueryBuilder;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

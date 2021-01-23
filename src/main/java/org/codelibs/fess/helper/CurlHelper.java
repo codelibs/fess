@@ -38,6 +38,6 @@ public class CurlHelper {
     }
 
     public CurlRequest request(final Method method, final String path) {
-        return new CurlRequest(method, ResourceUtil.getElasticsearchHttpUrl() + path);
+        return new CurlRequest(method, ResourceUtil.getFesenHttpUrl() + path);
     }
 }

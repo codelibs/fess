@@ -28,6 +28,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
+import org.codelibs.fesen.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.index.query.QueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilders;
+import org.codelibs.fesen.search.sort.SortOrder;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.entity.AccessResult;
@@ -56,10 +60,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.fess.util.ThreadDumpUtil;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 
 public class IndexUpdater extends Thread {
     private static final Logger logger = LogManager.getLogger(IndexUpdater.class);

@@ -17,7 +17,7 @@ package org.codelibs.fess.es.client;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
-import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
+import static org.codelibs.fesen.runner.FesenRunner.newConfigs;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,9 +51,92 @@ import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.curl.CurlResponse;
-import org.codelibs.elasticsearch.client.HttpClient;
-import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
-import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
+import org.codelibs.fesen.FesenException;
+import org.codelibs.fesen.action.ActionFuture;
+import org.codelibs.fesen.action.ActionListener;
+import org.codelibs.fesen.action.ActionRequest;
+import org.codelibs.fesen.action.ActionResponse;
+import org.codelibs.fesen.action.ActionType;
+import org.codelibs.fesen.action.DocWriteRequest;
+import org.codelibs.fesen.action.DocWriteRequest.OpType;
+import org.codelibs.fesen.action.DocWriteResponse.Result;
+import org.codelibs.fesen.action.admin.cluster.health.ClusterHealthResponse;
+import org.codelibs.fesen.action.admin.indices.alias.IndicesAliasesRequestBuilder;
+import org.codelibs.fesen.action.admin.indices.create.CreateIndexResponse;
+import org.codelibs.fesen.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.codelibs.fesen.action.admin.indices.flush.FlushResponse;
+import org.codelibs.fesen.action.admin.indices.get.GetIndexResponse;
+import org.codelibs.fesen.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.codelibs.fesen.action.admin.indices.refresh.RefreshResponse;
+import org.codelibs.fesen.action.bulk.BulkItemResponse;
+import org.codelibs.fesen.action.bulk.BulkItemResponse.Failure;
+import org.codelibs.fesen.action.bulk.BulkRequest;
+import org.codelibs.fesen.action.bulk.BulkRequestBuilder;
+import org.codelibs.fesen.action.bulk.BulkResponse;
+import org.codelibs.fesen.action.delete.DeleteRequest;
+import org.codelibs.fesen.action.delete.DeleteRequestBuilder;
+import org.codelibs.fesen.action.delete.DeleteResponse;
+import org.codelibs.fesen.action.explain.ExplainRequest;
+import org.codelibs.fesen.action.explain.ExplainRequestBuilder;
+import org.codelibs.fesen.action.explain.ExplainResponse;
+import org.codelibs.fesen.action.fieldcaps.FieldCapabilitiesRequest;
+import org.codelibs.fesen.action.fieldcaps.FieldCapabilitiesRequestBuilder;
+import org.codelibs.fesen.action.fieldcaps.FieldCapabilitiesResponse;
+import org.codelibs.fesen.action.get.GetRequest;
+import org.codelibs.fesen.action.get.GetRequestBuilder;
+import org.codelibs.fesen.action.get.GetResponse;
+import org.codelibs.fesen.action.get.MultiGetRequest;
+import org.codelibs.fesen.action.get.MultiGetRequestBuilder;
+import org.codelibs.fesen.action.get.MultiGetResponse;
+import org.codelibs.fesen.action.index.IndexRequest;
+import org.codelibs.fesen.action.index.IndexRequestBuilder;
+import org.codelibs.fesen.action.index.IndexResponse;
+import org.codelibs.fesen.action.search.ClearScrollRequest;
+import org.codelibs.fesen.action.search.ClearScrollRequestBuilder;
+import org.codelibs.fesen.action.search.ClearScrollResponse;
+import org.codelibs.fesen.action.search.MultiSearchRequest;
+import org.codelibs.fesen.action.search.MultiSearchRequestBuilder;
+import org.codelibs.fesen.action.search.MultiSearchResponse;
+import org.codelibs.fesen.action.search.SearchPhaseExecutionException;
+import org.codelibs.fesen.action.search.SearchRequest;
+import org.codelibs.fesen.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.action.search.SearchResponse;
+import org.codelibs.fesen.action.search.SearchScrollRequest;
+import org.codelibs.fesen.action.search.SearchScrollRequestBuilder;
+import org.codelibs.fesen.action.support.WriteRequest.RefreshPolicy;
+import org.codelibs.fesen.action.support.master.AcknowledgedResponse;
+import org.codelibs.fesen.action.termvectors.MultiTermVectorsRequest;
+import org.codelibs.fesen.action.termvectors.MultiTermVectorsRequestBuilder;
+import org.codelibs.fesen.action.termvectors.MultiTermVectorsResponse;
+import org.codelibs.fesen.action.termvectors.TermVectorsRequest;
+import org.codelibs.fesen.action.termvectors.TermVectorsRequestBuilder;
+import org.codelibs.fesen.action.termvectors.TermVectorsResponse;
+import org.codelibs.fesen.action.update.UpdateRequest;
+import org.codelibs.fesen.action.update.UpdateRequestBuilder;
+import org.codelibs.fesen.action.update.UpdateResponse;
+import org.codelibs.fesen.client.AdminClient;
+import org.codelibs.fesen.client.Client;
+import org.codelibs.fesen.client.HttpClient;
+import org.codelibs.fesen.cluster.metadata.MappingMetadata;
+import org.codelibs.fesen.common.collect.ImmutableOpenMap;
+import org.codelibs.fesen.common.document.DocumentField;
+import org.codelibs.fesen.common.settings.Settings;
+import org.codelibs.fesen.common.settings.Settings.Builder;
+import org.codelibs.fesen.common.unit.TimeValue;
+import org.codelibs.fesen.common.xcontent.XContentType;
+import org.codelibs.fesen.index.query.InnerHitBuilder;
+import org.codelibs.fesen.index.query.QueryBuilder;
+import org.codelibs.fesen.index.query.QueryBuilders;
+import org.codelibs.fesen.runner.FesenRunner;
+import org.codelibs.fesen.runner.FesenRunner.Configs;
+import org.codelibs.fesen.search.SearchHit;
+import org.codelibs.fesen.search.SearchHits;
+import org.codelibs.fesen.search.aggregations.AggregationBuilders;
+import org.codelibs.fesen.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.codelibs.fesen.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.codelibs.fesen.search.collapse.CollapseBuilder;
+import org.codelibs.fesen.search.fetch.subphase.highlight.HighlightBuilder;
+import org.codelibs.fesen.threadpool.ThreadPool;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -73,89 +156,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.ActionFuture;
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.action.ActionType;
-import org.elasticsearch.action.DocWriteRequest;
-import org.elasticsearch.action.DocWriteRequest.OpType;
-import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.admin.indices.flush.FlushResponse;
-import org.elasticsearch.action.admin.indices.get.GetIndexResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.bulk.BulkItemResponse;
-import org.elasticsearch.action.bulk.BulkItemResponse.Failure;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.explain.ExplainRequest;
-import org.elasticsearch.action.explain.ExplainRequestBuilder;
-import org.elasticsearch.action.explain.ExplainResponse;
-import org.elasticsearch.action.fieldcaps.FieldCapabilitiesRequest;
-import org.elasticsearch.action.fieldcaps.FieldCapabilitiesRequestBuilder;
-import org.elasticsearch.action.fieldcaps.FieldCapabilitiesResponse;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetRequest;
-import org.elasticsearch.action.get.MultiGetRequestBuilder;
-import org.elasticsearch.action.get.MultiGetResponse;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.ClearScrollRequest;
-import org.elasticsearch.action.search.ClearScrollRequestBuilder;
-import org.elasticsearch.action.search.ClearScrollResponse;
-import org.elasticsearch.action.search.MultiSearchRequest;
-import org.elasticsearch.action.search.MultiSearchRequestBuilder;
-import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchPhaseExecutionException;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchScrollRequest;
-import org.elasticsearch.action.search.SearchScrollRequestBuilder;
-import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.action.termvectors.MultiTermVectorsRequest;
-import org.elasticsearch.action.termvectors.MultiTermVectorsRequestBuilder;
-import org.elasticsearch.action.termvectors.MultiTermVectorsResponse;
-import org.elasticsearch.action.termvectors.TermVectorsRequest;
-import org.elasticsearch.action.termvectors.TermVectorsRequestBuilder;
-import org.elasticsearch.action.termvectors.TermVectorsResponse;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
-import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.document.DocumentField;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.Settings.Builder;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.InnerHitBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.collapse.CollapseBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.threadpool.ThreadPool;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.di.exception.ContainerInitFailureException;
 
@@ -173,7 +173,7 @@ public class FessEsClient implements Client {
 
     private static final String CONFIG_INDEX_PREFIX = ".fess_config";
 
-    protected ElasticsearchClusterRunner runner;
+    protected FesenRunner runner;
 
     protected Client client;
 
@@ -218,7 +218,7 @@ public class FessEsClient implements Client {
                 .name();
     }
 
-    public void setRunner(final ElasticsearchClusterRunner runner) {
+    public void setRunner(final FesenRunner runner) {
         this.runner = runner;
     }
 
@@ -244,7 +244,7 @@ public class FessEsClient implements Client {
         String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
         if (StringUtil.isBlank(httpAddress)) {
             if (runner == null) {
-                runner = new ElasticsearchClusterRunner();
+                runner = new FesenRunner();
                 final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
                 final String esDir = System.getProperty("fess.es.dir");
                 if (esDir != null) {
@@ -266,7 +266,7 @@ public class FessEsClient implements Client {
             }
             final int port = runner.node().settings().getAsInt("http.port", 9200);
             httpAddress = "http://localhost:" + port;
-            logger.warn("Embedded Elasticsearch is running. This configuration is not recommended for production use.");
+            logger.warn("Embedded Fesen is running. This configuration is not recommended for production use.");
         }
         client = createHttpClient(fessConfig, httpAddress);
 
@@ -581,19 +581,19 @@ public class FessEsClient implements Client {
                 final ClusterHealthResponse response = client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
                         .actionGet(fessConfig.getIndexHealthTimeout());
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Elasticsearch Cluster Status: {}", response.getStatus());
+                    logger.debug("Fesen Cluster Status: {}", response.getStatus());
                 }
                 return;
             } catch (final Exception e) {
                 cause = e;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access to Elasticsearch:{}", i, cause);
+                logger.debug("Failed to access to Fesen:{}", i, cause);
             }
             ThreadUtil.sleep(1000L);
         }
-        final String message = "Elasticsearch (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
-                + ") is not available. Check the state of your Elasticsearch cluster (" + clusterName + ") in "
+        final String message = "Fesen (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
+                + ") is not available. Check the state of your Fesen cluster (" + clusterName + ") in "
                 + (System.currentTimeMillis() - startTime) + "ms.";
         throw new ContainerInitFailureException(message, cause);
     }
@@ -638,7 +638,7 @@ public class FessEsClient implements Client {
         }
         try {
             client.close();
-        } catch (final ElasticsearchException e) {
+        } catch (final FesenException e) {
             logger.warn("Failed to close Client: {}", client, e);
         }
     }
@@ -904,7 +904,7 @@ public class FessEsClient implements Client {
             final Result result = client.prepareUpdate().setIndex(index).setId(id).setDoc(field, value).execute()
                     .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout()).getResult();
             return result == Result.CREATED || result == Result.UPDATED;
-        } catch (final ElasticsearchException e) {
+        } catch (final FesenException e) {
             throw new FessEsClientException("Failed to set " + value + " to " + field + " for doc " + id, e);
         }
     }
@@ -949,7 +949,7 @@ public class FessEsClient implements Client {
             final ClusterHealthResponse response =
                     client.admin().cluster().prepareHealth().execute().actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
             return new PingResponse(response);
-        } catch (final ElasticsearchException e) {
+        } catch (final FesenException e) {
             throw new FessEsClientException("Failed to process a ping request.", e);
         }
     }
@@ -1265,7 +1265,7 @@ public class FessEsClient implements Client {
             }
             final Result result = response.getResult();
             return result == Result.CREATED || result == Result.UPDATED;
-        } catch (final ElasticsearchException e) {
+        } catch (final FesenException e) {
             throw new FessEsClientException("Failed to store: " + obj, e);
         }
     }
@@ -1285,7 +1285,7 @@ public class FessEsClient implements Client {
             }
             final DeleteResponse response = builder.execute().actionGet(ComponentUtil.getFessConfig().getIndexDeleteTimeout());
             return response.getResult() == Result.DELETED;
-        } catch (final ElasticsearchException e) {
+        } catch (final FesenException e) {
             throw new FessEsClientException("Failed to delete: " + index + "/" + id + "@" + seqNo + ":" + primaryTerm, e);
         }
     }
@@ -1311,7 +1311,7 @@ public class FessEsClient implements Client {
     }
 
     //
-    // Elasticsearch Client
+    // Fesen Client
     //
 
     @Override

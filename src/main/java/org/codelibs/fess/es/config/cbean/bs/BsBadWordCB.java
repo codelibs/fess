@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fesen.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.BadWordDbm;
 import org.codelibs.fess.es.config.cbean.BadWordCB;
@@ -27,8 +29,6 @@ import org.codelibs.fess.es.config.cbean.ca.bs.BsBadWordCA;
 import org.codelibs.fess.es.config.cbean.cq.BadWordCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsBadWordCQ;
 import org.dbflute.cbean.ConditionQuery;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

@@ -1679,10 +1679,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'elasticsearch.http.url'. <br>
      * The value is, e.g. http://localhost:9201 <br>
-     * comment: Elasticsearch
+     * comment: Fesen
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchHttpUrl();
+    String getFesenHttpUrl();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -6878,7 +6878,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.DOMAIN_TITLE);
         }
 
-        public String getElasticsearchHttpUrl() {
+        public String getFesenHttpUrl() {
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
         }
 

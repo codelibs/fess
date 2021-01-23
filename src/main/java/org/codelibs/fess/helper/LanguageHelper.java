@@ -26,10 +26,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tika.language.detect.LanguageDetector;
 import org.apache.tika.language.detect.LanguageResult;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.script.Script;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.elasticsearch.script.Script;
 
 public class LanguageHelper {
     private static final Logger logger = LogManager.getLogger(LanguageHelper.class);

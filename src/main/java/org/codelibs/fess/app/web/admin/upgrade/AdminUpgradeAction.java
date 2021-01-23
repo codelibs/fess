@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fesen.client.IndicesAdminClient;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -32,7 +33,6 @@ import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.UpgradeUtil;
-import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;

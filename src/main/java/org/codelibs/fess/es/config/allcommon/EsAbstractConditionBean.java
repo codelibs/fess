@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.es.config.allcommon;
 
+import org.codelibs.fesen.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.common.unit.TimeValue;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.chelper.HpCBPurpose;
 import org.dbflute.cbean.chelper.HpColumnSpHandler;
@@ -37,8 +39,6 @@ import org.dbflute.dbmeta.accessory.DerivedTypeHandler;
 import org.dbflute.jdbc.StatementConfig;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.twowaysql.style.BoundDateDisplayStyle;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.common.unit.TimeValue;
 
 /**
  * @author ESFlute (using FreeGen)

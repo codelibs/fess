@@ -35,13 +35,13 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
+import org.codelibs.fesen.action.ActionListener;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.action.ActionListener;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -154,13 +154,13 @@ public class AdminMaintenanceAction extends FessAdminAction {
                 writeSystemProperties(zos, diagnosticId);
                 writeFessBasicConfig(zos, diagnosticId);
                 writeFessConfig(zos, diagnosticId);
-                writeElasticsearchCat(zos, diagnosticId);
-                writeElasticsearchJson(zos, diagnosticId);
+                writeFesenCat(zos, diagnosticId);
+                writeFesenJson(zos, diagnosticId);
             }
         });
     }
 
-    protected void writeElasticsearchJson(final ZipOutputStream zos, final String id) {
+    protected void writeFesenJson(final ZipOutputStream zos, final String id) {
         writeElastisearchJsonApi(zos, id, "cluster", "health");
         writeElastisearchJsonApi(zos, id, "cluster", "state");
         writeElastisearchJsonApi(zos, id, "cluster", "stats");
@@ -185,7 +185,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
     }
 
-    protected void writeElasticsearchCat(final ZipOutputStream zos, final String id) {
+    protected void writeFesenCat(final ZipOutputStream zos, final String id) {
         Arrays.stream(ES_CAT_NAMES).forEach(name -> {
             final ZipEntry entry = new ZipEntry(id + "/es_cat_" + name + ".txt");
             try {

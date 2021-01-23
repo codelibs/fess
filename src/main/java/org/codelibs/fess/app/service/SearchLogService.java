@@ -33,6 +33,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.search.aggregations.AggregationBuilders;
+import org.codelibs.fesen.search.aggregations.BucketOrder;
+import org.codelibs.fesen.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.codelibs.fesen.search.aggregations.bucket.histogram.Histogram;
+import org.codelibs.fesen.search.aggregations.bucket.terms.Terms;
+import org.codelibs.fesen.search.aggregations.metrics.Avg;
+import org.codelibs.fesen.search.aggregations.metrics.Cardinality;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SearchLogPager;
 import org.codelibs.fess.es.log.allcommon.EsPagingResultBean;
@@ -53,13 +60,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.dbflute.optional.OptionalEntity;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.metrics.Avg;
-import org.elasticsearch.search.aggregations.metrics.Cardinality;
 
 public class SearchLogService {
 
