@@ -32,7 +32,7 @@ import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -241,10 +241,10 @@ public class DataIndexHelper {
                                     .mustNot(QueryBuilders.existsQuery(fessConfig.getIndexFieldExpires())))
                             .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
-                final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+                final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
-                fessEsClient.admin().indices().prepareRefresh(index).execute().actionGet();
-                final long numOfDeleted = fessEsClient.deleteByQuery(index, queryBuilder);
+                searchEngineClient.admin().indices().prepareRefresh(index).execute().actionGet();
+                final long numOfDeleted = searchEngineClient.deleteByQuery(index, queryBuilder);
                 logger.info("Deleted {} old docs.", numOfDeleted);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at {}", dataConfig, e);

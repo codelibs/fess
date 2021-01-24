@@ -37,8 +37,8 @@ import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilder;
 import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilders;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.es.client.SearchEngineClient;
+import org.codelibs.fess.es.client.SearchEngineClient.SearchConditionBuilder;
 import org.codelibs.fess.es.config.exbhv.KeyMatchBhv;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -119,9 +119,9 @@ public class KeyMatchHelper {
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(),
+        return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> SearchConditionBuilder
                         .builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL))
                         .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
@@ -155,13 +155,13 @@ public class KeyMatchHelper {
     }
 
     public List<Map<String, Object>> getBoostedDocumentList(final String term, final int size) {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final Pair<QueryBuilder, ScoreFunctionBuilder<?>> pair = getQueryMap().get(toLowerCase(term));
         if (pair == null) {
             return Collections.emptyList();
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+        return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
             searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getFirst()).setSize(size);
             return true;
         });

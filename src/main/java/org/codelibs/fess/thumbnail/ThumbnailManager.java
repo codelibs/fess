@@ -43,7 +43,7 @@ import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fesen.index.query.QueryBuilders;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.es.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.exception.FessSystemException;
@@ -357,7 +357,7 @@ public class ThumbnailManager {
 
         protected final String imageExtention;
 
-        protected final FessEsClient fessEsClient;
+        protected final SearchEngineClient searchEngineClient;
 
         protected final FessConfig fessConfig;
 
@@ -367,7 +367,7 @@ public class ThumbnailManager {
             this.expiry = expiry;
             this.fessConfig = ComponentUtil.getFessConfig();
             this.maxPurgeSize = fessConfig.getPageThumbnailPurgeMaxFetchSizeAsInteger();
-            this.fessEsClient = ComponentUtil.getFessEsClient();
+            this.searchEngineClient = ComponentUtil.getFessEsClient();
         }
 
         protected void deleteFiles() {
@@ -384,7 +384,7 @@ public class ThumbnailManager {
 
             if (!deleteFileMap.isEmpty()) {
                 final String docIdField = fessConfig.getIndexFieldDocId();
-                fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+                searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
                     searchRequestBuilder.setQuery(
                             QueryBuilders.termsQuery(docIdField, deleteFileMap.keySet().toArray(new String[deleteFileMap.size()])));
                     searchRequestBuilder.setFetchSource(new String[] { docIdField }, StringUtil.EMPTY_STRINGS);

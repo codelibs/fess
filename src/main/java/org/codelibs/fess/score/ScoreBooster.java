@@ -30,7 +30,7 @@ import org.codelibs.fesen.index.query.QueryBuilders;
 import org.codelibs.fesen.script.Script;
 import org.codelibs.fesen.script.ScriptType;
 import org.codelibs.fesen.search.SearchHit;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -51,7 +51,7 @@ public abstract class ScoreBooster {
 
     protected Function<Map<String, Object>, String[]> idFinder = params -> {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final FessEsClient client = ComponentUtil.getFessEsClient();
+        final SearchEngineClient client = ComponentUtil.getFessEsClient();
         final String index = fessConfig.getIndexDocumentUpdateIndex();
         final Object url = params.get("url");
         if (url == null) {
@@ -68,7 +68,7 @@ public abstract class ScoreBooster {
         if (ids.length == 0) {
             return 0L;
         }
-        final FessEsClient client = ComponentUtil.getFessEsClient();
+        final SearchEngineClient client = ComponentUtil.getFessEsClient();
         if (bulkRequestBuilder == null) {
             bulkRequestBuilder = client.prepareBulk();
         }

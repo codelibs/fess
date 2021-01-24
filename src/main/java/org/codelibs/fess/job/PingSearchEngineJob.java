@@ -21,7 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.PingResponse;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -30,18 +30,18 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.lastaflute.core.mail.Postbox;
 
-public class PingEsJob {
+public class PingSearchEngineJob {
 
-    private static final Logger logger = LogManager.getLogger(PingEsJob.class);
+    private static final Logger logger = LogManager.getLogger(PingSearchEngineJob.class);
 
     public String execute() {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 
-        final PingResponse ping = fessEsClient.ping();
+        final PingResponse ping = searchEngineClient.ping();
         final int status = ping.getStatus();
         if (systemHelper.isChangedClusterState(status)) {
             if (fessConfig.hasNotification()) {

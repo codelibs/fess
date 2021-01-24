@@ -34,7 +34,7 @@ import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ThumbnailGenerationException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -160,10 +160,10 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     protected boolean process(final String id, final BiPredicate<String, String> consumer) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         try {
-            final Map<String, Object> doc = indexingHelper.getDocument(fessEsClient, id,
+            final Map<String, Object> doc = indexingHelper.getDocument(searchEngineClient, id,
                     new String[] { fessConfig.getIndexFieldThumbnail(), fessConfig.getIndexFieldConfigId() });
             if (doc == null) {
                 throw new ThumbnailGenerationException("Document is not found: " + id);

@@ -45,7 +45,7 @@ import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
@@ -187,11 +187,11 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         int status;
         Exception err = null;
         try {
-            final PingResponse pingResponse = fessEsClient.ping();
+            final PingResponse pingResponse = searchEngineClient.ping();
             status = pingResponse.getStatus();
             writeJsonResponse(status, "\"message\":" + pingResponse.getMessage());
         } catch (final Exception e) {

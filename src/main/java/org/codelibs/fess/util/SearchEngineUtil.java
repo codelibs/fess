@@ -26,11 +26,11 @@ import org.codelibs.fesen.common.xcontent.XContentBuilder;
 import org.codelibs.fesen.common.xcontent.XContentFactory;
 import org.codelibs.fesen.common.xcontent.XContentType;
 
-public final class EsUtil {
+public final class SearchEngineUtil {
 
-    private static final Logger logger = LogManager.getLogger(EsUtil.class);
+    private static final Logger logger = LogManager.getLogger(SearchEngineUtil.class);
 
-    private EsUtil() {
+    private SearchEngineUtil() {
     }
 
     public static OutputStream getXContentBuilderOutputStream(final XContentBuilderCallback func, final XContentType xContentType) {

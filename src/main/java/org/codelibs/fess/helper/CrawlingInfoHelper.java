@@ -39,7 +39,7 @@ import org.codelibs.fesen.search.aggregations.bucket.terms.Terms.Bucket;
 import org.codelibs.fesen.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingInfo;
 import org.codelibs.fess.es.config.exentity.CrawlingInfoParam;
@@ -178,9 +178,9 @@ public class CrawlingInfoHelper {
         return generateId(urlId);
     }
 
-    public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
+    public List<Map<String, String>> getSessionIdList(final SearchEngineClient searchEngineClient) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.search(fessConfig.getIndexDocumentSearchIndex(), queryRequestBuilder -> {
+        return searchEngineClient.search(fessConfig.getIndexDocumentSearchIndex(), queryRequestBuilder -> {
             queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
             final TermsAggregationBuilder termsBuilder = AggregationBuilders.terms(fessConfig.getIndexFieldSegment())
                     .field(fessConfig.getIndexFieldSegment()).size(maxSessionIdsInList).order(BucketOrder.key(false));

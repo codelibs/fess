@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fesen.script.Script;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -38,7 +38,7 @@ public class UpdateLabelJob {
     protected QueryBuilder queryBuilder = null;
 
     public String execute() {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         final LanguageHelper languageHelper = ComponentUtil.getLanguageHelper();
@@ -46,7 +46,7 @@ public class UpdateLabelJob {
         final StringBuilder resultBuf = new StringBuilder();
 
         try {
-            final long count = fessEsClient.updateByQuery(fessConfig.getIndexDocumentUpdateIndex(), option -> {
+            final long count = searchEngineClient.updateByQuery(fessConfig.getIndexDocumentUpdateIndex(), option -> {
                 if (queryBuilder != null) {
                     option.setQuery(queryBuilder);
                 }

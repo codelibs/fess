@@ -39,7 +39,7 @@ import org.codelibs.fesen.action.ActionListener;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
@@ -65,7 +65,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     //
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     // ===================================================================================
     //                                                                               Hook
@@ -117,9 +117,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
         final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
-        fessEsClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
+        searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
             logger.info("Close {}", docIndex);
-            fessEsClient.admin().indices().prepareOpen(docIndex).execute(
+            searchEngineClient.admin().indices().prepareOpen(docIndex).execute(
                     ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open {}", docIndex, e)));
         }, e -> logger.warn("Failed to close {}", docIndex, e)));
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -131,7 +131,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        fessEsClient.admin().indices().prepareDelete(//
+        searchEngineClient.admin().indices().prepareDelete(//
                 fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
                 fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
                 fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
@@ -290,11 +290,11 @@ public class AdminMaintenanceAction extends FessAdminAction {
         final String docIndex = "fess";
         final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-        if (fessEsClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
-            fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
-                fessEsClient.addMapping(docIndex, "doc", toIndex);
-                fessEsClient.reindex(fromIndex, toIndex, replaceAliases);
-                if (replaceAliases && !fessEsClient.updateAlias(toIndex)) {
+        if (searchEngineClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
+            searchEngineClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
+                searchEngineClient.addMapping(docIndex, "doc", toIndex);
+                searchEngineClient.reindex(fromIndex, toIndex, replaceAliases);
+                if (replaceAliases && !searchEngineClient.updateAlias(toIndex)) {
                     logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
                 }
             }, e -> logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e)));

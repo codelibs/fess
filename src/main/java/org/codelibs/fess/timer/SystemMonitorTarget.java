@@ -40,7 +40,7 @@ import org.codelibs.fesen.monitor.os.OsProbe;
 import org.codelibs.fesen.monitor.os.OsStats;
 import org.codelibs.fesen.monitor.process.ProcessProbe;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class SystemMonitorTarget implements TimeoutTarget {
@@ -178,7 +178,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
     private void appendFesenStats(final StringBuilder buf) {
         String stats = null;
         try {
-            final FessEsClient esClient = ComponentUtil.getFessEsClient();
+            final SearchEngineClient esClient = ComponentUtil.getFessEsClient();
             final NodesStatsResponse response = esClient.admin().cluster().prepareNodesStats().all().execute().actionGet(10000L);
             final XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();

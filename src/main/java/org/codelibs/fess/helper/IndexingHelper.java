@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fesen.action.search.SearchResponse;
 import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilders;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
@@ -40,7 +40,7 @@ public class IndexingHelper {
 
     protected long requestInterval = 500;
 
-    public void sendDocuments(final FessEsClient fessEsClient, final DocList docList) {
+    public void sendDocuments(final SearchEngineClient searchEngineClient, final DocList docList) {
         if (docList.isEmpty()) {
             return;
         }
@@ -68,9 +68,9 @@ public class IndexingHelper {
                 });
             }
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-            synchronized (fessEsClient) {
-                deleteOldDocuments(fessEsClient, docList);
-                fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
+            synchronized (searchEngineClient) {
+                deleteOldDocuments(searchEngineClient, docList);
+                searchEngineClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
                     final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
                     crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
                 });
@@ -90,7 +90,7 @@ public class IndexingHelper {
         }
     }
 
-    private void deleteOldDocuments(final FessEsClient fessEsClient, final DocList docList) {
+    private void deleteOldDocuments(final SearchEngineClient searchEngineClient, final DocList docList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final List<String> docIdList = new ArrayList<>();
@@ -109,7 +109,7 @@ public class IndexingHelper {
                     .must(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), inputDoc.get(fessConfig.getIndexFieldUrl())))
                     .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configIdValue));
 
-            final List<Map<String, Object>> docs = getDocumentListByQuery(fessEsClient, queryBuilder,
+            final List<Map<String, Object>> docs = getDocumentListByQuery(searchEngineClient, queryBuilder,
                     new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId() });
             for (final Map<String, Object> doc : docs) {
                 final Object oldIdValue = doc.get(fessConfig.getIndexFieldId());
@@ -125,76 +125,78 @@ public class IndexingHelper {
             }
         }
         if (!docIdList.isEmpty()) {
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+            searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
                     QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
 
         }
     }
 
-    public boolean updateDocument(final FessEsClient fessEsClient, final String id, final String field, final Object value) {
+    public boolean updateDocument(final SearchEngineClient searchEngineClient, final String id, final String field, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), id, field, value);
+        return searchEngineClient.update(fessConfig.getIndexDocumentUpdateIndex(), id, field, value);
     }
 
-    public boolean deleteDocument(final FessEsClient fessEsClient, final String id) {
+    public boolean deleteDocument(final SearchEngineClient searchEngineClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.delete(fessConfig.getIndexDocumentUpdateIndex(), id);
+        return searchEngineClient.delete(fessConfig.getIndexDocumentUpdateIndex(), id);
     }
 
-    public long deleteDocumentByUrl(final FessEsClient fessEsClient, final String url) {
+    public long deleteDocumentByUrl(final SearchEngineClient searchEngineClient, final String url) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+        return searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
                 QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url));
     }
 
-    public long deleteDocumentsByDocId(final FessEsClient fessEsClient, final List<String> docIdList) {
+    public long deleteDocumentsByDocId(final SearchEngineClient searchEngineClient, final List<String> docIdList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+        return searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
                 QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
     }
 
-    public long deleteDocumentByQuery(final FessEsClient fessEsClient, final QueryBuilder queryBuilder) {
+    public long deleteDocumentByQuery(final SearchEngineClient searchEngineClient, final QueryBuilder queryBuilder) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryBuilder);
+        return searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryBuilder);
     }
 
-    public Map<String, Object> getDocument(final FessEsClient fessEsClient, final String id, final String[] fields) {
+    public Map<String, Object> getDocument(final SearchEngineClient searchEngineClient, final String id, final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
+        return searchEngineClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
             builder.setQuery(QueryBuilders.idsQuery().addIds(id));
             builder.setFetchSource(fields, null);
             return true;
         }).orElse(null);
     }
 
-    public List<Map<String, Object>> getDocumentListByPrefixId(final FessEsClient fessEsClient, final String id, final String[] fields) {
+    public List<Map<String, Object>> getDocumentListByPrefixId(final SearchEngineClient searchEngineClient, final String id,
+            final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryBuilder queryBuilder = QueryBuilders.prefixQuery(fessConfig.getIndexFieldId(), id);
-        return getDocumentListByQuery(fessEsClient, queryBuilder, fields);
+        return getDocumentListByQuery(searchEngineClient, queryBuilder, fields);
     }
 
-    public void deleteChildDocument(final FessEsClient fessEsClient, final String id) {
+    public void deleteChildDocument(final SearchEngineClient searchEngineClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+        searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
                 QueryBuilders.termQuery(fessConfig.getIndexFieldParentId(), id));
     }
 
-    public List<Map<String, Object>> getChildDocumentList(final FessEsClient fessEsClient, final String id, final String[] fields) {
+    public List<Map<String, Object>> getChildDocumentList(final SearchEngineClient searchEngineClient, final String id,
+            final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryBuilder queryBuilder = QueryBuilders.termQuery(fessConfig.getIndexFieldParentId(), id);
-        return getDocumentListByQuery(fessEsClient, queryBuilder, fields);
+        return getDocumentListByQuery(searchEngineClient, queryBuilder, fields);
     }
 
-    protected List<Map<String, Object>> getDocumentListByQuery(final FessEsClient fessEsClient, final QueryBuilder queryBuilder,
+    protected List<Map<String, Object>> getDocumentListByQuery(final SearchEngineClient searchEngineClient, final QueryBuilder queryBuilder,
             final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        final SearchResponse countResponse = fessEsClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex()).setQuery(queryBuilder)
-                .setSize(0).execute().actionGet(fessConfig.getIndexSearchTimeout());
+        final SearchResponse countResponse = searchEngineClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex())
+                .setQuery(queryBuilder).setSize(0).execute().actionGet(fessConfig.getIndexSearchTimeout());
         final long numFound = countResponse.getHits().getTotalHits().value;
         // TODO max threshold
 
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+        return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
             requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
             if (fields != null) {
                 requestBuilder.setFetchSource(fields, null);

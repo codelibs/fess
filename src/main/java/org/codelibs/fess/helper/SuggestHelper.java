@@ -44,7 +44,7 @@ import org.codelibs.fesen.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilders;
 import org.codelibs.fesen.search.sort.SortBuilders;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.BadWord;
@@ -96,8 +96,9 @@ public class SuggestHelper {
         split(fessConfig.getSuggestFieldRoles(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(roleFieldNameSet::add));
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
 
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
-        fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        searchEngineClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+                .actionGet(fessConfig.getIndexHealthTimeout());
 
         final SuggestSettingsBuilder settingsBuilder = SuggestSettings.builder();
         settingsBuilder.bulkTimeout(fessConfig.getIndexBulkTimeout());
@@ -105,7 +106,7 @@ public class SuggestHelper {
         settingsBuilder.indexTimeout(fessConfig.getIndexIndexTimeout());
         settingsBuilder.indicesTimeout(fessConfig.getIndexIndicesTimeout());
         settingsBuilder.searchTimeout(fessConfig.getIndexSearchTimeout());
-        suggester = Suggester.builder().settings(settingsBuilder).build(fessEsClient, fessConfig.getIndexDocumentSuggestIndex());
+        suggester = Suggester.builder().settings(settingsBuilder).build(searchEngineClient, fessConfig.getIndexDocumentSuggestIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
         split(fessConfig.getSuggestFieldIndexContents(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(field -> {
             try {

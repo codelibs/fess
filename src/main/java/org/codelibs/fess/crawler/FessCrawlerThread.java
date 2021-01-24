@@ -38,7 +38,7 @@ import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.log.LogType;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.exception.ContentNotFoundException;
@@ -64,7 +64,7 @@ public class FessCrawlerThread extends CrawlerThread {
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+            final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
 
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;
@@ -98,19 +98,19 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Searching indexed document: {}", id);
                 }
-                final Map<String, Object> document = indexingHelper.getDocument(fessEsClient, id,
+                final Map<String, Object> document = indexingHelper.getDocument(searchEngineClient, id,
                         new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldLastModified(),
                                 fessConfig.getIndexFieldAnchor(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldExpires(),
                                 fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() });
                 if (document == null) {
-                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(fessEsClient, id));
+                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(searchEngineClient, id));
                     return true;
                 }
 
                 final Date expires = DocumentUtil.getValue(document, fessConfig.getIndexFieldExpires(), Date.class);
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
-                    if (idValue != null && !indexingHelper.deleteDocument(fessEsClient, idValue.toString())) {
+                    if (idValue != null && !indexingHelper.deleteDocument(searchEngineClient, idValue.toString())) {
                         logger.debug("Failed to delete expired document: {}", url);
                     }
                     return true;
@@ -137,7 +137,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
-                    if (!indexingHelper.deleteDocument(fessEsClient, id)) {
+                    if (!indexingHelper.deleteDocument(searchEngineClient, id)) {
                         logger.debug("Failed to delete 404 document: {}", url);
                     }
                     return false;
@@ -157,7 +157,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
                     final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
                     if (documentExpires != null
-                            && !indexingHelper.updateDocument(fessEsClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
+                            && !indexingHelper.updateDocument(searchEngineClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
                         logger.debug("Failed to update {} at {}", fessConfig.getIndexFieldExpires(), url);
                     }
 
@@ -210,11 +210,11 @@ public class FessCrawlerThread extends CrawlerThread {
         return childUrlSet;
     }
 
-    protected Set<RequestData> getChildUrlSet(final FessEsClient fessEsClient, final String id) {
+    protected Set<RequestData> getChildUrlSet(final SearchEngineClient searchEngineClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final List<Map<String, Object>> docList =
-                indexingHelper.getChildDocumentList(fessEsClient, id, new String[] { fessConfig.getIndexFieldUrl() });
+                indexingHelper.getChildDocumentList(searchEngineClient, id, new String[] { fessConfig.getIndexFieldUrl() });
         if (docList.isEmpty()) {
             return null;
         }

@@ -19,7 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilders;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -28,7 +28,7 @@ public class PurgeDocJob {
     private static final Logger logger = LogManager.getLogger(PurgeDocJob.class);
 
     public String execute() {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final StringBuilder resultBuf = new StringBuilder();
@@ -36,7 +36,7 @@ public class PurgeDocJob {
         // clean up
         final QueryBuilder queryBuilder = QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).to("now");
         try {
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryBuilder);
+            searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryBuilder);
 
         } catch (final Exception e) {
             logger.error("Could not delete expired documents: {}", queryBuilder.toString(), e);

@@ -163,9 +163,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 
-public class FessEsClient implements Client {
+public class SearchEngineClient implements Client {
 
-    private static final Logger logger = LogManager.getLogger(FessEsClient.class);
+    private static final Logger logger = LogManager.getLogger(SearchEngineClient.class);
 
     private static final String LOG_INDEX_PREFIX = "fess_log";
 
@@ -199,7 +199,7 @@ public class FessEsClient implements Client {
 
     protected int maxEsStatusRetry = 60;
 
-    protected String clusterName = "elasticsearch";
+    protected String clusterName = "fesen";
 
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
@@ -905,7 +905,7 @@ public class FessEsClient implements Client {
                     .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout()).getResult();
             return result == Result.CREATED || result == Result.UPDATED;
         } catch (final FesenException e) {
-            throw new FessEsClientException("Failed to set " + value + " to " + field + " for doc " + id, e);
+            throw new SearchEngineClientException("Failed to set " + value + " to " + field + " for doc " + id, e);
         }
     }
 
@@ -950,7 +950,7 @@ public class FessEsClient implements Client {
                     client.admin().cluster().prepareHealth().execute().actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
             return new PingResponse(response);
         } catch (final FesenException e) {
-            throw new FessEsClientException("Failed to process a ping request.", e);
+            throw new SearchEngineClientException("Failed to process a ping request.", e);
         }
     }
 
@@ -980,7 +980,7 @@ public class FessEsClient implements Client {
                     }
                 }
             }
-            throw new FessEsClientException(response.buildFailureMessage());
+            throw new SearchEngineClientException(response.buildFailureMessage());
         }
     }
 
@@ -1266,7 +1266,7 @@ public class FessEsClient implements Client {
             final Result result = response.getResult();
             return result == Result.CREATED || result == Result.UPDATED;
         } catch (final FesenException e) {
-            throw new FessEsClientException("Failed to store: " + obj, e);
+            throw new SearchEngineClientException("Failed to store: " + obj, e);
         }
     }
 
@@ -1286,7 +1286,7 @@ public class FessEsClient implements Client {
             final DeleteResponse response = builder.execute().actionGet(ComponentUtil.getFessConfig().getIndexDeleteTimeout());
             return response.getResult() == Result.DELETED;
         } catch (final FesenException e) {
-            throw new FessEsClientException("Failed to delete: " + index + "/" + id + "@" + seqNo + ":" + primaryTerm, e);
+            throw new SearchEngineClientException("Failed to delete: " + index + "/" + id + "@" + seqNo + ":" + primaryTerm, e);
         }
     }
 

@@ -15,7 +15,7 @@
 {"index":{"_index":".fess_config.scheduled_job","_id":"reload_config"}}
 {"name":"Config Reloader","target":"all","cronExpression":"*/10 * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"systemHelper\").updateConfiguration();","jobLogging":false,"crawler":false,"available":true,"sortOrder":8,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config.scheduled_job","_id":"ping_es"}}
-{"name":"Ping Search Engine","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"pingEsJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":9,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"name":"Search Engine Monitor","target":"all","cronExpression":"* * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"pingEsJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":9,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config.scheduled_job","_id":"score_booster"}}
 {"name":"Score Updater","target":"all","cronExpression":"0 * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"scoreUpdater\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":10,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config.scheduled_job","_id":"label_updater"}}

@@ -25,7 +25,7 @@ import javax.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.stream.StreamUtil;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
@@ -76,7 +76,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Adding {}", dataMap);
@@ -129,7 +129,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             }
 
             if (docList.getContentSize() >= maxDocumentRequestSize || docList.size() >= maxDocumentCacheSize) {
-                indexingHelper.sendDocuments(fessEsClient, docList);
+                indexingHelper.sendDocuments(searchEngineClient, docList);
             }
             executeTime += processingTime;
         }
@@ -162,8 +162,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         synchronized (docList) {
             if (!docList.isEmpty()) {
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-                final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
-                indexingHelper.sendDocuments(fessEsClient, docList);
+                final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+                indexingHelper.sendDocuments(searchEngineClient, docList);
             }
         }
     }

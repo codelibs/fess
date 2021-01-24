@@ -47,8 +47,8 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
-import org.codelibs.fess.es.client.FessEsClientException;
+import org.codelibs.fess.es.client.SearchEngineClient.SearchConditionBuilder;
+import org.codelibs.fess.es.client.SearchEngineClientException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.BooleanFunction;
@@ -331,7 +331,7 @@ public class SearchHelper {
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;
         } catch (final FesenException e) {
-            throw new FessEsClientException("Failed to update doc  " + id, e);
+            throw new SearchEngineClientException("Failed to update doc  " + id, e);
         }
     }
 
@@ -341,12 +341,12 @@ public class SearchHelper {
         try {
             final BulkResponse response = builder.execute().get();
             if (response.hasFailures()) {
-                throw new FessEsClientException(response.buildFailureMessage());
+                throw new SearchEngineClientException(response.buildFailureMessage());
             } else {
                 return true;
             }
         } catch (InterruptedException | ExecutionException e) {
-            throw new FessEsClientException("Failed to update bulk data.", e);
+            throw new SearchEngineClientException("Failed to update bulk data.", e);
         }
     }
 }

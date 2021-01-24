@@ -33,7 +33,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.cbean.ElevateWordCB;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
@@ -69,7 +69,7 @@ public class ElevateWordService {
     protected FessConfig fessConfig;
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     public List<ElevateWord> getElevateWordList(final ElevateWordPager elevateWordPager) {
 

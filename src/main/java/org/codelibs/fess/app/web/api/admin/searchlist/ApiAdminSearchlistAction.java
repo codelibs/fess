@@ -38,7 +38,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.SearchHelper;
@@ -63,7 +63,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     protected SearchHelper searchHelper;
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     // ===================================================================================
     //                                                                      Search Execute
@@ -104,7 +104,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     // GET /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> get$doc(final String id) {
-        return asJson(new ApiDocResponse().doc(fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
+        return asJson(new ApiDocResponse().doc(searchEngineClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
             builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id));
             return true;
         }).orElseGet(() -> {
@@ -130,7 +130,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 entity.put(fessConfig.getIndexFieldId(), newId);
 
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
-                fessEsClient.store(index, entity);
+                searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to add {}", entity, e);
@@ -167,11 +167,11 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                     final Number seqNo = (Number) entity.remove(fessConfig.getIndexFieldSeqNo());
                     final Number primaryTerm = (Number) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
                     if (seqNo != null && primaryTerm != null && oldId != null) {
-                        fessEsClient.delete(index, oldId, seqNo, primaryTerm);
+                        searchEngineClient.delete(index, oldId, seqNo, primaryTerm);
                     }
                 }
 
-                fessEsClient.store(index, entity);
+                searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to update {}", entity, e);
@@ -191,7 +191,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> delete$doc(final String id) {
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id);
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
+            searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL));

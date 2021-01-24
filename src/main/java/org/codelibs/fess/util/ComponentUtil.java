@@ -35,7 +35,7 @@ import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.crawler.service.DataService;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
@@ -357,7 +357,7 @@ public final class ComponentUtil {
         return getComponent(DATA_SERVICE);
     }
 
-    public static FessEsClient getFessEsClient() {
+    public static SearchEngineClient getFessEsClient() {
         return getComponent(FESS_ES_CLIENT);
     }
 

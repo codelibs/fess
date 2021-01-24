@@ -46,7 +46,7 @@ import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.crawler.transformer.Transformer;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -254,10 +254,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final long maxAccessCount = getMaxAccessCount(paramMap, dataMap);
             final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
             if (maxAccessCount != 1L) {
-                final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+                final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-                final long count =
-                        indexingHelper.deleteDocumentByQuery(fessEsClient, QueryBuilders.prefixQuery(fessConfig.getIndexFieldUrl(), url));
+                final long count = indexingHelper.deleteDocumentByQuery(searchEngineClient,
+                        QueryBuilders.prefixQuery(fessConfig.getIndexFieldUrl(), url));
                 if (logger.isDebugEnabled()) {
                     logger.debug("Deleted {} docs for {}*", count, url);
                 }
@@ -295,10 +295,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     protected void deleteDocuments() {
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         for (final String url : deleteUrlList) {
-            indexingHelper.deleteDocumentByUrl(fessEsClient, url);
+            indexingHelper.deleteDocumentByUrl(searchEngineClient, url);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Deleted {}", deleteUrlList);

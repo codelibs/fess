@@ -34,7 +34,7 @@ import org.codelibs.fesen.monitor.os.OsProbe;
 import org.codelibs.fesen.monitor.process.ProcessProbe;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.FesenClient;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.timer.SystemMonitorTarget;
@@ -51,7 +51,7 @@ public class SuggestCreator {
     private static final Logger logger = LogManager.getLogger(SuggestCreator.class);
 
     @Resource
-    public FessEsClient fessEsClient;
+    public SearchEngineClient searchEngineClient;
 
     protected static class Options {
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")

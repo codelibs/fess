@@ -23,7 +23,7 @@ import org.codelibs.fesen.client.IndicesAdminClient;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
@@ -107,7 +107,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     protected ElevateWordBhv elevateWordBhv;
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     @Resource
     protected ScheduledJobService scheduledJobService;
@@ -497,7 +497,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom12_1() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final IndicesAdminClient indicesClient = searchEngineClient.admin().indices();
 
         UpgradeUtil.putMapping(indicesClient, "fess_log.search_log", "search_log",
                 "{\"dynamic_templates\": [" + "{\"documents\": {\"path_match\": \"documents.*\",\"mapping\": {\"type\": \"keyword\"}}}"//
@@ -523,7 +523,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom12_6() {
-        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final IndicesAdminClient indicesClient = searchEngineClient.admin().indices();
         UpgradeUtil.deleteIndex(indicesClient, ".fess_config.web_config_to_role", res -> {});
         UpgradeUtil.deleteIndex(indicesClient, ".fess_config.file_config_to_role", res -> {});
         UpgradeUtil.deleteIndex(indicesClient, ".fess_config.data_config_to_role", res -> {});
@@ -533,7 +533,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom13_0() {
-        UpgradeUtil.addData(fessEsClient, ".fess_config.scheduled_job", "label_updater",
+        UpgradeUtil.addData(searchEngineClient, ".fess_config.scheduled_job", "label_updater",
                 "{\"name\":\"Label Updater\",\"target\":\"all\",\"cronExpression\":\"\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"updateLabelJob\\\").execute();\",\"jobLogging\":false,\"crawler\":false,\"available\":true,\"sortOrder\":11,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
     }
 

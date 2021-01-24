@@ -26,7 +26,7 @@ import org.codelibs.fesen.action.admin.cluster.health.ClusterHealthResponse;
 import org.codelibs.fesen.cluster.health.ClusterHealthStatus;
 import org.codelibs.fesen.common.xcontent.XContentType;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.util.EsUtil;
+import org.codelibs.fess.util.SearchEngineUtil;
 
 public class PingResponse {
     private static final String CLUSTER_NAME = "cluster_name";
@@ -57,7 +57,7 @@ public class PingResponse {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
         clusterName = response.getClusterName();
         clusterStatus = response.getStatus().toString();
-        try (OutputStream out = EsUtil.getXContentBuilderOutputStream((builder, params) -> {
+        try (OutputStream out = SearchEngineUtil.getXContentBuilderOutputStream((builder, params) -> {
             builder.startObject();
             builder.field(CLUSTER_NAME, response.getClusterName());
             builder.field(STATUS, response.getStatus().name().toLowerCase(Locale.ROOT));

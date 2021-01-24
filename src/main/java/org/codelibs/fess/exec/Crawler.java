@@ -51,7 +51,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.crawler.client.FesenClient;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
@@ -86,7 +86,7 @@ public class Crawler {
     private static Queue<String> errors = new ConcurrentLinkedQueue<>();
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     @Resource
     protected WebFsIndexHelper webFsIndexHelper;

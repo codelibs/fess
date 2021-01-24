@@ -44,7 +44,7 @@ import org.codelibs.fess.crawler.service.UrlQueueService;
 import org.codelibs.fess.crawler.service.impl.EsDataService;
 import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.crawler.util.EsResultList;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
@@ -67,7 +67,7 @@ public class IndexUpdater extends Thread {
     protected List<String> sessionIdList;
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     @Resource
     protected DataService<EsAccessResult> dataService;
@@ -237,7 +237,7 @@ public class IndexUpdater extends Thread {
                         hitCount = ((EsResultList<EsAccessResult>) arList).getTotalHits();
                     }
                     if (!docList.isEmpty()) {
-                        indexingHelper.sendDocuments(fessEsClient, docList);
+                        indexingHelper.sendDocuments(searchEngineClient, docList);
                     }
 
                     synchronized (finishedSessionIdList) {
@@ -379,7 +379,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     if (docList.getContentSize() >= maxDocumentRequestSize) {
-                        indexingHelper.sendDocuments(fessEsClient, docList);
+                        indexingHelper.sendDocuments(searchEngineClient, docList);
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {

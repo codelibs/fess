@@ -34,7 +34,7 @@ import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
-import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.QueryHelper;
@@ -69,7 +69,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // =========
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchEngineClient searchEngineClient;
 
     @Resource
     protected QueryHelper queryHelper;
@@ -212,7 +212,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         final String docId = form.docId;
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
+            searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), this::asListHtml);
@@ -280,7 +280,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 entity.put(fessConfig.getIndexFieldId(), newId);
 
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
-                fessEsClient.store(index, entity);
+                searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to add {}", entity, e);
@@ -313,11 +313,11 @@ public class AdminSearchlistAction extends FessAdminAction {
                     final Long seqNo = (Long) entity.remove(fessConfig.getIndexFieldSeqNo());
                     final Long primaryTerm = (Long) entity.remove(fessConfig.getIndexFieldPrimaryTerm());
                     if (seqNo != null && primaryTerm != null && oldId != null) {
-                        fessEsClient.delete(index, oldId, seqNo, primaryTerm);
+                        searchEngineClient.delete(index, oldId, seqNo, primaryTerm);
                     }
                 }
 
-                fessEsClient.store(index, entity);
+                searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to update {}", entity, e);
@@ -385,7 +385,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public static OptionalEntity<Map<String, Object>> getDoc(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final Map<String, Object> entity = new HashMap<>();
@@ -399,7 +399,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 docId = null;
             }
             if (StringUtil.isNotBlank(docId)) {
-                return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
+                return searchEngineClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), builder -> {
                     builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
                     return true;
                 });
