@@ -26,6 +26,7 @@ import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getUserIn
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -33,13 +34,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.codelibs.curl.CurlResponse;
+import org.apache.commons.text.StringEscapeUtils;
+import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiBackupFilesResponse;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.SearchEngineUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
@@ -92,9 +95,19 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                     filename = id + ".bulk";
                 }
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
-                    try (CurlResponse response =
-                            ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json").execute()) {
-                        out.write(response.getContentAsStream());
+                    try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
+                        SearchEngineUtil.scroll(index, hit -> {
+                            try {
+                                writer.write("{\"index\":{\"_index\":\"" + index + "\",\"_id\":\""
+                                        + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
+                                writer.write(hit.getSourceAsString());
+                                writer.write("\n");
+                            } catch (IOException e) {
+                                throw new IORuntimeException(e);
+                            }
+                            return true;
+                        });
+                        writer.flush();
                     }
                 });
             }

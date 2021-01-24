@@ -413,7 +413,7 @@ public class SystemHelper {
     }
 
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
+        runtime.registerData("developmentMode", ComponentUtil.getSearchEngineClient().isEmbedded());
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String installationLink = fessConfig.getOnlineHelpInstallation();
         runtime.registerData("installationLink", getHelpUrl(installationLink));
@@ -428,7 +428,7 @@ public class SystemHelper {
     }
 
     public void setupSearchHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        runtime.registerData("developmentMode", ComponentUtil.getFessEsClient().isEmbedded());
+        runtime.registerData("developmentMode", ComponentUtil.getSearchEngineClient().isEmbedded());
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String installationLink = fessConfig.getOnlineHelpInstallation();
         runtime.registerData("installationLink", getHelpUrl(installationLink));
@@ -465,7 +465,7 @@ public class SystemHelper {
     }
 
     public void reloadConfiguration() {
-        ComponentUtil.getFessEsClient().refresh();
+        ComponentUtil.getSearchEngineClient().refresh();
         ComponentUtil.getLabelTypeHelper().init();
         ComponentUtil.getPathMappingHelper().init();
         ComponentUtil.getSuggestHelper().init();

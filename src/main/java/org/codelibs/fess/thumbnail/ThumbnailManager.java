@@ -367,7 +367,7 @@ public class ThumbnailManager {
             this.expiry = expiry;
             this.fessConfig = ComponentUtil.getFessConfig();
             this.maxPurgeSize = fessConfig.getPageThumbnailPurgeMaxFetchSizeAsInteger();
-            this.searchEngineClient = ComponentUtil.getFessEsClient();
+            this.searchEngineClient = ComponentUtil.getSearchEngineClient();
         }
 
         protected void deleteFiles() {

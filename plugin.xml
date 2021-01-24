@@ -39,15 +39,6 @@
 			<param name="plugin.version" value="7.10.0" />
 			<param name="plugin.zip.version" value="7.10.0" />
 		</antcall>
-		<!-- dataformat -->
-		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/codelibs${use.fesen}" />
-			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="7.10.0" />
-			<param name="plugin.zip.version" value="7.10.0" />
-		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />

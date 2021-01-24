@@ -18,6 +18,7 @@ package org.codelibs.fess.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +26,8 @@ import org.codelibs.fesen.common.xcontent.ToXContent;
 import org.codelibs.fesen.common.xcontent.XContentBuilder;
 import org.codelibs.fesen.common.xcontent.XContentFactory;
 import org.codelibs.fesen.common.xcontent.XContentType;
+import org.codelibs.fesen.search.SearchHit;
+import org.codelibs.fess.es.client.SearchEngineClient;
 
 public final class SearchEngineUtil {
 
@@ -49,7 +52,15 @@ public final class SearchEngineUtil {
         return getXContentBuilderOutputStream((builder, params) -> xContent.toXContent(builder, params), xContentType);
     }
 
+    public static long scroll(String index, Function<SearchHit, Boolean> callback) {
+        SearchEngineClient client = ComponentUtil.getSearchEngineClient();
+        return client.<SearchHit> scrollSearch(index, searchRequestBuilder -> true, (searchResponse, hit) -> hit, hit -> {
+            return callback.apply(hit);
+        });
+    }
+
     public interface XContentBuilderCallback {
         XContentBuilder apply(XContentBuilder builder, ToXContent.Params params) throws IOException;
     }
+
 }

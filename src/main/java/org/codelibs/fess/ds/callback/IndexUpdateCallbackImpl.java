@@ -76,7 +76,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Adding {}", dataMap);
@@ -162,7 +162,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         synchronized (docList) {
             if (!docList.isEmpty()) {
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-                final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+                final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
                 indexingHelper.sendDocuments(searchEngineClient, docList);
             }
         }

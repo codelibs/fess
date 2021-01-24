@@ -357,7 +357,7 @@ public final class ComponentUtil {
         return getComponent(DATA_SERVICE);
     }
 
-    public static SearchEngineClient getFessEsClient() {
+    public static SearchEngineClient getSearchEngineClient() {
         return getComponent(FESS_ES_CLIENT);
     }
 

@@ -241,7 +241,7 @@ public class DataIndexHelper {
                                     .mustNot(QueryBuilders.existsQuery(fessConfig.getIndexFieldExpires())))
                             .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
-                final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+                final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
                 searchEngineClient.admin().indices().prepareRefresh(index).execute().actionGet();
                 final long numOfDeleted = searchEngineClient.deleteByQuery(index, queryBuilder);

@@ -96,7 +96,7 @@ public class SuggestHelper {
         split(fessConfig.getSuggestFieldRoles(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(roleFieldNameSet::add));
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
 
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         searchEngineClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
                 .actionGet(fessConfig.getIndexHealthTimeout());
 
@@ -208,7 +208,7 @@ public class SuggestHelper {
         final int docPerReq = fessConfig.getSuggestUpdateDocPerRequestAsInteger();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         suggester.indexer().indexFromDocument(() -> {
-            final ESSourceReader reader = new ESSourceReader(ComponentUtil.getFessEsClient(), suggester.settings(),
+            final ESSourceReader reader = new ESSourceReader(ComponentUtil.getSearchEngineClient(), suggester.settings(),
                     fessConfig.getIndexDocumentSearchIndex(), "_doc"); // TODO remove type
             reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
             reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
@@ -243,7 +243,7 @@ public class SuggestHelper {
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
-        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
+        SuggestUtil.deleteByQuery(ComponentUtil.getSearchEngineClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
     }
 
     public void purgeSearchlogSuggest(final LocalDateTime time) {
@@ -255,7 +255,7 @@ public class SuggestHelper {
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
-        SuggestUtil.deleteByQuery(ComponentUtil.getFessEsClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
+        SuggestUtil.deleteByQuery(ComponentUtil.getSearchEngineClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
     }
 
     public long getAllWordsNum() {

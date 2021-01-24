@@ -51,7 +51,7 @@ public abstract class ScoreBooster {
 
     protected Function<Map<String, Object>, String[]> idFinder = params -> {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchEngineClient client = ComponentUtil.getFessEsClient();
+        final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
         final String index = fessConfig.getIndexDocumentUpdateIndex();
         final Object url = params.get("url");
         if (url == null) {
@@ -68,7 +68,7 @@ public abstract class ScoreBooster {
         if (ids.length == 0) {
             return 0L;
         }
-        final SearchEngineClient client = ComponentUtil.getFessEsClient();
+        final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
         if (bulkRequestBuilder == null) {
             bulkRequestBuilder = client.prepareBulk();
         }
@@ -96,7 +96,7 @@ public abstract class ScoreBooster {
 
     protected UpdateRequestBuilder createUpdateRequestBuilder() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().prepareUpdate().setIndex(fessConfig.getIndexDocumentSearchIndex());
+        return ComponentUtil.getSearchEngineClient().prepareUpdate().setIndex(fessConfig.getIndexDocumentSearchIndex());
     }
 
     protected void flush() {

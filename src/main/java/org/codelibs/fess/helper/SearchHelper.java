@@ -93,7 +93,7 @@ public class SearchHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
         final List<Map<String, Object>> documentItems =
-                ComponentUtil.getFessEsClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+                ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                     return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
                             .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
@@ -189,7 +189,7 @@ public class SearchHelper {
             query = ComponentUtil.getQueryStringBuilder().params(params).build() + " sort:" + sortField;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().<Map<String, Object>> scrollSearch(fessConfig.getIndexDocumentSearchIndex(),
+        return ComponentUtil.getSearchEngineClient().<Map<String, Object>> scrollSearch(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> {
                     final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
@@ -233,7 +233,7 @@ public class SearchHelper {
         final QueryContext queryContext = ComponentUtil.getQueryHelper().build(params.getType(), query, context -> {
             context.skipRoleQuery();
         });
-        return ComponentUtil.getFessEsClient().deleteByQuery(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(),
+        return ComponentUtil.getSearchEngineClient().deleteByQuery(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(),
                 queryContext.getQueryBuilder());
     }
 
@@ -281,7 +281,7 @@ public class SearchHelper {
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().getDocument(fessConfig.getIndexDocumentSearchIndex(), builder -> {
+        return ComponentUtil.getSearchEngineClient().getDocument(fessConfig.getIndexDocumentSearchIndex(), builder -> {
             final BoolQueryBuilder boolQuery =
                     QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
             final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
@@ -300,7 +300,7 @@ public class SearchHelper {
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
             final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getFessEsClient().getDocumentList(fessConfig.getIndexDocumentSearchIndex(), builder -> {
+        return ComponentUtil.getSearchEngineClient().getDocumentList(fessConfig.getIndexDocumentSearchIndex(), builder -> {
             final BoolQueryBuilder boolQuery =
                     QueryBuilders.boolQuery().must(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
@@ -319,14 +319,14 @@ public class SearchHelper {
     }
 
     public boolean update(final String id, final String field, final Object value) {
-        return ComponentUtil.getFessEsClient().update(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(), id, field, value);
+        return ComponentUtil.getSearchEngineClient().update(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(), id, field, value);
     }
 
     public boolean update(final String id, final Consumer<UpdateRequestBuilder> builderLambda) {
         try {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final UpdateRequestBuilder builder =
-                    ComponentUtil.getFessEsClient().prepareUpdate().setIndex(fessConfig.getIndexDocumentUpdateIndex()).setId(id);
+                    ComponentUtil.getSearchEngineClient().prepareUpdate().setIndex(fessConfig.getIndexDocumentUpdateIndex()).setId(id);
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;
@@ -336,7 +336,7 @@ public class SearchHelper {
     }
 
     public boolean bulkUpdate(final Consumer<BulkRequestBuilder> consumer) {
-        final BulkRequestBuilder builder = ComponentUtil.getFessEsClient().prepareBulk();
+        final BulkRequestBuilder builder = ComponentUtil.getSearchEngineClient().prepareBulk();
         consumer.accept(builder);
         try {
             final BulkResponse response = builder.execute().get();

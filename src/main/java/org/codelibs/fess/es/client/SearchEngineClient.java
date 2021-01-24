@@ -803,25 +803,22 @@ public class SearchEngineClient implements Client {
                     for (final SearchHit hit : hits) {
                         count++;
                         if (!cursor.apply(creator.build(response, hit))) {
-                            if (scrollId != null) {
-                                client.prepareClearScroll().addScrollId(scrollId)
-                                        .execute(ActionListener.wrap(res -> {}, e1 -> logger.warn("Failed to clear scrollId.", e1)));
-                            }
                             break;
                         }
                     }
 
                     response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute()
                             .actionGet(fessConfig.getIndexBulkTimeout());
+                    if (!scrollId.equals(response.getScrollId())) {
+                        deleteScrollContext(scrollId);
+                    }
                     scrollId = response.getScrollId();
                 }
             } catch (final SearchPhaseExecutionException e) {
-                if (scrollId != null) {
-                    client.prepareClearScroll().addScrollId(scrollId)
-                            .execute(ActionListener.wrap(res -> {}, e1 -> logger.warn("Failed to clear scrollId.", e1)));
-                }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query: " + searchRequestBuilder, e);
+            } finally {
+                deleteScrollContext(scrollId);
             }
         }
 

@@ -187,7 +187,7 @@ public class JsonApiManager extends BaseJsonApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         int status;
         Exception err = null;
         try {

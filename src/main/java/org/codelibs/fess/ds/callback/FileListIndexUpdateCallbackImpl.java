@@ -254,7 +254,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final long maxAccessCount = getMaxAccessCount(paramMap, dataMap);
             final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
             if (maxAccessCount != 1L) {
-                final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+                final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                 final long count = indexingHelper.deleteDocumentByQuery(searchEngineClient,
                         QueryBuilders.prefixQuery(fessConfig.getIndexFieldUrl(), url));
@@ -295,7 +295,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     protected void deleteDocuments() {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         for (final String url : deleteUrlList) {
             indexingHelper.deleteDocumentByUrl(searchEngineClient, url);

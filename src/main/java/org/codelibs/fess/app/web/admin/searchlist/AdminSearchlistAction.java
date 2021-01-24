@@ -385,7 +385,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public static OptionalEntity<Map<String, Object>> getDoc(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         switch (form.crudMode) {
         case CrudMode.CREATE:
             final Map<String, Object> entity = new HashMap<>();

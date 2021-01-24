@@ -119,7 +119,7 @@ public class KeyMatchHelper {
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> SearchConditionBuilder
@@ -155,7 +155,7 @@ public class KeyMatchHelper {
     }
 
     public List<Map<String, Object>> getBoostedDocumentList(final String term, final int size) {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final Pair<QueryBuilder, ScoreFunctionBuilder<?>> pair = getQueryMap().get(toLowerCase(term));
         if (pair == null) {
             return Collections.emptyList();

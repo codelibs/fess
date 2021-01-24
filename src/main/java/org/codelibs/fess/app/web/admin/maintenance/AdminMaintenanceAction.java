@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.maintenance;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,8 +32,10 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
@@ -42,6 +46,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.SearchEngineUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -218,9 +223,20 @@ public class AdminMaintenanceAction extends FessAdminAction {
         final ZipEntry entry = new ZipEntry(id + "/fess_basic_config.bulk");
         try {
             zos.putNextEntry(entry);
-            try (CurlResponse response = ComponentUtil.getCurlHelper().get("/.fess_basic_config/_data").param("format", "json")
-                    .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
-                CopyUtil.copy(response.getContentAsStream(), zos);
+            final String index = ".fess_basic_config";
+            try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, Constants.CHARSET_UTF_8))) {
+                SearchEngineUtil.scroll(index, hit -> {
+                    try {
+                        writer.write("{\"index\":{\"_index\":\"" + index + "\",\"_id\":\"" + StringEscapeUtils.escapeJson(hit.getId())
+                                + "\"}}\n");
+                        writer.write(hit.getSourceAsString());
+                        writer.write("\n");
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    return true;
+                });
+                writer.flush();
             }
         } catch (final IOException e) {
             logger.warn("Failed to access system.properties.", e);

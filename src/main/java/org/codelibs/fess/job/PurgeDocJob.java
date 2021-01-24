@@ -28,7 +28,7 @@ public class PurgeDocJob {
     private static final Logger logger = LogManager.getLogger(PurgeDocJob.class);
 
     public String execute() {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final StringBuilder resultBuf = new StringBuilder();

@@ -178,7 +178,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
     private void appendFesenStats(final StringBuilder buf) {
         String stats = null;
         try {
-            final SearchEngineClient esClient = ComponentUtil.getFessEsClient();
+            final SearchEngineClient esClient = ComponentUtil.getSearchEngineClient();
             final NodesStatsResponse response = esClient.admin().cluster().prepareNodesStats().all().execute().actionGet(10000L);
             final XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();

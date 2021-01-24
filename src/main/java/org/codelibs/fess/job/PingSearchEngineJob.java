@@ -35,7 +35,7 @@ public class PingSearchEngineJob {
     private static final Logger logger = LogManager.getLogger(PingSearchEngineJob.class);
 
     public String execute() {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 

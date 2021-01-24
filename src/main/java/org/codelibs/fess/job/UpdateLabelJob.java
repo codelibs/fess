@@ -38,7 +38,7 @@ public class UpdateLabelJob {
     protected QueryBuilder queryBuilder = null;
 
     public String execute() {
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         final LanguageHelper languageHelper = ComponentUtil.getLanguageHelper();

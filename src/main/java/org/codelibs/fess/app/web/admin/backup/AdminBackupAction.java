@@ -67,6 +67,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.fess.util.SearchEngineUtil;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -332,9 +333,19 @@ public class AdminBackupAction extends FessAdminAction {
                     filename = id + ".bulk";
                 }
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
-                    try (CurlResponse response = ComponentUtil.getCurlHelper().get("/" + index + "/_data").param("format", "json")
-                            .param("scroll", fessConfig.getIndexScrollSearchTimeout()).execute()) {
-                        out.write(response.getContentAsStream());
+                    try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
+                        SearchEngineUtil.scroll(index, hit -> {
+                            try {
+                                writer.write("{\"index\":{\"_index\":\"" + index + "\",\"_id\":\""
+                                        + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
+                                writer.write(hit.getSourceAsString());
+                                writer.write("\n");
+                            } catch (IOException e) {
+                                throw new IORuntimeException(e);
+                            }
+                            return true;
+                        });
+                        writer.flush();
                     }
                 });
             }

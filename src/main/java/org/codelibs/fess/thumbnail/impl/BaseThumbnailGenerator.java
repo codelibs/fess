@@ -151,7 +151,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         // TODO bulk
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
-            ComponentUtil.getIndexingHelper().updateDocument(ComponentUtil.getFessEsClient(), thumbnailId,
+            ComponentUtil.getIndexingHelper().updateDocument(ComponentUtil.getSearchEngineClient(), thumbnailId,
                     fessConfig.getIndexFieldThumbnail(), value);
         } catch (final Exception e) {
             logger.warn("Failed to update thumbnail field at {}", thumbnailId, e);
@@ -160,7 +160,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     protected boolean process(final String id, final BiPredicate<String, String> consumer) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchEngineClient searchEngineClient = ComponentUtil.getFessEsClient();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         try {
             final Map<String, Object> doc = indexingHelper.getDocument(searchEngineClient, id,
