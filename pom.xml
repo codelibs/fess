@@ -221,7 +221,7 @@
 				<configuration>
 					<header>https://www.codelibs.org/assets/license/header.txt</header>
 					<properties>
-						<year>2020</year>
+						<year>2021</year>
 					</properties>
 					<includes>
 						<include>src/**/*.java</include>
