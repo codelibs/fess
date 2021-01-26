@@ -39,6 +39,7 @@ import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 public class AdminPluginAction extends FessAdminAction {
 
@@ -82,47 +83,53 @@ public class AdminPluginAction extends FessAdminAction {
     public HtmlResponse install(final InstallForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
         verifyToken(() -> asHtml(path_AdminPlugin_AdminPluginInstallpluginJsp));
-        if (UPLOAD.equals(form.id)) {
-            if (form.jarFile == null) {
-                throwValidationError(messages -> messages.addErrorsPluginFileIsNotFound(GLOBAL, form.id), this::asListHtml);
-            }
-            if (!form.jarFile.getFileName().endsWith(".jar")) {
-                throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()),
-                        this::asListHtml);
-            }
-            final String filename = form.jarFile.getFileName();
-            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("tmp-adminplugin-", ".jar");
-            try (final InputStream is = form.jarFile.getInputStream(); final OutputStream os = new FileOutputStream(tempFile)) {
-                CopyUtil.copy(is, os);
-            } catch (final Exception e) {
-                if (tempFile.exists() && !tempFile.delete()) {
-                    logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
+        try {
+            if (UPLOAD.equals(form.id)) {
+                if (form.jarFile == null) {
+                    throwValidationError(messages -> messages.addErrorsPluginFileIsNotFound(GLOBAL, form.id), this::asListHtml);
                 }
-                logger.debug("Failed to copy {}", filename, e);
-                throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, filename), this::asListHtml);
-            }
-            new Thread(() -> {
-                try {
-                    final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
-                    final Artifact artifact =
-                            pluginHelper.getArtifactFromFileName(ArtifactType.UNKNOWN, filename, tempFile.getAbsolutePath());
-                    pluginHelper.installArtifact(artifact);
+                if (!form.jarFile.getFileName().endsWith(".jar")) {
+                    throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, form.jarFile.getFileName()),
+                            this::asListHtml);
+                }
+                final String filename = form.jarFile.getFileName();
+                final File tempFile = ComponentUtil.getSystemHelper().createTempFile("tmp-adminplugin-", ".jar");
+                try (final InputStream is = form.jarFile.getInputStream(); final OutputStream os = new FileOutputStream(tempFile)) {
+                    CopyUtil.copy(is, os);
                 } catch (final Exception e) {
-                    logger.warn("Failed to install {}", filename, e);
-                } finally {
                     if (tempFile.exists() && !tempFile.delete()) {
                         logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
                     }
+                    logger.debug("Failed to copy {}", filename, e);
+                    throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, filename), this::asListHtml);
                 }
-            }).start();
-            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, form.jarFile.getFileName()));
-        } else {
-            final Artifact artifact = getArtifactFromInstallForm(form);
-            if (artifact == null) {
-                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asListHtml);
+                new Thread(() -> {
+                    try {
+                        final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
+                        final Artifact artifact =
+                                pluginHelper.getArtifactFromFileName(ArtifactType.UNKNOWN, filename, tempFile.getAbsolutePath());
+                        pluginHelper.installArtifact(artifact);
+                    } catch (final Exception e) {
+                        logger.warn("Failed to install {}", filename, e);
+                    } finally {
+                        if (tempFile.exists() && !tempFile.delete()) {
+                            logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
+                        }
+                    }
+                }).start();
+                saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, form.jarFile.getFileName()));
+            } else {
+                final Artifact artifact = getArtifactFromInstallForm(form);
+                if (artifact == null) {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asListHtml);
+                }
+                installArtifact(artifact);
+                saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
             }
-            installArtifact(artifact);
-            saveInfo(messages -> messages.addSuccessInstallPlugin(GLOBAL, artifact.getFileName()));
+        } catch (final ValidationErrorException e) {
+            throw e;
+        } catch (final Exception e) {
+            throwValidationError(messages -> messages.addErrorsFailedToInstallPlugin(GLOBAL, form.id), this::asListHtml);
         }
         return redirect(getClass());
     }
@@ -138,7 +145,12 @@ public class AdminPluginAction extends FessAdminAction {
             map.put("name", "");
             map.put("version", "");
             result.add(map);
-            result.addAll(getAllAvailableArtifacts());
+            try {
+                result.addAll(getAllAvailableArtifacts());
+            } catch (Exception e) {
+                saveError(messages -> messages.addErrorsFailedToFindPlugins(GLOBAL));
+                logger.warn("Failed to access a plugin repository.", e);
+            }
             RenderDataUtil.register(data, "availableArtifactItems", result);
         }).useForm(InstallForm.class, op -> op.setup(form -> {}));
     }

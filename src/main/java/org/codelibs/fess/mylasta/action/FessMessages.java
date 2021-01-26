@@ -353,6 +353,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to install {0}. */
     public static final String ERRORS_failed_to_install_plugin = "{errors.failed_to_install_plugin}";
 
+    /** The key of the message: Failed to access available plugins. */
+    public static final String ERRORS_failed_to_find_plugins = "{errors.failed_to_find_plugins}";
+
     /** The key of the message: Failed to process the request: {0} */
     public static final String ERRORS_failed_to_process_sso_request = "{errors.failed_to_process_sso_request}";
 
@@ -2094,6 +2097,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToInstallPlugin(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_install_plugin, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_find_plugins' with parameters.
+     * <pre>
+     * message: Failed to access available plugins.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToFindPlugins(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_find_plugins));
         return this;
     }
 
