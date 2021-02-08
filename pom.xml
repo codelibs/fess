@@ -35,8 +35,8 @@
 	</parent>
 	<properties>
 		<!-- Main Framework -->
-		<dbflute.version>1.2.3</dbflute.version>
-		<lastaflute.version>1.1.8</lastaflute.version>
+		<dbflute.version>1.2.4</dbflute.version>
+		<lastaflute.version>1.2.0</lastaflute.version>
 		<lasta.di.version>0.8.3</lasta.di.version>
 		<lasta.taglib.version>0.7.3</lasta.taglib.version>
 		<lasta.job.version>0.5.4</lasta.job.version>
@@ -45,10 +45,10 @@
 		<!-- Partner Library -->
 		<slf4j.version>1.7.30</slf4j.version>
 		<log4j.version>2.14.0</log4j.version>
-		<jackson.version>2.11.3</jackson.version>
+		<jackson.version>2.11.4</jackson.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
-		<asm.version>9.0</asm.version>
-		<tika.version>1.24.1</tika.version>
+		<asm.version>9.1</asm.version>
+		<tika.version>1.25</tika.version>
 		<groovy.version>3.0.7</groovy.version>
 		<minio.version>7.1.4</minio.version>
 		<okhttp.version>3.14.9</okhttp.version>
@@ -65,7 +65,7 @@
 		<fesen.runner.version>0.11.0-SNAPSHOT</fesen.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>9.0.41</tomcat.version>
+		<tomcat.version>9.0.43</tomcat.version>
 		<tomcat.boot.version>0.7.6</tomcat.boot.version>
 
 		<!-- Testing -->
@@ -1142,7 +1142,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>30.0-jre</version>
+			<version>30.1-jre</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1169,7 +1169,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
-			<version>1.30.6</version>
+			<version>1.31.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1184,7 +1184,7 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client</artifactId>
-			<version>1.34.2</version>
+			<version>1.38.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1195,12 +1195,12 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-jackson2</artifactId>
-			<version>1.34.2</version>
+			<version>1.38.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-xml</artifactId>
-			<version>1.34.2</version>
+			<version>1.38.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -1251,7 +1251,7 @@
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-			<version>68.1</version>
+			<version>68.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
@@ -1311,6 +1311,12 @@
 			<groupId>com.onelogin</groupId>
 			<artifactId>java-saml</artifactId>
 			<version>2.6.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.activation</groupId>
+					<artifactId>jakarta.activation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- suggest library -->
