@@ -173,7 +173,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                    docList.addAll(keyMatchHelper.getBoostedDocumentList(entity.getTerm(), entity.getMaxSize()));
+                    docList.addAll(keyMatchHelper.getBoostedDocumentList(entity.getId(), entity.getTerm(), entity.getMaxSize()));
                 }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });

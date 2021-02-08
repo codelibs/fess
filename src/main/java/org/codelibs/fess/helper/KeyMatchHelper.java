@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
-import org.codelibs.core.misc.Pair;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fesen.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilders;
@@ -48,7 +49,8 @@ import org.codelibs.fess.util.DocumentUtil;
 public class KeyMatchHelper {
     private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);
 
-    protected volatile Map<String, Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>>> keyMatchQueryMap = Collections.emptyMap();
+    protected volatile Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap =
+            Collections.emptyMap();
 
     protected long reloadInterval = 1000L;
 
@@ -73,7 +75,7 @@ public class KeyMatchHelper {
 
     protected void reload(final long interval) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Map<String, Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>>> keyMatchQueryMap = new HashMap<>();
+        final Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap = new HashMap<>();
         getAvailableKeyMatchList().stream().forEach(keyMatch -> {
             try {
                 final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
@@ -97,13 +99,19 @@ public class KeyMatchHelper {
                     if (StringUtil.isBlank(virtualHost)) {
                         virtualHost = StringUtil.EMPTY;
                     }
-                    Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> queryMap = keyMatchQueryMap.get(virtualHost);
+                    Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> queryMap = keyMatchQueryMap.get(virtualHost);
                     if (queryMap == null) {
                         queryMap = new HashMap<>();
                         keyMatchQueryMap.put(virtualHost, queryMap);
                     }
-                    queryMap.put(toLowerCase(keyMatch.getTerm()),
-                            new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
+                    final String termKey = toLowerCase(keyMatch.getTerm());
+                    List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList = queryMap.get(termKey);
+                    if (boostList == null) {
+                        boostList = new ArrayList<>();
+                        queryMap.put(termKey, boostList);
+                    }
+                    boostList.add(
+                            new Tuple3<>(keyMatch.getId(), boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
                 } else if (logger.isDebugEnabled()) {
                     logger.debug("No KeyMatch boost docs");
                 }
@@ -136,9 +144,9 @@ public class KeyMatchHelper {
         this.reloadInterval = reloadInterval;
     }
 
-    protected Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> getQueryMap() {
+    protected Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> getQueryMap() {
         final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
-        final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder<?>>> map = keyMatchQueryMap.get(key);
+        final Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> map = keyMatchQueryMap.get(key);
         if (map != null) {
             return map;
         }
@@ -147,24 +155,30 @@ public class KeyMatchHelper {
 
     public void buildQuery(final List<String> keywordList, final List<FilterFunctionBuilder> list) {
         keywordList.stream().forEach(keyword -> {
-            final Pair<QueryBuilder, ScoreFunctionBuilder<?>> pair = getQueryMap().get(toLowerCase(keyword));
-            if (pair != null) {
-                list.add(new FilterFunctionBuilder(pair.getFirst(), pair.getSecond()));
+            final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList = getQueryMap().get(toLowerCase(keyword));
+            if (boostList != null) {
+                boostList.forEach(pair -> list.add(new FilterFunctionBuilder(pair.getValue2(), pair.getValue3())));
             }
         });
     }
 
-    public List<Map<String, Object>> getBoostedDocumentList(final String term, final int size) {
+    public List<Map<String, Object>> getBoostedDocumentList(final String id, final String term, final int size) {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
-        final Pair<QueryBuilder, ScoreFunctionBuilder<?>> pair = getQueryMap().get(toLowerCase(term));
-        if (pair == null) {
+        final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList = getQueryMap().get(toLowerCase(term));
+        if (boostList == null) {
             return Collections.emptyList();
         }
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
-            searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getFirst()).setSize(size);
-            return true;
-        });
+        for (Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>> pair : boostList) {
+            if (!id.equals(pair.getValue1())) {
+                continue;
+            }
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+                searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getValue2()).setSize(size);
+                return true;
+            });
+        }
+        return Collections.emptyList();
     }
 
     private String toLowerCase(final String term) {
