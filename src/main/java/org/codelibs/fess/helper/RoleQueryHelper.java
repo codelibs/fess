@@ -74,7 +74,7 @@ public class RoleQueryHelper {
 
     protected boolean encryptedCookieValue = true;
 
-    protected long maxAge = 30 * 60 * 1000L; // msec
+    protected long maxAge = 30 * 60; // sec
 
     protected Map<String, String> cookieNameMap;
 
