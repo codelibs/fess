@@ -89,9 +89,9 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
             buf.append('(');
         }
         buf.append("{\"response\":");
-        buf.append("{\"version\":");
+        buf.append("{\"version\":\"");
         buf.append(ComponentUtil.getSystemHelper().getProductVersion());
-        buf.append(',');
+        buf.append("\",");
         buf.append("\"status\":");
         buf.append(status);
         if (StringUtil.isNotBlank(body)) {
