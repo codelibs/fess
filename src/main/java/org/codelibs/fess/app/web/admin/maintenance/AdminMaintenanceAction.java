@@ -293,13 +293,15 @@ public class AdminMaintenanceAction extends FessAdminAction {
         if (fessEsClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
             fessEsClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 fessEsClient.addMapping(docIndex, "doc", toIndex);
-                fessEsClient.reindex(fromIndex, toIndex, replaceAliases);
-                if (replaceAliases && !fessEsClient.updateAlias(toIndex)) {
-                    logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
+                if (fessEsClient.reindex(fromIndex, toIndex, replaceAliases)) {
+                    if (replaceAliases && !fessEsClient.updateAlias(toIndex)) {
+                        logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
+                    }
                 }
             }, e -> logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e)));
             return true;
         }
+
         saveError(messages -> messages.addErrorsFailedToReindex(GLOBAL, fromIndex, toIndex));
         return false;
     }
