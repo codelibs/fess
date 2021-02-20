@@ -717,6 +717,24 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     */
     String INDEX_FILETYPE = "index.filetype";
 
+    /** The key of the configuration. e.g. {"source":{"index":"__SOURCE_INDEX__","size":100},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} */
+    String INDEX_REINDEX_BODY = "index.reindex.body";
+
+    /** The key of the configuration. e.g. -1 */
+    String INDEX_REINDEX_requests_per_second = "index.reindex.requests_per_second";
+
+    /** The key of the configuration. e.g. false */
+    String INDEX_REINDEX_REFRESH = "index.reindex.refresh";
+
+    /** The key of the configuration. e.g. 1m */
+    String INDEX_REINDEX_TIMEOUT = "index.reindex.timeout";
+
+    /** The key of the configuration. e.g. 5m */
+    String INDEX_REINDEX_SCROLL = "index.reindex.scroll";
+
+    /** The key of the configuration. e.g. -1 */
+    String INDEX_REINDEX_max_docs = "index.reindex.max_docs";
+
     /** The key of the configuration. e.g. 1000 */
     String QUERY_MAX_LENGTH = "query.max.length";
 
@@ -3656,6 +3674,71 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFiletype();
+
+    /**
+     * Get the value for the key 'index.reindex.body'. <br>
+     * The value is, e.g. {"source":{"index":"__SOURCE_INDEX__","size":100},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexBody();
+
+    /**
+     * Get the value for the key 'index.reindex.requests_per_second'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexRequestsPerSecond();
+
+    /**
+     * Get the value for the key 'index.reindex.requests_per_second' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexReindexRequestsPerSecondAsInteger();
+
+    /**
+     * Get the value for the key 'index.reindex.refresh'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexRefresh();
+
+    /**
+     * Is the property for the key 'index.reindex.refresh' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isIndexReindexRefresh();
+
+    /**
+     * Get the value for the key 'index.reindex.timeout'. <br>
+     * The value is, e.g. 1m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexTimeout();
+
+    /**
+     * Get the value for the key 'index.reindex.scroll'. <br>
+     * The value is, e.g. 5m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexScroll();
+
+    /**
+     * Get the value for the key 'index.reindex.max_docs'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexMaxDocs();
+
+    /**
+     * Get the value for the key 'index.reindex.max_docs' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexReindexMaxDocsAsInteger();
 
     /**
      * Get the value for the key 'query.max.length'. <br>
@@ -7878,6 +7961,42 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FILETYPE);
         }
 
+        public String getIndexReindexBody() {
+            return get(FessConfig.INDEX_REINDEX_BODY);
+        }
+
+        public String getIndexReindexRequestsPerSecond() {
+            return get(FessConfig.INDEX_REINDEX_requests_per_second);
+        }
+
+        public Integer getIndexReindexRequestsPerSecondAsInteger() {
+            return getAsInteger(FessConfig.INDEX_REINDEX_requests_per_second);
+        }
+
+        public String getIndexReindexRefresh() {
+            return get(FessConfig.INDEX_REINDEX_REFRESH);
+        }
+
+        public boolean isIndexReindexRefresh() {
+            return is(FessConfig.INDEX_REINDEX_REFRESH);
+        }
+
+        public String getIndexReindexTimeout() {
+            return get(FessConfig.INDEX_REINDEX_TIMEOUT);
+        }
+
+        public String getIndexReindexScroll() {
+            return get(FessConfig.INDEX_REINDEX_SCROLL);
+        }
+
+        public String getIndexReindexMaxDocs() {
+            return get(FessConfig.INDEX_REINDEX_max_docs);
+        }
+
+        public Integer getIndexReindexMaxDocsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_REINDEX_max_docs);
+        }
+
         public String getQueryMaxLength() {
             return get(FessConfig.QUERY_MAX_LENGTH);
         }
@@ -9779,6 +9898,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_INDICES_TIMEOUT, "1m");
             defaultMap.put(FessConfig.INDEX_FILETYPE,
                     "text/html=html\napplication/msword=word\napplication/vnd.openxmlformats-officedocument.wordprocessingml.document=word\napplication/vnd.ms-excel=excel\napplication/vnd.ms-excel.sheet.2=excel\napplication/vnd.ms-excel.sheet.3=excel\napplication/vnd.ms-excel.sheet.4=excel\napplication/vnd.ms-excel.workspace.3=excel\napplication/vnd.ms-excel.workspace.4=excel\napplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel\napplication/vnd.ms-powerpoint=powerpoint\napplication/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint\napplication/vnd.oasis.opendocument.text=odt\napplication/vnd.oasis.opendocument.spreadsheet=ods\napplication/vnd.oasis.opendocument.presentation=odp\napplication/pdf=pdf\napplication/x-fictionbook+xml=fb2\napplication/e-pub+zip=epub\napplication/x-ibooks+zip=ibooks\ntext/plain=txt\napplication/rtf=rtf\napplication/vnd.ms-htmlhelp=chm\napplication/zip=zip\napplication/x-7z-comressed=7z\napplication/x-bzip=bz\napplication/x-bzip2=bz2\napplication/x-tar=tar\napplication/x-rar-compressed=rar\nvideo/3gp=3gp\nvideo/3g2=3g2\nvideo/x-msvideo=avi\nvideo/x-flv=flv\nvideo/mpeg=mpeg\nvideo/mp4=mp4\nvideo/ogv=ogv\nvideo/quicktime=qt\nvideo/x-m4v=m4v\naudio/x-aif=aif\naudio/midi=midi\naudio/mpga=mpga\naudio/mp4=mp4a\naudio/ogg=oga\naudio/x-wav=wav\nimage/webp=webp\nimage/bmp=bmp\nimage/x-icon=ico\nimage/x-icon=ico\nimage/png=png\nimage/svg+xml=svg\nimage/tiff=tiff\nimage/jpeg=jpg\n");
+            defaultMap.put(FessConfig.INDEX_REINDEX_BODY,
+                    "{\"source\":{\"index\":\"__SOURCE_INDEX__\",\"size\":100},\"dest\":{\"index\":\"__DEST_INDEX__\"},\"script\":{\"source\":\"__SCRIPT_SOURCE__\"}}");
+            defaultMap.put(FessConfig.INDEX_REINDEX_requests_per_second, "-1");
+            defaultMap.put(FessConfig.INDEX_REINDEX_REFRESH, "false");
+            defaultMap.put(FessConfig.INDEX_REINDEX_TIMEOUT, "1m");
+            defaultMap.put(FessConfig.INDEX_REINDEX_SCROLL, "5m");
+            defaultMap.put(FessConfig.INDEX_REINDEX_max_docs, "-1");
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");

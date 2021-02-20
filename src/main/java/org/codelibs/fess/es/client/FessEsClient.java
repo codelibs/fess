@@ -349,9 +349,14 @@ public class FessEsClient implements Client {
     }
 
     public boolean reindex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
-        final String source = "{\"source\":{\"index\":\"" + fromIndex + "\"},\"dest\":{\"index\":\"" + toIndex + "\"},"
-                + "\"script\":{\"source\":\"" + ComponentUtil.getLanguageHelper().getReindexScriptSource() + "\"}}";
-        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_reindex")
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String source = fessConfig.getIndexReindexBody()//
+                .replace("__SOURCE_INDEX__", fromIndex)//
+                .replace("__DEST_INDEX__", toIndex)
+                .replace("__SCRIPT_SOURCE__", ComponentUtil.getLanguageHelper().getReindexScriptSource());
+        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_reindex").param("refresh", fessConfig.getIndexReindexRefresh())
+                .param("requests_per_second", fessConfig.getIndexReindexRequestsPerSecond())
+                .param("scroll", fessConfig.getIndexReindexScroll()).param("max_docs", fessConfig.getIndexReindexMaxDocs())
                 .param("wait_for_completion", Boolean.toString(waitForCompletion)).body(source).execute()) {
             if (response.getHttpStatusCode() == 200) {
                 return true;
