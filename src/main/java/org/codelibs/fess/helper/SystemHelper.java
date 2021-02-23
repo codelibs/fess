@@ -124,7 +124,7 @@ public class SystemHelper {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.set(2022, 5 - 1, 11); // EOL Date
+        cal.set(2022, 8 - 1, 10); // EOL Date
         eolTime = cal.getTimeInMillis();
         if (isEoled()) {
             logger.error("Your system is out of support. See https://fess.codelibs.org/eol.html");
