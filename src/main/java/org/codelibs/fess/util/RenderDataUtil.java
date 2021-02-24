@@ -28,7 +28,9 @@ public class RenderDataUtil {
     public static void register(final RenderData data, final String key, final Object value) {
         if (value == null) {
             return;
-        } else if (value instanceof Entity) {
+        }
+
+        if (value instanceof Entity) {
             data.register(key, BeanUtil.copyBeanToNewMap(value));
         } else if (value instanceof Collection<?>) {
             final Collection<?> coll = ((Collection<?>) value);

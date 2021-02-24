@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -159,9 +160,7 @@ public class Crawler {
 
         private static List<String> createConfigIdList(final String[] values) {
             final List<String> idList = new ArrayList<>();
-            for (final String value : values) {
-                idList.add(value);
-            }
+            Collections.addAll(idList, values);
             return idList;
         }
 

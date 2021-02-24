@@ -151,12 +151,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
+                    } else if (maxAccessCount != 1L) {
+                        throw e;
                     } else {
-                        if (maxAccessCount != 1L) {
-                            throw e;
-                        } else {
-                            logger.warn("Failed to access {}.", processingUrl, e);
-                        }
+                        logger.warn("Failed to access {}.", processingUrl, e);
                     }
                 }
             }

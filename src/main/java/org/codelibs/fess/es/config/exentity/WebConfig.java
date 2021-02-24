@@ -55,7 +55,6 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     protected CrawlerClientFactory crawlerClientFactory = null;
 
     public WebConfig() {
-        super();
         setBoost(1.0f);
     }
 

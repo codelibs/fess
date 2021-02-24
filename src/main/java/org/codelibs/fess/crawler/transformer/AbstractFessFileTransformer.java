@@ -245,12 +245,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 } else {
                     putResultDataBody(dataMap, titleField, fessConfig.getCrawlerDocumentFileNoTitleLabel());
                 }
+            } else if (StringUtil.isBlank(fileName)) {
+                putResultDataBody(dataMap, titleField, decodeUrlAsName(url, url.startsWith("file:")));
             } else {
-                if (StringUtil.isBlank(fileName)) {
-                    putResultDataBody(dataMap, titleField, decodeUrlAsName(url, url.startsWith("file:")));
-                } else {
-                    putResultDataBody(dataMap, titleField, fileName);
-                }
+                putResultDataBody(dataMap, titleField, fileName);
             }
         }
         // host

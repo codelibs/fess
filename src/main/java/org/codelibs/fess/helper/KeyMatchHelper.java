@@ -168,7 +168,7 @@ public class KeyMatchHelper {
         if (boostList == null) {
             return Collections.emptyList();
         }
-        for (Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>> pair : boostList) {
+        for (final Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>> pair : boostList) {
             if (!id.equals(pair.getValue1())) {
                 continue;
             }

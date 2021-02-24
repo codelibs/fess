@@ -127,40 +127,38 @@ public class ElevateWordService {
                     op.setRefreshPolicy(Constants.TRUE);
                 });
             }
-        } else {
-            // Update
-            if (labelTypeIds != null) {
-                final List<ElevateWordToLabel> list = elevateWordToLabelBhv.selectList(wctltmCb -> {
-                    wctltmCb.query().setElevateWordId_Equal(elevateWordId);
-                    wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
-                });
-                final List<ElevateWordToLabel> newList = new ArrayList<>();
-                final List<ElevateWordToLabel> matchedList = new ArrayList<>();
-                for (final String id : labelTypeIds) {
-                    boolean exist = false;
-                    for (final ElevateWordToLabel mapping : list) {
-                        if (mapping.getLabelTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final ElevateWordToLabel mapping = new ElevateWordToLabel();
-                        mapping.setElevateWordId(elevateWordId);
-                        mapping.setLabelTypeId(id);
-                        newList.add(mapping);
+        } else // Update
+        if (labelTypeIds != null) {
+            final List<ElevateWordToLabel> list = elevateWordToLabelBhv.selectList(wctltmCb -> {
+                wctltmCb.query().setElevateWordId_Equal(elevateWordId);
+                wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
+            });
+            final List<ElevateWordToLabel> newList = new ArrayList<>();
+            final List<ElevateWordToLabel> matchedList = new ArrayList<>();
+            for (final String id : labelTypeIds) {
+                boolean exist = false;
+                for (final ElevateWordToLabel mapping : list) {
+                    if (mapping.getLabelTypeId().equals(id)) {
+                        exist = true;
+                        matchedList.add(mapping);
+                        break;
                     }
                 }
-                list.removeAll(matchedList);
-                elevateWordToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
-                elevateWordToLabelBhv.batchDelete(list, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
+                if (!exist) {
+                    // new
+                    final ElevateWordToLabel mapping = new ElevateWordToLabel();
+                    mapping.setElevateWordId(elevateWordId);
+                    mapping.setLabelTypeId(id);
+                    newList.add(mapping);
+                }
             }
+            list.removeAll(matchedList);
+            elevateWordToLabelBhv.batchInsert(newList, op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+            });
+            elevateWordToLabelBhv.batchDelete(list, op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+            });
         }
     }
 

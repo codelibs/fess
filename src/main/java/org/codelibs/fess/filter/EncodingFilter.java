@@ -88,8 +88,7 @@ public class EncodingFilter implements Filter {
                 locationBuf.append('/');
                 locationBuf.append(servletPath.substring(path.length()));
                 boolean append = false;
-                final Map<String, String[]> parameterMap = new HashMap<>();
-                parameterMap.putAll(req.getParameterMap());
+                final Map<String, String[]> parameterMap = new HashMap<>(req.getParameterMap());
                 parameterMap.putAll(getParameterMapFromQueryString(req, entry.getValue()));
                 for (final Map.Entry<String, String[]> paramEntry : parameterMap.entrySet()) {
                     final String[] values = paramEntry.getValue();

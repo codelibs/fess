@@ -353,9 +353,6 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     }
 
     private static void validateStopwordsString(final String values, final String propertyName, final VaErrorHook hook) {
-        if (values.length() == 0) {
-            return;
-        }
         // TODO validation
     }
 

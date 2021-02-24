@@ -16,6 +16,7 @@
 package org.codelibs.fess.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,9 +27,7 @@ public class WebApiManagerFactory {
 
     public void add(final WebApiManager webApiManager) {
         final List<WebApiManager> list = new ArrayList<>();
-        for (final WebApiManager manager : webApiManagers) {
-            list.add(manager);
-        }
+        Collections.addAll(list, webApiManagers);
         list.add(webApiManager);
         webApiManagers = list.toArray(new WebApiManager[list.size()]);
     }

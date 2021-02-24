@@ -85,7 +85,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     protected CrawlerClientFactory crawlerClientFactory = null;
 
     public DataConfig() {
-        super();
         setBoost(1.0f);
     }
 

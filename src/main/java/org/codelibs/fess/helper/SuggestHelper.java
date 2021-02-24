@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -147,21 +148,16 @@ public class SuggestHelper {
             final String sessionId;
             if (searchLog.getUserSessionId() != null) {
                 sessionId = searchLog.getUserSessionId();
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_WEB.equals(searchLog.getAccessType())) {
+                sessionId = searchLog.getClientIp();
             } else {
-                if (Constants.SEARCH_LOG_ACCESS_TYPE_WEB.equals(searchLog.getAccessType())) {
-                    sessionId = searchLog.getClientIp();
-                } else {
-                    sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
-                }
+                sessionId = searchLog.getClientIp() + '_' + searchLog.getSearchWord();
             }
 
             final LocalDateTime requestedAt = searchLog.getRequestedAt();
-            if (sessionId == null) {
+            if ((sessionId == null) || (duplicateSessionMap.containsKey(sessionId)
+                    && duplicateSessionMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt))) {
                 return;
-            } else if (duplicateSessionMap.containsKey(sessionId)) {
-                if (duplicateSessionMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt)) {
-                    return;
-                }
             }
 
             final StringBuilder sb = new StringBuilder(100);
@@ -343,15 +339,11 @@ public class SuggestHelper {
 
         final List<String> labelList = new ArrayList<>();
         if (tags != null) {
-            for (final String label : tags) {
-                labelList.add(label);
-            }
+            Collections.addAll(labelList, tags);
         }
         final List<String> roleList = new ArrayList<>();
         if (permissions != null) {
-            for (final String permission : permissions) {
-                roleList.add(permission);
-            }
+            Collections.addAll(roleList, permissions);
         }
 
         suggester.indexer().addElevateWord(new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings),

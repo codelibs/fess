@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -114,9 +115,7 @@ public abstract class ExecJob {
     }
 
     public ExecJob jvmOptions(final String... options) {
-        for (final String s : options) {
-            this.jvmOptions.add(s);
-        }
+        Collections.addAll(this.jvmOptions, options);
         return this;
     }
 

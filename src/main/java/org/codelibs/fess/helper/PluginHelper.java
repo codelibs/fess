@@ -373,7 +373,7 @@ public class PluginHelper {
 
         private final String id;
 
-        private ArtifactType(final String id) {
+        ArtifactType(final String id) {
             this.id = id;
         }
 

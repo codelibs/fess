@@ -52,11 +52,10 @@ public final class SearchEngineUtil {
         return getXContentBuilderOutputStream((builder, params) -> xContent.toXContent(builder, params), xContentType);
     }
 
-    public static long scroll(String index, Function<SearchHit, Boolean> callback) {
-        SearchEngineClient client = ComponentUtil.getSearchEngineClient();
-        return client.<SearchHit> scrollSearch(index, searchRequestBuilder -> true, (searchResponse, hit) -> hit, hit -> {
-            return callback.apply(hit);
-        });
+    public static long scroll(final String index, final Function<SearchHit, Boolean> callback) {
+        final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
+        return client.<SearchHit> scrollSearch(index, searchRequestBuilder -> true, (searchResponse, hit) -> hit,
+                hit -> callback.apply(hit));
     }
 
     public interface XContentBuilderCallback {

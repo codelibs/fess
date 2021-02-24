@@ -388,10 +388,8 @@ public class IndexUpdater extends Thread {
                 } catch (final Exception e) {
                     logger.warn("Could not add a doc: {}", accessResult.getUrl(), e);
                 }
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Skipped. No content. ");
-                }
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Skipped. No content. ");
             }
 
         }

@@ -102,7 +102,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
                                 writer.write(hit.getSourceAsString());
                                 writer.write("\n");
-                            } catch (IOException e) {
+                            } catch (final IOException e) {
                                 throw new IORuntimeException(e);
                             }
                             return true;

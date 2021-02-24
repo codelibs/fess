@@ -231,7 +231,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                                 + "\"}}\n");
                         writer.write(hit.getSourceAsString());
                         writer.write("\n");
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
                     return true;
@@ -309,10 +309,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
         if (searchEngineClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
             searchEngineClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 searchEngineClient.addMapping(docIndex, "doc", toIndex);
-                if (searchEngineClient.reindex(fromIndex, toIndex, replaceAliases)) {
-                    if (replaceAliases && !searchEngineClient.updateAlias(toIndex)) {
-                        logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
-                    }
+                if (searchEngineClient.reindex(fromIndex, toIndex, replaceAliases)
+                        && (replaceAliases && !searchEngineClient.updateAlias(toIndex))) {
+                    logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
                 }
             }, e -> logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e)));
             return true;

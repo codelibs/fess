@@ -16,6 +16,7 @@
 package org.codelibs.fess.dict.synonym;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.collection.ArrayUtil;
@@ -91,11 +92,7 @@ public class SynonymItem extends DictionaryItem {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(inputs);
-        result = prime * result + Arrays.hashCode(outputs);
-        return result;
+        return Objects.hash(Arrays.hashCode(inputs), Arrays.hashCode(outputs));
     }
 
     @Override
@@ -132,12 +129,10 @@ public class SynonymItem extends DictionaryItem {
             } else {
                 return StringUtils.join(newInputs, ",") + "=>" + StringUtils.join(newOutputs, ",");
             }
+        } else if (Arrays.equals(inputs, outputs)) {
+            return StringUtils.join(inputs, ",");
         } else {
-            if (Arrays.equals(inputs, outputs)) {
-                return StringUtils.join(inputs, ",");
-            } else {
-                return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");
-            }
+            return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");
         }
     }
 

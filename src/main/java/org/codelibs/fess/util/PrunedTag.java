@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.util;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
@@ -64,12 +66,7 @@ public class PrunedTag {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((css == null) ? 0 : css.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((tag == null) ? 0 : tag.hashCode());
-        return result;
+        return Objects.hash(css, id, tag);
     }
 
     @Override

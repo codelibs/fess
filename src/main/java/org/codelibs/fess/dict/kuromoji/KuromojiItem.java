@@ -110,13 +110,7 @@ public class KuromojiItem extends DictionaryItem {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (pos == null ? 0 : pos.hashCode());
-        result = prime * result + (reading == null ? 0 : reading.hashCode());
-        result = prime * result + (segmentation == null ? 0 : segmentation.hashCode());
-        result = prime * result + (token == null ? 0 : token.hashCode());
-        return result;
+        return Objects.hash(pos, reading, segmentation, token);
     }
 
     @Override

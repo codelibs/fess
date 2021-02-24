@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -768,16 +769,12 @@ public class QueryHelper {
 
     public void setApiResponseFields(final String[] fields) {
         apiResponseFieldSet = new HashSet<>();
-        for (final String field : fields) {
-            apiResponseFieldSet.add(field);
-        }
+        Collections.addAll(apiResponseFieldSet, fields);
     }
 
     public void setNotAnalyzedFields(final String[] fields) {
         notAnalyzedFieldSet = new HashSet<>();
-        for (final String field : fields) {
-            notAnalyzedFieldSet.add(field);
-        }
+        Collections.addAll(notAnalyzedFieldSet, fields);
     }
 
     public boolean isApiResponseField(final String field) {

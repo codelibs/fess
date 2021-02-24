@@ -436,9 +436,6 @@ public class ViewHelper {
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
                     return appendPDFSearchWord(url);
-                } else {
-                    // TODO others..
-                    return url;
                 }
             }
         }

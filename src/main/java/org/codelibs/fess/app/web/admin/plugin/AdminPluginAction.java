@@ -147,7 +147,7 @@ public class AdminPluginAction extends FessAdminAction {
             result.add(map);
             try {
                 result.addAll(getAllAvailableArtifacts());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 saveError(messages -> messages.addErrorsFailedToFindPlugins(GLOBAL));
                 logger.warn("Failed to access a plugin repository.", e);
             }

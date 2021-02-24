@@ -51,7 +51,6 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     protected CrawlerClientFactory crawlerClientFactory = null;
 
     public FileConfig() {
-        super();
         setBoost(1.0f);
     }
 

@@ -79,12 +79,10 @@ public class PingSearchEngineJob {
             }
             resultBuf.append("Status of ").append(ping.getClusterName()).append(" is changed to ").append(ping.getClusterStatus())
                     .append('.');
+        } else if (status == 0) {
+            resultBuf.append(ping.getClusterName()).append(" is alive.");
         } else {
-            if (status == 0) {
-                resultBuf.append(ping.getClusterName()).append(" is alive.");
-            } else {
-                resultBuf.append(ping.getClusterName()).append(" is not available.");
-            }
+            resultBuf.append(ping.getClusterName()).append(" is not available.");
         }
 
         return resultBuf.toString();

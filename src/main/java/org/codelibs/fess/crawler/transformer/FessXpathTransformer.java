@@ -793,10 +793,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 logger.debug("Add Child: {}", u);
             }
             urlList.add(u);
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Skip Child: {}", u);
-            }
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Skip Child: {}", u);
         }
     }
 

@@ -512,12 +512,10 @@ public class SearchEngineClient implements Client {
                         ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
                     if (response.getHttpStatusCode() == 200) {
                         logger.info("Register {} to {}", path, index);
+                    } else if (response.getContentException() != null) {
+                        logger.warn("Invalid request for {}.", path, response.getContentException());
                     } else {
-                        if (response.getContentException() != null) {
-                            logger.warn("Invalid request for {}.", path, response.getContentException());
-                        } else {
-                            logger.warn("Invalid request for {}. The response is {}", path, response.getContentAsString());
-                        }
+                        logger.warn("Invalid request for {}. The response is {}", path, response.getContentAsString());
                     }
                 }
             } catch (final Exception e) {

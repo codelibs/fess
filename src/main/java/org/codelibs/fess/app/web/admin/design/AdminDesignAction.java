@@ -296,8 +296,8 @@ public class AdminDesignAction extends FessAdminAction {
     }
 
     private List<File> getAccessibleFileList(final File baseDir) {
-        final List<File> fileList = new ArrayList<>();
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "images"), fessConfig.getSupportedUploadedMediaExtentionsAsArray(), true));
+        final List<File> fileList = new ArrayList<>(
+                FileUtils.listFiles(new File(baseDir, "images"), fessConfig.getSupportedUploadedMediaExtentionsAsArray(), true));
         fileList.addAll(FileUtils.listFiles(new File(baseDir, "css"), fessConfig.getSupportedUploadedCssExtentionsAsArray(), true));
         fileList.addAll(FileUtils.listFiles(new File(baseDir, "js"), fessConfig.getSupportedUploadedJsExtentionsAsArray(), true));
         return fileList;

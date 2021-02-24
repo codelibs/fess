@@ -43,7 +43,7 @@ public class ApiResult {
 
         private final int id;
 
-        private Status(final int id) {
+        Status(final int id) {
             this.id = id;
         }
 

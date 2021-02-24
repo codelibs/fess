@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.search;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -207,9 +208,7 @@ public class SearchAction extends FessSearchAction {
             final String[] values = form.fields.get(LABEL_FIELD);
             final List<String> labelList = new ArrayList<>();
             if (values != null) {
-                for (final String v : values) {
-                    labelList.add(v);
-                }
+                Collections.addAll(labelList, values);
             }
             for (final String labelTypeValue : labelList) {
                 for (final Map<String, String> map : labelTypeItems) {

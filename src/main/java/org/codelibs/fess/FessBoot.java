@@ -114,12 +114,8 @@ public class FessBoot extends TomcatBoot {
 
     protected static String getContextPath() {
         final String value = System.getProperty(FESS_CONTEXT_PATH);
-        if (value != null) {
-            if ("/".equals(value)) {
-                return StringUtil.EMPTY;
-            } else {
-                return value;
-            }
+        if (value != null && !"/".equals(value)) {
+            return value;
         }
         return StringUtil.EMPTY;
     }

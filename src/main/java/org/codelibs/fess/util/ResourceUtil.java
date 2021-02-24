@@ -148,10 +148,8 @@ public class ResourceUtil {
         try {
             final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
             final String webinfPath = servletContext.getRealPath("/" + root + base);
-            if (webinfPath != null) {
-                if (Files.exists(Paths.get(webinfPath))) {
-                    return Paths.get(webinfPath, names);
-                }
+            if ((webinfPath != null) && Files.exists(Paths.get(webinfPath))) {
+                return Paths.get(webinfPath, names);
             }
         } catch (final Throwable e) {
             // ignore

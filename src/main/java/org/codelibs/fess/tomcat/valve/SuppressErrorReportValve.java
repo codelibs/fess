@@ -19,7 +19,6 @@ import org.apache.catalina.valves.ErrorReportValve;
 
 public class SuppressErrorReportValve extends ErrorReportValve {
     public SuppressErrorReportValve() {
-        super();
         setShowReport(false);
         setShowServerInfo(false);
     }

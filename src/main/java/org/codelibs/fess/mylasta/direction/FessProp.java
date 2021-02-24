@@ -1035,10 +1035,7 @@ public interface FessProp {
                 return lang1;
             }
             final String lang2 = mapping.get(s.split("[\\-_]")[0]);
-            if (lang2 != null) {
-                return lang2;
-            }
-            return null;
+            return lang2;
         }).filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 

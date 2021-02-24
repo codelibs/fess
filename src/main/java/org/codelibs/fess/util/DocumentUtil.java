@@ -18,6 +18,7 @@ package org.codelibs.fess.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,9 +71,7 @@ public final class DocumentUtil {
                 return (T) value;
             } else if (clazz.isAssignableFrom(List.class)) {
                 final List<String> list = new ArrayList<>();
-                for (final String s : (String[]) value) {
-                    list.add(s);
-                }
+                Collections.addAll(list, (String[]) value);
                 return (T) list;
             }
 
