@@ -732,7 +732,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5m */
     String INDEX_REINDEX_SCROLL = "index.reindex.scroll";
 
-    /** The key of the configuration. e.g. -1 */
+    /** The key of the configuration. e.g.  */
     String INDEX_REINDEX_max_docs = "index.reindex.max_docs";
 
     /** The key of the configuration. e.g. 1000 */
@@ -3727,14 +3727,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.reindex.max_docs'. <br>
-     * The value is, e.g. -1 <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexMaxDocs();
 
     /**
      * Get the value for the key 'index.reindex.max_docs' as {@link Integer}. <br>
-     * The value is, e.g. -1 <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -9904,7 +9904,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_REINDEX_REFRESH, "false");
             defaultMap.put(FessConfig.INDEX_REINDEX_TIMEOUT, "1m");
             defaultMap.put(FessConfig.INDEX_REINDEX_SCROLL, "5m");
-            defaultMap.put(FessConfig.INDEX_REINDEX_max_docs, "-1");
+            defaultMap.put(FessConfig.INDEX_REINDEX_max_docs, "");
             defaultMap.put(FessConfig.QUERY_MAX_LENGTH, "1000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT, "10000");
             defaultMap.put(FessConfig.QUERY_TIMEOUT_LOGGING, "true");
