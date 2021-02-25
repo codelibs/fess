@@ -354,9 +354,13 @@ public class FessEsClient implements Client {
                 .replace("__SOURCE_INDEX__", fromIndex)//
                 .replace("__DEST_INDEX__", toIndex)
                 .replace("__SCRIPT_SOURCE__", ComponentUtil.getLanguageHelper().getReindexScriptSource());
-        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_reindex").param("refresh", fessConfig.getIndexReindexRefresh())
-                .param("requests_per_second", fessConfig.getIndexReindexRequestsPerSecond())
-                .param("scroll", fessConfig.getIndexReindexScroll()).param("max_docs", fessConfig.getIndexReindexMaxDocs())
+        final String refresh = StringUtil.isNotBlank(fessConfig.getIndexReindexRefresh()) ? fessConfig.getIndexReindexRefresh() : null;
+        final String requestsPerSecond =
+                StringUtil.isNotBlank(fessConfig.getIndexReindexRequestsPerSecond()) ? fessConfig.getIndexReindexRequestsPerSecond() : null;
+        final String scroll = StringUtil.isNotBlank(fessConfig.getIndexReindexScroll()) ? fessConfig.getIndexReindexScroll() : null;
+        final String maxDocs = StringUtil.isNotBlank(fessConfig.getIndexReindexMaxDocs()) ? fessConfig.getIndexReindexMaxDocs() : null;
+        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_reindex").param("refresh", refresh)
+                .param("requests_per_second", requestsPerSecond).param("scroll", scroll).param("max_docs", maxDocs)
                 .param("wait_for_completion", Boolean.toString(waitForCompletion)).body(source).execute()) {
             if (response.getHttpStatusCode() == 200) {
                 return true;
