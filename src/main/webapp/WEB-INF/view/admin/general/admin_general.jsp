@@ -84,7 +84,7 @@
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resultCollapsed"/>
                                         <div class="form-check">
-                                            <la:checkbox styleId="resultCollapsed" styleClass="form-check-input" property="resultCollapsed"/>
+                                            <la:checkbox styleId="resultCollapsed" styleClass="form-check-input" property="resultCollapsed" disabled="${fesenType=='cloud'}"/>
                                             <label for="resultCollapsed" class="form-check-label">
                                                 <la:message key="labels.enabled"/>
                                             </label>

@@ -52,6 +52,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fesen.FesenException;
+import org.codelibs.fesen.FesenStatusException;
 import org.codelibs.fesen.action.ActionFuture;
 import org.codelibs.fesen.action.ActionListener;
 import org.codelibs.fesen.action.ActionRequest;
@@ -127,6 +128,7 @@ import org.codelibs.fesen.common.xcontent.XContentType;
 import org.codelibs.fesen.index.query.InnerHitBuilder;
 import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilders;
+import org.codelibs.fesen.rest.RestStatus;
 import org.codelibs.fesen.runner.FesenRunner;
 import org.codelibs.fesen.runner.FesenRunner.Configs;
 import org.codelibs.fesen.search.SearchHit;
@@ -244,29 +246,37 @@ public class SearchEngineClient implements Client {
         String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
         if (StringUtil.isBlank(httpAddress)) {
             if (runner == null) {
-                runner = new FesenRunner();
-                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
-                final String esDir = System.getProperty("fess.es.dir");
-                if (esDir != null) {
-                    config.basePath(esDir);
+                switch (fessConfig.getFesenType()) {
+                case Constants.FESEN_TYPE_CLOUD:
+                    httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
+                    break;
+                default:
+                    runner = new FesenRunner();
+                    final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
+                    final String esDir = System.getProperty("fess.es.dir");
+                    if (esDir != null) {
+                        config.basePath(esDir);
+                    }
+                    config.disableESLogger();
+                    runner.onBuild((number, settingsBuilder) -> {
+                        final File pluginDir = new File(esDir, "plugins");
+                        if (pluginDir.isDirectory()) {
+                            settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
+                        } else {
+                            settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
+                        }
+                        if (settings != null) {
+                            settingsBuilder.putProperties(settings, s -> s);
+                        }
+                    });
+                    runner.build(config);
+
+                    final int port = runner.node().settings().getAsInt("http.port", 9200);
+                    httpAddress = "http://localhost:" + port;
+                    logger.warn("Embedded Fesen is running. This configuration is not recommended for production use.");
+                    break;
                 }
-                config.disableESLogger();
-                runner.onBuild((number, settingsBuilder) -> {
-                    final File pluginDir = new File(esDir, "plugins");
-                    if (pluginDir.isDirectory()) {
-                        settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
-                    } else {
-                        settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
-                    }
-                    if (settings != null) {
-                        settingsBuilder.putProperties(settings, s -> s);
-                    }
-                });
-                runner.build(config);
             }
-            final int port = runner.node().settings().getAsInt("http.port", 9200);
-            httpAddress = "http://localhost:" + port;
-            logger.warn("Embedded Fesen is running. This configuration is not recommended for production use.");
         }
         client = createHttpClient(fessConfig, httpAddress);
 
@@ -332,6 +342,10 @@ public class SearchEngineClient implements Client {
 
     protected Client createHttpClient(final FessConfig fessConfig, final String host) {
         final Builder builder = Settings.builder().putList("http.hosts", host).put("processors", fessConfig.availableProcessors());
+        if (StringUtil.isNotBlank(fessConfig.getFesenUsername()) && StringUtil.isNotBlank(fessConfig.getFesenPassword())) {
+            builder.put(Constants.FESEN_USERNAME, fessConfig.getFesenUsername());
+            builder.put(Constants.FESEN_PASSWORD, fessConfig.getFesenPassword());
+        }
         return new HttpClient(builder.build(), null);
     }
 
@@ -382,12 +396,20 @@ public class SearchEngineClient implements Client {
             final boolean uploadConfig) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
+        final String fesenType = fessConfig.getFesenType();
         if (uploadConfig) {
-            waitForConfigSyncStatus();
-            sendConfigFiles(index);
+            switch (fesenType) {
+            case Constants.FESEN_TYPE_CLOUD:
+                // nothing
+                break;
+            default:
+                waitForConfigSyncStatus();
+                sendConfigFiles(index);
+                break;
+            }
         }
 
-        final String indexConfigFile = indexConfigPath + "/" + index + ".json";
+        final String indexConfigFile = getResourcePath(indexConfigPath, fesenType, "/" + index + ".json");
         try {
             String source = FileUtil.readUTF8(indexConfigFile);
             String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
@@ -413,6 +435,14 @@ public class SearchEngineClient implements Client {
         return false;
     }
 
+    protected String getResourcePath(final String basePath, final String type, final String path) {
+        final String target = basePath + "/_" + type + path;
+        if (ResourceUtil.getResourceNoException(target) != null) {
+            return target;
+        }
+        return basePath + path;
+    }
+
     public void addMapping(final String index, final String docType, final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -421,7 +451,7 @@ public class SearchEngineClient implements Client {
         final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings().get(indexName);
         if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
-            final String mappingFile = indexConfigPath + "/" + index + "/" + docType + ".json";
+            final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
             try {
                 source = FileUtil.readUTF8(mappingFile);
             } catch (final Exception e) {
@@ -436,12 +466,13 @@ public class SearchEngineClient implements Client {
                     logger.warn("Failed to create {}/{} mapping.", indexName, docType);
                 }
 
-                final String dataPath = indexConfigPath + "/" + index + "/" + docType + ".bulk";
+                final String dataPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
                 if (ResourceUtil.isExist(dataPath)) {
                     insertBulkData(fessConfig, indexName, dataPath);
                 }
                 split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
-                    final String bulkPath = indexConfigPath + "/" + index + "/" + docType + "_" + name + ".bulk";
+                    final String bulkPath =
+                            getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + "_" + name + ".bulk");
                     if (ResourceUtil.isExist(bulkPath)) {
                         insertBulkData(fessConfig, indexName, bulkPath);
                     }
@@ -480,7 +511,7 @@ public class SearchEngineClient implements Client {
     protected void createAlias(final String index, final String createdIndexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         // alias
-        final String aliasConfigDirPath = indexConfigPath + "/" + index + "/alias";
+        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/alias");
         try {
             final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
             if (aliasConfigDir.isDirectory()) {
@@ -594,8 +625,19 @@ public class SearchEngineClient implements Client {
             } catch (final Exception e) {
                 cause = e;
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access to Fesen:{}", i, cause);
+            if (cause instanceof FesenStatusException) {
+                final RestStatus status = ((FesenStatusException) cause).status();
+                switch (status) {
+                case UNAUTHORIZED:
+                    logger.warn("[{}] Unauthorized access: {}", i, System.getProperty(Constants.FESS_ES_HTTP_ADDRESS), cause);
+                    break;
+                default:
+                    logger.debug("[{}][{}] Failed to access to Fesen ({})", i, status, System.getProperty(Constants.FESS_ES_HTTP_ADDRESS),
+                            cause);
+                    break;
+                }
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("[{}] Failed to access to Fesen ({})", i, System.getProperty(Constants.FESS_ES_HTTP_ADDRESS), cause);
             }
             ThreadUtil.sleep(1000L);
         }

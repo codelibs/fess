@@ -25,8 +25,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
 
+    /** The key of the configuration. e.g. default */
+    String ELASTICSEARCH_TYPE = "elasticsearch.type";
+
     /** The key of the configuration. e.g. http://localhost:9201 */
     String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
+
+    /** The key of the configuration. e.g.  */
+    String ELASTICSEARCH_USERNAME = "elasticsearch.username";
+
+    /** The key of the configuration. e.g.  */
+    String ELASTICSEARCH_PASSWORD = "elasticsearch.password";
 
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORISM = "app.cipher.algorism";
@@ -1695,12 +1704,49 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getDomainTitle();
 
     /**
-     * Get the value for the key 'elasticsearch.http.url'. <br>
-     * The value is, e.g. http://localhost:9201 <br>
+     * Get the value for the key 'elasticsearch.type'. <br>
+     * The value is, e.g. default <br>
      * comment: Fesen
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
+    String getFesenType();
+
+    /**
+     * Get the value for the key 'elasticsearch.http.url'. <br>
+     * The value is, e.g. http://localhost:9201 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
     String getFesenHttpUrl();
+
+    /**
+     * Get the value for the key 'elasticsearch.username'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFesenUsername();
+
+    /**
+     * Get the value for the key 'elasticsearch.username' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getFesenUsernameAsInteger();
+
+    /**
+     * Get the value for the key 'elasticsearch.password'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFesenPassword();
+
+    /**
+     * Get the value for the key 'elasticsearch.password' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getFesenPasswordAsInteger();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -6961,8 +7007,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.DOMAIN_TITLE);
         }
 
+        public String getFesenType() {
+            return get(FessConfig.ELASTICSEARCH_TYPE);
+        }
+
         public String getFesenHttpUrl() {
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
+        }
+
+        public String getFesenUsername() {
+            return get(FessConfig.ELASTICSEARCH_USERNAME);
+        }
+
+        public Integer getFesenUsernameAsInteger() {
+            return getAsInteger(FessConfig.ELASTICSEARCH_USERNAME);
+        }
+
+        public String getFesenPassword() {
+            return get(FessConfig.ELASTICSEARCH_PASSWORD);
+        }
+
+        public Integer getFesenPasswordAsInteger() {
+            return getAsInteger(FessConfig.ELASTICSEARCH_PASSWORD);
         }
 
         public String getAppCipherAlgorism() {
@@ -9713,7 +9779,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
             defaultMap.put(FessConfig.DOMAIN_TITLE, "Fess");
+            defaultMap.put(FessConfig.ELASTICSEARCH_TYPE, "default");
             defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_URL, "http://localhost:9201");
+            defaultMap.put(FessConfig.ELASTICSEARCH_USERNAME, "");
+            defaultMap.put(FessConfig.ELASTICSEARCH_PASSWORD, "");
             defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");

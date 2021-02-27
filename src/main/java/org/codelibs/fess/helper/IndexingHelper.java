@@ -47,7 +47,7 @@ public class IndexingHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isResultCollapsed()) {
             docList.forEach(doc -> {
-                doc.put("content_minhash", doc.get(fessConfig.getIndexFieldContent()));
+                doc.put(fessConfig.getIndexFieldContentMinhash(), doc.get(fessConfig.getIndexFieldContent()));
             });
         }
         final long execTime = System.currentTimeMillis();

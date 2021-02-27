@@ -1,0 +1,1707 @@
+{
+  "index": {
+    "refresh_interval": "1s",
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "auto_expand_replicas": "0-1"
+  },
+  "analysis" : {
+    "tokenizer" : {
+      "fess_japanese_normal" : {
+        "type" : "kuromoji_tokenizer",
+        "mode" : "normal",
+        "discard_punctuation" : "false"
+      },
+      "fess_korean_normal": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "mixed",
+        "user_dictionary_rules": ["덕후", "버카충", "낄끼빠빠" ]
+      }
+    },
+    "analyzer" : {
+      "reading_analyzer" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "filter" : ["reading_form"]
+      },
+      "reading_term_analyzer" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal"
+      },
+      "normalize_analyzer" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter", "reading_form"]
+      },
+      "reading_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "filter" : ["reading_form"]
+      },
+      "reading_term_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal"
+      },
+      "normalize_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter", "reading_form"]
+      },
+      "reading_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
+      },
+      "contents_reading_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
+      },
+      "reading_analyzer_ko" : {
+        "type" : "custom",
+        "tokenizer" : "fess_korean_normal"
+      },
+      "reading_term_analyzer_ko" : {
+        "type" : "custom",
+        "tokenizer" : "fess_korean_normal"
+      },
+      "normalize_analyzer_ko" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ko" : {
+        "type" : "custom",
+        "tokenizer" : "fess_korean_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
+      },
+      "contents_reading_analyzer_ko" : {
+        "type" : "custom",
+        "tokenizer" : "fess_korean_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
+      },
+      "reading_analyzer_ar" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ar" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ar" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ar" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_stop", "arabic_keywords"]
+      },
+      "contents_reading_analyzer_ar" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_stop", "arabic_normalization", "arabic_keywords"]
+      },
+      "reading_analyzer_bg" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_bg" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_bg" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_bg" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter", "bulgarian_stop", "bulgarian_keywords", "bulgarian_stemmer"]
+      },
+      "contents_reading_analyzer_bg" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter", "bulgarian_stop", "bulgarian_keywords", "bulgarian_stemmer"]
+      },
+      "reading_analyzer_ca" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ca" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ca" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "catalan_elision"]
+      },
+      "contents_analyzer_ca" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "catalan_elision", "catalan_stop", "catalan_keywords"]
+      },
+      "contents_reading_analyzer_ca" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "catalan_elision", "catalan_stop", "catalan_keywords"]
+      },
+      "reading_analyzer_cs" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_cs" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_cs" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_cs" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "czech_stop", "czech_keywords"]
+      },
+      "contents_reading_analyzer_cs" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "czech_stop", "czech_keywords"]
+      },
+      "reading_analyzer_da" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_da" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_da" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_da" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "danish_stop", "danish_keywords"]
+      },
+      "contents_reading_analyzer_da" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "danish_stop", "danish_keywords"]
+      },
+      "reading_analyzer_nl" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_nl" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_nl" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "dutch_override"]
+      },
+      "contents_analyzer_nl" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "dutch_stop", "dutch_keywords", "dutch_override"]
+      },
+      "contents_reading_analyzer_nl" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "dutch_stop", "dutch_keywords", "dutch_override"]
+      },
+      "reading_analyzer_fi" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_fi" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_fi" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_fi" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "finnish_stop", "finnish_keywords"]
+      },
+      "contents_reading_analyzer_fi" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "finnish_stop", "finnish_keywords"]
+      },
+      "reading_analyzer_fr" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_fr" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_fr" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "french_elision"]
+      },
+      "contents_analyzer_fr" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "french_elision", "french_stop", "french_keywords"]
+      },
+      "contents_reading_analyzer_fr" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "french_elision", "french_stop", "french_keywords"]
+      },
+      "reading_analyzer_de" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_de" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_de" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_de" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "german_stop", "german_keywords"]
+      },
+      "contents_reading_analyzer_de" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "german_stop", "german_keywords", "german_normalization"]
+      },
+      "reading_analyzer_el" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_el" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_el" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["greek_lowercase", "lowercase"]
+      },
+      "contents_analyzer_el" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["greek_lowercase", "lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "greek_stop", "greek_keywords"]
+      },
+      "contents_reading_analyzer_el" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["greek_lowercase", "lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "greek_stop", "greek_keywords"]
+      },
+
+      "reading_analyzer_hu" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_hu" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_hu" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_hu" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "hungarian_stop", "hungarian_keywords"]
+      },
+      "contents_reading_analyzer_hu" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "hungarian_stop", "hungarian_keywords"]
+      },
+      "reading_analyzer_id" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_id" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_id" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_id" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "indonesian_stop", "indonesian_keywords"]
+      },
+      "contents_reading_analyzer_id" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "indonesian_stop", "indonesian_keywords"]
+      },
+      "reading_analyzer_it" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_it" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_it" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "italian_elision"]
+      },
+      "contents_analyzer_it" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "italian_elision", "italian_stop", "italian_keywords"]
+      },
+      "contents_reading_analyzer_it" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "italian_elision", "italian_stop", "italian_keywords"]
+      },
+      "reading_analyzer_lv" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_lv" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_lv" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_lv" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "latvian_stop", "latvian_keywords"]
+      },
+      "contents_reading_analyzer_lv" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "latvian_stop", "latvian_keywords"]
+      },
+      "reading_analyzer_lt" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_lt" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_lt" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_lt" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "lithuanian_stop", "lithuanian_keywords"]
+      },
+      "contents_reading_analyzer_lt" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "lithuanian_stop", "lithuanian_keywords"]
+      },
+      "reading_analyzer_no" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_no" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_no" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_no" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "norwegian_stop", "norwegian_keywords"]
+      },
+      "contents_reading_analyzer_no" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "norwegian_stop", "norwegian_keywords"]
+      },
+      "reading_analyzer_fa" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_fa" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_fa" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_fa" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "persian_stop"]
+      },
+      "contents_reading_analyzer_fa" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_normalization", "persian_normalization", "persian_stop"]
+      },
+      "reading_analyzer_pt" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_pt" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_pt" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_pt" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "portuguese_stop", "portuguese_keywords"]
+      },
+      "contents_reading_analyzer_pt" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "portuguese_stop", "portuguese_keywords"]
+      },
+      "reading_analyzer_ro" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ro" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ro" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ro" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "romanian_stop", "romanian_keywords"]
+      },
+      "contents_reading_analyzer_ro" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "romanian_stop", "romanian_keywords"]
+      },
+      "reading_analyzer_ru" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ru" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ru" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ru" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "russian_stop", "russian_keywords"]
+      },
+      "contents_reading_analyzer_ru" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "russian_stop", "russian_keywords"]
+      },
+      "reading_analyzer_es" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_es" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_es" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_es" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "spanish_stop", "spanish_keywords"]
+      },
+      "contents_reading_analyzer_es" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "spanish_stop", "spanish_keywords"]
+      },
+      "reading_analyzer_sv" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_sv" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_sv" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_sv" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "swedish_stop", "swedish_keywords"]
+      },
+      "contents_reading_analyzer_sv" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "swedish_stop", "swedish_keywords"]
+      },
+      "reading_analyzer_tr" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_tr" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_tr" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "apostrophe", "turkish_lowercase", "turkish_stemmer"]
+      },
+      "contents_analyzer_tr" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "apostrophe", "turkish_lowercase", "turkish_stop", "turkish_keywords"]
+      },
+      "contents_reading_analyzer_tr" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "apostrophe", "turkish_lowercase", "turkish_stop", "turkish_keywords"]
+      },
+      "reading_analyzer_th" : {
+        "type" : "custom",
+        "tokenizer" : "thai"
+      },
+      "reading_term_analyzer_th" : {
+        "type" : "custom",
+        "tokenizer" : "thai"
+      },
+      "normalize_analyzer_th" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_th" : {
+        "type" : "custom",
+        "tokenizer" : "thai",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "thai_stop"]
+      },
+      "contents_reading_analyzer_th" : {
+        "type" : "custom",
+        "tokenizer" : "thai",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "thai_stop"]
+      },
+      "reading_analyzer_bn" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_bn" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_bn" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_bn" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_bn" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_et" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_et" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_et" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_et" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_et" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_gu" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_gu" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_gu" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_gu" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_gu" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_he" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_he" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_he" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_he" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_he" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_hi" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_hi" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_hi" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_hi" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_hi" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_hr" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_hr" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_hr" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_hr" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_hr" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_mk" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_mk" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_mk" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_mk" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_mk" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_ml" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ml" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ml" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ml" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_ml" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_pa" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_pa" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_pa" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_pa" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_pa" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_pl" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_pl" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_pl" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_pl" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_pl" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_si" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_si" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_si" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_si" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_si" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_sq" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_sq" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_sq" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_sq" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_sq" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_ta" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ta" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ta" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ta" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_ta" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_te" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_te" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_te" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_te" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_te" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_tl" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_tl" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_tl" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_tl" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_tl" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_uk" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_uk" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_uk" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_uk" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_uk" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_ur" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_ur" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_ur" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ur" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_ur" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_vi" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_vi" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_vi" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_vi" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_vi" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_zh-cn" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_zh-cn" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_zh-cn" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_zh-cn" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_zh-cn" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_zh-tw" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_zh-tw" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_zh-tw" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_zh-tw" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_zh-tw" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "content_length_filter", "limit_token_count_filter"]
+      }
+    },
+    "char_filter" : {
+      "mapping_char" : {
+        "type" : "mapping",
+        "mappings" : ["ｶﾞ=>ガ", "ｷﾞ=>ギ", "ｸﾞ=>グ", "ｹﾞ=>ゲ", "ｺﾞ=>ゴ", "ｻﾞ=>ザ", "ｼﾞ=>ジ", "ｽﾞ=>ズ", "ｾﾞ=>ゼ", "ｿﾞ=>ゾ", "ﾀﾞ=>ダ", "ﾁﾞ=>ヂ", "ﾂﾞ=>ヅ",
+          "ﾃﾞ=>デ", "ﾄﾞ=>ド", "ﾊﾞ=>バ", "ﾋﾞ=>ビ", "ﾌﾞ=>ブ", "ﾍﾞ=>ベ", "ﾎﾞ=>ボ", "｡=>。", "｢=>「", "｣=>」", "､=>、", "･=>・", "ｦ=>ヲ", "ｧ=>ァ", "ｨ=>ィ", "ｩ=>ゥ", "ｪ=>ェ", "ｫ=>ォ", "ｬ=>ャ", "ｭ=>ュ", "ｮ=>ョ", "ｯ=>ッ", "ｱ=>ア",
+          "ｲ=>イ", "ｳ=>ウ", "ｴ=>エ", "ｵ=>オ", "ｶ=>カ", "ｷ=>キ", "ｸ=>ク", "ｹ=>ケ", "ｺ=>コ", "ｻ=>サ", "ｼ=>シ", "ｽ=>ス", "ｾ=>セ", "ｿ=>ソ", "ﾀ=>タ", "ﾁ=>チ", "ﾂ=>ツ", "ﾃ=>テ", "ﾄ=>ト", "ﾅ=>ナ", "ﾆ=>ニ", "ﾇ=>ヌ", "ﾈ=>ネ", "ﾉ=>ノ", "ﾊ=>ハ",
+          "ﾋ=>ヒ", "ﾌ=>フ", "ﾍ=>ヘ", "ﾎ=>ホ", "ﾏ=>マ", "ﾐ=>ミ", "ﾑ=>ム", "ﾒ=>メ", "ﾓ=>モ", "ﾔ=>ヤ", "ﾕ=>ユ", "ﾖ=>ヨ", "ﾗ=>ラ", "ﾘ=>リ", "ﾙ=>ル", "ﾚ=>レ", "ﾛ=>ロ", "ﾜ=>ワ", "ﾝ=>ン",
+          "ａ=>a", "ｂ=>b","ｃ=>c","ｄ=>d","ｅ=>e","ｆ=>f","ｇ=>g","ｈ=>h","ｉ=>i","ｊ=>j","ｋ=>k","ｌ=>l","ｍ=>m","ｎ=>n","ｏ=>o","ｐ=>p","ｑ=>q","ｒ=>r","ｓ=>s",
+          "ｔ=>t","ｕ=>u","ｖ=>v","ｗ=>w","ｘ=>x", "ｙ=>y", "ｚ=>z",
+          "Ａ=>A", "Ｂ=>B","Ｃ=>C","Ｄ=>D","Ｅ=>E","Ｆ=>F","Ｇ=>g","Ｈ=>H","Ｉ=>I","Ｊ=>j","Ｋ=>k","Ｌ=>L","Ｍ=>M","Ｎ=>N","Ｏ=>O","Ｐ=>P","Ｑ=>Q","Ｒ=>R","Ｓ=>S",
+          "Ｔ=>T","Ｕ=>U","Ｖ=>V","Ｗ=>W","Ｘ=>X", "Ｙ=>Y", "Ｚ=>Z",
+          "１=>1", "２=>2", "３=>3", "４=>4", "５=>5", "６=>6", "７=>7", "８=>8", "９=>9", "０=>0"
+        ]
+      }
+    },
+    "filter" : {
+      "reading_form" : {
+        "type" : "kuromoji_readingform"
+      },
+      "pos_filter" : {
+        "type" : "kuromoji_part_of_speech",
+        "stoptags" : [
+          "その他",
+          "その他-間投",
+          "フィラー",
+          "感動詞",
+          "記号",
+          "記号-アルファベット",
+          "記号-一般",
+          "記号-括弧開",
+          "記号-括弧閉",
+          "記号-句点",
+          "記号-空白",
+          "記号-読点",
+          "形容詞",
+          "形容詞-接尾",
+          "形容詞-非自立",
+          "語断片",
+          "助詞",
+          "助詞-格助詞",
+          "助詞-格助詞-一般",
+          "助詞-格助詞-引用",
+          "助詞-格助詞-連語",
+          "助詞-間投助詞",
+          "助詞-係助詞",
+          "助詞-終助詞",
+          "助詞-接続助詞",
+          "助詞-特殊",
+          "助詞-副詞化",
+          "助詞-副助詞",
+          "助詞-副助詞／並立助詞／終助詞",
+          "助詞-並立助詞",
+          "助詞-連体化",
+          "助動詞",
+          "接続詞",
+          "接頭詞",
+          "接頭詞-形容詞接続",
+          "接頭詞-数接続",
+          "接頭詞-動詞接続",
+          "接頭詞-名詞接続",
+          "動詞",
+          "動詞-自立",
+          "動詞-接尾",
+          "動詞-非自立",
+          "非言語音",
+          "副詞",
+          "副詞-一般",
+          "副詞-助詞類接続",
+          "名詞-ナイ形容詞語幹",
+          "名詞-引用文字列",
+          "名詞-形容動詞語幹",
+          "名詞-数",
+          "名詞-接続詞的",
+          "名詞-接尾",
+          "名詞-接尾-サ変接続",
+          "名詞-接尾-一般",
+          "名詞-接尾-形容動詞語幹",
+          "名詞-接尾-助数詞",
+          "名詞-接尾-助動詞語幹",
+          "名詞-接尾-人名",
+          "名詞-接尾-地域",
+          "名詞-接尾-特殊",
+          "名詞-接尾-副詞可能",
+          "名詞-代名詞",
+          "名詞-代名詞-一般",
+          "名詞-代名詞-縮約",
+          "名詞-動詞非自立的",
+          "名詞-特殊",
+          "名詞-特殊-助動詞語幹",
+          "名詞-非自立",
+          "名詞-非自立-一般",
+          "名詞-非自立-形容動詞語幹",
+          "名詞-非自立-助動詞語幹",
+          "名詞-非自立-副詞可能",
+          "名詞-副詞可能",
+          "連体詞"
+        ]
+      },
+      "stopword_en_filter": {
+        "type": "stop",
+        "stopwords": "_english_"
+      },
+      "content_length_filter": {
+        "type": "length",
+        "max": 30
+      },
+      "limit_token_count_filter": {
+        "type": "limit",
+        "max_token_count": 2147483647
+      },
+      "stemmer_en_filter": {
+        "type": "stemmer",
+        "name": "english"
+      },
+      "arabic_stop": {
+        "type":       "stop",
+        "stopwords":  "_arabic_"
+      },
+      "arabic_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["ﻡﺮﺤﺑﺍﺍ", "ﻉﺎﻠﻣ", "ﺐﺤﺛ"]
+      },
+      "arabic_stemmer": {
+        "type":       "stemmer",
+        "language":   "arabic"
+      },
+      "bulgarian_stop": {
+        "type":       "stop",
+        "stopwords":  "_bulgarian_"
+      },
+      "bulgarian_keywords": {
+        "type":       "keyword_marker",
+        "keywords":   ["Добър ден"]
+      },
+      "bulgarian_stemmer": {
+        "type":       "stemmer",
+        "language":   "bulgarian"
+      },
+      "catalan_elision": {
+        "type":         "elision",
+        "articles": [ "d", "l", "m", "n", "s", "t"]
+      },
+      "catalan_stop": {
+        "type":       "stop",
+        "stopwords":  "_catalan_"
+      },
+      "catalan_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Hola", "món", "recerca"]
+      },
+      "catalan_stemmer": {
+        "type":       "stemmer",
+        "language":   "catalan"
+      },
+      "czech_stop": {
+        "type":       "stop",
+        "stopwords":  "_czech_"
+      },
+      "czech_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Haló", "svět", "vyhledávání"]
+      },
+      "czech_stemmer": {
+        "type":       "stemmer",
+        "language":   "czech"
+      },
+      "danish_stop": {
+        "type":       "stop",
+        "stopwords":  "_danish_"
+      },
+      "danish_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Hej", "verden", "Søg"]
+      },
+      "danish_stemmer": {
+        "type":       "stemmer",
+        "language":   "danish"
+      },
+      "dutch_stop": {
+        "type":       "stop",
+        "stopwords":  "_dutch_"
+      },
+      "dutch_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["hallo", "wereld", "zoeken"]
+      },
+      "dutch_stemmer": {
+        "type":       "stemmer",
+        "language":   "dutch"
+      },
+      "dutch_override": {
+        "type":       "stemmer_override",
+        "rules": [
+          "fiets=>fiets",
+          "bromfiets=>bromfiets",
+          "ei=>eier",
+          "kind=>kinder"
+        ]
+      },
+      "english_keywords": {
+        "type":       "keyword_marker",
+        "keywords":   ["hello"]
+      },
+      "finnish_stop": {
+        "type":       "stop",
+        "stopwords":  "_finnish_"
+      },
+      "finnish_keywords": {
+        "type":       "keyword_marker",
+        "keywords":   ["Hei"]
+      },
+      "finnish_stemmer": {
+        "type":       "stemmer",
+        "language":   "finnish"
+      },
+      "french_elision": {
+        "type":         "elision",
+        "articles_case": true,
+        "articles": [
+          "l", "m", "t", "qu", "n", "s",
+          "j", "d", "c", "jusqu", "quoiqu",
+          "lorsqu", "puisqu"
+        ]
+      },
+      "french_stop": {
+        "type":       "stop",
+        "stopwords":  "_french_"
+      },
+      "french_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Bonjour", "monde", "recherche"]
+      },
+      "french_stemmer": {
+        "type":       "stemmer",
+        "language":   "light_french"
+      },
+      "german_stop": {
+        "type":       "stop",
+        "stopwords":  "_german_"
+      },
+      "german_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Hallo", "Welt", "Suche"]
+      },
+      "german_stemmer": {
+        "type":       "stemmer",
+        "language":   "light_german"
+      },
+      "greek_stop": {
+        "type":       "stop",
+        "stopwords":  "_greek_"
+      },
+      "greek_lowercase": {
+        "type":       "lowercase",
+        "language":   "greek"
+      },
+      "greek_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Γεια σας", "κόσμος", "έρευνα"]
+      },
+      "greek_stemmer": {
+        "type":       "stemmer",
+        "language":   "greek"
+      },
+      "hindi_stop": {
+        "type":       "stop",
+        "stopwords":  "_hindi_"
+      },
+      "hungarian_stop": {
+        "type":       "stop",
+        "stopwords":  "_hungarian_"
+      },
+      "hungarian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Helló", "világ", "keresés"]
+      },
+      "hungarian_stemmer": {
+        "type":       "stemmer",
+        "language":   "hungarian"
+      },
+      "indonesian_stop": {
+        "type":       "stop",
+        "stopwords":  "_indonesian_"
+      },
+      "indonesian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["halo", "dunia", "pencarian"]
+      },
+      "indonesian_stemmer": {
+        "type":       "stemmer",
+        "language":   "indonesian"
+      },
+      "italian_elision": {
+        "type":         "elision",
+        "articles": [
+          "c", "l", "all", "dall", "dell",
+          "nell", "sull", "coll", "pell",
+          "gl", "agl", "dagl", "degl", "negl",
+          "sugl", "un", "m", "t", "s", "v", "d"
+        ]
+      },
+      "italian_stop": {
+        "type":       "stop",
+        "stopwords":  "_italian_"
+      },
+      "italian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Ciao", "mondo", "ricerca"]
+      },
+      "italian_stemmer": {
+        "type":       "stemmer",
+        "language":   "light_italian"
+      },
+      "latvian_stop": {
+        "type":       "stop",
+        "stopwords":  "_latvian_"
+      },
+      "latvian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["sveiki", "pasaule", "meklēšana"]
+      },
+      "latvian_stemmer": {
+        "type":       "stemmer",
+        "language":   "latvian"
+      },
+      "lithuanian_stop": {
+        "type":       "stop",
+        "stopwords":  "_lithuanian_"
+      },
+      "lithuanian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Sveiki", "pasaulis", "paieška"]
+      },
+      "lithuanian_stemmer": {
+        "type":       "stemmer",
+        "language":   "lithuanian"
+      },
+      "norwegian_stop": {
+        "type":       "stop",
+        "stopwords":  "_norwegian_"
+      },
+      "norwegian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Hallo", "verden", "Søk"]
+      },
+      "norwegian_stemmer": {
+        "type":       "stemmer",
+        "language":   "norwegian"
+      },
+      "persian_stop": {
+        "type":       "stop",
+        "stopwords":  "_persian_"
+      },
+      "portuguese_stop": {
+        "type":       "stop",
+        "stopwords":  "_portuguese_"
+      },
+      "portuguese_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Olá", "mundo", "pesquisa"]
+      },
+      "portuguese_stemmer": {
+        "type":       "stemmer",
+        "language":   "light_portuguese"
+      },
+      "romanian_stop": {
+        "type":       "stop",
+        "stopwords":  "_romanian_"
+      },
+      "romanian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Alo", "lume", "căutare"]
+      },
+      "romanian_stemmer": {
+        "type":       "stemmer",
+        "language":   "romanian"
+      },
+      "russian_stop": {
+        "type":       "stop",
+        "stopwords":  "_russian_"
+      },
+      "russian_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["привет", "мир", "поиск"]
+      },
+      "russian_stemmer": {
+        "type":       "stemmer",
+        "language":   "russian"
+      },
+      "spanish_stop": {
+        "type":       "stop",
+        "stopwords":  "_spanish_"
+      },
+      "spanish_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["¡Hola", "mundo", "búsqueda"]
+      },
+      "spanish_stemmer": {
+        "type":       "stemmer",
+        "language":   "light_spanish"
+      },
+      "swedish_stop": {
+        "type":       "stop",
+        "stopwords":  "_swedish_"
+      },
+      "swedish_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Hallå", "material", "sök"]
+      },
+      "swedish_stemmer": {
+        "type":       "stemmer",
+        "language":   "swedish"
+      },
+      "turkish_stop": {
+        "type":       "stop",
+        "stopwords":  "_turkish_"
+      },
+      "turkish_lowercase": {
+        "type":       "lowercase",
+        "language":   "turkish"
+      },
+      "turkish_keywords": {
+        "type":       "keyword_marker",
+        "keywords": ["Merhaba", "Dünya", "arama"]
+      },
+      "turkish_stemmer": {
+        "type":       "stemmer",
+        "language":   "turkish"
+      },
+      "thai_stop": {
+        "type":       "stop",
+        "stopwords":  "_thai_"
+      }
+    }
+  }
+}

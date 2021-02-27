@@ -63,7 +63,7 @@
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resetDictionaries"/>
                                         <div class="form-check">
-                                            <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries"/>
+                                            <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries" disabled="${fesenType=='cloud'}"/>
                                             <label for="resetDictionaries" class="form-check-label">
                                                 <la:message key="labels.enabled"/>
                                             </label>

@@ -15,8 +15,13 @@
  */
 package org.codelibs.fess.helper;
 
+import java.nio.charset.StandardCharsets;
+
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl.Method;
 import org.codelibs.curl.CurlRequest;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 
 public class CurlHelper {
@@ -38,6 +43,15 @@ public class CurlHelper {
     }
 
     public CurlRequest request(final Method method, final String path) {
-        return new CurlRequest(method, ResourceUtil.getFesenHttpUrl() + path);
+        final CurlRequest request = new CurlRequest(method, ResourceUtil.getFesenHttpUrl() + path);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String username = fessConfig.getFesenUsername();
+        final String password = fessConfig.getFesenPassword();
+        if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
+            final String value = username + ":" + password;
+            final String basicAuth = "Basic " + java.util.Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+            request.header("Authorization", basicAuth);
+        }
+        return request;
     }
 }

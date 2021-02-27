@@ -3,6 +3,6 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="esClient"
-		class="org.codelibs.fess.crawler.client.FesenClient">
+		class="org.codelibs.fess.es.client.CrawlerEngineClient">
 	</component>
 </components>

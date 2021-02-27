@@ -449,4 +449,10 @@ public class Constants extends CoreLibConstants {
     public static final String XERCES_FEATURE_PREFIX = "http://apache.org/xml/features/";
 
     public static final String LOAD_EXTERNAL_DTD_FEATURE = "nonvalidating/load-external-dtd";
+
+    public static final String FESEN_TYPE_CLOUD = "cloud";
+
+    public static final String FESEN_USERNAME = "fesen.username";
+
+    public static final String FESEN_PASSWORD = "fesen.password";
 }
