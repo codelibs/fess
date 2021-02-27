@@ -929,7 +929,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         this.convertUrlMap.putAll(convertUrlMap);
     }
 
-    public void addConvertUrl(final String regex,final String replacement) {
-        this.convertUrlMap.put(regex,replacement);
+    public void addConvertUrl(final String regex, final String replacement) {
+        this.convertUrlMap.put(regex, replacement);
     }
 }
