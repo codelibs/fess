@@ -1352,6 +1352,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Crawling/Displaying */
     public static final String LABELS_pathmap_pt_both = "{labels.pathmap_pt_both}";
 
+    /** The key of the message: Stored URLs */
+    public static final String LABELS_pathmap_pt_stored = "{labels.pathmap_pt_stored}";
+
     /** The key of the message: Regular Name */
     public static final String LABELS_regular_name = "{labels.regular_name}";
 

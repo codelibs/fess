@@ -157,6 +157,8 @@ public class GenerateThumbnailJob extends ExecJob {
             }
         } else if (StringUtil.isNotBlank(lastaEnv)) {
             cmdList.add("-Dlasta.env=" + lastaEnv);
+        } else {
+            cmdList.add("-Dlasta.env=" + getExecuteType());
         }
 
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
@@ -256,6 +258,6 @@ public class GenerateThumbnailJob extends ExecJob {
 
     @Override
     protected String getExecuteType() {
-        return "thumbnail";
+        return Constants.EXECUTE_TYPE_THUMBNAIL;
     }
 }

@@ -260,6 +260,8 @@ public class CrawlJob extends ExecJob {
             }
         } else if (StringUtil.isNotBlank(lastaEnv)) {
             cmdList.add("-Dlasta.env=" + lastaEnv);
+        } else {
+            cmdList.add("-Dlasta.env=" + getExecuteType());
         }
 
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
@@ -374,7 +376,7 @@ public class CrawlJob extends ExecJob {
 
     @Override
     protected String getExecuteType() {
-        return "crawler";
+        return Constants.EXECUTE_TYPE_CRAWLER;
     }
 
 }

@@ -58,9 +58,7 @@ public class PathMappingHelper {
     }
 
     public int update() {
-        final List<String> ptList = new ArrayList<>();
-        ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
-        ptList.add(Constants.PROCESS_TYPE_BOTH);
+        final List<String> ptList = getProcessTypeList();
 
         try {
             final PathMappingBhv pathMappingBhv = ComponentUtil.getComponent(PathMappingBhv.class);
@@ -79,6 +77,18 @@ public class PathMappingHelper {
             logger.warn("Failed to load path mappings.", e);
         }
         return 0;
+    }
+
+    protected List<String> getProcessTypeList() {
+        final List<String> ptList = new ArrayList<>();
+        final String executeType = System.getProperty("lasta.env");
+        if (Constants.EXECUTE_TYPE_CRAWLER.equalsIgnoreCase(executeType)) {
+            ptList.add(Constants.PROCESS_TYPE_REPLACE);
+        } else {
+            ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
+            ptList.add(Constants.PROCESS_TYPE_BOTH);
+        }
+        return ptList;
     }
 
     public void setPathMappingList(final String sessionId, final List<PathMapping> pathMappingList) {
@@ -102,7 +112,7 @@ public class PathMappingHelper {
         return pathMappingMap.get(sessionId);
     }
 
-    public String replaceUrl(final String sessionId, final String url) {
+    public String replaceUrl(final String sessionId, final String url) { // for crawling
         final List<PathMapping> pathMappingList = getPathMappingList(sessionId);
         if (pathMappingList == null) {
             return url;
@@ -131,7 +141,7 @@ public class PathMappingHelper {
         return result;
     }
 
-    public String replaceUrl(final String url) {
+    public String replaceUrl(final String url) { // for display or url converer
         if (cachedPathMappingList == null) {
             synchronized (this) {
                 if (cachedPathMappingList == null) {
@@ -142,7 +152,7 @@ public class PathMappingHelper {
         return replaceUrl(cachedPathMappingList, url);
     }
 
-    public BiFunction<String, Matcher, String> createPathMatcher(final Matcher matcher, final String replacement) {
+    public BiFunction<String, Matcher, String> createPathMatcher(final Matcher matcher, final String replacement) { // for PathMapping
         if (replacement.equals(FUNCTION_ENCODEURL_MATCHER)) {
             return (u, m) -> DocumentUtil.encodeUrl(u);
         } else if (replacement.startsWith(GROOVY_MATCHER)) {

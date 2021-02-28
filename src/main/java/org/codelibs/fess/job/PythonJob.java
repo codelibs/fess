@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutTask;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -161,6 +162,6 @@ public class PythonJob extends ExecJob {
 
     @Override
     protected String getExecuteType() {
-        return "python";
+        return Constants.EXECUTE_TYPE_PYTHON;
     }
 }

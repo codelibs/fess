@@ -74,6 +74,8 @@
                                             <la:message key="labels.pathmap_pt_displaying"/>
                                         </c:if> <c:if test="${processType=='B'}">
                                             <la:message key="labels.pathmap_pt_both"/>
+                                        </c:if> <c:if test="${processType=='R'}">
+                                            <la:message key="labels.pathmap_pt_stored"/>
                                         </c:if> <la:hidden property="processType"/></td>
                                     </tr>
                                     <tr>

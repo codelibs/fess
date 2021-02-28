@@ -84,6 +84,9 @@
                                             <la:option value="B">
                                                 <la:message key="labels.pathmap_pt_both"/>
                                             </la:option>
+                                            <la:option value="R">
+                                                <la:message key="labels.pathmap_pt_stored"/>
+                                            </la:option>
                                         </la:select>
                                     </div>
                                 </div>

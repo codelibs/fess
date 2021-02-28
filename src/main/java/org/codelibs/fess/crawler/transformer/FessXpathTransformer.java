@@ -741,11 +741,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     @Override
     protected List<RequestData> convertChildUrlList(final List<RequestData> urlList) {
         if (urlList != null) {
+            final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
             for (final RequestData requestData : urlList) {
                 String url = requestData.getUrl();
                 for (final Map.Entry<String, String> entry : convertUrlMap.entrySet()) {
                     url = url.replaceAll(entry.getKey(), entry.getValue());
                 }
+                url = pathMappingHelper.replaceUrl(url);
                 requestData.setUrl(replaceDuplicateHost(url));
             }
         }

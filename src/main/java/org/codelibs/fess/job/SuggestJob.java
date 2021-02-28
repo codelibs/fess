@@ -144,6 +144,8 @@ public class SuggestJob extends ExecJob {
             }
         } else if (StringUtil.isNotBlank(lastaEnv)) {
             cmdList.add("-Dlasta.env=" + lastaEnv);
+        } else {
+            cmdList.add("-Dlasta.env=" + getExecuteType());
         }
 
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
@@ -238,7 +240,7 @@ public class SuggestJob extends ExecJob {
 
     @Override
     protected String getExecuteType() {
-        return "suggest";
+        return Constants.EXECUTE_TYPE_SUGGEST;
     }
 
 }
