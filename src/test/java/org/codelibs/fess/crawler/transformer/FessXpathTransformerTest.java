@@ -471,6 +471,10 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
                 return Collections.emptyMap();
             }
+
+            protected PathMappingHelper getPathMappingHelper() {
+                return new PathMappingHelper();
+            }
         };
         transformer.fessConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -545,7 +549,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     public void test_convertChildUrlList() {
-        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
+        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer() {
+            protected PathMappingHelper getPathMappingHelper() {
+                return new PathMappingHelper();
+            }
+        };
         fessXpathTransformer.init();
         fessXpathTransformer.convertUrlMap.put("feed:", "http:");
 

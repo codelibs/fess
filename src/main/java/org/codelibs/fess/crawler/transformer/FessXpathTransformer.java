@@ -741,7 +741,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     @Override
     protected List<RequestData> convertChildUrlList(final List<RequestData> urlList) {
         if (urlList != null) {
-            final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
+            final PathMappingHelper pathMappingHelper = getPathMappingHelper();
             for (final RequestData requestData : urlList) {
                 String url = requestData.getUrl();
                 for (final Map.Entry<String, String> entry : convertUrlMap.entrySet()) {
@@ -752,6 +752,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
         return urlList;
+    }
+
+    protected PathMappingHelper getPathMappingHelper() {
+        return ComponentUtil.getPathMappingHelper();
     }
 
     @Override
