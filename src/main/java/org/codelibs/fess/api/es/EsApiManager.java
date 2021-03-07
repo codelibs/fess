@@ -141,7 +141,7 @@ public class EsApiManager extends BaseApiManager {
         });
         try (final CurlResponse curlResponse = curlRequest.onConnect((req, con) -> {
             con.setDoOutput(true);
-            if (httpMethod != Method.GET) {
+            if (httpMethod != Method.GET && request.getContentLength() > 2) {
                 try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
                     CopyUtil.copy(in, out);
                 } catch (final IOException e) {
