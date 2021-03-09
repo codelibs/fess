@@ -251,7 +251,7 @@ public class Constants extends CoreLibConstants {
     public static final String FTP = "FTP";
 
     public static final String[] RESERVED =
-            { "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
+            { "\\", "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "~", "*", "?", ";", ":", "/" };
 
     public static final Pattern LUCENE_FIELD_RESERVED_PATTERN = Pattern.compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",
 

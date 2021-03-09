@@ -28,7 +28,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 public class QueryStringBuilderTest extends UnitFessTestCase {
 
     public void test_query() {
-        assertEquals("", getQuery("", new String[0], Collections.emptyMap(), Collections.emptyMap()));
+        assertEquals("", getQuery("", new String[0], Collections.emptyMap(), Collections.emptyMap(), false));
     }
 
     public void test_conditions_q() {
@@ -69,16 +69,26 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("NOT aaa NOT bbb", getAsQuery("111", Collections.singletonMap(k, new String[] { "aaa bbb" })));
     }
 
+    public void test_escape() {
+        assertEquals("\\/", getQuery("/", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+        assertEquals("aaa\\/bbb", getQuery("aaa/bbb", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+        assertEquals("\\\\", getQuery("\\", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+        assertEquals("\\\\\\\\", getQuery("\\\\", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+        assertEquals("aaa \\&\\& bbb", getQuery("aaa && bbb", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+        assertEquals("\\\\\\+\\-\\&\\&\\|\\|\\!\\(\\)\\{\\}\\[\\]\\^\\~\\*\\?\\;\\:\\/",
+                getQuery("\\+-&&||!(){}[]^~*?;:/", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+    }
+
     private String getAsQuery(final String query, final Map<String, String[]> conditions) {
-        return getQuery(query, new String[0], Collections.emptyMap(), conditions);
+        return getQuery(query, new String[0], Collections.emptyMap(), conditions, false);
     }
 
     private String getAsQuery(final Map<String, String[]> conditions) {
-        return getQuery("", new String[0], Collections.emptyMap(), conditions);
+        return getQuery("", new String[0], Collections.emptyMap(), conditions, false);
     }
 
     private String getQuery(final String query, final String[] extraQueries, final Map<String, String[]> fields,
-            final Map<String, String[]> conditions) {
+            final Map<String, String[]> conditions, final boolean escape) {
         return new QueryStringBuilder().params(new SearchRequestParams() {
 
             @Override
@@ -156,6 +166,6 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
                 return new HighlightInfo();
             }
 
-        }).build();
+        }).escape(escape).build();
     }
 }
