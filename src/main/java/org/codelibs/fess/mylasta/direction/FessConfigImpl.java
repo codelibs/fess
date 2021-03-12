@@ -17,6 +17,7 @@ package org.codelibs.fess.mylasta.direction;
 
 import java.util.concurrent.ExecutionException;
 
+import org.codelibs.fess.Constants;
 import org.dbflute.helper.jprop.ObjectiveProperties;
 import org.lastaflute.core.direction.PropertyFilter;
 
@@ -26,8 +27,6 @@ import com.google.common.cache.CacheBuilder;
 public class FessConfigImpl extends FessConfig.SimpleImpl {
 
     private static final long serialVersionUID = 1L;
-
-    private static final String FESS_CONFIG = "fess.config.";
 
     @Override
     protected ObjectiveProperties newObjectiveProperties(final String resourcePath, final PropertyFilter propertyFilter) {
@@ -44,7 +43,8 @@ public class FessConfigImpl extends FessConfig.SimpleImpl {
 
             private String getFromCache(final String propertyKey) {
                 try {
-                    return cache.get(propertyKey, () -> System.getProperty(FESS_CONFIG + propertyKey, super.get(propertyKey)));
+                    return cache.get(propertyKey,
+                            () -> System.getProperty(Constants.FESS_CONFIG_PREFIX + propertyKey, super.get(propertyKey)));
                 } catch (final ExecutionException e) {
                     return super.get(propertyKey);
                 }

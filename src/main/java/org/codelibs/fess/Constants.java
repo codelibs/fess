@@ -448,6 +448,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SYSTEM_PROP_PREFIX = "fess.system.";
 
+    public static final String FESS_CONFIG_PREFIX = "fess.config.";
+
     public static final String XERCES_FEATURE_PREFIX = "http://apache.org/xml/features/";
 
     public static final String LOAD_EXTERNAL_DTD_FEATURE = "nonvalidating/load-external-dtd";

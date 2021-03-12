@@ -138,6 +138,16 @@ public abstract class ExecJob {
         }
     }
 
+    protected void addFessConfigProperties(final List<String> cmdList) {
+        System.getProperties().keySet().stream().filter(k -> k != null && k.toString().startsWith(Constants.FESS_CONFIG_PREFIX))
+                .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
+    }
+
+    protected void addFessSystemProperties(final List<String> cmdList) {
+        System.getProperties().keySet().stream().filter(k -> k != null && k.toString().startsWith(Constants.SYSTEM_PROP_PREFIX))
+                .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
+    }
+
     protected void deleteTempDir(final File ownTmpDir) {
         if (ownTmpDir == null) {
             return;
