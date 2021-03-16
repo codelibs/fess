@@ -62,7 +62,7 @@
 		<!-- Fesen -->
 		<fesen.version>0.11.0</fesen.version>
 		<fesen.httpclient.version>0.11.0</fesen.httpclient.version>
-		<fesen.runner.version>0.11.0</fesen.runner.version>
+		<fesen.runner.version>0.11.1-SNAPSHOT</fesen.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>9.0.43</tomcat.version>
