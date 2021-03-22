@@ -9,7 +9,6 @@ FESS_CONF_PATH=${packaging.fess.conf.dir}
 FESS_VAR_PATH=${packaging.fess.var.dir}
 
 FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
-FESS_CONTEXT_PATH=/
 
 # Port
 FESS_PORT=8080
