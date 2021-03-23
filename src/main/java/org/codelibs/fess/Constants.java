@@ -456,6 +456,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String FESEN_TYPE_CLOUD = "cloud";
 
+    public static final String FESEN_TYPE_AWS = "aws";
+
     public static final String FESEN_USERNAME = "fesen.username";
 
     public static final String FESEN_PASSWORD = "fesen.password";

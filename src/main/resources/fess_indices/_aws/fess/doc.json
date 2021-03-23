@@ -1,0 +1,592 @@
+{
+    "dynamic_templates": [
+      {
+        "lang_ar": {
+          "match": "*_ar",
+          "mapping": {
+            "type": "text",
+            "analyzer": "arabic_analyzer"
+          }
+        }
+      },
+      {
+        "lang_bg": {
+          "match": "*_bg",
+          "mapping": {
+            "type": "text",
+            "analyzer": "bulgarian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_bn": {
+          "match": "*_bn",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ca": {
+          "match": "*_ca",
+          "mapping": {
+            "type": "text",
+            "analyzer": "catalan_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ca": {
+          "match": "*_ckb-iq",
+          "mapping": {
+            "type": "text",
+            "analyzer": "sorani_analyzer"
+          }
+        }
+      },
+      {
+        "lang_cs": {
+          "match": "*_cs",
+          "mapping": {
+            "type": "text",
+            "analyzer": "czech_analyzer"
+          }
+        }
+      },
+      {
+        "lang_da": {
+          "match": "*_da",
+          "mapping": {
+            "type": "text",
+            "analyzer": "danish_analyzer"
+          }
+        }
+      },
+      {
+        "lang_de": {
+          "match": "*_de",
+          "mapping": {
+            "type": "text",
+            "analyzer": "german_analyzer"
+          }
+        }
+      },
+      {
+        "lang_el": {
+          "match": "*_el",
+          "mapping": {
+            "type": "text",
+            "analyzer": "greek_analyzer"
+          }
+        }
+      },
+      {
+        "lang_en": {
+          "match": "*_en",
+          "mapping": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          }
+        }
+      },
+      {
+        "lang_en": {
+          "match": "*_en-ie",
+          "mapping": {
+            "type": "text",
+            "analyzer": "irish_analyzer"
+          }
+        }
+      },
+      {
+        "lang_es": {
+          "match": "*_es",
+          "mapping": {
+            "type": "text",
+            "analyzer": "spanish_analyzer"
+          }
+        }
+      },
+      {
+        "lang_et": {
+          "match": "*_et",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_et": {
+          "match": "*_eu",
+          "mapping": {
+            "type": "text",
+            "analyzer": "basque_analyzer"
+          }
+        }
+      },
+      {
+        "lang_fa": {
+          "match": "*_fa",
+          "mapping": {
+            "type": "text",
+            "analyzer": "persian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_fi": {
+          "match": "*_fi",
+          "mapping": {
+            "type": "text",
+            "analyzer": "finnish_analyzer"
+          }
+        }
+      },
+      {
+        "lang_fr": {
+          "match": "*_fr",
+          "mapping": {
+            "type": "text",
+            "analyzer": "french_analyzer"
+          }
+        }
+      },
+      {
+        "lang_gl": {
+          "match": "*_gl",
+          "mapping": {
+            "type": "text",
+            "analyzer": "galician_analyzer"
+          }
+        }
+      },
+      {
+        "lang_gu": {
+          "match": "*_gu",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_he": {
+          "match": "*_he",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_hi": {
+          "match": "*_hi",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_hr": {
+          "match": "*_hr",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_hu": {
+          "match": "*_hu",
+          "mapping": {
+            "type": "text",
+            "analyzer": "hungarian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_hu": {
+          "match": "*_hy",
+          "mapping": {
+            "type": "text",
+            "analyzer": "armenian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_id": {
+          "match": "*_id",
+          "mapping": {
+            "type": "text",
+            "analyzer": "indonesian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_it": {
+          "match": "*_it",
+          "mapping": {
+            "type": "text",
+            "analyzer": "italian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ja": {
+          "match": "*_ja",
+          "mapping": {
+            "type": "text",
+            "analyzer": "japanese_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ko": {
+          "match": "*_ko",
+          "mapping": {
+            "type": "text",
+            "analyzer": "korean_analyzer"
+          }
+        }
+      },
+      {
+        "lang_lt": {
+          "match": "*_lt",
+          "mapping": {
+            "type": "text",
+            "analyzer": "lithuanian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_lv": {
+          "match": "*_lv",
+          "mapping": {
+            "type": "text",
+            "analyzer": "latvian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_mk": {
+          "match": "*_mk",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ml": {
+          "match": "*_ml",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_nl": {
+          "match": "*_nl",
+          "mapping": {
+            "type": "text",
+            "analyzer": "dutch_analyzer"
+          }
+        }
+      },
+      {
+        "lang_no": {
+          "match": "*_no",
+          "mapping": {
+            "type": "text",
+            "analyzer": "norwegian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_pa": {
+          "match": "*_pa",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_pl": {
+          "match": "*_pl",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_pt": {
+          "match": "*_pt",
+          "mapping": {
+            "type": "text",
+            "analyzer": "portuguese_analyzer"
+          }
+        }
+      },
+      {
+        "lang_pt-br": {
+          "match": "*_pt-br",
+          "mapping": {
+            "type": "text",
+            "analyzer": "brazilian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ro": {
+          "match": "*_ro",
+          "mapping": {
+            "type": "text",
+            "analyzer": "romanian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ru": {
+          "match": "*_ru",
+          "mapping": {
+            "type": "text",
+            "analyzer": "russian_analyzer"
+          }
+        }
+      },
+      {
+        "lang_si": {
+          "match": "*_si",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_sq": {
+          "match": "*_sq",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_sv": {
+          "match": "*_sv",
+          "mapping": {
+            "type": "text",
+            "analyzer": "swedish_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ta": {
+          "match": "*_ta",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_te": {
+          "match": "*_te",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_th": {
+          "match": "*_th",
+          "mapping": {
+            "type": "text",
+            "analyzer": "thai_analyzer"
+          }
+        }
+      },
+      {
+        "lang_tl": {
+          "match": "*_tl",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_tr": {
+          "match": "*_tr",
+          "mapping": {
+            "type": "text",
+            "analyzer": "turkish_analyzer"
+          }
+        }
+      },
+      {
+        "lang_uk": {
+          "match": "*_uk",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_ur": {
+          "match": "*_ur",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_vi": {
+          "match": "*_vi",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      },
+      {
+        "lang_zh-cn": {
+          "match": "*_zh-cn",
+          "mapping": {
+            "type": "text",
+            "analyzer": "simplified_chinese_analyzer"
+          }
+        }
+      },
+      {
+        "lang_zh-tw": {
+          "match": "*_zh-tw",
+          "mapping": {
+            "type": "text",
+            "analyzer": "empty_analyzer"
+          }
+        }
+      }
+    ],
+    "properties": {
+      "anchor": {
+        "type": "keyword"
+      },
+      "boost": {
+        "type": "float"
+      },
+      "click_count": {
+        "type": "long"
+      },
+      "config_id": {
+        "type": "keyword"
+      },
+      "important_content": {
+        "type": "text",
+        "analyzer": "standard_analyzer",
+        "search_analyzer": "standard_search_analyzer",
+        "term_vector": "with_positions_offsets"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "standard_analyzer",
+        "search_analyzer": "standard_search_analyzer",
+        "term_vector": "with_positions_offsets"
+      },
+      "content_minhash": {
+        "type": "keyword",
+        "index": false
+      },
+      "content_minhash_bits": {
+        "type": "keyword",
+        "index": false
+      },
+      "content_length": {
+        "type": "long"
+      },
+      "created": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "timestamp": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "expires": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "digest": {
+        "type": "text",
+        "index": false
+      },
+      "doc_id": {
+        "type": "keyword"
+      },
+      "favorite_count": {
+        "type": "long"
+      },
+      "filename": {
+        "type": "keyword"
+      },
+      "filetype": {
+        "type": "keyword"
+      },
+      "host": {
+        "type": "keyword"
+      },
+      "lang": {
+        "type": "keyword"
+      },
+      "last_modified": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "location": {
+        "type": "geo_point"
+      },
+      "mimetype": {
+        "type": "keyword"
+      },
+      "parent_id": {
+        "type": "keyword"
+      },
+      "role": {
+        "type": "keyword"
+      },
+      "label": {
+        "type": "keyword"
+      },
+      "virtual_host": {
+        "type": "keyword"
+      },
+      "segment": {
+        "type": "keyword"
+      },
+      "site": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "standard_analyzer",
+        "search_analyzer": "standard_search_analyzer",
+        "term_vector": "with_positions_offsets"
+      },
+      "thumbnail": {
+        "type": "keyword"
+      },
+      "url": {
+        "type": "keyword"
+      }
+    }
+}

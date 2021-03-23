@@ -340,6 +340,7 @@ public interface FessProp {
     default boolean isResultCollapsed() {
         switch (getFesenType()) {
         case Constants.FESEN_TYPE_CLOUD:
+        case Constants.FESEN_TYPE_AWS:
             return false;
         default:
             return getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
