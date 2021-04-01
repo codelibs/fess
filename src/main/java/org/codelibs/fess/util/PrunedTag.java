@@ -15,11 +15,16 @@
  */
 package org.codelibs.fess.util;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fess.exception.FessSystemException;
 import org.w3c.dom.Node;
 
 public class PrunedTag {
@@ -104,5 +109,30 @@ public class PrunedTag {
     @Override
     public String toString() {
         return "PrunedTag [tag=" + tag + ", id=" + id + ", css=" + css + ", attrName=" + attrName + ", attrValue=" + attrValue + "]";
+    }
+
+    public static PrunedTag[] parse(final String value) {
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
+            final Pattern pattern = Pattern.compile("(\\w+)(\\[[^\\]]+\\])?(\\.[\\w\\-]+)?(#[\\w\\-]+)?");
+            final Matcher matcher = pattern.matcher(v.trim());
+            if (matcher.matches()) {
+                final PrunedTag tag = new PrunedTag(matcher.group(1));
+                if (matcher.group(2) != null) {
+                    final String attrPair = matcher.group(2).substring(1, matcher.group(2).length() - 1);
+                    final Matcher equalMatcher = Pattern.compile("([\\w\\-]+)=(\\S+)").matcher(attrPair);
+                    if (equalMatcher.matches()) {
+                        tag.setAttr(equalMatcher.group(1), equalMatcher.group(2));
+                    }
+                }
+                if (matcher.group(3) != null) {
+                    tag.setCss(matcher.group(3).substring(1));
+                }
+                if (matcher.group(4) != null) {
+                    tag.setId(matcher.group(4).substring(1));
+                }
+                return tag;
+            }
+            throw new FessSystemException("Invalid pruned tag: " + v);
+        }).toArray(n -> new PrunedTag[n]));
     }
 }

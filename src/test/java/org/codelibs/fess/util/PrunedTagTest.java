@@ -44,6 +44,39 @@ public class PrunedTagTest extends UnitFessTestCase {
         prunedtag.setCss(css);
         assertEquals("PrunedTag [tag=" + tag + ", id=" + id + ", css=" + css + ", attrName=" + attrName + ", attrValue=" + attrValue + "]",
                 prunedtag.toString());
+    }
 
+    public void test_parse() {
+        PrunedTag[] tags = PrunedTag.parse("");
+        assertEquals(0, tags.length);
+
+        tags = PrunedTag.parse("a");
+        assertEquals(1, tags.length);
+        assertEquals("PrunedTag [tag=a, id=null, css=null, attrName=null, attrValue=null]", tags[0].toString());
+
+        tags = PrunedTag.parse("a#test");
+        assertEquals(1, tags.length);
+        assertEquals("PrunedTag [tag=a, id=test, css=null, attrName=null, attrValue=null]", tags[0].toString());
+
+        tags = PrunedTag.parse("a.test");
+        assertEquals(1, tags.length);
+        assertEquals("PrunedTag [tag=a, id=null, css=test, attrName=null, attrValue=null]", tags[0].toString());
+
+        tags = PrunedTag.parse("a[target=_blank]");
+        assertEquals(1, tags.length);
+        assertEquals("PrunedTag [tag=a, id=null, css=null, attrName=target, attrValue=_blank]", tags[0].toString());
+
+        tags = PrunedTag.parse("a.link,div#123");
+        assertEquals(2, tags.length);
+        assertEquals("PrunedTag [tag=a, id=null, css=link, attrName=null, attrValue=null]", tags[0].toString());
+        assertEquals("PrunedTag [tag=div, id=123, css=null, attrName=null, attrValue=null]", tags[1].toString());
+
+        tags = PrunedTag.parse("a#test-a");
+        assertEquals(1, tags.length);
+        assertEquals("PrunedTag [tag=a, id=test-a, css=null, attrName=null, attrValue=null]", tags[0].toString());
+
+        tags = PrunedTag.parse("a.test-a");
+        assertEquals(1, tags.length);
+        assertEquals("PrunedTag [tag=a, id=null, css=test-a, attrName=null, attrValue=null]", tags[0].toString());
     }
 }
