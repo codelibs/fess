@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
@@ -58,12 +59,20 @@ public abstract class AbstractDataStore implements DataStore {
 
     @Override
     public void store(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
-        final Map<String, String> configParamMap = config.getHandlerParameterMap();
-        final Map<String, String> configScriptMap = config.getHandlerScriptMap();
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(config);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Map<String, String> paramEnvMap = systemHelper.getFilteredEnvMap(fessConfig.getCrawlerDataEnvParamKeyPattern());
+        final Map<String, String> configParamMap = config.getHandlerParameterMap().entrySet().stream().map(e -> {
+            final String key = e.getKey();
+            String value = e.getValue();
+            for (Map.Entry<String, String> entry : paramEnvMap.entrySet()) {
+                value = value.replace("${" + entry.getKey() + "}", entry.getValue());
+            }
+            return new Pair<String, String>(key, value);
+        }).collect(Collectors.toMap(Pair<String, String>::getFirst, Pair<String, String>::getSecond));
+        final Map<String, String> configScriptMap = config.getHandlerScriptMap();
 
         initParamMap.putAll(configParamMap);
         final Map<String, String> paramMap = initParamMap;

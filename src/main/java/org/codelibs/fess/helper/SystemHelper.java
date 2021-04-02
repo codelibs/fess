@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -398,7 +400,7 @@ public class SystemHelper {
     }
 
     public String getHostname() {
-        final Map<String, String> env = System.getenv();
+        final Map<String, String> env = getEnvMap();
         if (env.containsKey("COMPUTERNAME")) {
             return env.get("COMPUTERNAME");
         } else if (env.containsKey("HOSTNAME")) {
@@ -584,6 +586,21 @@ public class SystemHelper {
             }
         }
         return systemCpuPercent;
+    }
+
+    public Map<String, String> getFilteredEnvMap(final String keyPattern) {
+        final Pattern pattern = Pattern.compile(keyPattern);
+        return getEnvMap().entrySet().stream().filter(e -> {
+            String key = e.getKey();
+            if (StringUtil.isBlank(key)) {
+                return false;
+            }
+            return pattern.matcher(key).matches();
+        }).collect(Collectors.toMap(Entry<String, String>::getKey, Entry<String, String>::getValue));
+    }
+
+    protected Map<String, String> getEnvMap() {
+        return System.getenv();
     }
 
     public String getVersion() {

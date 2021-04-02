@@ -325,6 +325,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. file,smb,smb1,ftp,storage */
     String CRAWLER_FILE_PROTOCOLS = "crawler.file.protocols";
 
+    /** The key of the configuration. e.g. ^FESS_ENV_ */
+    String CRAWLER_DATA_ENV_PARAM_KEY_PATTERN = "crawler.data.env.param.key.pattern";
+
     /** The key of the configuration. e.g. false */
     String CRAWLER_IGNORE_ROBOTS_TXT = "crawler.ignore.robots.txt";
 
@@ -2516,6 +2519,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFileProtocols();
+
+    /**
+     * Get the value for the key 'crawler.data.env.param.key.pattern'. <br>
+     * The value is, e.g. ^FESS_ENV_ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDataEnvParamKeyPattern();
 
     /**
      * Get the value for the key 'crawler.ignore.robots.txt'. <br>
@@ -7395,6 +7405,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.CRAWLER_FILE_PROTOCOLS);
         }
 
+        public String getCrawlerDataEnvParamKeyPattern() {
+            return get(FessConfig.CRAWLER_DATA_ENV_PARAM_KEY_PATTERN);
+        }
+
         public String getCrawlerIgnoreRobotsTxt() {
             return get(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT);
         }
@@ -9850,6 +9864,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
             defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,smb1,ftp,storage");
+            defaultMap.put(FessConfig.CRAWLER_DATA_ENV_PARAM_KEY_PATTERN, "^FESS_ENV_");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
