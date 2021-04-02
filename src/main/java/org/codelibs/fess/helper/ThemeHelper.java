@@ -28,6 +28,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
@@ -46,7 +47,8 @@ public class ThemeHelper {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    final String[] names = entry.getName().split("/");
+                    final String[] names = StreamUtil.split(entry.getName(), "/")
+                            .get(stream -> stream.filter(s -> !"..".equals(s)).toArray(n -> new String[n]));
                     if (names.length < 2) {
                         continue;
                     }

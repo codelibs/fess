@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -92,6 +93,8 @@ public class GsaConfigParser extends DefaultHandler {
             final SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setFeature(org.codelibs.fess.crawler.Constants.FEATURE_SECURE_PROCESSING, true);
             final SAXParser parser = factory.newSAXParser();
+            parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, StringUtil.EMPTY);
+            parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, StringUtil.EMPTY);
             parser.parse(is, this);
         } catch (final Exception e) {
             throw new GsaConfigException("Failed to parse XML file.", e);
