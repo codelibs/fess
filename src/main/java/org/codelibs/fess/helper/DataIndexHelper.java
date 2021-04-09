@@ -130,7 +130,7 @@ public class DataIndexHelper {
 
             // check status
             for (int i = 0; i < startedCrawlerNum; i++) {
-                if (!dataCrawlingThreadList.get(i).isRunning() && dataCrawlingThreadStatusList.get(i).equals(Constants.RUNNING)) {
+                if (!dataCrawlingThreadList.get(i).isRunning() && Constants.RUNNING.equals(dataCrawlingThreadStatusList.get(i))) {
                     dataCrawlingThreadList.get(i).awaitTermination();
                     dataCrawlingThreadStatusList.set(i, Constants.DONE);
                     activeCrawlerNum--;
@@ -144,10 +144,10 @@ public class DataIndexHelper {
             finishedAll = true;
             for (int i = 0; i < dataCrawlingThreadList.size(); i++) {
                 dataCrawlingThreadList.get(i).awaitTermination(crawlingExecutionInterval);
-                if (!dataCrawlingThreadList.get(i).isRunning() && dataCrawlingThreadStatusList.get(i).equals(Constants.RUNNING)) {
+                if (!dataCrawlingThreadList.get(i).isRunning() && Constants.RUNNING.equals(dataCrawlingThreadStatusList.get(i))) {
                     dataCrawlingThreadStatusList.set(i, Constants.DONE);
                 }
-                if (!dataCrawlingThreadStatusList.get(i).equals(Constants.DONE)) {
+                if (!Constants.DONE.equals(dataCrawlingThreadStatusList.get(i))) {
                     finishedAll = false;
                 }
             }

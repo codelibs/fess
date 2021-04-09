@@ -366,9 +366,8 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             final int backslashIndex = fileName.lastIndexOf('\\');
             if (colonIndex > -1 && backslashIndex > -1) {
                 return fileName.substring(backslashIndex + 1);
-            } else {
-                return fileName;
             }
+            return fileName;
         }
 
         @Override

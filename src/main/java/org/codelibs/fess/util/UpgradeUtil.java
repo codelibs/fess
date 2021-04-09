@@ -53,9 +53,8 @@ public final class UpgradeUtil {
                 if (response.getHttpStatusCode() == 200) {
                     logger.info("Register {} to {}", path, indexName);
                     return true;
-                } else {
-                    logger.warn("Invalid request for {}", path);
                 }
+                logger.warn("Invalid request for {}", path);
             }
         } catch (final Exception e) {
             logger.warn("Failed to register {}", filePath, e);
@@ -76,7 +75,8 @@ public final class UpgradeUtil {
                 if (response.isAcknowledged()) {
                     logger.info("Created {} alias for {}", aliasName, indexName);
                     return true;
-                } else if (logger.isDebugEnabled()) {
+                }
+                if (logger.isDebugEnabled()) {
                     logger.debug("Failed to create {} alias for {}", aliasName, indexName);
                 }
             }
@@ -108,10 +108,8 @@ public final class UpgradeUtil {
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created {}/{} mapping.", index, type);
                     return true;
-                } else {
-                    logger.warn("Failed to create {}/{} mapping.", index, type);
                 }
-                // TODO bulk
+                logger.warn("Failed to create {}/{} mapping.", index, type);
             } catch (final Exception e) {
                 logger.warn("Failed to create {}/{} mapping.", index, type, e);
             }
@@ -128,11 +126,10 @@ public final class UpgradeUtil {
             try {
                 final AcknowledgedResponse pmResponse =
                         indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON).execute().actionGet();
-                if (!pmResponse.isAcknowledged()) {
-                    logger.warn("Failed to add {} to {}/{}", field, index, type);
-                } else {
+                if (pmResponse.isAcknowledged()) {
                     return true;
                 }
+                logger.warn("Failed to add {} to {}/{}", field, index, type);
             } catch (final Exception e) {
                 logger.warn("Failed to add {} to {}/{} ", field, index, type, e);
             }
@@ -148,11 +145,10 @@ public final class UpgradeUtil {
         try {
             final PutMappingRequestBuilder builder = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON);
             final AcknowledgedResponse pmResponse = builder.execute().actionGet();
-            if (!pmResponse.isAcknowledged()) {
-                logger.warn("Failed to update {} settings.", index);
-            } else {
+            if (pmResponse.isAcknowledged()) {
                 return true;
             }
+            logger.warn("Failed to update {} settings.", index);
         } catch (final Exception e) {
             logger.warn("Failed to update {} settings.", index, e);
         }

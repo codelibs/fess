@@ -79,7 +79,8 @@ public class CrawlingConfigHelper {
         final String configType = configId.substring(0, 1);
         if (ConfigType.WEB.getTypePrefix().equals(configType)) {
             return ConfigType.WEB;
-        } else if (ConfigType.FILE.getTypePrefix().equals(configType)) {
+        }
+        if (ConfigType.FILE.getTypePrefix().equals(configType)) {
             return ConfigType.FILE;
         } else if (ConfigType.DATA.getTypePrefix().equals(configType)) {
             return ConfigType.DATA;
@@ -163,9 +164,8 @@ public class CrawlingConfigHelper {
     public List<WebConfig> getWebConfigListByIds(final List<String> idList) {
         if (idList == null) {
             return getAllWebConfigList();
-        } else {
-            return getAllWebConfigList(true, true, false, idList);
         }
+        return getAllWebConfigList(true, true, false, idList);
     }
 
     public List<WebConfig> getAllWebConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
@@ -191,9 +191,8 @@ public class CrawlingConfigHelper {
     public List<FileConfig> getFileConfigListByIds(final List<String> idList) {
         if (idList == null) {
             return getAllFileConfigList();
-        } else {
-            return getAllFileConfigList(true, true, false, idList);
         }
+        return getAllFileConfigList(true, true, false, idList);
     }
 
     public List<FileConfig> getAllFileConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
@@ -219,9 +218,8 @@ public class CrawlingConfigHelper {
     public List<DataConfig> getDataConfigListByIds(final List<String> idList) {
         if (idList == null) {
             return getAllDataConfigList();
-        } else {
-            return getAllDataConfigList(true, true, false, idList);
         }
+        return getAllDataConfigList(true, true, false, idList);
     }
 
     public List<DataConfig> getAllDataConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,

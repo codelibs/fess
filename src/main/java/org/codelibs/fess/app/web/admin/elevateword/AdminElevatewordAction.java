@@ -178,10 +178,9 @@ public class AdminElevatewordAction extends FessAdminAction {
             // back
             form.crudMode = CrudMode.DETAILS;
             return asDetailsHtml();
-        } else {
-            form.crudMode = CrudMode.EDIT;
-            return asEditHtml();
         }
+        form.crudMode = CrudMode.EDIT;
+        return asEditHtml();
     }
 
     // -----------------------------------------------------

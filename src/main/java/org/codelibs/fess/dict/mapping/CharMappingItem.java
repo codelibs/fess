@@ -129,9 +129,8 @@ public class CharMappingItem extends DictionaryItem {
     public String toLineString() {
         if (isUpdated()) {
             return StringUtils.join(newInputs, ",") + "=>" + newOutput;
-        } else {
-            return StringUtils.join(inputs, ",") + "=>" + output;
         }
+        return StringUtils.join(inputs, ",") + "=>" + output;
     }
 
 }

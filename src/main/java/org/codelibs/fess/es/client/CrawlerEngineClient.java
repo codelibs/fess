@@ -26,6 +26,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class CrawlerEngineClient extends FesenClient {
+    @Override
     protected Client createClient() {
         final Builder builder = Settings.builder().putList("http.hosts", address);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

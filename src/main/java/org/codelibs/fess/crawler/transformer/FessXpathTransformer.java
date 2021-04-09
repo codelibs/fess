@@ -237,7 +237,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 if (noindex && nofollow) {
                     logger.info("META(robots=noindex,nofollow): {}", responseData.getUrl());
                     throw new ChildUrlsException(Collections.emptySet(), "#processMetaRobots");
-                } else if (noindex) {
+                }
+                if (noindex) {
                     logger.info("META(robots=noindex): {}", responseData.getUrl());
                     storeChildUrls(responseData, resultData);
                     throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots");
@@ -264,7 +265,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         // X-Robots-Tag
-        responseData.getMetaDataMap().entrySet().stream().filter(e -> e.getKey().equalsIgnoreCase(X_ROBOTS_TAG) && e.getValue() != null)
+        responseData.getMetaDataMap().entrySet().stream().filter(e -> X_ROBOTS_TAG.equalsIgnoreCase(e.getKey()) && e.getValue() != null)
                 .forEach(e -> {
                     boolean noindex = false;
                     boolean nofollow = false;
@@ -283,7 +284,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     if (noindex && nofollow) {
                         logger.info("HEADER(robots=noindex,nofollow): {}", responseData.getUrl());
                         throw new ChildUrlsException(Collections.emptySet(), "#processXRobotsTag");
-                    } else if (noindex) {
+                    }
+                    if (noindex) {
                         logger.info("HEADER(robots=noindex): {}", responseData.getUrl());
                         storeChildUrls(responseData, resultData);
                         throw new ChildUrlsException(resultData.getChildUrlSet(), "#processXRobotsTag");
@@ -560,14 +562,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         int pos = value.indexOf("<!--");
         while (pos >= 0) {
             final int lastPos = value.indexOf("-->", pos);
-            if (lastPos >= 0) {
-                if (pos == 0) {
-                    value = " " + value.substring(lastPos + 3);
-                } else {
-                    value = value.substring(0, pos) + " " + value.substring(lastPos + 3);
-                }
-            } else {
+            if (lastPos < 0) {
                 break;
+            }
+            if (pos == 0) {
+                value = " " + value.substring(lastPos + 3);
+            } else {
+                value = value.substring(0, pos) + " " + value.substring(lastPos + 3);
             }
             pos = value.indexOf("<!--");
         }
@@ -852,7 +853,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 final Integer width = getAttributeAsInteger(attributes, "width");
                 if (!fessConfig.isThumbnailHtmlImageUrl(thumbnailUrl)) {
                     continue;
-                } else if (height != null && width != null) {
+                }
+                if (height != null && width != null) {
                     try {
                         if (fessConfig.validateThumbnailSize(width, height)) {
                             return thumbnailUrl;
@@ -915,7 +917,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             if (url.startsWith("://")) {
                 final String protocol = currentUrl.split(":")[0];
                 return new URL(protocol + url);
-            } else if (url.startsWith("//")) {
+            }
+            if (url.startsWith("//")) {
                 final String protocol = currentUrl.split(":")[0];
                 return new URL(protocol + ":" + url);
             } else if (url.startsWith("/") || url.indexOf(':') == -1) {

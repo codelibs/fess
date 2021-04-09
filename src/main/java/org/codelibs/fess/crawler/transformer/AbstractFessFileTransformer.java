@@ -339,7 +339,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final Object lastModifiedObj = dataMap.get(fessConfig.getIndexFieldLastModified());
         if (lastModifiedObj instanceof Date) {
             return (Date) lastModifiedObj;
-        } else if (lastModifiedObj instanceof String) {
+        }
+        if (lastModifiedObj instanceof String) {
             final Date lastModified = FessFunctions.parseDate(lastModifiedObj.toString());
             if (lastModified != null) {
                 return lastModified;
@@ -362,9 +363,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         if (titleObj != null) {
             if (titleObj instanceof String[]) {
                 return stream((String[]) titleObj).get(stream -> stream.anyMatch(StringUtil::isNotBlank));
-            } else {
-                return StringUtil.isNotBlank(titleObj.toString());
             }
+            return StringUtil.isNotBlank(titleObj.toString());
         }
         return false;
     }
@@ -435,7 +435,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             } else {
                 return "localhost";
             }
-        } else if (url.startsWith("file:")) {
+        }
+        if (url.startsWith("file:")) {
             return "localhost";
         }
 
@@ -461,7 +462,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         if (url.startsWith("file:////")) {
             final String value = decodeUrlAsName(url.substring(9), true);
             return abbreviateSite("\\\\" + value.replace('/', '\\'));
-        } else if (url.startsWith("file:")) {
+        }
+        if (url.startsWith("file:")) {
             final String value = decodeUrlAsName(url.substring(5), true);
             if (value.length() > 2 && value.charAt(2) == ':') {
                 // Windows

@@ -122,7 +122,8 @@ public class GsaConfigParser extends DefaultHandler {
         }
         if (tagQueue.isEmpty() && !"eef".equalsIgnoreCase(qName)) {
             throw new GsaConfigException("Invalid format.");
-        } else if (COLLECTION.equalsIgnoreCase(qName) && COLLECTIONS.equalsIgnoreCase(tagQueue.peekLast())) {
+        }
+        if (COLLECTION.equalsIgnoreCase(qName) && COLLECTIONS.equalsIgnoreCase(tagQueue.peekLast())) {
             final long now = System.currentTimeMillis();
             final String name = attributes.getValue("Name");
             labelType = new LabelType();
@@ -248,7 +249,8 @@ public class GsaConfigParser extends DefaultHandler {
     protected String getFilterPath(final String s) {
         if (s.startsWith("#")) {
             return StringUtil.EMPTY;
-        } else if (s.startsWith(CONTAINS)) {
+        }
+        if (s.startsWith(CONTAINS)) {
             final String v = s.substring(CONTAINS.length());
             final StringBuilder buf = new StringBuilder(100);
             return ".*" + appendFileterPath(buf, escape(v)) + ".*";
@@ -277,7 +279,8 @@ public class GsaConfigParser extends DefaultHandler {
     protected String escape(final String s) {
         if (s.startsWith("#")) {
             return StringUtil.EMPTY;
-        } else if (s.startsWith("^") && s.endsWith("$")) {
+        }
+        if (s.startsWith("^") && s.endsWith("$")) {
             return "^" + Pattern.quote(s.substring(1, s.length() - 1)) + "$";
         } else if (s.startsWith("^")) {
             return "^" + Pattern.quote(s.substring(1));

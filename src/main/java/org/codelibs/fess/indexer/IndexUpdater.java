@@ -362,9 +362,8 @@ public class IndexUpdater extends Thread {
                             logger.debug("Skipped. This document is not a index target. ");
                         }
                         continue;
-                    } else {
-                        map.remove(Constants.INDEXING_TARGET);
                     }
+                    map.remove(Constants.INDEXING_TARGET);
 
                     updateDocument(map);
 

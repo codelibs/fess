@@ -233,28 +233,27 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
 
         public StemmerOverrideItem write(final StemmerOverrideItem oldItem) {
             try {
-                if (item != null && item.getId() == oldItem.getId() && item.isUpdated()) {
-                    if (item.equals(oldItem)) {
-                        try {
-                            if (!item.isDeleted()) {
-                                // update
-                                writer.write(item.toLineString());
-                                writer.write(Constants.LINE_SEPARATOR);
-                                return new StemmerOverrideItem(item.getId(), item.getNewInput(), item.getNewOutput());
-                            } else {
-                                return null;
-                            }
-                        } finally {
-                            item.setNewInput(null);
-                            item.setNewOutput(null);
-                        }
-                    } else {
-                        throw new DictionaryException("StemmerOverride file was updated: old=" + oldItem + " : new=" + item);
-                    }
-                } else {
+                if ((item == null) || (item.getId() != oldItem.getId()) || !item.isUpdated()) {
                     writer.write(oldItem.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;
+                }
+                if (item.equals(oldItem)) {
+                    try {
+                        if (!item.isDeleted()) {
+                            // update
+                            writer.write(item.toLineString());
+                            writer.write(Constants.LINE_SEPARATOR);
+                            return new StemmerOverrideItem(item.getId(), item.getNewInput(), item.getNewOutput());
+                        } else {
+                            return null;
+                        }
+                    } finally {
+                        item.setNewInput(null);
+                        item.setNewOutput(null);
+                    }
+                } else {
+                    throw new DictionaryException("StemmerOverride file was updated: old=" + oldItem + " : new=" + item);
                 }
             } catch (final IOException e) {
                 throw new DictionaryException("Failed to write: " + oldItem + " -> " + item, e);

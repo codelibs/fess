@@ -66,7 +66,8 @@ public final class DocumentUtil {
             }
 
             return convertObj(((List<?>) value).get(0), clazz);
-        } else if (value instanceof String[]) {
+        }
+        if (value instanceof String[]) {
             if (clazz.isAssignableFrom(String[].class)) {
                 return (T) value;
             } else if (clazz.isAssignableFrom(List.class)) {
@@ -93,7 +94,8 @@ public final class DocumentUtil {
 
         if (clazz.isAssignableFrom(String.class)) {
             return (T) value.toString();
-        } else if (clazz.isAssignableFrom(Date.class)) {
+        }
+        if (clazz.isAssignableFrom(Date.class)) {
             if (value instanceof Date) {
                 return (T) value;
             } else {

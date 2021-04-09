@@ -214,11 +214,10 @@ public class SystemHelper {
         final String value = System.getProperty("fess.log.path");
         if (value != null) {
             return value;
-        } else {
-            final String userDir = System.getProperty("user.dir");
-            final File targetDir = new File(userDir, "target");
-            return new File(targetDir, "logs").getAbsolutePath();
         }
+        final String userDir = System.getProperty("user.dir");
+        final File targetDir = new File(userDir, "target");
+        return new File(targetDir, "logs").getAbsolutePath();
     }
 
     public String encodeUrlFilter(final String path) {
@@ -324,7 +323,7 @@ public class SystemHelper {
     public void refreshDesignJspFiles() {
         final ServletContext servletContext = LaServletContextUtil.getServletContext();
         stream(ComponentUtil.getVirtualHostHelper().getVirtualHostPaths())
-                .of(stream -> stream.filter(s -> s != null && !s.equals("/")).forEach(key -> {
+                .of(stream -> stream.filter(s -> s != null && !"/".equals(s)).forEach(key -> {
                     designJspFileNameMap.entrySet().stream().forEach(e -> {
                         final File jspFile = new File(servletContext.getRealPath("/WEB-INF/view" + key + "/" + e.getValue()));
                         if (!jspFile.exists()) {
@@ -403,7 +402,8 @@ public class SystemHelper {
         final Map<String, String> env = getEnvMap();
         if (env.containsKey("COMPUTERNAME")) {
             return env.get("COMPUTERNAME");
-        } else if (env.containsKey("HOSTNAME")) {
+        }
+        if (env.containsKey("HOSTNAME")) {
             return env.get("HOSTNAME");
         }
         try {
@@ -591,7 +591,7 @@ public class SystemHelper {
     public Map<String, String> getFilteredEnvMap(final String keyPattern) {
         final Pattern pattern = Pattern.compile(keyPattern);
         return getEnvMap().entrySet().stream().filter(e -> {
-            String key = e.getKey();
+            final String key = e.getKey();
             if (StringUtil.isBlank(key)) {
                 return false;
             }

@@ -270,7 +270,8 @@ public class AdminWizardAction extends FessAdminAction {
 
         if (path.startsWith("//")) {
             return "file://" + path;
-        } else if (path.startsWith("/")) {
+        }
+        if (path.startsWith("/")) {
             return "file:" + path;
         } else if (!path.startsWith("file:")) {
             return "file:/" + path.replace('\\', '/');

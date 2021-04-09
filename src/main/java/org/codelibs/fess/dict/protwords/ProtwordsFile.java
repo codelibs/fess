@@ -170,7 +170,8 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             for (int i = 0; i < s.length(); i++) {
                 final char ch = s.charAt(i);
                 if (ch == '\\' && i < s.length() - 1) {
-                    sb.append(s.charAt(++i));
+                    i++;
+                    sb.append(s.charAt(i));
                 } else {
                     sb.append(ch);
                 }
@@ -220,27 +221,26 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
         public ProtwordsItem write(final ProtwordsItem oldItem) {
             try {
-                if (item != null && item.getId() == oldItem.getId() && item.isUpdated()) {
-                    if (item.equals(oldItem)) {
-                        try {
-                            if (!item.isDeleted()) {
-                                // update
-                                writer.write(item.toLineString());
-                                writer.write(Constants.LINE_SEPARATOR);
-                                return new ProtwordsItem(item.getId(), item.getNewInput());
-                            } else {
-                                return null;
-                            }
-                        } finally {
-                            item.setNewInput(null);
-                        }
-                    } else {
-                        throw new DictionaryException("Protwords file was updated: old=" + oldItem + " : new=" + item);
-                    }
-                } else {
+                if ((item == null) || (item.getId() != oldItem.getId()) || !item.isUpdated()) {
                     writer.write(oldItem.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;
+                }
+                if (item.equals(oldItem)) {
+                    try {
+                        if (!item.isDeleted()) {
+                            // update
+                            writer.write(item.toLineString());
+                            writer.write(Constants.LINE_SEPARATOR);
+                            return new ProtwordsItem(item.getId(), item.getNewInput());
+                        } else {
+                            return null;
+                        }
+                    } finally {
+                        item.setNewInput(null);
+                    }
+                } else {
+                    throw new DictionaryException("Protwords file was updated: old=" + oldItem + " : new=" + item);
                 }
             } catch (final IOException e) {
                 throw new DictionaryException("Failed to write: " + oldItem + " -> " + item, e);

@@ -262,7 +262,8 @@ public class AdminStorageAction extends FessAdminAction {
         final String[] values = decodeId(id);
         if (StringUtil.isEmpty(values[0]) && StringUtil.isEmpty(values[1])) {
             return StringUtil.EMPTY;
-        } else if (StringUtil.isEmpty(values[0])) {
+        }
+        if (StringUtil.isEmpty(values[0])) {
             return values[1];
         } else {
             return values[0] + "/" + values[1];
@@ -275,7 +276,8 @@ public class AdminStorageAction extends FessAdminAction {
         if (values.length == 0) {
             // invalid?
             return new String[] { StringUtil.EMPTY, StringUtil.EMPTY };
-        } else if (values.length == 1) {
+        }
+        if (values.length == 1) {
             return new String[] { StringUtil.EMPTY, values[0] };
         } else {
             final StringBuilder buf = new StringBuilder();

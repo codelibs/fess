@@ -95,9 +95,8 @@ public class ProtwordsItem extends DictionaryItem {
     public String toLineString() {
         if (isUpdated()) {
             return StringUtils.join(newInput);
-        } else {
-            return StringUtils.join(input);
         }
+        return StringUtils.join(input);
     }
 
 }

@@ -56,7 +56,8 @@ public class SsoAction extends FessLoginAction {
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             }
             return redirect(LoginAction.class);
-        } else if (loginCredential instanceof ActionResponseCredential) {
+        }
+        if (loginCredential instanceof ActionResponseCredential) {
             return ((ActionResponseCredential) loginCredential).execute();
         }
         try {

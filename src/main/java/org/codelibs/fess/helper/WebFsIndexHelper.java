@@ -373,7 +373,7 @@ public class WebFsIndexHelper {
             // check status
             for (int i = 0; i < startedCrawlerNum; i++) {
                 if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
-                        && crawlerStatusList.get(i).equals(Constants.RUNNING)) {
+                        && Constants.RUNNING.equals(crawlerStatusList.get(i))) {
                     crawlerList.get(i).awaitTermination();
                     crawlerStatusList.set(i, Constants.DONE);
                     final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
@@ -390,12 +390,12 @@ public class WebFsIndexHelper {
             for (int i = 0; i < crawlerList.size(); i++) {
                 crawlerList.get(i).awaitTermination(crawlingExecutionInterval);
                 if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
-                        && !crawlerStatusList.get(i).equals(Constants.DONE)) {
+                        && !Constants.DONE.equals(crawlerStatusList.get(i))) {
                     crawlerStatusList.set(i, Constants.DONE);
                     final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
                     indexUpdater.addFinishedSessionId(sid);
                 }
-                if (!crawlerStatusList.get(i).equals(Constants.DONE)) {
+                if (!Constants.DONE.equals(crawlerStatusList.get(i))) {
                     finishedAll = false;
                 }
             }

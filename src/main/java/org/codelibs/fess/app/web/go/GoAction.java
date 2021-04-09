@@ -127,27 +127,26 @@ public class GoAction extends FessSearchAction {
         }
 
         final String targetUrl = pathMappingHelper.replaceUrl(url);
-        if (isFileSystemPath(targetUrl)) {
-            if (fessConfig.isSearchFileProxyEnabled()) {
-                final ViewHelper viewHelper = ComponentUtil.getViewHelper();
-                try {
-                    final StreamResponse response = viewHelper.asContentResponse(doc);
-                    if (response.getHttpStatus().orElse(200) == 404) {
-                        logger.debug("Not found: {}", targetUrl);
-                        saveError(messages -> messages.addErrorsNotFoundOnFileSystem(GLOBAL, targetUrl));
-                        return redirect(ErrorAction.class);
-                    }
-                    return response;
-                } catch (final Exception e) {
-                    logger.warn("Failed to load: {}", doc, e);
-                    saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
+        if (!isFileSystemPath(targetUrl)) {
+            return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
+        }
+        if (fessConfig.isSearchFileProxyEnabled()) {
+            final ViewHelper viewHelper = ComponentUtil.getViewHelper();
+            try {
+                final StreamResponse response = viewHelper.asContentResponse(doc);
+                if (response.getHttpStatus().orElse(200) == 404) {
+                    logger.debug("Not found: {}", targetUrl);
+                    saveError(messages -> messages.addErrorsNotFoundOnFileSystem(GLOBAL, targetUrl));
                     return redirect(ErrorAction.class);
                 }
-            } else {
-                return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
+                return response;
+            } catch (final Exception e) {
+                logger.warn("Failed to load: {}", doc, e);
+                saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
+                return redirect(ErrorAction.class);
             }
         } else {
-            return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
+            return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
         }
     }
 

@@ -30,9 +30,8 @@ public class WebApiRequest extends HttpServletRequestWrapper {
     public String getServletPath() {
         if (getQueryString() != null && getQueryString().indexOf("SAStruts.method") != -1) {
             return super.getServletPath();
-        } else {
-            return servletPath;
         }
+        return servletPath;
     }
 
 }

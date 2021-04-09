@@ -54,18 +54,16 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.groups");
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
-        } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
         }
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
     protected static String[] getDefaultRolesAsArray() {
         final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.roles");
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
-        } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
         }
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
     public static class OpenIdUser implements FessUser {

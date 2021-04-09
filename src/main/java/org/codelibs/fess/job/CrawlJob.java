@@ -253,7 +253,7 @@ public class CrawlJob extends ExecJob {
 
         final String systemLastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(systemLastaEnv)) {
-            if (systemLastaEnv.equals("web")) {
+            if ("web".equals(systemLastaEnv)) {
                 cmdList.add("-Dlasta.env=" + getExecuteType());
             } else {
                 cmdList.add("-Dlasta.env=" + systemLastaEnv);
@@ -274,7 +274,7 @@ public class CrawlJob extends ExecJob {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {
             cmdList.add("-Dfess.log.level=" + logLevel);
-            if (logLevel.equalsIgnoreCase("debug")) {
+            if ("debug".equalsIgnoreCase(logLevel)) {
                 cmdList.add("-Dorg.apache.tika.service.error.warn=true");
             }
         }

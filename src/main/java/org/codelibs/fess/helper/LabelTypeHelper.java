@@ -254,25 +254,7 @@ public class LabelTypeHelper {
         }
 
         public boolean match(final String path) {
-            if (includedPaths != null) {
-                if (includedPaths.matcher(path).matches()) {
-                    if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Path {} matches the include/exclude path expression {} on {} of label.", path, excludedPaths,
-                                    value);
-                        }
-                        return false;
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Path {} matches the include path expression {} on {} of label.", path, excludedPaths, value);
-                    }
-                    return true;
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Path {} does not match the include path expression {} on {} of label.", path, excludedPaths, value);
-                }
-                return false;
-            } else {
+            if (includedPaths == null) {
                 if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Path {} matches the exclude path expression {} on {} of label.", path, excludedPaths, value);
@@ -284,6 +266,22 @@ public class LabelTypeHelper {
                 }
                 return true;
             }
+            if (includedPaths.matcher(path).matches()) {
+                if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Path {} matches the include/exclude path expression {} on {} of label.", path, excludedPaths, value);
+                    }
+                    return false;
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Path {} matches the include path expression {} on {} of label.", path, excludedPaths, value);
+                }
+                return true;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Path {} does not match the include path expression {} on {} of label.", path, excludedPaths, value);
+            }
+            return false;
         }
 
     }

@@ -79,7 +79,8 @@ public class ThumbnailAction extends FessSearchAction {
         final String path = imageFile.getAbsolutePath();
         if (path.endsWith(".png")) {
             return "image/png";
-        } else if (path.endsWith(".gif")) {
+        }
+        if (path.endsWith(".gif")) {
             return "image/gif";
         } else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
             return "image/jpeg";

@@ -473,7 +473,8 @@ public class SearchLogService {
     public OptionalEntity<?> getSearchLog(final String logType, final String id) {
         if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
             return clickLogBhv.selectByPK(id);
-        } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
+        }
+        if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
             return favoriteLogBhv.selectByPK(id);
         } else if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
             return userInfoBhv.selectByPK(id);
@@ -491,7 +492,8 @@ public class SearchLogService {
                 params.put("Updated Time", FessFunctions.formatDate(e.getUpdatedAt()));
                 return params;
             }).get();
-        } else if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
+        }
+        if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
             return clickLogBhv.selectByPK(id).map(e -> {
                 final Map<String, String> params = new LinkedHashMap<>();
                 params.put("ID", e.getId());

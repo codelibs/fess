@@ -222,9 +222,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                 } catch (final CrawlingAccessException e) {
                     if (logger.isDebugEnabled()) {
                         throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
-                    } else {
-                        throw new ThumbnailGenerationException(e.getMessage());
                     }
+                    throw new ThumbnailGenerationException(e.getMessage());
                 } catch (final Exception e) {
                     throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
                 }

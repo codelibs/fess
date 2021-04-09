@@ -163,9 +163,8 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
             protected String getShowErrorsForwardPath(final ActionRuntime runtime) {
                 if (FessAdminAction.class.isAssignableFrom(runtime.getActionType())) {
                     return "/admin/error/error.jsp";
-                } else {
-                    return "/error/system.jsp";
                 }
+                return "/error/system.jsp";
             }
         });
     }

@@ -205,11 +205,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             validateNonce(stateData, authData);
 
             return new AzureAdCredential(authData);
-        } else {
-            final AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse) authResponse;
-            throw new SsoLoginException(String.format("Request for auth code failed: %s - %s", oidcResponse.getErrorObject().getCode(),
-                    oidcResponse.getErrorObject().getDescription()));
         }
+        final AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse) authResponse;
+        throw new SsoLoginException(String.format("Request for auth code failed: %s - %s", oidcResponse.getErrorObject().getCode(),
+                oidcResponse.getErrorObject().getDescription()));
     }
 
     protected AuthenticationResponse parseAuthenticationResponse(final String url, final Map<String, List<String>> params) {
@@ -344,7 +343,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("HTTP Method: {}", request.getMethod());
         }
-        if (!request.getMethod().equalsIgnoreCase("POST")) {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
             return false;
         }
         final Map<String, String[]> params = request.getParameterMap();
@@ -510,21 +509,19 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String value = ComponentUtil.getFessConfig().getSystemProperty("aad.default.groups");
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();
-        } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
         }
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
     }
 
     protected List<String> getDefaultRoleList() {
         final String value = ComponentUtil.getFessConfig().getSystemProperty("aad.default.roles");
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();
-        } else {
-            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
         }
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
     }
 
-    protected class StateData {
+    protected static class StateData {
         private final String nonce;
         private final long expiration;
 

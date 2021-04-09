@@ -190,7 +190,7 @@ public interface FessProp {
         final String value = getSystemProperty(key);
         if (value != null) {
             try {
-                return Integer.valueOf(value);
+                return Integer.parseInt(value);
             } catch (final NumberFormatException e) {
                 // ignore
             }
@@ -223,7 +223,8 @@ public interface FessProp {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
-                    } else if (pair.length == 2) {
+                    }
+                    if (pair.length == 2) {
                         String sortValue = pair[1].trim();
                         if (StringUtil.isBlank(sortValue) || "score".equals(sortValue)) {
                             sortValue = "score.desc";
@@ -241,8 +242,8 @@ public interface FessProp {
                 return p.getSecond();
             }
             if (userBean
-                    .map(user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s)))
-                            || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))))
+                    .map(user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> (ROLE_VALUE_PREFIX + s).equals(key)))
+                            || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> (GROUP_VALUE_PREFIX + s).equals(key))))
                     .orElse(false)) {
                 return p.getSecond();
             }
@@ -272,7 +273,8 @@ public interface FessProp {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
-                    } else if (pair.length == 2) {
+                    }
+                    if (pair.length == 2) {
                         return new Pair<>(pair[0].trim(), pair[1].trim());
                     }
                     return null;
@@ -287,8 +289,8 @@ public interface FessProp {
                 return e.getValue().stream();
             }
             if (userBean
-                    .map(user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s)))
-                            || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))))
+                    .map(user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> (ROLE_VALUE_PREFIX + s).equals(key)))
+                            || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> (GROUP_VALUE_PREFIX + s).equals(key))))
                     .orElse(false)) {
                 return e.getValue().stream();
             }
@@ -836,7 +838,8 @@ public interface FessProp {
                 if (v.length == 1) {
                     final int x = DfTypeUtil.toInteger(v[0].trim());
                     return new Pair<>(x, x);
-                } else if (v.length == 2) {
+                }
+                if (v.length == 2) {
                     final int x = DfTypeUtil.toInteger(v[0].trim());
                     final int y = DfTypeUtil.toInteger(v[1].trim());
                     return new Pair<>(x, y);
@@ -902,7 +905,8 @@ public interface FessProp {
     default String getJobTemplateTitle(final String type) {
         if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleWeb();
-        } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+        }
+        if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleFile();
         } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleData();
@@ -953,7 +957,8 @@ public interface FessProp {
                     final String[] subValues = values[1].split(":", 3);
                     if (subValues.length == 3) {
                         return new Tuple4<>(values[0], subValues[0], subValues[1], subValues[2]);
-                    } else if (subValues.length == 2) {
+                    }
+                    if (subValues.length == 2) {
                         return new Tuple4<>(values[0], subValues[0], subValues[1], StringUtil.EMPTY);
                     } else {
                         return new Tuple4<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY, StringUtil.EMPTY);
@@ -988,7 +993,7 @@ public interface FessProp {
     String getQueryReplaceTermWithPrefixQuery();
 
     default boolean getQueryReplaceTermWithPrefixQueryAsBoolean() {
-        return Boolean.valueOf(getQueryReplaceTermWithPrefixQuery());
+        return Boolean.parseBoolean(getQueryReplaceTermWithPrefixQuery());
     }
 
     String getQueryDefaultLanguages();
@@ -1664,10 +1669,9 @@ public interface FessProp {
                 final SortBuilder[] sortBuilders = split(sorts, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
                     final String[] values = s.split(":");
                     if (values.length > 1) {
-                        return SortBuilders.fieldSort(values[0]).order(values[0].equalsIgnoreCase("desc") ? SortOrder.DESC : SortOrder.ASC);
-                    } else {
-                        return SortBuilders.fieldSort(values[0]).order(SortOrder.ASC);
+                        return SortBuilders.fieldSort(values[0]).order("desc".equalsIgnoreCase(values[0]) ? SortOrder.DESC : SortOrder.ASC);
                     }
+                    return SortBuilders.fieldSort(values[0]).order(SortOrder.ASC);
                 }).toArray(n -> new SortBuilder[n]));
                 ot = OptionalThing.of(sortBuilders);
             }
@@ -1854,7 +1858,8 @@ public interface FessProp {
             final String[] values = name.split("\\\\");
             if (values.length == 0) {
                 return null;
-            } else if (values.length == 1) {
+            }
+            if (values.length == 1) {
                 return values[0];
             }
             return String.join("\\", Arrays.copyOfRange(values, 1, values.length));

@@ -61,7 +61,8 @@ public class WebAuthentication extends BsWebAuthentication {
         final String scheme = getProtocolScheme();
         if (Constants.BASIC.equals(scheme)) {
             return new BasicScheme();
-        } else if (Constants.DIGEST.equals(scheme)) {
+        }
+        if (Constants.DIGEST.equals(scheme)) {
             return new DigestScheme();
         } else if (Constants.NTLM.equals(scheme)) {
             final Properties props = new Properties();

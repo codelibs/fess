@@ -68,14 +68,15 @@ public class FacetInfo {
             final String[] values = sort.split("\\.");
             final boolean asc;
             if (values.length > 1) {
-                asc = !values[1].equalsIgnoreCase("desc");
+                asc = !"desc".equalsIgnoreCase(values[1]);
             } else {
                 asc = true;
             }
             if (values.length > 0) {
                 if ("term".equals(values[0]) || "key".equals(values[0])) {
                     return BucketOrder.key(asc);
-                } else if ("count".equals(values[0])) {
+                }
+                if ("count".equals(values[0])) {
                     return BucketOrder.count(asc);
                 }
             }

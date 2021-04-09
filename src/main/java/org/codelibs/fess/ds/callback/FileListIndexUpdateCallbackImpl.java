@@ -165,7 +165,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         final Object recursive = dataMap.remove(getParamValue(paramMap, "field.recursive", "recursive"));
         if (recursive == null || Constants.FALSE.equalsIgnoreCase(recursive.toString())) {
             return 1L;
-        } else if (Constants.TRUE.equalsIgnoreCase(recursive.toString())) {
+        }
+        if (Constants.TRUE.equalsIgnoreCase(recursive.toString())) {
             return -1L;
         }
         try {

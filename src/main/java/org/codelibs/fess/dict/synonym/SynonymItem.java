@@ -129,7 +129,8 @@ public class SynonymItem extends DictionaryItem {
             } else {
                 return StringUtils.join(newInputs, ",") + "=>" + StringUtils.join(newOutputs, ",");
             }
-        } else if (Arrays.equals(inputs, outputs)) {
+        }
+        if (Arrays.equals(inputs, outputs)) {
             return StringUtils.join(inputs, ",");
         } else {
             return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");

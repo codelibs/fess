@@ -288,7 +288,7 @@ public class AdminBackupAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
         if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
-            if (id.equals("system.properties")) {
+            if ("system.properties".equals(id)) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {
                     try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                         ComponentUtil.getSystemProperties().store(baos, id);
@@ -297,7 +297,8 @@ public class AdminBackupAction extends FessAdminAction {
                         }
                     }
                 });
-            } else if (id.endsWith(NDJSON_EXTENTION)) {
+            }
+            if (id.endsWith(NDJSON_EXTENTION)) {
                 final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
@@ -308,14 +309,14 @@ public class AdminBackupAction extends FessAdminAction {
                 } else if ("favorite_log".equals(name)) {
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
                 }
-            } else if (id.equals("fess.json")) {
+            } else if ("fess.json".equals(id)) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {
                     final Path fessJsonPath = getFessJsonPath();
                     try (final InputStream in = Files.newInputStream(fessJsonPath)) {
                         out.write(in);
                     }
                 });
-            } else if (id.equals("doc.json")) {
+            } else if ("doc.json".equals(id)) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {
                     final Path fessJsonPath = getDocJsonPath();
                     try (final InputStream in = Files.newInputStream(fessJsonPath)) {

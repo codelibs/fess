@@ -244,39 +244,37 @@ public class SearchEngineClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
-        if (StringUtil.isBlank(httpAddress)) {
-            if (runner == null) {
-                switch (fessConfig.getFesenType()) {
-                case Constants.FESEN_TYPE_CLOUD:
-                case Constants.FESEN_TYPE_AWS:
-                    httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
-                    break;
-                default:
-                    runner = new FesenRunner();
-                    final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
-                    final String esDir = System.getProperty("fess.es.dir");
-                    if (esDir != null) {
-                        config.basePath(esDir);
-                    }
-                    config.disableESLogger();
-                    runner.onBuild((number, settingsBuilder) -> {
-                        final File pluginDir = new File(esDir, "plugins");
-                        if (pluginDir.isDirectory()) {
-                            settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
-                        } else {
-                            settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
-                        }
-                        if (settings != null) {
-                            settingsBuilder.putProperties(settings, s -> s);
-                        }
-                    });
-                    runner.build(config);
-
-                    final int port = runner.node().settings().getAsInt("http.port", 9200);
-                    httpAddress = "http://localhost:" + port;
-                    logger.warn("Embedded Fesen is running. This configuration is not recommended for production use.");
-                    break;
+        if (StringUtil.isBlank(httpAddress) && (runner == null)) {
+            switch (fessConfig.getFesenType()) {
+            case Constants.FESEN_TYPE_CLOUD:
+            case Constants.FESEN_TYPE_AWS:
+                httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
+                break;
+            default:
+                runner = new FesenRunner();
+                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
+                final String esDir = System.getProperty("fess.es.dir");
+                if (esDir != null) {
+                    config.basePath(esDir);
                 }
+                config.disableESLogger();
+                runner.onBuild((number, settingsBuilder) -> {
+                    final File pluginDir = new File(esDir, "plugins");
+                    if (pluginDir.isDirectory()) {
+                        settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
+                    } else {
+                        settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
+                    }
+                    if (settings != null) {
+                        settingsBuilder.putProperties(settings, s -> s);
+                    }
+                });
+                runner.build(config);
+
+                final int port = runner.node().settings().getAsInt("http.port", 9200);
+                httpAddress = "http://localhost:" + port;
+                logger.warn("Embedded Fesen is running. This configuration is not recommended for production use.");
+                break;
             }
         }
         client = createHttpClient(fessConfig, httpAddress);
@@ -293,7 +291,7 @@ public class SearchEngineClient implements Client {
                 final String configIndex = values[0];
                 final String configType = values[1];
 
-                final boolean isFessIndex = configIndex.equals("fess");
+                final boolean isFessIndex = "fess".equals(configIndex);
                 final String indexName;
                 if (isFessIndex) {
                     final boolean exists = existsIndex(fessConfig.getIndexDocumentUpdateIndex());
@@ -379,9 +377,8 @@ public class SearchEngineClient implements Client {
                 .param("wait_for_completion", Boolean.toString(waitForCompletion)).body(source).execute()) {
             if (response.getHttpStatusCode() == 200) {
                 return true;
-            } else {
-                logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex);
             }
+            logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex);
         } catch (final IOException e) {
             logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
         }
@@ -419,7 +416,8 @@ public class SearchEngineClient implements Client {
             if (indexResponse.isAcknowledged()) {
                 logger.info("Created {} index.", indexName);
                 return true;
-            } else if (logger.isDebugEnabled()) {
+            }
+            if (logger.isDebugEnabled()) {
                 logger.debug("Failed to create {} index.", indexName);
             }
         } catch (final Exception e) {
@@ -527,7 +525,7 @@ public class SearchEngineClient implements Client {
                 stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(stream -> stream.forEach(f -> {
                     final String aliasName = f.getName().replaceFirst(".json$", "");
                     String source = FileUtil.readUTF8(f);
-                    if (source.trim().equals("{}")) {
+                    if ("{}".equals(source.trim())) {
                         source = null;
                     }
                     final AcknowledgedResponse response = client.admin().indices().prepareAliases()
@@ -593,7 +591,8 @@ public class SearchEngineClient implements Client {
                                 });
                         if (result.containsKey("index") || result.containsKey("update")) {
                             return line;
-                        } else if (result.containsKey("delete")) {
+                        }
+                        if (result.containsKey("delete")) {
                             return StringUtil.EMPTY;
                         }
                     } else {
@@ -664,13 +663,12 @@ public class SearchEngineClient implements Client {
                 if (httpStatusCode == 200) {
                     logger.info("ConfigSync is ready.");
                     return;
+                }
+                final String message = "Configsync is not available. HTTP Status is " + httpStatusCode;
+                if (response.getContentException() != null) {
+                    throw new FessSystemException(message, response.getContentException());
                 } else {
-                    final String message = "Configsync is not available. HTTP Status is " + httpStatusCode;
-                    if (response.getContentException() != null) {
-                        throw new FessSystemException(message, response.getContentException());
-                    } else {
-                        throw new FessSystemException(message);
-                    }
+                    throw new FessSystemException(message);
                 }
             } catch (final Exception e) {
                 cause = new FessSystemException("Configsync is not available.", e);
@@ -1181,11 +1179,11 @@ public class SearchEngineClient implements Client {
         protected void buildTrackTotalHits(final FessConfig fessConfig) {
             if (StringUtil.isNotBlank(trackTotalHits)) {
                 if (Constants.TRUE.equalsIgnoreCase(trackTotalHits) || Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
-                    searchRequestBuilder.setTrackTotalHits(Boolean.valueOf(trackTotalHits));
+                    searchRequestBuilder.setTrackTotalHits(Boolean.parseBoolean(trackTotalHits));
                     return;
                 }
                 try {
-                    searchRequestBuilder.setTrackTotalHitsUpTo(Integer.valueOf(trackTotalHits));
+                    searchRequestBuilder.setTrackTotalHitsUpTo(Integer.parseInt(trackTotalHits));
                     return;
                 } catch (final NumberFormatException e) {
                     // ignore
@@ -1201,24 +1199,23 @@ public class SearchEngineClient implements Client {
 
         protected void buildFacet(final QueryHelper queryHelper, final FessConfig fessConfig) {
             stream(facetInfo.field).of(stream -> stream.forEach(f -> {
-                if (queryHelper.isFacetField(f)) {
-                    final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
-                    final TermsAggregationBuilder termsBuilder =
-                            AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
-                    termsBuilder.order(facetInfo.getBucketOrder());
-                    if (facetInfo.size != null) {
-                        termsBuilder.size(facetInfo.size);
-                    }
-                    if (facetInfo.minDocCount != null) {
-                        termsBuilder.minDocCount(facetInfo.minDocCount);
-                    }
-                    if (facetInfo.missing != null) {
-                        termsBuilder.missing(facetInfo.missing);
-                    }
-                    searchRequestBuilder.addAggregation(termsBuilder);
-                } else {
+                if (!queryHelper.isFacetField(f)) {
                     throw new SearchQueryException("Invalid facet field: " + f);
                 }
+                final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
+                final TermsAggregationBuilder termsBuilder =
+                        AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
+                termsBuilder.order(facetInfo.getBucketOrder());
+                if (facetInfo.size != null) {
+                    termsBuilder.size(facetInfo.size);
+                }
+                if (facetInfo.minDocCount != null) {
+                    termsBuilder.minDocCount(facetInfo.minDocCount);
+                }
+                if (facetInfo.missing != null) {
+                    termsBuilder.missing(facetInfo.missing);
+                }
+                searchRequestBuilder.addAggregation(termsBuilder);
             }));
             stream(facetInfo.query).of(stream -> stream.forEach(fq -> {
                 final QueryContext facetContext = new QueryContext(fq, false);

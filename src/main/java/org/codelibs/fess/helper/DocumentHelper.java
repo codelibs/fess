@@ -198,26 +198,25 @@ public class DocumentHelper {
             final Rule rule = ruleManager.getRule(responseData);
             if (rule == null) {
                 throw new CrawlingAccessException("No url rule for " + url);
-            } else {
-                responseData.setRuleId(rule.getRuleId());
-                final ResponseProcessor responseProcessor = rule.getResponseProcessor();
-                if (responseProcessor instanceof DefaultResponseProcessor) {
-                    final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
-                    final ResultData resultData = transformer.transform(responseData);
-                    final byte[] data = resultData.getData();
-                    if (data != null) {
-                        try {
-                            @SuppressWarnings("unchecked")
-                            final Map<String, Object> result = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
-                            return result;
-                        } catch (final Exception e) {
-                            throw new CrawlerSystemException("Could not create an instance from bytes.", e);
-                        }
+            }
+            responseData.setRuleId(rule.getRuleId());
+            final ResponseProcessor responseProcessor = rule.getResponseProcessor();
+            if (responseProcessor instanceof DefaultResponseProcessor) {
+                final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
+                final ResultData resultData = transformer.transform(responseData);
+                final byte[] data = resultData.getData();
+                if (data != null) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Object> result = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
+                        return result;
+                    } catch (final Exception e) {
+                        throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                     }
-                } else {
-                    throw new CrawlingAccessException("The response processor is not DefaultResponseProcessor. responseProcessor: "
-                            + responseProcessor + ", url: " + url);
                 }
+            } else {
+                throw new CrawlingAccessException("The response processor is not DefaultResponseProcessor. responseProcessor: "
+                        + responseProcessor + ", url: " + url);
             }
             return null;
         } catch (final Exception e) {

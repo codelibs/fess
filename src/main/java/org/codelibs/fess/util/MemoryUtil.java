@@ -52,7 +52,8 @@ public final class MemoryUtil {
     public static long sizeOf(final Object obj) {
         if (obj == null) {
             return 0L;
-        } else if (obj instanceof String) {
+        }
+        if (obj instanceof String) {
             return ((String) obj).length() + 56L;
         } else if (obj instanceof Number) {
             return 24L;

@@ -54,9 +54,9 @@ public class QueryStringBuilder {
         }
 
         String newValue = value;
-        for (int i = 0; i < Constants.RESERVED.length; i++) {
-            final String replacement = Constants.RESERVED[i].replaceAll("(.)", "\\\\$1");
-            newValue = newValue.replace(Constants.RESERVED[i], replacement);
+        for (final String element : Constants.RESERVED) {
+            final String replacement = element.replaceAll("(.)", "\\\\$1");
+            newValue = newValue.replace(element, replacement);
         }
         return newValue;
     }
@@ -98,7 +98,7 @@ public class QueryStringBuilder {
             }
         }));
 
-        String baseQuery = queryBuf.toString().trim();
+        final String baseQuery = queryBuf.toString().trim();
         if (StringUtil.isBlank(sortField)) {
             return baseQuery;
         }

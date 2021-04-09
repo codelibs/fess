@@ -67,10 +67,10 @@ public abstract class AbstractDataStore implements DataStore {
         final Map<String, String> configParamMap = config.getHandlerParameterMap().entrySet().stream().map(e -> {
             final String key = e.getKey();
             String value = e.getValue();
-            for (Map.Entry<String, String> entry : paramEnvMap.entrySet()) {
+            for (final Map.Entry<String, String> entry : paramEnvMap.entrySet()) {
                 value = value.replace("${" + entry.getKey() + "}", entry.getValue());
             }
-            return new Pair<String, String>(key, value);
+            return new Pair<>(key, value);
         }).collect(Collectors.toMap(Pair<String, String>::getFirst, Pair<String, String>::getSecond));
         final Map<String, String> configScriptMap = config.getHandlerScriptMap();
 

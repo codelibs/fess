@@ -77,7 +77,7 @@ public class CorsFilter implements Filter {
             httpResponse.addHeader(ACCESS_CONTROL_MAX_AGE, fessConfig.getApiCorsMaxAge());
             httpResponse.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, fessConfig.getApiCorsAllowCredentials());
 
-            if (httpRequest.getMethod().equals(OPTIONS)) {
+            if (OPTIONS.equals(httpRequest.getMethod())) {
                 httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
                 return;
             }

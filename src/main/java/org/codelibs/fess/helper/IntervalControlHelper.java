@@ -119,16 +119,15 @@ public class IntervalControlHelper {
         }
 
         public boolean isTarget(final int hours, final int minutes, final int day) {
-            if (reverse) {
-                if ((compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1))
-                        || (compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day))) {
-                    return true;
-                }
-                return false;
-            } else {
+            if (!reverse) {
                 return compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && compareTime(hours, minutes, toHours, toMinutes) >= 0
                         && isInDays(day);
             }
+            if ((compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1))
+                    || (compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day))) {
+                return true;
+            }
+            return false;
         }
 
         private boolean isInDays(final int day) {
@@ -152,7 +151,8 @@ public class IntervalControlHelper {
         protected int compareTime(final int h1, final int m1, final int h2, final int m2) {
             if (h1 < h2) {
                 return 1;
-            } else if (h1 == h2) {
+            }
+            if (h1 == h2) {
                 if (m1 == m2) {
                     return 0;
                 } else if (m1 < m2) {

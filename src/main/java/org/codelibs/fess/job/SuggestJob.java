@@ -137,7 +137,7 @@ public class SuggestJob extends ExecJob {
 
         final String systemLastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(systemLastaEnv)) {
-            if (systemLastaEnv.equals("web")) {
+            if ("web".equals(systemLastaEnv)) {
                 cmdList.add("-Dlasta.env=" + getExecuteType());
             } else {
                 cmdList.add("-Dlasta.env=" + systemLastaEnv);

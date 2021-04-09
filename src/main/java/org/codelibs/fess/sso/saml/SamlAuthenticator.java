@@ -232,18 +232,17 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 settings.setSPValidationOnly(true);
                 final String metadata = settings.getSPMetadata();
                 final List<String> errors = Saml2Settings.validateMetadata(metadata);
-                if (errors.isEmpty()) {
-                    return new StreamResponse("metadata").contentType("application/xhtml+xml").stream(out -> {
-                        try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
-                            writer.write(metadata);
-                        }
-                    });
-                } else {
+                if (!errors.isEmpty()) {
                     final String msg = errors.stream().collect(Collectors.joining(", "));
                     throw new SsoMessageException(
                             messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
                             "Failed to log out.", new SsoProcessException(msg));
                 }
+                return new StreamResponse("metadata").contentType("application/xhtml+xml").stream(out -> {
+                    try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
+                        writer.write(metadata);
+                    }
+                });
             } catch (final SsoMessageException e) {
                 throw e;
             } catch (final Exception e) {
@@ -268,12 +267,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 final List<String> errors = auth.getErrors();
                 if (errors.isEmpty()) {
                     throw new SsoMessageException(messages -> messages.addSuccessSsoLogout(UserMessages.GLOBAL_PROPERTY_KEY), "Logged out");
-                } else {
-                    final String msg = errors.stream().collect(Collectors.joining(", "));
-                    throw new SsoMessageException(
-                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to log out.", new SsoProcessException(msg));
                 }
+                final String msg = errors.stream().collect(Collectors.joining(", "));
+                throw new SsoMessageException(
+                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
+                        "Failed to log out.", new SsoProcessException(msg));
             } catch (final SsoMessageException e) {
                 throw e;
             } catch (final Exception e) {

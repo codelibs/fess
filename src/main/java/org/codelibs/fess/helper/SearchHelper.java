@@ -263,7 +263,8 @@ public class SearchHelper {
                 langSet.remove(Constants.ALL_LANGUAGES);
             }
             return langSet.toArray(new String[langSet.size()]);
-        } else if (ComponentUtil.getFessConfig().isBrowserLocaleForSearchUsed()) {
+        }
+        if (ComponentUtil.getFessConfig().isBrowserLocaleForSearchUsed()) {
             final Set<String> langSet = new HashSet<>();
             final Enumeration<Locale> locales = request.getLocales();
             if (locales != null) {
@@ -346,9 +347,8 @@ public class SearchHelper {
             final BulkResponse response = builder.execute().get();
             if (response.hasFailures()) {
                 throw new SearchEngineClientException(response.buildFailureMessage());
-            } else {
-                return true;
             }
+            return true;
         } catch (InterruptedException | ExecutionException e) {
             throw new SearchEngineClientException("Failed to update bulk data.", e);
         }

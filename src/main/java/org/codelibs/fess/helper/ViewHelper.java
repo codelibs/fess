@@ -433,10 +433,8 @@ public class ViewHelper {
             }
 
             final String mimetype = DocumentUtil.getValue(document, fessConfig.getIndexFieldMimetype(), String.class);
-            if (StringUtil.isNotBlank(mimetype)) {
-                if ("application/pdf".equals(mimetype)) {
-                    return appendPDFSearchWord(url);
-                }
+            if (StringUtil.isNotBlank(mimetype) && "application/pdf".equals(mimetype)) {
+                return appendPDFSearchWord(url);
             }
         }
         return url;
@@ -608,9 +606,8 @@ public class ViewHelper {
             final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
             if (size > -1) {
                 return StringUtils.abbreviate(site, size);
-            } else {
-                return site;
             }
+            return site;
         }
         final Object urlLink = docMap.get(fessConfig.getResponseFieldUrlLink());
         if (urlLink != null) {
@@ -626,9 +623,8 @@ public class ViewHelper {
             final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
             if (size > -1) {
                 return StringUtils.abbreviate(returnUrl, size);
-            } else {
-                return returnUrl;
             }
+            return returnUrl;
         }
         return null;
     }
@@ -746,9 +742,8 @@ public class ViewHelper {
         final String value = request.getHeader("x-forwarded-for");
         if (StringUtil.isNotBlank(value)) {
             return value;
-        } else {
-            return request.getRemoteAddr();
         }
+        return request.getRemoteAddr();
     }
 
     public FacetResponse getCachedFacetResponse(final String query) {

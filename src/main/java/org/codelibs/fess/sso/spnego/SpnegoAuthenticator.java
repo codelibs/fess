@@ -188,7 +188,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 } else {
                     return "0";
                 }
-            } else if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
             } else if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));

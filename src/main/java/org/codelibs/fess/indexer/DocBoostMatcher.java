@@ -57,7 +57,8 @@ public class DocBoostMatcher {
         final Object value = GroovyUtil.evaluate(boostExpression, map);
         if (value instanceof Integer) {
             return ((Integer) value).floatValue();
-        } else if (value instanceof Long) {
+        }
+        if (value instanceof Long) {
             return ((Long) value).floatValue();
         } else if (value instanceof Float) {
             return ((Float) value);

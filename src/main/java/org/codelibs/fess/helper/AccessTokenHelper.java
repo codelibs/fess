@@ -39,7 +39,8 @@ public class AccessTokenHelper {
             final String[] values = token.trim().split(" ");
             if (values.length == 2 && "Bearer".equals(values[0])) {
                 return values[1];
-            } else if (values.length == 1) {
+            }
+            if (values.length == 1) {
                 return values[0];
             }
             throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);

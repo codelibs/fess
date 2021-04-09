@@ -50,9 +50,8 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     public ApiResponse handleApplicationException(final ApiFailureResource resource, final RuntimeException cause) {
         if (cause instanceof LoginUnauthorizedException) {
             return asJson(createFailureBean(Status.UNAUTHORIZED, "Unauthorized request.")).httpStatus(HTTP_UNAUTHORIZED);
-        } else {
-            return asJson(createFailureBean(Status.BAD_REQUEST, createMessage(resource, cause))).httpStatus(HTTP_BAD_REQUEST);
         }
+        return asJson(createFailureBean(Status.BAD_REQUEST, createMessage(resource, cause))).httpStatus(HTTP_BAD_REQUEST);
     }
 
     // ===================================================================================

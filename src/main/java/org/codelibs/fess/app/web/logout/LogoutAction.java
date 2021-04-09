@@ -51,9 +51,8 @@ public class LogoutAction extends FessSearchAction {
         userInfoHelper.deleteUserCodeFromCookie(request);
         if (StringUtil.isNotBlank(redirectUrl)) {
             return HtmlResponse.fromRedirectPathAsIs(redirectUrl);
-        } else {
-            return redirect(LoginAction.class);
         }
+        return redirect(LoginAction.class);
     }
 
 }

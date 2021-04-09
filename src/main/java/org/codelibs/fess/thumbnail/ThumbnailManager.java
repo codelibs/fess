@@ -209,14 +209,13 @@ public class ThumbnailManager {
             cb.fetchFirst(fessConfig.getPageThumbnailQueueMaxFetchSizeAsInteger());
         }).stream().map(entity -> {
             idList.add(entity.getId());
-            if (cleanup) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Removing thumbnail queue: {}", entity);
-                }
-                return null;
-            } else {
+            if (!cleanup) {
                 return executorService.submit(() -> process(fessConfig, entity));
             }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing thumbnail queue: {}", entity);
+            }
+            return null;
         }).filter(f -> f != null).forEach(f -> {
             try {
                 f.get();

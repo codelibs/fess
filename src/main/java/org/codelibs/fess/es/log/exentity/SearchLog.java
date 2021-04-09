@@ -84,7 +84,8 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
     public OptionalEntity<UserInfo> getUserInfo() {
         if (getUserInfoId() == null) {
             return OptionalEntity.empty();
-        } else if (userInfo == null) {
+        }
+        if (userInfo == null) {
             final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
             userInfo = userInfoBhv.selectByPK(getUserInfoId());
         }

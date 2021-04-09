@@ -153,9 +153,10 @@ public class PathMappingHelper {
     }
 
     public BiFunction<String, Matcher, String> createPathMatcher(final Matcher matcher, final String replacement) { // for PathMapping
-        if (replacement.equals(FUNCTION_ENCODEURL_MATCHER)) {
+        if (FUNCTION_ENCODEURL_MATCHER.equals(replacement)) {
             return (u, m) -> DocumentUtil.encodeUrl(u);
-        } else if (replacement.startsWith(GROOVY_MATCHER)) {
+        }
+        if (replacement.startsWith(GROOVY_MATCHER)) {
             final String template = replacement.substring(GROOVY_MATCHER.length());
             return (u, m) -> {
                 final Map<String, Object> paramMap = new HashMap<>();

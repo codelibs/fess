@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -210,7 +211,7 @@ public class PluginHelper {
             for (final File file : jarFiles) {
                 list.add(getArtifactFromFileName(artifactType, file.getName()));
             }
-            list.sort((a, b) -> a.getName().compareTo(b.getName()));
+            list.sort(Comparator.comparing(Artifact::getName));
             return list.toArray(new Artifact[list.size()]);
         }
 
@@ -219,7 +220,7 @@ public class PluginHelper {
         for (final File file : jarFiles) {
             list.add(getArtifactFromFileName(artifactType, file.getName()));
         }
-        list.sort((a, b) -> a.getName().compareTo(b.getName()));
+        list.sort(Comparator.comparing(Artifact::getName));
         return list.toArray(new Artifact[list.size()]);
     }
 
@@ -262,7 +263,8 @@ public class PluginHelper {
         final String url = artifact.getUrl();
         if (StringUtil.isBlank(url)) {
             throw new PluginException("url is blank: " + artifact.getName());
-        } else if (url.startsWith("http:") || url.startsWith("https:")) {
+        }
+        if (url.startsWith("http:") || url.startsWith("https:")) {
             try (final CurlResponse response = createCurlRequest(url).execute()) {
                 if (response.getHttpStatusCode() != 200) {
                     throw new PluginException("HTTP Status " + response.getHttpStatusCode() + " : failed to get the artifact from " + url);
@@ -387,7 +389,8 @@ public class PluginHelper {
         public static ArtifactType getType(final String name) {
             if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
-            } else if (name.startsWith(THEME.getId())) {
+            }
+            if (name.startsWith(THEME.getId())) {
                 return THEME;
             } else if (name.startsWith(INGEST.getId())) {
                 return INGEST;

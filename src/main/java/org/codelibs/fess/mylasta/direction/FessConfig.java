@@ -325,7 +325,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. file,smb,smb1,ftp,storage */
     String CRAWLER_FILE_PROTOCOLS = "crawler.file.protocols";
 
-    /** The key of the configuration. e.g. ^FESS_ENV_ */
+    /** The key of the configuration. e.g. ^FESS_ENV_.* */
     String CRAWLER_DATA_ENV_PARAM_KEY_PATTERN = "crawler.data.env.param.key.pattern";
 
     /** The key of the configuration. e.g. false */
@@ -2522,7 +2522,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.data.env.param.key.pattern'. <br>
-     * The value is, e.g. ^FESS_ENV_ <br>
+     * The value is, e.g. ^FESS_ENV_.* <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDataEnvParamKeyPattern();
@@ -9864,7 +9864,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_WEB_PROTOCOLS, "http,https");
             defaultMap.put(FessConfig.CRAWLER_FILE_PROTOCOLS, "file,smb,smb1,ftp,storage");
-            defaultMap.put(FessConfig.CRAWLER_DATA_ENV_PARAM_KEY_PATTERN, "^FESS_ENV_");
+            defaultMap.put(FessConfig.CRAWLER_DATA_ENV_PARAM_KEY_PATTERN, "^FESS_ENV_.*");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");

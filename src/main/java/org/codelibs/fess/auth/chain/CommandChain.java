@@ -100,7 +100,8 @@ public class CommandChain implements AuthenticationChain {
         final String[] cmds = stream(commands).get(stream -> stream.map(s -> {
             if ("$USERNAME".equals(s)) {
                 return username;
-            } else if ("$PASSWORD".equals(s)) {
+            }
+            if ("$PASSWORD".equals(s)) {
                 return password;
             } else {
                 return s;

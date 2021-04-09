@@ -487,9 +487,8 @@ public final class ComponentUtil {
         } catch (final NullPointerException e) {
             if (logger.isDebugEnabled()) {
                 throw new ContainerNotAvailableException(clazz.getCanonicalName(), e);
-            } else {
-                throw new ContainerNotAvailableException(clazz.getCanonicalName());
             }
+            throw new ContainerNotAvailableException(clazz.getCanonicalName());
         }
     }
 
@@ -499,9 +498,8 @@ public final class ComponentUtil {
         } catch (final NullPointerException e) {
             if (logger.isDebugEnabled()) {
                 throw new ContainerNotAvailableException(componentName, e);
-            } else {
-                throw new ContainerNotAvailableException(componentName);
             }
+            throw new ContainerNotAvailableException(componentName);
         } catch (final ComponentNotFoundException e) {
             if (componentMap.containsKey(componentName)) {
                 @SuppressWarnings("unchecked")

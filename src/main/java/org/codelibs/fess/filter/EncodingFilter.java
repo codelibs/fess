@@ -122,9 +122,8 @@ public class EncodingFilter implements Filter {
         final String queryString = request.getQueryString();
         if (StringUtil.isNotBlank(queryString)) {
             return parseQueryString(queryString, enc);
-        } else {
-            return Collections.emptyMap();
         }
+        return Collections.emptyMap();
     }
 
     protected Map<String, String[]> parseQueryString(final String queryString, final String enc) throws IOException {

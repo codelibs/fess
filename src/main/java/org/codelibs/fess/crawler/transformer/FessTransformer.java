@@ -169,9 +169,8 @@ public interface FessTransformer {
         final int maxSiteLength = getMaxSiteLength();
         if (maxSiteLength > -1) {
             return StringUtils.abbreviate(value, maxSiteLength);
-        } else {
-            return value;
         }
+        return value;
     }
 
     default String getFileName(final String url, final String encoding) {

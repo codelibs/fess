@@ -180,10 +180,9 @@ public class AdminSchedulerAction extends FessAdminAction {
             // back
             form.crudMode = CrudMode.DETAILS;
             return asDetailsHtml(id);
-        } else {
-            form.crudMode = CrudMode.EDIT;
-            return asEditHtml();
         }
+        form.crudMode = CrudMode.EDIT;
+        return asEditHtml();
     }
 
     // -----------------------------------------------------

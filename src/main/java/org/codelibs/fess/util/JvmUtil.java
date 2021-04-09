@@ -30,19 +30,18 @@ public final class JvmUtil {
         final int version = getJavaVersion();
         return Arrays.stream(values).map(s -> {
             final Matcher matcher = VERSION_PREFIX_PATTERN.matcher(s);
-            if (matcher.matches()) {
-                final int v = Integer.parseInt(matcher.group(1));
-                if ("-".equals(matcher.group(2))) {
-                    if (version >= v) {
-                        return matcher.group(3);
-                    }
-                } else if (v == version) {
-                    return matcher.group(3);
-                }
-                return null;
-            } else {
+            if (!matcher.matches()) {
                 return s;
             }
+            final int v = Integer.parseInt(matcher.group(1));
+            if ("-".equals(matcher.group(2))) {
+                if (version >= v) {
+                    return matcher.group(3);
+                }
+            } else if (v == version) {
+                return matcher.group(3);
+            }
+            return null;
         }).filter(s -> s != null).toArray(n -> new String[n]);
     }
 

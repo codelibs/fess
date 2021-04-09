@@ -1024,13 +1024,12 @@ public class LdapManager {
         final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(username);
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(username), null, adminEnv, result -> {
-            if (!result.isEmpty()) {
-                final List<ModificationItem> modifyList = new ArrayList<>();
-                modifyReplaceEntry(modifyList, "userPassword", password);
-                modify(userDN, modifyList, adminEnv);
-            } else {
+            if (result.isEmpty()) {
                 throw new LdapOperationException("User is not found: " + username);
             }
+            final List<ModificationItem> modifyList = new ArrayList<>();
+            modifyReplaceEntry(modifyList, "userPassword", password);
+            modify(userDN, modifyList, adminEnv);
         });
         return true;
     }
@@ -1108,18 +1107,17 @@ public class LdapManager {
 
     protected DirContextHolder getDirContext(final Supplier<Hashtable<String, String>> envSupplier) {
         DirContextHolder holder = contextLocal.get();
-        if (holder == null) {
-            final Hashtable<String, String> env = envSupplier.get();
-            try {
-                holder = new DirContextHolder(new InitialDirContext(env));
-                contextLocal.set(holder);
-                return holder;
-            } catch (final NamingException e) {
-                throw new LdapOperationException("Failed to create DirContext.", e);
-            }
-        } else {
+        if (holder != null) {
             holder.inc();
             return holder;
+        }
+        final Hashtable<String, String> env = envSupplier.get();
+        try {
+            holder = new DirContextHolder(new InitialDirContext(env));
+            contextLocal.set(holder);
+            return holder;
+        } catch (final NamingException e) {
+            throw new LdapOperationException("Failed to create DirContext.", e);
         }
     }
 

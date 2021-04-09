@@ -119,7 +119,7 @@ public class EsApiManager extends BaseApiManager {
             }
         }
 
-        if (path.equals("/_plugin") || path.startsWith("/_plugin/")) {
+        if ("/_plugin".equals(path) || path.startsWith("/_plugin/")) {
             processPluginRequest(request, response, path.replaceFirst("^/_plugin", StringUtil.EMPTY));
             return;
         }
@@ -158,11 +158,10 @@ public class EsApiManager extends BaseApiManager {
                 logger.debug("Client aborts this request.", e);
             }
         } catch (final Exception e) {
-            if (e.getCause() instanceof ClientAbortException) {
-                logger.debug("Client aborts this request.", e);
-            } else {
+            if (!(e.getCause() instanceof ClientAbortException)) {
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
+            logger.debug("Client aborts this request.", e);
         }
     }
 

@@ -49,13 +49,12 @@ public class PrunedTag {
             if (id == null) {
                 if (css == null) {
                     return true;
-                } else {
-                    final Node classAttr = node.getAttributes().getNamedItem("class");
-                    if (classAttr != null) {
-                        final String value = classAttr.getNodeValue();
-                        if (StringUtil.isNotBlank(value)) {
-                            return StreamUtil.split(value, " ").get(stream -> stream.anyMatch(s -> css.equals(s)));
-                        }
+                }
+                final Node classAttr = node.getAttributes().getNamedItem("class");
+                if (classAttr != null) {
+                    final String value = classAttr.getNodeValue();
+                    if (StringUtil.isNotBlank(value)) {
+                        return StreamUtil.split(value, " ").get(stream -> stream.anyMatch(s -> css.equals(s)));
                     }
                 }
             } else {

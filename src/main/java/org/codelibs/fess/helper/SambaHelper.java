@@ -68,7 +68,8 @@ public class SambaHelper {
         final Integer id = fessConfig.getAvailableSmbSidType(type);
         if (id != null) {
             return createSearchRole(id, sid.getAccountName());
-        } else if (logger.isDebugEnabled()) {
+        }
+        if (logger.isDebugEnabled()) {
             logger.debug("Ignored SID: {} {}", type, sid);
         }
         return null;
@@ -86,7 +87,8 @@ public class SambaHelper {
         final Integer id = fessConfig.getAvailableSmbSidType(type);
         if (id != null) {
             return createSearchRole(id, sid.getAccountName());
-        } else if (logger.isDebugEnabled()) {
+        }
+        if (logger.isDebugEnabled()) {
             logger.debug("Ignored SID: {} {}", type, sid);
         }
         return null;

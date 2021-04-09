@@ -387,25 +387,24 @@ public class JsonApiManager extends BaseJsonApiManager {
             return "Unknown";
         }
         Throwable target = t;
-        if (target.getCause() != null) {
-            final StringBuilder sb = new StringBuilder();
-            while (target != null) {
-                sb.append(target.getClass().getSimpleName());
-                if (target.getMessage() != null) {
-                    sb.append("[");
-                    sb.append(target.getMessage());
-                    sb.append("]");
-                }
-                sb.append("; ");
-                target = target.getCause();
-                if (target != null) {
-                    sb.append("nested: ");
-                }
-            }
-            return sb.toString();
-        } else {
+        if (target.getCause() == null) {
             return target.getClass().getSimpleName() + "[" + target.getMessage() + "]";
         }
+        final StringBuilder sb = new StringBuilder();
+        while (target != null) {
+            sb.append(target.getClass().getSimpleName());
+            if (target.getMessage() != null) {
+                sb.append("[");
+                sb.append(target.getMessage());
+                sb.append("]");
+            }
+            sb.append("; ");
+            target = target.getCause();
+            if (target != null) {
+                sb.append("nested: ");
+            }
+        }
+        return sb.toString();
     }
 
     protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
@@ -532,7 +531,8 @@ public class JsonApiManager extends BaseJsonApiManager {
 
                         if (StringUtil.isBlank(userCode)) {
                             throw new WebApiException(2, "No user session.");
-                        } else if (StringUtil.isBlank(favoriteUrl)) {
+                        }
+                        if (StringUtil.isBlank(favoriteUrl)) {
                             throw new WebApiException(2, "URL is null.");
                         }
 
@@ -610,7 +610,8 @@ public class JsonApiManager extends BaseJsonApiManager {
 
             if (StringUtil.isBlank(userCode)) {
                 throw new WebApiException(2, "No user session.");
-            } else if (StringUtil.isBlank(queryId)) {
+            }
+            if (StringUtil.isBlank(queryId)) {
                 throw new WebApiException(3, "Query ID is null.");
             }
 

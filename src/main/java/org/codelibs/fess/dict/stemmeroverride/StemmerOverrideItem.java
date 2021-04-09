@@ -107,9 +107,8 @@ public class StemmerOverrideItem extends DictionaryItem {
     public String toLineString() {
         if (isUpdated()) {
             return newInput + "=>" + newOutput;
-        } else {
-            return input + "=>" + output;
         }
+        return input + "=>" + output;
     }
 
 }

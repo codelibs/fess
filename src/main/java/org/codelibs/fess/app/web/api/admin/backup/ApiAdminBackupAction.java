@@ -64,7 +64,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
     public StreamResponse get$file(final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
-            if (id.equals("system.properties")) {
+            if ("system.properties".equals(id)) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {
                     try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                         ComponentUtil.getSystemProperties().store(baos, id);
@@ -73,7 +73,8 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                         }
                     }
                 });
-            } else if (id.endsWith(NDJSON_EXTENTION)) {
+            }
+            if (id.endsWith(NDJSON_EXTENTION)) {
                 final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());

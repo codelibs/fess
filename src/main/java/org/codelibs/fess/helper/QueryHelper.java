@@ -427,7 +427,8 @@ public class QueryHelper {
     protected QueryBuilder convertQuery(final QueryContext context, final Query query, final float boost) {
         if (query instanceof TermQuery) {
             return convertTermQuery(context, (TermQuery) query, boost);
-        } else if (query instanceof TermRangeQuery) {
+        }
+        if (query instanceof TermRangeQuery) {
             return convertTermRangeQuery(context, (TermRangeQuery) query, boost);
         } else if (query instanceof PhraseQuery) {
             return convertPhraseQuery(context, (PhraseQuery) query, boost);
@@ -496,7 +497,8 @@ public class QueryHelper {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return buildDefaultQueryBuilder(
                     (f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(b * boost));
-        } else if (isSearchField(field)) {
+        }
+        if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(boost);
         } else {
@@ -514,7 +516,8 @@ public class QueryHelper {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders
                     .matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost));
-        } else if (isSearchField(field)) {
+        }
+        if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             if (notAnalyzedFieldSet.contains(field)) {
                 return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
@@ -538,7 +541,8 @@ public class QueryHelper {
             context.addFieldLog(field, term.text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, term.text())
                     .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
-        } else if (isSearchField(field)) {
+        }
+        if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
             return QueryBuilders.fuzzyQuery(field, term.text()).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()));
         } else {
@@ -552,33 +556,32 @@ public class QueryHelper {
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
         final String field = getSearchField(context, termRangeQuery.getField());
-        if (isSearchField(field)) {
-            context.addFieldLog(field, termRangeQuery.toString(field));
-            final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);
-            final BytesRef min = termRangeQuery.getLowerTerm();
-            if (min != null) {
-                if (termRangeQuery.includesLower()) {
-                    rangeQuery.gte(min.utf8ToString());
-                } else {
-                    rangeQuery.gt(min.utf8ToString());
-                }
-            }
-            final BytesRef max = termRangeQuery.getUpperTerm();
-            if (max != null) {
-                if (termRangeQuery.includesUpper()) {
-                    rangeQuery.lte(max.utf8ToString());
-                } else {
-                    rangeQuery.lt(max.utf8ToString());
-                }
-            }
-            rangeQuery.boost(boost);
-            return rangeQuery;
-        } else {
+        if (!isSearchField(field)) {
             final String origQuery = termRangeQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
         }
+        context.addFieldLog(field, termRangeQuery.toString(field));
+        final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);
+        final BytesRef min = termRangeQuery.getLowerTerm();
+        if (min != null) {
+            if (termRangeQuery.includesLower()) {
+                rangeQuery.gte(min.utf8ToString());
+            } else {
+                rangeQuery.gt(min.utf8ToString());
+            }
+        }
+        final BytesRef max = termRangeQuery.getUpperTerm();
+        if (max != null) {
+            if (termRangeQuery.includesUpper()) {
+                rangeQuery.lte(max.utf8ToString());
+            } else {
+                rangeQuery.lt(max.utf8ToString());
+            }
+        }
+        rangeQuery.boost(boost);
+        return rangeQuery;
     }
 
     protected QueryBuilder buildMatchPhraseQuery(final String f, final String text) {
@@ -605,7 +608,8 @@ public class QueryHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))), boost);
-        } else if (Constants.DEFAULT_FIELD.equals(field)) {
+        }
+        if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
             return buildDefaultTermQueryBuilder(boost, text);
@@ -800,7 +804,8 @@ public class QueryHelper {
             final Object accessType = r.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
             if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
                 return processJsonSearchPreference(r, query);
-            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+            }
+            if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
                 return processGsaSearchPreference(r, query);
             }
             return null;
@@ -811,7 +816,8 @@ public class QueryHelper {
         final String pref = ComponentUtil.getFessConfig().getQueryJsonDefaultPreference();
         if (PREFERENCE_QUERY.equals(pref)) {
             return Integer.toString(query.hashCode());
-        } else if (StringUtil.isNotBlank(pref)) {
+        }
+        if (StringUtil.isNotBlank(pref)) {
             return pref;
         }
         return null;
@@ -821,7 +827,8 @@ public class QueryHelper {
         final String pref = ComponentUtil.getFessConfig().getQueryGsaDefaultPreference();
         if (PREFERENCE_QUERY.equals(pref)) {
             return Integer.toString(query.hashCode());
-        } else if (StringUtil.isNotBlank(pref)) {
+        }
+        if (StringUtil.isNotBlank(pref)) {
             return pref;
         }
         return null;
@@ -961,9 +968,8 @@ public class QueryHelper {
     protected SortBuilder<?> createFieldSortBuilder(final String field, final SortOrder order) {
         if (SCORE_FIELD.equals(field) || ES_SCORE_FIELD.equals(field)) {
             return SortBuilders.scoreSort().order(order);
-        } else {
-            return SortBuilders.fieldSort(field).order(order);
         }
+        return SortBuilders.fieldSort(field).order(order);
     }
 
     public void setHighlightPrefix(final String highlightPrefix) {

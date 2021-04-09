@@ -141,7 +141,8 @@ public class FessCrawlerThread extends CrawlerThread {
                         logger.debug("Failed to delete 404 document: {}", url);
                     }
                     return false;
-                } else if (responseData.getLastModified() == null) {
+                }
+                if (responseData.getLastModified() == null) {
                     return true;
                 } else if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == 200) {
 

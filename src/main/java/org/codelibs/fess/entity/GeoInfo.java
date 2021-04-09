@@ -58,20 +58,19 @@ public class GeoInfo {
                                         geoMap.put(geoField, list);
                                     }
                                     final String[] values = pt.split(",");
-                                    if (values.length == 2) {
-                                        try {
-                                            final double lat = Double.parseDouble(values[0]);
-                                            final double lon = Double.parseDouble(values[1]);
-                                            list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance).point(lat, lon));
-                                        } catch (final Exception ex) {
-                                            throw new InvalidQueryException(
-                                                    messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
-                                                    ex.getLocalizedMessage(), ex);
-                                        }
-                                    } else {
+                                    if (values.length != 2) {
                                         throw new InvalidQueryException(
                                                 messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
                                                 "Invalid geo point: " + pt);
+                                    }
+                                    try {
+                                        final double lat = Double.parseDouble(values[0]);
+                                        final double lon = Double.parseDouble(values[1]);
+                                        list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance).point(lat, lon));
+                                    } catch (final Exception ex) {
+                                        throw new InvalidQueryException(
+                                                messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                                                ex.getLocalizedMessage(), ex);
                                     }
                                 }));
                             }
@@ -83,7 +82,8 @@ public class GeoInfo {
         final QueryBuilder[] queryBuilders = geoMap.values().stream().map(list -> {
             if (list.size() == 1) {
                 return list.get(0);
-            } else if (list.size() > 1) {
+            }
+            if (list.size() > 1) {
                 final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 list.forEach(boolQuery::should);
                 return boolQuery;

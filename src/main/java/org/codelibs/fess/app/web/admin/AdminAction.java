@@ -307,7 +307,8 @@ public class AdminAction extends FessAdminAction {
     public static Class<? extends FessAdminAction> getAdminActionClass(final FessUserBean user) {
         if (user.hasRoles(getActionRoles(AdminDashboardAction.ROLE))) {
             return AdminDashboardAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminWizardAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminWizardAction.ROLE))) {
             return AdminWizardAction.class;
         } else if (user.hasRoles(getActionRoles(AdminGeneralAction.ROLE))) {
             return AdminGeneralAction.class;

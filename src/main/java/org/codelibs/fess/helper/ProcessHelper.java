@@ -152,16 +152,15 @@ public class ProcessHelper {
 
     public void sendCommand(final String sessionId, final String command) {
         final JobProcess jobProcess = runningProcessMap.get(sessionId);
-        if (jobProcess != null) {
-            try {
-                final OutputStream out = jobProcess.getProcess().getOutputStream();
-                IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
-                out.flush();
-            } catch (final IOException e) {
-                throw new JobProcessingException(e);
-            }
-        } else {
+        if (jobProcess == null) {
             throw new JobNotFoundException("Job for " + sessionId + " is not found.");
+        }
+        try {
+            final OutputStream out = jobProcess.getProcess().getOutputStream();
+            IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
+            out.flush();
+        } catch (final IOException e) {
+            throw new JobProcessingException(e);
         }
     }
 }
