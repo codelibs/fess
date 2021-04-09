@@ -336,7 +336,7 @@ public class AdminBackupAction extends FessAdminAction {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
                         SearchEngineUtil.scroll(index, hit -> {
                             try {
-                                writer.write("{\"index\":{\"_index\":\"" + index + "\",\"_id\":\""
+                                writer.write("{\"index\":{\"_index\":\"" + hit.getIndex() + "\",\"_id\":\""
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
                                 writer.write(hit.getSourceAsString());
                                 writer.write("\n");
