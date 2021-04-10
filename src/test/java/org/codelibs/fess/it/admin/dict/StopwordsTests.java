@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.it.admin.dict;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +74,7 @@ public class StopwordsTests extends DictCrudTestBase {
 
     @Override
     protected Map<String, Object> getUpdateMap() {
-        assertTrue(false); // Unreachable
+        fail(); // Unreachable
         return null;
     }
 

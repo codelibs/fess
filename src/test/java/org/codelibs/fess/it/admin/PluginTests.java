@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.AfterEach;
@@ -146,7 +147,7 @@ public class PluginTests extends CrudTestBase {
                 boolean exists = installed.stream().map(this::getArtifactFromMap)
                         .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (!exists) {
-                    Thread.sleep(500);
+                    ThreadUtil.sleep(500);
                     continue;
                 }
                 assertTrue(exists);
@@ -166,7 +167,7 @@ public class PluginTests extends CrudTestBase {
                 boolean exists = installed.stream().map(this::getArtifactFromMap)
                         .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (exists) {
-                    Thread.sleep(500);
+                    ThreadUtil.sleep(500);
                     continue;
                 }
                 assertFalse(exists);

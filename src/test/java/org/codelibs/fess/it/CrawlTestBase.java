@@ -17,6 +17,7 @@ package org.codelibs.fess.it;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.ThreadUtil;
 
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -52,21 +54,17 @@ public class CrawlTestBase extends ITBase {
                 logger.info("Start scheduler \"{}\"", schedulerId);
                 return;
             }
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            ThreadUtil.sleep(1000L);
         }
-        assertTrue(false, "could not start job.");
+        fail("could not start job.");
     }
 
-    protected static void waitJob(final String namePrefix) throws InterruptedException {
+    protected static void waitJob(final String namePrefix) {
         Boolean isRunning = false;
         int count = 0;
 
         while (count < 300 && !isRunning) { // Wait until the crawler starts
-            Thread.sleep(500);
+            ThreadUtil.sleep(500);
             count++;
             final Map<String, Object> scheduler = getSchedulerItem(namePrefix);
             assertTrue(scheduler.containsKey("running"));
@@ -74,14 +72,14 @@ public class CrawlTestBase extends ITBase {
         }
         if (300 <= count) {
             logger.info("Time out: Failed to start crawler)");
-            assertTrue(false); // Time Out
+            fail(); // Time Out
         }
 
         logger.info("Crawler is running");
         count = 0;
         isRunning = true;
         while (count < 300 && isRunning) { // Wait until the crawler terminates
-            Thread.sleep(1000);
+            ThreadUtil.sleep(1000);
             count++;
             final Map<String, Object> scheduler = getSchedulerItem(namePrefix);
             assertTrue(scheduler.containsKey("running"));
@@ -90,7 +88,7 @@ public class CrawlTestBase extends ITBase {
         }
         if (300 <= count) {
             logger.info("Time out: Crawler takes too much time");
-            //TODO assertTrue(false); // Time Out
+            //TODO fail(); // Time Out
         }
 
         logger.info("Crawler terminated");

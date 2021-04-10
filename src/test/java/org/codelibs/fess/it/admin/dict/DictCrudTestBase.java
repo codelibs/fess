@@ -17,6 +17,7 @@ package org.codelibs.fess.it.admin.dict;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public abstract class DictCrudTestBase extends CrudTestBase {
             }
         }
 
-        assertTrue(false);
+        fail();
     }
 
     @Override

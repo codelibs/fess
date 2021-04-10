@@ -17,6 +17,7 @@ package org.codelibs.fess.it.admin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,13 +65,13 @@ public class SystemInfoTests extends CrudTestBase {
 
     @Override
     protected Map<String, Object> createTestParam(int id) {
-        assertTrue(false); // Unreachable
+        fail(); // Unreachable
         return null;
     }
 
     @Override
     protected Map<String, Object> getUpdateMap() {
-        assertTrue(false); // Unreachable
+        fail(); // Unreachable
         return null;
     }
 

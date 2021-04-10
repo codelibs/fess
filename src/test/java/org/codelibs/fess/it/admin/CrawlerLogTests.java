@@ -57,24 +57,19 @@ public class CrawlerLogTests extends CrawlTestBase {
         settingTestToken();
 
         // create and execute a web crawler
-        try {
-            createWebConfig();
-            logger.info("WebConfig is created");
-            refresh();
-            webConfigId = getWebConfigIds(NAME_PREFIX).get(0);
+        createWebConfig();
+        logger.info("WebConfig is created");
+        refresh();
+        webConfigId = getWebConfigIds(NAME_PREFIX).get(0);
 
-            createJob();
-            logger.info("Job is created");
-            refresh();
+        createJob();
+        logger.info("Job is created");
+        refresh();
 
-            startJob(NAME_PREFIX);
+        startJob(NAME_PREFIX);
 
-            waitJob(NAME_PREFIX);
-            refresh();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
+        waitJob(NAME_PREFIX);
+        refresh();
     }
 
     @BeforeEach

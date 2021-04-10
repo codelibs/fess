@@ -58,27 +58,22 @@ public class SearchApiTests extends CrawlTestBase {
         settingTestToken();
 
         // create and execute a file crawler
-        try {
-            labelId = createLabel();
-            crawlLabelId = createCrawlLabel();
+        labelId = createLabel();
+        crawlLabelId = createCrawlLabel();
 
-            createFileConfig();
-            logger.info("FileConfig is created");
-            refresh();
-            fileConfigId = getFileConfigIds(NAME_PREFIX).get(0);
+        createFileConfig();
+        logger.info("FileConfig is created");
+        refresh();
+        fileConfigId = getFileConfigIds(NAME_PREFIX).get(0);
 
-            createJob();
-            logger.info("Job is created");
-            refresh();
+        createJob();
+        logger.info("Job is created");
+        refresh();
 
-            startJob(NAME_PREFIX);
+        startJob(NAME_PREFIX);
 
-            waitJob(NAME_PREFIX);
-            refresh();
-        } catch (Exception e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
+        waitJob(NAME_PREFIX);
+        refresh();
     }
 
     @BeforeEach
