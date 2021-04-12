@@ -144,7 +144,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
                 if (responseData.getLastModified() == null) {
                     return true;
-                } else if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == 200) {
+                }
+                if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == 200) {
 
                     log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
 

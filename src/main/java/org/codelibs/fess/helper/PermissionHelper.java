@@ -78,9 +78,8 @@ public class PermissionHelper {
         if (lower.startsWith(userPrefix)) {
             if (permission.length() > userPrefix.length()) {
                 return aclPrefix + systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
-            } else {
-                return null;
             }
+            return null;
         }
         if (lower.startsWith(groupPrefix)) {
             if (permission.length() > groupPrefix.length()) {
@@ -88,7 +87,8 @@ public class PermissionHelper {
             } else {
                 return null;
             }
-        } else if (lower.startsWith(rolePrefix)) {
+        }
+        if (lower.startsWith(rolePrefix)) {
             if (permission.length() > rolePrefix.length()) {
                 return aclPrefix + systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
             } else {
@@ -124,7 +124,8 @@ public class PermissionHelper {
         if (permission.startsWith(fessConfig.getRoleSearchGroupPrefix())
                 && permission.length() > fessConfig.getRoleSearchGroupPrefix().length()) {
             return aclPrefix + groupPrefix + permission.substring(fessConfig.getRoleSearchGroupPrefix().length());
-        } else if (permission.startsWith(fessConfig.getRoleSearchRolePrefix())
+        }
+        if (permission.startsWith(fessConfig.getRoleSearchRolePrefix())
                 && permission.length() > fessConfig.getRoleSearchRolePrefix().length()) {
             return aclPrefix + rolePrefix + permission.substring(fessConfig.getRoleSearchRolePrefix().length());
         }

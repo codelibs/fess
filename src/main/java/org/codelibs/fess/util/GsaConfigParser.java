@@ -254,7 +254,8 @@ public class GsaConfigParser extends DefaultHandler {
             final String v = s.substring(CONTAINS.length());
             final StringBuilder buf = new StringBuilder(100);
             return ".*" + appendFileterPath(buf, escape(v)) + ".*";
-        } else if (s.startsWith(REGEXP_IGNORE_CASE)) {
+        }
+        if (s.startsWith(REGEXP_IGNORE_CASE)) {
             final String v = s.substring(REGEXP_IGNORE_CASE.length());
             final StringBuilder buf = new StringBuilder(100);
             buf.append("(?i)");
@@ -282,7 +283,8 @@ public class GsaConfigParser extends DefaultHandler {
         }
         if (s.startsWith("^") && s.endsWith("$")) {
             return "^" + Pattern.quote(s.substring(1, s.length() - 1)) + "$";
-        } else if (s.startsWith("^")) {
+        }
+        if (s.startsWith("^")) {
             return "^" + Pattern.quote(s.substring(1));
         } else if (s.endsWith("$")) {
             return Pattern.quote(s.substring(0, s.length() - 1)) + "$";

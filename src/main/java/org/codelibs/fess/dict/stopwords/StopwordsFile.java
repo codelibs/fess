@@ -226,21 +226,20 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;
                 }
-                if (item.equals(oldItem)) {
-                    try {
-                        if (!item.isDeleted()) {
-                            // update
-                            writer.write(item.toLineString());
-                            writer.write(Constants.LINE_SEPARATOR);
-                            return new StopwordsItem(item.getId(), item.getNewInput());
-                        } else {
-                            return null;
-                        }
-                    } finally {
-                        item.setNewInput(null);
-                    }
-                } else {
+                if (!item.equals(oldItem)) {
                     throw new DictionaryException("Stopwords file was updated: old=" + oldItem + " : new=" + item);
+                }
+                try {
+                    if (!item.isDeleted()) {
+                        // update
+                        writer.write(item.toLineString());
+                        writer.write(Constants.LINE_SEPARATOR);
+                        return new StopwordsItem(item.getId(), item.getNewInput());
+                    } else {
+                        return null;
+                    }
+                } finally {
+                    item.setNewInput(null);
                 }
             } catch (final IOException e) {
                 throw new DictionaryException("Failed to write: " + oldItem + " -> " + item, e);

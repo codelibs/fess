@@ -227,22 +227,21 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;
                 }
-                if (item.equals(oldItem)) {
-                    try {
-                        if (!item.isDeleted()) {
-                            // update
-                            writer.write(item.toLineString());
-                            writer.write(Constants.LINE_SEPARATOR);
-                            return new KuromojiItem(item.getId(), item.getNewToken(), item.getNewSegmentation(), item.getNewReading(),
-                                    item.getNewPos());
-                        } else {
-                            return null;
-                        }
-                    } finally {
-                        item.setNewToken(null);
-                    }
-                } else {
+                if (!item.equals(oldItem)) {
                     throw new DictionaryException("Kuromoji file was updated: old=" + oldItem + " : new=" + item);
+                }
+                try {
+                    if (!item.isDeleted()) {
+                        // update
+                        writer.write(item.toLineString());
+                        writer.write(Constants.LINE_SEPARATOR);
+                        return new KuromojiItem(item.getId(), item.getNewToken(), item.getNewSegmentation(), item.getNewReading(),
+                                item.getNewPos());
+                    } else {
+                        return null;
+                    }
+                } finally {
+                    item.setNewToken(null);
                 }
             } catch (final IOException e) {
                 throw new DictionaryException("Failed to write: " + oldItem + " -> " + item, e);

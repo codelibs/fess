@@ -103,9 +103,8 @@ public class CommandChain implements AuthenticationChain {
             }
             if ("$PASSWORD".equals(s)) {
                 return password;
-            } else {
-                return s;
             }
+            return s;
         }).toArray(n -> new String[n]));
         final ProcessBuilder pb = new ProcessBuilder(cmds);
         if (workingDirectory != null) {

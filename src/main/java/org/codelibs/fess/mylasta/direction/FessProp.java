@@ -908,7 +908,8 @@ public interface FessProp {
         }
         if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleFile();
-        } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+        }
+        if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleData();
         }
         return "None";
@@ -960,9 +961,8 @@ public interface FessProp {
                     }
                     if (subValues.length == 2) {
                         return new Tuple4<>(values[0], subValues[0], subValues[1], StringUtil.EMPTY);
-                    } else {
-                        return new Tuple4<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY, StringUtil.EMPTY);
                     }
+                    return new Tuple4<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY, StringUtil.EMPTY);
                 }
                 return null;
             }).collect(Collectors.toMap(Tuple4::getValue1, d -> new Tuple3<>(d.getValue2(), d.getValue3(), d.getValue4()))));

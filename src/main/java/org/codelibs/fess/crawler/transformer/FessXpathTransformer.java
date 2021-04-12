@@ -242,7 +242,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     logger.info("META(robots=noindex): {}", responseData.getUrl());
                     storeChildUrls(responseData, resultData);
                     throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots");
-                } else if (nofollow) {
+                }
+                if (nofollow) {
                     logger.info("META(robots=nofollow): {}", responseData.getUrl());
                     responseData.setNoFollow(true);
                 }
@@ -289,7 +290,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                         logger.info("HEADER(robots=noindex): {}", responseData.getUrl());
                         storeChildUrls(responseData, resultData);
                         throw new ChildUrlsException(resultData.getChildUrlSet(), "#processXRobotsTag");
-                    } else if (nofollow) {
+                    }
+                    if (nofollow) {
                         logger.info("HEADER(robots=nofollow): {}", responseData.getUrl());
                         responseData.setNoFollow(true);
                     }
@@ -921,7 +923,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             if (url.startsWith("//")) {
                 final String protocol = currentUrl.split(":")[0];
                 return new URL(protocol + ":" + url);
-            } else if (url.startsWith("/") || url.indexOf(':') == -1) {
+            }
+            if (url.startsWith("/") || url.indexOf(':') == -1) {
                 return new URL(new URL(currentUrl), url);
             }
             return new URL(url);

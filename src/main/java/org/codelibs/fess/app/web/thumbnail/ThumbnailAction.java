@@ -82,7 +82,8 @@ public class ThumbnailAction extends FessSearchAction {
         }
         if (path.endsWith(".gif")) {
             return "image/gif";
-        } else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+        }
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
             return "image/jpeg";
         } else {
             return "application/octet-stream";

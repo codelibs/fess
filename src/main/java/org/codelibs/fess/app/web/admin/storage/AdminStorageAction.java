@@ -265,9 +265,8 @@ public class AdminStorageAction extends FessAdminAction {
         }
         if (StringUtil.isEmpty(values[0])) {
             return values[1];
-        } else {
-            return values[0] + "/" + values[1];
         }
+        return values[0] + "/" + values[1];
     }
 
     public static String[] decodeId(final String id) {
@@ -279,16 +278,15 @@ public class AdminStorageAction extends FessAdminAction {
         }
         if (values.length == 1) {
             return new String[] { StringUtil.EMPTY, values[0] };
-        } else {
-            final StringBuilder buf = new StringBuilder();
-            for (int i = 0; i < values.length - 1; i++) {
-                if (buf.length() > 0) {
-                    buf.append('/');
-                }
-                buf.append(values[i]);
-            }
-            return new String[] { buf.toString(), values[values.length - 1] };
         }
+        final StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < values.length - 1; i++) {
+            if (buf.length() > 0) {
+                buf.append('/');
+            }
+            buf.append(values[i]);
+        }
+        return new String[] { buf.toString(), values[values.length - 1] };
     }
 
     protected static String createParentId(final String prefix) {

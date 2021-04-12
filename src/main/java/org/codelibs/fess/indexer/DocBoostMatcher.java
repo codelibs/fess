@@ -60,7 +60,8 @@ public class DocBoostMatcher {
         }
         if (value instanceof Long) {
             return ((Long) value).floatValue();
-        } else if (value instanceof Float) {
+        }
+        if (value instanceof Float) {
             return ((Float) value);
         } else if (value instanceof Double) {
             return ((Double) value).floatValue();

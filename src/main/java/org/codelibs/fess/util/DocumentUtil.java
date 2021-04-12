@@ -57,7 +57,8 @@ public final class DocumentUtil {
         if (value instanceof List) {
             if (clazz.isAssignableFrom(List.class)) {
                 return (T) value;
-            } else if (clazz.isAssignableFrom(String[].class)) {
+            }
+            if (clazz.isAssignableFrom(String[].class)) {
                 return (T) ((List<?>) value).stream().filter(s -> s != null).map(Object::toString).toArray(n -> new String[n]);
             }
 
@@ -70,7 +71,8 @@ public final class DocumentUtil {
         if (value instanceof String[]) {
             if (clazz.isAssignableFrom(String[].class)) {
                 return (T) value;
-            } else if (clazz.isAssignableFrom(List.class)) {
+            }
+            if (clazz.isAssignableFrom(List.class)) {
                 final List<String> list = new ArrayList<>();
                 Collections.addAll(list, (String[]) value);
                 return (T) list;
@@ -101,7 +103,8 @@ public final class DocumentUtil {
             } else {
                 return (T) FessFunctions.parseDate(value.toString());
             }
-        } else if (clazz.isAssignableFrom(Long.class)) {
+        }
+        if (clazz.isAssignableFrom(Long.class)) {
             if (value instanceof Long) {
                 return (T) value;
             } else {

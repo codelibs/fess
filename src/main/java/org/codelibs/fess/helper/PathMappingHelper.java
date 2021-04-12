@@ -156,21 +156,20 @@ public class PathMappingHelper {
         if (FUNCTION_ENCODEURL_MATCHER.equals(replacement)) {
             return (u, m) -> DocumentUtil.encodeUrl(u);
         }
-        if (replacement.startsWith(GROOVY_MATCHER)) {
-            final String template = replacement.substring(GROOVY_MATCHER.length());
-            return (u, m) -> {
-                final Map<String, Object> paramMap = new HashMap<>();
-                paramMap.put("url", u);
-                paramMap.put("matcher", m);
-                final Object value = GroovyUtil.evaluate(template, paramMap);
-                if (value == null) {
-                    return u;
-                }
-                return value.toString();
-            };
-        } else {
+        if (!replacement.startsWith(GROOVY_MATCHER)) {
             return (u, m) -> m.replaceAll(replacement);
         }
+        final String template = replacement.substring(GROOVY_MATCHER.length());
+        return (u, m) -> {
+            final Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("url", u);
+            paramMap.put("matcher", m);
+            final Object value = GroovyUtil.evaluate(template, paramMap);
+            if (value == null) {
+                return u;
+            }
+            return value.toString();
+        };
     }
 
     protected String replaceUrl(final List<PathMapping> pathMappingList, final String url) {

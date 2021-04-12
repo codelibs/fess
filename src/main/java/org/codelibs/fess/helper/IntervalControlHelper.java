@@ -155,7 +155,8 @@ public class IntervalControlHelper {
             if (h1 == h2) {
                 if (m1 == m2) {
                     return 0;
-                } else if (m1 < m2) {
+                }
+                if (m1 < m2) {
                     return 1;
                 }
             }

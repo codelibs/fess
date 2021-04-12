@@ -259,9 +259,8 @@ public class SearchHelper {
             }
             if (langSet.size() > 1 && langSet.contains(Constants.ALL_LANGUAGES)) {
                 return new String[] { Constants.ALL_LANGUAGES };
-            } else {
-                langSet.remove(Constants.ALL_LANGUAGES);
             }
+            langSet.remove(Constants.ALL_LANGUAGES);
             return langSet.toArray(new String[langSet.size()]);
         }
         if (ComponentUtil.getFessConfig().isBrowserLocaleForSearchUsed()) {

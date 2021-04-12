@@ -392,7 +392,8 @@ public class PluginHelper {
             }
             if (name.startsWith(THEME.getId())) {
                 return THEME;
-            } else if (name.startsWith(INGEST.getId())) {
+            }
+            if (name.startsWith(INGEST.getId())) {
                 return INGEST;
             }
             return UNKNOWN;

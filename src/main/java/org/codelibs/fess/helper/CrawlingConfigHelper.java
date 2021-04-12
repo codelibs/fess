@@ -82,7 +82,8 @@ public class CrawlingConfigHelper {
         }
         if (ConfigType.FILE.getTypePrefix().equals(configType)) {
             return ConfigType.FILE;
-        } else if (ConfigType.DATA.getTypePrefix().equals(configType)) {
+        }
+        if (ConfigType.DATA.getTypePrefix().equals(configType)) {
             return ConfigType.DATA;
         }
         return null;

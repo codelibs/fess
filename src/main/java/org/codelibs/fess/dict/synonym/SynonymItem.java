@@ -126,15 +126,13 @@ public class SynonymItem extends DictionaryItem {
         if (isUpdated()) {
             if (Arrays.equals(newInputs, newOutputs)) {
                 return StringUtils.join(newInputs, ",");
-            } else {
-                return StringUtils.join(newInputs, ",") + "=>" + StringUtils.join(newOutputs, ",");
             }
+            return StringUtils.join(newInputs, ",") + "=>" + StringUtils.join(newOutputs, ",");
         }
         if (Arrays.equals(inputs, outputs)) {
             return StringUtils.join(inputs, ",");
-        } else {
-            return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");
         }
+        return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");
     }
 
 }

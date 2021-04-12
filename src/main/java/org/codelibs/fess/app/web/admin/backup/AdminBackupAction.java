@@ -302,7 +302,8 @@ public class AdminBackupAction extends FessAdminAction {
                 final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
                 if ("search_log".equals(name)) {
                     return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
-                } else if ("user_info".equals(name)) {
+                }
+                if ("user_info".equals(name)) {
                     return writeNdjsonResponse(id, getUserInfoNdjsonWriteCall());
                 } else if ("click_log".equals(name)) {
                     return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());

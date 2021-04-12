@@ -177,7 +177,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
                 if (StringUtil.isNotBlank(logLevel)) {
                     return logLevel;
-                } else if (logger.isDebugEnabled()) {
+                }
+                if (logger.isDebugEnabled()) {
                     return "3";
                 } else if (logger.isInfoEnabled()) {
                     return "5";
@@ -191,7 +192,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
             if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
-            } else if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));
             } else if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");

@@ -430,7 +430,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             final int pos = value.indexOf('/');
             if (pos > 0) {
                 return value.substring(0, pos);
-            } else if (pos == -1) {
+            }
+            if (pos == -1) {
                 return value;
             } else {
                 return "localhost";
@@ -472,7 +473,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 // Unix
                 return abbreviateSite(value);
             }
-        } else if (url.startsWith("smb:") || url.startsWith("smb1:")) {
+        }
+        if (url.startsWith("smb:") || url.startsWith("smb1:")) {
             final String value = url.replaceFirst("^smb.?:/+", StringUtil.EMPTY);
             return abbreviateSite("\\\\" + value.replace('/', '\\'));
         }

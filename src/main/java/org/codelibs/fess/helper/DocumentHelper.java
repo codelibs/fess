@@ -201,22 +201,21 @@ public class DocumentHelper {
             }
             responseData.setRuleId(rule.getRuleId());
             final ResponseProcessor responseProcessor = rule.getResponseProcessor();
-            if (responseProcessor instanceof DefaultResponseProcessor) {
-                final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
-                final ResultData resultData = transformer.transform(responseData);
-                final byte[] data = resultData.getData();
-                if (data != null) {
-                    try {
-                        @SuppressWarnings("unchecked")
-                        final Map<String, Object> result = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
-                        return result;
-                    } catch (final Exception e) {
-                        throw new CrawlerSystemException("Could not create an instance from bytes.", e);
-                    }
-                }
-            } else {
+            if (!(responseProcessor instanceof DefaultResponseProcessor)) {
                 throw new CrawlingAccessException("The response processor is not DefaultResponseProcessor. responseProcessor: "
                         + responseProcessor + ", url: " + url);
+            }
+            final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
+            final ResultData resultData = transformer.transform(responseData);
+            final byte[] data = resultData.getData();
+            if (data != null) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    final Map<String, Object> result = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
+                    return result;
+                } catch (final Exception e) {
+                    throw new CrawlerSystemException("Could not create an instance from bytes.", e);
+                }
             }
             return null;
         } catch (final Exception e) {

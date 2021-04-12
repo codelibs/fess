@@ -476,7 +476,8 @@ public class SearchLogService {
         }
         if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
             return favoriteLogBhv.selectByPK(id);
-        } else if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
+        }
+        if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
             return userInfoBhv.selectByPK(id);
         } else {
             return searchLogBhv.selectByPK(id);
@@ -507,7 +508,8 @@ public class SearchLogService {
                 params.put("Requested Time", FessFunctions.formatDate(e.getRequestedAt()));
                 return params;
             }).get();
-        } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
+        }
+        if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
             return favoriteLogBhv.selectByPK(id).map(e -> {
                 final Map<String, String> params = new LinkedHashMap<>();
                 params.put("ID", e.getId());

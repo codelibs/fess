@@ -430,7 +430,8 @@ public class QueryHelper {
         }
         if (query instanceof TermRangeQuery) {
             return convertTermRangeQuery(context, (TermRangeQuery) query, boost);
-        } else if (query instanceof PhraseQuery) {
+        }
+        if (query instanceof PhraseQuery) {
             return convertPhraseQuery(context, (PhraseQuery) query, boost);
         } else if (query instanceof FuzzyQuery) {
             return convertFuzzyQuery(context, (FuzzyQuery) query, boost);
@@ -501,13 +502,12 @@ public class QueryHelper {
         if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(boost);
-        } else {
-            final String query = wildcardQuery.getTerm().toString();
-            final String origQuery = toLowercaseWildcard(query);
-            context.addFieldLog(Constants.DEFAULT_FIELD, query);
-            context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
         }
+        final String query = wildcardQuery.getTerm().toString();
+        final String origQuery = toLowercaseWildcard(query);
+        context.addFieldLog(Constants.DEFAULT_FIELD, query);
+        context.addHighlightedQuery(origQuery);
+        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
     }
 
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
@@ -517,19 +517,18 @@ public class QueryHelper {
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders
                     .matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost));
         }
-        if (isSearchField(field)) {
-            context.addFieldLog(field, prefixQuery.getPrefix().text());
-            if (notAnalyzedFieldSet.contains(field)) {
-                return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
-            } else {
-                return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
-            }
-        } else {
+        if (!isSearchField(field)) {
             final String query = prefixQuery.getPrefix().toString();
             final String origQuery = toLowercaseWildcard(query);
             context.addFieldLog(Constants.DEFAULT_FIELD, query);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost));
+        }
+        context.addFieldLog(field, prefixQuery.getPrefix().text());
+        if (notAnalyzedFieldSet.contains(field)) {
+            return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
+        } else {
+            return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
         }
     }
 
@@ -545,13 +544,12 @@ public class QueryHelper {
         if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
             return QueryBuilders.fuzzyQuery(field, term.text()).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()));
-        } else {
-            final String origQuery = fuzzyQuery.toString();
-            context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
-            context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
         }
+        final String origQuery = fuzzyQuery.toString();
+        context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
+        context.addHighlightedQuery(origQuery);
+        return buildDefaultQueryBuilder(
+                (f, b) -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
     }
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
@@ -613,7 +611,8 @@ public class QueryHelper {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
             return buildDefaultTermQueryBuilder(boost, text);
-        } else if ("sort".equals(field)) {
+        }
+        if ("sort".equals(field)) {
             split(text, ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(t -> {
                 final String[] values = t.split("\\.");
                 if (values.length > 2) {

@@ -64,7 +64,8 @@ public class WebAuthentication extends BsWebAuthentication {
         }
         if (Constants.DIGEST.equals(scheme)) {
             return new DigestScheme();
-        } else if (Constants.NTLM.equals(scheme)) {
+        }
+        if (Constants.NTLM.equals(scheme)) {
             final Properties props = new Properties();
             getWebConfig().getConfigParameterMap(ConfigName.CONFIG).entrySet().stream()
                     .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX)).forEach(e -> {

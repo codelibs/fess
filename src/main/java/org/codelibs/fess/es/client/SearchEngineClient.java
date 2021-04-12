@@ -667,9 +667,8 @@ public class SearchEngineClient implements Client {
                 final String message = "Configsync is not available. HTTP Status is " + httpStatusCode;
                 if (response.getContentException() != null) {
                     throw new FessSystemException(message, response.getContentException());
-                } else {
-                    throw new FessSystemException(message);
                 }
+                throw new FessSystemException(message);
             } catch (final Exception e) {
                 cause = new FessSystemException("Configsync is not available.", e);
             }

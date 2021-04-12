@@ -74,18 +74,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                     }
                 });
             }
-            if (id.endsWith(NDJSON_EXTENTION)) {
-                final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
-                if ("search_log".equals(name)) {
-                    return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
-                } else if ("user_info".equals(name)) {
-                    return writeNdjsonResponse(id, getUserInfoNdjsonWriteCall());
-                } else if ("click_log".equals(name)) {
-                    return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
-                } else if ("favorite_log".equals(name)) {
-                    return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
-                }
-            } else {
+            if (!id.endsWith(NDJSON_EXTENTION)) {
                 final String index;
                 final String filename;
                 if (id.endsWith(".bulk")) {
@@ -111,6 +100,16 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                         writer.flush();
                     }
                 });
+            }
+            final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
+            if ("search_log".equals(name)) {
+                return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
+            } else if ("user_info".equals(name)) {
+                return writeNdjsonResponse(id, getUserInfoNdjsonWriteCall());
+            } else if ("click_log".equals(name)) {
+                return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
+            } else if ("favorite_log".equals(name)) {
+                return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
             }
         }
 

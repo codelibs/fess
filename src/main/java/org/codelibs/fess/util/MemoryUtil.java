@@ -55,7 +55,8 @@ public final class MemoryUtil {
         }
         if (obj instanceof String) {
             return ((String) obj).length() + 56L;
-        } else if (obj instanceof Number) {
+        }
+        if (obj instanceof Number) {
             return 24L;
         } else if (obj instanceof Date) {
             return 32L;
