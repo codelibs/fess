@@ -206,6 +206,35 @@ public class IndexingHelper {
 
     }
 
+    public long deleteBySessionId(final String sessionId) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String index = fessConfig.getIndexDocumentUpdateIndex();
+        final QueryBuilder queryBuilder = QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId);
+        return deleteByQueryBuilder(index, queryBuilder);
+    }
+
+    public long deleteByConfigId(final String configId) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String index = fessConfig.getIndexDocumentUpdateIndex();
+        final QueryBuilder queryBuilder = QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configId);
+        return deleteByQueryBuilder(index, queryBuilder);
+    }
+
+    public long deleteByVirtualHost(final String virtualHost) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String index = fessConfig.getIndexDocumentUpdateIndex();
+        final QueryBuilder queryBuilder = QueryBuilders.termQuery(fessConfig.getIndexFieldVirtualHost(), virtualHost);
+        return deleteByQueryBuilder(index, queryBuilder);
+    }
+
+    protected long deleteByQueryBuilder(final String index, final QueryBuilder queryBuilder) {
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
+        searchEngineClient.admin().indices().prepareRefresh(index).execute().actionGet();
+        final long numOfDeleted = searchEngineClient.deleteByQuery(index, queryBuilder);
+        logger.info("Deleted {} old docs.", numOfDeleted);
+        return numOfDeleted;
+    }
+
     public long calculateDocumentSize(final Map<String, Object> dataMap) {
         return MemoryUtil.sizeOf(dataMap);
     }
