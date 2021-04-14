@@ -143,7 +143,7 @@ public class CrawlerLogTests extends CrawlTestBase {
      * */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        final String urls = "http://example.com" + "\n" + "http://failure.url";
+        final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.url";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("user_agent", "Mozilla/5.0");
