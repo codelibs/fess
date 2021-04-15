@@ -231,7 +231,7 @@ public class CrawlerLogTests extends CrawlTestBase {
         assertTrue(results.size() >= 1);
         Map<String, Object> item = results.get(0);
         assertTrue(item.containsKey("content_title"));
-        assertEquals("<strong>CodeLibs</strong>", item.get("content_title"));
+        assertEquals("<strong>CodeLibs</strong> Project", item.get("content_title"));
     }
 
     private void testDeleteSearchList() {
