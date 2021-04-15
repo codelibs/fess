@@ -75,7 +75,7 @@
 							<p><la:message key="labels.menu_design" /></p>
 						</a></li></c:if>
 						
-					<c:if test="${fe:permission('admin-dict-view') and fesenType!='cloud'}">
+					<c:if test="${fe:permission('admin-dict-view') and fesenType!='cloud' and fesenType!='aws'}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/dict/')}" class="nav-link <c:if test="${param.menuType=='dict'}">active</c:if>">
 							<em class='fa fa-genderless nav-icon'></em>
