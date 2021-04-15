@@ -236,7 +236,7 @@ public class CrawlerLogTests extends CrawlTestBase {
 
     private void testDeleteSearchList() {
         final Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("q", "Example Domain");
+        requestBody.put("q", "CodeLibs");
 
         checkMethodBase(requestBody).delete("/api/admin/searchlist/query").then().body("response.status", equalTo(0));
         refresh();
