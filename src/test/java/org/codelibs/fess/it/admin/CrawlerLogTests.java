@@ -99,7 +99,7 @@ public class CrawlerLogTests extends CrawlTestBase {
         }
 
         final Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("q", "Example Domain");
+        requestBody.put("q", "CodeLibs");
         checkMethodBase(requestBody).delete("/api/admin/searchlist/query");
         refresh();
 
@@ -231,7 +231,7 @@ public class CrawlerLogTests extends CrawlTestBase {
         assertTrue(results.size() >= 1);
         Map<String, Object> item = results.get(0);
         assertTrue(item.containsKey("content_title"));
-        assertEquals("<strong>Example</strong> <strong>Domain</strong>", item.get("content_title"));
+        assertEquals("<strong>CodeLibs</strong>", item.get("content_title"));
     }
 
     private void testDeleteSearchList() {
@@ -247,7 +247,7 @@ public class CrawlerLogTests extends CrawlTestBase {
 
     private List<Map<String, Object>> getSearchResults() {
         final Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("q", "Example Domain");
+        requestBody.put("q", "CodeLibs");
 
         final String response = checkMethodBase(requestBody).get("/api/admin/searchlist/docs").asString();
         final List<Map<String, Object>> results = JsonPath.from(response).getList("response.docs");
