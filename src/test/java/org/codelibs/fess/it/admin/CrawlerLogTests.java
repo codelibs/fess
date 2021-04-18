@@ -116,24 +116,28 @@ public class CrawlerLogTests extends CrawlTestBase {
 
     @Test
     void jobLogTest() {
+        logger.info("start jobLogTest");
         testReadJobLog();
         testDeleteJobLog();
     }
 
     @Test
     void crawlingInfoTest() {
+        logger.info("start crawlingInfoTest");
         testReadCrawlingInfo();
         testDeleteCrawlingInfo();
     }
 
     @Test
     void failureUrlTest() {
+        logger.info("start failureUrlTest");
         testReadFailureUrl();
         testDeleteFailureUrl();
     }
 
     @Test
     void searchListTest() {
+        logger.info("start searchListTest");
         testReadSearchList();
         testDeleteSearchList();
     }
@@ -174,11 +178,13 @@ public class CrawlerLogTests extends CrawlTestBase {
      * */
     private void testReadJobLog() {
         final List<Map<String, Object>> logList = readJobLog(NAME_PREFIX);
+        logger.info("logList: {}", logList);
         assertEquals(1, logList.size());
     }
 
     private void testDeleteJobLog() {
         final List<Map<String, Object>> logList = readJobLog(NAME_PREFIX);
+        logger.info("logList: {}", logList);
         for (Map<String, Object> elem : logList) {
             deleteMethod("/api/admin/joblog/log/" + elem.get("id")).then().body("response.status", equalTo(0));
         }
@@ -192,11 +198,13 @@ public class CrawlerLogTests extends CrawlTestBase {
      * */
     private void testReadCrawlingInfo() {
         final List<Map<String, Object>> logList = readCrawlingInfo(webConfigId);
+        logger.info("logList: {}", logList);
         assertEquals(1, logList.size());
     }
 
     private void testDeleteCrawlingInfo() {
         final List<Map<String, Object>> logList = readCrawlingInfo(webConfigId);
+        logger.info("logList: {}", logList);
         for (Map<String, Object> elem : logList) {
             deleteMethod("/api/admin/crawlinginfo/log/" + elem.get("id")).then().body("response.status", equalTo(0));
         }
@@ -210,11 +218,13 @@ public class CrawlerLogTests extends CrawlTestBase {
      * */
     private void testReadFailureUrl() {
         final List<Map<String, Object>> logList = readFailureUrl(webConfigId);
+        logger.info("logList: {}", logList);
         assertEquals(1, logList.size());
     }
 
     private void testDeleteFailureUrl() {
         final List<Map<String, Object>> logList = readFailureUrl(webConfigId);
+        logger.info("logList: {}", logList);
         for (Map<String, Object> elem : logList) {
             deleteMethod("/api/admin/failureurl/log/" + elem.get("id")).then().body("response.status", equalTo(0));
         }
