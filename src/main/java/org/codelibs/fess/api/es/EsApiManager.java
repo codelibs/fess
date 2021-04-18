@@ -102,8 +102,8 @@ public class EsApiManager extends BaseApiManager {
                 throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid session.");
             });
         } catch (final WebApiException e) {
-            logger.debug("Web API access error. ", e);
-            e.sendError(response);
+            logger.warn("Web API access error.", e);
+            response.sendError(e.getStatusCode(), "Web API access error.");
         }
     }
 

@@ -15,10 +15,6 @@
  */
 package org.codelibs.fess.exception;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-
 public class WebApiException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
@@ -41,13 +37,5 @@ public class WebApiException extends FessSystemException {
 
     public WebApiException(final int statusCode, final Exception e) {
         this(statusCode, e.getMessage(), e);
-    }
-
-    public void sendError(final HttpServletResponse response) {
-        try {
-            response.sendError(statusCode, getMessage());
-        } catch (final IOException e) {
-            throw new FessSystemException("SC:" + statusCode + ": " + getMessage(), e);
-        }
     }
 }
