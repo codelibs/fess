@@ -33,7 +33,6 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.GroovyUtil;
 
 public interface FessTransformer {
 
@@ -158,7 +157,7 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
-        return GroovyUtil.evaluate(template, paramMap);
+        return ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
     }
 
     default int getMaxSiteLength() {

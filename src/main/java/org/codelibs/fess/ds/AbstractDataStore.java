@@ -36,7 +36,6 @@ import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.GroovyUtil;
 
 public abstract class AbstractDataStore implements DataStore {
 
@@ -130,7 +129,7 @@ public abstract class AbstractDataStore implements DataStore {
             return paramMap.get(template);
         }
 
-        return GroovyUtil.evaluate(template, paramMap);
+        return ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
     }
 
     protected long getReadInterval(final Map<String, String> paramMap) {

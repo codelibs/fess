@@ -1445,13 +1445,6 @@
 			<version>4.2.0</version>
 		</dependency>
 
-		<!-- groovy -->
-		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy</artifactId>
-			<version>${groovy.version}</version>
-		</dependency>
-
 		<!-- Tomcat -->
 		<dependency>
 			<groupId>org.dbflute.tomcat</groupId>
@@ -1531,6 +1524,12 @@
 					<artifactId>jakarta.xml.bind-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>${groovy.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

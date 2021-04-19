@@ -469,4 +469,6 @@ public class Constants extends CoreLibConstants {
     public static final String EXECUTE_TYPE_PYTHON = "python";
 
     public static final String EXECUTE_TYPE_SUGGEST = "suggest";
+
+    public static final String DEFAULT_SCRIPT = "groovy";
 }

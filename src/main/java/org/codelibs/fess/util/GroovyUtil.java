@@ -15,46 +15,18 @@
  */
 package org.codelibs.fess.util;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.exception.JobProcessingException;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.codelibs.fess.Constants;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyShell;
-
+@Deprecated
 public final class GroovyUtil {
-    private static final Logger logger = LogManager.getLogger(GroovyUtil.class);
 
     private GroovyUtil() {
         // nothing
     }
 
     public static Object evaluate(final String template, final Map<String, Object> paramMap) {
-        final Map<String, Object> bindingMap = new HashMap<>(paramMap);
-        bindingMap.put("container", SingletonLaContainerFactory.getContainer());
-        final GroovyShell groovyShell = new GroovyShell(new Binding(bindingMap));
-        try {
-            return groovyShell.evaluate(template);
-        } catch (final JobProcessingException e) {
-            throw e;
-        } catch (final Exception e) {
-            logger.warn("Failed to evalue groovy script: {} => {}", template, paramMap, e);
-            return null;
-        } finally {
-            final GroovyClassLoader loader = groovyShell.getClassLoader();
-            //            StreamUtil.of(loader.getLoadedClasses()).forEach(c -> {
-            //                try {
-            //                    GroovySystem.getMetaClassRegistry().removeMetaClass(c);
-            //                } catch (Throwable t) {
-            //                    logger.warn("Failed to delete " + c, t);
-            //                }
-            //            });
-            loader.clearCache();
-        }
+        return ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
     }
 }

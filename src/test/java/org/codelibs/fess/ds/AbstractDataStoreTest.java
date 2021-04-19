@@ -18,9 +18,19 @@ package org.codelibs.fess.ds;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.script.AbstractScriptEngine;
+import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+
+import groovy.lang.Binding;
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyShell;
 
 public class AbstractDataStoreTest extends UnitFessTestCase {
     public AbstractDataStore dataStore;
@@ -40,6 +50,33 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
                 // TODO nothing
             }
         };
+
+        ScriptEngineFactory scriptEngineFactory = new ScriptEngineFactory();
+        ComponentUtil.register(scriptEngineFactory, "scriptEngineFactory");
+        new AbstractScriptEngine() {
+
+            @Override
+            public Object evaluate(String template, Map<String, Object> paramMap) {
+                final Map<String, Object> bindingMap = new HashMap<>(paramMap);
+                bindingMap.put("container", SingletonLaContainerFactory.getContainer());
+                final GroovyShell groovyShell = new GroovyShell(new Binding(bindingMap));
+                try {
+                    return groovyShell.evaluate(template);
+                } catch (final JobProcessingException e) {
+                    throw e;
+                } catch (final Exception e) {
+                    return null;
+                } finally {
+                    final GroovyClassLoader loader = groovyShell.getClassLoader();
+                    loader.clearCache();
+                }
+            }
+
+            @Override
+            protected String getName() {
+                return Constants.DEFAULT_SCRIPT;
+            }
+        }.register();
     }
 
     public void test_convertValue() {

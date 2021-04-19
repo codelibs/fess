@@ -13,21 +13,17 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.util;
+package org.codelibs.fess.exception;
 
-import java.util.HashMap;
-import java.util.Map;
+public class ScriptEngineException extends FessSystemException {
 
-import org.codelibs.fess.unit.UnitFessTestCase;
+    private static final long serialVersionUID = 1L;
 
-public class GroovyUtilTest extends UnitFessTestCase {
-    public void test_evaluate() {
-        final Map<String, Object> params = new HashMap<>();
-        assertNull(GroovyUtil.evaluate("", params));
-        assertEquals("", GroovyUtil.evaluate("return ''", params));
-        assertEquals(1, GroovyUtil.evaluate("return 1", params));
+    public ScriptEngineException(final String message) {
+        super(message);
+    }
 
-        params.put("test", "123");
-        assertEquals("123", GroovyUtil.evaluate("return test", params));
+    public ScriptEngineException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

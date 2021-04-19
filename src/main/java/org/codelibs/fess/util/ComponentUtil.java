@@ -77,6 +77,7 @@ import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
+import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
@@ -94,6 +95,8 @@ public final class ComponentUtil {
     private static final Logger logger = LogManager.getLogger(ComponentUtil.class);
 
     private static Map<String, Object> componentMap = new HashMap<>();
+
+    private static final String SCRIPT_ENGINE_FACTORY = "scriptEngineFactory";
 
     private static final String INGEST_FACTORY = "ingestFactory";
 
@@ -479,6 +482,10 @@ public final class ComponentUtil {
 
     public static IngestFactory getIngestFactory() {
         return getComponent(INGEST_FACTORY);
+    }
+
+    public static ScriptEngineFactory getScriptEngineFactory() {
+        return getComponent(SCRIPT_ENGINE_FACTORY);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

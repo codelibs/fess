@@ -13,23 +13,10 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.job.impl;
+package org.codelibs.fess.script;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.Constants;
-import org.codelibs.fess.job.JobExecutor;
-import org.codelibs.fess.util.ComponentUtil;
-
-public class GroovyExecutor extends JobExecutor {
-
-    @Override
-    public Object execute(final String script) {
-        final Map<String, Object> params = new HashMap<>();
-        params.put("executor", this);
-
-        return ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(script, params);
-    }
-
+public interface ScriptEngine {
+    Object evaluate(final String template, final Map<String, Object> paramMap);
 }

@@ -32,7 +32,6 @@ import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.fess.util.GroovyUtil;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -164,7 +163,8 @@ public class PathMappingHelper {
             final Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("url", u);
             paramMap.put("matcher", m);
-            final Object value = GroovyUtil.evaluate(template, paramMap);
+            final Object value =
+                    ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
             if (value == null) {
                 return u;
             }

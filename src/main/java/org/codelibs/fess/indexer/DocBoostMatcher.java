@@ -17,8 +17,9 @@ package org.codelibs.fess.indexer;
 
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
-import org.codelibs.fess.util.GroovyUtil;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class DocBoostMatcher {
 
@@ -41,7 +42,8 @@ public class DocBoostMatcher {
             return false;
         }
 
-        final Object value = GroovyUtil.evaluate(matchExpression, map);
+        final Object value =
+                ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(matchExpression, map);
         if (value instanceof Boolean) {
             return ((Boolean) value);
         }
@@ -54,7 +56,8 @@ public class DocBoostMatcher {
             return 0.0f;
         }
 
-        final Object value = GroovyUtil.evaluate(boostExpression, map);
+        final Object value =
+                ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(boostExpression, map);
         if (value instanceof Integer) {
             return ((Integer) value).floatValue();
         }
