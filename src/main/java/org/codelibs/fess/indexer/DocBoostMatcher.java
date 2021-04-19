@@ -27,13 +27,16 @@ public class DocBoostMatcher {
 
     private String matchExpression;
 
+    private String scriptType;
+
     public DocBoostMatcher() {
-        // nothing
+        scriptType = Constants.DEFAULT_SCRIPT;
     }
 
     public DocBoostMatcher(final BoostDocumentRule rule) {
         matchExpression = rule.getUrlExpr();
         boostExpression = rule.getBoostExpr();
+        scriptType = ComponentUtil.getFessConfig().getCrawlerDefaultScript();
     }
 
     public boolean match(final Map<String, Object> map) {
@@ -42,8 +45,7 @@ public class DocBoostMatcher {
             return false;
         }
 
-        final Object value =
-                ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(matchExpression, map);
+        final Object value = ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(matchExpression, map);
         if (value instanceof Boolean) {
             return ((Boolean) value);
         }
@@ -56,8 +58,7 @@ public class DocBoostMatcher {
             return 0.0f;
         }
 
-        final Object value =
-                ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(boostExpression, map);
+        final Object value = ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(boostExpression, map);
         if (value instanceof Integer) {
             return ((Integer) value).floatValue();
         }

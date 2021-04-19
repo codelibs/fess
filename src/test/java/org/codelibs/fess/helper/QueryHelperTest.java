@@ -22,16 +22,16 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.Constants;
-import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fesen.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.index.query.MatchPhraseQueryBuilder;
 import org.codelibs.fesen.index.query.PrefixQueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilders;
 import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilders;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class QueryHelperTest extends UnitFessTestCase {
 

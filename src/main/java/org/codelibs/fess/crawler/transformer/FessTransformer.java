@@ -136,7 +136,13 @@ public interface FessTransformer {
         }
     }
 
+    @Deprecated
     default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template) {
+        putResultDataWithTemplate(dataMap, key, value, template, Constants.DEFAULT_SCRIPT);
+    }
+
+    default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template,
+            final String scriptType) {
         Object target = value;
         if (template != null) {
             final Map<String, Object> contextMap = new HashMap<>();
@@ -145,19 +151,24 @@ public interface FessTransformer {
             paramMap.putAll(dataMap);
             paramMap.put("value", target);
             paramMap.put("context", contextMap);
-            target = evaluateValue(template, paramMap);
+            target = evaluateValue(scriptType, template, paramMap);
         }
         if (key != null && target != null) {
             putResultDataBody(dataMap, key, target);
         }
     }
 
-    default Object evaluateValue(final String template, final Map<String, Object> paramMap) {
+    @Deprecated
+    default Object evaluateValue(String template, final Map<String, Object> paramMap) {
+        return evaluateValue(Constants.DEFAULT_SCRIPT, template, paramMap);
+    }
+
+    default Object evaluateValue(final String scriptType, String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }
 
-        return ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
+        return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(template, paramMap);
     }
 
     default int getMaxSiteLength() {

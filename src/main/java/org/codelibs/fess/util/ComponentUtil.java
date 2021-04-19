@@ -322,7 +322,10 @@ public final class ComponentUtil {
     }
 
     public static JobExecutor getJobExecutor(final String name) {
-        return getComponent(name + JOB_EXECUTOR_SUFFIX);
+        if (name.endsWith(JOB_EXECUTOR_SUFFIX)) {
+            return getComponent(name);
+        }
+        return getComponent("script" + JOB_EXECUTOR_SUFFIX);
     }
 
     public static FileTypeHelper getFileTypeHelper() {

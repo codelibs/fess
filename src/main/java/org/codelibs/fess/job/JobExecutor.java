@@ -15,10 +15,17 @@
  */
 package org.codelibs.fess.job;
 
+import org.codelibs.fess.Constants;
+
 public abstract class JobExecutor {
     protected ShutdownListener shutdownListener;
 
-    public abstract Object execute(String script);
+    @Deprecated
+    public Object execute(String script) {
+        return execute(Constants.DEFAULT_SCRIPT, script);
+    }
+
+    public abstract Object execute(String scriptType, String script);
 
     public void shutdown() {
         shutdownListener.onShutdown();

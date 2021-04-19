@@ -493,16 +493,17 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         // from config
+        final String scriptType = crawlingConfig.getScriptType();
         final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);
         xpathConfigMap.entrySet().stream().filter(e -> !e.getKey().startsWith("default.")).forEach(e -> {
             final String key = e.getKey();
             final String value = getSingleNodeValue(document, e.getValue(), true);
-            putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key));
+            putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key), scriptType);
         });
         crawlingConfig.getConfigParameterMap(ConfigName.VALUE).entrySet().stream().forEach(e -> {
             final String key = e.getKey();
             final String value = e.getValue();
-            putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key));
+            putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key), scriptType);
         });
     }
 

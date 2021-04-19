@@ -2,7 +2,7 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
-	<component name="groovyJobExecutor" class="org.codelibs.fess.job.impl.GroovyExecutor" instance="prototype">
+	<component name="scriptJobExecutor" class="org.codelibs.fess.job.impl.ScriptExecutor" instance="prototype">
 	</component>
 
 	<!-- Jobs -->

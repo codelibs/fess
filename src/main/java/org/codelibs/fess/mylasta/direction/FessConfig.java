@@ -181,6 +181,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0 */
     String JOB_MAX_CRAWLER_PROCESSES = "job.max.crawler.processes";
 
+    /** The key of the configuration. e.g. groovy */
+    String JOB_DEFAULT_SCRIPT = "job.default.script";
+
     /** The key of the configuration. e.g. 0 */
     String PROCESSORS = "processors";
 
@@ -282,6 +285,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 262144 */
     String HTTP_FILEUPLOAD_THRESHOLD_SIZE = "http.fileupload.threshold.size";
+
+    /** The key of the configuration. e.g. groovy */
+    String CRAWLER_DEFAULT_SCRIPT = "crawler.default.script";
 
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
@@ -1968,6 +1974,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getJobMaxCrawlerProcessesAsInteger();
 
     /**
+     * Get the value for the key 'job.default.script'. <br>
+     * The value is, e.g. groovy <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobDefaultScript();
+
+    /**
      * Get the value for the key 'processors'. <br>
      * The value is, e.g. 0 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2377,9 +2390,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getHttpFileuploadThresholdSizeAsInteger();
 
     /**
+     * Get the value for the key 'crawler.default.script'. <br>
+     * The value is, e.g. groovy <br>
+     * comment: common
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDefaultScript();
+
+    /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
      * The value is, e.g. 50 <br>
-     * comment: common
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentMaxSiteLength();
@@ -2387,7 +2407,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.site.length' as {@link Integer}. <br>
      * The value is, e.g. 50 <br>
-     * comment: common
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7099,6 +7118,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.JOB_MAX_CRAWLER_PROCESSES);
         }
 
+        public String getJobDefaultScript() {
+            return get(FessConfig.JOB_DEFAULT_SCRIPT);
+        }
+
         public String getProcessors() {
             return get(FessConfig.PROCESSORS);
         }
@@ -7321,6 +7344,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getHttpFileuploadThresholdSizeAsInteger() {
             return getAsInteger(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE);
+        }
+
+        public String getCrawlerDefaultScript() {
+            return get(FessConfig.CRAWLER_DEFAULT_SCRIPT);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {
@@ -9809,6 +9836,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.JOB_TEMPLATE_SCRIPT,
                     "return container.getComponent(\"crawlJob\").logLevel(\"info\").sessionId(\"{3}\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
             defaultMap.put(FessConfig.JOB_MAX_CRAWLER_PROCESSES, "0");
+            defaultMap.put(FessConfig.JOB_DEFAULT_SCRIPT, "groovy");
             defaultMap.put(FessConfig.PROCESSORS, "0");
             defaultMap.put(FessConfig.JAVA_COMMAND_PATH, "java");
             defaultMap.put(FessConfig.PYTHON_COMMAND_PATH, "python");
@@ -9844,6 +9872,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.HTTP_PROXY_PASSWORD, "");
             defaultMap.put(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE, "262144000");
             defaultMap.put(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE, "262144");
+            defaultMap.put(FessConfig.CRAWLER_DEFAULT_SCRIPT, "groovy");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "50");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");

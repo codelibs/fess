@@ -317,19 +317,20 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         putResultDataBody(dataMap, fessConfig.getIndexFieldThumbnail(), responseData.getUrl());
 
         // from config
+        final String scriptType = crawlingConfig.getScriptType();
         final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);
         final Map<String, String> metaConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.META);
         for (final Map.Entry<String, String> entry : metaConfigMap.entrySet()) {
             final String key = entry.getKey();
             final String[] values = entry.getValue().split(",");
             for (final String value : values) {
-                putResultDataWithTemplate(dataMap, key, metaDataMap.get(value), scriptConfigMap.get(key));
+                putResultDataWithTemplate(dataMap, key, metaDataMap.get(value), scriptConfigMap.get(key), scriptType);
             }
         }
         final Map<String, String> valueConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.VALUE);
         for (final Map.Entry<String, String> entry : valueConfigMap.entrySet()) {
             final String key = entry.getKey();
-            putResultDataWithTemplate(dataMap, key, entry.getValue(), scriptConfigMap.get(key));
+            putResultDataWithTemplate(dataMap, key, entry.getValue(), scriptConfigMap.get(key), scriptType);
         }
 
         return dataMap;

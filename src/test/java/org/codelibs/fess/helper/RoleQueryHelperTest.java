@@ -22,9 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.crypto.CachedCipher;
-import org.codelibs.core.exception.IllegalBlockSizeRuntimeException;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 
 public class RoleQueryHelperTest extends UnitFessTestCase {
     public CachedCipher cipher;

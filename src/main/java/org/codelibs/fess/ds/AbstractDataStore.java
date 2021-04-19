@@ -120,7 +120,12 @@ public abstract class AbstractDataStore implements DataStore {
 
     }
 
+    @Deprecated
     protected Object convertValue(final String template, final Map<String, Object> paramMap) {
+        return convertValue(ComponentUtil.getFessConfig().getCrawlerDefaultScript(), template, paramMap);
+    }
+
+    protected Object convertValue(final String scriptType, final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }
@@ -129,7 +134,7 @@ public abstract class AbstractDataStore implements DataStore {
             return paramMap.get(template);
         }
 
-        return ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
+        return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(template, paramMap);
     }
 
     protected long getReadInterval(final Map<String, String> paramMap) {

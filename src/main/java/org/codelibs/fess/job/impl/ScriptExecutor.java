@@ -21,8 +21,7 @@ import java.util.Map;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.util.ComponentUtil;
 
-@Deprecated
-public class GroovyExecutor extends JobExecutor {
+public class ScriptExecutor extends JobExecutor {
 
     @Override
     public Object execute(final String scriptType, final String script) {

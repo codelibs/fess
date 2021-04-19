@@ -59,6 +59,14 @@
 			<param name="jar.version" value="13.12.0" />
 			<param name="file.version" value="13.12.0" />
 		</antcall>
+		<!-- fess-script-groovy -->
+		<antcall target="install.plugin.jar">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-script-groovy" />
+			<param name="jar.version" value="13.12.0-SNAPSHOT" />
+			<param name="file.version" value="13.12.0-20210419.212149-1" />
+		</antcall>
 	</target>
 
 	<target name="install.env.jar">

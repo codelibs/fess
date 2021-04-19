@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
@@ -63,6 +64,14 @@ public interface CrawlingConfig {
             }
 
         }
+    }
+
+    default String getScriptType() {
+        final String scriptType = getConfigParameterMap(ConfigName.CONFIG).get(Param.Config.SCRIPT_TYPE);
+        if (StringUtil.isNotBlank(scriptType)) {
+            return scriptType;
+        }
+        return Constants.DEFAULT_SCRIPT;
     }
 
     public enum ConfigType {
@@ -121,6 +130,7 @@ public interface CrawlingConfig {
             public static final String HTML_CANONICAL_XPATH = "html.canonical.xpath";
             public static final String PIPELINE = "pipeline";
             public static final String IGNORE_ROBOTS_TAGS = "ignore.robots.tags";
+            public static final String SCRIPT_TYPE = "script.type";
         }
 
         // meta.*
