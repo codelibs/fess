@@ -280,7 +280,7 @@ public class ViewHelper {
             final String widthStr = req.getParameter(SCREEN_WIDTH);
             if (StringUtil.isNotBlank(widthStr)) {
                 final int width = Integer.parseInt(widthStr);
-                updateHighlisthInfo(highlightInfo, width);
+                updateHighlightInfo(highlightInfo, width);
                 final HttpSession session = req.getSession(false);
                 if (session != null) {
                     session.setAttribute(SCREEN_WIDTH, width);
@@ -290,7 +290,7 @@ public class ViewHelper {
                 if (session != null) {
                     final Integer width = (Integer) session.getAttribute(SCREEN_WIDTH);
                     if (width != null) {
-                        updateHighlisthInfo(highlightInfo, width);
+                        updateHighlightInfo(highlightInfo, width);
                     }
                 }
             }
@@ -298,7 +298,12 @@ public class ViewHelper {
         }).orElse(new HighlightInfo());
     }
 
+    @Deprecated
     protected void updateHighlisthInfo(final HighlightInfo highlightInfo, final int width) {
+        updateHighlightInfo(highlightInfo, width);
+    }
+
+    protected void updateHighlightInfo(final HighlightInfo highlightInfo, final int width) {
         if (width < TABLET_WIDTH) {
             float ratio = ((float) width) / ((float) TABLET_WIDTH);
             if (ratio < 0.5) {
