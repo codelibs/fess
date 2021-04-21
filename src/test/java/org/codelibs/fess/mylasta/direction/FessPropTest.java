@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -213,6 +214,24 @@ public class FessPropTest extends UnitFessTestCase {
         assertArrays(new String[] { "ja", "zh-cn" }, fessConfig.normalizeQueryLanguages(new String[] { "ja", "zh-cn" }));
         assertArrays(new String[] { "zh-cn" }, fessConfig.normalizeQueryLanguages(new String[] { "zh", "zh-cn" }));
         assertArrays(new String[] { "zh-tw" }, fessConfig.normalizeQueryLanguages(new String[] { "zh_TW" }));
+    }
+
+    public void test_getQueryLocaleFromName() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getQueryLanguageMapping() {
+                return "ja=ja\nzh_cn=zh-cn\nzh_TW=zh-tw\nzh=zh-cn";
+            }
+        };
+
+        assertEquals(Locale.ROOT, fessConfig.getQueryLocaleFromName(null));
+        assertEquals(Locale.ROOT, fessConfig.getQueryLocaleFromName(""));
+        assertEquals(Locale.ROOT, fessConfig.getQueryLocaleFromName("ja"));
+        assertEquals(Locale.JAPANESE, fessConfig.getQueryLocaleFromName("test_ja"));
+        assertEquals(Locale.CHINESE, fessConfig.getQueryLocaleFromName("test_zh"));
+        assertEquals(Locale.SIMPLIFIED_CHINESE, fessConfig.getQueryLocaleFromName("test_zh_cn"));
+        assertEquals(Locale.TRADITIONAL_CHINESE, fessConfig.getQueryLocaleFromName("test_zh_TW"));
     }
 
     private void assertArrays(final String[] expected, final String[] actual) {

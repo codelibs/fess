@@ -119,7 +119,8 @@ public abstract class FessSearchAction extends FessBaseAction {
 
         runtime.registerData("osddLink", openSearchHelper.hasOpenSearchFile());
 
-        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
+        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH,
+                request.getLocale() == null ? Locale.ROOT : request.getLocale());
         runtime.registerData("labelTypeItems", labelTypeItems);
         runtime.registerData("displayLabelTypeItems", labelTypeItems != null && !labelTypeItems.isEmpty());
 
@@ -158,7 +159,8 @@ public abstract class FessSearchAction extends FessBaseAction {
         }
 
         // label
-        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
+        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH,
+                request.getLocale() == null ? Locale.ROOT : request.getLocale());
 
         if (!labelTypeItems.isEmpty() && !form.fields.containsKey(FessSearchAction.LABEL_FIELD)) {
             final String[] defaultLabelValues = fessConfig.getDefaultLabelValues(getUserBean());

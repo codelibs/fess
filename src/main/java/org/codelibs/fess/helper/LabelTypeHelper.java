@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -73,12 +74,17 @@ public class LabelTypeHelper {
             item.setValue(labelType.getValue());
             item.setPermissions(labelType.getPermissions());
             item.setVirtualHost(labelType.getVirtualHost());
+            item.setLocale(labelType.getLocale());
             itemList.add(item);
         }
         labelTypeItemList = itemList;
     }
 
     public List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType) {
+        return getLabelTypeItemList(searchRequestType, Locale.ROOT);
+    }
+
+    public List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType, final Locale requestLocale) {
         if (labelTypeItemList == null) {
             init();
         }
@@ -86,10 +92,12 @@ public class LabelTypeHelper {
         final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final List<LabelTypeItem> labelList;
         if (StringUtil.isBlank(virtualHostKey)) {
-            labelList = labelTypeItemList;
-        } else {
             labelList =
-                    labelTypeItemList.stream().filter(item -> virtualHostKey.equals(item.getVirtualHost())).collect(Collectors.toList());
+                    labelTypeItemList.stream().filter(item -> matchLocale(requestLocale, item.getLocale())).collect(Collectors.toList());
+        } else {
+            labelList = labelTypeItemList.stream()
+                    .filter(item -> matchLocale(requestLocale, item.getLocale()) && virtualHostKey.equals(item.getVirtualHost()))
+                    .collect(Collectors.toList());
         }
 
         final List<Map<String, String>> itemList = new ArrayList<>();
@@ -119,6 +127,22 @@ public class LabelTypeHelper {
         }
 
         return itemList;
+    }
+
+    protected boolean matchLocale(final Locale requestLocale, final Locale targetLocale) {
+        if (targetLocale.equals(requestLocale) || targetLocale.equals(Locale.ROOT)) {
+            return true;
+        }
+        if (requestLocale == null) {
+            return false;
+        }
+        if (!requestLocale.getLanguage().equals(targetLocale.getLanguage())) {
+            return false;
+        }
+        if (targetLocale.getCountry().length() > 0 && !requestLocale.getCountry().equals(targetLocale.getCountry())) {
+            return false;
+        }
+        return true;
     }
 
     public Set<String> getMatchedLabelValueSet(final String path) {
@@ -169,6 +193,8 @@ public class LabelTypeHelper {
 
         private String virtualHost;
 
+        private Locale locale;
+
         public String getLabel() {
             return label;
         }
@@ -199,6 +225,14 @@ public class LabelTypeHelper {
 
         public void setVirtualHost(final String virtualHost) {
             this.virtualHost = virtualHost;
+        }
+
+        public Locale getLocale() {
+            return locale;
+        }
+
+        public void setLocale(Locale locale) {
+            this.locale = locale;
         }
     }
 

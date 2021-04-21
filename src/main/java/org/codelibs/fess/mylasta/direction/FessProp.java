@@ -1000,7 +1000,7 @@ public interface FessProp {
 
     String getQueryLanguageMapping();
 
-    default String[] normalizeQueryLanguages(final String[] langs) {
+    default Map<String, String> getQueryLanguageMappingMap() {
         @SuppressWarnings("unchecked")
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
@@ -1013,7 +1013,11 @@ public interface FessProp {
             }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)));
             propMap.put(QUERY_LANGUAGE_MAPPING, params);
         }
-        final Map<String, String> mapping = params;
+        return params;
+    }
+
+    default String[] normalizeQueryLanguages(final String[] langs) {
+        final Map<String, String> mapping = getQueryLanguageMappingMap();
         return stream(langs).get(stream -> stream.map(s -> {
             if (StringUtil.isBlank(s)) {
                 return null;
@@ -1058,6 +1062,29 @@ public interface FessProp {
             }
             return null;
         }).toArray(n -> new String[n]));
+    }
+
+    default Locale getQueryLocaleFromName(final String name) {
+        if (name == null) {
+            return Locale.ROOT;
+        }
+        final String value = name.toLowerCase(Locale.ROOT);
+        final Map<String, String> mapping = getQueryLanguageMappingMap();
+        for (final String key : mapping.keySet()) {
+            if (value.endsWith("_" + key.toLowerCase(Locale.ROOT))) {
+                final String[] values = key.split("_");
+                if (values.length == 1) {
+                    return new Locale(values[0]);
+                }
+                if (values.length == 2) {
+                    return new Locale(values[0], values[1]);
+                }
+                if (values.length == 3) {
+                    return new Locale(values[0], values[1], values[2]);
+                }
+            }
+        }
+        return Locale.ROOT;
     }
 
     String getSupportedUploadedFiles();

@@ -15,7 +15,10 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
+import java.util.Locale;
+
 import org.codelibs.fess.es.config.bsentity.BsLabelType;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
@@ -23,6 +26,7 @@ import org.codelibs.fess.es.config.bsentity.BsLabelType;
 public class LabelType extends BsLabelType {
 
     private static final long serialVersionUID = 1L;
+    private Locale locale;
 
     public String getId() {
         return asDocMeta().id();
@@ -38,6 +42,16 @@ public class LabelType extends BsLabelType {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    public Locale getLocale() {
+        if (locale == null) {
+            if (getValue() == null) {
+                return Locale.ROOT;
+            }
+            locale = ComponentUtil.getFessConfig().getQueryLocaleFromName(getValue());
+        }
+        return locale;
     }
 
     @Override
