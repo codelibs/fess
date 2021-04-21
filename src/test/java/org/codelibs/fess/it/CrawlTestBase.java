@@ -170,6 +170,7 @@ public class CrawlTestBase extends ITBase {
         final Map<String, Object> searchBody = new HashMap<>();
         final String response = checkMethodBase(searchBody).get("/api/admin/" + apiName + "/logs").asString();
         final List<Map<String, Object>> itemList = JsonPath.from(response).getList("response.logs");
+        logger.info("itemList: {}", itemList);
         return itemList;
     }
 
