@@ -206,6 +206,7 @@ public class CrawlTestBase extends ITBase {
         final List<Map<String, Object>> logList = readLogItems("crawlinginfo");
         final List<Map<String, Object>> resList = new ArrayList<>();
         for (Map<String, Object> elem : logList) {
+            logger.info("config_id: {}, session_id: {}", configId, elem.containsKey("session_id"));
             if (elem.containsKey("session_id") && elem.get("session_id").equals(configId)) {
                 resList.add(elem);
             }
@@ -217,6 +218,7 @@ public class CrawlTestBase extends ITBase {
         final List<Map<String, Object>> logList = readLogItems("failureurl");
         final List<Map<String, Object>> resList = new ArrayList<>();
         for (Map<String, Object> elem : logList) {
+            logger.info("config_id: {}, thread_name: {}", configId, elem.containsKey("thread_name"));
             if (elem.containsKey("thread_name") && elem.get("thread_name").toString().startsWith("Crawler-" + configId)) {
                 resList.add(elem);
             }

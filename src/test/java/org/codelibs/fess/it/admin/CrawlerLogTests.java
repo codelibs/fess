@@ -64,7 +64,7 @@ public class CrawlerLogTests extends CrawlTestBase {
         webConfigId = getWebConfigIds(NAME_PREFIX).get(0);
 
         createJob();
-        logger.info("Job is created");
+        logger.info("Job is created: {}", webConfigId);
         refresh();
 
         startJob(NAME_PREFIX);
