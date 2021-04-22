@@ -51,7 +51,7 @@
 		<tika.version>1.26</tika.version>
 		<groovy.version>3.0.7</groovy.version>
 		<minio.version>8.1.0</minio.version>
-		<okhttp.version>3.14.9</okhttp.version>
+		<okhttp.version>4.9.1</okhttp.version>
 
 		<!-- Crawler -->
 		<crawler.version>3.12.1-SNAPSHOT</crawler.version>
