@@ -23,14 +23,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fesen.action.search.SearchResponse;
 import org.codelibs.fesen.common.document.DocumentField;
-import org.codelibs.fesen.common.text.Text;
 import org.codelibs.fesen.search.SearchHit;
 import org.codelibs.fesen.search.SearchHits;
 import org.codelibs.fesen.search.aggregations.Aggregations;
@@ -44,8 +41,6 @@ import org.dbflute.optional.OptionalEntity;
 public class QueryResponseList implements List<Map<String, Object>> {
 
     private static final Logger logger = LogManager.getLogger(QueryResponseList.class);
-
-    protected static final String ELLIPSIS = "...";
 
     protected final List<Map<String, Object>> parent;
 
@@ -153,23 +148,20 @@ public class QueryResponseList implements List<Map<String, Object>> {
             docMap.putAll(searchHit.getSourceAsMap());
         }
 
+        final ViewHelper viewHelper = ComponentUtil.getViewHelper();
+
         final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
         try {
             if (highlightFields != null) {
-                for (final Map.Entry<String, HighlightField> entry : highlightFields.entrySet()) {
-                    final HighlightField highlightField = entry.getValue();
-                    final Text[] fragments = highlightField.fragments();
-                    if (fragments != null && fragments.length != 0) {
-                        final String[] texts = new String[fragments.length];
-                        for (int i = 0; i < fragments.length; i++) {
-                            texts[i] = fragments[i].string();
-                        }
-                        String value = StringUtils.join(texts, ELLIPSIS);
-                        if (StringUtil.isNotBlank(value) && !fessConfig.endsWithFullstop(value)) {
-                            value = value + ELLIPSIS;
-                        }
-                        docMap.put(hlPrefix + highlightField.getName(), value);
+                highlightFields.values().stream().forEach(highlightField -> {
+                    final String text = viewHelper.createHighlightText(highlightField);
+                    if (text != null) {
+                        docMap.put(hlPrefix + highlightField.getName(), text);
                     }
+                });
+                if (Constants.TEXT_FRAGMENT_TYPE_HIGHLIGHT.equals(fessConfig.getQueryHighlightTextFragmentType())) {
+                    docMap.put(Constants.TEXT_FRAGMENTS,
+                            viewHelper.createTextFragmentsByHighlight(highlightFields.values().toArray(n -> new HighlightField[n])));
                 }
             }
         } catch (final Exception e) {
@@ -178,8 +170,11 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
         }
 
+        if (Constants.TEXT_FRAGMENT_TYPE_QUERY.equals(fessConfig.getQueryHighlightTextFragmentType())) {
+            docMap.put(Constants.TEXT_FRAGMENTS, viewHelper.createTextFragmentsByQuery());
+        }
+
         // ContentTitle
-        final ViewHelper viewHelper = ComponentUtil.getViewHelper();
         if (viewHelper != null) {
             docMap.put(fessConfig.getResponseFieldContentTitle(), viewHelper.getContentTitle(docMap));
             docMap.put(fessConfig.getResponseFieldContentDescription(), viewHelper.getContentDescription(docMap));

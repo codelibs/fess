@@ -825,6 +825,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT = "query.highlight.boundary.position.detect";
 
+    /** The key of the configuration. e.g. query */
+    String QUERY_HIGHLIGHT_TEXT_FRAGMENT_TYPE = "query.highlight.text.fragment.type";
+
+    /** The key of the configuration. e.g. 3 */
+    String QUERY_HIGHLIGHT_TEXT_FRAGMENT_SIZE = "query.highlight.text.fragment.size";
+
+    /** The key of the configuration. e.g. 5 */
+    String QUERY_HIGHLIGHT_TEXT_FRAGMENT_PREFIX_LENGTH = "query.highlight.text.fragment.prefix.length";
+
+    /** The key of the configuration. e.g. 5 */
+    String QUERY_HIGHLIGHT_TEXT_FRAGMENT_SUFFIX_LENGTH = "query.highlight.text.fragment.suffix.length";
+
     /** The key of the configuration. e.g. 100000 */
     String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
@@ -4085,6 +4097,58 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryHighlightBoundaryPositionDetect();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.type'. <br>
+     * The value is, e.g. query <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightTextFragmentType();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.size'. <br>
+     * The value is, e.g. 3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightTextFragmentSize();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.size' as {@link Integer}. <br>
+     * The value is, e.g. 3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightTextFragmentSizeAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.prefix.length'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightTextFragmentPrefixLength();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.prefix.length' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightTextFragmentPrefixLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.suffix.length'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightTextFragmentSuffixLength();
+
+    /**
+     * Get the value for the key 'query.highlight.text.fragment.suffix.length' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightTextFragmentSuffixLengthAsInteger();
 
     /**
      * Get the value for the key 'query.max.search.result.offset'. <br>
@@ -8250,6 +8314,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT);
         }
 
+        public String getQueryHighlightTextFragmentType() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_TYPE);
+        }
+
+        public String getQueryHighlightTextFragmentSize() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_SIZE);
+        }
+
+        public Integer getQueryHighlightTextFragmentSizeAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_SIZE);
+        }
+
+        public String getQueryHighlightTextFragmentPrefixLength() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_PREFIX_LENGTH);
+        }
+
+        public Integer getQueryHighlightTextFragmentPrefixLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_PREFIX_LENGTH);
+        }
+
+        public String getQueryHighlightTextFragmentSuffixLength() {
+            return get(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_SUFFIX_LENGTH);
+        }
+
+        public Integer getQueryHighlightTextFragmentSuffixLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_SUFFIX_LENGTH);
+        }
+
         public String getQueryMaxSearchResultOffset() {
             return get(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
         }
@@ -10038,6 +10130,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_PHRASE_LIMIT, "256");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_CONTENT_DESCRIPTION_FIELDS, "hl_content,digest");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_BOUNDARY_POSITION_DETECT, "true");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_TYPE, "query");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_SIZE, "3");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_PREFIX_LENGTH, "5");
+            defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TEXT_FRAGMENT_SUFFIX_LENGTH, "5");
             defaultMap.put(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET, "100000");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_DEFAULT_FIELDS, "");
             defaultMap.put(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS, "");

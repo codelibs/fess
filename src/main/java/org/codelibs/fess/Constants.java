@@ -471,4 +471,11 @@ public class Constants extends CoreLibConstants {
     public static final String EXECUTE_TYPE_SUGGEST = "suggest";
 
     public static final String DEFAULT_SCRIPT = "groovy";
+
+    public static final String TEXT_FRAGMENTS = "text_fragments";
+
+    public static final String TEXT_FRAGMENT_TYPE_QUERY = "query";
+
+    public static final String TEXT_FRAGMENT_TYPE_HIGHLIGHT = "highlight";
+
 }

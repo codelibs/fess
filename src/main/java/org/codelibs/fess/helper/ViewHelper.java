@@ -57,6 +57,8 @@ import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fesen.common.text.Text;
+import org.codelibs.fesen.search.fetch.subphase.highlight.HighlightField;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -114,6 +116,8 @@ public class ViewHelper {
 
     protected static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
 
+    protected static final String ELLIPSIS = "...";
+
     protected boolean encodeUrlLink = false;
 
     protected String urlLinkEncoding = Constants.UTF_8;
@@ -153,6 +157,12 @@ public class ViewHelper {
     protected Cache<String, FacetResponse> facetCache;
 
     protected long facetCacheDuration = 60 * 10L; // 10min
+
+    protected int textFragmentPrefixLength;
+
+    protected int textFragmentSuffixLength;
+
+    protected int textFragmentSize;
 
     @PostConstruct
     public void init() {
@@ -197,6 +207,10 @@ public class ViewHelper {
         }));
 
         facetCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(facetCacheDuration, TimeUnit.SECONDS).build();
+
+        textFragmentPrefixLength = fessConfig.getQueryHighlightTextFragmentPrefixLengthAsInteger();
+        textFragmentSuffixLength = fessConfig.getQueryHighlightTextFragmentSuffixLengthAsInteger();
+        textFragmentSize = fessConfig.getQueryHighlightTextFragmentSizeAsInteger();
     }
 
     public String getContentTitle(final Map<String, Object> document) {
@@ -438,14 +452,39 @@ public class ViewHelper {
             }
 
             final String mimetype = DocumentUtil.getValue(document, fessConfig.getIndexFieldMimetype(), String.class);
-            if (StringUtil.isNotBlank(mimetype) && "application/pdf".equals(mimetype)) {
-                return appendPDFSearchWord(url);
+            if (StringUtil.isNotBlank(mimetype)) {
+                switch (mimetype) {
+                case "text/html":
+                    return appendHTMLSearchWord(document, url);
+                case "application/pdf":
+                    return appendPDFSearchWord(document, url);
+                default:
+                    break;
+                }
             }
         }
         return url;
     }
 
+    protected String appendHTMLSearchWord(final Map<String, Object> document, final String url) {
+        final TextFragment[] textFragments = (TextFragment[]) document.get(Constants.TEXT_FRAGMENTS);
+        if (textFragments != null) {
+            final StringBuilder buf = new StringBuilder(1000);
+            buf.append(url).append("#:~:");
+            for (int i = 0; i < textFragmentSize && i < textFragments.length; i++) {
+                buf.append(textFragments[i].toURLString()).append('&');
+            }
+            return buf.toString();
+        }
+        return url;
+    }
+
+    @Deprecated
     protected String appendPDFSearchWord(final String url) {
+        return appendPDFSearchWord(null, url);
+    }
+
+    protected String appendPDFSearchWord(final Map<String, Object> document, final String url) {
         final String queries = (String) LaRequestUtil.getRequest().getAttribute(Constants.REQUEST_QUERIES);
         if (queries != null) {
             try {
@@ -783,6 +822,54 @@ public class ViewHelper {
         }
     }
 
+    public String createHighlightText(final HighlightField highlightField) {
+        final Text[] fragments = highlightField.fragments();
+        if (fragments != null && fragments.length != 0) {
+            final String[] texts = new String[fragments.length];
+            for (int i = 0; i < fragments.length; i++) {
+                texts[i] = fragments[i].string();
+            }
+            String value = StringUtils.join(texts, ELLIPSIS);
+            if (StringUtil.isNotBlank(value) && !ComponentUtil.getFessConfig().endsWithFullstop(value)) {
+                return value + ELLIPSIS;
+            }
+            return value;
+        }
+        return null;
+    }
+
+    public TextFragment[] createTextFragmentsByHighlight(final HighlightField[] fields) {
+        final List<TextFragment> list = new ArrayList<>();
+        for (final HighlightField field : fields) {
+            final Text[] fragments = field.fragments();
+            if (fragments != null) {
+                for (final Text fragment : fragments) {
+                    final String text = fragment.string();
+                    if (text.length() > textFragmentPrefixLength + textFragmentSuffixLength) {
+                        final String target =
+                                text.replace(originalHighlightTagPre, StringUtil.EMPTY).replace(originalHighlightTagPost, StringUtil.EMPTY);
+                        if (target.length() > textFragmentPrefixLength + textFragmentSuffixLength) {
+                            list.add(new TextFragment(null, target.substring(0, textFragmentPrefixLength),
+                                    target.substring(target.length() - textFragmentSuffixLength), null));
+                        }
+                    }
+                }
+            }
+        }
+        return list.toArray(n -> new TextFragment[n]);
+    }
+
+    public TextFragment[] createTextFragmentsByQuery() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            @SuppressWarnings("unchecked")
+            Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
+            if (querySet != null) {
+                return querySet.stream().map(s -> new TextFragment(null, s, null, null)).toArray(n -> new TextFragment[n]);
+            }
+            return new TextFragment[0];
+        }).orElse(new TextFragment[0]);
+    }
+
     public boolean isUseSession() {
         return useSession;
     }
@@ -827,6 +914,30 @@ public class ViewHelper {
         this.actionHook = actionHook;
     }
 
+    public void setEncodeUrlLink(final boolean encodeUrlLink) {
+        this.encodeUrlLink = encodeUrlLink;
+    }
+
+    public void setUrlLinkEncoding(final String urlLinkEncoding) {
+        this.urlLinkEncoding = urlLinkEncoding;
+    }
+
+    public void setOriginalHighlightTagPre(final String originalHighlightTagPre) {
+        this.originalHighlightTagPre = originalHighlightTagPre;
+    }
+
+    public void setOriginalHighlightTagPost(final String originalHighlightTagPost) {
+        this.originalHighlightTagPost = originalHighlightTagPost;
+    }
+
+    public void setCacheTemplateName(final String cacheTemplateName) {
+        this.cacheTemplateName = cacheTemplateName;
+    }
+
+    public void setFacetCacheDuration(final long facetCacheDuration) {
+        this.facetCacheDuration = facetCacheDuration;
+    }
+
     public static class ActionHook {
 
         public ActionResponse godHandPrologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
@@ -850,27 +961,38 @@ public class ViewHelper {
         }
     }
 
-    public void setEncodeUrlLink(final boolean encodeUrlLink) {
-        this.encodeUrlLink = encodeUrlLink;
-    }
+    // #:~:text=[prefix-,]textStart[,textEnd][,-suffix]
+    public static class TextFragment {
+        private String prefix;
+        private String textStart;
+        private String textEnd;
+        private String suffix;
 
-    public void setUrlLinkEncoding(final String urlLinkEncoding) {
-        this.urlLinkEncoding = urlLinkEncoding;
-    }
+        TextFragment(final String prefix, final String textStart, final String textEnd, final String suffix) {
+            this.prefix = prefix;
+            this.textStart = textStart == null ? StringUtil.EMPTY : textStart;
+            this.textEnd = textEnd;
+            this.suffix = suffix;
+        }
 
-    public void setOriginalHighlightTagPre(final String originalHighlightTagPre) {
-        this.originalHighlightTagPre = originalHighlightTagPre;
-    }
+        public String toURLString() {
+            final StringBuilder buf = new StringBuilder();
+            buf.append("text=");
+            if (StringUtil.isNotBlank(prefix)) {
+                buf.append(encodeToString(prefix)).append("-,");
+            }
+            buf.append(encodeToString(textStart));
+            if (StringUtil.isNotBlank(textEnd)) {
+                buf.append(',').append(encodeToString(textEnd));
+            }
+            if (StringUtil.isNotBlank(suffix)) {
+                buf.append(",-").append(encodeToString(suffix));
+            }
+            return buf.toString();
+        }
 
-    public void setOriginalHighlightTagPost(final String originalHighlightTagPost) {
-        this.originalHighlightTagPost = originalHighlightTagPost;
-    }
-
-    public void setCacheTemplateName(final String cacheTemplateName) {
-        this.cacheTemplateName = cacheTemplateName;
-    }
-
-    public void setFacetCacheDuration(final long facetCacheDuration) {
-        this.facetCacheDuration = facetCacheDuration;
+        private String encodeToString(final String text) {
+            return URLEncoder.encode(text, Constants.CHARSET_UTF_8);
+        }
     }
 }
