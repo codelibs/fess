@@ -54,10 +54,10 @@
 		<okhttp.version>4.9.1</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.12.1-SNAPSHOT</crawler.version>
+		<crawler.version>3.12.1</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.12.1-SNAPSHOT</suggest.version>
+		<suggest.version>7.12.1</suggest.version>
 
 		<!-- Fesen -->
 		<fesen.version>0.12.0</fesen.version>
