@@ -1038,7 +1038,7 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-common</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.annotation</groupId>
