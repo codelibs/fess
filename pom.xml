@@ -1279,6 +1279,10 @@
 					<groupId>javax.activation</groupId>
 					<artifactId>activation</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.intellij</groupId>
+					<artifactId>annotations</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
