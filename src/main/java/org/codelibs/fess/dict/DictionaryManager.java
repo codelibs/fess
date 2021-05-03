@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.curl.CurlResponse;
-import org.codelibs.fesen.runner.net.EcrCurl;
+import org.codelibs.fesen.runner.net.FesenCurl;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -52,7 +52,7 @@ public class DictionaryManager {
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
                 .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
-            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+            final Map<String, Object> contentMap = response.getContent(FesenCurl.jsonParser());
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
             return fileList.stream().map(fileMap -> {
@@ -94,7 +94,7 @@ public class DictionaryManager {
             // TODO use stream
             try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
                     .body(FileUtil.readUTF8(file)).execute()) {
-                final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+                final Map<String, Object> contentMap = response.getContent(FesenCurl.jsonParser());
                 if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                     throw new DictionaryException("Failed to update " + dictFile.getPath());
                 }

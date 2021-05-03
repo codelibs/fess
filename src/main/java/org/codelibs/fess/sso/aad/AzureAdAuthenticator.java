@@ -47,7 +47,7 @@ import org.codelibs.core.net.UuidUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
-import org.codelibs.fesen.runner.net.EcrCurl;
+import org.codelibs.fesen.runner.net.FesenCurl;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.AzureAdCredential;
 import org.codelibs.fess.app.web.base.login.AzureAdCredential.AzureAdUser;
@@ -369,7 +369,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
         try (CurlResponse response = Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
                 .header("Accept", "application/json").execute()) {
-            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+            final Map<String, Object> contentMap = response.getContent(FesenCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);
             }
@@ -449,7 +449,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                         Curl.post(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
                                 .header("Accept", "application/json").header("Content-type", "application/json")
                                 .body("{\"securityEnabledOnly\":false}").execute()) {
-                    final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+                    final Map<String, Object> contentMap = response.getContent(FesenCurl.jsonParser());
                     if (logger.isDebugEnabled()) {
                         logger.debug("response: {}", contentMap);
                     }
@@ -487,7 +487,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
         try (CurlResponse response = Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
                 .header("Accept", "application/json").execute()) {
-            final Map<String, Object> contentMap = response.getContent(EcrCurl.jsonParser());
+            final Map<String, Object> contentMap = response.getContent(FesenCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);
             }

@@ -46,7 +46,6 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -60,7 +59,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.dbflute.optional.OptionalThing;
 
-public class GsaApiManager extends BaseApiManager implements WebApiManager {
+public class GsaApiManager extends BaseApiManager {
     private static final Logger logger = LogManager.getLogger(GsaApiManager.class);
 
     private static final String OUTPUT_XML = "xml"; // or xml_no_dtd
