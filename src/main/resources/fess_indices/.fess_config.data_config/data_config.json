@@ -40,7 +40,8 @@
         "type": "long"
       },
       "description" : {
-        "type": "text"
+        "type": "text",
+        "analyzer": "standard_analyzer"
       }
     }
 }

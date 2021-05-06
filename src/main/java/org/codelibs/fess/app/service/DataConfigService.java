@@ -94,7 +94,7 @@ public class DataConfigService extends FessAppService {
             cb.query().setHandlerName_Wildcard(wrapQuery(dataConfigPager.handlerName));
         }
         if (StringUtil.isNotBlank(dataConfigPager.description)) {
-            cb.query().setDescription_Wildcard(wrapQuery(dataConfigPager.description));
+            cb.query().setDescription_MatchPhrase(wrapQuery(dataConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 

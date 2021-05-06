@@ -111,7 +111,7 @@ public class WebConfigService extends FessAppService {
             cb.query().setUrls_Wildcard(wrapQuery(webConfigPager.urls));
         }
         if (StringUtil.isNotBlank(webConfigPager.description)) {
-            cb.query().setDescription_Wildcard(wrapQuery(webConfigPager.description));
+            cb.query().setDescription_MatchPhrase(wrapQuery(webConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 
