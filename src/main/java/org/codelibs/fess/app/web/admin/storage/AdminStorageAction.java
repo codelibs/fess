@@ -39,6 +39,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
@@ -119,7 +120,15 @@ public class AdminStorageAction extends FessAdminAction {
         if (StringUtil.isEmpty(values[1])) {
             throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(values[0])));
         }
-        return asStream(values[1]).contentTypeOctetStream().stream(out -> {
+        final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
+        final String name = values[1];
+        final String encodedName = URLEncoder.encode(name, Constants.UTF_8_CHARSET).replace("+", "%20");
+        response.header("Content-Disposition", "attachment; filename=\"" + name + "\"; filename*=utf-8''" + encodedName);
+        response.header("Pragma", "no-cache");
+        response.header("Cache-Control", "no-cache");
+        response.header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+        response.contentTypeOctetStream();
+        return response.stream(out -> {
             try {
                 downloadObject(getObjectName(values[0], values[1]), out);
             } catch (final StorageException e) {
