@@ -259,7 +259,7 @@ public class AdminStorageAction extends FessAdminAction {
         if (values.length == 0) {
             return StringUtil.EMPTY;
         }
-        return values[values.length - 1];
+        return urlDecode(values[values.length - 1]);
     }
 
     public static String decodePath(final String id) {
