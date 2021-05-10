@@ -698,7 +698,6 @@
           "synonyms_path": "${fess.dictionary.path}synonym.txt",
           "dynamic_reload": true,
           "expand": false,
-          "expand_ngram": true,
           "reload_interval": "1m"
         }
       },
