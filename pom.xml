@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>13.12.3-SNAPSHOT</version>
+	<version>13.13.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -54,10 +54,10 @@
 		<okhttp.version>4.9.1</okhttp.version>
 
 		<!-- Crawler -->
-		<crawler.version>3.12.1</crawler.version>
+		<crawler.version>3.13.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>7.12.1</suggest.version>
+		<suggest.version>7.13.0-SNAPSHOT</suggest.version>
 
 		<!-- Fesen -->
 		<fesen.version>0.12.0</fesen.version>
