@@ -1025,6 +1025,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS = "query.boost.fuzzy.content.transpositions";
 
+    /** The key of the configuration. e.g. 50 */
+    String QUERY_PREFIX_EXPANSIONS = "query.prefix.expansions";
+
+    /** The key of the configuration. e.g. 0 */
+    String QUERY_PREFIX_SLOP = "query.prefix.slop";
+
+    /** The key of the configuration. e.g. 0 */
+    String QUERY_FUZZY_prefix_length = "query.fuzzy.prefix_length";
+
+    /** The key of the configuration. e.g. 50 */
+    String QUERY_FUZZY_EXPANSIONS = "query.fuzzy.expansions";
+
+    /** The key of the configuration. e.g. true */
+    String QUERY_FUZZY_TRANSPOSITIONS = "query.fuzzy.transpositions";
+
     /** The key of the configuration. e.g. label */
     String QUERY_FACET_FIELDS = "query.facet.fields";
 
@@ -4765,6 +4780,80 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryBoostFuzzyContentTranspositions();
+
+    /**
+     * Get the value for the key 'query.prefix.expansions'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryPrefixExpansions();
+
+    /**
+     * Get the value for the key 'query.prefix.expansions' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryPrefixExpansionsAsInteger();
+
+    /**
+     * Get the value for the key 'query.prefix.slop'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryPrefixSlop();
+
+    /**
+     * Get the value for the key 'query.prefix.slop' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryPrefixSlopAsInteger();
+
+    /**
+     * Get the value for the key 'query.fuzzy.prefix_length'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFuzzyPrefixLength();
+
+    /**
+     * Get the value for the key 'query.fuzzy.prefix_length' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFuzzyPrefixLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.fuzzy.expansions'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFuzzyExpansions();
+
+    /**
+     * Get the value for the key 'query.fuzzy.expansions' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFuzzyExpansionsAsInteger();
+
+    /**
+     * Get the value for the key 'query.fuzzy.transpositions'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFuzzyTranspositions();
+
+    /**
+     * Is the property for the key 'query.fuzzy.transpositions' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryFuzzyTranspositions();
 
     /**
      * Get the value for the key 'query.facet.fields'. <br>
@@ -8642,6 +8731,46 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS);
         }
 
+        public String getQueryPrefixExpansions() {
+            return get(FessConfig.QUERY_PREFIX_EXPANSIONS);
+        }
+
+        public Integer getQueryPrefixExpansionsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_PREFIX_EXPANSIONS);
+        }
+
+        public String getQueryPrefixSlop() {
+            return get(FessConfig.QUERY_PREFIX_SLOP);
+        }
+
+        public Integer getQueryPrefixSlopAsInteger() {
+            return getAsInteger(FessConfig.QUERY_PREFIX_SLOP);
+        }
+
+        public String getQueryFuzzyPrefixLength() {
+            return get(FessConfig.QUERY_FUZZY_prefix_length);
+        }
+
+        public Integer getQueryFuzzyPrefixLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FUZZY_prefix_length);
+        }
+
+        public String getQueryFuzzyExpansions() {
+            return get(FessConfig.QUERY_FUZZY_EXPANSIONS);
+        }
+
+        public Integer getQueryFuzzyExpansionsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FUZZY_EXPANSIONS);
+        }
+
+        public String getQueryFuzzyTranspositions() {
+            return get(FessConfig.QUERY_FUZZY_TRANSPOSITIONS);
+        }
+
+        public boolean isQueryFuzzyTranspositions() {
+            return is(FessConfig.QUERY_FUZZY_TRANSPOSITIONS);
+        }
+
         public String getQueryFacetFields() {
             return get(FessConfig.QUERY_FACET_FIELDS);
         }
@@ -10178,6 +10307,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS, "10");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_prefix_length, "0");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS, "true");
+            defaultMap.put(FessConfig.QUERY_PREFIX_EXPANSIONS, "50");
+            defaultMap.put(FessConfig.QUERY_PREFIX_SLOP, "0");
+            defaultMap.put(FessConfig.QUERY_FUZZY_prefix_length, "0");
+            defaultMap.put(FessConfig.QUERY_FUZZY_EXPANSIONS, "50");
+            defaultMap.put(FessConfig.QUERY_FUZZY_TRANSPOSITIONS, "true");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS, "label");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE, "100");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");

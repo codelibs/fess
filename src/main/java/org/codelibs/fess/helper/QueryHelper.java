@@ -511,45 +511,58 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context, prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders
-                    .matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost));
+            return buildDefaultQueryBuilder(
+                    (f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost)
+                            .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
         if (!isSearchField(field)) {
             final String query = prefixQuery.getPrefix().toString();
             final String origQuery = toLowercaseWildcard(query);
             context.addFieldLog(Constants.DEFAULT_FIELD, query);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost)
+                    .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
         context.addFieldLog(field, prefixQuery.getPrefix().text());
         if (notAnalyzedFieldSet.contains(field)) {
             return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
         } else {
-            return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
+            return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost)
+                    .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger());
         }
     }
 
     protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Term term = fuzzyQuery.getTerm();
         final String field = getSearchField(context, term.field());
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, term.text())
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
+            return buildDefaultQueryBuilder(
+                    (f, b) -> QueryBuilders.fuzzyQuery(f, term.text()).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
+                            .boost(b * boost).maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
+                            .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
+                            .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));
         }
         if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
-            return QueryBuilders.fuzzyQuery(field, term.text()).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()));
+            return QueryBuilders.fuzzyQuery(field, term.text()).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
+                    .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
+                    .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
+                    .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions()));
         }
         final String origQuery = fuzzyQuery.toString();
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
         context.addHighlightedQuery(origQuery);
-        return buildDefaultQueryBuilder(
-                (f, b) -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
+        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
+                .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost)
+                .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger()).prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
+                .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));
     }
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
