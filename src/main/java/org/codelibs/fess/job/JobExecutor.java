@@ -20,11 +20,6 @@ import org.codelibs.fess.Constants;
 public abstract class JobExecutor {
     protected ShutdownListener shutdownListener;
 
-    @Deprecated
-    public Object execute(String script) {
-        return execute(Constants.DEFAULT_SCRIPT, script);
-    }
-
     public abstract Object execute(String scriptType, String script);
 
     public void shutdown() {

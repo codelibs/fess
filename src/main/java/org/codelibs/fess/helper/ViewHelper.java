@@ -312,11 +312,6 @@ public class ViewHelper {
         }).orElse(new HighlightInfo());
     }
 
-    @Deprecated
-    protected void updateHighlisthInfo(final HighlightInfo highlightInfo, final int width) {
-        updateHighlightInfo(highlightInfo, width);
-    }
-
     protected void updateHighlightInfo(final HighlightInfo highlightInfo, final int width) {
         if (width < TABLET_WIDTH) {
             float ratio = ((float) width) / ((float) TABLET_WIDTH);
@@ -477,11 +472,6 @@ public class ViewHelper {
             return buf.toString();
         }
         return url;
-    }
-
-    @Deprecated
-    protected String appendPDFSearchWord(final String url) {
-        return appendPDFSearchWord(null, url);
     }
 
     protected String appendPDFSearchWord(final Map<String, Object> document, final String url) {

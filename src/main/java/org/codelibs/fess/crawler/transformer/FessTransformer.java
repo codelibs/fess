@@ -136,11 +136,6 @@ public interface FessTransformer {
         }
     }
 
-    @Deprecated
-    default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template) {
-        putResultDataWithTemplate(dataMap, key, value, template, Constants.DEFAULT_SCRIPT);
-    }
-
     default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template,
             final String scriptType) {
         Object target = value;
@@ -156,11 +151,6 @@ public interface FessTransformer {
         if (key != null && target != null) {
             putResultDataBody(dataMap, key, target);
         }
-    }
-
-    @Deprecated
-    default Object evaluateValue(String template, final Map<String, Object> paramMap) {
-        return evaluateValue(Constants.DEFAULT_SCRIPT, template, paramMap);
     }
 
     default Object evaluateValue(final String scriptType, String template, final Map<String, Object> paramMap) {

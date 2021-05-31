@@ -87,24 +87,24 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
         paramMap.put("param3", "PARAM3*");
 
         value = "\"abc\"";
-        assertEquals("abc", dataStore.convertValue(value, paramMap));
+        assertEquals("abc", dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
 
         value = "param1";
-        assertEquals("PARAM1", dataStore.convertValue(value, paramMap));
+        assertEquals("PARAM1", dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
 
         value = "param2";
-        assertEquals("PARAM2+", dataStore.convertValue(value, paramMap));
+        assertEquals("PARAM2+", dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
 
         value = "\"123\"+param2+\",\"+param3+\"abc\"";
-        assertEquals("123PARAM2+,PARAM3*abc", dataStore.convertValue(value, paramMap));
+        assertEquals("123PARAM2+,PARAM3*abc", dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
 
         value = null;
-        assertEquals("", dataStore.convertValue(value, paramMap));
+        assertEquals("", dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
 
         value = "";
-        assertEquals("", dataStore.convertValue(value, paramMap));
+        assertEquals("", dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
 
         value = " ";
-        assertNull(dataStore.convertValue(value, paramMap));
+        assertNull(dataStore.convertValue(Constants.DEFAULT_SCRIPT, value, paramMap));
     }
 }

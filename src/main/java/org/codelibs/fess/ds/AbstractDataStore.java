@@ -120,11 +120,6 @@ public abstract class AbstractDataStore implements DataStore {
 
     }
 
-    @Deprecated
-    protected Object convertValue(final String template, final Map<String, Object> paramMap) {
-        return convertValue(ComponentUtil.getFessConfig().getCrawlerDefaultScript(), template, paramMap);
-    }
-
     protected Object convertValue(final String scriptType, final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
