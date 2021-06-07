@@ -144,8 +144,7 @@ public class KeyMatchHelper {
         this.reloadInterval = reloadInterval;
     }
 
-    protected Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> getQueryMap() {
-        final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+    protected Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> getQueryMap(final String key) {
         final Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> map = keyMatchQueryMap.get(key);
         if (map != null) {
             return map;
@@ -154,27 +153,30 @@ public class KeyMatchHelper {
     }
 
     public void buildQuery(final List<String> keywordList, final List<FilterFunctionBuilder> list) {
+        final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         keywordList.stream().forEach(keyword -> {
-            final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList = getQueryMap().get(toLowerCase(keyword));
+            final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList = getQueryMap(key).get(toLowerCase(keyword));
             if (boostList != null) {
                 boostList.forEach(pair -> list.add(new FilterFunctionBuilder(pair.getValue2(), pair.getValue3())));
             }
         });
     }
 
-    public List<Map<String, Object>> getBoostedDocumentList(final String id, final String term, final int size) {
+    public List<Map<String, Object>> getBoostedDocumentList(final KeyMatch keyMatch) {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
-        final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList = getQueryMap().get(toLowerCase(term));
+        final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList =
+                getQueryMap(keyMatch.getVirtualHost()).get(toLowerCase(keyMatch.getTerm()));
         if (boostList == null) {
             return Collections.emptyList();
         }
         for (final Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>> pair : boostList) {
-            if (!id.equals(pair.getValue1())) {
+            if (!keyMatch.getId().equals(pair.getValue1())) {
                 continue;
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
-                searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getValue2()).setSize(size);
+                searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getValue2())
+                        .setSize(keyMatch.getMaxSize());
                 return true;
             });
         }
