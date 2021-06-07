@@ -41,6 +41,8 @@ public abstract class AbstractDataStore implements DataStore {
 
     private static final Logger logger = LogManager.getLogger(AbstractDataStore.class);
 
+    protected static final String SCRIPT_LANGUAGE = "script_language";
+
     public String mimeType = "application/datastore";
 
     protected boolean alive = true;
@@ -118,6 +120,14 @@ public abstract class AbstractDataStore implements DataStore {
 
         storeData(config, callback, paramMap, configScriptMap, defaultDataMap);
 
+    }
+
+    protected String getScriptLanguage(final Map<String, String> paramMap) {
+        final String value = paramMap.get(SCRIPT_LANGUAGE);
+        if (StringUtil.isBlank(value)) {
+            return Constants.DEFAULT_SCRIPT;
+        }
+        return value;
     }
 
     protected Object convertValue(final String scriptType, final String template, final Map<String, Object> paramMap) {
