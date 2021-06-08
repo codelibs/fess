@@ -118,7 +118,7 @@ public abstract class AbstractDataStore implements DataStore {
         defaultDataMap.put(fessConfig.getIndexFieldVirtualHost(),
                 stream(config.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.toList())));
 
-        storeData(config, callback, paramMap, configScriptMap, defaultDataMap);
+        storeData(config, callback, new ParamMap<>(paramMap), configScriptMap, defaultDataMap);
 
     }
 
