@@ -87,10 +87,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<release>11</release>
-					<encoding>UTF-8</encoding>
-				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
@@ -168,40 +164,10 @@
 			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<header>https://www.codelibs.org/assets/license/header.txt</header>
-					<properties>
-						<year>2021</year>
-					</properties>
-					<includes>
-						<include>src/**/*.java</include>
-					</includes>
-					<encoding>UTF-8</encoding>
-					<headerDefinitions>
-						<headerDefinition>https://www.codelibs.org/assets/license/header-definition-2.xml</headerDefinition>
-					</headerDefinitions>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>format</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<configFile>${basedir}/src/main/config/eclipse/formatter/java.xml</configFile>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
@@ -938,7 +904,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
-			<version>1.2</version>
+			<version>${jstl.version}</version>
 			<!-- contains taglibs.standard -->
 			<!-- <scope>provided</scope> -->
 		</dependency>
@@ -1133,7 +1099,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>sai</artifactId>
-			<version>0.2.0</version>
+			<version>${sai.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
@@ -1148,7 +1114,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>spnego</artifactId>
-			<version>1.1.0</version>
+			<version>${spnego.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
