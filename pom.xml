@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
 	<version>13.13.0-SNAPSHOT</version>
 	<packaging>war</packaging>
@@ -29,51 +28,11 @@
 		<url>https://github.com/codelibs/fess</url>
 	</scm>
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>9</version>
+		<groupId>org.codelibs.fess</groupId>
+		<artifactId>fess-parent</artifactId>
+		<version>13.13.0-SNAPSHOT</version>
 	</parent>
 	<properties>
-		<!-- Main Framework -->
-		<dbflute.version>1.2.4</dbflute.version>
-		<lastaflute.version>1.2.0</lastaflute.version>
-		<lasta.di.version>0.8.3</lasta.di.version>
-		<lasta.taglib.version>0.7.3</lasta.taglib.version>
-		<lasta.job.version>0.5.4</lasta.job.version>
-		<mailflute.version>0.6.4</mailflute.version>
-
-		<!-- Partner Library -->
-		<slf4j.version>1.7.30</slf4j.version>
-		<log4j.version>2.14.1</log4j.version>
-		<jackson.version>2.12.2</jackson.version>
-		<commons.fileupload.version>1.4</commons.fileupload.version>
-		<asm.version>9.1</asm.version>
-		<tika.version>1.26</tika.version>
-		<groovy.version>3.0.7</groovy.version>
-		<minio.version>8.1.0</minio.version>
-		<okhttp.version>4.9.1</okhttp.version>
-
-		<!-- Crawler -->
-		<crawler.version>3.13.0-SNAPSHOT</crawler.version>
-
-		<!-- Suggest -->
-		<suggest.version>7.13.0-SNAPSHOT</suggest.version>
-
-		<!-- Fesen -->
-		<fesen.version>0.13.0</fesen.version>
-		<fesen.httpclient.version>0.13.0</fesen.httpclient.version>
-		<fesen.runner.version>0.13.0</fesen.runner.version>
-
-		<!-- Tomcat -->
-		<tomcat.version>9.0.44</tomcat.version>
-		<tomcat.boot.version>0.7.7</tomcat.boot.version>
-
-		<!-- Testing -->
-		<utflute.version>0.9.1</utflute.version>
-		<junit.version>4.13.2</junit.version>
-		<junit.jupiter.version>5.7.0</junit.jupiter.version>
-		<junit.vintage.version>5.7.0</junit.vintage.version>
-
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
 		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
@@ -91,7 +50,6 @@
 		<packaging.fess.systemd.sysctl.dir>/usr/lib/sysctl.d</packaging.fess.systemd.sysctl.dir>
 		<packaging.fess.tmpfilesd.dir>/usr/lib/tmpfiles.d</packaging.fess.tmpfilesd.dir>
 		<packaging.fess.dictionary.dir>/var/lib/fesen/config</packaging.fess.dictionary.dir>
-
 	</properties>
 	<profiles>
 		<profile>
@@ -128,7 +86,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
 				<configuration>
 					<release>11</release>
 					<encoding>UTF-8</encoding>
@@ -136,7 +93,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<id>source-jar</id>
@@ -149,7 +105,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.1</version>
 				<configuration>
 					<webResources>
 						<resource>
@@ -160,7 +115,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.2</version>
 				<executions>
 					<execution>
 						<id>unpack-provided</id>
@@ -180,7 +134,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
 				<configuration>
 					<includes>
 						<include>${test.include.path}</include>
@@ -191,11 +144,9 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.22.2</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
@@ -208,7 +159,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-jxr-plugin</artifactId>
-				<version>3.0.0</version>
 				<configuration>
 					<docTitle>&lt;a href="https://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess Reference&lt;/a&gt;</docTitle>
 					<windowTitle>Open Source Enterprise Search: Fess Source Code Reference</windowTitle>
@@ -217,7 +167,6 @@
 			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>4.0</version>
 				<configuration>
 					<header>https://www.codelibs.org/assets/license/header.txt</header>
 					<properties>
@@ -242,7 +191,6 @@
 			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
-				<version>2.14.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -257,7 +205,6 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>yuicompressor-maven-plugin</artifactId>
-				<version>1.5.1</version>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -280,7 +227,6 @@
 			<plugin>
 				<groupId>org.dbflute</groupId>
 				<artifactId>dbflute-maven-plugin</artifactId>
-				<version>1.1.0</version>
 				<configuration>
 					<dbfluteVersion>${dbflute.version}</dbfluteVersion>
 					<packageBase>org.codelibs.fess.dbflute</packageBase>
@@ -290,7 +236,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>3.0.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.ant</groupId>
@@ -316,7 +261,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>copy-resources-deb</id>
@@ -415,7 +359,6 @@
 			<!-- zip, tarball -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.3.0</version>
 				<configuration>
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
@@ -439,7 +382,6 @@
 			<plugin>
 				<groupId>org.vafer</groupId>
 				<artifactId>jdeb</artifactId>
-				<version>1.8</version>
 				<configuration>
 					<deb>${project.build.directory}/releases/${project.artifactId}-${project.version}.deb</deb>
 					<controlDir>${project.build.directory}/generated-packaging/deb/scripts</controlDir>
@@ -695,7 +637,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>rpm-maven-plugin</artifactId>
-				<version>2.2.0</version>
 				<configuration>
 					<distribution>Fess</distribution>
 					<group>Application/Internet</group>
@@ -967,36 +908,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>codelibs.org</id>
-			<name>CodeLibs Repository</name>
-			<url>https://maven.codelibs.org/</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>oss.sonatype.org</id>
-			<name>oss.sonatype.org</name>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<repositories>
-		<repository>
-			<id>codelibs.org</id>
-			<name>CodeLibs Repository</name>
-			<url>https://maven.codelibs.org/</url>
-		</repository>
-		<repository>
-			<id>oss.sonatype.org</id>
-			<name>oss.sonatype.org</name>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 	<dependencies>
 		<!-- lastaflute -->
 		<dependency>
@@ -1033,12 +944,12 @@
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>javax.transaction-api</artifactId>
-			<version>1.3</version>
+			<version>${javax.transaction.api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-common</artifactId>
-			<version>3.0.2</version>
+			<version>${jersey.common.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.annotation</groupId>
@@ -1049,7 +960,7 @@
 		<dependency>
 			<groupId>jakarta.activation</groupId>
 			<artifactId>jakarta.activation-api</artifactId>
-			<version>1.2.2</version>
+			<version>${jakarta.activation.api}</version>
 		</dependency>
 
 		<!-- logging -->
@@ -1147,7 +1058,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>30.1.1-jre</version>
+			<version>${guava.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1174,7 +1085,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
-			<version>1.31.4</version>
+			<version>${google.oauth.client.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1189,7 +1100,7 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client</artifactId>
-			<version>1.38.1</version>
+			<version>${google.http.client.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
@@ -1200,12 +1111,12 @@
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-jackson2</artifactId>
-			<version>1.38.1</version>
+			<version>${google.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-xml</artifactId>
-			<version>1.38.1</version>
+			<version>${google.http.client.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -1216,7 +1127,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.5.4</version>
+			<version>${corelib.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
@@ -1231,7 +1142,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>curl4j</artifactId>
-			<version>1.2.4</version>
+			<version>${curl4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
@@ -1241,22 +1152,22 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.15</version>
+			<version>${commons.codec.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.8.0</version>
+			<version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
+			<version>${commons.lang3.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-			<version>68.2</version>
+			<version>${icu4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
@@ -1288,7 +1199,7 @@
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
 			<artifactId>adal4j</artifactId>
-			<version>1.6.6</version>
+			<version>${adal4j.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.stephenc.jcip</groupId>
@@ -1327,7 +1238,7 @@
 		<dependency>
 			<groupId>com.onelogin</groupId>
 			<artifactId>java-saml</artifactId>
-			<version>2.6.0</version>
+			<version>${java.saml.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.xml.bind</groupId>
@@ -1446,7 +1357,7 @@
 		<dependency>
 			<groupId>com.github.jknack</groupId>
 			<artifactId>handlebars</artifactId>
-			<version>4.2.0</version>
+			<version>${handlebars.version}</version>
 		</dependency>
 
 		<!-- Tomcat -->
