@@ -16,7 +16,7 @@
 package org.codelibs.fess.mylasta;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.doc.DocumentGenerator;
+import org.lastaflute.meta.DocumentGenerator;
 
 public class FessLastaDocTest extends UnitFessTestCase {
 
