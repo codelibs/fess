@@ -84,9 +84,6 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:+DisableExplicitGC
 REM Ensure UTF-8 encoding by default (e.g. filenames)
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfile.encoding=UTF-8
 
-REM Use Groovy ClassValue
-set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dgroovy.use.classvalue=true
-
 REM Application Configuration
 set APP_NAME=fess
 set ES_HOME=%FESS_HOME%/es

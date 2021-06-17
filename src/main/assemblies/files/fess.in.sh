@@ -78,9 +78,6 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -XX:+DisableExplicitGC"
 # Ensure UTF-8 encoding by default (e.g. filenames)
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfile.encoding=UTF-8"
 
-# Use Groovy ClassValue
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dgroovy.use.classvalue=true"
-
 # Application Configuration
 if [ "x$APP_NAME" = "x" ]; then
   APP_NAME=fess
