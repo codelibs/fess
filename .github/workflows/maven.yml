@@ -21,5 +21,18 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Download Plugins with Maven
+      run: mvn -B antrun:run --file pom.xml
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Run Fess
+      run: bash .travis/before_script.sh
+    - name: Run Integration Test
+      run: bash .travis/run.sh
+
