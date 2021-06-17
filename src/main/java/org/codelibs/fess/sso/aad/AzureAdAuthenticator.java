@@ -55,6 +55,7 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResol
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -376,6 +377,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             if (contentMap.containsKey("value")) {
                 @SuppressWarnings("unchecked")
                 final List<Map<String, Object>> memberOfList = (List<Map<String, Object>>) contentMap.get("value");
+                final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 for (final Map<String, Object> memberOf : memberOfList) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("member: {}", memberOf);
@@ -402,20 +404,23 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     } else {
                         logger.warn("id is empty: {}", memberOf);
                     }
-                    final String mail = (String) memberOf.get("mail");
-                    if (StringUtil.isNotBlank(mail)) {
-                        if (memberType.contains("group")) {
-                            groupList.add(mail);
-                        } else if (memberType.contains("role")) {
-                            roleList.add(mail);
-                        } else {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("unknown @odata.type: {}", memberOf);
+                    final String[] names = fessConfig.getAzureAdPermissionFields();
+                    for (final String name : names) {
+                        final String value = (String) memberOf.get(name);
+                        if (StringUtil.isNotBlank(value)) {
+                            if (memberType.contains("group")) {
+                                groupList.add(value);
+                            } else if (memberType.contains("role")) {
+                                roleList.add(value);
+                            } else {
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("unknown @odata.type: {}", memberOf);
+                                }
+                                groupList.add(value);
                             }
-                            groupList.add(mail);
+                        } else if (logger.isDebugEnabled()) {
+                            logger.debug("{} is empty: {}", name, memberOf);
                         }
-                    } else if (logger.isDebugEnabled()) {
-                        logger.debug("mail is empty: {}", memberOf);
                     }
                 }
                 final String nextLink = (String) contentMap.get("@odata.nextLink");
@@ -495,9 +500,15 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             if (contentMap.containsKey("error")) {
                 logger.warn("Failed to access parent groups: {}", contentMap);
             } else {
-                final String mail = (String) contentMap.get("mail");
-                if (StringUtil.isNotBlank(mail)) {
-                    groupList.add(mail);
+                final FessConfig fessConfig = ComponentUtil.getFessConfig();
+                final String[] names = fessConfig.getAzureAdPermissionFields();
+                for (final String name : names) {
+                    final String value = (String) contentMap.get(name);
+                    if (StringUtil.isNotBlank(value)) {
+                        groupList.add(value);
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("{} is empty: {}", name, id);
+                    }
                 }
             }
         } catch (final IOException e) {

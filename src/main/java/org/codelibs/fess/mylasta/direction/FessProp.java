@@ -721,6 +721,11 @@ public interface FessProp {
         return getSystemPropertyAsInt(Constants.LTR_WINDOW_SIZE_PROPERTY, 100);
     }
 
+    default String[] getAzureAdPermissionFields() {
+        return split(getSystemProperty("aad.permission.fields", "mail"), ",")
+                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
+    }
+
     //
     // fess_*.properties
     //
