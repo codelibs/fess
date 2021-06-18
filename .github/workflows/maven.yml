@@ -32,7 +32,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Run Fess
-      run: bash .travis/before_script.sh
+      run: bash src/test/resources/before_script.sh
     - name: Run Integration Test
-      run: bash .travis/run.sh
+      run: bash src/test/resources/run.sh
 
