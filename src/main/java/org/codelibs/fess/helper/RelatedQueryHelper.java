@@ -30,7 +30,7 @@ import org.codelibs.fess.es.config.exbhv.RelatedQueryBhv;
 import org.codelibs.fess.es.config.exentity.RelatedQuery;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class RelatedQueryHelper {
+public class RelatedQueryHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(RelatedQueryHelper.class);
 
     protected volatile Map<String, Map<String, String[]>> relatedQueryMap = Collections.emptyMap();
@@ -40,11 +40,7 @@ public class RelatedQueryHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        reload();
-    }
-
-    public int update() {
-        return reload();
+        load();
     }
 
     public List<RelatedQuery> getAvailableRelatedQueryList() {
@@ -56,7 +52,8 @@ public class RelatedQueryHelper {
         });
     }
 
-    protected int reload() {
+    @Override
+    public int load() {
         final Map<String, Map<String, String[]>> relatedQueryMap = new HashMap<>();
         getAvailableRelatedQueryList().stream().forEach(entity -> {
             final String key = getHostKey(entity);

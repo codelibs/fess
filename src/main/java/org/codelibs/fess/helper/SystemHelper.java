@@ -468,15 +468,18 @@ public class SystemHelper {
 
     public void reloadConfiguration() {
         ComponentUtil.getSearchEngineClient().refresh();
-        ComponentUtil.getLabelTypeHelper().init();
-        ComponentUtil.getPathMappingHelper().init();
+
         ComponentUtil.getSuggestHelper().init();
         ComponentUtil.getPopularWordHelper().init();
-        ComponentUtil.getJobManager().reboot();
-        ComponentUtil.getLdapManager().updateConfig();
+
+        ComponentUtil.getLabelTypeHelper().update();
+        ComponentUtil.getPathMappingHelper().update();
         ComponentUtil.getRelatedContentHelper().update();
         ComponentUtil.getRelatedQueryHelper().update();
         ComponentUtil.getKeyMatchHelper().update();
+
+        ComponentUtil.getLdapManager().updateConfig();
+        ComponentUtil.getJobManager().reboot();
         updateSystemProperties();
     }
 
@@ -506,10 +509,11 @@ public class SystemHelper {
 
     public String updateConfiguration() {
         final StringBuilder buf = new StringBuilder();
-        buf.append("Label: ").append(ComponentUtil.getLabelTypeHelper().update()).append("\n");
-        buf.append("PathMapping: ").append(ComponentUtil.getPathMappingHelper().update()).append("\n");
-        buf.append("RelatedContent: ").append(ComponentUtil.getRelatedContentHelper().update()).append("\n");
-        buf.append("RelatedQuery: ").append(ComponentUtil.getRelatedQueryHelper().update()).append("\n");
+        buf.append("Label: ").append(ComponentUtil.getLabelTypeHelper().load()).append("\n");
+        buf.append("PathMapping: ").append(ComponentUtil.getPathMappingHelper().load()).append("\n");
+        buf.append("RelatedContent: ").append(ComponentUtil.getRelatedContentHelper().load()).append("\n");
+        buf.append("RelatedQuery: ").append(ComponentUtil.getRelatedQueryHelper().load()).append("\n");
+        buf.append("KeyMatch: ").append(ComponentUtil.getKeyMatchHelper().load()).append("\n");
         return buf.toString();
     }
 

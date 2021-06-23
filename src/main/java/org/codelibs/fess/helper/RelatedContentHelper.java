@@ -33,11 +33,11 @@ import org.codelibs.fess.es.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class RelatedContentHelper {
+public class RelatedContentHelper extends AbstractConfigHelper {
 
     private static final Logger logger = LogManager.getLogger(RelatedContentHelper.class);
 
-    protected volatile Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = Collections.emptyMap();
+    protected Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = Collections.emptyMap();
 
     protected String regexPrefix = "regex:";
 
@@ -48,15 +48,10 @@ public class RelatedContentHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        reload();
-    }
-
-    public int update() {
-        return reload();
+        load();
     }
 
     public List<RelatedContent> getAvailableRelatedContentList() {
-
         return ComponentUtil.getComponent(RelatedContentBhv.class).selectList(cb -> {
             cb.query().matchAll();
             cb.query().addOrderBy_SortOrder_Asc();
@@ -65,7 +60,8 @@ public class RelatedContentHelper {
         });
     }
 
-    protected int reload() {
+    @Override
+    public int load() {
         final Map<String, Pair<Map<String, String>, List<Pair<Pattern, String>>>> relatedContentMap = new HashMap<>();
         getAvailableRelatedContentList().stream().forEach(entity -> {
             final String key = getHostKey(entity);

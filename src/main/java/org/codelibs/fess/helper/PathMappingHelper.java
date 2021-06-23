@@ -36,7 +36,7 @@ import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
 
-public class PathMappingHelper {
+public class PathMappingHelper extends AbstractConfigHelper {
 
     private static final Logger logger = LogManager.getLogger(PathMappingHelper.class);
 
@@ -53,10 +53,11 @@ public class PathMappingHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        update();
+        load();
     }
 
-    public int update() {
+    @Override
+    public int load() {
         final List<String> ptList = getProcessTypeList();
 
         try {

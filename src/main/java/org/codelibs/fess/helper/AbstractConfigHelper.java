@@ -13,22 +13,28 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.job;
+package org.codelibs.fess.helper;
 
-public abstract class JobExecutor {
-    protected ShutdownListener shutdownListener;
+import org.codelibs.core.concurrent.CommonPoolUtil;
+import org.codelibs.core.lang.ThreadUtil;
 
-    public abstract Object execute(String scriptType, String script);
+public abstract class AbstractConfigHelper {
 
-    public void shutdown() {
-        shutdownListener.onShutdown();
+    protected long reloadInterval = 1000L;
+
+    public void update() {
+        CommonPoolUtil.execute(() -> load());
     }
 
-    public void addShutdownListener(final ShutdownListener listener) {
-        shutdownListener = listener;
+    protected void waitForNext() {
+        if (reloadInterval > 0) {
+            ThreadUtil.sleep(reloadInterval);
+        }
     }
 
-    public interface ShutdownListener {
-        void onShutdown();
+    public abstract int load();
+
+    public void setReloadInterval(final long reloadInterval) {
+        this.reloadInterval = reloadInterval;
     }
 }

@@ -39,7 +39,7 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class LabelTypeHelper {
+public class LabelTypeHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(LabelTypeHelper.class);
 
     protected volatile List<LabelTypeItem> labelTypeItemList;
@@ -51,10 +51,11 @@ public class LabelTypeHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        update();
+        load();
     }
 
-    public int update() {
+    @Override
+    public int load() {
         final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
         buildLabelTypePatternList(labelTypeList);

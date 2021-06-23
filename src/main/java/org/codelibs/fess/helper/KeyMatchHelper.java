@@ -26,9 +26,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fesen.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.index.query.QueryBuilder;
@@ -46,24 +44,18 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
-public class KeyMatchHelper {
+public class KeyMatchHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);
 
     protected volatile Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap =
             Collections.emptyMap();
-
-    protected long reloadInterval = 1000L;
 
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        reload(0);
-    }
-
-    public void update() {
-        CommonPoolUtil.execute(() -> reload(reloadInterval));
+        load();
     }
 
     public List<KeyMatch> getAvailableKeyMatchList() {
@@ -73,7 +65,8 @@ public class KeyMatchHelper {
         });
     }
 
-    protected void reload(final long interval) {
+    @Override
+    public int load() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap = new HashMap<>();
         getAvailableKeyMatchList().stream().forEach(keyMatch -> {
@@ -116,14 +109,13 @@ public class KeyMatchHelper {
                     logger.debug("No KeyMatch boost docs");
                 }
 
-                if (interval > 0) {
-                    ThreadUtil.sleep(interval);
-                }
+                waitForNext();
             } catch (final Exception e) {
                 logger.warn("Cannot load {}", keyMatch, e);
             }
         });
         this.keyMatchQueryMap = keyMatchQueryMap;
+        return keyMatchQueryMap.size();
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
@@ -134,14 +126,6 @@ public class KeyMatchHelper {
                         .builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL))
                         .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
                         .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build());
-    }
-
-    public long getReloadInterval() {
-        return reloadInterval;
-    }
-
-    public void setReloadInterval(final long reloadInterval) {
-        this.reloadInterval = reloadInterval;
     }
 
     protected Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> getQueryMap(final String key) {
