@@ -148,8 +148,12 @@ public class KeyMatchHelper extends AbstractConfigHelper {
 
     public List<Map<String, Object>> getBoostedDocumentList(final KeyMatch keyMatch) {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
+        String virtualHost = keyMatch.getVirtualHost();
+        if (StringUtil.isBlank(virtualHost)) {
+            virtualHost = StringUtil.EMPTY;
+        }
         final List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>> boostList =
-                getQueryMap(keyMatch.getVirtualHost()).get(toLowerCase(keyMatch.getTerm()));
+                getQueryMap(virtualHost).get(toLowerCase(keyMatch.getTerm()));
         if (boostList == null) {
             return Collections.emptyList();
         }
