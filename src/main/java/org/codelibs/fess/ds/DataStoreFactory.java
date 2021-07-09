@@ -89,6 +89,8 @@ public class DataStoreFactory {
                 try (InputStream is = Files.newInputStream(xmlPath)) {
                     final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     factory.setFeature(org.codelibs.fess.crawler.Constants.FEATURE_SECURE_PROCESSING, true);
+                    factory.setFeature(org.codelibs.fess.crawler.Constants.FEATURE_EXTERNAL_GENERAL_ENTITIES, false);
+                    factory.setFeature(org.codelibs.fess.crawler.Constants.FEATURE_EXTERNAL_PARAMETER_ENTITIES, false);
                     factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
                     final DocumentBuilder builder = factory.newDocumentBuilder();
 
