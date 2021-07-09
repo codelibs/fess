@@ -70,4 +70,15 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         request.setParameter("userCode", buf.toString() + "x");
         assertNull(userInfoHelper.getUserCodeFromRequest(request));
     }
+
+    public void test_createUserCodeFromUserId() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        assertEquals("009ab986effa1a9664ada54eb81d7fce", userInfoHelper.createUserCodeFromUserId("a"));
+        assertEquals("b17816944bb30c19cb3265480470288caaa93e36666527a57ca94d8a8b8d7b80",
+                userInfoHelper.createUserCodeFromUserId("test@example.com"));
+        assertEquals("41ebbef035e6cebb9d0cf6b98266d9335abd454718a3b172efa30635ef19f1cc",
+                userInfoHelper.createUserCodeFromUserId("!\"#$%&'()'\\^-=,./_?><+*}{`P@[]"));
+        assertNull(userInfoHelper
+                .createUserCodeFromUserId("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"));
+    }
 }

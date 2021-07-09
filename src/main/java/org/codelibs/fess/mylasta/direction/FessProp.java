@@ -1675,10 +1675,20 @@ public interface FessProp {
 
     String getUserCodePattern();
 
+    Integer getUserCodeMinLengthAsInteger();
+
+    Integer getUserCodeMaxLengthAsInteger();
+
     default boolean isValidUserCode(final String userCode) {
         if (userCode == null) {
             return false;
         }
+
+        final int length = userCode.length();
+        if (getUserCodeMinLengthAsInteger().intValue() > length || getUserCodeMaxLengthAsInteger().intValue() < length) {
+            return false;
+        }
+
         Pattern pattern = (Pattern) propMap.get(USER_CODE_PATTERN);
         if (pattern == null) {
             pattern = Pattern.compile(getUserCodePattern());

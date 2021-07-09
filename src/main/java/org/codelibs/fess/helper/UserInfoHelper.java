@@ -91,11 +91,20 @@ public class UserInfoHelper {
             return null;
         }
 
-        final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
-        userCode = cipher.encrypt(userCode);
+        userCode = createUserCodeFromUserId(userCode);
         request.setAttribute(Constants.USER_CODE, userCode);
         deleteUserCodeFromCookie(request);
         return userCode;
+    }
+
+    protected String createUserCodeFromUserId(String userCode) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
+        userCode = cipher.encrypt(userCode);
+        if (fessConfig.isValidUserCode(userCode)) {
+            return userCode;
+        }
+        return null;
     }
 
     public void deleteUserCodeFromCookie(final HttpServletRequest request) {
@@ -109,12 +118,6 @@ public class UserInfoHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String userCode = request.getParameter(fessConfig.getUserCodeRequestParameter());
         if (StringUtil.isBlank(userCode)) {
-            return null;
-        }
-
-        final int length = userCode.length();
-        if (fessConfig.getUserCodeMinLengthAsInteger().intValue() > length
-                || fessConfig.getUserCodeMaxLengthAsInteger().intValue() < length) {
             return null;
         }
 
@@ -155,10 +158,11 @@ public class UserInfoHelper {
     }
 
     protected String getUserCodeFromCookie(final HttpServletRequest request) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
+                if (cookieName.equals(cookie.getName()) && fessConfig.isValidUserCode(cookie.getValue())) {
                     return cookie.getValue();
                 }
             }

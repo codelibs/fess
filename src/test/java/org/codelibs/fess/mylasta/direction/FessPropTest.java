@@ -234,6 +234,34 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(Locale.TRADITIONAL_CHINESE, fessConfig.getQueryLocaleFromName("test_zh_TW"));
     }
 
+    public void test_isValidUserCode() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public Integer getUserCodeMinLengthAsInteger() {
+                return 10;
+            }
+
+            @Override
+            public Integer getUserCodeMaxLengthAsInteger() {
+                return 20;
+            }
+
+            @Override
+            public String getUserCodePattern() {
+                return "[a-zA-Z0-9_]+";
+            }
+        };
+
+        assertTrue(fessConfig.isValidUserCode("1234567890"));
+        assertTrue(fessConfig.isValidUserCode("12345678901234567890"));
+        assertTrue(fessConfig.isValidUserCode("1234567890abcdeABCD_"));
+
+        assertFalse(fessConfig.isValidUserCode("123456789"));
+        assertFalse(fessConfig.isValidUserCode("123456789012345678901"));
+        assertFalse(fessConfig.isValidUserCode("123456789?"));
+    }
+
     private void assertArrays(final String[] expected, final String[] actual) {
         Arrays.sort(expected);
         Arrays.sort(actual);
