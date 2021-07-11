@@ -151,8 +151,10 @@ public class CrawlerLogTests extends CrawlTestBase {
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
         final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.url";
+        final String includedUrls = "https://www.codelibs.org/.*" + "\n" + "http://failure.url.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
+        requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
         requestBody.put("depth", 1);
         requestBody.put("num_of_thread", 1);
@@ -242,6 +244,7 @@ public class CrawlerLogTests extends CrawlTestBase {
     private void testReadSearchList() {
         final List<Map<String, Object>> results = getSearchResults();
         assertTrue(results.size() >= 1);
+        logger.info("results: {}", results);
         Map<String, Object> item = results.get(0);
         logger.info("item: {}", item);
         assertTrue(item.containsKey("content_title"));
