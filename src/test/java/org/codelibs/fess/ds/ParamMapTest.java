@@ -22,20 +22,27 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class ParamMapTest extends UnitFessTestCase {
 
-    private Map<Object, Object> paramMap;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    private ParamMap<Object, Object> createSnakeMap() {
         final Map<Object, Object> map = new HashMap<>();
         map.put("aaa", "111");
         map.put("aaa_bbb", "222");
         map.put("aaa_bbb_ccc", "333");
         map.put("ccc.ddd", "444");
-        paramMap = new ParamMap<>(map);
+        return new ParamMap<>(map);
     }
 
-    public void test_get() {
+    private ParamMap<Object, Object> createCamelMap() {
+        final Map<Object, Object> map = new HashMap<>();
+        map.put("aaa", "111");
+        map.put("aaaBbb", "222");
+        map.put("aaaBbbCcc", "333");
+        map.put("ccc.ddd", "444");
+        return new ParamMap<>(map);
+    }
+
+    public void test_snake_get() {
+        Map<Object, Object> paramMap = createSnakeMap();
+
         assertNull(paramMap.get("xxx"));
         assertEquals("111", paramMap.get("aaa"));
         assertEquals("222", paramMap.get("aaa_bbb"));
@@ -51,7 +58,9 @@ public class ParamMapTest extends UnitFessTestCase {
         assertNull(paramMap.get("DccDdd"));
     }
 
-    public void test_containsKey() {
+    public void test_snake_containsKey() {
+        Map<Object, Object> paramMap = createSnakeMap();
+
         assertFalse(paramMap.containsKey("xxx"));
         assertTrue(paramMap.containsKey("aaa"));
         assertTrue(paramMap.containsKey("aaa_bbb"));
@@ -61,6 +70,42 @@ public class ParamMapTest extends UnitFessTestCase {
         assertTrue(paramMap.containsKey("aaa_bbb_ccc"));
         assertTrue(paramMap.containsKey("aaaBbbCcc"));
         assertTrue(paramMap.containsKey("AaaBbbCcc"));
+        assertFalse(paramMap.containsKey("aaabbbcc"));
+        assertTrue(paramMap.containsKey("ccc.ddd"));
+        assertFalse(paramMap.containsKey("cccDdd"));
+        assertFalse(paramMap.containsKey("DccDdd"));
+    }
+
+    public void test_camel_get() {
+        Map<Object, Object> paramMap = createCamelMap();
+
+        assertNull(paramMap.get("xxx"));
+        assertEquals("111", paramMap.get("aaa"));
+        assertEquals("222", paramMap.get("aaa_bbb"));
+        assertEquals("222", paramMap.get("aaaBbb"));
+        assertNull(paramMap.get("AaaBbb")); // null
+        assertNull(paramMap.get("aaabbb"));
+        assertEquals("333", paramMap.get("aaa_bbb_ccc"));
+        assertEquals("333", paramMap.get("aaaBbbCcc"));
+        assertNull(paramMap.get("AaaBbbCcc")); // null
+        assertNull(paramMap.get("aaabbbcc"));
+        assertEquals("444", paramMap.get("ccc.ddd"));
+        assertNull(paramMap.get("cccDdd"));
+        assertNull(paramMap.get("DccDdd"));
+    }
+
+    public void test_camel_containsKey() {
+        Map<Object, Object> paramMap = createCamelMap();
+
+        assertFalse(paramMap.containsKey("xxx"));
+        assertTrue(paramMap.containsKey("aaa"));
+        assertTrue(paramMap.containsKey("aaa_bbb"));
+        assertTrue(paramMap.containsKey("aaaBbb"));
+        assertFalse(paramMap.containsKey("AaaBbb")); // false
+        assertFalse(paramMap.containsKey("aaabbb"));
+        assertTrue(paramMap.containsKey("aaa_bbb_ccc"));
+        assertTrue(paramMap.containsKey("aaaBbbCcc"));
+        assertFalse(paramMap.containsKey("AaaBbbCcc")); // false
         assertFalse(paramMap.containsKey("aaabbbcc"));
         assertTrue(paramMap.containsKey("ccc.ddd"));
         assertFalse(paramMap.containsKey("cccDdd"));

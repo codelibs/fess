@@ -22,6 +22,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.CaseFormat;
 
 public class ParamMap<K, V> implements Map<K, V> {
@@ -36,8 +38,13 @@ public class ParamMap<K, V> implements Map<K, V> {
         if (key == null) {
             return key;
         }
-        final String keyStr = key.toString();
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keyStr);
+        String keyStr = key.toString();
+        if (keyStr.indexOf('_') < 0) {
+            keyStr = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.uncapitalize(keyStr));
+        } else {
+            keyStr = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, keyStr);
+        }
+        return keyStr;
     }
 
     public int size() {
