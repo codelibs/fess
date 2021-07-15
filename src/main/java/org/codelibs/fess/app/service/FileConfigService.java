@@ -103,7 +103,7 @@ public class FileConfigService extends FessAppService {
             cb.query().setPaths_Wildcard(wrapQuery(fileConfigPager.paths));
         }
         if (StringUtil.isNotBlank(fileConfigPager.description)) {
-            cb.query().setDescription_MatchPhrase(wrapQuery(fileConfigPager.description));
+            cb.query().setDescription_Wildcard(wrapQuery(fileConfigPager.description));
         }
         // TODO Long, Integer, String supported only.
 
