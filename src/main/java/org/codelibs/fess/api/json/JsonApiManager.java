@@ -414,7 +414,8 @@ public class JsonApiManager extends BaseJsonApiManager {
         Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
-            final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON);
+            final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON,
+                    request.getLocale() == null ? Locale.ROOT : request.getLocale());
             buf.append("\"record_count\":");
             buf.append(labelTypeItems.size());
             if (!labelTypeItems.isEmpty()) {
