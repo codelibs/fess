@@ -24,6 +24,7 @@
 .classpath
 *.iml
 .idea
+.vscode
 .DS_Store
 /plugins/
 /tomcat.8080/
