@@ -30,7 +30,7 @@
 	<parent>
 		<groupId>org.codelibs.fess</groupId>
 		<artifactId>fess-parent</artifactId>
-		<version>13.13.1</version>
+		<version>13.14.0-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<properties>
@@ -927,7 +927,12 @@
 		<dependency>
 			<groupId>jakarta.activation</groupId>
 			<artifactId>jakarta.activation-api</artifactId>
-			<version>${jakarta.activation.api}</version>
+			<version>${jakarta.activation.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>jakarta.activation</artifactId>
+			<version>${jakarta.activation.version}</version>
 		</dependency>
 
 		<!-- logging -->
@@ -1274,6 +1279,14 @@
 				<exclusion>
 					<groupId>javax.activation</groupId>
 					<artifactId>activation</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>javax.activation-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
