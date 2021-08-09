@@ -23,7 +23,7 @@ import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
  */
 public interface FessEnv {
 
-    /** The key of the configuration. e.g. hot */
+    /** The key of the configuration. e.g. warm */
     String lasta_di_SMART_DEPLOY_MODE = "lasta_di.smart.deploy.mode";
 
     /** The key of the configuration. e.g. true */
@@ -68,7 +68,7 @@ public interface FessEnv {
 
     /**
      * Get the value for the key 'lasta_di.smart.deploy.mode'. <br>
-     * The value is, e.g. hot <br>
+     * The value is, e.g. warm <br>
      * comment: The mode of Lasta Di's smart-deploy, should be cool in production (e.g. hot, cool, warm)
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -235,7 +235,7 @@ public interface FessEnv {
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
-            defaultMap.put(FessEnv.lasta_di_SMART_DEPLOY_MODE, "hot");
+            defaultMap.put(FessEnv.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessEnv.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessEnv.ENVIRONMENT_TITLE, "Local Development");
             defaultMap.put(FessEnv.FRAMEWORK_DEBUG, "false");

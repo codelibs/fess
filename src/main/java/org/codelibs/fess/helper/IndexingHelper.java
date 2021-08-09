@@ -45,11 +45,6 @@ public class IndexingHelper {
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (fessConfig.isResultCollapsed()) {
-            docList.forEach(doc -> {
-                doc.put(fessConfig.getIndexFieldContentMinhash(), doc.get(fessConfig.getIndexFieldContent()));
-            });
-        }
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Sending {} documents to a server.", docList.size());

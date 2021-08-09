@@ -540,9 +540,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. content */
     String INDEX_FIELD_CONTENT = "index.field.content";
 
-    /** The key of the configuration. e.g. content_minhash */
-    String INDEX_FIELD_content_minhash = "index.field.content_minhash";
-
     /** The key of the configuration. e.g. content_minhash_bits */
     String INDEX_FIELD_content_minhash_bits = "index.field.content_minhash_bits";
 
@@ -3299,13 +3296,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldContent();
-
-    /**
-     * Get the value for the key 'index.field.content_minhash'. <br>
-     * The value is, e.g. content_minhash <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getIndexFieldContentMinhash();
 
     /**
      * Get the value for the key 'index.field.content_minhash_bits'. <br>
@@ -7983,10 +7973,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_CONTENT);
         }
 
-        public String getIndexFieldContentMinhash() {
-            return get(FessConfig.INDEX_FIELD_content_minhash);
-        }
-
         public String getIndexFieldContentMinhashBits() {
             return get(FessConfig.INDEX_FIELD_content_minhash_bits);
         }
@@ -10178,7 +10164,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_parent_id, "parent_id");
             defaultMap.put(FessConfig.INDEX_FIELD_important_content, "important_content");
             defaultMap.put(FessConfig.INDEX_FIELD_CONTENT, "content");
-            defaultMap.put(FessConfig.INDEX_FIELD_content_minhash, "content_minhash");
             defaultMap.put(FessConfig.INDEX_FIELD_content_minhash_bits, "content_minhash_bits");
             defaultMap.put(FessConfig.INDEX_FIELD_CACHE, "cache");
             defaultMap.put(FessConfig.INDEX_FIELD_DIGEST, "digest");
@@ -10539,7 +10524,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PLUGIN_VERSION_FILTER, "");
             defaultMap.put(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE, "1000");
             defaultMap.put(FessConfig.PASSWORD_INVALID_ADMIN_PASSWORDS, "admin");
-            defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "hot");
+            defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");
             defaultMap.put(FessConfig.FRAMEWORK_DEBUG, "false");

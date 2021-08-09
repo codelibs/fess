@@ -501,15 +501,17 @@
         "type": "text",
         "analyzer": "standard_analyzer",
         "search_analyzer": "standard_search_analyzer",
-        "term_vector": "with_positions_offsets"
+        "term_vector": "with_positions_offsets",
+        "copy_to": ["content_minhash_bits"]
       },
       "content_minhash": {
-        "type": "minhash",
-        "minhash_analyzer": "minhash_analyzer",
-        "copy_bits_to": "content_minhash_bits"
+        "type": "text",
+        "index": false
       },
       "content_minhash_bits": {
-        "type": "keyword"
+        "type": "minhash",
+        "bit_string": true,
+        "minhash_analyzer": "minhash_analyzer"
       },
       "content_length": {
         "type": "long"
