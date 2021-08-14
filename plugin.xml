@@ -20,7 +20,7 @@
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="analysis-extension" />
 			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210807.035319-2" />
+			<param name="plugin.zip.version" value="0.14.0-20210814.063841-3" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
@@ -29,7 +29,7 @@
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="analysis-fess" />
 			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210807.035309-2" />
+			<param name="plugin.zip.version" value="0.14.0-20210814.065812-4" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
@@ -38,7 +38,7 @@
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="configsync" />
 			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210807.035622-2" />
+			<param name="plugin.zip.version" value="0.14.0-20210814.064158-3" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
