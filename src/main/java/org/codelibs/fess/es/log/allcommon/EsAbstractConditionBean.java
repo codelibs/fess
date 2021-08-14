@@ -16,7 +16,7 @@
 package org.codelibs.fess.es.log.allcommon;
 
 import org.codelibs.fesen.action.search.SearchRequestBuilder;
-import org.codelibs.fesen.common.unit.TimeValue;
+import org.codelibs.fesen.core.TimeValue;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.chelper.HpCBPurpose;
 import org.dbflute.cbean.chelper.HpColumnSpHandler;
