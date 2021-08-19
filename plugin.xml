@@ -29,7 +29,7 @@
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="analysis-fess" />
 			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210814.081343-5" />
+			<param name="plugin.zip.version" value="0.14.0-20210819.024931-7" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
