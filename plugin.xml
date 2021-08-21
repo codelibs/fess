@@ -15,39 +15,39 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-extension -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs${use.fesen}" />
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210815.011317-6" />
+			<param name="plugin.version" value="0.14.0" />
+			<param name="plugin.zip.version" value="0.14.0" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs${use.fesen}" />
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210819.024931-7" />
+			<param name="plugin.version" value="0.14.0" />
+			<param name="plugin.zip.version" value="0.14.0" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs${use.fesen}" />
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210814.081640-5" />
+			<param name="plugin.version" value="0.14.0" />
+			<param name="plugin.zip.version" value="0.14.0" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs${use.fesen}" />
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="0.14.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="0.14.0-20210814.081453-6" />
+			<param name="plugin.version" value="0.14.0" />
+			<param name="plugin.zip.version" value="0.14.0" />
 		</antcall>
 
 		<antcall target="remove.jars" />
