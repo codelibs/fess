@@ -729,10 +729,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     */
     String INDEX_FILETYPE = "index.filetype";
 
-    /** The key of the configuration. e.g. {"source":{"index":"__SOURCE_INDEX__","size":100},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} */
+    /** The key of the configuration. e.g. 100 */
+    String INDEX_REINDEX_SIZE = "index.reindex.size";
+
+    /** The key of the configuration. e.g. {"source":{"index":"__SOURCE_INDEX__","size":__SIZE__},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} */
     String INDEX_REINDEX_BODY = "index.reindex.body";
 
-    /** The key of the configuration. e.g. -1 */
+    /** The key of the configuration. e.g. adaptive */
     String INDEX_REINDEX_requests_per_second = "index.reindex.requests_per_second";
 
     /** The key of the configuration. e.g. false */
@@ -3762,26 +3765,33 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexFiletype();
 
     /**
+     * Get the value for the key 'index.reindex.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexReindexSize();
+
+    /**
+     * Get the value for the key 'index.reindex.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexReindexSizeAsInteger();
+
+    /**
      * Get the value for the key 'index.reindex.body'. <br>
-     * The value is, e.g. {"source":{"index":"__SOURCE_INDEX__","size":100},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} <br>
+     * The value is, e.g. {"source":{"index":"__SOURCE_INDEX__","size":__SIZE__},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexBody();
 
     /**
      * Get the value for the key 'index.reindex.requests_per_second'. <br>
-     * The value is, e.g. -1 <br>
+     * The value is, e.g. adaptive <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexRequestsPerSecond();
-
-    /**
-     * Get the value for the key 'index.reindex.requests_per_second' as {@link Integer}. <br>
-     * The value is, e.g. -1 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getIndexReindexRequestsPerSecondAsInteger();
 
     /**
      * Get the value for the key 'index.reindex.refresh'. <br>
@@ -8201,16 +8211,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FILETYPE);
         }
 
+        public String getIndexReindexSize() {
+            return get(FessConfig.INDEX_REINDEX_SIZE);
+        }
+
+        public Integer getIndexReindexSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEX_REINDEX_SIZE);
+        }
+
         public String getIndexReindexBody() {
             return get(FessConfig.INDEX_REINDEX_BODY);
         }
 
         public String getIndexReindexRequestsPerSecond() {
             return get(FessConfig.INDEX_REINDEX_requests_per_second);
-        }
-
-        public Integer getIndexReindexRequestsPerSecondAsInteger() {
-            return getAsInteger(FessConfig.INDEX_REINDEX_requests_per_second);
         }
 
         public String getIndexReindexRefresh() {
@@ -10211,9 +10225,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_INDICES_TIMEOUT, "1m");
             defaultMap.put(FessConfig.INDEX_FILETYPE,
                     "text/html=html\napplication/msword=word\napplication/vnd.openxmlformats-officedocument.wordprocessingml.document=word\napplication/vnd.ms-excel=excel\napplication/vnd.ms-excel.sheet.2=excel\napplication/vnd.ms-excel.sheet.3=excel\napplication/vnd.ms-excel.sheet.4=excel\napplication/vnd.ms-excel.workspace.3=excel\napplication/vnd.ms-excel.workspace.4=excel\napplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel\napplication/vnd.ms-powerpoint=powerpoint\napplication/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint\napplication/vnd.oasis.opendocument.text=odt\napplication/vnd.oasis.opendocument.spreadsheet=ods\napplication/vnd.oasis.opendocument.presentation=odp\napplication/pdf=pdf\napplication/x-fictionbook+xml=fb2\napplication/e-pub+zip=epub\napplication/x-ibooks+zip=ibooks\ntext/plain=txt\napplication/rtf=rtf\napplication/vnd.ms-htmlhelp=chm\napplication/zip=zip\napplication/x-7z-comressed=7z\napplication/x-bzip=bz\napplication/x-bzip2=bz2\napplication/x-tar=tar\napplication/x-rar-compressed=rar\nvideo/3gp=3gp\nvideo/3g2=3g2\nvideo/x-msvideo=avi\nvideo/x-flv=flv\nvideo/mpeg=mpeg\nvideo/mp4=mp4\nvideo/ogv=ogv\nvideo/quicktime=qt\nvideo/x-m4v=m4v\naudio/x-aif=aif\naudio/midi=midi\naudio/mpga=mpga\naudio/mp4=mp4a\naudio/ogg=oga\naudio/x-wav=wav\nimage/webp=webp\nimage/bmp=bmp\nimage/x-icon=ico\nimage/x-icon=ico\nimage/png=png\nimage/svg+xml=svg\nimage/tiff=tiff\nimage/jpeg=jpg\n");
+            defaultMap.put(FessConfig.INDEX_REINDEX_SIZE, "100");
             defaultMap.put(FessConfig.INDEX_REINDEX_BODY,
-                    "{\"source\":{\"index\":\"__SOURCE_INDEX__\",\"size\":100},\"dest\":{\"index\":\"__DEST_INDEX__\"},\"script\":{\"source\":\"__SCRIPT_SOURCE__\"}}");
-            defaultMap.put(FessConfig.INDEX_REINDEX_requests_per_second, "-1");
+                    "{\"source\":{\"index\":\"__SOURCE_INDEX__\",\"size\":__SIZE__},\"dest\":{\"index\":\"__DEST_INDEX__\"},\"script\":{\"source\":\"__SCRIPT_SOURCE__\"}}");
+            defaultMap.put(FessConfig.INDEX_REINDEX_requests_per_second, "adaptive");
             defaultMap.put(FessConfig.INDEX_REINDEX_REFRESH, "false");
             defaultMap.put(FessConfig.INDEX_REINDEX_TIMEOUT, "1m");
             defaultMap.put(FessConfig.INDEX_REINDEX_SCROLL, "5m");

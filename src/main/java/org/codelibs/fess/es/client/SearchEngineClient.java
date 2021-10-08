@@ -365,11 +365,11 @@ public class SearchEngineClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String source = fessConfig.getIndexReindexBody()//
                 .replace("__SOURCE_INDEX__", fromIndex)//
-                .replace("__DEST_INDEX__", toIndex)
+                .replace("__SIZE__", fessConfig.getIndexReindexSize())//
+                .replace("__DEST_INDEX__", toIndex)//
                 .replace("__SCRIPT_SOURCE__", ComponentUtil.getLanguageHelper().getReindexScriptSource());
         final String refresh = StringUtil.isNotBlank(fessConfig.getIndexReindexRefresh()) ? fessConfig.getIndexReindexRefresh() : null;
-        final String requestsPerSecond =
-                StringUtil.isNotBlank(fessConfig.getIndexReindexRequestsPerSecond()) ? fessConfig.getIndexReindexRequestsPerSecond() : null;
+        final String requestsPerSecond = getReindexRequestsPerSecound(fessConfig);
         final String scroll = StringUtil.isNotBlank(fessConfig.getIndexReindexScroll()) ? fessConfig.getIndexReindexScroll() : null;
         final String maxDocs = StringUtil.isNotBlank(fessConfig.getIndexReindexMaxDocs()) ? fessConfig.getIndexReindexMaxDocs() : null;
         try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_reindex").param("refresh", refresh)
@@ -383,6 +383,22 @@ public class SearchEngineClient implements Client {
             logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
         }
         return false;
+    }
+
+    protected String getReindexRequestsPerSecound(final FessConfig fessConfig) {
+        if (StringUtil.isBlank(fessConfig.getIndexReindexRequestsPerSecond())) {
+            return null;
+        }
+        final String value = fessConfig.getIndexReindexRequestsPerSecond();
+        if ("adaptive".equalsIgnoreCase(value)) {
+            if (fessConfig.availableProcessors() >= 4) {
+                return null;
+            }
+            String requestsPerSecond = String.valueOf(fessConfig.getIndexReindexSizeAsInteger() * fessConfig.availableProcessors());
+            logger.info("Set requests_per_second to {}", requestsPerSecond);
+            return requestsPerSecond;
+        }
+        return value;
     }
 
     public boolean createIndex(final String index, final String indexName) {
