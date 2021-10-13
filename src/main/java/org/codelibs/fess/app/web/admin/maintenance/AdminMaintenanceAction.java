@@ -214,32 +214,28 @@ public class AdminMaintenanceAction extends FessAdminAction {
                 zos.putNextEntry(entry);
                 prop.store(zos, getHostInfo());
             } catch (final IOException e) {
-                logger.warn("Failed to access system.properties.", e);
+                logger.warn("Failed to access fess_config.properties.", e);
             }
         }
     }
 
     protected void writeFessBasicConfig(final ZipOutputStream zos, final String id) {
+        final String index = ".fess_basic_config";
         final ZipEntry entry = new ZipEntry(id + "/fess_basic_config.bulk");
         try {
             zos.putNextEntry(entry);
-            final String index = ".fess_basic_config";
-            try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, Constants.CHARSET_UTF_8))) {
-                SearchEngineUtil.scroll(index, hit -> {
-                    try {
-                        writer.write("{\"index\":{\"_index\":\"" + index + "\",\"_id\":\"" + StringEscapeUtils.escapeJson(hit.getId())
-                                + "\"}}\n");
-                        writer.write(hit.getSourceAsString());
-                        writer.write("\n");
-                    } catch (final IOException e) {
-                        throw new IORuntimeException(e);
-                    }
-                    return true;
-                });
-                writer.flush();
-            }
+            SearchEngineUtil.scroll(index, hit -> {
+                final String data = "{\"index\":{\"_index\":\"" + index + "\",\"_id\":\"" + StringEscapeUtils.escapeJson(hit.getId())
+                        + "\"}}\n" + hit.getSourceAsString() + "\n";
+                try {
+                    zos.write(data.getBytes(Constants.CHARSET_UTF_8));
+                } catch (final IOException e) {
+                    logger.warn("Failed to access /{}/{}.", index, hit.getId(), e);
+                }
+                return true;
+            });
         } catch (final IOException e) {
-            logger.warn("Failed to access system.properties.", e);
+            logger.warn("Failed to access /{}.", index, e);
         }
     }
 
