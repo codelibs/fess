@@ -339,7 +339,7 @@ public class IndexUpdater extends Thread {
             }
 
             final long startTime = System.currentTimeMillis();
-            final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
+            final AccessResultData<?> accessResultData = getAccessResultData(accessResult);
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
                 try {
@@ -392,6 +392,15 @@ public class IndexUpdater extends Thread {
             }
 
         }
+    }
+
+    private AccessResultData<?> getAccessResultData(final EsAccessResult accessResult) {
+        try {
+            return accessResult.getAccessResultData();
+        } catch (Exception e) {
+            logger.warn("Failed to get data from {}", accessResult.getUrl(), e);
+        }
+        return null;
     }
 
     protected Map<String, Object> ingest(final AccessResult<String> accessResult, final Map<String, Object> map) {
