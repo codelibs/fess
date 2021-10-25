@@ -471,7 +471,13 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                             }
                         }
                     } else if (contentMap.containsKey("error")) {
-                        logger.warn("Failed to access parent groups: {}", contentMap);
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Object> errorMap = (Map<String, Object>) contentMap.get("error");
+                        if ("Request_ResourceNotFound".equals(errorMap.get("code"))) {
+                            logger.debug("Failed to access parent groups: {}", contentMap);
+                        } else {
+                            logger.warn("Failed to access parent groups: {}", contentMap);
+                        }
                     }
                 } catch (final IOException e) {
                     logger.warn("Failed to access groups/roles in AzureAD.", e);
