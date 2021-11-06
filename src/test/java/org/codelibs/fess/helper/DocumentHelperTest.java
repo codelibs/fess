@@ -125,20 +125,20 @@ public class DocumentHelperTest extends UnitFessTestCase {
         DocumentHelper documentHelper = new DocumentHelper();
 
         String hash = "01010101010101010101010101010101";
-        String value = "$H4sIAAAAAAAAADMwNMALAXC7sg0gAAAA";
+        String value = "$H4sIAAAAAAAA_zMwNMALAXC7sg0gAAAA";
         assertEquals(value, documentHelper.encodeSimilarDocHash(hash));
         hash = "00101010010010100100101010001010";
-        value = "$H4sIAAAAAAAAADMwMARDCELQQApMAgAi5-3LIAAAAA";
+        value = "$H4sIAAAAAAAA_zMwMARDCELQQApMAgAi5-3LIAAAAA";
         assertEquals(value, documentHelper.encodeSimilarDocHash(hash));
         hash = "0001010100100101001001010100010100101010010010100100101011000100";
-        value = "$H4sIAAAAAAAAADMwMDAEQwhC0EAKxscqDZE3AABZOHx2QAAAAA";
+        value = "$H4sIAAAAAAAA_zMwMDAEQwhC0EAKxscqDZE3AABZOHx2QAAAAA";
         assertEquals(value, documentHelper.encodeSimilarDocHash(hash));
         hash = "00100101010001010100100101001001010100010100010101010010010101010010101100010101001000010101001001010001000001010010101001001010";
-        value = "$H4sIAAAAAAAAADMwMDQAIhCE01ARdBkYD1kGxkDVjWESRBBJPVwKAHL5QrqAAAAA";
+        value = "$H4sIAAAAAAAA_zMwMDQAIhCE01ARdBkYD1kGxkDVjWESRBBJPVwKAHL5QrqAAAAA";
         assertEquals(value, documentHelper.encodeSimilarDocHash(hash));
 
         hash = "";
-        value = "$H4sIAAAAAAAAAAMAAAAAAAAAAAA";
+        value = "$H4sIAAAAAAAA_wMAAAAAAAAAAAA";
         assertEquals(value, documentHelper.encodeSimilarDocHash(hash));
         hash = "$H4sIAAAAAAAAAAMAAAAAAAAAAAA";
         value = "$H4sIAAAAAAAAAAMAAAAAAAAAAAA";
