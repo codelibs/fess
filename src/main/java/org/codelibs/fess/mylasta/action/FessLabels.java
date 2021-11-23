@@ -95,7 +95,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Port */
     public static final String LABELS_PORT = "{labels.port}";
 
-    /** The key of the message: Regexp. */
+    /** The key of the message: Regular Expression */
     public static final String LABELS_REGEX = "{labels.regex}";
 
     /** The key of the message: Regular Name */
