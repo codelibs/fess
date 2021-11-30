@@ -37,7 +37,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     public static final String ROLE = "admin-searchlog";
 
     private static final String[] CONDITION_FIELDS =
-            new String[] { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize" };
+            { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize" };
 
     // ===================================================================================
     //                                                                           Attribute

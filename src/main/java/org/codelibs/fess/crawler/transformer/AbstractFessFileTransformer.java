@@ -346,8 +346,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (lastModified != null) {
                 return lastModified;
             }
-        } else if (lastModifiedObj instanceof String[]) {
-            final String[] lastModifieds = (String[]) lastModifiedObj;
+        } else if (lastModifiedObj instanceof String[] lastModifieds) {
             if (lastModifieds.length > 0) {
                 final Date lastModified = FessFunctions.parseDate(lastModifieds[0]);
                 if (lastModified != null) {
@@ -434,9 +433,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             }
             if (pos == -1) {
                 return value;
-            } else {
-                return "localhost";
             }
+            return "localhost";
         }
         if (url.startsWith("file:")) {
             return "localhost";
@@ -470,10 +468,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (value.length() > 2 && value.charAt(2) == ':') {
                 // Windows
                 return abbreviateSite(value.substring(1).replace('/', '\\'));
-            } else {
-                // Unix
-                return abbreviateSite(value);
             }
+            // Unix
+            return abbreviateSite(value);
         }
         if (url.startsWith("smb:") || url.startsWith("smb1:")) {
             final String value = url.replaceFirst("^smb.?:/+", StringUtil.EMPTY);

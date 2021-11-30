@@ -237,9 +237,8 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
                         writer.write(Constants.LINE_SEPARATOR);
                         return new KuromojiItem(item.getId(), item.getNewToken(), item.getNewSegmentation(), item.getNewReading(),
                                 item.getNewPos());
-                    } else {
-                        return null;
                     }
+                    return null;
                 } finally {
                     item.setNewToken(null);
                 }

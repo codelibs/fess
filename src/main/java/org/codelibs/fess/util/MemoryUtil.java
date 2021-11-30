@@ -58,7 +58,8 @@ public final class MemoryUtil {
         }
         if (obj instanceof Number) {
             return 24L;
-        } else if (obj instanceof Date) {
+        }
+        if (obj instanceof Date) {
             return 32L;
         } else if (obj instanceof LocalDateTime) {
             return 80L;

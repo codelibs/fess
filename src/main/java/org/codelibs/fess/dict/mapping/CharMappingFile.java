@@ -250,9 +250,8 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
                         writer.write(item.toLineString());
                         writer.write(Constants.LINE_SEPARATOR);
                         return new CharMappingItem(item.getId(), item.getNewInputs(), item.getNewOutput());
-                    } else {
-                        return null;
                     }
+                    return null;
                 } finally {
                     item.setNewInputs(null);
                     item.setNewOutput(null);

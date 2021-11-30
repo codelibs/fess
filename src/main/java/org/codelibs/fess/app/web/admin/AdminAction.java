@@ -313,7 +313,8 @@ public class AdminAction extends FessAdminAction {
         }
         if (user.hasRoles(getActionRoles(AdminGeneralAction.ROLE))) {
             return AdminGeneralAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminSchedulerAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminSchedulerAction.ROLE))) {
             return AdminSchedulerAction.class;
         } else if (user.hasRoles(getActionRoles(AdminDesignAction.ROLE))) {
             return AdminDesignAction.class;

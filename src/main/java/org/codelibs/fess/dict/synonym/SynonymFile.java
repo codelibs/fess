@@ -311,9 +311,8 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                         writer.write(item.toLineString());
                         writer.write(Constants.LINE_SEPARATOR);
                         return new SynonymItem(item.getId(), item.getNewInputs(), item.getNewOutputs());
-                    } else {
-                        return null;
                     }
+                    return null;
                 } finally {
                     item.setNewInputs(null);
                     item.setNewOutputs(null);

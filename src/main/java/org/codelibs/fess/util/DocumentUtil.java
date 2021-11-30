@@ -100,9 +100,8 @@ public final class DocumentUtil {
         if (clazz.isAssignableFrom(Date.class)) {
             if (value instanceof Date) {
                 return (T) value;
-            } else {
-                return (T) FessFunctions.parseDate(value.toString());
             }
+            return (T) FessFunctions.parseDate(value.toString());
         }
         if (clazz.isAssignableFrom(Long.class)) {
             if (value instanceof Long) {
@@ -110,7 +109,8 @@ public final class DocumentUtil {
             } else {
                 return (T) Long.valueOf(value.toString());
             }
-        } else if (clazz.isAssignableFrom(Integer.class)) {
+        }
+        if (clazz.isAssignableFrom(Integer.class)) {
             if (value instanceof Integer) {
                 return (T) value;
             } else {

@@ -126,8 +126,7 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     @Override
     protected void addFieldToSource(final Map<String, Object> sourceMap, final String field, final Object value) {
-        if (value instanceof LocalDateTime) {
-            final LocalDateTime ldt = (LocalDateTime) value;
+        if (value instanceof LocalDateTime ldt) {
             final ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
             super.addFieldToSource(sourceMap, field, DateTimeFormatter.ISO_INSTANT.format(zdt));
         } else {

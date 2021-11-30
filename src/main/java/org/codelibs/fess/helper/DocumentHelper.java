@@ -210,9 +210,7 @@ public class DocumentHelper {
             final byte[] data = resultData.getData();
             if (data != null) {
                 try {
-                    @SuppressWarnings("unchecked")
-                    final Map<String, Object> result = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
-                    return result;
+                    return (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
                 } catch (final Exception e) {
                     throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                 }

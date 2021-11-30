@@ -55,8 +55,7 @@ public class SearchLogBhv extends BsSearchLogBhv {
         if (value != null) {
             try {
                 final Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
-                final LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-                return date;
+                return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
             } catch (final DateTimeParseException e) {
                 logger.debug("Invalid date format: {}", value, e);
             }

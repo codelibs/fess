@@ -45,8 +45,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
             return;
         }
 
-        if (t instanceof InvalidAccessTokenException) {
-            final InvalidAccessTokenException e = (InvalidAccessTokenException) t;
+        if (t instanceof InvalidAccessTokenException e) {
             final HttpServletResponse response = LaResponseUtil.getResponse();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setHeader("WWW-Authenticate", "Bearer error=\"" + e.getType() + "\"");

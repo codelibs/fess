@@ -27,16 +27,11 @@ public class UriTypeValidator implements ConstraintValidator<UriType, String> {
 
     @Override
     public void initialize(final UriType uriType) {
-        switch (uriType.protocolType()) {
-        case WEB:
-            protocols = ComponentUtil.getFessConfig().getCrawlerWebProtocolsAsArray();
-            break;
-        case FILE:
-            protocols = ComponentUtil.getFessConfig().getCrawlerFileProtocolsAsArray();
-            break;
-        default:
-            throw new ConstraintDefinitionException("protocolType is emtpy.");
-        }
+        protocols = switch (uriType.protocolType()) {
+        case WEB -> ComponentUtil.getFessConfig().getCrawlerWebProtocolsAsArray();
+        case FILE -> ComponentUtil.getFessConfig().getCrawlerFileProtocolsAsArray();
+        default -> throw new ConstraintDefinitionException("protocolType is emtpy.");
+        };
     }
 
     @Override

@@ -238,10 +238,7 @@ public interface FessProp {
         }
         return list.stream().map(p -> {
             final String key = p.getFirst();
-            if (StringUtil.isEmpty(key)) {
-                return p.getSecond();
-            }
-            if (userBean
+            if (StringUtil.isEmpty(key) || userBean
                     .map(user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> (ROLE_VALUE_PREFIX + s).equals(key)))
                             || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> (GROUP_VALUE_PREFIX + s).equals(key))))
                     .orElse(false)) {
@@ -285,10 +282,7 @@ public interface FessProp {
         }
         return map.entrySet().stream().flatMap(e -> {
             final String key = e.getKey();
-            if (StringUtil.isEmpty(key)) {
-                return e.getValue().stream();
-            }
-            if (userBean
+            if (StringUtil.isEmpty(key) || userBean
                     .map(user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> (ROLE_VALUE_PREFIX + s).equals(key)))
                             || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> (GROUP_VALUE_PREFIX + s).equals(key))))
                     .orElse(false)) {
@@ -924,9 +918,7 @@ public interface FessProp {
 
     default Class<? extends LaJob> getSchedulerJobClassAsClass() {
         try {
-            @SuppressWarnings("unchecked")
-            final Class<? extends LaJob> clazz = (Class<? extends LaJob>) Class.forName(getSchedulerJobClass());
-            return clazz;
+            return (Class<? extends LaJob>) Class.forName(getSchedulerJobClass());
         } catch (final ClassNotFoundException e) {
             throw new ClassNotFoundRuntimeException(e);
         }
@@ -944,7 +936,7 @@ public interface FessProp {
         Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_EXCLUDES);
         if (patterns == null) {
             patterns = split(getCrawlerMetadataContentExcludes(), ",")
-                    .get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> Pattern.compile(v)).toArray(n -> new Pattern[n]));
+                    .get(stream -> stream.filter(StringUtil::isNotBlank).map(Pattern::compile).toArray(n -> new Pattern[n]));
             propMap.put(CRAWLER_METADATA_CONTENT_EXCLUDES, patterns);
         }
         return !stream(patterns).get(stream -> stream.anyMatch(p -> p.matcher(name).matches()));
@@ -1031,8 +1023,7 @@ public interface FessProp {
             if (lang1 != null) {
                 return lang1;
             }
-            final String lang2 = mapping.get(s.split("[\\-_]")[0]);
-            return lang2;
+            return mapping.get(s.split("[\\-_]")[0]);
         }).filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
@@ -1078,14 +1069,15 @@ public interface FessProp {
         for (final String key : mapping.keySet()) {
             if (value.endsWith("_" + key.toLowerCase(Locale.ROOT))) {
                 final String[] values = key.split("_");
-                if (values.length == 1) {
+                switch (values.length) {
+                case 1:
                     return new Locale(values[0]);
-                }
-                if (values.length == 2) {
+                case 2:
                     return new Locale(values[0], values[1]);
-                }
-                if (values.length == 3) {
+                case 3:
                     return new Locale(values[0], values[1], values[2]);
+                default:
+                    break;
                 }
             }
         }
@@ -1785,11 +1777,8 @@ public interface FessProp {
     java.math.BigDecimal getThumbnailHtmlImageMaxAspectRatioAsDecimal();
 
     default boolean validateThumbnailSize(final int width, final int height) {
-        if (width <= 0 || height <= 0) {
-            return false;
-        }
-
-        if (width < getThumbnailHtmlImageMinWidthAsInteger().intValue() || height < getThumbnailHtmlImageMinHeightAsInteger().intValue()) {
+        if (width <= 0 || height <= 0 || width < getThumbnailHtmlImageMinWidthAsInteger().intValue()
+                || height < getThumbnailHtmlImageMinHeightAsInteger().intValue()) {
             return false;
         }
 

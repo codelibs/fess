@@ -235,9 +235,8 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                         writer.write(item.toLineString());
                         writer.write(Constants.LINE_SEPARATOR);
                         return new ProtwordsItem(item.getId(), item.getNewInput());
-                    } else {
-                        return null;
                     }
+                    return null;
                 } finally {
                     item.setNewInput(null);
                 }

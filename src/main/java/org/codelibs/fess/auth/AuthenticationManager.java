@@ -24,7 +24,7 @@ import org.codelibs.fess.es.user.exentity.User;
 
 public class AuthenticationManager {
 
-    protected AuthenticationChain[] chains = new AuthenticationChain[0];
+    protected AuthenticationChain[] chains = {};
 
     public void insert(final User user) {
         chains().of(stream -> stream.forEach(c -> c.update(user)));

@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 public class IngestFactory {
     private static final Logger logger = LogManager.getLogger(IngestFactory.class);
 
-    private Ingester[] ingesters = new Ingester[0];
+    private Ingester[] ingesters = {};
 
     public synchronized void add(final Ingester ingester) {
         if (logger.isDebugEnabled()) {

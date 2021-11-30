@@ -159,7 +159,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     }
 
-    protected class SpengoConfig implements FilterConfig {
+    protected static class SpengoConfig implements FilterConfig {
 
         @Override
         public String getFilterName() {
@@ -180,7 +180,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 }
                 if (logger.isDebugEnabled()) {
                     return "3";
-                } else if (logger.isInfoEnabled()) {
+                }
+                if (logger.isInfoEnabled()) {
                     return "5";
                 } else if (logger.isWarnEnabled()) {
                     return "6";
@@ -195,7 +196,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
             if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));
-            } else if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");
             } else if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");

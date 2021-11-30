@@ -23,7 +23,7 @@ import org.codelibs.core.lang.StringUtil;
 
 public class Constants extends CoreLibConstants {
 
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    public static final String LINE_SEPARATOR = System.lineSeparator();
 
     public static final int DEFAULT_ADMIN_PAGE_NUMBER = 1;
 
@@ -353,10 +353,9 @@ public class Constants extends CoreLibConstants {
 
     public static final String DATA_CRAWLER_TYPE = "data_crawling";
 
-    public static final String[] COMMON_CONVERSION_RULE =
-            new String[] { "crudMode", "createdBy", "createdTime", "updatedBy", "updatedTime" };
+    public static final String[] COMMON_CONVERSION_RULE = { "crudMode", "createdBy", "createdTime", "updatedBy", "updatedTime" };
 
-    public static final String[] COMMON_API_CONVERSION_RULE = new String[] { "crudMode" };
+    public static final String[] COMMON_API_CONVERSION_RULE = { "crudMode" };
 
     public static final String USER_INFO = "LoginInfo";
 

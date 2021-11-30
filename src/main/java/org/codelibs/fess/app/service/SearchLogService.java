@@ -479,9 +479,8 @@ public class SearchLogService {
         }
         if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
             return userInfoBhv.selectByPK(id);
-        } else {
-            return searchLogBhv.selectByPK(id);
         }
+        return searchLogBhv.selectByPK(id);
     }
 
     public Map<String, String> getSearchLogMap(final String logType, final String id) {
@@ -521,33 +520,32 @@ public class SearchLogService {
                 params.put("Requested Time", FessFunctions.formatDate(e.getRequestedAt()));
                 return params;
             }).get();
-        } else {
-            return searchLogBhv.selectByPK(id).map(e -> {
-                final Map<String, String> params = new LinkedHashMap<>();
-                params.put("ID", e.getId());
-                params.put("Query ID", e.getQueryId());
-                params.put("User Info ID", e.getUserInfoId());
-                params.put("User Session ID", e.getUserSessionId());
-                params.put("Access Type", e.getAccessType());
-                params.put("Search Word", e.getSearchWord());
-                params.put("Requested Time", FessFunctions.formatDate(e.getRequestedAt()));
-                params.put("Query Time", toNumberString(e.getQueryTime()));
-                params.put("Response Time", toNumberString(e.getResponseTime()));
-                params.put("Hit Count", toNumberString(e.getHitCount()));
-                params.put("Offset", toNumberString(e.getQueryOffset()));
-                params.put("Page Size", toNumberString(e.getQueryPageSize()));
-                params.put("Client IP", e.getClientIp());
-                params.put("Referer", e.getReferer());
-                params.put("Languages", e.getLanguages());
-                params.put("Virtual Host", e.getVirtualHost());
-                params.put("Roles", e.getRoles() != null ? String.join(" ", e.getRoles()) : StringUtil.EMPTY);
-                params.put("User Agent", e.getUserAgent());
-                e.getSearchFieldLogList().stream().forEach(p -> {
-                    params.put(p.getFirst(), p.getSecond());
-                });
-                return params;
-            }).get();
         }
+        return searchLogBhv.selectByPK(id).map(e -> {
+            final Map<String, String> params = new LinkedHashMap<>();
+            params.put("ID", e.getId());
+            params.put("Query ID", e.getQueryId());
+            params.put("User Info ID", e.getUserInfoId());
+            params.put("User Session ID", e.getUserSessionId());
+            params.put("Access Type", e.getAccessType());
+            params.put("Search Word", e.getSearchWord());
+            params.put("Requested Time", FessFunctions.formatDate(e.getRequestedAt()));
+            params.put("Query Time", toNumberString(e.getQueryTime()));
+            params.put("Response Time", toNumberString(e.getResponseTime()));
+            params.put("Hit Count", toNumberString(e.getHitCount()));
+            params.put("Offset", toNumberString(e.getQueryOffset()));
+            params.put("Page Size", toNumberString(e.getQueryPageSize()));
+            params.put("Client IP", e.getClientIp());
+            params.put("Referer", e.getReferer());
+            params.put("Languages", e.getLanguages());
+            params.put("Virtual Host", e.getVirtualHost());
+            params.put("Roles", e.getRoles() != null ? String.join(" ", e.getRoles()) : StringUtil.EMPTY);
+            params.put("User Agent", e.getUserAgent());
+            e.getSearchFieldLogList().stream().forEach(p -> {
+                params.put(p.getFirst(), p.getSecond());
+            });
+            return params;
+        }).get();
     }
 
     private String toNumberString(final Number value) {

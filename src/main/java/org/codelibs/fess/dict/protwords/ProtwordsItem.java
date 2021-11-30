@@ -65,8 +65,7 @@ public class ProtwordsItem extends DictionaryItem {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + input.hashCode();
-        return result;
+        return prime * result + input.hashCode();
     }
 
     @Override
@@ -74,10 +73,7 @@ public class ProtwordsItem extends DictionaryItem {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         final ProtwordsItem other = (ProtwordsItem) obj;

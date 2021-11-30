@@ -30,9 +30,7 @@ public final class WebApiUtil {
     }
 
     public static <T> T getObject(final String name) {
-        @SuppressWarnings("unchecked")
-        final T value = (T) LaRequestUtil.getRequest().getAttribute(name);
-        return value;
+        return (T) LaRequestUtil.getRequest().getAttribute(name);
     }
 
     public static void setError(final int statusCode, final String message) {

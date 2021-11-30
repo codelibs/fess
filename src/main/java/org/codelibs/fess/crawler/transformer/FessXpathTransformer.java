@@ -301,8 +301,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
-        final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(config);
-        return configMap;
+        return crawlingConfig.getConfigParameterMap(config);
     }
 
     protected boolean isValidUrl(final String urlStr) {
@@ -320,10 +319,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         try {
             final URL url = new java.net.URL(value);
             final String host = url.getHost();
-            if (StringUtil.isBlank(host)) {
-                return false;
-            }
-            if ("http".equalsIgnoreCase(host) || "https".equalsIgnoreCase(host)) {
+            if (StringUtil.isBlank(host) || "http".equalsIgnoreCase(host) || "https".equalsIgnoreCase(host)) {
                 return false;
             }
         } catch (final MalformedURLException e) {

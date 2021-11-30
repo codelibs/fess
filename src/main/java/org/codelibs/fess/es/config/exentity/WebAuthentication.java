@@ -72,7 +72,8 @@ public class WebAuthentication extends BsWebAuthentication {
                         props.setProperty(e.getKey(), e.getValue());
                     });
             return new NTLMScheme(new JcifsEngine(props));
-        } else if (Constants.FORM.equals(scheme)) {
+        }
+        if (Constants.FORM.equals(scheme)) {
             final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
             return new FormScheme(parameterMap);
         }

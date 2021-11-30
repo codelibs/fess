@@ -235,9 +235,8 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
                         writer.write(item.toLineString());
                         writer.write(Constants.LINE_SEPARATOR);
                         return new StopwordsItem(item.getId(), item.getNewInput());
-                    } else {
-                        return null;
                     }
+                    return null;
                 } finally {
                     item.setNewInput(null);
                 }

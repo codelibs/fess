@@ -84,16 +84,14 @@ public class PermissionHelper {
         if (lower.startsWith(groupPrefix)) {
             if (permission.length() > groupPrefix.length()) {
                 return aclPrefix + systemHelper.getSearchRoleByGroup(permission.substring(groupPrefix.length()));
-            } else {
-                return null;
             }
+            return null;
         }
         if (lower.startsWith(rolePrefix)) {
             if (permission.length() > rolePrefix.length()) {
                 return aclPrefix + systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
-            } else {
-                return null;
             }
+            return null;
         }
         return permission;
     }

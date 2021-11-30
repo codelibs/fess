@@ -199,8 +199,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
 
         final AuthenticationResponse authResponse = parseAuthenticationResponse(urlBuf.toString(), params);
-        if (authResponse instanceof AuthenticationSuccessResponse) {
-            final AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse) authResponse;
+        if (authResponse instanceof AuthenticationSuccessResponse oidcResponse) {
             validateAuthRespMatchesCodeFlow(oidcResponse);
             final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
             validateNonce(stateData, authData);

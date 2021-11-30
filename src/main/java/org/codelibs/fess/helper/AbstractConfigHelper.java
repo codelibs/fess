@@ -23,7 +23,7 @@ public abstract class AbstractConfigHelper {
     protected long reloadInterval = 1000L;
 
     public void update() {
-        CommonPoolUtil.execute(() -> load());
+        CommonPoolUtil.execute(this::load);
     }
 
     protected void waitForNext() {

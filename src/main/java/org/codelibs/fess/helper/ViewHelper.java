@@ -247,9 +247,7 @@ public class ViewHelper {
 
     protected OptionalThing<Set<String>> getQuerySet() {
         return LaRequestUtil.getOptionalRequest().map(req -> {
-            @SuppressWarnings("unchecked")
-            final Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
-            return querySet;
+            return (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
         }).filter(s -> s != null);
     }
 
@@ -819,7 +817,7 @@ public class ViewHelper {
             for (int i = 0; i < fragments.length; i++) {
                 texts[i] = fragments[i].string();
             }
-            String value = StringUtils.join(texts, ELLIPSIS);
+            final String value = StringUtils.join(texts, ELLIPSIS);
             if (StringUtil.isNotBlank(value) && !ComponentUtil.getFessConfig().endsWithFullstop(value)) {
                 return value + ELLIPSIS;
             }
@@ -852,7 +850,7 @@ public class ViewHelper {
     public TextFragment[] createTextFragmentsByQuery() {
         return LaRequestUtil.getOptionalRequest().map(req -> {
             @SuppressWarnings("unchecked")
-            Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
+            final Set<String> querySet = (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
             if (querySet != null) {
                 return querySet.stream().map(s -> new TextFragment(null, s, null, null)).toArray(n -> new TextFragment[n]);
             }
@@ -953,10 +951,10 @@ public class ViewHelper {
 
     // #:~:text=[prefix-,]textStart[,textEnd][,-suffix]
     public static class TextFragment {
-        private String prefix;
-        private String textStart;
-        private String textEnd;
-        private String suffix;
+        private final String prefix;
+        private final String textStart;
+        private final String textEnd;
+        private final String suffix;
 
         TextFragment(final String prefix, final String textStart, final String textEnd, final String suffix) {
             this.prefix = prefix;

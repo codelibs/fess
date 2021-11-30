@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class CommandChain implements AuthenticationChain {
 
     protected long executionTimeout = 30L * 1000L; // 30sec
 
-    protected String commandOutputEncoding = System.getProperty("file.encoding");
+    protected String commandOutputEncoding = Charset.defaultCharset().displayName();
 
     protected String[] updateCommand;
 

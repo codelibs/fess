@@ -68,9 +68,9 @@ public class GsaConfigParser extends DefaultHandler {
 
     protected static final String BAD_URLS = "bad_urls";
 
-    protected String[] webProtocols = new String[] { "http:", "https:" };
+    protected String[] webProtocols = { "http:", "https:" };
 
-    protected String[] fileProtocols = new String[] { "file:", "smb:", "smb1:", "ftp:", "storage:" };
+    protected String[] fileProtocols = { "file:", "smb:", "smb1:", "ftp:", "storage:" };
 
     protected LinkedList<String> tagQueue;
 
@@ -262,7 +262,8 @@ public class GsaConfigParser extends DefaultHandler {
             final StringBuilder buf = new StringBuilder(100);
             buf.append("(?i)");
             return appendFileterPath(buf, unescape(v));
-        } else if (s.startsWith(REGEXP_CASE)) {
+        }
+        if (s.startsWith(REGEXP_CASE)) {
             final String v = s.substring(REGEXP_CASE.length());
             final StringBuilder buf = new StringBuilder(100);
             return appendFileterPath(buf, unescape(v));
@@ -288,7 +289,8 @@ public class GsaConfigParser extends DefaultHandler {
         }
         if (s.startsWith("^")) {
             return "^" + Pattern.quote(s.substring(1));
-        } else if (s.endsWith("$")) {
+        }
+        if (s.endsWith("$")) {
             return Pattern.quote(s.substring(0, s.length() - 1)) + "$";
         }
         return Pattern.quote(s);

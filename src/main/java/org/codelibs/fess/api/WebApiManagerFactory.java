@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class WebApiManagerFactory {
 
-    protected WebApiManager[] webApiManagers = new WebApiManager[0];
+    protected WebApiManager[] webApiManagers = {};
 
     public void add(final WebApiManager webApiManager) {
         final List<WebApiManager> list = new ArrayList<>();

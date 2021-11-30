@@ -41,11 +41,10 @@ public class ImplementedInvokerAssistant implements InvokerAssistant {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected static final String[] DEFAULT_CLIENT_INVOKE_NAMES =
-            new String[] { "Page", "Action", "Controller", "ControllerImpl", "Task", "Test" };
+    protected static final String[] DEFAULT_CLIENT_INVOKE_NAMES = { "Page", "Action", "Controller", "ControllerImpl", "Task", "Test" };
 
     protected static final String[] DEFAULT_BYPASS_INVOKE_NAMES =
-            new String[] { "Service", "ServiceImpl", "Facade", "FacadeImpl", "Logic", "LogicImpl" };
+            { "Service", "ServiceImpl", "Facade", "FacadeImpl", "Logic", "LogicImpl" };
 
     @Override
     public DBDef assistCurrentDBDef() {

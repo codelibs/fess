@@ -134,13 +134,8 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         if (targetLocale.equals(requestLocale) || targetLocale.equals(Locale.ROOT)) {
             return true;
         }
-        if (requestLocale == null) {
-            return false;
-        }
-        if (!requestLocale.getLanguage().equals(targetLocale.getLanguage())) {
-            return false;
-        }
-        if (targetLocale.getCountry().length() > 0 && !requestLocale.getCountry().equals(targetLocale.getCountry())) {
+        if ((requestLocale == null) || !requestLocale.getLanguage().equals(targetLocale.getLanguage())
+                || (targetLocale.getCountry().length() > 0 && !requestLocale.getCountry().equals(targetLocale.getCountry()))) {
             return false;
         }
         return true;
@@ -232,7 +227,7 @@ public class LabelTypeHelper extends AbstractConfigHelper {
             return locale;
         }
 
-        public void setLocale(Locale locale) {
+        public void setLocale(final Locale locale) {
             this.locale = locale;
         }
     }

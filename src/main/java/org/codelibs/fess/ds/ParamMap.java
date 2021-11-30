@@ -47,26 +47,31 @@ public class ParamMap<K, V> implements Map<K, V> {
         return keyStr;
     }
 
+    @Override
     public int size() {
         return parent.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return parent.isEmpty();
     }
 
-    public boolean containsKey(Object key) {
+    @Override
+    public boolean containsKey(final Object key) {
         if (parent.containsKey(key)) {
             return true;
         }
         return parent.containsKey(toCamelCase(key));
     }
 
-    public boolean containsValue(Object value) {
+    @Override
+    public boolean containsValue(final Object value) {
         return parent.containsValue(value);
     }
 
-    public V get(Object key) {
+    @Override
+    public V get(final Object key) {
         final V value = parent.get(key);
         if (value != null) {
             return value;
@@ -74,11 +79,13 @@ public class ParamMap<K, V> implements Map<K, V> {
         return parent.get(toCamelCase(key));
     }
 
-    public V put(K key, V value) {
+    @Override
+    public V put(final K key, final V value) {
         return parent.put(key, value);
     }
 
-    public V remove(Object key) {
+    @Override
+    public V remove(final Object key) {
         final V value = parent.remove(key);
         if (value != null) {
             return value;
@@ -86,37 +93,45 @@ public class ParamMap<K, V> implements Map<K, V> {
         return parent.remove(key);
     }
 
-    public void putAll(Map<? extends K, ? extends V> m) {
+    @Override
+    public void putAll(final Map<? extends K, ? extends V> m) {
         parent.putAll(m);
     }
 
+    @Override
     public void clear() {
         parent.clear();
     }
 
+    @Override
     public Set<K> keySet() {
         // return original keys
         return parent.keySet();
     }
 
+    @Override
     public Collection<V> values() {
         return parent.values();
     }
 
+    @Override
     public Set<Entry<K, V>> entrySet() {
         // return original keys
         return parent.entrySet();
     }
 
-    public boolean equals(Object o) {
+    @Override
+    public boolean equals(final Object o) {
         return parent.equals(o);
     }
 
+    @Override
     public int hashCode() {
         return parent.hashCode();
     }
 
-    public V getOrDefault(Object key, V defaultValue) {
+    @Override
+    public V getOrDefault(final Object key, final V defaultValue) {
         final V value = parent.get(key);
         if (value != null) {
             return value;
@@ -124,53 +139,63 @@ public class ParamMap<K, V> implements Map<K, V> {
         return parent.getOrDefault(toCamelCase(key), defaultValue);
     }
 
-    public void forEach(BiConsumer<? super K, ? super V> action) {
+    @Override
+    public void forEach(final BiConsumer<? super K, ? super V> action) {
         parent.forEach(action);
     }
 
-    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    @Override
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) {
         parent.replaceAll(function);
     }
 
-    public V putIfAbsent(K key, V value) {
+    @Override
+    public V putIfAbsent(final K key, final V value) {
         return parent.putIfAbsent(key, value);
     }
 
-    public boolean remove(Object key, Object value) {
+    @Override
+    public boolean remove(final Object key, final Object value) {
         if (parent.remove(key, value)) {
             return true;
         }
         return parent.remove(toCamelCase(key), value);
     }
 
-    public boolean replace(K key, V oldValue, V newValue) {
+    @Override
+    public boolean replace(final K key, final V oldValue, final V newValue) {
         if (parent.replace(key, oldValue, newValue)) {
             return true;
         }
         return parent.replace(key, oldValue, newValue);
     }
 
-    public V replace(K key, V value) {
+    @Override
+    public V replace(final K key, final V value) {
         // use original key
         return parent.replace(key, value);
     }
 
-    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    @Override
+    public V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction) {
         // use original key
         return parent.computeIfAbsent(key, mappingFunction);
     }
 
-    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    @Override
+    public V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         // use original key
         return parent.computeIfPresent(key, remappingFunction);
     }
 
-    public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    @Override
+    public V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         // use original key
         return parent.compute(key, remappingFunction);
     }
 
-    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    @Override
+    public V merge(final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
         // use original key
         return parent.merge(key, value, remappingFunction);
     }

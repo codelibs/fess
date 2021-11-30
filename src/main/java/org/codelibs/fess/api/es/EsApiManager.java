@@ -54,7 +54,7 @@ public class EsApiManager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(EsApiManager.class);
 
-    protected String[] acceptedRoles = new String[] { "admin" };
+    protected String[] acceptedRoles = { "admin" };
 
     public EsApiManager() {
         setPathPrefix(ADMIN_SERVER);

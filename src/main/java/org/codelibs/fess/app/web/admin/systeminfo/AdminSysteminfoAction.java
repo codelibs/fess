@@ -131,8 +131,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
             }
             itemList.add(createItem(k, value));
         });
-        if (fessConfig instanceof ObjectiveConfig) {
-            final ObjectiveConfig config = (ObjectiveConfig) fessConfig;
+        if (fessConfig instanceof ObjectiveConfig config) {
             config.keySet().stream().forEach(k -> {
                 final String value;
                 if (isMaskedValue(k)) {

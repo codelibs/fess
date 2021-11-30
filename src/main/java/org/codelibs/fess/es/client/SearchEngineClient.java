@@ -394,7 +394,7 @@ public class SearchEngineClient implements Client {
             if (fessConfig.availableProcessors() >= 4) {
                 return null;
             }
-            String requestsPerSecond = String.valueOf(fessConfig.getIndexReindexSizeAsInteger() * fessConfig.availableProcessors());
+            final String requestsPerSecond = String.valueOf(fessConfig.getIndexReindexSizeAsInteger() * fessConfig.availableProcessors());
             logger.info("Set requests_per_second to {}", requestsPerSecond);
             return requestsPerSecond;
         }
@@ -451,11 +451,10 @@ public class SearchEngineClient implements Client {
         if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
             dictionaryPath = dictionaryPath + "/";
         }
-        source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
-        source = source.replaceAll(Pattern.quote("${fess.index.codec}"), fessConfig.getIndexCodec());
-        source = source.replaceAll(Pattern.quote("${fess.index.number_of_shards}"), numberOfShards);
-        source = source.replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), autoExpandReplicas);
-        return source;
+        return source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath)//
+                .replaceAll(Pattern.quote("${fess.index.codec}"), fessConfig.getIndexCodec())//
+                .replaceAll(Pattern.quote("${fess.index.number_of_shards}"), numberOfShards)//
+                .replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), autoExpandReplicas);
     }
 
     protected String getResourcePath(final String basePath, final String type, final String path) {

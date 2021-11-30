@@ -397,7 +397,7 @@ public class IndexUpdater extends Thread {
     private AccessResultData<?> getAccessResultData(final EsAccessResult accessResult) {
         try {
             return accessResult.getAccessResultData();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to get data from {}", accessResult.getUrl(), e);
         }
         return null;

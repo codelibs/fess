@@ -433,19 +433,18 @@ public class QueryHelper {
         }
         if (query instanceof PhraseQuery) {
             return convertPhraseQuery(context, (PhraseQuery) query, boost);
-        } else if (query instanceof FuzzyQuery) {
+        }
+        if (query instanceof FuzzyQuery) {
             return convertFuzzyQuery(context, (FuzzyQuery) query, boost);
         } else if (query instanceof PrefixQuery) {
             return convertPrefixQuery(context, (PrefixQuery) query, boost);
         } else if (query instanceof WildcardQuery) {
             return convertWildcardQuery(context, (WildcardQuery) query, boost);
-        } else if (query instanceof BooleanQuery) {
-            final BooleanQuery booleanQuery = (BooleanQuery) query;
+        } else if (query instanceof BooleanQuery booleanQuery) {
             return convertBooleanQuery(context, booleanQuery, boost);
         } else if (query instanceof MatchAllDocsQuery) {
             return QueryBuilders.matchAllQuery();
-        } else if (query instanceof BoostQuery) {
-            final BoostQuery boostQuery = (BoostQuery) query;
+        } else if (query instanceof BoostQuery boostQuery) {
             return convertQuery(context, boostQuery.getQuery(), boostQuery.getBoost());
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -530,10 +529,9 @@ public class QueryHelper {
         context.addFieldLog(field, prefixQuery.getPrefix().text());
         if (notAnalyzedFieldSet.contains(field)) {
             return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
-        } else {
-            return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost)
-                    .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger());
         }
+        return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost)
+                .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger());
     }
 
     protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
@@ -653,7 +651,8 @@ public class QueryHelper {
                 context.addSorts(createFieldSortBuilder(sortField, sortOrder));
             }));
             return null;
-        } else if (INURL_FIELD.equals(field) || (StringUtil.equals(field, context.getDefaultField())
+        }
+        if (INURL_FIELD.equals(field) || (StringUtil.equals(field, context.getDefaultField())
                 && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
         } else if (SITE_FIELD.equals(field)) {

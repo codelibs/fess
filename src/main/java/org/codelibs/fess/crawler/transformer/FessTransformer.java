@@ -86,14 +86,11 @@ public interface FessTransformer {
         if (encoding != null) {
             String enc;
             if (StringUtil.isNotBlank(getFessConfig().getCrawlerDocumentSiteEncoding())) {
-                if (getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish()) {
-                    if ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding)) {
-                        enc = getFessConfig().getCrawlerDocumentSiteEncoding();
-                    } else {
-                        enc = encoding;
-                    }
-                } else {
+                if (!getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish()
+                        || ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding))) {
                     enc = getFessConfig().getCrawlerDocumentSiteEncoding();
+                } else {
+                    enc = encoding;
                 }
             } else {
                 enc = encoding;
@@ -153,7 +150,7 @@ public interface FessTransformer {
         }
     }
 
-    default Object evaluateValue(final String scriptType, String template, final Map<String, Object> paramMap) {
+    default Object evaluateValue(final String scriptType, final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }

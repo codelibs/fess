@@ -27,7 +27,7 @@ public class DocBoostMatcher {
 
     private String matchExpression;
 
-    private String scriptType;
+    private final String scriptType;
 
     public DocBoostMatcher() {
         scriptType = Constants.DEFAULT_SCRIPT;
@@ -67,7 +67,8 @@ public class DocBoostMatcher {
         }
         if (value instanceof Float) {
             return ((Float) value);
-        } else if (value instanceof Double) {
+        }
+        if (value instanceof Double) {
             return ((Double) value).floatValue();
         } else if (value != null) {
             return Float.parseFloat(value.toString());

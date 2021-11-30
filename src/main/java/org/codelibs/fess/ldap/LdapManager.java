@@ -150,11 +150,7 @@ public class LdapManager {
     }
 
     public OptionalEntity<FessUser> login(final String username, final String password) {
-        if (StringUtil.isBlank(fessConfig.getLdapProviderUrl())) {
-            return OptionalEntity.empty();
-        }
-
-        if (!validate()) {
+        if (StringUtil.isBlank(fessConfig.getLdapProviderUrl()) || !validate()) {
             return OptionalEntity.empty();
         }
 

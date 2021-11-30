@@ -247,9 +247,8 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
                         writer.write(item.toLineString());
                         writer.write(Constants.LINE_SEPARATOR);
                         return new StemmerOverrideItem(item.getId(), item.getNewInput(), item.getNewOutput());
-                    } else {
-                        return null;
                     }
+                    return null;
                 } finally {
                     item.setNewInput(null);
                     item.setNewOutput(null);
