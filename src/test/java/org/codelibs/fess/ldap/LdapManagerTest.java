@@ -15,11 +15,23 @@
  */
 package org.codelibs.fess.ldap;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class LdapManagerTest extends UnitFessTestCase {
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+    }
 
     @SuppressWarnings("serial")
     public void test_getSearchRoleName() {
@@ -71,5 +83,47 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("_a_", ldapManager.replaceWithUnderscores("/a/"));
         assertEquals("___", ldapManager.replaceWithUnderscores("///"));
         assertEquals("a_a", ldapManager.replaceWithUnderscores("a/a"));
+    }
+
+    public void test_allowEmptyGroupAndRole() {
+        final AtomicBoolean allowEmptyPermission = new AtomicBoolean();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            public boolean isLdapAllowEmptyPermission() {
+                return allowEmptyPermission.get();
+            }
+
+            public String getRoleSearchUserPrefix() {
+                return "1";
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+        final List<String> permissionList = new ArrayList<>();
+        LdapUser user = new LdapUser(new Hashtable<>(), "test") {
+            @Override
+            public String[] getPermissions() {
+                return permissionList.toArray(n -> new String[n]);
+            }
+        };
+
+        allowEmptyPermission.set(true);
+        assertTrue(ldapManager.allowEmptyGroupAndRole(user));
+        allowEmptyPermission.set(false);
+        assertFalse(ldapManager.allowEmptyGroupAndRole(user));
+
+        permissionList.add("2aaa");
+
+        allowEmptyPermission.set(true);
+        assertTrue(ldapManager.allowEmptyGroupAndRole(user));
+        allowEmptyPermission.set(false);
+        assertTrue(ldapManager.allowEmptyGroupAndRole(user));
+
+        permissionList.clear();
+        permissionList.add("Raaa");
+
+        allowEmptyPermission.set(true);
+        assertTrue(ldapManager.allowEmptyGroupAndRole(user));
+        allowEmptyPermission.set(false);
+        assertTrue(ldapManager.allowEmptyGroupAndRole(user));
     }
 }

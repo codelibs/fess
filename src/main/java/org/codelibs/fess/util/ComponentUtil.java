@@ -559,6 +559,7 @@ public final class ComponentUtil {
     public static void setFessConfig(final FessConfig fessConfig) {
         ComponentUtil.fessConfig = fessConfig;
         if (fessConfig == null) {
+            systemHelper = null;
             FessProp.propMap.clear();
             componentMap.clear();
         }

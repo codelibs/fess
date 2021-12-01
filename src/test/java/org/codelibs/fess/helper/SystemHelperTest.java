@@ -147,4 +147,24 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals(1, filteredEnvMap.size());
         assertEquals("123", filteredEnvMap.get("FESS_ENV_TEST"));
     }
+
+    public void test_isUserPermission() {
+        assertTrue(systemHelper.isUserPermission("1test"));
+
+        assertFalse(systemHelper.isUserPermission(null));
+        assertFalse(systemHelper.isUserPermission(""));
+        assertFalse(systemHelper.isUserPermission(" "));
+        assertFalse(systemHelper.isUserPermission("2test"));
+        assertFalse(systemHelper.isUserPermission("Rtest"));
+    }
+
+    public void test_getSearchRole() {
+        assertEquals("1test", systemHelper.getSearchRoleByUser("test"));
+        assertEquals("Rtest", systemHelper.getSearchRoleByRole("test"));
+        assertEquals("2test", systemHelper.getSearchRoleByGroup("test"));
+
+        assertEquals("1", systemHelper.getSearchRoleByUser(""));
+        assertEquals("R", systemHelper.getSearchRoleByRole(""));
+        assertEquals("2", systemHelper.getSearchRoleByGroup(""));
+    }
 }
