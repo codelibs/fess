@@ -161,10 +161,17 @@ public class LdapManager {
         final Hashtable<String, String> env = createSearchEnv(username, password);
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Logged in.", context);
+            final LdapUser ldapUser = createLdapUser(username, env);
+            if (!fessConfig.isLdapAllowEmptyPermission() && ldapUser.getPermissions().length == 0) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Login failed. No permissions. {}", context);
+                }
+                return OptionalEntity.empty();
             }
-            return OptionalEntity.of(createLdapUser(username, env));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logged in. {}", context);
+            }
+            return OptionalEntity.of(ldapUser);
         } catch (final Exception e) {
             logger.debug("Login failed.", e);
         }
@@ -175,10 +182,17 @@ public class LdapManager {
         final Hashtable<String, String> env = createSearchEnv();
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
+            final LdapUser ldapUser = createLdapUser(username, env);
+            if (!fessConfig.isLdapAllowEmptyPermission() && ldapUser.getPermissions().length == 0) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Login failed. No permissions. {}", context);
+                }
+                return OptionalEntity.empty();
+            }
             if (logger.isDebugEnabled()) {
                 logger.debug("Logged in.", context);
             }
-            return OptionalEntity.of(createLdapUser(username, env));
+            return OptionalEntity.of(ldapUser);
         } catch (final Exception e) {
             logger.debug("Login failed.", e);
         }

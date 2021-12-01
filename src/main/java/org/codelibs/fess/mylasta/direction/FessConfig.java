@@ -1584,6 +1584,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String LDAP_LOWERCASE_PERMISSION_NAME = "ldap.lowercase.permission.name";
 
     /** The key of the configuration. e.g. true */
+    String LDAP_ALLOW_EMPTY_PERMISSION = "ldap.allow.empty.permission";
+
+    /** The key of the configuration. e.g. true */
     String LDAP_ROLE_SEARCH_USER_ENABLED = "ldap.role.search.user.enabled";
 
     /** The key of the configuration. e.g. true */
@@ -6830,6 +6833,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapLowercasePermissionName();
 
     /**
+     * Get the value for the key 'ldap.allow.empty.permission'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAllowEmptyPermission();
+
+    /**
+     * Is the property for the key 'ldap.allow.empty.permission' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapAllowEmptyPermission();
+
+    /**
      * Get the value for the key 'ldap.role.search.user.enabled'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -9839,6 +9856,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.LDAP_LOWERCASE_PERMISSION_NAME);
         }
 
+        public String getLdapAllowEmptyPermission() {
+            return get(FessConfig.LDAP_ALLOW_EMPTY_PERMISSION);
+        }
+
+        public boolean isLdapAllowEmptyPermission() {
+            return is(FessConfig.LDAP_ALLOW_EMPTY_PERMISSION);
+        }
+
         public String getLdapRoleSearchUserEnabled() {
             return get(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED);
         }
@@ -10495,6 +10520,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_IGNORE_NETBIOS_NAME, "true");
             defaultMap.put(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES, "false");
             defaultMap.put(FessConfig.LDAP_LOWERCASE_PERMISSION_NAME, "false");
+            defaultMap.put(FessConfig.LDAP_ALLOW_EMPTY_PERMISSION, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_GROUP_ENABLED, "true");
             defaultMap.put(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED, "true");
