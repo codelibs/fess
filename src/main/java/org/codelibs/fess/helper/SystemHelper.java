@@ -446,6 +446,13 @@ public class SystemHelper {
         return getCurrentTimeAsLong() > eolTime;
     }
 
+    public boolean isUserPermission(final String permission) {
+        if (StringUtil.isNotBlank(permission)) {
+            return permission.startsWith(ComponentUtil.getFessConfig().getRoleSearchUserPrefix());
+        }
+        return false;
+    }
+
     public String getSearchRoleByUser(final String name) {
         return createSearchRole(ComponentUtil.getFessConfig().getRoleSearchUserPrefix(), name);
     }

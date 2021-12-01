@@ -162,7 +162,7 @@ public class LdapManager {
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
             final LdapUser ldapUser = createLdapUser(username, env);
-            if (!fessConfig.isLdapAllowEmptyPermission() && ldapUser.getPermissions().length == 0) {
+            if (!allowEmptyGroupAndRole(ldapUser)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Login failed. No permissions. {}", context);
                 }
@@ -183,7 +183,7 @@ public class LdapManager {
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
             final LdapUser ldapUser = createLdapUser(username, env);
-            if (!fessConfig.isLdapAllowEmptyPermission() && ldapUser.getPermissions().length == 0) {
+            if (!allowEmptyGroupAndRole(ldapUser)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Login failed. No permissions. {}", context);
                 }
@@ -197,6 +197,20 @@ public class LdapManager {
             logger.debug("Login failed.", e);
         }
         return OptionalEntity.empty();
+    }
+
+    protected boolean allowEmptyGroupAndRole(final LdapUser ldapUser) {
+        if (fessConfig.isLdapAllowEmptyPermission()) {
+            return true;
+        }
+
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        for (final String permission : ldapUser.getPermissions()) {
+            if (!systemHelper.isUserPermission(permission)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
