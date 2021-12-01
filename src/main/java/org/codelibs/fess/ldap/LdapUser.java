@@ -17,6 +17,7 @@ package org.codelibs.fess.ldap;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -56,10 +57,10 @@ public class LdapUser implements FessUser {
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 final LdapManager ldapManager = ComponentUtil.getLdapManager();
-                permissions = ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
-                    permissions = roles;
+                permissions = distinct(ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
+                    permissions = distinct(roles);
                     ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
-                }), fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName()));
+                }), fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName())));
             } else {
                 permissions = StringUtil.EMPTY_STRINGS;
             }
@@ -88,6 +89,16 @@ public class LdapUser implements FessUser {
     @Override
     public boolean isEditable() {
         return ComponentUtil.getFessConfig().isLdapAdminEnabled(name);
+    }
+
+    private static String[] distinct(final String[] values) {
+        if (values == null) {
+            return StringUtil.EMPTY_STRINGS;
+        }
+        if (values.length < 2) {
+            return values;
+        }
+        return Arrays.stream(values).distinct().toArray(n -> new String[n]);
     }
 
 }
