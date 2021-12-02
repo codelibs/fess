@@ -1,5 +1,5 @@
 {
-  ".fess_config.thumbnail_queue" : {
+  "fess_config.thumbnail_queue" : {
     "aliases" : { },
     "mappings" : {
       "thumbnail_queue" : {
@@ -34,7 +34,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.thumbnail_queue"
+        "provided_name" : "fess_config.thumbnail_queue"
       }
     }
   }

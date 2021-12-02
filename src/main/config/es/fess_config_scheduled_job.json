@@ -1,5 +1,5 @@
 {
-  ".fess_config.scheduled_job" : {
+  "fess_config.scheduled_job" : {
     "aliases" : { },
     "mappings" : {
       "scheduled_job" : {
@@ -55,7 +55,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.scheduled_job"
+        "provided_name" : "fess_config.scheduled_job"
       }
     }
   }

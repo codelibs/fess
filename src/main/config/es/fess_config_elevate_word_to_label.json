@@ -1,5 +1,5 @@
 {
-  ".fess_config.elevate_word_to_label" : {
+  "fess_config.elevate_word_to_label" : {
     "aliases" : { },
     "mappings" : {
       "elevate_word_to_label" : {
@@ -22,7 +22,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.elevate_word_to_label"
+        "provided_name" : "fess_config.elevate_word_to_label"
       }
     }
   }

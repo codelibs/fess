@@ -51,7 +51,7 @@ public abstract class BsScheduledJobBhv extends EsAbstractBehavior<ScheduledJob,
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.scheduled_job";
+        return "fess_config.scheduled_job";
     }
 
     @Override

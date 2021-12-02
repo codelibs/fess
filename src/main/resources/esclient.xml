@@ -431,88 +431,88 @@
 		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>
 		</postConstruct>
-		<!-- .fess_config index -->
+		<!-- fess_config index -->
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.access_token/access_token"</arg>
+			<arg>"fess_config.access_token/access_token"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.bad_word/bad_word"</arg>
+			<arg>"fess_config.bad_word/bad_word"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.boost_document_rule/boost_document_rule"</arg>
+			<arg>"fess_config.boost_document_rule/boost_document_rule"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.crawling_info/crawling_info"</arg>
+			<arg>"fess_config.crawling_info/crawling_info"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.crawling_info_param/crawling_info_param"</arg>
+			<arg>"fess_config.crawling_info_param/crawling_info_param"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.data_config/data_config"</arg>
+			<arg>"fess_config.data_config/data_config"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.duplicate_host/duplicate_host"</arg>
+			<arg>"fess_config.duplicate_host/duplicate_host"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.elevate_word/elevate_word"</arg>
+			<arg>"fess_config.elevate_word/elevate_word"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.elevate_word_to_label/elevate_word_to_label"</arg>
+			<arg>"fess_config.elevate_word_to_label/elevate_word_to_label"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.failure_url/failure_url"</arg>
+			<arg>"fess_config.failure_url/failure_url"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.file_authentication/file_authentication"</arg>
+			<arg>"fess_config.file_authentication/file_authentication"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.file_config/file_config"</arg>
+			<arg>"fess_config.file_config/file_config"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.job_log/job_log"</arg>
+			<arg>"fess_config.job_log/job_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.key_match/key_match"</arg>
+			<arg>"fess_config.key_match/key_match"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.label_type/label_type"</arg>
+			<arg>"fess_config.label_type/label_type"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.path_mapping/path_mapping"</arg>
+			<arg>"fess_config.path_mapping/path_mapping"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.related_content/related_content"</arg>
+			<arg>"fess_config.related_content/related_content"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.related_query/related_query"</arg>
+			<arg>"fess_config.related_query/related_query"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.request_header/request_header"</arg>
+			<arg>"fess_config.request_header/request_header"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.role_type/role_type"</arg>
+			<arg>"fess_config.role_type/role_type"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.scheduled_job/scheduled_job"</arg>
+			<arg>"fess_config.scheduled_job/scheduled_job"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.thumbnail_queue/thumbnail_queue"</arg>
+			<arg>"fess_config.thumbnail_queue/thumbnail_queue"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.web_authentication/web_authentication"</arg>
+			<arg>"fess_config.web_authentication/web_authentication"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config.web_config/web_config"</arg>
+			<arg>"fess_config.web_config/web_config"</arg>
 		</postConstruct>
-		<!-- .fess_user index -->
+		<!-- fess_user index -->
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_user.user/user"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_user.role/role"</arg>
+			<arg>"fess_user.user/user"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_user.group/group"</arg>
+			<arg>"fess_user.role/role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_user.group/group"</arg>
 		</postConstruct>
 		<!-- fess_log index -->
 		<postConstruct name="addIndexConfig">

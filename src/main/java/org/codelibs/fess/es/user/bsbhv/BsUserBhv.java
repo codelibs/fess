@@ -51,7 +51,7 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_user.user";
+        return "fess_user.user";
     }
 
     @Override

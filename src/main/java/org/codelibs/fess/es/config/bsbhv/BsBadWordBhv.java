@@ -51,7 +51,7 @@ public abstract class BsBadWordBhv extends EsAbstractBehavior<BadWord, BadWordCB
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.bad_word";
+        return "fess_config.bad_word";
     }
 
     @Override

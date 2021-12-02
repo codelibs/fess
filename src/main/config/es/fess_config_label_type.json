@@ -1,5 +1,5 @@
 {
-  ".fess_config.label_type" : {
+  "fess_config.label_type" : {
     "aliases" : { },
     "mappings" : {
       "label_type" : {
@@ -58,7 +58,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.label_type"
+        "provided_name" : "fess_config.label_type"
       }
     }
   }

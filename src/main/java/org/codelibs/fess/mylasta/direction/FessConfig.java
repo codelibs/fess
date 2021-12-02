@@ -624,10 +624,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1 */
     String INDEX_DOCUMENT_CRAWLER_FILTER_number_of_replicas = "index.document.crawler.filter.number_of_replicas";
 
-    /** The key of the configuration. e.g. .fess_config */
+    /** The key of the configuration. e.g. fess_config */
     String INDEX_CONFIG_INDEX = "index.config.index";
 
-    /** The key of the configuration. e.g. .fess_user */
+    /** The key of the configuration. e.g. fess_user */
     String INDEX_USER_INDEX = "index.user.index";
 
     /** The key of the configuration. e.g. fess_log */
@@ -1073,7 +1073,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String FTP_ROLE_FROM_FILE = "ftp.role.from.file";
 
-    /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json */
+    /** The key of the configuration. e.g. fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
     /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
@@ -3573,14 +3573,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.config.index'. <br>
-     * The value is, e.g. .fess_config <br>
+     * The value is, e.g. fess_config <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexConfigIndex();
 
     /**
      * Get the value for the key 'index.user.index'. <br>
-     * The value is, e.g. .fess_user <br>
+     * The value is, e.g. fess_user <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexUserIndex();
@@ -4981,7 +4981,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.backup.targets'. <br>
-     * The value is, e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json <br>
+     * The value is, e.g. fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json <br>
      * comment: backup
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -10231,8 +10231,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_QUEUE_number_of_replicas, "1");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_DATA_number_of_replicas, "1");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_CRAWLER_FILTER_number_of_replicas, "1");
-            defaultMap.put(FessConfig.INDEX_CONFIG_INDEX, ".fess_config");
-            defaultMap.put(FessConfig.INDEX_USER_INDEX, ".fess_user");
+            defaultMap.put(FessConfig.INDEX_CONFIG_INDEX, "fess_config");
+            defaultMap.put(FessConfig.INDEX_USER_INDEX, "fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
             defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host");
             defaultMap.put(FessConfig.INDEX_ADMIN_DATE_FIELDS, "expires,created,timestamp,last_modified");
@@ -10349,7 +10349,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FILE_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS,
-                    ".fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties,fess.json,doc.json");
+                    "fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,

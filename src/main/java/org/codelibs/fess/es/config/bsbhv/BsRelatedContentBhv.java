@@ -51,7 +51,7 @@ public abstract class BsRelatedContentBhv extends EsAbstractBehavior<RelatedCont
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.related_content";
+        return "fess_config.related_content";
     }
 
     @Override

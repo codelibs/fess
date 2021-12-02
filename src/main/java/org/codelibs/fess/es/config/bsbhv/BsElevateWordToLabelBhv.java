@@ -51,7 +51,7 @@ public abstract class BsElevateWordToLabelBhv extends EsAbstractBehavior<Elevate
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.elevate_word_to_label";
+        return "fess_config.elevate_word_to_label";
     }
 
     @Override

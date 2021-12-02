@@ -7,144 +7,144 @@ map:{
 
     # settings for indexes
     ; indexMap = map:{
-        # Index: .fess_user
-        ; .fess_user.group = map:{
+        # Index: fess_user
+        ; fess_user.group = map:{
             ; package = user
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_user.xml
         }
-        ; .fess_user.role = map:{
+        ; fess_user.role = map:{
             ; package = user
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_user.xml
         }
-        ; .fess_user.user = map:{
+        ; fess_user.user = map:{
             ; package = user
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_user.xml
         }
-        # Index: .fess_user
-        ; .fess_config.access_token = map:{
+        # Index: fess_user
+        ; fess_config.access_token = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.bad_word = map:{
+        ; fess_config.bad_word = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.boost_document_rule = map:{
+        ; fess_config.boost_document_rule = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.crawling_info = map:{
+        ; fess_config.crawling_info = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.crawling_info_param = map:{
+        ; fess_config.crawling_info_param = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.data_config = map:{
+        ; fess_config.data_config = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.duplicate_host = map:{
+        ; fess_config.duplicate_host = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.elevate_word = map:{
+        ; fess_config.elevate_word = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.elevate_word_to_label = map:{
+        ; fess_config.elevate_word_to_label = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.failure_url = map:{
+        ; fess_config.failure_url = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.file_authentication = map:{
+        ; fess_config.file_authentication = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.file_config = map:{
+        ; fess_config.file_config = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.job_log = map:{
+        ; fess_config.job_log = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.key_match = map:{
+        ; fess_config.key_match = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.label_type = map:{
+        ; fess_config.label_type = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.path_mapping = map:{
+        ; fess_config.path_mapping = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.related_content = map:{
+        ; fess_config.related_content = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.related_query = map:{
+        ; fess_config.related_query = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.request_header = map:{
+        ; fess_config.request_header = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.role_type = map:{
+        ; fess_config.role_type = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.scheduled_job = map:{
+        ; fess_config.scheduled_job = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.thumbnail_queue = map:{
+        ; fess_config.thumbnail_queue = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.web_authentication = map:{
+        ; fess_config.web_authentication = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        ; .fess_config.web_config = map:{
+        ; fess_config.web_config = map:{
             ; package = config
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
-        # Index: .fess_user
+        # Index: fess_user
         ; fess_log.click_log = map:{
             ; package = log
             ; esclientDiFile = esclient.xml

@@ -51,7 +51,7 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.label_type";
+        return "fess_config.label_type";
     }
 
     @Override

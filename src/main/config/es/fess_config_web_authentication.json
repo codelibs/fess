@@ -1,5 +1,5 @@
 {
-  ".fess_config.web_authentication" : {
+  "fess_config.web_authentication" : {
     "aliases" : { },
     "mappings" : {
       "web_authentication" : {
@@ -52,7 +52,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.web_authentication"
+        "provided_name" : "fess_config.web_authentication"
       }
     }
   }

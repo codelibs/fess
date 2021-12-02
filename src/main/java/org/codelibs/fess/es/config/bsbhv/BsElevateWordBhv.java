@@ -51,7 +51,7 @@ public abstract class BsElevateWordBhv extends EsAbstractBehavior<ElevateWord, E
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.elevate_word";
+        return "fess_config.elevate_word";
     }
 
     @Override

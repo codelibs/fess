@@ -51,7 +51,7 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.job_log";
+        return "fess_config.job_log";
     }
 
     @Override

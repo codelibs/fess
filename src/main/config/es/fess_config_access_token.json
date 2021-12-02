@@ -1,5 +1,5 @@
 {
-  ".fess_config.access_token" : {
+  "fess_config.access_token" : {
     "aliases" : { },
     "mappings" : {
       "access_token" : {
@@ -52,7 +52,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.access_token"
+        "provided_name" : "fess_config.access_token"
       }
     }
   }

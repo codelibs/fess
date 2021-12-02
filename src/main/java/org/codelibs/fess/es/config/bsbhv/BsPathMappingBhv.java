@@ -51,7 +51,7 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.path_mapping";
+        return "fess_config.path_mapping";
     }
 
     @Override

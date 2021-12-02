@@ -1,5 +1,5 @@
 {
-  ".fess_config.boost_document_rule" : {
+  "fess_config.boost_document_rule" : {
     "aliases" : { },
     "mappings" : {
       "boost_document_rule" : {
@@ -37,7 +37,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.boost_document_rule"
+        "provided_name" : "fess_config.boost_document_rule"
       }
     }
   }

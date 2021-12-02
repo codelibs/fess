@@ -44,7 +44,7 @@ public class ITBase {
             return testToken;
         }
 
-        given().contentType("application/json").body("{\"index\":{\"_index\":\".fess_config.access_token\",\"_id\":\""
+        given().contentType("application/json").body("{\"index\":{\"_index\":\"fess_config.access_token\",\"_id\":\""
                 + DEFAULT_TEST_TOKEN_ID
                 + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\",\"Rguest\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
                 + DEFAULT_TEST_TOKEN + "\"}\n").when().post(getEsUrl() + "/_bulk");
@@ -58,7 +58,7 @@ public class ITBase {
         if (testToken != null) {
             return;
         }
-        given().contentType("application/json").delete(getEsUrl() + "/.fess_config.access_token/_doc/" + DEFAULT_TEST_TOKEN_ID);
+        given().contentType("application/json").delete(getEsUrl() + "/fess_config.access_token/_doc/" + DEFAULT_TEST_TOKEN_ID);
     }
 
     public static void refresh() {

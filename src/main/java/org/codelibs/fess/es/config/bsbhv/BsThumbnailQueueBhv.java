@@ -51,7 +51,7 @@ public abstract class BsThumbnailQueueBhv extends EsAbstractBehavior<ThumbnailQu
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.thumbnail_queue";
+        return "fess_config.thumbnail_queue";
     }
 
     @Override

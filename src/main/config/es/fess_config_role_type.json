@@ -1,5 +1,5 @@
 {
-  ".fess_config.role_type" : {
+  "fess_config.role_type" : {
     "aliases" : { },
     "mappings" : {
       "role_type" : {
@@ -37,7 +37,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.role_type"
+        "provided_name" : "fess_config.role_type"
       }
     }
   }

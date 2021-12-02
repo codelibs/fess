@@ -1,5 +1,5 @@
 {
-  ".fess_config.duplicate_host" : {
+  "fess_config.duplicate_host" : {
     "aliases" : { },
     "mappings" : {
       "duplicate_host" : {
@@ -37,7 +37,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.duplicate_host"
+        "provided_name" : "fess_config.duplicate_host"
       }
     }
   }

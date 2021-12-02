@@ -50,14 +50,6 @@
 									<div class="col-sm-9">
 										<la:errors property="targetVersion" />
 										<la:select styleId="targetVersion" property="targetVersion" styleClass="form-control">
-											<la:option value="12.0">12.0</la:option>
-											<la:option value="12.1">12.1</la:option>
-											<la:option value="12.2">12.2</la:option>
-											<la:option value="12.3">12.3</la:option>
-											<la:option value="12.4">12.4</la:option>
-											<la:option value="12.5">12.5</la:option>
-											<la:option value="12.6">12.6</la:option>
-											<la:option value="12.7">12.7</la:option>
 											<la:option value="13.0">13.0</la:option>
 											<la:option value="13.1">13.1</la:option>
 											<la:option value="13.2">13.2</la:option>

@@ -51,7 +51,7 @@ public abstract class BsAccessTokenBhv extends EsAbstractBehavior<AccessToken, A
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.access_token";
+        return "fess_config.access_token";
     }
 
     @Override

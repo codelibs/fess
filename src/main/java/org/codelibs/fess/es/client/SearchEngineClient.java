@@ -171,9 +171,9 @@ public class SearchEngineClient implements Client {
 
     private static final String LOG_INDEX_PREFIX = "fess_log";
 
-    private static final String USER_INDEX_PREFIX = ".fess_user";
+    private static final String USER_INDEX_PREFIX = "fess_user";
 
-    private static final String CONFIG_INDEX_PREFIX = ".fess_config";
+    private static final String CONFIG_INDEX_PREFIX = "fess_config";
 
     protected FesenRunner runner;
 

@@ -1,5 +1,5 @@
 {
-  ".fess_config.web_config" : {
+  "fess_config.web_config" : {
     "aliases" : { },
     "mappings" : {
       "web_config" : {
@@ -97,7 +97,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.web_config"
+        "provided_name" : "fess_config.web_config"
       }
     }
   }

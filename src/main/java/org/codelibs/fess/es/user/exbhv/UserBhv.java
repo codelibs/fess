@@ -42,7 +42,7 @@ public class UserBhv extends BsUserBhv {
     protected String asEsIndex() {
         if (indexName == null) {
             final String name = ComponentUtil.getFessConfig().getIndexUserIndex();
-            indexName = super.asEsIndex().replaceFirst(Pattern.quote(".fess_user"), name);
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote("fess_user"), name);
         }
         return indexName;
     }

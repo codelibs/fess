@@ -51,7 +51,7 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.failure_url";
+        return "fess_config.failure_url";
     }
 
     @Override

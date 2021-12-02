@@ -51,7 +51,7 @@ public abstract class BsBoostDocumentRuleBhv extends EsAbstractBehavior<BoostDoc
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.boost_document_rule";
+        return "fess_config.boost_document_rule";
     }
 
     @Override

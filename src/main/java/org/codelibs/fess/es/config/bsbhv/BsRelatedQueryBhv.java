@@ -51,7 +51,7 @@ public abstract class BsRelatedQueryBhv extends EsAbstractBehavior<RelatedQuery,
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.related_query";
+        return "fess_config.related_query";
     }
 
     @Override

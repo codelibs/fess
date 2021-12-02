@@ -51,7 +51,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_user.group";
+        return "fess_user.group";
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class BsDataConfigBhv extends EsAbstractBehavior<DataConfig, Dat
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.data_config";
+        return "fess_config.data_config";
     }
 
     @Override

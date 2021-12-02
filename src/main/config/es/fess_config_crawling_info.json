@@ -1,5 +1,5 @@
 {
-  ".fess_config.crawling_info" : {
+  "fess_config.crawling_info" : {
     "aliases" : { },
     "mappings" : {
       "crawling_info" : {
@@ -28,7 +28,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.crawling_info"
+        "provided_name" : "fess_config.crawling_info"
       }
     }
   }

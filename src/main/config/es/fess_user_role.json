@@ -1,5 +1,5 @@
 {
-  ".fess_user.role" : {
+  "fess_user.role" : {
     "aliases" : { },
     "mappings" : {
       "role" : {
@@ -19,7 +19,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_user.role"
+        "provided_name" : "fess_user.role"
       }
     }
   }

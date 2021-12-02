@@ -1,5 +1,5 @@
 {
-  ".fess_config.path_mapping" : {
+  "fess_config.path_mapping" : {
     "aliases" : { },
     "mappings" : {
       "path_mapping" : {
@@ -43,7 +43,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.path_mapping"
+        "provided_name" : "fess_config.path_mapping"
       }
     }
   }

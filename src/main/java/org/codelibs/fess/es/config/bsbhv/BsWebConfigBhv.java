@@ -51,7 +51,7 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.web_config";
+        return "fess_config.web_config";
     }
 
     @Override

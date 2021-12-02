@@ -51,7 +51,7 @@ public abstract class BsCrawlingInfoBhv extends EsAbstractBehavior<CrawlingInfo,
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.crawling_info";
+        return "fess_config.crawling_info";
     }
 
     @Override

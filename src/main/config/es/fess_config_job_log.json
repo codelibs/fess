@@ -1,5 +1,5 @@
 {
-  ".fess_config.job_log" : {
+  "fess_config.job_log" : {
     "aliases" : { },
     "mappings" : {
       "job_log" : {
@@ -43,7 +43,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.job_log"
+        "provided_name" : "fess_config.job_log"
       }
     }
   }

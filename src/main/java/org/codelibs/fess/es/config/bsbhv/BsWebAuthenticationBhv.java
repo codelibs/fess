@@ -51,7 +51,7 @@ public abstract class BsWebAuthenticationBhv extends EsAbstractBehavior<WebAuthe
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.web_authentication";
+        return "fess_config.web_authentication";
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class BsRequestHeaderBhv extends EsAbstractBehavior<RequestHeade
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.request_header";
+        return "fess_config.request_header";
     }
 
     @Override

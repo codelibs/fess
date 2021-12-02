@@ -51,7 +51,7 @@ public abstract class BsDuplicateHostBhv extends EsAbstractBehavior<DuplicateHos
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.duplicate_host";
+        return "fess_config.duplicate_host";
     }
 
     @Override

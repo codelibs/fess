@@ -1,5 +1,5 @@
 {
-  ".fess_config.related_query" : {
+  "fess_config.related_query" : {
     "aliases" : { },
     "mappings" : {
       "related_query" : {
@@ -46,7 +46,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.related_query"
+        "provided_name" : "fess_config.related_query"
       }
     }
   }

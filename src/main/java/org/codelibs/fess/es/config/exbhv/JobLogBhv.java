@@ -30,7 +30,7 @@ public class JobLogBhv extends BsJobLogBhv {
     protected String asEsIndex() {
         if (indexName == null) {
             final String name = ComponentUtil.getFessConfig().getIndexConfigIndex();
-            indexName = super.asEsIndex().replaceFirst(Pattern.quote(".fess_config"), name);
+            indexName = super.asEsIndex().replaceFirst(Pattern.quote("fess_config"), name);
         }
         return indexName;
     }

@@ -51,7 +51,7 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
 
     @Override
     protected String asEsIndex() {
-        return ".fess_user.role";
+        return "fess_user.role";
     }
 
     @Override

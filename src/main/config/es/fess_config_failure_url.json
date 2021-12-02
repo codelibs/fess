@@ -1,5 +1,5 @@
 {
-  ".fess_config.failure_url" : {
+  "fess_config.failure_url" : {
     "aliases" : { },
     "mappings" : {
       "failure_url" : {
@@ -37,7 +37,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_config.failure_url"
+        "provided_name" : "fess_config.failure_url"
       }
     }
   }

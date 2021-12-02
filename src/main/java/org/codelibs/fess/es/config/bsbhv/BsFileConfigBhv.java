@@ -51,7 +51,7 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.file_config";
+        return "fess_config.file_config";
     }
 
     @Override

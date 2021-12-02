@@ -51,7 +51,7 @@ public abstract class BsFileAuthenticationBhv extends EsAbstractBehavior<FileAut
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.file_authentication";
+        return "fess_config.file_authentication";
     }
 
     @Override

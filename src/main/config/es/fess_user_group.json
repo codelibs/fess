@@ -1,5 +1,5 @@
 {
-  ".fess_user.group" : {
+  "fess_user.group" : {
     "aliases" : { },
     "mappings" : {
       "group" : {
@@ -22,7 +22,7 @@
         "version" : {
           "created" : "6000051"
         },
-        "provided_name" : ".fess_user.group"
+        "provided_name" : "fess_user.group"
       }
     }
   }

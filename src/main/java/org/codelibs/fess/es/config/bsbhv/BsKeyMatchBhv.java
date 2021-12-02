@@ -51,7 +51,7 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.key_match";
+        return "fess_config.key_match";
     }
 
     @Override

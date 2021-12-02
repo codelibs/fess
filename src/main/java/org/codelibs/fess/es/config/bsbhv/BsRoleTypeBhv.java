@@ -51,7 +51,7 @@ public abstract class BsRoleTypeBhv extends EsAbstractBehavior<RoleType, RoleTyp
 
     @Override
     protected String asEsIndex() {
-        return ".fess_config.role_type";
+        return "fess_config.role_type";
     }
 
     @Override
