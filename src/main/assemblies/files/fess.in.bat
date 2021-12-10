@@ -66,6 +66,7 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dio.netty.recycler.maxCapacityPerThread=0
 
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j.shutdownHookEnabled=false
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j2.disable.jmx=true
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j2.formatMsgNoLookups=true
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlog4j.skipJansi=true
 
 REM SSL truststore for certificate validation over https
