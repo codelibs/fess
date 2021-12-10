@@ -64,6 +64,7 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dio.netty.recycler.maxCapacityPerThread=0"
 
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j2.disable.jmx=true"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j2.formatMsgNoLookups=true"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlog4j.skipJansi=true"
 
 # Causes the JVM to dump its heap on OutOfMemory.
