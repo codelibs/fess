@@ -74,6 +74,8 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private static final String VERSION_13_14 = "13.14";
 
+    private static final String VERSION_13_15 = "13.15";
+
     // ===================================================================================
     //                                                                           Attribute
     //
@@ -155,6 +157,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -180,6 +183,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -204,6 +208,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -227,6 +232,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -249,6 +255,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -270,6 +277,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -290,6 +298,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -309,6 +318,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -327,6 +337,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -344,6 +355,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -360,6 +372,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -375,6 +388,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -389,6 +403,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 upgradeFrom13_12();
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -402,6 +417,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             try {
                 upgradeFrom13_13();
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -414,6 +430,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         } else if (VERSION_13_14.equals(form.targetVersion)) {
             try {
                 upgradeFrom13_14();
+                upgradeFrom13_15();
                 upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -422,6 +439,18 @@ public class AdminUpgradeAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_13_14, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_13_15.equals(form.targetVersion)) {
+            try {
+                upgradeFrom13_15();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+
+                systemHelper.reloadConfiguration();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_13_15, e.getLocalizedMessage()));
             }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
@@ -487,6 +516,10 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom13_14() {
+        // nothing
+    }
+
+    private void upgradeFrom13_15() {
         // nothing
     }
 
