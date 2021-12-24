@@ -86,7 +86,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         long max = 0;
         for (int i = 0; i < 10000; i++) {
             if (i % 1000 == 0) {
-                logger.info(MemoryUtil.getMemoryUsageLog() + ":" + i);
+                logger.info("count:" + i + ", " + MemoryUtil.getMemoryUsageLog());
                 long mem = MemoryUtil.getUsedMemory();
                 if (max < mem) {
                     max = mem;
@@ -110,9 +110,14 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
 
         System.gc();
-        Thread.sleep(1000L);
-        logger.info(MemoryUtil.getMemoryUsageLog());
-        assertTrue(MemoryUtil.getUsedMemory() < max - 100000000L);
+        for (int i = 0; i < 10; i++) {
+            if (MemoryUtil.getUsedMemory() < max - 100000000L) {
+                break;
+            }
+            Thread.sleep(1000L);
+        }
+        final long usedMemory = MemoryUtil.getUsedMemory();
+        assertTrue(usedMemory + " < " + max + " -100000000L, " + MemoryUtil.getMemoryUsageLog(), usedMemory < max - 100000000L);
     }
 
     private void setValueToObject(Object obj, String name, Object value) {
