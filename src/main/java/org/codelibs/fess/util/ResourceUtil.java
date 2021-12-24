@@ -48,7 +48,7 @@ public class ResourceUtil {
             return url;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessConfig.getFesenHttpUrl();
+        return fessConfig.getOpenSearchHttpUrl();
     }
 
     public static String getAppType() {

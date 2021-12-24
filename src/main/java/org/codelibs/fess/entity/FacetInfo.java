@@ -23,9 +23,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
-import org.codelibs.fesen.search.aggregations.BucketOrder;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.opensearch.search.aggregations.BucketOrder;
 
 public class FacetInfo {
     private static final Logger logger = LogManager.getLogger(FacetInfo.class);

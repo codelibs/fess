@@ -33,15 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fesen.FesenException;
-import org.codelibs.fesen.action.DocWriteResponse.Result;
-import org.codelibs.fesen.action.bulk.BulkRequestBuilder;
-import org.codelibs.fesen.action.bulk.BulkResponse;
-import org.codelibs.fesen.action.update.UpdateRequestBuilder;
-import org.codelibs.fesen.action.update.UpdateResponse;
-import org.codelibs.fesen.common.document.DocumentField;
-import org.codelibs.fesen.index.query.BoolQueryBuilder;
-import org.codelibs.fesen.index.query.QueryBuilders;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -60,6 +51,15 @@ import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.opensearch.OpenSearchException;
+import org.opensearch.action.DocWriteResponse.Result;
+import org.opensearch.action.bulk.BulkRequestBuilder;
+import org.opensearch.action.bulk.BulkResponse;
+import org.opensearch.action.update.UpdateRequestBuilder;
+import org.opensearch.action.update.UpdateResponse;
+import org.opensearch.common.document.DocumentField;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
 
 public class SearchHelper {
 
@@ -334,7 +334,7 @@ public class SearchHelper {
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;
-        } catch (final FesenException e) {
+        } catch (final OpenSearchException e) {
             throw new SearchEngineClientException("Failed to update doc  " + id, e);
         }
     }

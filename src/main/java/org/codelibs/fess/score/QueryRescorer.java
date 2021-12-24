@@ -17,7 +17,7 @@ package org.codelibs.fess.score;
 
 import java.util.Map;
 
-import org.codelibs.fesen.search.rescore.RescorerBuilder;
+import org.opensearch.search.rescore.RescorerBuilder;
 
 public interface QueryRescorer {
     RescorerBuilder<?> evaluate(final Map<String, Object> params);

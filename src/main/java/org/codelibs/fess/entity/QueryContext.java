@@ -27,15 +27,15 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fesen.index.query.BoolQueryBuilder;
-import org.codelibs.fesen.index.query.MatchAllQueryBuilder;
-import org.codelibs.fesen.index.query.QueryBuilder;
-import org.codelibs.fesen.index.query.QueryBuilders;
-import org.codelibs.fesen.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
-import org.codelibs.fesen.search.sort.SortBuilder;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.MatchAllQueryBuilder;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
+import org.opensearch.search.sort.SortBuilder;
 
 public class QueryContext {
 

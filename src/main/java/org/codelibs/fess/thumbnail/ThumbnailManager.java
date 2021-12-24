@@ -41,7 +41,6 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Tuple3;
-import org.codelibs.fesen.index.query.QueryBuilders;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv;
@@ -53,6 +52,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.opensearch.index.query.QueryBuilders;
 
 import com.google.common.collect.Lists;
 

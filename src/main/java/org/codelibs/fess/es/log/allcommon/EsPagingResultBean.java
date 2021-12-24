@@ -16,9 +16,9 @@
 package org.codelibs.fess.es.log.allcommon;
 
 import org.apache.lucene.search.TotalHits;
-import org.codelibs.fesen.action.search.SearchRequestBuilder;
-import org.codelibs.fesen.search.aggregations.Aggregations;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.search.aggregations.Aggregations;
 
 /**
  * @param <ENTITY> The type of entity.

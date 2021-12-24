@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fesen.action.search.SearchRequestBuilder;
-import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.log.bsentity.dbmeta.UserInfoDbm;
 import org.codelibs.fess.es.log.cbean.UserInfoCB;
@@ -29,6 +27,8 @@ import org.codelibs.fess.es.log.cbean.ca.bs.BsUserInfoCA;
 import org.codelibs.fess.es.log.cbean.cq.UserInfoCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsUserInfoCQ;
 import org.dbflute.cbean.ConditionQuery;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.index.query.QueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

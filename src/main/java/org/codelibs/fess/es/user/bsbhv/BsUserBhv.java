@@ -18,9 +18,6 @@ package org.codelibs.fess.es.user.bsbhv;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fesen.action.bulk.BulkRequestBuilder;
-import org.codelibs.fesen.action.delete.DeleteRequestBuilder;
-import org.codelibs.fesen.action.index.IndexRequestBuilder;
 import org.codelibs.fess.es.user.allcommon.EsAbstractBehavior;
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.es.user.bsentity.dbmeta.UserDbm;
@@ -35,6 +32,9 @@ import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
+import org.opensearch.action.bulk.BulkRequestBuilder;
+import org.opensearch.action.delete.DeleteRequestBuilder;
+import org.opensearch.action.index.IndexRequestBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fesen.action.search.SearchRequestBuilder;
-import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.log.bsentity.dbmeta.ClickLogDbm;
 import org.codelibs.fess.es.log.cbean.ClickLogCB;
@@ -29,6 +27,8 @@ import org.codelibs.fess.es.log.cbean.ca.bs.BsClickLogCA;
 import org.codelibs.fess.es.log.cbean.cq.ClickLogCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsClickLogCQ;
 import org.dbflute.cbean.ConditionQuery;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.index.query.QueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

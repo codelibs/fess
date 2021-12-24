@@ -61,7 +61,6 @@ import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.fesen.monitor.os.OsProbe;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.exception.FessSystemException;
@@ -80,6 +79,7 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.ActionValidator;
+import org.opensearch.monitor.os.OsProbe;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

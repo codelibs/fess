@@ -50,7 +50,7 @@
 		<packaging.fess.systemd.dir>/usr/lib/systemd/system</packaging.fess.systemd.dir>
 		<packaging.fess.systemd.sysctl.dir>/usr/lib/sysctl.d</packaging.fess.systemd.sysctl.dir>
 		<packaging.fess.tmpfilesd.dir>/usr/lib/tmpfiles.d</packaging.fess.tmpfilesd.dir>
-		<packaging.fess.dictionary.dir>/var/lib/fesen/config</packaging.fess.dictionary.dir>
+		<packaging.fess.dictionary.dir>/var/lib/fess/config</packaging.fess.dictionary.dir>
 	</properties>
 	<profiles>
 		<profile>
@@ -215,8 +215,8 @@
 						<ant antfile="${basedir}/dbflute.xml" target="download.dbflute" />
 						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
 							<property name="with.fess" value="true" />
-							<property name="use.fesen" value="/fesen" />
-							<property name="name.prefix" value="fesen" />
+							<property name="use.opensearch" value="/opensearch" />
+							<property name="name.prefix" value="opensearch" />
 						</ant>
 						<ant antfile="deps.xml" target="install.jars" />
 						<echo message="fess.version=${project.version}" file="${basedir}/src/main/webapp/WEB-INF/project.properties" />
@@ -972,16 +972,16 @@
 			<version>${log4j.version}</version>
 		</dependency>
 
-		<!-- fesen -->
+		<!-- opensearch -->
 		<dependency>
-			<groupId>org.codelibs.fesen</groupId>
-			<artifactId>fesen-engine-server</artifactId>
-			<version>${fesen.version}</version>
+			<groupId>org.opensearch</groupId>
+			<artifactId>opensearch</artifactId>
+			<version>${opensearch.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codelibs.fesen</groupId>
-			<artifactId>fesen-runner</artifactId>
-			<version>${fesen.runner.version}</version>
+			<groupId>org.codelibs.opensearch</groupId>
+			<artifactId>opensearch-runner</artifactId>
+			<version>${opensearch.runner.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.ow2.asm</groupId>

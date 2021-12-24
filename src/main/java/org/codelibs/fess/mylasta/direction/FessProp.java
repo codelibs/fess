@@ -48,9 +48,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.core.misc.Tuple4;
-import org.codelibs.fesen.search.sort.SortBuilder;
-import org.codelibs.fesen.search.sort.SortBuilders;
-import org.codelibs.fesen.search.sort.SortOrder;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -67,6 +64,9 @@ import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
 import org.lastaflute.web.validation.theme.typed.FloatTypeValidator;
 import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
+import org.opensearch.search.sort.SortBuilder;
+import org.opensearch.search.sort.SortBuilders;
+import org.opensearch.search.sort.SortOrder;
 
 public interface FessProp {
 

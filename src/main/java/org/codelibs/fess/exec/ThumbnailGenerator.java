@@ -29,9 +29,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
-import org.codelibs.fesen.monitor.jvm.JvmInfo;
-import org.codelibs.fesen.monitor.os.OsProbe;
-import org.codelibs.fesen.monitor.process.ProcessProbe;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.FesenClient;
 import org.codelibs.fess.es.client.SearchEngineClient;
@@ -44,6 +41,9 @@ import org.kohsuke.args4j.Option;
 import org.lastaflute.di.core.external.GenericExternalContext;
 import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.opensearch.monitor.jvm.JvmInfo;
+import org.opensearch.monitor.os.OsProbe;
+import org.opensearch.monitor.process.ProcessProbe;
 
 public class ThumbnailGenerator {
 

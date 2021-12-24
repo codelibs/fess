@@ -27,23 +27,6 @@ import java.util.function.Function;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fesen.action.ActionListener;
-import org.codelibs.fesen.action.DocWriteResponse.Result;
-import org.codelibs.fesen.action.admin.indices.refresh.RefreshResponse;
-import org.codelibs.fesen.action.bulk.BulkItemResponse;
-import org.codelibs.fesen.action.bulk.BulkRequestBuilder;
-import org.codelibs.fesen.action.bulk.BulkResponse;
-import org.codelibs.fesen.action.delete.DeleteRequestBuilder;
-import org.codelibs.fesen.action.delete.DeleteResponse;
-import org.codelibs.fesen.action.index.IndexRequestBuilder;
-import org.codelibs.fesen.action.index.IndexResponse;
-import org.codelibs.fesen.action.search.SearchRequestBuilder;
-import org.codelibs.fesen.action.search.SearchResponse;
-import org.codelibs.fesen.action.update.UpdateRequestBuilder;
-import org.codelibs.fesen.client.Client;
-import org.codelibs.fesen.index.seqno.SequenceNumbers;
-import org.codelibs.fesen.search.SearchHit;
-import org.codelibs.fesen.search.SearchHits;
 import org.codelibs.fess.es.log.allcommon.EsAbstractEntity.DocMeta;
 import org.codelibs.fess.es.log.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.dbflute.Entity;
@@ -58,6 +41,23 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
+import org.opensearch.action.ActionListener;
+import org.opensearch.action.DocWriteResponse.Result;
+import org.opensearch.action.admin.indices.refresh.RefreshResponse;
+import org.opensearch.action.bulk.BulkItemResponse;
+import org.opensearch.action.bulk.BulkRequestBuilder;
+import org.opensearch.action.bulk.BulkResponse;
+import org.opensearch.action.delete.DeleteRequestBuilder;
+import org.opensearch.action.delete.DeleteResponse;
+import org.opensearch.action.index.IndexRequestBuilder;
+import org.opensearch.action.index.IndexResponse;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.action.search.SearchResponse;
+import org.opensearch.action.update.UpdateRequestBuilder;
+import org.opensearch.client.Client;
+import org.opensearch.index.seqno.SequenceNumbers;
+import org.opensearch.search.SearchHit;
+import org.opensearch.search.SearchHits;
 
 /**
  * @param <ENTITY> The type of entity.
@@ -89,7 +89,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected abstract <RESULT extends ENTITY> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType);
 
     // ===================================================================================
-    //                                                                       Fesen
+    //                                                                       OpenSearch
     //                                                                              ======
     public RefreshResponse refresh() {
         return client.admin().indices().prepareRefresh(asEsIndex()).execute().actionGet(refreshTimeout);

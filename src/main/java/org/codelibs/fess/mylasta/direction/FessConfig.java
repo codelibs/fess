@@ -1745,7 +1745,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'elasticsearch.type'. <br>
      * The value is, e.g. default <br>
-     * comment: Fesen
+     * comment: OpenSearch
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFesenType();
@@ -1755,7 +1755,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g. http://localhost:9201 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getFesenHttpUrl();
+    String getOpenSearchHttpUrl();
 
     /**
      * Get the value for the key 'elasticsearch.username'. <br>
@@ -7210,7 +7210,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ELASTICSEARCH_TYPE);
         }
 
-        public String getFesenHttpUrl() {
+        public String getOpenSearchHttpUrl() {
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
         }
 

@@ -38,12 +38,6 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.fesen.common.lucene.search.function.CombineFunction;
-import org.codelibs.fesen.index.query.BoolQueryBuilder;
-import org.codelibs.fesen.index.query.QueryBuilders;
-import org.codelibs.fesen.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.codelibs.fesen.index.query.functionscore.ScoreFunctionBuilders;
-import org.codelibs.fesen.search.sort.SortBuilders;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
@@ -63,6 +57,12 @@ import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.settings.SuggestSettingsBuilder;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
+import org.opensearch.common.lucene.search.function.CombineFunction;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.opensearch.search.sort.SortBuilders;
 
 public class SuggestHelper {
     private static final Logger logger = LogManager.getLogger(SuggestHelper.class);

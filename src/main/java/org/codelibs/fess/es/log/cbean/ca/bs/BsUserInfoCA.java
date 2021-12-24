@@ -15,21 +15,21 @@
  */
 package org.codelibs.fess.es.log.cbean.ca.bs;
 
-import org.codelibs.fesen.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.global.GlobalAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.missing.MissingAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.range.DateRangeAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.CardinalityAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.TopHitsAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.ValueCountAggregationBuilder;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionAggregation;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.log.cbean.ca.UserInfoCA;
 import org.codelibs.fess.es.log.cbean.cq.UserInfoCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsUserInfoCQ;
+import org.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

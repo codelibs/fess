@@ -57,8 +57,6 @@ import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.stream.StreamUtil;
-import org.codelibs.fesen.common.text.Text;
-import org.codelibs.fesen.search.fetch.subphase.highlight.HighlightField;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -87,6 +85,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.opensearch.common.text.Text;
+import org.opensearch.search.fetch.subphase.highlight.HighlightField;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;

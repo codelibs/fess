@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fesen.action.search.SearchRequestBuilder;
-import org.codelibs.fesen.index.query.QueryBuilder;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordToLabelDbm;
 import org.codelibs.fess.es.config.cbean.ElevateWordToLabelCB;
@@ -29,6 +27,8 @@ import org.codelibs.fess.es.config.cbean.ca.bs.BsElevateWordToLabelCA;
 import org.codelibs.fess.es.config.cbean.cq.ElevateWordToLabelCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordToLabelCQ;
 import org.dbflute.cbean.ConditionQuery;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.index.query.QueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

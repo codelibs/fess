@@ -21,15 +21,15 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.lucene.search.Query;
-import org.codelibs.fesen.common.ParseField;
-import org.codelibs.fesen.common.io.stream.NamedWriteable;
-import org.codelibs.fesen.common.io.stream.StreamOutput;
-import org.codelibs.fesen.common.xcontent.ObjectParser;
-import org.codelibs.fesen.common.xcontent.XContentBuilder;
-import org.codelibs.fesen.common.xcontent.XContentParser;
-import org.codelibs.fesen.index.query.AbstractQueryBuilder;
-import org.codelibs.fesen.index.query.QueryBuilder;
-import org.codelibs.fesen.index.query.QueryShardContext;
+import org.opensearch.common.ParseField;
+import org.opensearch.common.io.stream.NamedWriteable;
+import org.opensearch.common.io.stream.StreamOutput;
+import org.opensearch.common.xcontent.ObjectParser;
+import org.opensearch.common.xcontent.XContentBuilder;
+import org.opensearch.common.xcontent.XContentParser;
+import org.opensearch.index.query.AbstractQueryBuilder;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.index.query.QueryShardContext;
 
 public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBuilder> implements NamedWriteable {
     public static final String NAME = "sltr";

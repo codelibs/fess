@@ -15,22 +15,22 @@
  */
 package org.codelibs.fess.es.user.cbean.ca.bs;
 
-import org.codelibs.fesen.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.global.GlobalAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.missing.MissingAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.range.IpRangeAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.CardinalityAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.TopHitsAggregationBuilder;
-import org.codelibs.fesen.search.aggregations.metrics.ValueCountAggregationBuilder;
 import org.codelibs.fess.es.user.allcommon.EsAbstractConditionAggregation;
 import org.codelibs.fess.es.user.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.user.cbean.ca.RoleCA;
 import org.codelibs.fess.es.user.cbean.cq.RoleCQ;
 import org.codelibs.fess.es.user.cbean.cq.bs.BsRoleCQ;
+import org.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
+import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

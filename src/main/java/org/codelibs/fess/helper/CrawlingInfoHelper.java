@@ -31,12 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.security.MessageDigestUtil;
-import org.codelibs.fesen.index.query.QueryBuilders;
-import org.codelibs.fesen.search.aggregations.AggregationBuilders;
-import org.codelibs.fesen.search.aggregations.BucketOrder;
-import org.codelibs.fesen.search.aggregations.bucket.terms.Terms;
-import org.codelibs.fesen.search.aggregations.bucket.terms.Terms.Bucket;
-import org.codelibs.fesen.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.es.client.SearchEngineClient;
@@ -46,6 +40,12 @@ import org.codelibs.fess.es.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.search.aggregations.AggregationBuilders;
+import org.opensearch.search.aggregations.BucketOrder;
+import org.opensearch.search.aggregations.bucket.terms.Terms;
+import org.opensearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
 public class CrawlingInfoHelper {
     private static final Logger logger = LogManager.getLogger(CrawlingInfoHelper.class);
