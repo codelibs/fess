@@ -37,8 +37,8 @@
 			<param name="plugin.groupId" value="org/codelibs${use.opensearch}" />
 			<param name="plugin.name.prefix" value="${name.prefix}-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="1.2.0" />
-			<param name="plugin.zip.version" value="1.2.0" />
+			<param name="plugin.version" value="1.2.1" />
+			<param name="plugin.zip.version" value="1.2.1" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
