@@ -193,15 +193,21 @@ public class AdminBackupAction extends FessAdminAction {
                 while ((line = br.readLine()) != null) {
                     if (StringUtil.isNotBlank(line)) {
                         final Map<String, Map<String, String>> dataObj;
-                        if (line.contains("_type")) {
+                        if (line.contains("\"_index\"") || line.contains("\"_type\"")) {
                             dataObj = parseObject(mapper, line);
                         } else {
                             dataObj = null;
                         }
                         if (dataObj != null) {
                             final Map<String, String> indexObj = dataObj.get("index");
-                            if (indexObj != null && indexObj.containsKey("_type")) {
-                                indexObj.remove("_type");
+                            if (indexObj != null) {
+                                if (indexObj.containsKey("_type")) {
+                                    indexObj.remove("_type");
+                                }
+                                final String index = indexObj.get("_index");
+                                if (index != null && index.startsWith(".fess")) {
+                                    indexObj.put("_index", index.substring(1));
+                                }
                                 bw.write(mapper.writeValueAsString(dataObj));
                             } else {
                                 bw.write(line);
