@@ -110,14 +110,15 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
 
         System.gc();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 30; i++) {
             if (MemoryUtil.getUsedMemory() < max - 100000000L) {
                 break;
             }
+            System.gc();
             Thread.sleep(1000L);
         }
         final long usedMemory = MemoryUtil.getUsedMemory();
-        assertTrue(usedMemory + " < " + max + " -100000000L, " + MemoryUtil.getMemoryUsageLog(), usedMemory < max - 100000000L);
+        assertTrue(usedMemory + " < " + max + " - 100000000L, " + MemoryUtil.getMemoryUsageLog(), usedMemory < max - 100000000L);
     }
 
     private void setValueToObject(Object obj, String name, Object value) {
