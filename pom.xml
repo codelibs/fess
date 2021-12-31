@@ -1143,7 +1143,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-langdetect</artifactId>
+			<artifactId>tika-langdetect-optimaize</artifactId>
 			<version>${tika.version}</version>
 			<exclusions>
 				<exclusion>

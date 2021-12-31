@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
@@ -371,9 +369,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     protected Map<String, String> createExtractParams(final ResponseData responseData, final CrawlingConfig crawlingConfig) {
         final Map<String, String> params = new HashMap<>(crawlingConfig.getConfigParameterMap(ConfigName.CONFIG));
-        params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
-        params.put(HttpHeaders.CONTENT_TYPE, responseData.getMimeType());
-        params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
+        params.put(ExtractData.RESOURCE_NAME_KEY, getResourceName(responseData));
+        params.put(ExtractData.CONTENT_TYPE, responseData.getMimeType());
+        params.put(ExtractData.CONTENT_ENCODING, responseData.getCharSet());
         params.put(ExtractData.URL, responseData.getUrl());
         final Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
         if (configParam != null) {
