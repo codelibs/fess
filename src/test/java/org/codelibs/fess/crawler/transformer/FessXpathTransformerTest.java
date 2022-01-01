@@ -83,14 +83,12 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.getCrawlingConfigHelper().store("test", webConfig);
         setValueToObject(ComponentUtil.getLabelTypeHelper(), "labelTypePatternList", new ArrayList<LabelTypePattern>());
 
-        long max = 0;
+        System.gc();
+        Thread.sleep(1000L);
+        long current = MemoryUtil.getUsedMemory();
         for (int i = 0; i < 10000; i++) {
             if (i % 1000 == 0) {
                 logger.info("count:" + i + ", " + MemoryUtil.getMemoryUsageLog());
-                long mem = MemoryUtil.getUsedMemory();
-                if (max < mem) {
-                    max = mem;
-                }
             }
             ResponseData responseData = new ResponseData();
             responseData.setCharSet("UTF-8");
@@ -109,16 +107,17 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             // System.out.println(resultData.toString());
         }
 
+        long margin = 5000000L;
         System.gc();
         for (int i = 0; i < 30; i++) {
-            if (MemoryUtil.getUsedMemory() < max - 100000000L) {
+            if (MemoryUtil.getUsedMemory() < current + margin) {
                 break;
             }
             System.gc();
             Thread.sleep(1000L);
         }
         final long usedMemory = MemoryUtil.getUsedMemory();
-        assertTrue(usedMemory + " < " + max + " - 100000000L, " + MemoryUtil.getMemoryUsageLog(), usedMemory < max - 100000000L);
+        assertTrue(usedMemory + " < " + current + " + " + margin + ", " + MemoryUtil.getMemoryUsageLog(), usedMemory < current + margin);
     }
 
     private void setValueToObject(Object obj, String name, Object value) {
