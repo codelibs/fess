@@ -13,7 +13,7 @@
 	</component>
 	<component name="languageHelper" class="org.codelibs.fess.helper.LanguageHelper">
 		<property name="detector">
-			<component class="org.apache.tika.langdetect.OptimaizeLangDetector">
+			<component class="org.apache.tika.langdetect.optimaize.OptimaizeLangDetector">
 				<postConstruct name="loadModels"></postConstruct>
 			</component>
 		</property>
