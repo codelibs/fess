@@ -18,19 +18,18 @@ package org.codelibs.fess.util;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.exception.FessSystemException;
 
 public class InputStreamThread extends Thread {
     private static final Logger logger = LogManager.getLogger(InputStreamThread.class);
 
-    private BufferedReader br;
+    private final BufferedReader br;
 
     public static final int MAX_BUFFER_SIZE = 1000;
 
@@ -40,20 +39,17 @@ public class InputStreamThread extends Thread {
 
     private final Consumer<String> outputCallback;
 
+    @Deprecated
     public InputStreamThread(final InputStream is, final String charset) {
-        this(is, charset, MAX_BUFFER_SIZE, null);
+        this(is, Charset.forName(charset), MAX_BUFFER_SIZE, null);
     }
 
-    public InputStreamThread(final InputStream is, final String charset, final int bufferSize, final Consumer<String> outputCallback) {
+    public InputStreamThread(final InputStream is, final Charset charset, final int bufferSize, final Consumer<String> outputCallback) {
         super("InputStreamThread");
         this.bufferSize = bufferSize;
         this.outputCallback = outputCallback;
 
-        try {
-            br = new BufferedReader(new InputStreamReader(is, charset));
-        } catch (final UnsupportedEncodingException e) {
-            throw new FessSystemException(e);
-        }
+        br = new BufferedReader(new InputStreamReader(is, charset));
     }
 
     @Override
@@ -68,7 +64,9 @@ public class InputStreamThread extends Thread {
                     if (logger.isDebugEnabled()) {
                         logger.debug(line);
                     }
-                    list.add(line);
+                    if (bufferSize > 0) {
+                        list.add(line);
+                    }
                     if (outputCallback != null) {
                         outputCallback.accept(line);
                     }

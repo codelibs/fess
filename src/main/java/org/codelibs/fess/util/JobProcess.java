@@ -30,7 +30,7 @@ public class JobProcess {
 
     public JobProcess(final Process process, final int bufferSize, final Consumer<String> outputCallback) {
         this.process = process;
-        inputStreamThread = new InputStreamThread(process.getInputStream(), Constants.UTF_8, bufferSize, outputCallback);
+        inputStreamThread = new InputStreamThread(process.getInputStream(), Constants.CHARSET_UTF_8, bufferSize, outputCallback);
     }
 
     public Process getProcess() {

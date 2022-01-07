@@ -15,24 +15,25 @@
  */
 package org.codelibs.fess.thumbnail.impl;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.InputStreamThread;
 
 public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LogManager.getLogger(CommandGenerator.class);
@@ -45,7 +46,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
     protected File baseDir;
 
-    private volatile Timer destoryTimer;
+    private Timer destoryTimer;
 
     @PostConstruct
     public void init() {
@@ -127,48 +128,48 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     }
 
     protected void executeCommand(final String thumbnailId, final List<String> cmdList) {
-        ProcessBuilder pb = null;
-        Process p = null;
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail Command: {}", cmdList);
-        }
-
-        TimerTask task = null;
+        ProcessDestroyer task = null;
         try {
-            pb = new ProcessBuilder(cmdList);
+            ProcessBuilder pb = new ProcessBuilder(cmdList);
             pb.directory(baseDir);
             pb.redirectErrorStream(true);
 
-            p = pb.start();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Thumbnail Command: {}", cmdList);
+            }
 
-            task = new ProcessDestroyer(p, cmdList, commandTimeout);
-            try {
-                destoryTimer.schedule(task, commandTimeout);
+            Process p = pb.start();
 
-                String line;
-                BufferedReader br = null;
-                try {
-                    br = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()));
-                    while ((line = br.readLine()) != null) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(line);
-                        }
-                    }
-                } finally {
-                    CloseableUtil.closeQuietly(br);
+            final InputStreamThread ist = new InputStreamThread(p.getInputStream(), Charset.defaultCharset(), 0, s -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(s);
                 }
+            });
+            task = new ProcessDestroyer(p, ist, commandDestroyTimeout);
+            destoryTimer.schedule(task, commandTimeout);
+            ist.start();
 
-                p.waitFor();
-            } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Waiting for {}.", getName());
+            }
+            if (!p.waitFor(commandTimeout + commandDestroyTimeout, TimeUnit.MILLISECONDS)) {
+                logger.warn("Destroying {} because of the process timeout.", getName());
                 p.destroy();
             }
+
+            final int exitValue = p.exitValue();
+            if (exitValue != 0) {
+                logger.warn("{} is failed (exit code:{}, timeout:{}): {}", getName(), exitValue, task.isExecuted(), commandList);
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} is finished with exit code {}.", getName(), exitValue);
+            }
         } catch (final Exception e) {
-            logger.warn("Failed to generate a thumbnail of {}", thumbnailId, e);
+            logger.warn("Failed to generate a thumbnail of {}: {}", thumbnailId, commandList, e);
         }
-        if (task != null) {
+        if (task != null && !task.isExecuted()) {
             task.cancel();
-            task = null;
         }
     }
 
@@ -176,24 +177,69 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
         private final Process p;
 
-        private final List<String> commandList;
+        private final InputStreamThread ist;
+
+        private final AtomicBoolean executed = new AtomicBoolean(false);
 
         private final long timeout;
 
-        protected ProcessDestroyer(final Process p, final List<String> commandList, final long timeout) {
+        public ProcessDestroyer(final Process p, final InputStreamThread ist, final long timeout) {
             this.p = p;
-            this.commandList = commandList;
+            this.ist = ist;
             this.timeout = timeout;
         }
 
         @Override
         public void run() {
-            logger.warn("CommandGenerator is timed out: {}", commandList);
+            if (!p.isAlive()) {
+                return;
+            }
+
+            executed.set(true);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Interrupting a stream thread.");
+            }
+            ist.interrupt();
+
+            CommonPoolUtil.execute(() -> {
+                try {
+                    CloseableUtil.closeQuietly(p.getInputStream());
+                } catch (final Exception e) {
+                    logger.warn("Could not close a process input stream.", e);
+                }
+            });
+            CommonPoolUtil.execute(() -> {
+                try {
+                    CloseableUtil.closeQuietly(p.getErrorStream());
+                } catch (final Exception e) {
+                    logger.warn("Could not close a process error stream.", e);
+                }
+            });
+            CommonPoolUtil.execute(() -> {
+                try {
+                    CloseableUtil.closeQuietly(p.getOutputStream());
+                } catch (final Exception e) {
+                    logger.warn("Could not close a process output stream.", e);
+                }
+            });
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Terminating process {}.", p);
+            }
             try {
-                p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS);
+                if (!p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS)) {
+                    logger.warn("Terminating process {} is timed out.", p);
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("Terminated process {}.", p);
+                }
             } catch (final Exception e) {
                 logger.warn("Failed to stop destroyer.", e);
             }
+        }
+
+        public boolean isExecuted() {
+            return executed.get();
         }
     }
 
