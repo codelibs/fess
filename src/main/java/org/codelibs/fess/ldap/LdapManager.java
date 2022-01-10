@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 CodeLibs Project and the Others.
+ * Copyright 2012-2022 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -408,7 +408,7 @@ public class LdapManager {
                 setAttributeValue(result, fessConfig.getLdapAttrTelephoneNumber(), o -> user.setTelephoneNumber(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrHomePhone(), o -> user.setHomePhone(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrHomePostalAddress(), o -> user.setHomePostalAddress(o.toString()));
-                setAttributeValue(result, fessConfig.getLdapAttrLabeleduri(), o -> user.setLabeledURI(o.toString()));
+                setAttributeValue(result, fessConfig.getLdapAttrLabeledURI(), o -> user.setLabeledURI(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrRoomNumber(), o -> user.setRoomNumber(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrDescription(), o -> user.setDescription(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrTitle(), o -> user.setTitle(o.toString()));
@@ -418,7 +418,7 @@ public class LdapManager {
                 setAttributeValue(result, fessConfig.getLdapAttrPhysicalDeliveryOfficeName(),
                         o -> user.setPhysicalDeliveryOfficeName(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrDestinationIndicator(), o -> user.setDestinationIndicator(o.toString()));
-                setAttributeValue(result, fessConfig.getLdapAttrInternationalisdnNumber(),
+                setAttributeValue(result, fessConfig.getLdapAttrInternationaliSDNNumber(),
                         o -> user.setInternationaliSDNNumber(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrState(), o -> user.setState(o.toString()));
                 setAttributeValue(result, fessConfig.getLdapAttrEmployeeType(), o -> user.setEmployeeType(o.toString()));
@@ -634,7 +634,7 @@ public class LdapManager {
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrHomePostalAddress, s))
                 .orElse(() -> getAttributeValueList(result, attrHomePostalAddress).stream()
                         .forEach(v -> modifyDeleteEntry(modifyList, attrHomePostalAddress, v)));
-        final String attrLabeledURI = fessConfig.getLdapAttrLabeleduri();
+        final String attrLabeledURI = fessConfig.getLdapAttrLabeledURI();
         OptionalUtil.ofNullable(user.getLabeledURI()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrLabeledURI, s))
                 .orElse(() -> getAttributeValueList(result, attrLabeledURI).stream()
@@ -674,7 +674,7 @@ public class LdapManager {
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrDestinationIndicator, s))
                 .orElse(() -> getAttributeValueList(result, attrDestinationIndicator).stream()
                         .forEach(v -> modifyDeleteEntry(modifyList, attrDestinationIndicator, v)));
-        final String attrInternationaliSDNNumber = fessConfig.getLdapAttrInternationalisdnNumber();
+        final String attrInternationaliSDNNumber = fessConfig.getLdapAttrInternationaliSDNNumber();
         OptionalUtil.ofNullable(user.getInternationaliSDNNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrInternationaliSDNNumber, s))
                 .orElse(() -> getAttributeValueList(result, attrInternationaliSDNNumber).stream()
@@ -791,7 +791,7 @@ public class LdapManager {
         OptionalUtil.ofNullable(user.getHomePostalAddress()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrHomePostalAddress(), s)));
         OptionalUtil.ofNullable(user.getLabeledURI()).filter(StringUtil::isNotBlank)
-                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrLabeleduri(), s)));
+                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrLabeledURI(), s)));
         OptionalUtil.ofNullable(user.getRoomNumber()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrRoomNumber(), s)));
         OptionalUtil.ofNullable(user.getDescription()).filter(StringUtil::isNotBlank)
@@ -809,7 +809,7 @@ public class LdapManager {
         OptionalUtil.ofNullable(user.getDestinationIndicator()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrDestinationIndicator(), s)));
         OptionalUtil.ofNullable(user.getInternationaliSDNNumber()).filter(StringUtil::isNotBlank)
-                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrInternationalisdnNumber(), s)));
+                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrInternationaliSDNNumber(), s)));
         OptionalUtil.ofNullable(user.getState()).filter(StringUtil::isNotBlank)
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrState(), s)));
         OptionalUtil.ofNullable(user.getEmployeeType()).filter(StringUtil::isNotBlank)

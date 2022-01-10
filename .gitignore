@@ -12,6 +12,7 @@
 /src/main/webapp/WEB-INF/env/thumbnail/lib/
 /src/main/webapp/WEB-INF/thumbnails/
 /src/main/webapp/jar/
+/dbflute_fess/extlib/*
 /dbflute_fess/log/*.log
 /dbflute_h2/log/*.log
 /dbflute_mysql/log/*.log

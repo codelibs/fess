@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 CodeLibs Project and the Others.
+ * Copyright 2012-2022 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,118 +52,118 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String APP_EXTENSION_NAMES = "app.extension.names";
 
-    /** The key of the configuration. e.g. -Djava.awt.headless=true
-    -Dfile.encoding=UTF-8
-    -Djna.nosys=true
-    -Djdk.io.permissionsUseCanonicalPath=true
-    -Dhttp.maxConnections=20
-    -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
-    -server
-    -Xms128m
-    -Xmx512m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-HeapDumpOnOutOfMemoryError
-    -XX:-OmitStackTraceInFastThrow
-    -XX:+UnlockExperimentalVMOptions
-    -XX:+UseG1GC
-    -XX:InitiatingHeapOccupancyPercent=45
-    -XX:G1HeapRegionSize=1m
-    -XX:MaxGCPauseMillis=60000
-    -XX:G1NewSizePercent=5
-    -XX:G1MaxNewSizePercent=5
-    -Djcifs.smb.client.responseTimeout=30000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.sessionTimeout=60000
-    -Djcifs.smb1.smb.client.connTimeout=60000
-    -Djcifs.smb1.smb.client.soTimeout=35000
-    -Djcifs.smb1.smb.client.responseTimeout=30000
-    -Dio.netty.noUnsafe=true
-    -Dio.netty.noKeySetOptimization=true
-    -Dio.netty.recycler.maxCapacityPerThread=0
-    -Dlog4j.shutdownHookEnabled=false
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j2.disable.jmx=true
-    -Dlog4j.skipJansi=true
-    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
-    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
-    */
+    /** The key of the configuration. e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Dhttp.maxConnections=20<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx512m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:-OmitStackTraceInFastThrow<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=5<br>
+     * -Djcifs.smb.client.responseTimeout=30000<br>
+     * -Djcifs.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb.client.sessionTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb1.smb.client.responseTimeout=30000<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     * -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider<br>
+     * -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true<br>
+     *  */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
-    /** The key of the configuration. e.g. -Djava.awt.headless=true
-    -Dfile.encoding=UTF-8
-    -Djna.nosys=true
-    -Djdk.io.permissionsUseCanonicalPath=true
-    -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
-    -server
-    -Xms128m
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-HeapDumpOnOutOfMemoryError
-    -XX:+UnlockExperimentalVMOptions
-    -XX:+UseG1GC
-    -XX:InitiatingHeapOccupancyPercent=45
-    -XX:G1HeapRegionSize=1m
-    -XX:MaxGCPauseMillis=60000
-    -XX:G1NewSizePercent=5
-    -XX:G1MaxNewSizePercent=30
-    -Dio.netty.noUnsafe=true
-    -Dio.netty.noKeySetOptimization=true
-    -Dio.netty.recycler.maxCapacityPerThread=0
-    -Dlog4j.shutdownHookEnabled=false
-    -Dlog4j2.disable.jmx=true
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j.skipJansi=true
-    */
+    /** The key of the configuration. e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=30<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     *  */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
-    /** The key of the configuration. e.g. -Djava.awt.headless=true
-    -Dfile.encoding=UTF-8
-    -Djna.nosys=true
-    -Djdk.io.permissionsUseCanonicalPath=true
-    -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
-    -server
-    -Xms128m
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-HeapDumpOnOutOfMemoryError
-    -XX:-OmitStackTraceInFastThrow
-    -XX:+UnlockExperimentalVMOptions
-    -XX:+UseG1GC
-    -XX:InitiatingHeapOccupancyPercent=45
-    -XX:G1HeapRegionSize=4m
-    -XX:MaxGCPauseMillis=60000
-    -XX:G1NewSizePercent=5
-    -XX:G1MaxNewSizePercent=50
-    -Djcifs.smb.client.responseTimeout=30000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.sessionTimeout=60000
-    -Djcifs.smb1.smb.client.connTimeout=60000
-    -Djcifs.smb1.smb.client.soTimeout=35000
-    -Djcifs.smb1.smb.client.responseTimeout=30000
-    -Dio.netty.noUnsafe=true
-    -Dio.netty.noKeySetOptimization=true
-    -Dio.netty.recycler.maxCapacityPerThread=0
-    -Dlog4j.shutdownHookEnabled=false
-    -Dlog4j2.disable.jmx=true
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j.skipJansi=true
-    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
-    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
-    */
+    /** The key of the configuration. e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:-OmitStackTraceInFastThrow<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=4m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=50<br>
+     * -Djcifs.smb.client.responseTimeout=30000<br>
+     * -Djcifs.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb.client.sessionTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb1.smb.client.responseTimeout=30000<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     * -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider<br>
+     * -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true<br>
+     *  */
     String JVM_THUMBNAIL_OPTIONS = "jvm.thumbnail.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -352,9 +352,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
-    /** The key of the configuration. e.g. title=title:string
-    Title=title:string
-    */
+    /** The key of the configuration. e.g. title=title:string<br>
+     * Title=title:string<br>
+     *  */
     String CRAWLER_METADATA_NAME_MAPPING = "crawler.metadata.name.mapping";
 
     /** The key of the configuration. e.g. //BODY */
@@ -678,58 +678,58 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1m */
     String INDEX_INDICES_TIMEOUT = "index.indices.timeout";
 
-    /** The key of the configuration. e.g. text/html=html
-    application/msword=word
-    application/vnd.openxmlformats-officedocument.wordprocessingml.document=word
-    application/vnd.ms-excel=excel
-    application/vnd.ms-excel.sheet.2=excel
-    application/vnd.ms-excel.sheet.3=excel
-    application/vnd.ms-excel.sheet.4=excel
-    application/vnd.ms-excel.workspace.3=excel
-    application/vnd.ms-excel.workspace.4=excel
-    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel
-    application/vnd.ms-powerpoint=powerpoint
-    application/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint
-    application/vnd.oasis.opendocument.text=odt
-    application/vnd.oasis.opendocument.spreadsheet=ods
-    application/vnd.oasis.opendocument.presentation=odp
-    application/pdf=pdf
-    application/x-fictionbook+xml=fb2
-    application/e-pub+zip=epub
-    application/x-ibooks+zip=ibooks
-    text/plain=txt
-    application/rtf=rtf
-    application/vnd.ms-htmlhelp=chm
-    application/zip=zip
-    application/x-7z-comressed=7z
-    application/x-bzip=bz
-    application/x-bzip2=bz2
-    application/x-tar=tar
-    application/x-rar-compressed=rar
-    video/3gp=3gp
-    video/3g2=3g2
-    video/x-msvideo=avi
-    video/x-flv=flv
-    video/mpeg=mpeg
-    video/mp4=mp4
-    video/ogv=ogv
-    video/quicktime=qt
-    video/x-m4v=m4v
-    audio/x-aif=aif
-    audio/midi=midi
-    audio/mpga=mpga
-    audio/mp4=mp4a
-    audio/ogg=oga
-    audio/x-wav=wav
-    image/webp=webp
-    image/bmp=bmp
-    image/x-icon=ico
-    image/x-icon=ico
-    image/png=png
-    image/svg+xml=svg
-    image/tiff=tiff
-    image/jpeg=jpg
-    */
+    /** The key of the configuration. e.g. text/html=html<br>
+     * application/msword=word<br>
+     * application/vnd.openxmlformats-officedocument.wordprocessingml.document=word<br>
+     * application/vnd.ms-excel=excel<br>
+     * application/vnd.ms-excel.sheet.2=excel<br>
+     * application/vnd.ms-excel.sheet.3=excel<br>
+     * application/vnd.ms-excel.sheet.4=excel<br>
+     * application/vnd.ms-excel.workspace.3=excel<br>
+     * application/vnd.ms-excel.workspace.4=excel<br>
+     * application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel<br>
+     * application/vnd.ms-powerpoint=powerpoint<br>
+     * application/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint<br>
+     * application/vnd.oasis.opendocument.text=odt<br>
+     * application/vnd.oasis.opendocument.spreadsheet=ods<br>
+     * application/vnd.oasis.opendocument.presentation=odp<br>
+     * application/pdf=pdf<br>
+     * application/x-fictionbook+xml=fb2<br>
+     * application/e-pub+zip=epub<br>
+     * application/x-ibooks+zip=ibooks<br>
+     * text/plain=txt<br>
+     * application/rtf=rtf<br>
+     * application/vnd.ms-htmlhelp=chm<br>
+     * application/zip=zip<br>
+     * application/x-7z-comressed=7z<br>
+     * application/x-bzip=bz<br>
+     * application/x-bzip2=bz2<br>
+     * application/x-tar=tar<br>
+     * application/x-rar-compressed=rar<br>
+     * video/3gp=3gp<br>
+     * video/3g2=3g2<br>
+     * video/x-msvideo=avi<br>
+     * video/x-flv=flv<br>
+     * video/mpeg=mpeg<br>
+     * video/mp4=mp4<br>
+     * video/ogv=ogv<br>
+     * video/quicktime=qt<br>
+     * video/x-m4v=m4v<br>
+     * audio/x-aif=aif<br>
+     * audio/midi=midi<br>
+     * audio/mpga=mpga<br>
+     * audio/mp4=mp4a<br>
+     * audio/ogg=oga<br>
+     * audio/x-wav=wav<br>
+     * image/webp=webp<br>
+     * image/bmp=bmp<br>
+     * image/x-icon=ico<br>
+     * image/x-icon=ico<br>
+     * image/png=png<br>
+     * image/svg+xml=svg<br>
+     * image/tiff=tiff<br>
+     * image/jpeg=jpg<br>
+     *  */
     String INDEX_FILETYPE = "index.filetype";
 
     /** The key of the configuration. e.g. 100 */
@@ -915,66 +915,66 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. _query */
     String QUERY_GSA_DEFAULT_PREFERENCE = "query.gsa.default.preference";
 
-    /** The key of the configuration. e.g. ar=ar
-    bg=bg
-    bn=bn
-    ca=ca
-    ckb-iq=ckb-iq
-    ckb_IQ=ckb-iq
-    cs=cs
-    da=da
-    de=de
-    el=el
-    en=en
-    en-ie=en-ie
-    en_IE=en-ie
-    es=es
-    et=et
-    eu=eu
-    fa=fa
-    fi=fi
-    fr=fr
-    gl=gl
-    gu=gu
-    he=he
-    hi=hi
-    hr=hr
-    hu=hu
-    hy=hy
-    id=id
-    it=it
-    ja=ja
-    ko=ko
-    lt=lt
-    lv=lv
-    mk=mk
-    ml=ml
-    nl=nl
-    no=no
-    pa=pa
-    pl=pl
-    pt=pt
-    pt-br=pt-br
-    pt_BR=pt-br
-    ro=ro
-    ru=ru
-    si=si
-    sq=sq
-    sv=sv
-    ta=ta
-    te=te
-    th=th
-    tl=tl
-    tr=tr
-    uk=uk
-    ur=ur
-    vi=vi
-    zh-cn=zh-cn
-    zh_CN=zh-cn
-    zh-tw=zh-tw
-    zh_TW=zh-tw
-    zh=zh
-    */
+    /** The key of the configuration. e.g. ar=ar<br>
+     * bg=bg<br>
+     * bn=bn<br>
+     * ca=ca<br>
+     * ckb-iq=ckb-iq<br>
+     * ckb_IQ=ckb-iq<br>
+     * cs=cs<br>
+     * da=da<br>
+     * de=de<br>
+     * el=el<br>
+     * en=en<br>
+     * en-ie=en-ie<br>
+     * en_IE=en-ie<br>
+     * es=es<br>
+     * et=et<br>
+     * eu=eu<br>
+     * fa=fa<br>
+     * fi=fi<br>
+     * fr=fr<br>
+     * gl=gl<br>
+     * gu=gu<br>
+     * he=he<br>
+     * hi=hi<br>
+     * hr=hr<br>
+     * hu=hu<br>
+     * hy=hy<br>
+     * id=id<br>
+     * it=it<br>
+     * ja=ja<br>
+     * ko=ko<br>
+     * lt=lt<br>
+     * lv=lv<br>
+     * mk=mk<br>
+     * ml=ml<br>
+     * nl=nl<br>
+     * no=no<br>
+     * pa=pa<br>
+     * pl=pl<br>
+     * pt=pt<br>
+     * pt-br=pt-br<br>
+     * pt_BR=pt-br<br>
+     * ro=ro<br>
+     * ru=ru<br>
+     * si=si<br>
+     * sq=sq<br>
+     * sv=sv<br>
+     * ta=ta<br>
+     * te=te<br>
+     * th=th<br>
+     * tl=tl<br>
+     * tr=tr<br>
+     * uk=uk<br>
+     * ur=ur<br>
+     * vi=vi<br>
+     * zh-cn=zh-cn<br>
+     * zh_CN=zh-cn<br>
+     * zh-tw=zh-tw<br>
+     * zh_TW=zh-tw<br>
+     * zh=zh<br>
+     *  */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
     /** The key of the configuration. e.g. 0.5 */
@@ -1058,10 +1058,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String QUERY_FACET_FIELDS_MISSING = "query.facet.fields.missing";
 
-    /** The key of the configuration. e.g. labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]	labels.facet_timestamp_1week=timestamp:[now/d-7d TO *]	labels.facet_timestamp_1month=timestamp:[now/d-1M TO *]	labels.facet_timestamp_1year=timestamp:[now/d-1y TO *]
-    labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]
-    labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others
-    */
+    /** The key of the configuration. e.g. labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]	labels.facet_timestamp_1week=timestamp:[now/d-7d TO *]	labels.facet_timestamp_1month=timestamp:[now/d-1M TO *]	labels.facet_timestamp_1year=timestamp:[now/d-1y TO *]<br>
+     * labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]<br>
+     * labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others<br>
+     *  */
     String QUERY_FACET_QUERIES = "query.facet.queries";
 
     /** The key of the configuration. e.g. true */
@@ -1620,7 +1620,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String LDAP_ATTR_HOME_POSTAL_ADDRESS = "ldap.attr.homePostalAddress";
 
     /** The key of the configuration. e.g. labeledURI */
-    String LDAP_ATTR_LABELEDURI = "ldap.attr.labeledURI";
+    String LDAP_ATTR_LABELED_U_R_I = "ldap.attr.labeledURI";
 
     /** The key of the configuration. e.g. roomNumber */
     String LDAP_ATTR_ROOM_NUMBER = "ldap.attr.roomNumber";
@@ -1647,7 +1647,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String LDAP_ATTR_DESTINATION_INDICATOR = "ldap.attr.destinationIndicator";
 
     /** The key of the configuration. e.g. internationaliSDNNumber */
-    String LDAP_ATTR_INTERNATIONALISDN_NUMBER = "ldap.attr.internationaliSDNNumber";
+    String LDAP_ATTR_INTERNATIONALI_S_D_N_NUMBER = "ldap.attr.internationaliSDNNumber";
 
     /** The key of the configuration. e.g. st */
     String LDAP_ATTR_STATE = "ldap.attr.state";
@@ -1833,46 +1833,46 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
-     * The value is, e.g. -Djava.awt.headless=true
-    -Dfile.encoding=UTF-8
-    -Djna.nosys=true
-    -Djdk.io.permissionsUseCanonicalPath=true
-    -Dhttp.maxConnections=20
-    -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
-    -server
-    -Xms128m
-    -Xmx512m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-HeapDumpOnOutOfMemoryError
-    -XX:-OmitStackTraceInFastThrow
-    -XX:+UnlockExperimentalVMOptions
-    -XX:+UseG1GC
-    -XX:InitiatingHeapOccupancyPercent=45
-    -XX:G1HeapRegionSize=1m
-    -XX:MaxGCPauseMillis=60000
-    -XX:G1NewSizePercent=5
-    -XX:G1MaxNewSizePercent=5
-    -Djcifs.smb.client.responseTimeout=30000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.sessionTimeout=60000
-    -Djcifs.smb1.smb.client.connTimeout=60000
-    -Djcifs.smb1.smb.client.soTimeout=35000
-    -Djcifs.smb1.smb.client.responseTimeout=30000
-    -Dio.netty.noUnsafe=true
-    -Dio.netty.noKeySetOptimization=true
-    -Dio.netty.recycler.maxCapacityPerThread=0
-    -Dlog4j.shutdownHookEnabled=false
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j2.disable.jmx=true
-    -Dlog4j.skipJansi=true
-    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
-    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
-    <br>
+     * The value is, e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Dhttp.maxConnections=20<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx512m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:-OmitStackTraceInFastThrow<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=5<br>
+     * -Djcifs.smb.client.responseTimeout=30000<br>
+     * -Djcifs.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb.client.sessionTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb1.smb.client.responseTimeout=30000<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     * -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider<br>
+     * -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true<br>
+     *  <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -1880,80 +1880,80 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'jvm.suggest.options'. <br>
-     * The value is, e.g. -Djava.awt.headless=true
-    -Dfile.encoding=UTF-8
-    -Djna.nosys=true
-    -Djdk.io.permissionsUseCanonicalPath=true
-    -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
-    -server
-    -Xms128m
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-HeapDumpOnOutOfMemoryError
-    -XX:+UnlockExperimentalVMOptions
-    -XX:+UseG1GC
-    -XX:InitiatingHeapOccupancyPercent=45
-    -XX:G1HeapRegionSize=1m
-    -XX:MaxGCPauseMillis=60000
-    -XX:G1NewSizePercent=5
-    -XX:G1MaxNewSizePercent=30
-    -Dio.netty.noUnsafe=true
-    -Dio.netty.noKeySetOptimization=true
-    -Dio.netty.recycler.maxCapacityPerThread=0
-    -Dlog4j.shutdownHookEnabled=false
-    -Dlog4j2.disable.jmx=true
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j.skipJansi=true
-    <br>
+     * The value is, e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=30<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     *  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
 
     /**
      * Get the value for the key 'jvm.thumbnail.options'. <br>
-     * The value is, e.g. -Djava.awt.headless=true
-    -Dfile.encoding=UTF-8
-    -Djna.nosys=true
-    -Djdk.io.permissionsUseCanonicalPath=true
-    -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
-    -server
-    -Xms128m
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-HeapDumpOnOutOfMemoryError
-    -XX:-OmitStackTraceInFastThrow
-    -XX:+UnlockExperimentalVMOptions
-    -XX:+UseG1GC
-    -XX:InitiatingHeapOccupancyPercent=45
-    -XX:G1HeapRegionSize=4m
-    -XX:MaxGCPauseMillis=60000
-    -XX:G1NewSizePercent=5
-    -XX:G1MaxNewSizePercent=50
-    -Djcifs.smb.client.responseTimeout=30000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.sessionTimeout=60000
-    -Djcifs.smb1.smb.client.connTimeout=60000
-    -Djcifs.smb1.smb.client.soTimeout=35000
-    -Djcifs.smb1.smb.client.responseTimeout=30000
-    -Dio.netty.noUnsafe=true
-    -Dio.netty.noKeySetOptimization=true
-    -Dio.netty.recycler.maxCapacityPerThread=0
-    -Dlog4j.shutdownHookEnabled=false
-    -Dlog4j2.disable.jmx=true
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j.skipJansi=true
-    -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider
-    -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true
-    <br>
+     * The value is, e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:-OmitStackTraceInFastThrow<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=4m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=50<br>
+     * -Djcifs.smb.client.responseTimeout=30000<br>
+     * -Djcifs.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb.client.sessionTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.connTimeout=60000<br>
+     * -Djcifs.smb1.smb.client.soTimeout=35000<br>
+     * -Djcifs.smb1.smb.client.responseTimeout=30000<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     * -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider<br>
+     * -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true<br>
+     *  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmThumbnailOptions();
@@ -2323,6 +2323,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
      * The value is, e.g.  <br>
+     * comment: Virtual Host: Host:fess.codelibs.org=fess
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getVirtualHostHeaders();
@@ -2330,6 +2331,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'virtual.host.headers' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Virtual Host: Host:fess.codelibs.org=fess
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2657,9 +2659,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.metadata.name.mapping'. <br>
-     * The value is, e.g. title=title:string
-    Title=title:string
-    <br>
+     * The value is, e.g. title=title:string<br>
+     * Title=title:string<br>
+     *  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataNameMapping();
@@ -3716,58 +3718,58 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.filetype'. <br>
-     * The value is, e.g. text/html=html
-    application/msword=word
-    application/vnd.openxmlformats-officedocument.wordprocessingml.document=word
-    application/vnd.ms-excel=excel
-    application/vnd.ms-excel.sheet.2=excel
-    application/vnd.ms-excel.sheet.3=excel
-    application/vnd.ms-excel.sheet.4=excel
-    application/vnd.ms-excel.workspace.3=excel
-    application/vnd.ms-excel.workspace.4=excel
-    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel
-    application/vnd.ms-powerpoint=powerpoint
-    application/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint
-    application/vnd.oasis.opendocument.text=odt
-    application/vnd.oasis.opendocument.spreadsheet=ods
-    application/vnd.oasis.opendocument.presentation=odp
-    application/pdf=pdf
-    application/x-fictionbook+xml=fb2
-    application/e-pub+zip=epub
-    application/x-ibooks+zip=ibooks
-    text/plain=txt
-    application/rtf=rtf
-    application/vnd.ms-htmlhelp=chm
-    application/zip=zip
-    application/x-7z-comressed=7z
-    application/x-bzip=bz
-    application/x-bzip2=bz2
-    application/x-tar=tar
-    application/x-rar-compressed=rar
-    video/3gp=3gp
-    video/3g2=3g2
-    video/x-msvideo=avi
-    video/x-flv=flv
-    video/mpeg=mpeg
-    video/mp4=mp4
-    video/ogv=ogv
-    video/quicktime=qt
-    video/x-m4v=m4v
-    audio/x-aif=aif
-    audio/midi=midi
-    audio/mpga=mpga
-    audio/mp4=mp4a
-    audio/ogg=oga
-    audio/x-wav=wav
-    image/webp=webp
-    image/bmp=bmp
-    image/x-icon=ico
-    image/x-icon=ico
-    image/png=png
-    image/svg+xml=svg
-    image/tiff=tiff
-    image/jpeg=jpg
-    <br>
+     * The value is, e.g. text/html=html<br>
+     * application/msword=word<br>
+     * application/vnd.openxmlformats-officedocument.wordprocessingml.document=word<br>
+     * application/vnd.ms-excel=excel<br>
+     * application/vnd.ms-excel.sheet.2=excel<br>
+     * application/vnd.ms-excel.sheet.3=excel<br>
+     * application/vnd.ms-excel.sheet.4=excel<br>
+     * application/vnd.ms-excel.workspace.3=excel<br>
+     * application/vnd.ms-excel.workspace.4=excel<br>
+     * application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=excel<br>
+     * application/vnd.ms-powerpoint=powerpoint<br>
+     * application/vnd.openxmlformats-officedocument.presentationml.presentation=powerpoint<br>
+     * application/vnd.oasis.opendocument.text=odt<br>
+     * application/vnd.oasis.opendocument.spreadsheet=ods<br>
+     * application/vnd.oasis.opendocument.presentation=odp<br>
+     * application/pdf=pdf<br>
+     * application/x-fictionbook+xml=fb2<br>
+     * application/e-pub+zip=epub<br>
+     * application/x-ibooks+zip=ibooks<br>
+     * text/plain=txt<br>
+     * application/rtf=rtf<br>
+     * application/vnd.ms-htmlhelp=chm<br>
+     * application/zip=zip<br>
+     * application/x-7z-comressed=7z<br>
+     * application/x-bzip=bz<br>
+     * application/x-bzip2=bz2<br>
+     * application/x-tar=tar<br>
+     * application/x-rar-compressed=rar<br>
+     * video/3gp=3gp<br>
+     * video/3g2=3g2<br>
+     * video/x-msvideo=avi<br>
+     * video/x-flv=flv<br>
+     * video/mpeg=mpeg<br>
+     * video/mp4=mp4<br>
+     * video/ogv=ogv<br>
+     * video/quicktime=qt<br>
+     * video/x-m4v=m4v<br>
+     * audio/x-aif=aif<br>
+     * audio/midi=midi<br>
+     * audio/mpga=mpga<br>
+     * audio/mp4=mp4a<br>
+     * audio/ogg=oga<br>
+     * audio/x-wav=wav<br>
+     * image/webp=webp<br>
+     * image/bmp=bmp<br>
+     * image/x-icon=ico<br>
+     * image/x-icon=ico<br>
+     * image/png=png<br>
+     * image/svg+xml=svg<br>
+     * image/tiff=tiff<br>
+     * image/jpeg=jpg<br>
+     *  <br>
      * comment: filetype
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -4487,66 +4489,66 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.language.mapping'. <br>
-     * The value is, e.g. ar=ar
-    bg=bg
-    bn=bn
-    ca=ca
-    ckb-iq=ckb-iq
-    ckb_IQ=ckb-iq
-    cs=cs
-    da=da
-    de=de
-    el=el
-    en=en
-    en-ie=en-ie
-    en_IE=en-ie
-    es=es
-    et=et
-    eu=eu
-    fa=fa
-    fi=fi
-    fr=fr
-    gl=gl
-    gu=gu
-    he=he
-    hi=hi
-    hr=hr
-    hu=hu
-    hy=hy
-    id=id
-    it=it
-    ja=ja
-    ko=ko
-    lt=lt
-    lv=lv
-    mk=mk
-    ml=ml
-    nl=nl
-    no=no
-    pa=pa
-    pl=pl
-    pt=pt
-    pt-br=pt-br
-    pt_BR=pt-br
-    ro=ro
-    ru=ru
-    si=si
-    sq=sq
-    sv=sv
-    ta=ta
-    te=te
-    th=th
-    tl=tl
-    tr=tr
-    uk=uk
-    ur=ur
-    vi=vi
-    zh-cn=zh-cn
-    zh_CN=zh-cn
-    zh-tw=zh-tw
-    zh_TW=zh-tw
-    zh=zh
-    <br>
+     * The value is, e.g. ar=ar<br>
+     * bg=bg<br>
+     * bn=bn<br>
+     * ca=ca<br>
+     * ckb-iq=ckb-iq<br>
+     * ckb_IQ=ckb-iq<br>
+     * cs=cs<br>
+     * da=da<br>
+     * de=de<br>
+     * el=el<br>
+     * en=en<br>
+     * en-ie=en-ie<br>
+     * en_IE=en-ie<br>
+     * es=es<br>
+     * et=et<br>
+     * eu=eu<br>
+     * fa=fa<br>
+     * fi=fi<br>
+     * fr=fr<br>
+     * gl=gl<br>
+     * gu=gu<br>
+     * he=he<br>
+     * hi=hi<br>
+     * hr=hr<br>
+     * hu=hu<br>
+     * hy=hy<br>
+     * id=id<br>
+     * it=it<br>
+     * ja=ja<br>
+     * ko=ko<br>
+     * lt=lt<br>
+     * lv=lv<br>
+     * mk=mk<br>
+     * ml=ml<br>
+     * nl=nl<br>
+     * no=no<br>
+     * pa=pa<br>
+     * pl=pl<br>
+     * pt=pt<br>
+     * pt-br=pt-br<br>
+     * pt_BR=pt-br<br>
+     * ro=ro<br>
+     * ru=ru<br>
+     * si=si<br>
+     * sq=sq<br>
+     * sv=sv<br>
+     * ta=ta<br>
+     * te=te<br>
+     * th=th<br>
+     * tl=tl<br>
+     * tr=tr<br>
+     * uk=uk<br>
+     * ur=ur<br>
+     * vi=vi<br>
+     * zh-cn=zh-cn<br>
+     * zh_CN=zh-cn<br>
+     * zh-tw=zh-tw<br>
+     * zh_TW=zh-tw<br>
+     * zh=zh<br>
+     *  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryLanguageMapping();
@@ -4926,10 +4928,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.facet.queries'. <br>
-     * The value is, e.g. labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]	labels.facet_timestamp_1week=timestamp:[now/d-7d TO *]	labels.facet_timestamp_1month=timestamp:[now/d-1M TO *]	labels.facet_timestamp_1year=timestamp:[now/d-1y TO *]
-    labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]
-    labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others
-    <br>
+     * The value is, e.g. labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]	labels.facet_timestamp_1week=timestamp:[now/d-7d TO *]	labels.facet_timestamp_1month=timestamp:[now/d-1M TO *]	labels.facet_timestamp_1year=timestamp:[now/d-1y TO *]<br>
+     * labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]<br>
+     * labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others<br>
+     *  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetQueries();
@@ -5083,7 +5085,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
      * The value is, e.g. admin <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminUsers();
@@ -5988,7 +5989,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.target.name'. <br>
      * The value is, e.g.  <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSchedulerTargetName();
@@ -5996,7 +5996,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.target.name' as {@link Integer}. <br>
      * The value is, e.g.  <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6034,7 +6033,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.base.link'. <br>
      * The value is, e.g. https://fess.codelibs.org/{lang}/{version}/admin/ <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpBaseLink();
@@ -6378,7 +6376,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'forum.link'. <br>
      * The value is, e.g. https://discuss.codelibs.org/c/Fess{lang}/ <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getForumLink();
@@ -6393,7 +6390,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.seed'. <br>
      * The value is, e.g. 0 <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordSeed();
@@ -6401,7 +6397,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.seed' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6677,7 +6672,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.enabled'. <br>
      * The value is, e.g. false <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminEnabled();
@@ -6685,7 +6679,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.admin.enabled' true? <br>
      * The value is, e.g. false <br>
-     * comment: ------
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapAdminEnabled();
@@ -6948,7 +6941,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g. labeledURI <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getLdapAttrLabeleduri();
+    String getLdapAttrLabeledURI();
 
     /**
      * Get the value for the key 'ldap.attr.roomNumber'. <br>
@@ -7011,7 +7004,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g. internationaliSDNNumber <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getLdapAttrInternationalisdnNumber();
+    String getLdapAttrInternationaliSDNNumber();
 
     /**
      * Get the value for the key 'ldap.attr.state'. <br>
@@ -7171,7 +7164,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'storage.max.items.in.page'. <br>
      * The value is, e.g. 1000 <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getStorageMaxItemsInPage();
@@ -7179,7 +7171,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'storage.max.items.in.page' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7188,7 +7179,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'password.invalid.admin.passwords'. <br>
      * The value is, e.g. admin <br>
-     * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPasswordInvalidAdminPasswords();
@@ -9922,8 +9912,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.LDAP_ATTR_HOME_POSTAL_ADDRESS);
         }
 
-        public String getLdapAttrLabeleduri() {
-            return get(FessConfig.LDAP_ATTR_LABELEDURI);
+        public String getLdapAttrLabeledURI() {
+            return get(FessConfig.LDAP_ATTR_LABELED_U_R_I);
         }
 
         public String getLdapAttrRoomNumber() {
@@ -9958,8 +9948,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.LDAP_ATTR_DESTINATION_INDICATOR);
         }
 
-        public String getLdapAttrInternationalisdnNumber() {
-            return get(FessConfig.LDAP_ATTR_INTERNATIONALISDN_NUMBER);
+        public String getLdapAttrInternationaliSDNNumber() {
+            return get(FessConfig.LDAP_ATTR_INTERNATIONALI_S_D_N_NUMBER);
         }
 
         public String getLdapAttrState() {
@@ -10537,7 +10527,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ATTR_TELEPHONE_NUMBER, "telephoneNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_HOME_PHONE, "homePhone");
             defaultMap.put(FessConfig.LDAP_ATTR_HOME_POSTAL_ADDRESS, "homePostalAddress");
-            defaultMap.put(FessConfig.LDAP_ATTR_LABELEDURI, "labeledURI");
+            defaultMap.put(FessConfig.LDAP_ATTR_LABELED_U_R_I, "labeledURI");
             defaultMap.put(FessConfig.LDAP_ATTR_ROOM_NUMBER, "roomNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_DESCRIPTION, "description");
             defaultMap.put(FessConfig.LDAP_ATTR_TITLE, "title");
@@ -10546,7 +10536,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ATTR_POSTAL_CODE, "postalCode");
             defaultMap.put(FessConfig.LDAP_ATTR_PHYSICAL_DELIVERY_OFFICE_NAME, "physicalDeliveryOfficeName");
             defaultMap.put(FessConfig.LDAP_ATTR_DESTINATION_INDICATOR, "destinationIndicator");
-            defaultMap.put(FessConfig.LDAP_ATTR_INTERNATIONALISDN_NUMBER, "internationaliSDNNumber");
+            defaultMap.put(FessConfig.LDAP_ATTR_INTERNATIONALI_S_D_N_NUMBER, "internationaliSDNNumber");
             defaultMap.put(FessConfig.LDAP_ATTR_STATE, "st");
             defaultMap.put(FessConfig.LDAP_ATTR_EMPLOYEE_TYPE, "employeeType");
             defaultMap.put(FessConfig.LDAP_ATTR_FACSIMILE_TELEPHONE_NUMBER, "facsimileTelephoneNumber");

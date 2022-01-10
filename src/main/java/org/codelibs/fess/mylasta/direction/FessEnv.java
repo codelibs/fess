@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 CodeLibs Project and the Others.
+ * Copyright 2012-2022 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,10 @@ public interface FessEnv {
     /**
      * Get the value for the key 'time.adjust.time.millis'. <br>
      * The value is, e.g. 0 <br>
-     * comment: The milliseconds for (relative or absolute) adjust time (set only when test) @LongType *dynamic in development
+     * comment: <br>
+     * one day: 86400000, three days: 259200000, five days: 432000000, one week: 604800000, one year: 31556926000<br>
+     * special script :: absolute mode: $(2014/07/10), relative mode: addDay(3).addMonth(4)<br>
+     * The milliseconds for (relative or absolute) adjust time (set only when test) @LongType *dynamic in development
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getTimeAdjustTimeMillis();
@@ -125,7 +128,10 @@ public interface FessEnv {
     /**
      * Get the value for the key 'time.adjust.time.millis' as {@link Long}. <br>
      * The value is, e.g. 0 <br>
-     * comment: The milliseconds for (relative or absolute) adjust time (set only when test) @LongType *dynamic in development
+     * comment: <br>
+     * one day: 86400000, three days: 259200000, five days: 432000000, one week: 604800000, one year: 31556926000<br>
+     * special script :: absolute mode: $(2014/07/10), relative mode: addDay(3).addMonth(4)<br>
+     * The milliseconds for (relative or absolute) adjust time (set only when test) @LongType *dynamic in development
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not long.
      */

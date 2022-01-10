@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 CodeLibs Project and the Others.
+ * Copyright 2012-2022 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -617,7 +617,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: MENU */
     public static final String LABELS_SIDEBAR_MENU = "{labels.sidebar.menu}";
 
-    /** The key of the message: &copy;2021 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. */
+    /** The key of the message: &amp;copy;2022 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
 
     /** The key of the message: Search */
@@ -761,7 +761,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Size */
     public static final String LABELS_facet_contentLength_title = "{labels.facet_contentLength_title}";
 
-    /** The key of the message: &nbsp; - 10kb */
+    /** The key of the message: &amp;nbsp; - 10kb */
     public static final String LABELS_facet_contentLength_10k = "{labels.facet_contentLength_10k}";
 
     /** The key of the message: 10kb - 100kb */
@@ -773,7 +773,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: 500kb - 1mb */
     public static final String LABELS_facet_contentLength_500kto1m = "{labels.facet_contentLength_500kto1m}";
 
-    /** The key of the message: 1mb - &nbsp; */
+    /** The key of the message: 1mb - &amp;nbsp; */
     public static final String LABELS_facet_contentLength_1m = "{labels.facet_contentLength_1m}";
 
     /** The key of the message: 10kb - 50kb */
@@ -791,7 +791,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: 1mb - 5mb */
     public static final String LABELS_facet_contentLength_1mto5m = "{labels.facet_contentLength_1mto5m}";
 
-    /** The key of the message: 5mb - &nbsp; */
+    /** The key of the message: 5mb - &amp;nbsp; */
     public static final String LABELS_facet_contentLength_5m = "{labels.facet_contentLength_5m}";
 
     /** The key of the message: File Type */
@@ -2662,7 +2662,7 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_user_labeledURI = "{labels.user_labeledURI}";
 
     /** The key of the message: labeledURI */
-    public static final String LABELS_LABELEDURI = "{labels.labeledURI}";
+    public static final String LABELS_LABELED_U_R_I = "{labels.labeledURI}";
 
     /** The key of the message: Room Number */
     public static final String LABELS_user_roomNumber = "{labels.user_roomNumber}";
@@ -2716,7 +2716,7 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_user_internationaliSDNNumber = "{labels.user_internationaliSDNNumber}";
 
     /** The key of the message: International ISDN Number */
-    public static final String LABELS_INTERNATIONALISDN_NUMBER = "{labels.internationaliSDNNumber}";
+    public static final String LABELS_INTERNATIONALI_S_D_N_NUMBER = "{labels.internationaliSDNNumber}";
 
     /** The key of the message: State */
     public static final String LABELS_user_state = "{labels.user_state}";

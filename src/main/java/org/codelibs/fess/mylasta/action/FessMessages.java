@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 CodeLibs Project and the Others.
+ * Copyright 2012-2022 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -531,7 +531,6 @@ public class FessMessages extends FessLabels {
      * Add the created action message for the key 'errors.front_header' with parameters.
      * <pre>
      * message: 
-     * comment: ------------
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -644,7 +643,6 @@ public class FessMessages extends FessLabels {
      * Add the created action message for the key 'constraints.AssertFalse.message' with parameters.
      * <pre>
      * message: {item} must be false.
-     * comment: ---------------
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -836,7 +834,6 @@ public class FessMessages extends FessLabels {
      * Add the created action message for the key 'constraints.CreditCardNumber.message' with parameters.
      * <pre>
      * message: {item} is invalid credit card number.
-     * comment: -------------------
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -1172,7 +1169,10 @@ public class FessMessages extends FessLabels {
      * Add the created action message for the key 'errors.login.failure' with parameters.
      * <pre>
      * message: Login failed.
-     * comment: - - - - - - - - - -/
+     * comment:
+     * /- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     * five framework-embedded messages (don't change key names)
+     * - - - - - - - - - -/
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
