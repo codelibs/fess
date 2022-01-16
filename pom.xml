@@ -30,7 +30,7 @@
 	<parent>
 		<groupId>org.codelibs.fess</groupId>
 		<artifactId>fess-parent</artifactId>
-		<version>13.16.2</version>
+		<version>13.16.3</version>
 		<relativePath />
 	</parent>
 	<properties>
