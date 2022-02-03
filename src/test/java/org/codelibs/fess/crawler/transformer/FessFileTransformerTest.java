@@ -69,7 +69,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
 
-        url = "http://example.com/" + encodeUrl("#") + "/@@bar/index.html#fragment?foo=bar";
+        url = "https://example.com/" + encodeUrl("#") + "/@@bar/index.html#fragment?foo=bar";
         exp = "index.html";
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
 
@@ -83,6 +83,14 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
         url = "file://example.com/test%20+%2B.txt";
         exp = "test ++.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "file://example.com/test#.txt";
+        exp = "test#.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "smb://example.com/test?.txt";
+        exp = "test?.txt";
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
     }
 

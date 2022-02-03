@@ -175,15 +175,18 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
+        int idx = 0;
         String u = url;
-        int idx = u.lastIndexOf('?');
-        if (idx >= 0) {
-            u = u.substring(0, idx);
-        }
+        if (u.startsWith("https:") || u.startsWith("http:")) {
+            idx = u.lastIndexOf('?');
+            if (idx >= 0) {
+                u = u.substring(0, idx);
+            }
 
-        idx = u.lastIndexOf('#');
-        if (idx >= 0) {
-            u = u.substring(0, idx);
+            idx = u.lastIndexOf('#');
+            if (idx >= 0) {
+                u = u.substring(0, idx);
+            }
         }
         u = decodeUrlAsName(u, u.startsWith("file:"));
         idx = u.lastIndexOf('/');
