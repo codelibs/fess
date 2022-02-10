@@ -592,13 +592,18 @@ public class AdminUpgradeAction extends FessAdminAction {
         final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
         for (final String index : configIndices) {
             final String oldIndex = "." + index;
-            if (client.existsIndex(oldIndex)) {
+            if (client.existsIndex(oldIndex) && client.existsIndex(index)) {
                 logger.info("Copying from {} to {}", oldIndex, index);
                 if (!client.reindex(oldIndex, index, false)) {
                     logger.warn("Failed to copy from {} to {}", oldIndex, index);
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("{} does not exist.", oldIndex);
+                if (!client.existsIndex(oldIndex)) {
+                    logger.debug("{} does not exist.", oldIndex);
+                }
+                if (!client.existsIndex(index)) {
+                    logger.debug("{} does not exist.", index);
+                }
             }
         }
         for (final String index : crawlerIndices) {
