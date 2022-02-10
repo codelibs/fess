@@ -356,18 +356,35 @@ public class SearchEngineClient implements Client {
                     client.admin().indices().prepareExists(indexName).execute().actionGet(fessConfig.getIndexSearchTimeout());
             exists = response.isExists();
         } catch (final Exception e) {
-            // ignore
+            logger.debug("Failed to check {} index status.", indexName, e);
         }
         return exists;
     }
 
-    public boolean reindex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
+    public boolean copyDocIndex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String source = fessConfig.getIndexReindexBody()//
                 .replace("__SOURCE_INDEX__", fromIndex)//
                 .replace("__SIZE__", fessConfig.getIndexReindexSize())//
                 .replace("__DEST_INDEX__", toIndex)//
                 .replace("__SCRIPT_SOURCE__", ComponentUtil.getLanguageHelper().getReindexScriptSource());
+        return reindex(fromIndex, toIndex, source, waitForCompletion);
+    }
+
+    public boolean reindex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
+        final String template = """
+                {"source":{"index":"__SOURCE_INDEX__","size":__SIZE__},"dest":{"index":"__DEST_INDEX__"}}
+                """;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String source = template //
+                .replace("__SOURCE_INDEX__", fromIndex)//
+                .replace("__SIZE__", fessConfig.getIndexReindexSize())//
+                .replace("__DEST_INDEX__", toIndex);
+        return reindex(fromIndex, toIndex, source, waitForCompletion);
+    }
+
+    protected boolean reindex(final String fromIndex, final String toIndex, final String source, final boolean waitForCompletion) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String refresh = StringUtil.isNotBlank(fessConfig.getIndexReindexRefresh()) ? fessConfig.getIndexReindexRefresh() : null;
         final String requestsPerSecond = getReindexRequestsPerSecound(fessConfig);
         final String scroll = StringUtil.isNotBlank(fessConfig.getIndexReindexScroll()) ? fessConfig.getIndexReindexScroll() : null;
@@ -440,6 +457,18 @@ public class SearchEngineClient implements Client {
             logger.warn("{} is not found.", indexConfigFile, e);
         }
 
+        return false;
+    }
+
+    public boolean deleteIndex(final String indexName) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            final AcknowledgedResponse response =
+                    client.admin().indices().prepareDelete(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
+            return response.isAcknowledged();
+        } catch (Exception e) {
+            logger.debug("Failed to delete {}.", indexName, e);
+        }
         return false;
     }
 
