@@ -30,11 +30,15 @@ public class CrawlerEngineClient extends FesenClient {
     protected Client createClient() {
         final Builder builder = Settings.builder().putList("http.hosts", address);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String username = fessConfig.getFesenUsername();
-        final String password = fessConfig.getFesenPassword();
+        final String username = fessConfig.getOpenSearchUsername();
+        final String password = fessConfig.getOpenSearchPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
             builder.put(Constants.FESEN_USERNAME, username);
             builder.put(Constants.FESEN_PASSWORD, password);
+        }
+        final String authorities = fessConfig.getOpenSearchHttpSslCertificateAuthorities();
+        if (StringUtil.isNotBlank(authorities)) {
+            builder.put("http.ssl.certificate_authorities", authorities);
         }
         return new HttpClient(builder.build(), null);
     }

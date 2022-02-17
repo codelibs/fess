@@ -32,6 +32,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
 
     /** The key of the configuration. e.g.  */
+    String ELASTICSEARCH_HTTP_SSL_certificate_authorities = "elasticsearch.http.ssl.certificate_authorities";
+
+    /** The key of the configuration. e.g.  */
     String ELASTICSEARCH_USERNAME = "elasticsearch.username";
 
     /** The key of the configuration. e.g.  */
@@ -1758,11 +1761,26 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOpenSearchHttpUrl();
 
     /**
+     * Get the value for the key 'elasticsearch.http.ssl.certificate_authorities'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOpenSearchHttpSslCertificateAuthorities();
+
+    /**
+     * Get the value for the key 'elasticsearch.http.ssl.certificate_authorities' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getOpenSearchHttpSslCertificateAuthoritiesAsInteger();
+
+    /**
      * Get the value for the key 'elasticsearch.username'. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getFesenUsername();
+    String getOpenSearchUsername();
 
     /**
      * Get the value for the key 'elasticsearch.username' as {@link Integer}. <br>
@@ -1770,14 +1788,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getFesenUsernameAsInteger();
+    Integer getOpenSearchUsernameAsInteger();
 
     /**
      * Get the value for the key 'elasticsearch.password'. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getFesenPassword();
+    String getOpenSearchPassword();
 
     /**
      * Get the value for the key 'elasticsearch.password' as {@link Integer}. <br>
@@ -1785,7 +1803,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getFesenPasswordAsInteger();
+    Integer getOpenSearchPasswordAsInteger();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -7204,19 +7222,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
         }
 
-        public String getFesenUsername() {
+        public String getOpenSearchHttpSslCertificateAuthorities() {
+            return get(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities);
+        }
+
+        public Integer getOpenSearchHttpSslCertificateAuthoritiesAsInteger() {
+            return getAsInteger(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities);
+        }
+
+        public String getOpenSearchUsername() {
             return get(FessConfig.ELASTICSEARCH_USERNAME);
         }
 
-        public Integer getFesenUsernameAsInteger() {
+        public Integer getOpenSearchUsernameAsInteger() {
             return getAsInteger(FessConfig.ELASTICSEARCH_USERNAME);
         }
 
-        public String getFesenPassword() {
+        public String getOpenSearchPassword() {
             return get(FessConfig.ELASTICSEARCH_PASSWORD);
         }
 
-        public Integer getFesenPasswordAsInteger() {
+        public Integer getOpenSearchPasswordAsInteger() {
             return getAsInteger(FessConfig.ELASTICSEARCH_PASSWORD);
         }
 
@@ -10058,6 +10084,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.DOMAIN_TITLE, "Fess");
             defaultMap.put(FessConfig.ELASTICSEARCH_TYPE, "default");
             defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_URL, "http://localhost:9201");
+            defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities, "");
             defaultMap.put(FessConfig.ELASTICSEARCH_USERNAME, "");
             defaultMap.put(FessConfig.ELASTICSEARCH_PASSWORD, "");
             defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");

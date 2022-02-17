@@ -341,9 +341,15 @@ public class SearchEngineClient implements Client {
 
     protected Client createHttpClient(final FessConfig fessConfig, final String host) {
         final Builder builder = Settings.builder().putList("http.hosts", host).put("processors", fessConfig.availableProcessors());
-        if (StringUtil.isNotBlank(fessConfig.getFesenUsername()) && StringUtil.isNotBlank(fessConfig.getFesenPassword())) {
-            builder.put(Constants.FESEN_USERNAME, fessConfig.getFesenUsername());
-            builder.put(Constants.FESEN_PASSWORD, fessConfig.getFesenPassword());
+        final String username = fessConfig.getOpenSearchUsername();
+        final String password = fessConfig.getOpenSearchPassword();
+        if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
+            builder.put(Constants.FESEN_USERNAME, username);
+            builder.put(Constants.FESEN_PASSWORD, password);
+        }
+        final String authorities = fessConfig.getOpenSearchHttpSslCertificateAuthorities();
+        if (StringUtil.isNotBlank(authorities)) {
+            builder.put("http.ssl.certificate_authorities", authorities);
         }
         return new HttpClient(builder.build(), null);
     }
