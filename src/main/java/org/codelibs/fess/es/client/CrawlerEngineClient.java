@@ -28,8 +28,8 @@ import org.opensearch.common.settings.Settings.Builder;
 public class CrawlerEngineClient extends FesenClient {
     @Override
     protected Client createClient() {
-        final Builder builder = Settings.builder().putList("http.hosts", address);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Builder builder = Settings.builder().putList("http.hosts", address).put("processors", fessConfig.getCrawlerHttpProcessors());
         final String username = fessConfig.getOpenSearchUsername();
         final String password = fessConfig.getOpenSearchPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {

@@ -2041,6 +2041,16 @@ public interface FessProp {
         return Runtime.getRuntime().availableProcessors();
     }
 
+    Integer getCrawlerHttpThreadPoolSizeAsInteger();
+
+    default int getCrawlerHttpProcessors() {
+        final int num = getCrawlerHttpThreadPoolSizeAsInteger();
+        if (num > 0) {
+            return num;
+        }
+        return Runtime.getRuntime().availableProcessors();
+    }
+
     String getPluginVersionFilter();
 
     default boolean isTargetPluginVersion(final String version) {

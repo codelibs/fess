@@ -295,6 +295,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. groovy */
     String CRAWLER_DEFAULT_SCRIPT = "crawler.default.script";
 
+    /** The key of the configuration. e.g. 0 */
+    String CRAWLER_HTTP_thread_pool_SIZE = "crawler.http.thread_pool.size";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -2452,6 +2455,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDefaultScript();
+
+    /**
+     * Get the value for the key 'crawler.http.thread_pool.size'. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHttpThreadPoolSize();
+
+    /**
+     * Get the value for the key 'crawler.http.thread_pool.size' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerHttpThreadPoolSizeAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -7542,6 +7560,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.CRAWLER_DEFAULT_SCRIPT);
         }
 
+        public String getCrawlerHttpThreadPoolSize() {
+            return get(FessConfig.CRAWLER_HTTP_thread_pool_SIZE);
+        }
+
+        public Integer getCrawlerHttpThreadPoolSizeAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_HTTP_thread_pool_SIZE);
+        }
+
         public String getCrawlerDocumentMaxSiteLength() {
             return get(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH);
         }
@@ -10142,6 +10168,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.HTTP_FILEUPLOAD_MAX_SIZE, "262144000");
             defaultMap.put(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE, "262144");
             defaultMap.put(FessConfig.CRAWLER_DEFAULT_SCRIPT, "groovy");
+            defaultMap.put(FessConfig.CRAWLER_HTTP_thread_pool_SIZE, "0");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "50");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");
