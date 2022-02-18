@@ -42,12 +42,12 @@ public class CurlHelper {
     private SSLSocketFactory sslSocketFactory;
 
     @PostConstruct
-    protected void init() {
+    public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String authorities = fessConfig.getOpenSearchHttpSslCertificateAuthorities();
         if (StringUtil.isNotBlank(authorities)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Loading {}", authorities);
+                logger.debug("Loading certificate_authorities: {}", authorities);
             }
             try (final InputStream in = new FileInputStream(authorities)) {
                 final Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(in);
