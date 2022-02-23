@@ -175,11 +175,13 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsAccessTokenCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsAccessTokenCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -386,10 +388,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy) {
         setCreatedBy_CommonTerms(createdBy, null);
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
@@ -564,10 +568,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime) {
         setCreatedTime_CommonTerms(createdTime, null);
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
         if (opLambda != null) {
@@ -742,10 +748,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setExpiredTime_CommonTerms(Long expiredTime) {
         setExpiredTime_CommonTerms(expiredTime, null);
     }
 
+    @Deprecated
     public void setExpiredTime_CommonTerms(Long expiredTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("expiredTime", expiredTime);
         if (opLambda != null) {
@@ -964,10 +972,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name) {
         setName_CommonTerms(name, null);
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
@@ -1186,10 +1196,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setParameterName_CommonTerms(String parameterName) {
         setParameterName_CommonTerms(parameterName, null);
     }
 
+    @Deprecated
     public void setParameterName_CommonTerms(String parameterName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("parameter_name", parameterName);
         if (opLambda != null) {
@@ -1408,10 +1420,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPermissions_CommonTerms(String permissions) {
         setPermissions_CommonTerms(permissions, null);
     }
 
+    @Deprecated
     public void setPermissions_CommonTerms(String permissions, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("permissions", permissions);
         if (opLambda != null) {
@@ -1630,10 +1644,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setToken_CommonTerms(String token) {
         setToken_CommonTerms(token, null);
     }
 
+    @Deprecated
     public void setToken_CommonTerms(String token, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("token", token);
         if (opLambda != null) {
@@ -1852,10 +1868,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy) {
         setUpdatedBy_CommonTerms(updatedBy, null);
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
@@ -2030,10 +2048,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime) {
         setUpdatedTime_CommonTerms(updatedTime, null);
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {

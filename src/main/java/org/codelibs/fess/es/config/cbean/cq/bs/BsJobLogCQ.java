@@ -174,11 +174,13 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsJobLogCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsJobLogCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -341,10 +343,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setEndTime_CommonTerms(Long endTime) {
         setEndTime_CommonTerms(endTime, null);
     }
 
+    @Deprecated
     public void setEndTime_CommonTerms(Long endTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("endTime", endTime);
         if (opLambda != null) {
@@ -563,10 +567,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setJobName_CommonTerms(String jobName) {
         setJobName_CommonTerms(jobName, null);
     }
 
+    @Deprecated
     public void setJobName_CommonTerms(String jobName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("jobName", jobName);
         if (opLambda != null) {
@@ -785,10 +791,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setJobStatus_CommonTerms(String jobStatus) {
         setJobStatus_CommonTerms(jobStatus, null);
     }
 
+    @Deprecated
     public void setJobStatus_CommonTerms(String jobStatus, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("jobStatus", jobStatus);
         if (opLambda != null) {
@@ -963,10 +971,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setLastUpdated_CommonTerms(Long lastUpdated) {
         setLastUpdated_CommonTerms(lastUpdated, null);
     }
 
+    @Deprecated
     public void setLastUpdated_CommonTerms(Long lastUpdated, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("lastUpdated", lastUpdated);
         if (opLambda != null) {
@@ -1185,10 +1195,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setScriptData_CommonTerms(String scriptData) {
         setScriptData_CommonTerms(scriptData, null);
     }
 
+    @Deprecated
     public void setScriptData_CommonTerms(String scriptData, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("scriptData", scriptData);
         if (opLambda != null) {
@@ -1407,10 +1419,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setScriptResult_CommonTerms(String scriptResult) {
         setScriptResult_CommonTerms(scriptResult, null);
     }
 
+    @Deprecated
     public void setScriptResult_CommonTerms(String scriptResult, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("scriptResult", scriptResult);
         if (opLambda != null) {
@@ -1629,10 +1643,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setScriptType_CommonTerms(String scriptType) {
         setScriptType_CommonTerms(scriptType, null);
     }
 
+    @Deprecated
     public void setScriptType_CommonTerms(String scriptType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("scriptType", scriptType);
         if (opLambda != null) {
@@ -1807,10 +1823,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setStartTime_CommonTerms(Long startTime) {
         setStartTime_CommonTerms(startTime, null);
     }
 
+    @Deprecated
     public void setStartTime_CommonTerms(Long startTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("startTime", startTime);
         if (opLambda != null) {
@@ -2029,10 +2047,12 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setTarget_CommonTerms(String target) {
         setTarget_CommonTerms(target, null);
     }
 
+    @Deprecated
     public void setTarget_CommonTerms(String target, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("target", target);
         if (opLambda != null) {

@@ -176,11 +176,13 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsFileAuthenticationCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsFileAuthenticationCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -387,10 +389,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy) {
         setCreatedBy_CommonTerms(createdBy, null);
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
@@ -565,10 +569,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime) {
         setCreatedTime_CommonTerms(createdTime, null);
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
         if (opLambda != null) {
@@ -787,10 +793,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setFileConfigId_CommonTerms(String fileConfigId) {
         setFileConfigId_CommonTerms(fileConfigId, null);
     }
 
+    @Deprecated
     public void setFileConfigId_CommonTerms(String fileConfigId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("fileConfigId", fileConfigId);
         if (opLambda != null) {
@@ -1009,10 +1017,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setHostname_CommonTerms(String hostname) {
         setHostname_CommonTerms(hostname, null);
     }
 
+    @Deprecated
     public void setHostname_CommonTerms(String hostname, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("hostname", hostname);
         if (opLambda != null) {
@@ -1231,10 +1241,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setParameters_CommonTerms(String parameters) {
         setParameters_CommonTerms(parameters, null);
     }
 
+    @Deprecated
     public void setParameters_CommonTerms(String parameters, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("parameters", parameters);
         if (opLambda != null) {
@@ -1453,10 +1465,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPassword_CommonTerms(String password) {
         setPassword_CommonTerms(password, null);
     }
 
+    @Deprecated
     public void setPassword_CommonTerms(String password, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("password", password);
         if (opLambda != null) {
@@ -1631,10 +1645,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPort_CommonTerms(Integer port) {
         setPort_CommonTerms(port, null);
     }
 
+    @Deprecated
     public void setPort_CommonTerms(Integer port, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("port", port);
         if (opLambda != null) {
@@ -1853,10 +1869,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setProtocolScheme_CommonTerms(String protocolScheme) {
         setProtocolScheme_CommonTerms(protocolScheme, null);
     }
 
+    @Deprecated
     public void setProtocolScheme_CommonTerms(String protocolScheme, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
@@ -2075,10 +2093,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy) {
         setUpdatedBy_CommonTerms(updatedBy, null);
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
@@ -2253,10 +2273,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime) {
         setUpdatedTime_CommonTerms(updatedTime, null);
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {
@@ -2475,10 +2497,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUsername_CommonTerms(String username) {
         setUsername_CommonTerms(username, null);
     }
 
+    @Deprecated
     public void setUsername_CommonTerms(String username, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("username", username);
         if (opLambda != null) {

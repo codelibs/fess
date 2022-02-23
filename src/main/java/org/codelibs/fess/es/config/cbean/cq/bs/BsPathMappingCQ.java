@@ -175,11 +175,13 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsPathMappingCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsPathMappingCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -386,10 +388,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy) {
         setCreatedBy_CommonTerms(createdBy, null);
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
@@ -564,10 +568,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime) {
         setCreatedTime_CommonTerms(createdTime, null);
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
         if (opLambda != null) {
@@ -786,10 +792,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setProcessType_CommonTerms(String processType) {
         setProcessType_CommonTerms(processType, null);
     }
 
+    @Deprecated
     public void setProcessType_CommonTerms(String processType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("processType", processType);
         if (opLambda != null) {
@@ -1008,10 +1016,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setRegex_CommonTerms(String regex) {
         setRegex_CommonTerms(regex, null);
     }
 
+    @Deprecated
     public void setRegex_CommonTerms(String regex, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("regex", regex);
         if (opLambda != null) {
@@ -1230,10 +1240,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setReplacement_CommonTerms(String replacement) {
         setReplacement_CommonTerms(replacement, null);
     }
 
+    @Deprecated
     public void setReplacement_CommonTerms(String replacement, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("replacement", replacement);
         if (opLambda != null) {
@@ -1408,10 +1420,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setSortOrder_CommonTerms(Integer sortOrder) {
         setSortOrder_CommonTerms(sortOrder, null);
     }
 
+    @Deprecated
     public void setSortOrder_CommonTerms(Integer sortOrder, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("sortOrder", sortOrder);
         if (opLambda != null) {
@@ -1630,10 +1644,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy) {
         setUpdatedBy_CommonTerms(updatedBy, null);
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
@@ -1808,10 +1824,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime) {
         setUpdatedTime_CommonTerms(updatedTime, null);
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {
@@ -2030,10 +2048,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUserAgent_CommonTerms(String userAgent) {
         setUserAgent_CommonTerms(userAgent, null);
     }
 
+    @Deprecated
     public void setUserAgent_CommonTerms(String userAgent, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("userAgent", userAgent);
         if (opLambda != null) {

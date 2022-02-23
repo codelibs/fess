@@ -175,11 +175,13 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsRelatedContentCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsRelatedContentCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -386,10 +388,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setContent_CommonTerms(String content) {
         setContent_CommonTerms(content, null);
     }
 
+    @Deprecated
     public void setContent_CommonTerms(String content, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("content", content);
         if (opLambda != null) {
@@ -608,10 +612,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy) {
         setCreatedBy_CommonTerms(createdBy, null);
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
@@ -786,10 +792,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime) {
         setCreatedTime_CommonTerms(createdTime, null);
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
         if (opLambda != null) {
@@ -964,10 +972,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setSortOrder_CommonTerms(Integer sortOrder) {
         setSortOrder_CommonTerms(sortOrder, null);
     }
 
+    @Deprecated
     public void setSortOrder_CommonTerms(Integer sortOrder, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("sortOrder", sortOrder);
         if (opLambda != null) {
@@ -1186,10 +1196,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setTerm_CommonTerms(String term) {
         setTerm_CommonTerms(term, null);
     }
 
+    @Deprecated
     public void setTerm_CommonTerms(String term, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("term", term);
         if (opLambda != null) {
@@ -1408,10 +1420,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy) {
         setUpdatedBy_CommonTerms(updatedBy, null);
     }
 
+    @Deprecated
     public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
@@ -1586,10 +1600,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime) {
         setUpdatedTime_CommonTerms(updatedTime, null);
     }
 
+    @Deprecated
     public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {
@@ -1808,10 +1824,12 @@ public abstract class BsRelatedContentCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setVirtualHost_CommonTerms(String virtualHost) {
         setVirtualHost_CommonTerms(virtualHost, null);
     }
 
+    @Deprecated
     public void setVirtualHost_CommonTerms(String virtualHost, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("virtualHost", virtualHost);
         if (opLambda != null) {

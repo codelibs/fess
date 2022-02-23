@@ -174,11 +174,13 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsUserCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsUserCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -386,10 +388,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setBusinessCategory_CommonTerms(String businessCategory) {
         setBusinessCategory_CommonTerms(businessCategory, null);
     }
 
+    @Deprecated
     public void setBusinessCategory_CommonTerms(String businessCategory, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("businessCategory", businessCategory);
         if (opLambda != null) {
@@ -608,10 +612,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCarLicense_CommonTerms(String carLicense) {
         setCarLicense_CommonTerms(carLicense, null);
     }
 
+    @Deprecated
     public void setCarLicense_CommonTerms(String carLicense, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("carLicense", carLicense);
         if (opLambda != null) {
@@ -830,10 +836,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCity_CommonTerms(String city) {
         setCity_CommonTerms(city, null);
     }
 
+    @Deprecated
     public void setCity_CommonTerms(String city, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("city", city);
         if (opLambda != null) {
@@ -1053,10 +1061,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setDepartmentNumber_CommonTerms(String departmentNumber) {
         setDepartmentNumber_CommonTerms(departmentNumber, null);
     }
 
+    @Deprecated
     public void setDepartmentNumber_CommonTerms(String departmentNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("departmentNumber", departmentNumber);
         if (opLambda != null) {
@@ -1275,10 +1285,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setDescription_CommonTerms(String description) {
         setDescription_CommonTerms(description, null);
     }
 
+    @Deprecated
     public void setDescription_CommonTerms(String description, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("description", description);
         if (opLambda != null) {
@@ -1500,10 +1512,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setDestinationIndicator_CommonTerms(String destinationIndicator) {
         setDestinationIndicator_CommonTerms(destinationIndicator, null);
     }
 
+    @Deprecated
     public void setDestinationIndicator_CommonTerms(String destinationIndicator, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("destinationIndicator", destinationIndicator);
         if (opLambda != null) {
@@ -1722,10 +1736,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setDisplayName_CommonTerms(String displayName) {
         setDisplayName_CommonTerms(displayName, null);
     }
 
+    @Deprecated
     public void setDisplayName_CommonTerms(String displayName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("displayName", displayName);
         if (opLambda != null) {
@@ -1944,10 +1960,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setEmployeeNumber_CommonTerms(String employeeNumber) {
         setEmployeeNumber_CommonTerms(employeeNumber, null);
     }
 
+    @Deprecated
     public void setEmployeeNumber_CommonTerms(String employeeNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("employeeNumber", employeeNumber);
         if (opLambda != null) {
@@ -2166,10 +2184,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setEmployeeType_CommonTerms(String employeeType) {
         setEmployeeType_CommonTerms(employeeType, null);
     }
 
+    @Deprecated
     public void setEmployeeType_CommonTerms(String employeeType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("employeeType", employeeType);
         if (opLambda != null) {
@@ -2392,10 +2412,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setFacsimileTelephoneNumber_CommonTerms(String facsimileTelephoneNumber) {
         setFacsimileTelephoneNumber_CommonTerms(facsimileTelephoneNumber, null);
     }
 
+    @Deprecated
     public void setFacsimileTelephoneNumber_CommonTerms(String facsimileTelephoneNumber,
             ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("facsimileTelephoneNumber", facsimileTelephoneNumber);
@@ -2571,10 +2593,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setGidNumber_CommonTerms(Long gidNumber) {
         setGidNumber_CommonTerms(gidNumber, null);
     }
 
+    @Deprecated
     public void setGidNumber_CommonTerms(Long gidNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("gidNumber", gidNumber);
         if (opLambda != null) {
@@ -2793,10 +2817,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setGivenName_CommonTerms(String givenName) {
         setGivenName_CommonTerms(givenName, null);
     }
 
+    @Deprecated
     public void setGivenName_CommonTerms(String givenName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("givenName", givenName);
         if (opLambda != null) {
@@ -3015,10 +3041,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setGroups_CommonTerms(String groups) {
         setGroups_CommonTerms(groups, null);
     }
 
+    @Deprecated
     public void setGroups_CommonTerms(String groups, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("groups", groups);
         if (opLambda != null) {
@@ -3237,10 +3265,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setHomeDirectory_CommonTerms(String homeDirectory) {
         setHomeDirectory_CommonTerms(homeDirectory, null);
     }
 
+    @Deprecated
     public void setHomeDirectory_CommonTerms(String homeDirectory, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("homeDirectory", homeDirectory);
         if (opLambda != null) {
@@ -3459,10 +3489,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setHomePhone_CommonTerms(String homePhone) {
         setHomePhone_CommonTerms(homePhone, null);
     }
 
+    @Deprecated
     public void setHomePhone_CommonTerms(String homePhone, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("homePhone", homePhone);
         if (opLambda != null) {
@@ -3682,10 +3714,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setHomePostalAddress_CommonTerms(String homePostalAddress) {
         setHomePostalAddress_CommonTerms(homePostalAddress, null);
     }
 
+    @Deprecated
     public void setHomePostalAddress_CommonTerms(String homePostalAddress, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("homePostalAddress", homePostalAddress);
         if (opLambda != null) {
@@ -3904,10 +3938,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setInitials_CommonTerms(String initials) {
         setInitials_CommonTerms(initials, null);
     }
 
+    @Deprecated
     public void setInitials_CommonTerms(String initials, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("initials", initials);
         if (opLambda != null) {
@@ -4130,10 +4166,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setInternationaliSDNNumber_CommonTerms(String internationaliSDNNumber) {
         setInternationaliSDNNumber_CommonTerms(internationaliSDNNumber, null);
     }
 
+    @Deprecated
     public void setInternationaliSDNNumber_CommonTerms(String internationaliSDNNumber,
             ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("internationaliSDNNumber", internationaliSDNNumber);
@@ -4353,10 +4391,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setLabeledURI_CommonTerms(String labeledURI) {
         setLabeledURI_CommonTerms(labeledURI, null);
     }
 
+    @Deprecated
     public void setLabeledURI_CommonTerms(String labeledURI, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("labeledURI", labeledURI);
         if (opLambda != null) {
@@ -4575,10 +4615,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setMail_CommonTerms(String mail) {
         setMail_CommonTerms(mail, null);
     }
 
+    @Deprecated
     public void setMail_CommonTerms(String mail, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("mail", mail);
         if (opLambda != null) {
@@ -4797,10 +4839,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setMobile_CommonTerms(String mobile) {
         setMobile_CommonTerms(mobile, null);
     }
 
+    @Deprecated
     public void setMobile_CommonTerms(String mobile, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("mobile", mobile);
         if (opLambda != null) {
@@ -5019,10 +5063,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name) {
         setName_CommonTerms(name, null);
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
@@ -5241,10 +5287,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPager_CommonTerms(String pager) {
         setPager_CommonTerms(pager, null);
     }
 
+    @Deprecated
     public void setPager_CommonTerms(String pager, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("pager", pager);
         if (opLambda != null) {
@@ -5463,10 +5511,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPassword_CommonTerms(String password) {
         setPassword_CommonTerms(password, null);
     }
 
+    @Deprecated
     public void setPassword_CommonTerms(String password, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("password", password);
         if (opLambda != null) {
@@ -5694,10 +5744,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPhysicalDeliveryOfficeName_CommonTerms(String physicalDeliveryOfficeName) {
         setPhysicalDeliveryOfficeName_CommonTerms(physicalDeliveryOfficeName, null);
     }
 
+    @Deprecated
     public void setPhysicalDeliveryOfficeName_CommonTerms(String physicalDeliveryOfficeName,
             ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("physicalDeliveryOfficeName", physicalDeliveryOfficeName);
@@ -5917,10 +5969,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPostOfficeBox_CommonTerms(String postOfficeBox) {
         setPostOfficeBox_CommonTerms(postOfficeBox, null);
     }
 
+    @Deprecated
     public void setPostOfficeBox_CommonTerms(String postOfficeBox, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("postOfficeBox", postOfficeBox);
         if (opLambda != null) {
@@ -6139,10 +6193,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPostalAddress_CommonTerms(String postalAddress) {
         setPostalAddress_CommonTerms(postalAddress, null);
     }
 
+    @Deprecated
     public void setPostalAddress_CommonTerms(String postalAddress, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("postalAddress", postalAddress);
         if (opLambda != null) {
@@ -6361,10 +6417,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPostalCode_CommonTerms(String postalCode) {
         setPostalCode_CommonTerms(postalCode, null);
     }
 
+    @Deprecated
     public void setPostalCode_CommonTerms(String postalCode, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("postalCode", postalCode);
         if (opLambda != null) {
@@ -6584,10 +6642,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPreferredLanguage_CommonTerms(String preferredLanguage) {
         setPreferredLanguage_CommonTerms(preferredLanguage, null);
     }
 
+    @Deprecated
     public void setPreferredLanguage_CommonTerms(String preferredLanguage, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("preferredLanguage", preferredLanguage);
         if (opLambda != null) {
@@ -6807,10 +6867,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setRegisteredAddress_CommonTerms(String registeredAddress) {
         setRegisteredAddress_CommonTerms(registeredAddress, null);
     }
 
+    @Deprecated
     public void setRegisteredAddress_CommonTerms(String registeredAddress, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("registeredAddress", registeredAddress);
         if (opLambda != null) {
@@ -7029,10 +7091,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setRoles_CommonTerms(String roles) {
         setRoles_CommonTerms(roles, null);
     }
 
+    @Deprecated
     public void setRoles_CommonTerms(String roles, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("roles", roles);
         if (opLambda != null) {
@@ -7251,10 +7315,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setRoomNumber_CommonTerms(String roomNumber) {
         setRoomNumber_CommonTerms(roomNumber, null);
     }
 
+    @Deprecated
     public void setRoomNumber_CommonTerms(String roomNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("roomNumber", roomNumber);
         if (opLambda != null) {
@@ -7473,10 +7539,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setState_CommonTerms(String state) {
         setState_CommonTerms(state, null);
     }
 
+    @Deprecated
     public void setState_CommonTerms(String state, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("state", state);
         if (opLambda != null) {
@@ -7695,10 +7763,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setStreet_CommonTerms(String street) {
         setStreet_CommonTerms(street, null);
     }
 
+    @Deprecated
     public void setStreet_CommonTerms(String street, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("street", street);
         if (opLambda != null) {
@@ -7917,10 +7987,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setSurname_CommonTerms(String surname) {
         setSurname_CommonTerms(surname, null);
     }
 
+    @Deprecated
     public void setSurname_CommonTerms(String surname, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("surname", surname);
         if (opLambda != null) {
@@ -8139,10 +8211,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setTelephoneNumber_CommonTerms(String telephoneNumber) {
         setTelephoneNumber_CommonTerms(telephoneNumber, null);
     }
 
+    @Deprecated
     public void setTelephoneNumber_CommonTerms(String telephoneNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("telephoneNumber", telephoneNumber);
         if (opLambda != null) {
@@ -8369,10 +8443,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setTeletexTerminalIdentifier_CommonTerms(String teletexTerminalIdentifier) {
         setTeletexTerminalIdentifier_CommonTerms(teletexTerminalIdentifier, null);
     }
 
+    @Deprecated
     public void setTeletexTerminalIdentifier_CommonTerms(String teletexTerminalIdentifier,
             ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("teletexTerminalIdentifier", teletexTerminalIdentifier);
@@ -8592,10 +8668,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setTitle_CommonTerms(String title) {
         setTitle_CommonTerms(title, null);
     }
 
+    @Deprecated
     public void setTitle_CommonTerms(String title, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("title", title);
         if (opLambda != null) {
@@ -8770,10 +8848,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUidNumber_CommonTerms(Long uidNumber) {
         setUidNumber_CommonTerms(uidNumber, null);
     }
 
+    @Deprecated
     public void setUidNumber_CommonTerms(Long uidNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("uidNumber", uidNumber);
         if (opLambda != null) {
@@ -8992,10 +9072,12 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setX121Address_CommonTerms(String x121Address) {
         setX121Address_CommonTerms(x121Address, null);
     }
 
+    @Deprecated
     public void setX121Address_CommonTerms(String x121Address, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("x121Address", x121Address);
         if (opLambda != null) {

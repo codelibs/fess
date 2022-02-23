@@ -170,11 +170,13 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsUserInfoCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsUserInfoCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -337,10 +339,12 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedAt_CommonTerms(LocalDateTime createdAt) {
         setCreatedAt_CommonTerms(createdAt, null);
     }
 
+    @Deprecated
     public void setCreatedAt_CommonTerms(LocalDateTime createdAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdAt", createdAt);
         if (opLambda != null) {
@@ -515,10 +519,12 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUpdatedAt_CommonTerms(LocalDateTime updatedAt) {
         setUpdatedAt_CommonTerms(updatedAt, null);
     }
 
+    @Deprecated
     public void setUpdatedAt_CommonTerms(LocalDateTime updatedAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("updatedAt", updatedAt);
         if (opLambda != null) {

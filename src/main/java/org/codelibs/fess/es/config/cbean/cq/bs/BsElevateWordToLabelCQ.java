@@ -176,11 +176,13 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsElevateWordToLabelCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsElevateWordToLabelCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -387,10 +389,12 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setElevateWordId_CommonTerms(String elevateWordId) {
         setElevateWordId_CommonTerms(elevateWordId, null);
     }
 
+    @Deprecated
     public void setElevateWordId_CommonTerms(String elevateWordId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
@@ -609,10 +613,12 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setLabelTypeId_CommonTerms(String labelTypeId) {
         setLabelTypeId_CommonTerms(labelTypeId, null);
     }
 
+    @Deprecated
     public void setLabelTypeId_CommonTerms(String labelTypeId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("labelTypeId", labelTypeId);
         if (opLambda != null) {

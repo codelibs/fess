@@ -174,11 +174,13 @@ public abstract class BsRoleCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsRoleCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsRoleCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -385,10 +387,12 @@ public abstract class BsRoleCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name) {
         setName_CommonTerms(name, null);
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {

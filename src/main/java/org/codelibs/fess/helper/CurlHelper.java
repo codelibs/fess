@@ -44,7 +44,7 @@ public class CurlHelper {
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String authorities = fessConfig.getOpenSearchHttpSslCertificateAuthorities();
+        final String authorities = fessConfig.getElasticsearchHttpSslCertificateAuthorities();
         if (StringUtil.isNotBlank(authorities)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Loading certificate_authorities: {}", authorities);
@@ -87,8 +87,8 @@ public class CurlHelper {
     public CurlRequest request(final Method method, final String path) {
         final CurlRequest request = new CurlRequest(method, ResourceUtil.getFesenHttpUrl() + path);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String username = fessConfig.getOpenSearchUsername();
-        final String password = fessConfig.getOpenSearchPassword();
+        final String username = fessConfig.getElasticsearchUsername();
+        final String password = fessConfig.getElasticsearchPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
             final String value = username + ":" + password;
             final String basicAuth = "Basic " + java.util.Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));

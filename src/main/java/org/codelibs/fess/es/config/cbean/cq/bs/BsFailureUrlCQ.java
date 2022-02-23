@@ -174,11 +174,13 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsFailureUrlCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsFailureUrlCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -385,10 +387,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setConfigId_CommonTerms(String configId) {
         setConfigId_CommonTerms(configId, null);
     }
 
+    @Deprecated
     public void setConfigId_CommonTerms(String configId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("configId", configId);
         if (opLambda != null) {
@@ -563,10 +567,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setErrorCount_CommonTerms(Integer errorCount) {
         setErrorCount_CommonTerms(errorCount, null);
     }
 
+    @Deprecated
     public void setErrorCount_CommonTerms(Integer errorCount, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("errorCount", errorCount);
         if (opLambda != null) {
@@ -785,10 +791,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setErrorLog_CommonTerms(String errorLog) {
         setErrorLog_CommonTerms(errorLog, null);
     }
 
+    @Deprecated
     public void setErrorLog_CommonTerms(String errorLog, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("errorLog", errorLog);
         if (opLambda != null) {
@@ -1007,10 +1015,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setErrorName_CommonTerms(String errorName) {
         setErrorName_CommonTerms(errorName, null);
     }
 
+    @Deprecated
     public void setErrorName_CommonTerms(String errorName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("errorName", errorName);
         if (opLambda != null) {
@@ -1185,10 +1195,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setLastAccessTime_CommonTerms(Long lastAccessTime) {
         setLastAccessTime_CommonTerms(lastAccessTime, null);
     }
 
+    @Deprecated
     public void setLastAccessTime_CommonTerms(Long lastAccessTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("lastAccessTime", lastAccessTime);
         if (opLambda != null) {
@@ -1407,10 +1419,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setThreadName_CommonTerms(String threadName) {
         setThreadName_CommonTerms(threadName, null);
     }
 
+    @Deprecated
     public void setThreadName_CommonTerms(String threadName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("threadName", threadName);
         if (opLambda != null) {
@@ -1629,10 +1643,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUrl_CommonTerms(String url) {
         setUrl_CommonTerms(url, null);
     }
 
+    @Deprecated
     public void setUrl_CommonTerms(String url, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("url", url);
         if (opLambda != null) {

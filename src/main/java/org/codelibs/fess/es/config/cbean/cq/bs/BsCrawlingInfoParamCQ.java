@@ -176,11 +176,13 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsCrawlingInfoParamCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsCrawlingInfoParamCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -387,10 +389,12 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCrawlingInfoId_CommonTerms(String crawlingInfoId) {
         setCrawlingInfoId_CommonTerms(crawlingInfoId, null);
     }
 
+    @Deprecated
     public void setCrawlingInfoId_CommonTerms(String crawlingInfoId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
@@ -565,10 +569,12 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime) {
         setCreatedTime_CommonTerms(createdTime, null);
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
         if (opLambda != null) {
@@ -787,10 +793,12 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setKey_CommonTerms(String key) {
         setKey_CommonTerms(key, null);
     }
 
+    @Deprecated
     public void setKey_CommonTerms(String key, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("key", key);
         if (opLambda != null) {
@@ -1009,10 +1017,12 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setValue_CommonTerms(String value) {
         setValue_CommonTerms(value, null);
     }
 
+    @Deprecated
     public void setValue_CommonTerms(String value, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("value", value);
         if (opLambda != null) {

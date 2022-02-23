@@ -175,11 +175,13 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsThumbnailQueueCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsThumbnailQueueCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -386,10 +388,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy) {
         setCreatedBy_CommonTerms(createdBy, null);
     }
 
+    @Deprecated
     public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
@@ -564,10 +568,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime) {
         setCreatedTime_CommonTerms(createdTime, null);
     }
 
+    @Deprecated
     public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
         if (opLambda != null) {
@@ -786,10 +792,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setGenerator_CommonTerms(String generator) {
         setGenerator_CommonTerms(generator, null);
     }
 
+    @Deprecated
     public void setGenerator_CommonTerms(String generator, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("generator", generator);
         if (opLambda != null) {
@@ -1008,10 +1016,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setPath_CommonTerms(String path) {
         setPath_CommonTerms(path, null);
     }
 
+    @Deprecated
     public void setPath_CommonTerms(String path, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("path", path);
         if (opLambda != null) {
@@ -1230,10 +1240,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setTarget_CommonTerms(String target) {
         setTarget_CommonTerms(target, null);
     }
 
+    @Deprecated
     public void setTarget_CommonTerms(String target, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("target", target);
         if (opLambda != null) {
@@ -1452,10 +1464,12 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setThumbnailId_CommonTerms(String thumbnailId) {
         setThumbnailId_CommonTerms(thumbnailId, null);
     }
 
+    @Deprecated
     public void setThumbnailId_CommonTerms(String thumbnailId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("thumbnail_id", thumbnailId);
         if (opLambda != null) {

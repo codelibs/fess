@@ -174,11 +174,13 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsClickLogCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsClickLogCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -385,10 +387,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUrlId_CommonTerms(String urlId) {
         setUrlId_CommonTerms(urlId, null);
     }
 
+    @Deprecated
     public void setUrlId_CommonTerms(String urlId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("urlId", urlId);
         if (opLambda != null) {
@@ -607,10 +611,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setDocId_CommonTerms(String docId) {
         setDocId_CommonTerms(docId, null);
     }
 
+    @Deprecated
     public void setDocId_CommonTerms(String docId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("docId", docId);
         if (opLambda != null) {
@@ -785,10 +791,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setOrder_CommonTerms(Integer order) {
         setOrder_CommonTerms(order, null);
     }
 
+    @Deprecated
     public void setOrder_CommonTerms(Integer order, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("order", order);
         if (opLambda != null) {
@@ -1007,10 +1015,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setQueryId_CommonTerms(String queryId) {
         setQueryId_CommonTerms(queryId, null);
     }
 
+    @Deprecated
     public void setQueryId_CommonTerms(String queryId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("queryId", queryId);
         if (opLambda != null) {
@@ -1187,10 +1197,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setQueryRequestedAt_CommonTerms(LocalDateTime queryRequestedAt) {
         setQueryRequestedAt_CommonTerms(queryRequestedAt, null);
     }
 
+    @Deprecated
     public void setQueryRequestedAt_CommonTerms(LocalDateTime queryRequestedAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("queryRequestedAt", queryRequestedAt);
         if (opLambda != null) {
@@ -1365,10 +1377,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setRequestedAt_CommonTerms(LocalDateTime requestedAt) {
         setRequestedAt_CommonTerms(requestedAt, null);
     }
 
+    @Deprecated
     public void setRequestedAt_CommonTerms(LocalDateTime requestedAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("requestedAt", requestedAt);
         if (opLambda != null) {
@@ -1587,10 +1601,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUrl_CommonTerms(String url) {
         setUrl_CommonTerms(url, null);
     }
 
+    @Deprecated
     public void setUrl_CommonTerms(String url, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("url", url);
         if (opLambda != null) {
@@ -1809,10 +1825,12 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setUserSessionId_CommonTerms(String userSessionId) {
         setUserSessionId_CommonTerms(userSessionId, null);
     }
 
+    @Deprecated
     public void setUserSessionId_CommonTerms(String userSessionId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("userSessionId", userSessionId);
         if (opLambda != null) {

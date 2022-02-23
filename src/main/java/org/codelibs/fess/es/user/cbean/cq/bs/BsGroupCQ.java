@@ -174,11 +174,13 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
+    @Deprecated
     public BsGroupCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
+    @Deprecated
     public BsGroupCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
@@ -341,10 +343,12 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setGidNumber_CommonTerms(Long gidNumber) {
         setGidNumber_CommonTerms(gidNumber, null);
     }
 
+    @Deprecated
     public void setGidNumber_CommonTerms(Long gidNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("gidNumber", gidNumber);
         if (opLambda != null) {
@@ -563,10 +567,12 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
         }
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name) {
         setName_CommonTerms(name, null);
     }
 
+    @Deprecated
     public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
         CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
