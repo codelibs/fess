@@ -369,5 +369,9 @@ public class ViewHelperTest extends UnitFessTestCase {
         document.put("title", "on 111 strong on aaaa");
         assertEquals("<strong>on</strong> 111 str<strong>on</strong>g <strong>on</strong> <strong>aaa</strong>a",
                 viewHelper.getContentTitle(document));
+
+        querySet.add("$");
+        document.put("title", "$test");
+        assertEquals("<strong>$</strong>test", viewHelper.getContentTitle(document));
     }
 }

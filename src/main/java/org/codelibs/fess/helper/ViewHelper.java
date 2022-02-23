@@ -238,7 +238,7 @@ public class ViewHelper {
             final Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(value);
             final StringBuffer buf = new StringBuffer(value.length() + 100);
             while (matcher.find()) {
-                matcher.appendReplacement(buf, highlightTagPre + matcher.group(0) + highlightTagPost);
+                matcher.appendReplacement(buf, Matcher.quoteReplacement(highlightTagPre + matcher.group(0) + highlightTagPost));
             }
             matcher.appendTail(buf);
             return buf.toString();
