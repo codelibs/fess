@@ -8,8 +8,8 @@ Fess Enterprise Search Server [![Tweet](https://img.shields.io/twitter/url/http/
 
 Fess is a very powerful and easily deployable Enterprise Search Server. You can quickly install and run Fess on any platform where you can run the Java Runtime Environment. Fess is provided under the [Apache License 2.0](LICENSE).
 
-Fess is based on [Elasticsearch](https://www.elastic.co/products/elasticsearch), but knowledge/experience about Elasticsearch is _not_ required. Fess provides an easy to use Administration GUI to configure the system via your browser.
-Fess also contains a Crawler, which can crawl documents on a [web server](https://fess.codelibs.org/13.16/admin/webconfig-guide.html), [file system](https://fess.codelibs.org/13.16/admin/fileconfig-guide.html), or [Data Store](https://fess.codelibs.org/13.16/admin/dataconfig-guide.html) (such as a CSV or database). Many file formats are supported including (but not limited to): Microsoft Office, PDF, and zip.
+Fess is based on [Elasticsearch](https://github.com/elastic/elasticsearch)/[OpenSearch](https://github.com/opensearch-project/OpenSearch), but knowledge/experience about Elasticsearch/OpenSearch is _not_ required. Fess provides an easy to use Administration GUI to configure the system via your browser.
+Fess also contains a Crawler, which can crawl documents on a [web server](https://fess.codelibs.org/14.0/admin/webconfig-guide.html), [file system](https://fess.codelibs.org/14.0/admin/fileconfig-guide.html), or [Data Store](https://fess.codelibs.org/14.0/admin/dataconfig-guide.html) (such as a CSV or database). Many file formats are supported including (but not limited to): Microsoft Office, PDF, and zip.
 
 *[Fess Site Search](https://github.com/codelibs/fess-site-search)* is a free alternative to [Google Site Search](https://enterprise.google.com/search/products/gss.html). For more details, see the [FSS JS Generator documentation](https://fss-generator.codelibs.org/docs/manual).
 
@@ -27,15 +27,15 @@ There are 2 ways to try Fess. The first is to download and install yourself. The
 
 ### Download and Install/Run
 
-Fess 13.16 is now available and can be downloaded on the [Releases page](https://github.com/codelibs/fess/releases "download"). Downloads come in 3 flavors: deb, rpm, zip.
+Fess 14.0 is now available and can be downloaded on the [Releases page](https://github.com/codelibs/fess/releases "download"). Downloads come in 3 flavors: deb, rpm, zip.
 
 The following commands show how to use the zip download:
 
-    $ unzip fess-13.16.x.zip
-    $ cd fess-13.16.x
+    $ unzip fess-14.0.x.zip
+    $ cd fess-14.0.x
     $ ./bin/fess
 
-For more details, see the [Installation Guide](https://fess.codelibs.org/13.16/install/index.html).
+For more details, see the [Installation Guide](https://fess.codelibs.org/14.0/install/index.html).
 
 ### Docker
 
@@ -51,7 +51,7 @@ We provide Docker images on [ghcr.io](https://github.com/orgs/codelibs/packages)
 
 ![Admin UI](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-You can register crawling targets in the Admin UI on the (Web, File, Data Store) crawler configuration pages, and then start the Crawler manually on the [Scheduler page](https://fess.codelibs.org/13.16/admin/scheduler-guide.html).
+You can register crawling targets in the Admin UI on the (Web, File, Data Store) crawler configuration pages, and then start the Crawler manually on the [Scheduler page](https://fess.codelibs.org/14.0/admin/scheduler-guide.html).
 
 ## Migration from another search provider
 
@@ -59,7 +59,7 @@ Please see [MIGRATION.md](MIGRATION.md).
 
 ## Data Store
 
-Currently, Fess supports crawling the following [storage locations and APIs](https://fess.codelibs.org/13.16/admin/dataconfig-guide.html):
+Currently, Fess supports crawling the following [storage locations and APIs](https://fess.codelibs.org/14.0/admin/dataconfig-guide.html):
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
