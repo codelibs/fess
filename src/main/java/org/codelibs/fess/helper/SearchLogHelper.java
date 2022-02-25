@@ -20,8 +20,10 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -109,7 +111,8 @@ public class SearchLogHelper {
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
         final SearchLog searchLog = new SearchLog();
 
-        if (ComponentUtil.getFessConfig().isUserInfo()) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isUserInfo()) {
             final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
@@ -164,13 +167,22 @@ public class SearchLogHelper {
         @SuppressWarnings("unchecked")
         final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
         if (fieldLogMap != null) {
-            final int queryMaxLength = ComponentUtil.getFessConfig().getQueryMaxLengthAsInteger();
+            final int queryMaxLength = fessConfig.getQueryMaxLengthAsInteger();
             for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
                 for (final String value : logEntry.getValue()) {
                     searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
                 }
             }
         }
+
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
+            for (final String s : fessConfig.getSearchlogRequestHeadersAsArray()) {
+                final String key = s.replace('-', '_').toLowerCase(Locale.ENGLISH);
+                Collections.list(req.getHeaders(s)).stream().forEach(v -> {
+                    searchLog.addRequestHeaderValue(key, v);
+                });
+            }
+        });
 
         addDocumentsInResponse(queryResponseList, searchLog);
 

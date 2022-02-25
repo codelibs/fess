@@ -451,7 +451,10 @@ public class AdminBackupAction extends FessAdminAction {
                 appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
                 final Map<String, List<String>> searchFieldMap = entity.getSearchFieldLogList().stream()
                         .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
-                appendJson("search-field", searchFieldMap, buf);
+                appendJson("search-field", searchFieldMap, buf).append(',');
+                final Map<String, List<String>> requestHeaderMap = entity.getRequestHeaderList().stream()
+                        .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+                appendJson("headers", requestHeaderMap, buf);
                 buf.append('}');
                 buf.append('\n');
                 try {

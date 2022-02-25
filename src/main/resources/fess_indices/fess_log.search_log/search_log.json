@@ -1,6 +1,14 @@
 {
     "dynamic_templates": [
       {
+        "headers": {
+          "path_match": "headers.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      },
+      {
         "search_fields": {
           "path_match": "searchField.*",
           "mapping": {

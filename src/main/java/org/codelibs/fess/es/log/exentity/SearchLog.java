@@ -43,6 +43,8 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     private final List<Pair<String, String>> searchFieldLogList = new ArrayList<>();
 
+    private final List<Pair<String, String>> headerList = new ArrayList<>();
+
     private OptionalEntity<UserInfo> userInfo;
 
     private Map<String, Object> fields;
@@ -70,6 +72,12 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
     public void addSearchFieldLogValue(final String name, final String value) {
         if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
             searchFieldLogList.add(new Pair<>(name, value));
+        }
+    }
+
+    public void addRequestHeaderValue(final String name, final String value) {
+        if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
+            headerList.add(new Pair<>(name, value));
         }
     }
 
@@ -103,6 +111,10 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
         return searchFieldLogList;
     }
 
+    public List<Pair<String, String>> getRequestHeaderList() {
+        return headerList;
+    }
+
     public void addField(final String key, final Object value) {
         fields.put(key, value);
     }
@@ -120,6 +132,9 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
         final Map<String, List<String>> searchFieldMap = searchFieldLogList.stream()
                 .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
         sourceMap.put("searchField", searchFieldMap);
+        final Map<String, List<String>> headerMap = headerList.stream()
+                .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+        sourceMap.put("headers", headerMap);
         sourceMap.put("documents", documentList);
         return sourceMap;
     }
@@ -142,12 +157,12 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     @Override
     public String toString() {
-        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", userInfo=" + userInfo + ", fields=" + fields + ", accessType="
-                + accessType + ", clientIp=" + clientIp + ", hitCount=" + hitCount + ", languages=" + languages + ", queryId=" + queryId
-                + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", queryTime=" + queryTime + ", referer=" + referer
-                + ", requestedAt=" + requestedAt + ", responseTime=" + responseTime + ", roles=" + Arrays.toString(roles) + ", searchWord="
-                + searchWord + ", user=" + user + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId="
-                + userSessionId + ", virtualHost=" + virtualHost + ", documents=" + documentList + "]";
+        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", headerList=" + headerList + ", userInfo=" + userInfo + ", fields="
+                + fields + ", accessType=" + accessType + ", clientIp=" + clientIp + ", hitCount=" + hitCount + ", languages=" + languages
+                + ", queryId=" + queryId + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", queryTime=" + queryTime
+                + ", referer=" + referer + ", requestedAt=" + requestedAt + ", responseTime=" + responseTime + ", roles="
+                + Arrays.toString(roles) + ", searchWord=" + searchWord + ", user=" + user + ", userAgent=" + userAgent + ", userInfoId="
+                + userInfoId + ", userSessionId=" + userSessionId + ", virtualHost=" + virtualHost + ", documents=" + documentList + "]";
     }
 
     @Override

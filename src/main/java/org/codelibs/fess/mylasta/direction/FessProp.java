@@ -2106,4 +2106,11 @@ public interface FessProp {
     default String getFesenType() {
         return getElasticsearchType();
     }
+
+    String getSearchlogRequestHeaders();
+
+    default String[] getSearchlogRequestHeadersAsArray() {
+        return split(getSearchlogRequestHeaders(), ",")
+                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
+    }
 }

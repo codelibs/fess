@@ -544,6 +544,9 @@ public class SearchLogService {
             e.getSearchFieldLogList().stream().forEach(p -> {
                 params.put(p.getFirst(), p.getSecond());
             });
+            e.getRequestHeaderList().stream().forEach(p -> {
+                params.put(p.getFirst(), p.getSecond());
+            });
             return params;
         }).get();
     }
