@@ -51,6 +51,7 @@ import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.curl.CurlResponse;
+import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fesen.client.HttpClient;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
@@ -1409,6 +1410,13 @@ public class SearchEngineClient implements Client {
 
     public void setClusterName(final String clusterName) {
         this.clusterName = clusterName;
+    }
+
+    public EngineInfo getEngineInfo() {
+        if (client instanceof HttpClient httpClient) {
+            return httpClient.getEngineInfo();
+        }
+        throw new SearchEngineClientException("client is not HttpClient.");
     }
 
     //
