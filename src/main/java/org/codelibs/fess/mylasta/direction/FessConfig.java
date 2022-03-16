@@ -355,7 +355,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60 */
     String CRAWLER_SYSTEM_MONITOR_INTERVAL = "crawler.system.monitor.interval";
 
-    /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
+    /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
     /** The key of the configuration. e.g. title=title:string<br>
@@ -2691,7 +2691,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
-     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* <br>
+     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.* <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataContentExcludes();
@@ -10215,7 +10215,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
             defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404");
             defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");
-            defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES, "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*");
+            defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES,
+                    "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*");
             defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING, "title=title:string\nTitle=title:string\n");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH, "//BODY");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH, "//HTML/@lang");
