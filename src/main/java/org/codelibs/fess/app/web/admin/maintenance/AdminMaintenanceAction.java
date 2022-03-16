@@ -217,7 +217,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     protected void writeFessBasicConfig(final ZipOutputStream zos, final String id) {
-        final String index = ".fess_basic_config";
+        final String index = "fess_basic_config";
         final ZipEntry entry = new ZipEntry(id + "/fess_basic_config.bulk");
         try {
             zos.putNextEntry(entry);
