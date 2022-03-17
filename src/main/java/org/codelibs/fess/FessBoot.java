@@ -37,6 +37,8 @@ public class FessBoot extends TomcatBoot {
 
     private static final String FESS_TEMP_PATH = "fess.temp.path";
 
+    private static final String FESS_VAR_PATH = "fess.var.path";
+
     private static final String FESS_WEBAPP_PATH = "fess.webapp.path";
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
@@ -74,7 +76,10 @@ public class FessBoot extends TomcatBoot {
 
         final TomcatBoot tomcatBoot = new FessBoot(getPort(), getContextPath()) //
                 .useTldDetect(); // for JSP
-        if (tempPath != null) {
+        final String varPath = System.getProperty(FESS_VAR_PATH);
+        if (varPath != null) {
+            tomcatBoot.atBaseDir(new File(varPath, "webapp").getAbsolutePath());
+        } else if (tempPath != null) {
             tomcatBoot.atBaseDir(new File(tempPath, "webapp").getAbsolutePath());
         }
         final String tomcatConfigPath = getTomcatConfigPath();
@@ -90,8 +95,8 @@ public class FessBoot extends TomcatBoot {
             op.replace("fess.log.path", fessLogPath.replace("\\", "/"));
         }).asYouLikeIt(resource -> {
             final Host host = resource.getHost();
-            if (host instanceof StandardHost) {
-                ((StandardHost) host).setErrorReportValveClass(SuppressErrorReportValve.class.getName());
+            if (host instanceof StandardHost standardHost) {
+                standardHost.setErrorReportValveClass(SuppressErrorReportValve.class.getName());
             }
         }).useTldDetect(jarName -> (jarName.contains("jstl") || jarName.contains("lasta-taglib"))).asDevelopment(isNoneEnv()).bootAwait();
     }
