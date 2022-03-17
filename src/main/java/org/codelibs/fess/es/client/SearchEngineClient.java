@@ -260,6 +260,12 @@ public class SearchEngineClient implements Client {
                 }
                 config.disableESLogger();
                 runner.onBuild((number, settingsBuilder) -> {
+                    final File moduleDir = new File(esDir, "modules");
+                    if (moduleDir.isDirectory()) {
+                        settingsBuilder.put("path.modules", moduleDir.getAbsolutePath());
+                    } else {
+                        settingsBuilder.put("path.modules", new File(System.getProperty("user.dir"), "modules").getAbsolutePath());
+                    }
                     final File pluginDir = new File(esDir, "plugins");
                     if (pluginDir.isDirectory()) {
                         settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module" basedir=".">
+	<property name="modules.dir" value="${basedir}/modules" />
+	<property name="target.dir" value="${basedir}/target/modules" />
+
+	<!-- Maven Repository -->
+	<property name="maven.snapshot.repo.url" value="https://maven.codelibs.org/" />
+	<property name="maven.release.repo.url" value="https://maven.codelibs.org/" />
+	<property name="opensearch.version" value="1.2.4" />
+
+	<target name="install.modules">
+		<mkdir dir="${target.dir}" />
+		<delete dir="${modules.dir}" />
+		<mkdir dir="${modules.dir}" />
+
+		<!-- analysis-common -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="analysis-common" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+		<!-- geo -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="geo" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+		<!-- lang-expression -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="lang-expression" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+		<!-- lang-painless -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="lang-painless" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+		<!-- mapper-extras -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="mapper-extras" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+		<!-- reindex -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="reindex" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+		<!-- transport-netty4 -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="transport-netty4" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
+
+		<antcall target="remove.jars" />
+	</target>
+
+	<target name="install.module">
+		<get dest="${target.dir}">
+			<url url="${repo.url}/${module.groupId}/${module.name.prefix}${module.name}/${module.version}/${module.name.prefix}${module.name}-${module.zip.version}.zip" />
+		</get>
+		<unzip dest="${modules.dir}/${module.name}" src="${target.dir}/${module.name.prefix}${module.name}-${module.zip.version}.zip">
+			<patternset>
+				<include name="**" />
+			</patternset>
+			<cutdirsmapper dirs="1" />
+		</unzip>
+	</target>
+
+	<target name="remove.jars" if="with.fess">
+		<delete>
+			<fileset dir="${modules.dir}">
+				<include name="lang-expression/asm-*" />
+				<include name="lang-painless/asm-*" />
+				<include name="reindex/commons-codec-*" />
+				<include name="reindex/commons-logging-*" />
+				<include name="reindex/httpclient-*" />
+				<include name="reindex/httpcore-4*" />
+			</fileset>
+		</delete>
+	</target>
+</project>
