@@ -50,6 +50,7 @@
 			<filtered>false</filtered>
 			<outputDirectory>fess-${project.version}/bin</outputDirectory>
 			<includes>
+				<include>module.xml</include>
 				<include>plugin.xml</include>
 			</includes>
 		</fileSet>
@@ -92,6 +93,11 @@
 				<exclude>*</exclude>
 			</excludes>
 			<filtered>false</filtered>
+		</fileSet>
+		<!-- es/modules -->
+		<fileSet>
+			<directory>${project.basedir}/modules</directory>
+			<outputDirectory>fess-${project.version}/es/modules</outputDirectory>
 		</fileSet>
 		<!-- es/plugins -->
 		<fileSet>
