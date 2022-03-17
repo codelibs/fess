@@ -3081,7 +3081,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Crawler Indices */
     public static final String LABELS_clear_crawler_index = "{labels.clear_crawler_index}";
 
-    /** The key of the message: Clear .crawler Indices */
+    /** The key of the message: Clear Crawler Indices */
     public static final String LABELS_clear_crawler_index_button = "{labels.clear_crawler_index_button}";
 
     /** The key of the message: Diagnostic */
