@@ -425,26 +425,31 @@ public class QueryHelper {
     }
 
     protected QueryBuilder convertQuery(final QueryContext context, final Query query, final float boost) {
-        if (query instanceof TermQuery) {
-            return convertTermQuery(context, (TermQuery) query, boost);
+        if (query instanceof final TermQuery termQuery) {
+            return convertTermQuery(context, termQuery, boost);
         }
-        if (query instanceof TermRangeQuery) {
-            return convertTermRangeQuery(context, (TermRangeQuery) query, boost);
+        if (query instanceof final TermRangeQuery termRangeQuery) {
+            return convertTermRangeQuery(context, termRangeQuery, boost);
         }
-        if (query instanceof PhraseQuery) {
-            return convertPhraseQuery(context, (PhraseQuery) query, boost);
+        if (query instanceof final PhraseQuery phraseQuery) {
+            return convertPhraseQuery(context, phraseQuery, boost);
         }
-        if (query instanceof FuzzyQuery) {
-            return convertFuzzyQuery(context, (FuzzyQuery) query, boost);
-        } else if (query instanceof PrefixQuery) {
-            return convertPrefixQuery(context, (PrefixQuery) query, boost);
-        } else if (query instanceof WildcardQuery) {
-            return convertWildcardQuery(context, (WildcardQuery) query, boost);
-        } else if (query instanceof BooleanQuery booleanQuery) {
+        if (query instanceof final FuzzyQuery fuzzyQuery) {
+            return convertFuzzyQuery(context, fuzzyQuery, boost);
+        }
+        if (query instanceof final PrefixQuery prefixQuery) {
+            return convertPrefixQuery(context, prefixQuery, boost);
+        }
+        if (query instanceof final WildcardQuery wildcardQuery) {
+            return convertWildcardQuery(context, wildcardQuery, boost);
+        }
+        if (query instanceof final BooleanQuery booleanQuery) {
             return convertBooleanQuery(context, booleanQuery, boost);
-        } else if (query instanceof MatchAllDocsQuery) {
+        }
+        if (query instanceof MatchAllDocsQuery) {
             return QueryBuilders.matchAllQuery();
-        } else if (query instanceof BoostQuery boostQuery) {
+        }
+        if (query instanceof final BoostQuery boostQuery) {
             return convertQuery(context, boostQuery.getQuery(), boostQuery.getBoost());
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -655,22 +660,22 @@ public class QueryHelper {
         if (INURL_FIELD.equals(field) || (StringUtil.equals(field, context.getDefaultField())
                 && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
-        } else if (SITE_FIELD.equals(field)) {
+        }
+        if (SITE_FIELD.equals(field)) {
             return convertSiteQuery(context, text, boost);
-        } else if (isSearchField(field)) {
-            context.addFieldLog(field, text);
-            context.addHighlightedQuery(text);
-            if (notAnalyzedFieldSet.contains(field)) {
-                return QueryBuilders.termQuery(field, text).boost(boost);
-            } else {
-                return buildMatchPhraseQuery(field, text).boost(boost);
-            }
-        } else {
+        }
+        if (!isSearchField(field)) {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, origQuery).boost(b * boost));
         }
+        context.addFieldLog(field, text);
+        context.addHighlightedQuery(text);
+        if (notAnalyzedFieldSet.contains(field)) {
+            return QueryBuilders.termQuery(field, text).boost(boost);
+        }
+        return buildMatchPhraseQuery(field, text).boost(boost);
     }
 
     protected QueryBuilder convertSiteQuery(final QueryContext context, final String text, final float boost) {

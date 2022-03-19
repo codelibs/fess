@@ -344,12 +344,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (lastModified != null) {
                 return lastModified;
             }
-        } else if (lastModifiedObj instanceof String[] lastModifieds) {
-            if (lastModifieds.length > 0) {
-                final Date lastModified = FessFunctions.parseDate(lastModifieds[0]);
-                if (lastModified != null) {
-                    return lastModified;
-                }
+        } else if ((lastModifiedObj instanceof final String[] lastModifieds) && (lastModifieds.length > 0)) {
+            final Date lastModified = FessFunctions.parseDate(lastModifieds[0]);
+            if (lastModified != null) {
+                return lastModified;
             }
         }
 

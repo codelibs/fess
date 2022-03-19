@@ -183,13 +183,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 }
                 if (logger.isInfoEnabled()) {
                     return "5";
-                } else if (logger.isWarnEnabled()) {
-                    return "6";
-                } else if (logger.isErrorEnabled()) {
-                    return "7";
-                } else {
-                    return "0";
                 }
+                if (logger.isWarnEnabled()) {
+                    return "6";
+                }
+                if (logger.isErrorEnabled()) {
+                    return "7";
+                }
+                return "0";
             }
             if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
@@ -199,15 +200,20 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
             if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");
-            } else if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");
-            } else if (SpnegoHttpFilter.Constants.PREAUTH_USERNAME.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.PREAUTH_USERNAME.equals(name)) {
                 return getProperty(SPNEGO_PREAUTH_USERNAME, "username");
-            } else if (SpnegoHttpFilter.Constants.PREAUTH_PASSWORD.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.PREAUTH_PASSWORD.equals(name)) {
                 return getProperty(SPNEGO_PREAUTH_PASSWORD, "password");
-            } else if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_BASIC, "true");
-            } else if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "true");
             } else if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");

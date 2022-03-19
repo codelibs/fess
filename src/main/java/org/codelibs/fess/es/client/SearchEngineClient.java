@@ -479,7 +479,7 @@ public class SearchEngineClient implements Client {
             final AcknowledgedResponse response =
                     client.admin().indices().prepareDelete(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
             return response.isAcknowledged();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.debug("Failed to delete {}.", indexName, e);
         }
         return false;
@@ -488,7 +488,7 @@ public class SearchEngineClient implements Client {
     protected String readIndexSetting(final String fesenType, final String indexConfigFile, final String numberOfShards,
             final String autoExpandReplicas) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String source = FileUtil.readUTF8(indexConfigFile);
+        final String source = FileUtil.readUTF8(indexConfigFile);
         String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
         if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
             dictionaryPath = dictionaryPath + "/";
@@ -1419,7 +1419,7 @@ public class SearchEngineClient implements Client {
     }
 
     public EngineInfo getEngineInfo() {
-        if (client instanceof HttpClient httpClient) {
+        if (client instanceof final HttpClient httpClient) {
             return httpClient.getEngineInfo();
         }
         throw new SearchEngineClientException("client is not HttpClient.");

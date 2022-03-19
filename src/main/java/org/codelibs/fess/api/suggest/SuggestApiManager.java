@@ -154,7 +154,7 @@ public class SuggestApiManager extends BaseJsonApiManager {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a suggest request.", e);
             }
-            if (e instanceof InvalidAccessTokenException iate) {
+            if (e instanceof final InvalidAccessTokenException iate) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setHeader("WWW-Authenticate", "Bearer error=\"" + iate.getType() + "\"");
             }

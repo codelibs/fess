@@ -64,7 +64,7 @@ public class StopwordsItem extends DictionaryItem {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
+        final int result = 1;
         return prime * result + input.hashCode();
     }
 

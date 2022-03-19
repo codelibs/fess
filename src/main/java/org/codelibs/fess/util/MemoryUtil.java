@@ -61,23 +61,28 @@ public final class MemoryUtil {
         }
         if (obj instanceof Date) {
             return 32L;
-        } else if (obj instanceof LocalDateTime) {
+        }
+        if (obj instanceof LocalDateTime) {
             return 80L;
-        } else if (obj instanceof ZonedDateTime) {
+        }
+        if (obj instanceof ZonedDateTime) {
             return 2128L;
-        } else if (obj instanceof Object[]) {
+        }
+        if (obj instanceof Object[]) {
             long size = 0;
             for (final Object value : (Object[]) obj) {
                 size += sizeOf(value);
             }
             return size;
-        } else if (obj instanceof Collection<?>) {
+        }
+        if (obj instanceof Collection<?>) {
             long size = 0;
             for (final Object value : (Collection<?>) obj) {
                 size += sizeOf(value);
             }
             return size;
-        } else if (obj instanceof Map<?, ?>) {
+        }
+        if (obj instanceof Map<?, ?>) {
             long size = 0;
             for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
                 size += sizeOf(entry.getKey());

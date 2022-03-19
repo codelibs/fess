@@ -95,7 +95,7 @@ public class FessBoot extends TomcatBoot {
             op.replace("fess.log.path", fessLogPath.replace("\\", "/"));
         }).asYouLikeIt(resource -> {
             final Host host = resource.getHost();
-            if (host instanceof StandardHost standardHost) {
+            if (host instanceof final StandardHost standardHost) {
                 standardHost.setErrorReportValveClass(SuppressErrorReportValve.class.getName());
             }
         }).useTldDetect(jarName -> (jarName.contains("jstl") || jarName.contains("lasta-taglib"))).asDevelopment(isNoneEnv()).bootAwait();

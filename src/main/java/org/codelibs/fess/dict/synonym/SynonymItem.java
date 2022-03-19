@@ -104,10 +104,7 @@ public class SynonymItem extends DictionaryItem {
             return false;
         }
         final SynonymItem other = (SynonymItem) obj;
-        if (!ArrayUtil.equalsIgnoreSequence(inputs, other.inputs)) {
-            return false;
-        }
-        if (!ArrayUtil.equalsIgnoreSequence(outputs, other.outputs)) {
+        if (!ArrayUtil.equalsIgnoreSequence(inputs, other.inputs) || !ArrayUtil.equalsIgnoreSequence(outputs, other.outputs)) {
             return false;
         }
         return true;

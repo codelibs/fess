@@ -267,17 +267,17 @@ public class GsaConfigParser extends DefaultHandler {
             final String v = s.substring(REGEXP_CASE.length());
             final StringBuilder buf = new StringBuilder(100);
             return appendFileterPath(buf, unescape(v));
-        } else if (s.startsWith(REGEXP)) {
+        }
+        if (s.startsWith(REGEXP)) {
             final String v = s.substring(REGEXP.length());
             final StringBuilder buf = new StringBuilder(100);
             return appendFileterPath(buf, unescape(v));
-        } else if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p))
-                || Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
-            return escape(s) + ".*";
-        } else {
-            final StringBuilder buf = new StringBuilder(100);
-            return appendFileterPath(buf, escape(s));
         }
+        if (Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p)) || Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p))) {
+            return escape(s) + ".*";
+        }
+        final StringBuilder buf = new StringBuilder(100);
+        return appendFileterPath(buf, escape(s));
     }
 
     protected String escape(final String s) {

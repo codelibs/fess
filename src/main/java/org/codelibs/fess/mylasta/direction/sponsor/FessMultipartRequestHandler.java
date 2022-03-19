@@ -264,7 +264,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             }
             haveValue = true;
         }
-        if (request instanceof MultipartRequestWrapper wrapper) {
+        if (request instanceof final MultipartRequestWrapper wrapper) {
             wrapper.setParameter(name, value);
         }
         final String[] oldArray = elementsText.get(name);

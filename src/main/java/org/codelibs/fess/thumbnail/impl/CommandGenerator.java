@@ -130,7 +130,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     protected void executeCommand(final String thumbnailId, final List<String> cmdList) {
         ProcessDestroyer task = null;
         try {
-            ProcessBuilder pb = new ProcessBuilder(cmdList);
+            final ProcessBuilder pb = new ProcessBuilder(cmdList);
             pb.directory(baseDir);
             pb.redirectErrorStream(true);
 
@@ -138,7 +138,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 logger.debug("Thumbnail Command: {}", cmdList);
             }
 
-            Process p = pb.start();
+            final Process p = pb.start();
 
             final InputStreamThread ist = new InputStreamThread(p.getInputStream(), Charset.defaultCharset(), 0, s -> {
                 if (logger.isDebugEnabled()) {

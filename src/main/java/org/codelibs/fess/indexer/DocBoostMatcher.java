@@ -70,7 +70,8 @@ public class DocBoostMatcher {
         }
         if (value instanceof Double) {
             return ((Double) value).floatValue();
-        } else if (value != null) {
+        }
+        if (value != null) {
             return Float.parseFloat(value.toString());
         }
 

@@ -106,34 +106,32 @@ public final class DocumentUtil {
         if (clazz.isAssignableFrom(Long.class)) {
             if (value instanceof Long) {
                 return (T) value;
-            } else {
-                return (T) Long.valueOf(value.toString());
             }
+            return (T) Long.valueOf(value.toString());
         }
         if (clazz.isAssignableFrom(Integer.class)) {
             if (value instanceof Integer) {
                 return (T) value;
-            } else {
-                return (T) Integer.valueOf(value.toString());
             }
-        } else if (clazz.isAssignableFrom(Double.class)) {
+            return (T) Integer.valueOf(value.toString());
+        }
+        if (clazz.isAssignableFrom(Double.class)) {
             if (value instanceof Double) {
                 return (T) value;
-            } else {
-                return (T) Double.valueOf(value.toString());
             }
-        } else if (clazz.isAssignableFrom(Float.class)) {
+            return (T) Double.valueOf(value.toString());
+        }
+        if (clazz.isAssignableFrom(Float.class)) {
             if (value instanceof Float) {
                 return (T) value;
-            } else {
-                return (T) Float.valueOf(value.toString());
             }
-        } else if (clazz.isAssignableFrom(Boolean.class)) {
+            return (T) Float.valueOf(value.toString());
+        }
+        if (clazz.isAssignableFrom(Boolean.class)) {
             if (value instanceof Boolean) {
                 return (T) value;
-            } else {
-                return (T) Boolean.valueOf(value.toString());
             }
+            return (T) Boolean.valueOf(value.toString());
         }
         return null;
     }

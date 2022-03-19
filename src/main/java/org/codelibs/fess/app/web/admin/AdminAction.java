@@ -316,15 +316,20 @@ public class AdminAction extends FessAdminAction {
         }
         if (user.hasRoles(getActionRoles(AdminSchedulerAction.ROLE))) {
             return AdminSchedulerAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminDesignAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminDesignAction.ROLE))) {
             return AdminDesignAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminDictAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminDictAction.ROLE))) {
             return AdminDictAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminAccesstokenAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminAccesstokenAction.ROLE))) {
             return AdminAccesstokenAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminPluginAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminPluginAction.ROLE))) {
             return AdminPluginAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminStorageAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminStorageAction.ROLE))) {
             return AdminStorageAction.class;
         } else if (user.hasRoles(getActionRoles(AdminWebconfigAction.ROLE))) {
             return AdminWebconfigAction.class;

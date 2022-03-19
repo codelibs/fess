@@ -108,10 +108,7 @@ public class CharMappingItem extends DictionaryItem {
         final CharMappingItem other = (CharMappingItem) obj;
         sort();
         other.sort();
-        if (!Arrays.equals(inputs, other.inputs)) {
-            return false;
-        }
-        if (!output.equals(other.getOutput())) {
+        if (!Arrays.equals(inputs, other.inputs) || !output.equals(other.getOutput())) {
             return false;
         }
         return true;

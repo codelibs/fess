@@ -87,10 +87,7 @@ public class StemmerOverrideItem extends DictionaryItem {
             return false;
         }
         final StemmerOverrideItem other = (StemmerOverrideItem) obj;
-        if (!Objects.equals(input, other.input)) {
-            return false;
-        }
-        if (!Objects.equals(output, other.output)) {
+        if (!Objects.equals(input, other.input) || !Objects.equals(output, other.output)) {
             return false;
         }
         return true;

@@ -33,14 +33,12 @@ public class RenderDataUtil {
         if (value instanceof Entity) {
             data.register(key, BeanUtil.copyBeanToNewMap(value));
         } else {
-            if (value instanceof Collection<?> coll) {
-                if (!coll.isEmpty()) {
-                    // care performance for List that the most frequent pattern
-                    final Object first = coll instanceof List<?> ? ((List<?>) coll).get(0) : coll.iterator().next();
-                    if (first instanceof Entity) {
-                        data.register(key, coll.stream().map(BeanUtil::copyBeanToNewMap).collect(Collectors.toList()));
-                        return;
-                    }
+            if ((value instanceof final Collection<?> coll) && !coll.isEmpty()) {
+                // care performance for List that the most frequent pattern
+                final Object first = coll instanceof List<?> ? ((List<?>) coll).get(0) : coll.iterator().next();
+                if (first instanceof Entity) {
+                    data.register(key, coll.stream().map(BeanUtil::copyBeanToNewMap).collect(Collectors.toList()));
+                    return;
                 }
             }
             data.register(key, value);

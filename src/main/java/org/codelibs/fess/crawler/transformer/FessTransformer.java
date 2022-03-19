@@ -85,13 +85,10 @@ public interface FessTransformer {
 
         if (encoding != null) {
             String enc;
-            if (StringUtil.isNotBlank(getFessConfig().getCrawlerDocumentSiteEncoding())) {
-                if (!getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish()
-                        || ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding))) {
-                    enc = getFessConfig().getCrawlerDocumentSiteEncoding();
-                } else {
-                    enc = encoding;
-                }
+            if (StringUtil.isNotBlank(getFessConfig().getCrawlerDocumentSiteEncoding())
+                    && (!getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish()
+                            || ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding)))) {
+                enc = getFessConfig().getCrawlerDocumentSiteEncoding();
             } else {
                 enc = encoding;
             }

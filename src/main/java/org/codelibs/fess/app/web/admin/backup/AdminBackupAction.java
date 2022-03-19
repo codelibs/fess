@@ -314,7 +314,8 @@ public class AdminBackupAction extends FessAdminAction {
                 }
                 if ("click_log".equals(name)) {
                     return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
-                } else if ("favorite_log".equals(name)) {
+                }
+                if ("favorite_log".equals(name)) {
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
                 }
             } else if ("fess.json".equals(id)) {

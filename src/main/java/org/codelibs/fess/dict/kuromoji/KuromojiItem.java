@@ -122,16 +122,8 @@ public class KuromojiItem extends DictionaryItem {
             return false;
         }
         final KuromojiItem other = (KuromojiItem) obj;
-        if (!Objects.equals(pos, other.pos)) {
-            return false;
-        }
-        if (!Objects.equals(reading, other.reading)) {
-            return false;
-        }
-        if (!Objects.equals(segmentation, other.segmentation)) {
-            return false;
-        }
-        if (!Objects.equals(token, other.token)) {
+        if (!Objects.equals(pos, other.pos) || !Objects.equals(reading, other.reading) || !Objects.equals(segmentation, other.segmentation)
+                || !Objects.equals(token, other.token)) {
             return false;
         }
         return true;

@@ -70,7 +70,7 @@ public class ClickLog extends BsClickLog implements SearchLogEvent {
 
     @Override
     protected void addFieldToSource(final Map<String, Object> sourceMap, final String field, final Object value) {
-        if (value instanceof LocalDateTime ldt) {
+        if (value instanceof final LocalDateTime ldt) {
             final ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
             super.addFieldToSource(sourceMap, field, DateTimeFormatter.ISO_INSTANT.format(zdt));
         } else {

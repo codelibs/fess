@@ -246,9 +246,8 @@ public class ViewHelper {
     }
 
     protected OptionalThing<Set<String>> getQuerySet() {
-        return LaRequestUtil.getOptionalRequest().map(req -> {
-            return (Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES);
-        }).filter(s -> s != null);
+        return LaRequestUtil.getOptionalRequest().map(req -> ((Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES)))
+                .filter(s -> s != null);
     }
 
     public String getContentDescription(final Map<String, Object> document) {
