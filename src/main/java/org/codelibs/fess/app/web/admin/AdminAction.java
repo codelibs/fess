@@ -331,7 +331,8 @@ public class AdminAction extends FessAdminAction {
         }
         if (user.hasRoles(getActionRoles(AdminStorageAction.ROLE))) {
             return AdminStorageAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminWebconfigAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminWebconfigAction.ROLE))) {
             return AdminWebconfigAction.class;
         } else if (user.hasRoles(getActionRoles(AdminFileconfigAction.ROLE))) {
             return AdminFileconfigAction.class;

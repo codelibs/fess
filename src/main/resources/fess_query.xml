@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="queryFieldConfig"
+		class="org.codelibs.fess.query.QueryFieldConfig">
+	</component>
+
+	<component name="queryProcessor"
+		class="org.codelibs.fess.query.QueryProcessor">
+	</component>
+
+	<component name="booleanQueryCommand"
+		class="org.codelibs.fess.query.BooleanQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="boostQueryCommand"
+		class="org.codelibs.fess.query.BoostQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="fuzzyQueryCommand"
+		class="org.codelibs.fess.query.FuzzyQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="matchAllQueryCommand"
+		class="org.codelibs.fess.query.MatchAllQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="phraseQueryCommand"
+		class="org.codelibs.fess.query.PhraseQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="prefixQueryCommand"
+		class="org.codelibs.fess.query.PrefixQueryCommand">
+		<property name="lowercaseWildcard">false</property>
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="termQueryCommand"
+		class="org.codelibs.fess.query.TermQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="termRangeQueryCommand"
+		class="org.codelibs.fess.query.TermRangeQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
+	<component name="wildcardQueryCommand"
+		class="org.codelibs.fess.query.WildcardQueryCommand">
+		<property name="lowercaseWildcard">false</property>
+		<postConstruct name="register"></postConstruct>
+	</component>
+</components>

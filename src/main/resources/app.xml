@@ -14,6 +14,7 @@
 	<include path="fess_thumbnail.xml"/>
 	<include path="fess_sso.xml"/>
 	<include path="fess_score.xml"/>
+	<include path="fess_query.xml"/>
 
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
@@ -52,13 +53,6 @@
 	</component>
 	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
 		<property name="defaultFacetInfo">facetInfo</property>
-		<property name="lowercaseWildcard">false</property>
-		<postConstruct name="addHighlightField">
-			<arg>"title"</arg>
-		</postConstruct>
-		<postConstruct name="addHighlightField">
-			<arg>"content"</arg>
-		</postConstruct>
 		<postConstruct name="addQueryRescorer">
 			<arg>
 				<component class="org.codelibs.fess.score.LtrQueryRescorer" />

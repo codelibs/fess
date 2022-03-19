@@ -41,6 +41,7 @@ import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -65,6 +66,9 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     @Resource
     protected QueryHelper queryHelper;
+
+    @Resource
+    protected QueryFieldConfig queryFieldConfig;
 
     @Resource
     protected RoleQueryHelper roleQueryHelper;

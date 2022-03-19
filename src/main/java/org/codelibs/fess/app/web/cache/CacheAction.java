@@ -54,7 +54,7 @@ public class CacheAction extends FessSearchAction {
 
         Map<String, Object> doc = null;
         try {
-            doc = searchHelper.getDocumentByDocId(form.docId, queryHelper.getCacheResponseFields(), getUserBean()).orElse(null);
+            doc = searchHelper.getDocumentByDocId(form.docId, queryFieldConfig.getCacheResponseFields(), getUserBean()).orElse(null);
         } catch (final Exception e) {
             logger.warn("Failed to request: {}", form.docId, e);
         }

@@ -77,6 +77,8 @@ import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
+import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.query.QueryProcessor;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
@@ -180,6 +182,10 @@ public final class ComponentUtil {
 
     private static final String QUERY_HELPER = "queryHelper";
 
+    private static final String QUERY_FIELD_CONFIG = "queryFieldConfig";
+
+    private static final String QUERY_PROCESSOR = "queryProcessor";
+
     private static final String SAMBA_HELPER = "sambaHelper";
 
     private static final String VIEW_HELPER = "viewHelper";
@@ -260,6 +266,14 @@ public final class ComponentUtil {
 
     public static QueryHelper getQueryHelper() {
         return getComponent(QUERY_HELPER);
+    }
+
+    public static QueryFieldConfig getQueryFieldConfig() {
+        return getComponent(QUERY_FIELD_CONFIG);
+    }
+
+    public static QueryProcessor getQueryProcessor() {
+        return getComponent(QUERY_PROCESSOR);
     }
 
     public static LabelTypeHelper getLabelTypeHelper() {
@@ -502,6 +516,7 @@ public final class ComponentUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T getComponent(final String componentName) {
         try {
             return SingletonLaContainer.getComponent(componentName);

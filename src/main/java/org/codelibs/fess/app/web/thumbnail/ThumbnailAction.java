@@ -52,7 +52,7 @@ public class ThumbnailAction extends FessSearchAction {
         }
 
         final Map<String, Object> doc =
-                searchHelper.getDocumentByDocId(form.docId, queryHelper.getResponseFields(), getUserBean()).orElse(null);
+                searchHelper.getDocumentByDocId(form.docId, queryFieldConfig.getResponseFields(), getUserBean()).orElse(null);
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldThumbnail(), String.class);
         if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || !thumbnailSupport) {
             // 404

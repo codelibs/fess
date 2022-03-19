@@ -67,6 +67,7 @@ import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
@@ -1191,13 +1192,14 @@ public class SearchEngineClient implements Client {
             }
 
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
             if (offset > fessConfig.getQueryMaxSearchResultOffsetAsInteger()) {
                 throw new ResultOffsetExceededException("The number of result size is exceeded.");
             }
 
-            final QueryContext queryContext = buildQueryContext(queryHelper, fessConfig);
+            final QueryContext queryContext = buildQueryContext(queryHelper, queryFieldConfig, fessConfig);
 
             searchRequestBuilder.setFrom(offset).setSize(size);
 
@@ -1208,19 +1210,19 @@ public class SearchEngineClient implements Client {
             }
 
             // rescorer
-            buildRescorer(queryHelper, fessConfig);
+            buildRescorer(queryHelper, queryFieldConfig, fessConfig);
 
             // sort
-            buildSort(queryContext, fessConfig);
+            buildSort(queryContext, queryFieldConfig, fessConfig);
 
             // highlighting
             if (highlightInfo != null) {
-                buildHighlighter(queryHelper, fessConfig);
+                buildHighlighter(queryHelper, queryFieldConfig, fessConfig);
             }
 
             // facets
             if (facetInfo != null) {
-                buildFacet(queryHelper, fessConfig);
+                buildFacet(queryHelper, queryFieldConfig, fessConfig);
             }
 
             if (!SearchRequestType.ADMIN_SEARCH.equals(searchRequestType) && !isScroll && fessConfig.isResultCollapsed()
@@ -1253,9 +1255,9 @@ public class SearchEngineClient implements Client {
             }
         }
 
-        protected void buildFacet(final QueryHelper queryHelper, final FessConfig fessConfig) {
+        protected void buildFacet(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             stream(facetInfo.field).of(stream -> stream.forEach(f -> {
-                if (!queryHelper.isFacetField(f)) {
+                if (!queryFieldConfig.isFacetField(f)) {
                     throw new SearchQueryException("Invalid facet field: " + f);
                 }
                 final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
@@ -1283,7 +1285,8 @@ public class SearchEngineClient implements Client {
             }));
         }
 
-        protected void buildHighlighter(final QueryHelper queryHelper, final FessConfig fessConfig) {
+        protected void buildHighlighter(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig,
+                final FessConfig fessConfig) {
             final String highlighterType = highlightInfo.getType();
             final int fragmentSize = highlightInfo.getFragmentSize();
             final int numOfFragments = highlightInfo.getNumOfFragments();
@@ -1298,7 +1301,7 @@ public class SearchEngineClient implements Client {
             final int phraseLimit = fessConfig.getQueryHighlightPhraseLimitAsInteger();
             final String encoder = fessConfig.getQueryHighlightEncoder();
             final HighlightBuilder highlightBuilder = new HighlightBuilder();
-            queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder
+            queryFieldConfig.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder
                     .field(new HighlightBuilder.Field(hf).highlighterType(highlighterType).fragmentSize(fragmentSize)
                             .numOfFragments(numOfFragments).boundaryChars(boundaryChars).boundaryMaxScan(boundaryMaxScan)
                             .boundaryScannerType(boundaryScannerType).forceSource(forceSource).fragmenter(fragmenter)
@@ -1307,15 +1310,16 @@ public class SearchEngineClient implements Client {
             searchRequestBuilder.highlighter(highlightBuilder);
         }
 
-        protected void buildSort(final QueryContext queryContext, final FessConfig fessConfig) {
+        protected void buildSort(final QueryContext queryContext, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
         }
 
-        protected void buildRescorer(final QueryHelper queryHelper, final FessConfig fessConfig) {
+        protected void buildRescorer(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             stream(queryHelper.getRescorers(condition())).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
         }
 
-        protected QueryContext buildQueryContext(final QueryHelper queryHelper, final FessConfig fessConfig) {
+        protected QueryContext buildQueryContext(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig,
+                final FessConfig fessConfig) {
             return queryHelper.build(searchRequestType, query, context -> {
                 if (SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
                     context.skipRoleQuery();

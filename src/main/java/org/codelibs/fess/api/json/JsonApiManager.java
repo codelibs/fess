@@ -302,7 +302,7 @@ public class JsonApiManager extends BaseJsonApiManager {
                     for (final Map.Entry<String, Object> entry : document.entrySet()) {
                         final String name = entry.getKey();
                         if (StringUtil.isNotBlank(name) && entry.getValue() != null
-                                && ComponentUtil.getQueryHelper().isApiResponseField(name)) {
+                                && ComponentUtil.getQueryFieldConfig().isApiResponseField(name)) {
                             if (!first2) {
                                 buf.append(',');
                             } else {

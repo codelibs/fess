@@ -24,11 +24,20 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.query.BooleanQueryCommand;
+import org.codelibs.fess.query.BoostQueryCommand;
+import org.codelibs.fess.query.FuzzyQueryCommand;
+import org.codelibs.fess.query.MatchAllQueryCommand;
+import org.codelibs.fess.query.PhraseQueryCommand;
+import org.codelibs.fess.query.PrefixQueryCommand;
+import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.query.QueryProcessor;
+import org.codelibs.fess.query.TermQueryCommand;
+import org.codelibs.fess.query.TermRangeQueryCommand;
+import org.codelibs.fess.query.WildcardQueryCommand;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.MatchPhraseQueryBuilder;
-import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -36,6 +45,8 @@ import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 public class QueryHelperTest extends UnitFessTestCase {
 
     private QueryHelper queryHelper;
+
+    private QueryFieldConfig queryFieldConfig;
 
     @Override
     public void setUp() throws Exception {
@@ -57,7 +68,19 @@ public class QueryHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
         ComponentUtil.register(new KeyMatchHelper(), "keyMatchHelper");
         inject(queryHelper);
-        queryHelper.init();
+        queryFieldConfig = new QueryFieldConfig();
+        ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+        queryFieldConfig.init();
+        ComponentUtil.register(new QueryProcessor(), "queryProcessor");
+        new BooleanQueryCommand().register();
+        new BoostQueryCommand().register();
+        new FuzzyQueryCommand().register();
+        new MatchAllQueryCommand().register();
+        new PhraseQueryCommand().register();
+        new PrefixQueryCommand().register();
+        new TermQueryCommand().register();
+        new TermRangeQueryCommand().register();
+        new WildcardQueryCommand().register();
     }
 
     public void test_build() {
@@ -81,34 +104,6 @@ public class QueryHelperTest extends UnitFessTestCase {
                 functionScoreQuery(
                         orQuery(simpleQuery("QUERY1", titleBoost, contentBoost), simpleQuery("QUERY2", titleBoost, contentBoost))),
                 buildQuery("QUERY1 OR QUERY2"));
-
-        assertQueryBuilder("test", "", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("test", "test", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("test", "a", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("test", "あ", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("test", "ア", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("test", "亜", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("test", "아", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("title", "test", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("title", "a", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("title", "あ", PrefixQueryBuilder.class);
-        assertQueryBuilder("title", "ああ", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("title", "ア", PrefixQueryBuilder.class);
-        assertQueryBuilder("title", "アア", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("title", "亜", PrefixQueryBuilder.class);
-        assertQueryBuilder("title", "亜亜", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("title", "아", PrefixQueryBuilder.class);
-        assertQueryBuilder("title", "아아", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("content", "test", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("content", "a", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("content", "あ", PrefixQueryBuilder.class);
-        assertQueryBuilder("content", "ああ", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("content", "ア", PrefixQueryBuilder.class);
-        assertQueryBuilder("content", "アア", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("content", "亜", PrefixQueryBuilder.class);
-        assertQueryBuilder("content", "亜亜", MatchPhraseQueryBuilder.class);
-        assertQueryBuilder("content", "아", PrefixQueryBuilder.class);
-        assertQueryBuilder("content", "아아", MatchPhraseQueryBuilder.class);
 
         assertEquals(
                 "{\"function_score\":{\"query\":{\"prefix\":{\"site\":{\"value\":\"fess.codelibs.org\",\"boost\":1.0}}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
@@ -139,11 +134,6 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals(
                 "{\"function_score\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"url\":{\"wildcard\":\"*aaa*\",\"boost\":1.0}}},{\"wildcard\":{\"url\":{\"wildcard\":\"*bbb*\",\"boost\":1.0}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 buildQuery("allinurl: aaa bbb").toString().replaceAll("\\s", ""));
-    }
-
-    private void assertQueryBuilder(String field, String value, Class<?> clazz) {
-        QueryBuilder queryBuilder = queryHelper.buildMatchPhraseQuery(field, value);
-        assertEquals(clazz, queryBuilder.getClass());
     }
 
     private QueryBuilder andQuery(QueryBuilder... queries) {

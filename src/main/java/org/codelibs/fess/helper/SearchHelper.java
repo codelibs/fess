@@ -43,6 +43,7 @@ import org.codelibs.fess.es.client.SearchEngineClientException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
@@ -159,12 +160,13 @@ public class SearchHelper {
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
         return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
             queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(params.getStartPosition())
                     .size(params.getPageSize()).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
                     .highlightInfo(params.getHighlightInfo()).similarDocHash(params.getSimilarDocHash())
-                    .responseFields(queryHelper.getResponseFields()).searchRequestType(params.getType())
+                    .responseFields(queryFieldConfig.getResponseFields()).searchRequestType(params.getType())
                     .trackTotalHits(params.getTrackTotalHits()).build();
         }, (searchRequestBuilder, execTime, searchResponse) -> {
             searchResponse.ifPresent(r -> {
@@ -196,9 +198,10 @@ public class SearchHelper {
         return ComponentUtil.getSearchEngineClient().<Map<String, Object>> scrollSearch(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> {
                     final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+                    final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
                     return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
-                            .responseFields(queryHelper.getScrollResponseFields()).searchRequestType(params.getType()).build();
+                            .responseFields(queryFieldConfig.getScrollResponseFields()).searchRequestType(params.getType()).build();
                 }, (searchResponse, hit) -> {
                     final Map<String, Object> docMap = new HashMap<>();
                     final Map<String, Object> source = hit.getSourceAsMap();

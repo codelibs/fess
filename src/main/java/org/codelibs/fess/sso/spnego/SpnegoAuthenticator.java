@@ -215,7 +215,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
             if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "true");
-            } else if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");
             } else if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_LOCALHOST, "true");
