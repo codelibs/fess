@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.query;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.Query;
@@ -29,6 +31,7 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
 public class FuzzyQueryCommand extends QueryCommand {
+    private static final Logger logger = LogManager.getLogger(FuzzyQueryCommand.class);
 
     @Override
     protected String getQueryClassName() {
@@ -38,6 +41,9 @@ public class FuzzyQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final FuzzyQuery fuzzyQuery) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}:{}", query, boost);
+            }
             return convertFuzzyQuery(context, fuzzyQuery, boost);
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -47,7 +53,7 @@ public class FuzzyQueryCommand extends QueryCommand {
     protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Term term = fuzzyQuery.getTerm();
-        final String field = getSearchField(context, term.field());
+        final String field = getSearchField(context.getDefaultField(), term.field());
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());

@@ -17,6 +17,8 @@ package org.codelibs.fess.query;
 
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.codelibs.fess.Constants;
@@ -27,6 +29,8 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
 public class WildcardQueryCommand extends QueryCommand {
+    private static final Logger logger = LogManager.getLogger(WildcardQueryCommand.class);
+
     protected boolean lowercaseWildcard = true;
 
     @Override
@@ -37,6 +41,9 @@ public class WildcardQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final WildcardQuery wildcardQuery) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}:{}", query, boost);
+            }
             return convertWildcardQuery(context, wildcardQuery, boost);
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -44,7 +51,7 @@ public class WildcardQueryCommand extends QueryCommand {
     }
 
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
-        final String field = getSearchField(context, wildcardQuery.getField());
+        final String field = getSearchField(context.getDefaultField(), wildcardQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return buildDefaultQueryBuilder(
@@ -55,9 +62,9 @@ public class WildcardQueryCommand extends QueryCommand {
             return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(boost);
         }
         final String query = wildcardQuery.getTerm().toString();
-        final String origQuery = toLowercaseWildcard(query);
-        context.addFieldLog(Constants.DEFAULT_FIELD, query);
-        context.addHighlightedQuery(origQuery);
+        final String origQuery = "*" + toLowercaseWildcard(query) + "*";
+        context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
+        context.addHighlightedQuery(query);
         return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
     }
 

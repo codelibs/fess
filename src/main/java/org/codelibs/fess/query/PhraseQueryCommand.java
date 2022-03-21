@@ -17,6 +17,8 @@ package org.codelibs.fess.query;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
@@ -26,6 +28,7 @@ import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 
 public class PhraseQueryCommand extends QueryCommand {
+    private static final Logger logger = LogManager.getLogger(PhraseQueryCommand.class);
 
     @Override
     protected String getQueryClassName() {
@@ -35,6 +38,9 @@ public class PhraseQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final PhraseQuery phraseQuery) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}:{}", query, boost);
+            }
             return convertPhraseQuery(context, phraseQuery, boost);
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),

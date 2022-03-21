@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.query;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.util.BytesRef;
@@ -27,6 +29,7 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.RangeQueryBuilder;
 
 public class TermRangeQueryCommand extends QueryCommand {
+    private static final Logger logger = LogManager.getLogger(TermRangeQueryCommand.class);
 
     @Override
     protected String getQueryClassName() {
@@ -36,6 +39,9 @@ public class TermRangeQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final TermRangeQuery termRangeQuery) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}:{}", query, boost);
+            }
             return convertTermRangeQuery(context, termRangeQuery, boost);
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -43,7 +49,7 @@ public class TermRangeQueryCommand extends QueryCommand {
     }
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
-        final String field = getSearchField(context, termRangeQuery.getField());
+        final String field = getSearchField(context.getDefaultField(), termRangeQuery.getField());
         if (!isSearchField(field)) {
             final String origQuery = termRangeQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);

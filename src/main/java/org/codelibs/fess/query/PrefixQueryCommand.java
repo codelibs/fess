@@ -17,6 +17,8 @@ package org.codelibs.fess.query;
 
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.codelibs.fess.Constants;
@@ -29,6 +31,8 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
 public class PrefixQueryCommand extends QueryCommand {
+    private static final Logger logger = LogManager.getLogger(PrefixQueryCommand.class);
+
     protected boolean lowercaseWildcard = true;
 
     @Override
@@ -39,6 +43,9 @@ public class PrefixQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final PrefixQuery prefixQuery) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}:{}", query, boost);
+            }
             return convertPrefixQuery(context, prefixQuery, boost);
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -47,7 +54,7 @@ public class PrefixQueryCommand extends QueryCommand {
 
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String field = getSearchField(context, prefixQuery.getField());
+        final String field = getSearchField(context.getDefaultField(), prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             return buildDefaultQueryBuilder(
@@ -57,12 +64,12 @@ public class PrefixQueryCommand extends QueryCommand {
         if (!isSearchField(field)) {
             final String query = prefixQuery.getPrefix().toString();
             final String origQuery = toLowercaseWildcard(query);
-            context.addFieldLog(Constants.DEFAULT_FIELD, query);
+            context.addFieldLog(Constants.DEFAULT_FIELD, query + "*");
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost)
                     .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
-        context.addFieldLog(field, prefixQuery.getPrefix().text());
+        context.addFieldLog(field, prefixQuery.getPrefix().text() + "*");
         if (getQueryFieldConfig().notAnalyzedFieldSet.contains(field)) {
             return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
         }

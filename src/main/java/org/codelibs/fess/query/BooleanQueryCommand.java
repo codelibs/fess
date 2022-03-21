@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.query;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -26,6 +28,7 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
 public class BooleanQueryCommand extends QueryCommand {
+    private static final Logger logger = LogManager.getLogger(BooleanQueryCommand.class);
 
     @Override
     protected String getQueryClassName() {
@@ -35,6 +38,9 @@ public class BooleanQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final BooleanQuery booleanQuery) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}:{}", query, boost);
+            }
             return convertBooleanQuery(context, booleanQuery, boost);
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),

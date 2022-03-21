@@ -75,7 +75,7 @@ public class TermQueryCommandTest extends UnitFessTestCase {
                 "{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}", //
                 "content:aaa");
         assertQueryBuilder(BoolQueryBuilder.class,
-                "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
+                "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
                 "xxx:aaa");
         assertQueryBuilder(WildcardQueryBuilder.class, //
                 "{\"wildcard\":{\"url\":{\"wildcard\":\"*aaa*\",\"boost\":1.0}}}", //

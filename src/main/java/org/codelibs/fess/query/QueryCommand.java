@@ -117,9 +117,9 @@ public abstract class QueryCommand {
         return QueryBuilders.matchPhraseQuery(f, text);
     }
 
-    protected String getSearchField(final QueryContext context, final String field) {
-        if (Constants.DEFAULT_FIELD.equals(field) && context.getDefaultField() != null) {
-            return context.getDefaultField();
+    protected String getSearchField(final String defaultField, final String field) {
+        if (Constants.DEFAULT_FIELD.equals(field) && defaultField != null) {
+            return defaultField;
         }
         return field;
     }
