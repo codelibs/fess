@@ -16,7 +16,7 @@
 		<!-- analysis-common -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="analysis-common" />
 			<param name="module.version" value="${opensearch.version}" />
@@ -25,7 +25,7 @@
 		<!-- geo -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="geo" />
 			<param name="module.version" value="${opensearch.version}" />
@@ -34,7 +34,7 @@
 		<!-- lang-expression -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="lang-expression" />
 			<param name="module.version" value="${opensearch.version}" />
@@ -43,7 +43,7 @@
 		<!-- lang-painless -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="lang-painless" />
 			<param name="module.version" value="${opensearch.version}" />
@@ -52,7 +52,7 @@
 		<!-- mapper-extras -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="mapper-extras" />
 			<param name="module.version" value="${opensearch.version}" />
@@ -61,7 +61,7 @@
 		<!-- reindex -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="reindex" />
 			<param name="module.version" value="${opensearch.version}" />
@@ -70,7 +70,7 @@
 		<!-- transport-netty4 -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="module.groupId" value="org/codelibs/opensearch" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="transport-netty4" />
 			<param name="module.version" value="${opensearch.version}" />
