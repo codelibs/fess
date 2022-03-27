@@ -24,6 +24,8 @@ import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 
@@ -53,12 +55,13 @@ public class PhraseQueryCommand extends QueryCommand {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
                     "Unknown phrase query: " + phraseQuery);
         }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = terms[0].field();
         final String[] texts = stream(terms).get(stream -> stream.map(Term::text).toArray(n -> new String[n]));
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
         stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
-        return buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+        return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
     }
 
 }

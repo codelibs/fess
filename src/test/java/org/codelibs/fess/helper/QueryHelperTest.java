@@ -71,7 +71,9 @@ public class QueryHelperTest extends UnitFessTestCase {
         queryFieldConfig = new QueryFieldConfig();
         ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
         queryFieldConfig.init();
-        ComponentUtil.register(new QueryProcessor(), "queryProcessor");
+        QueryProcessor queryProcessor = new QueryProcessor();
+        ComponentUtil.register(queryProcessor, "queryProcessor");
+        queryProcessor.init();
         new BooleanQueryCommand().register();
         new BoostQueryCommand().register();
         new FuzzyQueryCommand().register();

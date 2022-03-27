@@ -57,7 +57,7 @@ public class FuzzyQueryCommand extends QueryCommand {
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
-            return buildDefaultQueryBuilder(
+            return buildDefaultQueryBuilder(fessConfig, context,
                     (f, b) -> QueryBuilders.fuzzyQuery(f, term.text()).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
                             .boost(b * boost).maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
                             .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
@@ -73,9 +73,10 @@ public class FuzzyQueryCommand extends QueryCommand {
         final String origQuery = fuzzyQuery.toString();
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
         context.addHighlightedQuery(origQuery);
-        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
-                .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost)
-                .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger()).prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
-                .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));
+        return buildDefaultQueryBuilder(fessConfig, context,
+                (f, b) -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost)
+                        .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
+                        .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
+                        .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));
     }
 }

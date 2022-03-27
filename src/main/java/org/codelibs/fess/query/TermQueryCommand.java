@@ -158,7 +158,8 @@ public class TermQueryCommand extends QueryCommand {
             final float boost, final String field, final String text) {
         context.addFieldLog(field, text);
         context.addHighlightedQuery(text);
-        final BoolQueryBuilder boolQuery = buildDefaultQueryBuilder((f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+        final BoolQueryBuilder boolQuery =
+                buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
         if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength) {
             boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)

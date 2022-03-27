@@ -72,9 +72,9 @@ public abstract class QueryCommand {
                 (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
-    protected BoolQueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
+    protected BoolQueryBuilder buildDefaultQueryBuilder(final FessConfig fessConfig, final QueryContext context,
+            final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         boolQuery.should(builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue()));
         boolQuery.should(builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue()));
         final float importantContentBoost = fessConfig.getQueryBoostImportantContentAsDecimal().floatValue();

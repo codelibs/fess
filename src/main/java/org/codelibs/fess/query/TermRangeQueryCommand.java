@@ -23,6 +23,8 @@ import org.apache.lucene.util.BytesRef;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
@@ -49,12 +51,13 @@ public class TermRangeQueryCommand extends QueryCommand {
     }
 
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), termRangeQuery.getField());
         if (!isSearchField(field)) {
             final String origQuery = termRangeQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
+            return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
         }
         context.addFieldLog(field, termRangeQuery.toString(field));
         final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);

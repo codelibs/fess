@@ -57,7 +57,7 @@ public class PrefixQueryCommand extends QueryCommand {
         final String field = getSearchField(context.getDefaultField(), prefixQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder(
+            return buildDefaultQueryBuilder(fessConfig, context,
                     (f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost)
                             .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
@@ -66,8 +66,9 @@ public class PrefixQueryCommand extends QueryCommand {
             final String origQuery = toLowercaseWildcard(query);
             context.addFieldLog(Constants.DEFAULT_FIELD, query + "*");
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost)
-                    .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
+            return buildDefaultQueryBuilder(fessConfig, context,
+                    (f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost)
+                            .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
         context.addFieldLog(field, prefixQuery.getPrefix().text() + "*");
         if (getQueryFieldConfig().notAnalyzedFieldSet.contains(field)) {

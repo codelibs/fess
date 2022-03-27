@@ -24,6 +24,8 @@ import org.apache.lucene.search.WildcardQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
@@ -51,10 +53,11 @@ public class WildcardQueryCommand extends QueryCommand {
     }
 
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), wildcardQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return buildDefaultQueryBuilder(
+            return buildDefaultQueryBuilder(fessConfig, context,
                     (f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(b * boost));
         }
         if (isSearchField(field)) {
@@ -65,7 +68,7 @@ public class WildcardQueryCommand extends QueryCommand {
         final String origQuery = "*" + toLowercaseWildcard(query) + "*";
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
         context.addHighlightedQuery(query);
-        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
+        return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
     }
 
     protected String toLowercaseWildcard(final String value) {

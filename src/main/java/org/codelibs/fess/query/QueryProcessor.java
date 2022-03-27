@@ -15,8 +15,12 @@
  */
 package org.codelibs.fess.query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,13 +35,17 @@ public class QueryProcessor {
 
     protected Map<String, QueryCommand> queryCommandMap = new HashMap<>();
 
+    protected List<Filter> filterList = new ArrayList<>();
+
+    protected FilterChain filterChain;
+
+    @PostConstruct
+    public void init() {
+        createFilterChain();
+    }
+
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
-        final QueryCommand queryCommand = queryCommandMap.get(query.getClass().getSimpleName());
-        if (queryCommand != null) {
-            return queryCommand.execute(context, query, boost);
-        }
-        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
-                "Unknown q: " + query.getClass() + " => " + query);
+        return filterChain.execute(context, query, boost);
     }
 
     public void add(final String name, final QueryCommand queryCommand) {
@@ -48,5 +56,42 @@ public class QueryProcessor {
             logger.debug("Loaded {}", name);
         }
         queryCommandMap.put(name, queryCommand);
+    }
+
+    protected void addFilter(final Filter filter) {
+        filterList.add(filter);
+        createFilterChain();
+    }
+
+    protected void createFilterChain() {
+        FilterChain chain = createDefaultFilterChain();
+        for (final Filter element : filterList) {
+            chain = appendFilterChain(element, chain);
+        }
+        filterChain = chain;
+    }
+
+    protected FilterChain appendFilterChain(final Filter filter, final FilterChain chain) {
+        return (context, query, boost) -> filter.execute(context, query, boost, chain);
+    }
+
+    protected FilterChain createDefaultFilterChain() {
+        return (context, query, boost) -> {
+            final QueryCommand queryCommand = queryCommandMap.get(query.getClass().getSimpleName());
+            if (queryCommand != null) {
+                return queryCommand.execute(context, query, boost);
+            }
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                    "Unknown q: " + query.getClass() + " => " + query);
+        };
+    }
+
+    protected interface Filter {
+        QueryBuilder execute(final QueryContext context, final Query query, final float boost, final FilterChain chain);
+
+    }
+
+    protected interface FilterChain {
+        QueryBuilder execute(final QueryContext context, final Query query, final float boost);
     }
 }
