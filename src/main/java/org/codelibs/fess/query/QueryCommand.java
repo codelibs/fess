@@ -23,7 +23,6 @@ import org.apache.lucene.search.Query;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.query.TermQueryCommand.DefaultQueryBuilderFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -122,5 +121,9 @@ public abstract class QueryCommand {
             return defaultField;
         }
         return field;
+    }
+
+    protected interface DefaultQueryBuilderFunction {
+        QueryBuilder apply(String field, float boost);
     }
 }

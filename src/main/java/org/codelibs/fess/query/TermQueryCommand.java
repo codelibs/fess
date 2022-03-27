@@ -184,8 +184,4 @@ public class TermQueryCommand extends QueryCommand {
         context.addHighlightedQuery(text);
         return QueryBuilders.prefixQuery(siteField, text).boost(boost);
     }
-
-    interface DefaultQueryBuilderFunction {
-        QueryBuilder apply(String field, float boost);
-    }
 }
