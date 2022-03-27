@@ -86,12 +86,12 @@ public class QueryProcessor {
         };
     }
 
-    protected interface Filter {
+    public interface Filter {
         QueryBuilder execute(final QueryContext context, final Query query, final float boost, final FilterChain chain);
 
     }
 
-    protected interface FilterChain {
+    public interface FilterChain {
         QueryBuilder execute(final QueryContext context, final Query query, final float boost);
     }
 }
