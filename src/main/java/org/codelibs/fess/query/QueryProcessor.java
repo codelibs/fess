@@ -58,7 +58,7 @@ public class QueryProcessor {
         queryCommandMap.put(name, queryCommand);
     }
 
-    protected void addFilter(final Filter filter) {
+    public void addFilter(final Filter filter) {
         filterList.add(filter);
         createFilterChain();
     }
@@ -88,7 +88,6 @@ public class QueryProcessor {
 
     public interface Filter {
         QueryBuilder execute(final QueryContext context, final Query query, final float boost, final FilterChain chain);
-
     }
 
     public interface FilterChain {
