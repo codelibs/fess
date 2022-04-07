@@ -334,59 +334,86 @@ public class AdminAction extends FessAdminAction {
         }
         if (user.hasRoles(getActionRoles(AdminWebconfigAction.ROLE))) {
             return AdminWebconfigAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminFileconfigAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminFileconfigAction.ROLE))) {
             return AdminFileconfigAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminDataconfigAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminDataconfigAction.ROLE))) {
             return AdminDataconfigAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminLabeltypeAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminLabeltypeAction.ROLE))) {
             return AdminLabeltypeAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminKeymatchAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminKeymatchAction.ROLE))) {
             return AdminKeymatchAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminBoostdocAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminBoostdocAction.ROLE))) {
             return AdminBoostdocAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminRelatedcontentAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminRelatedcontentAction.ROLE))) {
             return AdminRelatedcontentAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminRelatedqueryAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminRelatedqueryAction.ROLE))) {
             return AdminRelatedqueryAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminPathmapAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminPathmapAction.ROLE))) {
             return AdminPathmapAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminWebauthAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminWebauthAction.ROLE))) {
             return AdminWebauthAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminFileauthAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminFileauthAction.ROLE))) {
             return AdminFileauthAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminReqheaderAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminReqheaderAction.ROLE))) {
             return AdminReqheaderAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminDuplicatehostAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminDuplicatehostAction.ROLE))) {
             return AdminDuplicatehostAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminUserAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminUserAction.ROLE))) {
             return AdminUserAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminRoleAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminRoleAction.ROLE))) {
             return AdminRoleAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminGroupAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminGroupAction.ROLE))) {
             return AdminGroupAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminSuggestAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminSuggestAction.ROLE))) {
             return AdminSuggestAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminElevatewordAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminElevatewordAction.ROLE))) {
             return AdminElevatewordAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminBadwordAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminBadwordAction.ROLE))) {
             return AdminBadwordAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminSysteminfoAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminSysteminfoAction.ROLE))) {
             return AdminSysteminfoAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminSearchlogAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminSearchlogAction.ROLE))) {
             return AdminSearchlogAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminJoblogAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminJoblogAction.ROLE))) {
             return AdminJoblogAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminCrawlinginfoAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminCrawlinginfoAction.ROLE))) {
             return AdminCrawlinginfoAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminLogAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminLogAction.ROLE))) {
             return AdminLogAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminFailureurlAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminFailureurlAction.ROLE))) {
             return AdminFailureurlAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminBackupAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminBackupAction.ROLE))) {
             return AdminBackupAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminMaintenanceAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminMaintenanceAction.ROLE))) {
             return AdminMaintenanceAction.class;
-        } else if (user.hasRoles(getActionRoles(AdminEsreqAction.ROLE))) {
+        }
+        if (user.hasRoles(getActionRoles(AdminEsreqAction.ROLE))) {
             return AdminEsreqAction.class;
         }
         return null;

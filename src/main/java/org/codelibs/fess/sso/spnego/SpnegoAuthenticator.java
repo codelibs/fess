@@ -218,11 +218,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
             if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");
-            } else if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_LOCALHOST, "true");
-            } else if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
-            } else if (SpnegoHttpFilter.Constants.EXCLUDE_DIRS.equals(name)) {
+            }
+            if (SpnegoHttpFilter.Constants.EXCLUDE_DIRS.equals(name)) {
                 return getProperty(SPNEGO_EXCLUDE_DIRS, StringUtil.EMPTY);
             }
             return null;

@@ -28,7 +28,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
     /*
     // TODO
     private File file1;
-    
+
     @Override
     protected void setUp() throws Exception {
         file1 = File.createTempFile("kuromoji_", ".txt");
@@ -37,7 +37,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
                 "token1,seg1,reading1,pos1\ntoken2,seg2,reading2,pos2\ntoken3,seg3,reading3,pos3"
                         .getBytes(Constants.UTF_8));
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         file1.delete();
@@ -92,7 +92,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0,
                 20);
         assertEquals(3, itemList1.size());
-    
+
         final KuromojiItem kuromojiItem1 = new KuromojiItem(0, "token4",
                 "seg4", "reading4", "pos4");
         kuromojiFile.insert(kuromojiItem1);
@@ -103,7 +103,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertEquals("seg4", itemList2.get(3).getSegmentation());
         assertEquals("reading4", itemList2.get(3).getReading());
         assertEquals("pos4", itemList2.get(3).getPos());
-    
+
         final KuromojiItem kuromojiItem2 = new KuromojiItem(0, "token5",
                 "seg5", "reading5", "pos5");
         kuromojiFile.insert(kuromojiItem2);
@@ -115,13 +115,13 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertEquals("reading5", itemList3.get(4).getReading());
         assertEquals("pos5", itemList3.get(4).getPos());
     }
-    
+
     public void test_update() {
         final KuromojiFile kuromojiFile = new KuromojiFile(file1);
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0,
                 20);
         assertEquals(3, itemList1.size());
-    
+
         final KuromojiItem kuromojiItem1 = itemList1.get(0);
         kuromojiItem1.setNewToken("TOKEN1");
         kuromojiItem1.setNewSegmentation("SEG1");
@@ -137,7 +137,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertEquals("READING1", kuromojiItem2.getReading());
         assertEquals("POS1", kuromojiItem2.getPos());
         assertFalse(kuromojiItem2.isUpdated());
-    
+
         final KuromojiItem kuromojiItem3 = itemList2.get(2);
         kuromojiItem3.setNewToken("TOKEN3");
         kuromojiItem3.setNewSegmentation("SEG3");
@@ -154,28 +154,28 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertEquals("POS3", kuromojiItem4.getPos());
         assertFalse(kuromojiItem4.isUpdated());
     }
-    
+
     public void test_delete() throws Exception {
         final KuromojiFile kuromojiFile = new KuromojiFile(file1);
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0,
                 20);
         assertEquals(3, itemList1.size());
-    
+
         final KuromojiItem kuromojiItem1 = itemList1.get(0);
         kuromojiFile.delete(kuromojiItem1);
         final PagingList<KuromojiItem> itemList2 = kuromojiFile.selectList(0,
                 20);
         assertEquals(2, itemList2.size());
-    
+
         final KuromojiItem kuromojiItem2 = itemList2.get(1);
         kuromojiFile.delete(kuromojiItem2);
         final PagingList<KuromojiItem> itemList3 = kuromojiFile.selectList(0,
                 20);
         assertEquals(1, itemList3.size());
-    
+
         assertEquals("token2,seg2,reading2,pos2" + Constants.LINE_SEPARATOR,
                 new String(FileUtil.getBytes(file1), Constants.UTF_8));
-    
+
     }
     */
 

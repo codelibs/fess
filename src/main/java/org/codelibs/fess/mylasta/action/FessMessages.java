@@ -530,7 +530,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.front_header' with parameters.
      * <pre>
-     * message: 
+     * message:
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -544,7 +544,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.front_footer' with parameters.
      * <pre>
-     * message: 
+     * message:
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)

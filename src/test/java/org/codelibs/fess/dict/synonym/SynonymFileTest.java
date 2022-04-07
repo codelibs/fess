@@ -38,7 +38,7 @@ public class SynonymFileTest extends UnitFessTestCase {
         // TODO set up elasticsearch and dictionaryManager
         synonymFile = new SynonymFile("1", file1.getAbsolutePath(), new Date());
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         file1.delete();
@@ -120,7 +120,7 @@ public class SynonymFileTest extends UnitFessTestCase {
     public void test_insert() {
          final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);
          assertEquals(5, itemList1.size());
-    
+
          final SynonymItem synonymItem1 = new SynonymItem(0, new String[] { "z1", "z2" }, new String[] { "Z1", "Z2" });
          synonymFile.insert(synonymItem1);
          final PagingList<SynonymItem> itemList2 = synonymFile.selectList(0, 20);
@@ -129,7 +129,7 @@ public class SynonymFileTest extends UnitFessTestCase {
          assertEquals("z2", itemList2.get(5).getInputs()[1]);
          assertEquals("Z1", itemList2.get(5).getOutputs()[0]);
          assertEquals("Z2", itemList2.get(5).getOutputs()[1]);
-    
+
          final SynonymItem synonymItem2 = new SynonymItem(0, new String[] {"z1", "z2" }, new String[] { "z1", "z2" });
          synonymFile.insert(synonymItem2);
          final PagingList<SynonymItem> itemList3 = synonymFile.selectList(0, 20);
@@ -139,12 +139,12 @@ public class SynonymFileTest extends UnitFessTestCase {
          assertEquals("z1", itemList3.get(6).getOutputs()[0]);
          assertEquals("z2", itemList3.get(6).getOutputs()[1]);
      }
-    
+
      public void test_update() {
          final SynonymFile synonymFile = new SynonymFile(file1);
          final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);
          assertEquals(5, itemList1.size());
-    
+
          final SynonymItem synonymItem1 = itemList1.get(0);
          synonymItem1.setNewInputs(new String[] { "a1", "a2" });
          synonymItem1.setNewOutputs(new String[] { "A1", "A2" });
@@ -159,7 +159,7 @@ public class SynonymFileTest extends UnitFessTestCase {
          assertEquals("A1", synonymItem2.getOutputs()[0]);
          assertEquals("A2", synonymItem2.getOutputs()[1]);
          assertFalse(synonymItem2.isUpdated());
-    
+
          final SynonymItem synonymItem3 = itemList2.get(2);
          synonymItem3.setNewInputs(new String[] { "c1", "c2" });
          synonymItem3.setNewOutputs(new String[] { "c1", "c2" });
@@ -175,22 +175,22 @@ public class SynonymFileTest extends UnitFessTestCase {
          assertEquals("c2", synonymItem4.getOutputs()[1]);
          assertFalse(synonymItem2.isUpdated());
      }
-    
+
      public void test_delete() throws Exception {
          final SynonymFile synonymFile = new SynonymFile(file1);
          final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);
          assertEquals(5, itemList1.size());
-    
+
          final SynonymItem synonymItem1 = itemList1.get(0);
          synonymFile.delete(synonymItem1);
          final PagingList<SynonymItem> itemList2 = synonymFile.selectList(0, 20);
          assertEquals(4, itemList2.size());
-    
+
          final SynonymItem synonymItem2 = itemList2.get(3);
          synonymFile.delete(synonymItem2);
          final PagingList<SynonymItem> itemList3 = synonymFile.selectList(0, 20);
          assertEquals(3, itemList3.size());
-    
+
          assertEquals(
                  "b1,b2=>B1" + Constants.LINE_SEPARATOR + "c1=>C1,C2"
                          + Constants.LINE_SEPARATOR + "X1,x1"

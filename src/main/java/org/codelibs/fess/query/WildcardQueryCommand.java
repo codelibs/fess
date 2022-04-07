@@ -78,7 +78,7 @@ public class WildcardQueryCommand extends QueryCommand {
         return value;
     }
 
-    public void setLowercaseWildcard(boolean lowercaseWildcard) {
+    public void setLowercaseWildcard(final boolean lowercaseWildcard) {
         this.lowercaseWildcard = lowercaseWildcard;
     }
 }

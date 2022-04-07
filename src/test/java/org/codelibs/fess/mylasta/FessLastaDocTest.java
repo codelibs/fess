@@ -28,7 +28,7 @@ public class FessLastaDocTest extends UnitFessTestCase {
         // ## Arrange ##
         String appWebPkg = ".app.web.";
         String actionSuffix = "Action";
-    
+
         // ## Act ##
         policeStoryOfJavaClassChase((srcFile, clazz) -> {
             if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) { // e.g. BaseAction
