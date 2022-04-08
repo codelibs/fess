@@ -19,6 +19,8 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -126,7 +128,21 @@ public class ActivityHelper {
         log(buf);
     }
 
-    private void log(final StringBuilder buf) {
+    public void print(final String action, final OptionalThing<FessUserBean> user, final Map<String, String> params) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(action.replace('\t', '_').toUpperCase(Locale.ENGLISH));
+        buf.append('\t');
+        buf.append("user:");
+        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
+        params.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).map(s -> s.replace('\t', '_')).sorted().forEach(s -> {
+            buf.append('\t');
+            buf.append(s);
+        });
+        log(buf);
+    }
+
+    protected void log(final StringBuilder buf) {
         buf.append('\t');
         buf.append("ip:");
         buf.append(getClientIp());
