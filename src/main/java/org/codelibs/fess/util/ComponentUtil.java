@@ -39,6 +39,7 @@ import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.helper.CrawlerStatsHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.CurlHelper;
@@ -207,6 +208,8 @@ public final class ComponentUtil {
     private static final String RELATED_CONTENT_HELPER = "relatedContentHelper";
 
     private static final String RELATED_QUERY_HELPER = "relatedQueryHelper";
+
+    private static final String CRAWLER_STATS_HELPER = "crawlerStatsHelper";
 
     private static IndexingHelper indexingHelper;
 
@@ -503,6 +506,10 @@ public final class ComponentUtil {
 
     public static ScriptEngineFactory getScriptEngineFactory() {
         return getComponent(SCRIPT_ENGINE_FACTORY);
+    }
+
+    public static CrawlerStatsHelper getCrawlerStatsHelper() {
+        return getComponent(CRAWLER_STATS_HELPER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

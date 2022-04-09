@@ -3,12 +3,13 @@
 
 	<Properties>
 		<Property name="domain.name" value="${sys:fess.log.name:-fess}" />
-		<Property name="log.level" value="${sys:fess.log.level:-info}" />
-		<Property name="root.log.level" value="${sys:fess.log.level:-warn}" />
+		<Property name="log.level" value="${sys:fess.log.level:-debug}" />
+		<Property name="root.log.level" value="${sys:fess.log.level:-info}" />
 		<Property name="log.pattern" value="%d [%t] %-5p %msg%n" />
 		<Property name="log.file.basedir" value="${sys:fess.log.path:-target/logs}" />
 		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
 		<Property name="backup.max.history" value="90" />
+		<Property name="stats.log.pattern" value="%msg%n" />
 	</Properties>
 
 	<Appenders>
@@ -39,12 +40,35 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
+		<RollingFile name="StatsFile" fileName="${log.file.basedir}/fess-urls.log"
+			filePattern="${log.file.basedir}/fess-urls${backup.date.suffix}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>${stats.log.pattern}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy fileIndex="max" min="1"
+				max="${backup.max.history}" compressionLevel="9" />
+		</RollingFile>
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.codelibs.fess" additivity="false" level="${log.level}">
+		<Logger name="org.codelibs" additivity="false" level="${log.level}">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
+		</Logger>
+		<Logger name="org.dbflute" additivity="false" level="${log.level}">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="AppFile" />
+		</Logger>
+		<Logger name="org.lastaflute" additivity="false" level="${log.level}">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="AppFile" />
+		</Logger>
+		<Logger name="fess.log.crawler.stats" additivity="false" level="info">
+			<AppenderRef ref="StatsFile" />
 		</Logger>
 		<Root level="${root.log.level}">
 			<AppenderRef ref="Console" />

@@ -44,6 +44,9 @@
 		</postConstruct>
 		 -->
 	</component>
+	<component name="crawlerStatsHelper"
+		class="org.codelibs.fess.helper.CrawlerStatsHelper">
+	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
 	</component>

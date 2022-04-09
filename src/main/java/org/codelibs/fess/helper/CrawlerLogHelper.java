@@ -38,40 +38,70 @@ public class CrawlerLogHelper extends LogHelperImpl {
             }
             return;
         }
+        super.log(key, objs);
+    }
+
+    @Override
+    protected void processStartCrawling(Object... objs) {
+        super.processStartCrawling(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().begin(urlQueue);
+        }
+    }
+
+    @Override
+    protected void processCleanupCrawling(Object... objs) {
+        super.processCleanupCrawling(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().done(urlQueue);
+        }
+    }
+
+    @Override
+    protected void processProcessChildUrlByException(Object... objs) {
+        super.processProcessChildUrlByException(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "child_url");
+        }
+    }
+
+    @Override
+    protected void processProcessChildUrlsByException(Object... objs) {
+        super.processProcessChildUrlsByException(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "child_urls");
+        }
+    }
+
+    @Override
+    protected void processFinishedCrawling(Object... objs) {
+        super.processFinishedCrawling(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "finished");
+        }
+    }
+
+    @Override
+    protected void processCrawlingAccessException(final Object... objs) {
         try {
-            switch (key) {
-            case CRAWLING_ACCESS_EXCEPTION: {
-                final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
-                final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
-                Throwable e = (Throwable) objs[2];
-                if (e instanceof MultipleCrawlingAccessException) {
-                    final Throwable[] causes = ((MultipleCrawlingAccessException) e).getCauses();
-                    if (causes.length > 0) {
-                        e = causes[causes.length - 1];
-                    }
+            final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
+            final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
+            Throwable e = (Throwable) objs[2];
+            if (e instanceof MultipleCrawlingAccessException) {
+                final Throwable[] causes = ((MultipleCrawlingAccessException) e).getCauses();
+                if (causes.length > 0) {
+                    e = causes[causes.length - 1];
                 }
+            }
 
-                String errorName;
-                final Throwable cause = e.getCause();
-                if (cause != null) {
-                    errorName = cause.getClass().getCanonicalName();
-                } else {
-                    errorName = e.getClass().getCanonicalName();
-                }
-                storeFailureUrl(crawlerContext, urlQueue, errorName, e);
-                break;
+            String errorName;
+            final Throwable cause = e.getCause();
+            if (cause != null) {
+                errorName = cause.getClass().getCanonicalName();
+            } else {
+                errorName = e.getClass().getCanonicalName();
             }
-            case CRAWLING_EXCETPION: {
-                final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
-                final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
-                final Throwable e = (Throwable) objs[2];
-
-                storeFailureUrl(crawlerContext, urlQueue, e.getClass().getCanonicalName(), e);
-                break;
-            }
-            default:
-                break;
-            }
+            storeFailureUrl(crawlerContext, urlQueue, errorName, e);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("container was destroyed.");
@@ -87,10 +117,42 @@ public class CrawlerLogHelper extends LogHelperImpl {
             logger.warn("Failed to store a failure url.", e);
         }
 
-        super.log(key, objs);
+        super.processCrawlingAccessException(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "access_exception");
+        }
     }
 
-    private void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName,
+    @Override
+    protected void processCrawlingException(final Object... objs) {
+        try {
+            final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
+            final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
+            final Throwable e = (Throwable) objs[2];
+
+            storeFailureUrl(crawlerContext, urlQueue, e.getClass().getCanonicalName(), e);
+        } catch (final ContainerNotAvailableException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("container was destroyed.");
+            }
+            return;
+        } catch (final Exception e) {
+            if (!ComponentUtil.available()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("container was destroyed.");
+                }
+                return;
+            }
+            logger.warn("Failed to store a failure url.", e);
+        }
+
+        super.processCrawlingException(objs);
+        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "exception");
+        }
+    }
+
+    protected void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName,
             final Throwable e) {
 
         final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
@@ -100,7 +162,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 
-    private CrawlingConfig getCrawlingConfig(final String sessionCountId) {
+    protected CrawlingConfig getCrawlingConfig(final String sessionCountId) {
         return ComponentUtil.getCrawlingConfigHelper().get(sessionCountId);
     }
 
