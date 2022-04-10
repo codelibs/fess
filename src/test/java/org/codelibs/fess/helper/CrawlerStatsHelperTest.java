@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.helper.CrawlerStatsHelper.StatsKeyObject;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class CrawlerStatsHelperTest extends UnitFessTestCase {
@@ -87,6 +88,25 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertTrue(values[2].startsWith("done:"));
         assertTrue(values[3].startsWith("aaa:"));
         assertTrue(values[4].startsWith("bbb:"));
+
+        localLogMsg.remove();
+        crawlerStatsHelper.done(key);
+        assertNull(localLogMsg.get());
+    }
+
+    public void test_beginDoneWithRecord1WithStatsKeyObject() {
+        StatsKeyObject key = new StatsKeyObject("id");
+        crawlerStatsHelper.begin(key);
+        key.setUrl("test");
+        crawlerStatsHelper.record(key, "aaa");
+        crawlerStatsHelper.done(key);
+        logger.info(localLogMsg.get());
+        String[] values = localLogMsg.get().split("\t");
+        assertEquals(4, values.length);
+        assertEquals("url:test", values[0]);
+        assertTrue(values[1].startsWith("time:"));
+        assertTrue(values[2].startsWith("done:"));
+        assertTrue(values[3].startsWith("aaa:"));
 
         localLogMsg.remove();
         crawlerStatsHelper.done(key);

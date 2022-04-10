@@ -127,6 +127,8 @@ public class CrawlerStatsHelper {
     protected String getUrl(final Object keyObj) {
         if (keyObj instanceof UrlQueue<?> urlQueue) {
             return escapeValue(urlQueue.getUrl());
+        } else if (keyObj instanceof StatsKeyObject statsKey) {
+            return escapeValue(statsKey.getUrl());
         } else if (keyObj instanceof String key) {
             return escapeValue(key);
         } else if (keyObj instanceof Number key) {
@@ -138,6 +140,8 @@ public class CrawlerStatsHelper {
     protected OptionalThing<String> getCacheKey(final Object keyObj) {
         if (keyObj instanceof UrlQueue<?> urlQueue) {
             return OptionalThing.of(urlQueue.getId().toString());
+        } else if (keyObj instanceof StatsKeyObject statsKey) {
+            return OptionalThing.of(statsKey.getId());
         } else if (keyObj instanceof String key) {
             return OptionalThing.of(key);
         } else if (keyObj instanceof Number key) {
@@ -166,4 +170,29 @@ public class CrawlerStatsHelper {
         this.cacheExpireAfterWrite = cacheExpireAfterWrite;
     }
 
+    public static class StatsKeyObject {
+
+        private final String id;
+
+        private String url;
+
+        public StatsKeyObject(final String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setUrl(final String url) {
+            this.url = url;
+        }
+
+        protected String getUrl() {
+            if (url != null) {
+                return url;
+            }
+            return id;
+        }
+    }
 }
