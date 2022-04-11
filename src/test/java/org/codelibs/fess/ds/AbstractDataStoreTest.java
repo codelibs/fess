@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.script.AbstractScriptEngine;
@@ -45,7 +46,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
             }
 
             @Override
-            protected void storeData(DataConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,
+            protected void storeData(DataConfig dataConfig, IndexUpdateCallback callback, DataStoreParams paramMap,
                     Map<String, String> scriptMap, Map<String, Object> defaultDataMap) {
                 // TODO nothing
             }

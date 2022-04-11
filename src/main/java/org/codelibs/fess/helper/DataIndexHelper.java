@@ -17,9 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +28,7 @@ import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -88,7 +87,7 @@ public class DataIndexHelper {
         dataCrawlingThreadList.clear();
         final List<String> dataCrawlingThreadStatusList = new ArrayList<>();
         for (final DataConfig dataConfig : configList) {
-            final Map<String, String> initParamMap = new HashMap<>();
+            final DataStoreParams initParamMap = new DataStoreParams();
             final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, dataConfig);
             sessionIdList.add(sid);
 
@@ -180,7 +179,7 @@ public class DataIndexHelper {
 
         private final IndexUpdateCallback indexUpdateCallback;
 
-        private final Map<String, String> initParamMap;
+        private final DataStoreParams initParamMap;
 
         protected boolean finished = false;
 
@@ -189,7 +188,7 @@ public class DataIndexHelper {
         private DataStore dataStore;
 
         protected DataCrawlingThread(final DataConfig dataConfig, final IndexUpdateCallback indexUpdateCallback,
-                final Map<String, String> initParamMap) {
+                final DataStoreParams initParamMap) {
             this.dataConfig = dataConfig;
             this.indexUpdateCallback = indexUpdateCallback;
             this.initParamMap = initParamMap;
@@ -226,10 +225,10 @@ public class DataIndexHelper {
         }
 
         private void deleteOldDocs() {
-            if (Constants.FALSE.equals(initParamMap.get(DELETE_OLD_DOCS))) {
+            if (Constants.FALSE.equals(initParamMap.getAsString(DELETE_OLD_DOCS))) {
                 return;
             }
-            final String sessionId = initParamMap.get(Constants.SESSION_ID);
+            final String sessionId = initParamMap.getAsString(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
                 logger.warn("Invalid sessionId at {}", dataConfig);
                 return;
@@ -262,7 +261,7 @@ public class DataIndexHelper {
         }
 
         public String getCrawlingInfoId() {
-            return initParamMap.get(Constants.CRAWLING_INFO_ID);
+            return initParamMap.getAsString(Constants.CRAWLING_INFO_ID);
         }
 
         public boolean isRunning() {

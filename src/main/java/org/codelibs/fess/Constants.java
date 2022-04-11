@@ -458,4 +458,5 @@ public class Constants extends CoreLibConstants {
 
     public static final String TEXT_FRAGMENT_TYPE_HIGHLIGHT = "highlight";
 
+    public static final String CRAWLER_STATS_KEY = "crawler.stats.key";
 }

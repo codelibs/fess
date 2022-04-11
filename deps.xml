@@ -45,27 +45,27 @@
 		</unzip>
 		<!-- fess-ds-csv -->
 		<antcall target="install.plugin.jar">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-csv" />
-			<param name="jar.version" value="14.0.0" />
-			<param name="file.version" value="14.0.0" />
+			<param name="jar.version" value="14.1.0-SNAPSHOT" />
+			<param name="file.version" value="14.1.0-20220410.221610-1" />
 		</antcall>
 		<!-- fess-ds-db -->
 		<antcall target="install.plugin.jar">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-ds-db" />
-			<param name="jar.version" value="14.0.0" />
-			<param name="file.version" value="14.0.0" />
+			<param name="jar.version" value="14.1.0-SNAPSHOT" />
+			<param name="file.version" value="14.1.0-20220410.222311-1" />
 		</antcall>
 		<!-- fess-script-groovy -->
 		<antcall target="install.plugin.jar">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-script-groovy" />
-			<param name="jar.version" value="14.0.0" />
-			<param name="file.version" value="14.0.0" />
+			<param name="jar.version" value="14.1.0-SNAPSHOT" />
+			<param name="file.version" value="14.1.0-20220411.123412-1" />
 		</antcall>
 	</target>
 

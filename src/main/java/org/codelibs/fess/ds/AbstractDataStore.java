@@ -31,6 +31,7 @@ import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -59,7 +60,7 @@ public abstract class AbstractDataStore implements DataStore {
     }
 
     @Override
-    public void store(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
+    public void store(final DataConfig config, final IndexUpdateCallback callback, final DataStoreParams initParamMap) {
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(config);
@@ -76,7 +77,7 @@ public abstract class AbstractDataStore implements DataStore {
         final Map<String, String> configScriptMap = config.getHandlerScriptMap();
 
         initParamMap.putAll(configParamMap);
-        final Map<String, String> paramMap = initParamMap;
+        final DataStoreParams paramMap = initParamMap;
 
         // default values
         final Map<String, Object> defaultDataMap = new HashMap<>();
@@ -91,7 +92,7 @@ public abstract class AbstractDataStore implements DataStore {
             defaultDataMap.put(fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // segment
-        defaultDataMap.put(fessConfig.getIndexFieldSegment(), initParamMap.get(Constants.SESSION_ID));
+        defaultDataMap.put(fessConfig.getIndexFieldSegment(), initParamMap.getAsString(Constants.SESSION_ID));
         // created
         defaultDataMap.put(fessConfig.getIndexFieldCreated(), systemHelper.getCurrentTime());
         // boost
@@ -118,12 +119,12 @@ public abstract class AbstractDataStore implements DataStore {
         defaultDataMap.put(fessConfig.getIndexFieldVirtualHost(),
                 stream(config.getVirtualHosts()).get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.toList())));
 
-        storeData(config, callback, new ParamMap<>(paramMap), configScriptMap, defaultDataMap);
+        storeData(config, callback, paramMap.newInstance(), configScriptMap, defaultDataMap);
 
     }
 
-    protected String getScriptType(final Map<String, String> paramMap) {
-        final String value = paramMap.get(SCRIPT_TYPE);
+    protected String getScriptType(final DataStoreParams paramMap) {
+        final String value = paramMap.getAsString(SCRIPT_TYPE);
         if (StringUtil.isBlank(value)) {
             return Constants.DEFAULT_SCRIPT;
         }
@@ -142,9 +143,9 @@ public abstract class AbstractDataStore implements DataStore {
         return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(template, paramMap);
     }
 
-    protected long getReadInterval(final Map<String, String> paramMap) {
+    protected long getReadInterval(final DataStoreParams paramMap) {
         long readInterval = 0;
-        final String value = paramMap.get("readInterval");
+        final String value = paramMap.getAsString("readInterval");
         if (StringUtil.isNotBlank(value)) {
             try {
                 readInterval = Long.parseLong(value);
@@ -159,6 +160,6 @@ public abstract class AbstractDataStore implements DataStore {
         ThreadUtil.sleepQuietly(interval);
     }
 
-    protected abstract void storeData(DataConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,
+    protected abstract void storeData(DataConfig dataConfig, IndexUpdateCallback callback, DataStoreParams paramMap,
             Map<String, String> scriptMap, Map<String, Object> defaultDataMap);
 }

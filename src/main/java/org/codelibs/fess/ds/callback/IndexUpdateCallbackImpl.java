@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -70,7 +71,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
      * @see org.codelibs.fess.ds.callback.IndexUpdateCallback#store(java.util.Map)
      */
     @Override
-    public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    public void store(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         systemHelper.calibrateCpuLoad();
 
@@ -142,7 +143,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     }
 
-    protected Map<String, Object> ingest(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    protected Map<String, Object> ingest(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         if (ingestFactory == null) {
             return dataMap;
         }

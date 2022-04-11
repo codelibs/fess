@@ -17,9 +17,11 @@ package org.codelibs.fess.ds.callback;
 
 import java.util.Map;
 
+import org.codelibs.fess.entity.DataStoreParams;
+
 public interface IndexUpdateCallback {
 
-    void store(Map<String, String> paramMap, Map<String, Object> dataMap);
+    void store(DataStoreParams paramMap, Map<String, Object> dataMap);
 
     long getDocumentSize();
 

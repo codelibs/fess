@@ -15,14 +15,13 @@
  */
 package org.codelibs.fess.ds;
 
-import java.util.Map;
-
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 
 public interface DataStore {
 
-    void store(DataConfig config, IndexUpdateCallback callback, Map<String, String> initParamMap);
+    void store(DataConfig config, IndexUpdateCallback callback, DataStoreParams initParamMap);
 
     void stop();
 

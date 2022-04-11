@@ -20,6 +20,7 @@ import java.util.Map;
 import org.codelibs.fess.crawler.entity.AccessResult;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.util.ComponentUtil;
 
 public abstract class Ingester {
@@ -49,7 +50,7 @@ public abstract class Ingester {
     }
 
     // datastore
-    public Map<String, Object> process(final Map<String, Object> target, final Map<String, String> params) {
+    public Map<String, Object> process(final Map<String, Object> target, final DataStoreParams params) {
         return process(target);
     }
 

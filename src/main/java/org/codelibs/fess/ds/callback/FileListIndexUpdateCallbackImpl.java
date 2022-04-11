@@ -45,8 +45,11 @@ import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.crawler.transformer.Transformer;
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.DataStoreCrawlingException;
+import org.codelibs.fess.helper.CrawlerStatsHelper;
+import org.codelibs.fess.helper.CrawlerStatsHelper.StatsKeyObject;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -89,7 +92,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     @Override
-    public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    public void store(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         executor.execute(() -> {
             final Object eventType = dataMap.remove(getParamValue(paramMap, "field.event_type", "event_type"));
             if (getParamValue(paramMap, "event.create", "create").equals(eventType)
@@ -105,12 +108,13 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         });
     }
 
-    protected String getParamValue(final Map<String, String> paramMap, final String key, final String defaultValue) {
-        return paramMap.getOrDefault(key, defaultValue);
+    protected String getParamValue(final DataStoreParams paramMap, final String key, final String defaultValue) {
+        return paramMap.getAsString(key, defaultValue);
     }
 
-    protected void addDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    protected void addDocument(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
         synchronized (indexUpdateCallback) {
             // required check
             if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
@@ -125,6 +129,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 return;
             }
 
+            final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof StatsKeyObject sko ? sko : null;
+
             final long maxAccessCount = getMaxAccessCount(paramMap, dataMap);
             long counter = 0;
             final Deque<String> urlQueue = new LinkedList<>();
@@ -138,16 +144,23 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 }
                 try {
                     for (int i = 0; i < maxRedirectCount; i++) {
+                        if (keyObj != null) {
+                            keyObj.setUrl(processingUrl);
+                        }
+                        crawlerStatsHelper.record(keyObj, "prepared");
                         processingUrl = processRequest(paramMap, localDataMap, processingUrl, client);
                         if (processingUrl == null) {
                             break;
                         }
                         counter++;
                         localDataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
+                        crawlerStatsHelper.record(keyObj, "redirected");
                     }
                 } catch (final ChildUrlsException e) {
+                    crawlerStatsHelper.record(keyObj, "child_urls");
                     e.getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
                 } catch (final DataStoreCrawlingException e) {
+                    crawlerStatsHelper.record(keyObj, "crawling_exception");
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
@@ -161,7 +174,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
-    protected long getMaxAccessCount(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    protected long getMaxAccessCount(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         final Object recursive = dataMap.remove(getParamValue(paramMap, "field.recursive", "recursive"));
         if (recursive == null || Constants.FALSE.equalsIgnoreCase(recursive.toString())) {
             return 1L;
@@ -176,9 +189,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
-    protected String processRequest(final Map<String, String> paramMap, final Map<String, Object> dataMap, final String url,
+    protected String processRequest(final DataStoreParams paramMap, final Map<String, Object> dataMap, final String url,
             final CrawlerClient client) {
         final long startTime = System.currentTimeMillis();
+        final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
+        final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof StatsKeyObject sko ? sko : null;
         try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
             if (responseData.getRedirectLocation() != null) {
                 return responseData.getRedirectLocation();
@@ -187,7 +202,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             if (dataMap.containsKey(Constants.SESSION_ID)) {
                 responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
             } else {
-                responseData.setSessionId(paramMap.get(Constants.CRAWLING_INFO_ID));
+                responseData.setSessionId((String) paramMap.get(Constants.CRAWLING_INFO_ID));
             }
 
             final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
@@ -210,17 +225,19 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                             throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                         }
                     }
+                    crawlerStatsHelper.record(keyObj, "accessed");
 
                     // remove
                     String[] ignoreFields;
                     if (paramMap.containsKey("ignore.field.names")) {
-                        ignoreFields = paramMap.get("ignore.field.names").split(",");
+                        ignoreFields = ((String) paramMap.get("ignore.field.names")).split(",");
                     } else {
                         ignoreFields = new String[] { Constants.INDEXING_TARGET, Constants.SESSION_ID };
                     }
                     stream(ignoreFields).of(stream -> stream.map(String::trim).forEach(s -> dataMap.remove(s)));
 
                     indexUpdateCallback.store(paramMap, dataMap);
+                    crawlerStatsHelper.record(keyObj, "processed");
                 } else {
                     logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: {}, Data: {}",
                             responseProcessor, dataMap);
@@ -235,7 +252,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
-    protected boolean deleteDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    protected boolean deleteDocument(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Deleting {}", dataMap);
