@@ -161,7 +161,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     crawlerStatsHelper.record(keyObj, StatsAction.CHILD_URLS);
                     e.getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
                 } catch (final DataStoreCrawlingException e) {
-                    crawlerStatsHelper.record(keyObj, StatsAction.CRAWLING_EXCEPTION);
+                    crawlerStatsHelper.record(keyObj, StatsAction.ACCESS_EXCEPTION);
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);

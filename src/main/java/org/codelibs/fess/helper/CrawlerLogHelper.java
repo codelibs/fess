@@ -120,7 +120,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
         super.processCrawlingAccessException(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CRAWLING_EXCEPTION);
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
         }
     }
 
@@ -149,7 +149,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
         super.processCrawlingException(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CRAWLING_EXCEPTION);
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
         }
     }
 

@@ -203,9 +203,9 @@ public class CrawlerStatsHelper {
 
     public enum StatsAction {
         ACCESSED, //
+        ACCESS_EXCEPTION, //
         CHILD_URL, //
         CHILD_URLS, //
-        CRAWLING_EXCEPTION, //
         EVALUATED, //
         EXCEPTION, //
         FINISHED, //
