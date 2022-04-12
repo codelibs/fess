@@ -49,6 +49,7 @@ import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.helper.CrawlerStatsHelper;
+import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsKeyObject;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -147,20 +148,20 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                         if (keyObj != null) {
                             keyObj.setUrl(processingUrl);
                         }
-                        crawlerStatsHelper.record(keyObj, "prepared");
+                        crawlerStatsHelper.record(keyObj, StatsAction.PREPARED);
                         processingUrl = processRequest(paramMap, localDataMap, processingUrl, client);
                         if (processingUrl == null) {
                             break;
                         }
                         counter++;
                         localDataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
-                        crawlerStatsHelper.record(keyObj, "redirected");
+                        crawlerStatsHelper.record(keyObj, StatsAction.REDIRECTED);
                     }
                 } catch (final ChildUrlsException e) {
-                    crawlerStatsHelper.record(keyObj, "child_urls");
+                    crawlerStatsHelper.record(keyObj, StatsAction.CHILD_URLS);
                     e.getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
                 } catch (final DataStoreCrawlingException e) {
-                    crawlerStatsHelper.record(keyObj, "crawling_exception");
+                    crawlerStatsHelper.record(keyObj, StatsAction.CRAWLING_EXCEPTION);
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
@@ -225,7 +226,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                             throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                         }
                     }
-                    crawlerStatsHelper.record(keyObj, "accessed");
+                    crawlerStatsHelper.record(keyObj, StatsAction.ACCESSED);
 
                     // remove
                     String[] ignoreFields;
@@ -237,7 +238,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     stream(ignoreFields).of(stream -> stream.map(String::trim).forEach(s -> dataMap.remove(s)));
 
                     indexUpdateCallback.store(paramMap, dataMap);
-                    crawlerStatsHelper.record(keyObj, "processed");
+                    crawlerStatsHelper.record(keyObj, StatsAction.PROCESSED);
                 } else {
                     logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: {}, Data: {}",
                             responseProcessor, dataMap);

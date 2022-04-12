@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +75,10 @@ public class CrawlerStatsHelper {
                 log(buf);
             }
         });
+    }
+
+    public void record(final Object keyObj, final StatsAction action) {
+        record(keyObj, action.name().toLowerCase(Locale.ENGLISH));
     }
 
     public void record(final Object keyObj, final String action) {
@@ -194,5 +199,19 @@ public class CrawlerStatsHelper {
             }
             return id;
         }
+    }
+
+    public enum StatsAction {
+        ACCESSED, //
+        CHILD_URL, //
+        CHILD_URLS, //
+        CRAWLING_EXCEPTION, //
+        EVALUATED, //
+        EXCEPTION, //
+        FINISHED, //
+        PARSED, //
+        PREPARED, //
+        REDIRECTED, //
+        PROCESSED,//
     }
 }

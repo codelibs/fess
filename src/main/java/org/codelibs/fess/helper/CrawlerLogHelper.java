@@ -25,6 +25,7 @@ import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
+import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class CrawlerLogHelper extends LogHelperImpl {
@@ -61,7 +62,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
     protected void processProcessChildUrlByException(Object... objs) {
         super.processProcessChildUrlByException(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "child_url");
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CHILD_URL);
         }
     }
 
@@ -69,7 +70,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
     protected void processProcessChildUrlsByException(Object... objs) {
         super.processProcessChildUrlsByException(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "child_urls");
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CHILD_URLS);
         }
     }
 
@@ -77,7 +78,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
     protected void processFinishedCrawling(Object... objs) {
         super.processFinishedCrawling(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "finished");
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.FINISHED);
         }
     }
 
@@ -119,7 +120,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
         super.processCrawlingAccessException(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "access_exception");
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CRAWLING_EXCEPTION);
         }
     }
 
@@ -148,7 +149,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
         super.processCrawlingException(objs);
         if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, "exception");
+            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CRAWLING_EXCEPTION);
         }
     }
 
