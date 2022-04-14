@@ -112,4 +112,59 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         crawlerStatsHelper.done(key);
         assertNull(localLogMsg.get());
     }
+
+    public void test_beginDoneWithRecordOnLazy() {
+        String key = "test";
+        crawlerStatsHelper.begin(key);
+        crawlerStatsHelper.record(key, "aaa");
+        crawlerStatsHelper.runOnThread(key);
+        crawlerStatsHelper.done(key);
+        logger.info(localLogMsg.get());
+        assertNull(localLogMsg.get());
+        crawlerStatsHelper.done(key);
+        logger.info(localLogMsg.get());
+        String[] values = localLogMsg.get().split("\t");
+        assertEquals(4, values.length);
+        assertEquals("url:test", values[0]);
+        assertTrue(values[1].startsWith("time:"));
+        assertTrue(values[2].startsWith("done:"));
+        assertTrue(values[3].startsWith("aaa:"));
+
+        localLogMsg.remove();
+        crawlerStatsHelper.done(key);
+        assertNull(localLogMsg.get());
+    }
+
+    public void test_beginWithRecordAndDiscard() {
+        String key = "test";
+        crawlerStatsHelper.begin(key);
+        crawlerStatsHelper.record(key, "aaa");
+        crawlerStatsHelper.discard(key);
+        logger.info(localLogMsg.get());
+        assertNull(localLogMsg.get());
+
+        crawlerStatsHelper.done(key);
+        logger.info(localLogMsg.get());
+        assertNull(localLogMsg.get());
+
+        localLogMsg.remove();
+    }
+
+    public void test_beginWithRecordOnDestroy() {
+        String key = "test";
+        crawlerStatsHelper.begin(key);
+        crawlerStatsHelper.record(key, "aaa");
+        logger.info(localLogMsg.get());
+        assertNull(localLogMsg.get());
+
+        crawlerStatsHelper.destroy();
+        logger.info(localLogMsg.get());
+        String[] values = localLogMsg.get().split("\t");
+        assertEquals(3, values.length);
+        assertEquals("url:test", values[0]);
+        assertTrue(values[1].startsWith("time:"));
+        assertTrue(values[2].startsWith("aaa:"));
+
+        localLogMsg.remove();
+    }
 }

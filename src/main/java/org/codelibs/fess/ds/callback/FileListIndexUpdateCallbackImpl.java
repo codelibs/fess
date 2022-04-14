@@ -94,17 +94,29 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     @Override
     public void store(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
+        final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
+        final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof StatsKeyObject sko ? sko : null;
+        if (keyObj != null) {
+            crawlerStatsHelper.runOnThread(keyObj);
+        }
+        final DataStoreParams localParams = paramMap.newInstance();
         executor.execute(() -> {
-            final Object eventType = dataMap.remove(getParamValue(paramMap, "field.event_type", "event_type"));
-            if (getParamValue(paramMap, "event.create", "create").equals(eventType)
-                    || getParamValue(paramMap, "event.modify", "modify").equals(eventType)) {
-                // updated file
-                addDocument(paramMap, dataMap);
-            } else if (getParamValue(paramMap, "event.delete", "delete").equals(eventType)) {
-                // deleted file
-                deleteDocument(paramMap, dataMap);
-            } else {
-                logger.warn("unknown event: {}, data: {}", eventType, dataMap);
+            try {
+                final Object eventType = dataMap.remove(getParamValue(localParams, "field.event_type", "event_type"));
+                if (getParamValue(localParams, "event.create", "create").equals(eventType)
+                        || getParamValue(localParams, "event.modify", "modify").equals(eventType)) {
+                    // updated file
+                    addDocument(localParams, dataMap);
+                } else if (getParamValue(localParams, "event.delete", "delete").equals(eventType)) {
+                    // deleted file
+                    deleteDocument(localParams, dataMap);
+                } else {
+                    logger.warn("unknown event: {}, data: {}", eventType, dataMap);
+                }
+            } finally {
+                if (keyObj != null) {
+                    crawlerStatsHelper.done(keyObj);
+                }
             }
         });
     }
