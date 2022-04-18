@@ -18,14 +18,21 @@ package org.codelibs.fess;
 // DO NOT DEPEND OTHER JARs
 
 import java.io.File;
+import java.util.List;
+import java.util.Properties;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardHost;
+import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.net.SSLHostConfig;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
 import org.codelibs.fess.tomcat.webresources.FessWebResourceRoot;
 import org.dbflute.tomcat.TomcatBoot;
+import org.dbflute.tomcat.logging.BootLogger;
+import org.dbflute.tomcat.props.BootPropsTranslator;
 
 public class FessBoot extends TomcatBoot {
 
@@ -139,6 +146,36 @@ public class FessBoot extends TomcatBoot {
         final Context context = (Context) server.getHost().findChild(contextPath);
         if (context != null) {
             context.setResources(new FessWebResourceRoot(context));
+        }
+    }
+
+    @Override
+    protected BootPropsTranslator createBootPropsTranslator() {
+        return new FessBootPropsTranslator();
+    }
+
+    static class FessBootPropsTranslator extends BootPropsTranslator {
+        @Override
+        public void setupServerConfigIfNeeds(final BootLogger logger, final Tomcat server, final Connector connector,
+                final Properties props, final List<String> readConfigList) {
+            if (props == null) {
+                return;
+            }
+            super.setupServerConfigIfNeeds(logger, server, connector, props, readConfigList);
+            doSetupServerConfig(logger, props, "SSLEnabled", value -> {
+                if ("true".equalsIgnoreCase(value)) {
+                    connector.setProperty("SSLEnabled", "true");
+                    final SSLHostConfig sslHostConfig = new SSLHostConfig();
+                    sslHostConfig.setHostName("_default_");
+                    doSetupServerConfig(logger, props, "certificateKeystoreFile", v -> sslHostConfig.setCertificateKeystoreFile(v));
+                    doSetupServerConfig(logger, props, "certificateKeystorePassword", v -> sslHostConfig.setCertificateKeystorePassword(v));
+                    doSetupServerConfig(logger, props, "certificateKeyAlias", v -> sslHostConfig.setCertificateKeyAlias(v));
+                    doSetupServerConfig(logger, props, "sslProtocol", v -> sslHostConfig.setSslProtocol(v));
+                    doSetupServerConfig(logger, props, "enabledProtocols", v -> sslHostConfig.setEnabledProtocols(v.trim().split(",")));
+                    connector.addSslHostConfig(sslHostConfig);
+                }
+            });
+
         }
     }
 }
