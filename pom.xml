@@ -387,9 +387,12 @@
 							</mapper>
 						</data>
 						<data>
-							<type>file</type>
-							<src>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/FessBoot.class</src>
-							<dst>${packaging.fess.lib.dir}/classes/org/codelibs/fess/FessBoot.class</dst>
+							<type>files</type>
+							<paths>
+								<path>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/FessBoot.class</path>
+								<path>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/FessBoot$FessBootPropsTranslator.class</path>
+							</paths>
+							<dst>${packaging.fess.lib.dir}/classes/org/codelibs/fess/</dst>
 							<mapper>
 								<type>perm</type>
 								<user>${packaging.fess.user}</user>
