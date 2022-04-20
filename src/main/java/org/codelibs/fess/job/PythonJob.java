@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 
@@ -113,6 +114,9 @@ public class PythonJob extends ExecJob {
             final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
                 pb.directory(baseDir);
                 pb.redirectErrorStream(true);
+                final Map<String, String> environment = pb.environment();
+                environment.put("SESSION_ID", sessionId);
+                environment.put("OPENSEARCH_URL", System.getProperty(Constants.FESS_ES_HTTP_ADDRESS));
             });
 
             final InputStreamThread it = jobProcess.getInputStreamThread();
