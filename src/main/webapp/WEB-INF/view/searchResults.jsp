@@ -1,5 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%-- query matched some document --%>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
 <div id="subheader" class="row">
 	<div class="col">
 		<p>
@@ -38,10 +39,13 @@
 	<ol class="list-unstyled col-md-8">
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
 			<li id="result${s.index}">
-				<h3 class="title text-truncate">
+				<h3 class="title text-truncate" style="margin-bottom:0;">
 					<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 						data-id="${doc.doc_id}" data-order="${s.index}">${doc.content_title}</a>
 				</h3>
+				<c:if test="${ fn:substring(doc.url,0,4)=='smb:' }">					
+					<i id="tooltip${s.index}" class="clipboard-copy-button fa fa-copy" aria-hidden="true" data-clipboard-text="${doc.url_link}"></i>
+				</c:if>	
 				<div class="body">
 					<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
 					<div class="mr-3">
@@ -226,4 +230,14 @@
 			</c:if>
 		</ul>
 	</nav>
+	<script>
+		const clipboard = new ClipboardJS('.clipboard-copy-button');
+		clipboard.on('success', function(e) {
+			e.trigger.classList.add('clipboard-copy-copied');
+			setTimeout(()=>{
+				e.trigger.classList.remove('clipboard-copy-copied');
+			},1200);
+			e.clearSelection();
+		});
+	</script>
 </div>

@@ -160,3 +160,39 @@ legend{
 		white-space: nowrap;
 	}
 }
+
+.clipboard-copy-button{
+	 cursor: pointer;
+	 color:gray;
+	 text-overflow: unset;
+}
+.clipboard-copy-button::after{
+	 content:'copied!';
+	 font-size:.7em;
+	 border-radius:3px;
+	 padding:5px;margin:5px;
+	 background: gray;
+	 color: white;
+	 opacity: 0;
+}
+.clipboard-copy-copied::after {
+	 opacity: 1;
+}
+
+.clipboard-copy-button{
+	 cursor: pointer;
+	 color:gray;
+	 text-overflow: unset;
+}
+.clipboard-copy-button::after{
+	 content:'copied!';
+	 font-size:.7em;
+	 border-radius:3px;
+	 padding:5px;margin:5px;
+	 background: gray;
+	 color: white;
+	 opacity: 0;
+}
+.clipboard-copy-copied::after {
+	 opacity: 1;
+}
