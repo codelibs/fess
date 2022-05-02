@@ -5,7 +5,6 @@ $(function() {
       $searchButton = $("#searchButton"),
       contextPath = $("#contextPath").val(),
       loadImage;
-
   $("#searchForm").on("submit", function(e) {
     $searchButton.attr("disabled", true);
     setTimeout(function() {
@@ -259,5 +258,18 @@ $(function() {
       'url("' + contextPath + '/images/loading.gif")'
     );
     loadImage(this, $(this).attr("data-src"), IMG_LOADING_MAX);
+  });
+  
+  const clipboard = new ClipboardJS('.clipboard-copy');
+  clipboard.on('success', function(e) {
+    e.trigger.classList.remove('clipboard-copy');
+    e.trigger.classList.add('clipboard-copy-');
+    e.trigger.classList.add('clipboard-copy-copied');
+    setTimeout(()=>{
+      e.trigger.classList.remove('clipboard-copy-copied');
+      e.trigger.classList.remove('clipboard-copy-');
+      e.trigger.classList.add('clipboard-copy');
+    },1200);
+    e.clearSelection();
   });
 });

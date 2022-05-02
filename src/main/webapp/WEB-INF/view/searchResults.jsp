@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%-- query matched some document --%>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
 <div id="subheader" class="row">
 	<div class="col">
 		<p>
@@ -39,11 +39,10 @@
 	<ol class="list-unstyled col-md-8">
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
 			<li id="result${s.index}">
-				<h3 class="title text-truncate" style="margin-bottom:0;">
+				<h3 class="title text-truncate">
 					<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 						data-id="${doc.doc_id}" data-order="${s.index}">${doc.content_title}</a>
 				</h3>									
-				<p>${doc.url}</p>
 				<div class="body">
 					<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
 					<div class="mr-3">
@@ -233,18 +232,4 @@
 			</c:if>
 		</ul>
 	</nav>
-	<script>
-		const clipboard = new ClipboardJS('.clipboard-copy');
-		clipboard.on('success', function(e) {
-			e.trigger.classList.remove('clipboard-copy');
-			e.trigger.classList.add('clipboard-copy-');
-			e.trigger.classList.add('clipboard-copy-copied');
-			setTimeout(()=>{
-				e.trigger.classList.remove('clipboard-copy-copied');
-				e.trigger.classList.remove('clipboard-copy-');
-				e.trigger.classList.add('clipboard-copy');
-			},1200);
-			e.clearSelection();
-		});
-	</script>
 </div>
