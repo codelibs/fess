@@ -1,6 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%-- query matched some document --%>
-<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
 <div id="subheader" class="row">
 	<div class="col">
 		<p>
@@ -42,7 +41,7 @@
 				<h3 class="title text-truncate">
 					<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 						data-id="${doc.doc_id}" data-order="${s.index}">${doc.content_title}</a>
-				</h3>									
+				</h3>
 				<div class="body">
 					<c:if test="${thumbnailSupport && !empty doc.thumbnail}">
 					<div class="mr-3">
@@ -233,3 +232,4 @@
 		</ul>
 	</nav>
 </div>
+<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>

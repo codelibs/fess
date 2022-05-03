@@ -5,6 +5,7 @@ $(function() {
       $searchButton = $("#searchButton"),
       contextPath = $("#contextPath").val(),
       loadImage;
+
   $("#searchForm").on("submit", function(e) {
     $searchButton.attr("disabled", true);
     setTimeout(function() {
