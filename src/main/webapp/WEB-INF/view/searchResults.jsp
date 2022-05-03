@@ -56,7 +56,7 @@
 					<div class="description">${doc.content_description}</div>
 				</div>
 				<div class="site">
-					<div class="title-container" style="overflow:unset;">
+					<div class="title-container">
 						<cite>${f:h(doc.site_path)}</cite>
 						<i class="clipboard-copy fa fa-copy" data-clipboard-text="${doc.url_link}"></i>
 					</div>
