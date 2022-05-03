@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.es.client;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fesen.client.HttpClient;
 import org.codelibs.fess.Constants;
@@ -29,7 +31,9 @@ public class CrawlerEngineClient extends FesenClient {
     @Override
     protected Client createClient() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Builder builder = Settings.builder().putList("http.hosts", address).put("processors", fessConfig.getCrawlerHttpProcessors());
+        final String[] hosts =
+                split(address, ",").get(stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
+        final Builder builder = Settings.builder().putList("http.hosts", hosts).put("processors", fessConfig.getCrawlerHttpProcessors());
         final String username = fessConfig.getElasticsearchUsername();
         final String password = fessConfig.getElasticsearchPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
