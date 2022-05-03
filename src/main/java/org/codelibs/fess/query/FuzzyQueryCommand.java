@@ -54,23 +54,29 @@ public class FuzzyQueryCommand extends QueryCommand {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Term term = fuzzyQuery.getTerm();
         final String field = getSearchField(context.getDefaultField(), term.field());
-        // TODO fuzzy value
+
         if (Constants.DEFAULT_FIELD.equals(field)) {
-            context.addFieldLog(field, term.text());
+            final String text = term.text();
+            context.addFieldLog(field, text);
+            context.addHighlightedQuery(text);
             return buildDefaultQueryBuilder(fessConfig, context,
-                    (f, b) -> QueryBuilders.fuzzyQuery(f, term.text()).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
-                            .boost(b * boost).maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
+                    (f, b) -> QueryBuilders.fuzzyQuery(f, text).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost)
+                            .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
                             .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
                             .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));
         }
+
         if (isSearchField(field)) {
-            context.addFieldLog(field, term.text());
-            return QueryBuilders.fuzzyQuery(field, term.text()).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
+            final String text = term.text();
+            context.addFieldLog(field, text);
+            context.addHighlightedQuery(text);
+            return QueryBuilders.fuzzyQuery(field, text).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
                     .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
                     .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
                     .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions()));
         }
-        final String origQuery = fuzzyQuery.toString();
+
+        final String origQuery = term.toString();
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
         context.addHighlightedQuery(origQuery);
         return buildDefaultQueryBuilder(fessConfig, context,

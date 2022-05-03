@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -59,8 +60,20 @@ public class PhraseQueryCommand extends QueryCommand {
         final String field = terms[0].field();
         final String[] texts = stream(terms).get(stream -> stream.map(Term::text).toArray(n -> new String[n]));
         final String text = String.join(" ", texts);
-        context.addFieldLog(field, text);
-        stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
+
+        if (Constants.DEFAULT_FIELD.equals(field)) {
+            context.addFieldLog(field, text);
+            stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
+            return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+        }
+
+        if (isSearchField(field)) {
+            context.addFieldLog(field, text);
+            stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
+            return buildMatchPhraseQuery(field, text);
+        }
+
+        context.addFieldLog(Constants.DEFAULT_FIELD, text);
         return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
     }
 

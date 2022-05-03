@@ -17,6 +17,7 @@ package org.codelibs.fess.query;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.util.BytesRef;
@@ -53,12 +54,22 @@ public class TermRangeQueryCommand extends QueryCommand {
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), termRangeQuery.getField());
+
         if (!isSearchField(field)) {
-            final String origQuery = termRangeQuery.toString();
+            final StringBuilder queryBuf = new StringBuilder();
+            queryBuf.append(termRangeQuery.includesLower() ? '[' : '{');
+            final BytesRef lowerTerm = termRangeQuery.getLowerTerm();
+            queryBuf.append(lowerTerm != null ? ("*".equals(Term.toString(lowerTerm)) ? "\\*" : Term.toString(lowerTerm)) : "*");
+            queryBuf.append(" TO ");
+            final BytesRef upperTerm = termRangeQuery.getUpperTerm();
+            queryBuf.append(upperTerm != null ? ("*".equals(Term.toString(upperTerm)) ? "\\*" : Term.toString(upperTerm)) : "*");
+            queryBuf.append(termRangeQuery.includesUpper() ? ']' : '}');
+            final String origQuery = queryBuf.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
         }
+
         context.addFieldLog(field, termRangeQuery.toString(field));
         final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);
         final BytesRef min = termRangeQuery.getLowerTerm();

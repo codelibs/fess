@@ -55,12 +55,16 @@ public class PrefixQueryCommand extends QueryCommand {
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), prefixQuery.getField());
+        final String text = prefixQuery.getPrefix().text();
+
         if (Constants.DEFAULT_FIELD.equals(field)) {
-            context.addFieldLog(field, prefixQuery.getPrefix().text());
+            context.addFieldLog(field, text + "*");
+            context.addHighlightedQuery(text);
             return buildDefaultQueryBuilder(fessConfig, context,
-                    (f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(b * boost)
+                    (f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, toLowercaseWildcard(text)).boost(b * boost)
                             .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
+
         if (!isSearchField(field)) {
             final String query = prefixQuery.getPrefix().toString();
             final String origQuery = toLowercaseWildcard(query);
@@ -70,11 +74,13 @@ public class PrefixQueryCommand extends QueryCommand {
                     (f, b) -> QueryBuilders.matchPhrasePrefixQuery(f, origQuery).boost(b * boost)
                             .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger()));
         }
-        context.addFieldLog(field, prefixQuery.getPrefix().text() + "*");
+
+        context.addFieldLog(field, text + "*");
+        context.addHighlightedQuery(text);
         if (getQueryFieldConfig().notAnalyzedFieldSet.contains(field)) {
-            return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
+            return QueryBuilders.prefixQuery(field, toLowercaseWildcard(text)).boost(boost);
         }
-        return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost)
+        return QueryBuilders.matchPhrasePrefixQuery(field, toLowercaseWildcard(text)).boost(boost)
                 .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger());
     }
 

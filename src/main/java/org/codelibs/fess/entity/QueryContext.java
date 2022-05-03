@@ -43,19 +43,19 @@ public class QueryContext {
 
     protected static final String ALLINTITLE_FIELD_PREFIX = "allintitle:";
 
-    private QueryBuilder queryBuilder;
+    protected QueryBuilder queryBuilder;
 
-    private final List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
+    protected final List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
 
-    private String queryString;
+    protected String queryString;
 
-    private Set<String> highlightedQuerySet = null;
+    protected Set<String> highlightedQuerySet = null;
 
-    private Map<String, List<String>> fieldLogMap = null;
+    protected Map<String, List<String>> fieldLogMap = null;
 
-    private boolean disableRoleQuery = false;
+    protected boolean disableRoleQuery = false;
 
-    private String defaultField = null;
+    protected String defaultField = null;
 
     @SuppressWarnings("unchecked")
     public QueryContext(final String queryString, final boolean isQuery) {

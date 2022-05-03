@@ -17,6 +17,7 @@ package org.codelibs.fess.query;
 
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
@@ -56,18 +57,32 @@ public class WildcardQueryCommand extends QueryCommand {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), wildcardQuery.getField());
         if (Constants.DEFAULT_FIELD.equals(field)) {
-            context.addFieldLog(field, wildcardQuery.getTerm().text());
+            final String text = wildcardQuery.getTerm().text();
+            context.addFieldLog(field, text);
+            context.addHighlightedQuery(StringUtils.strip(text, "*"));
             return buildDefaultQueryBuilder(fessConfig, context,
-                    (f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(b * boost));
+                    (f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(text)).boost(b * boost));
         }
+
         if (isSearchField(field)) {
-            context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(boost);
+            final String text = wildcardQuery.getTerm().text();
+            context.addFieldLog(field, text);
+            context.addHighlightedQuery(StringUtils.strip(text, "*"));
+            return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(text)).boost(boost);
         }
+
         final String query = wildcardQuery.getTerm().toString();
-        final String origQuery = "*" + toLowercaseWildcard(query) + "*";
+        final StringBuilder queryBuf = new StringBuilder(query.length() + 2);
+        if (!query.startsWith("*")) {
+            queryBuf.append('*');
+        }
+        queryBuf.append(toLowercaseWildcard(query));
+        if (!query.endsWith("*")) {
+            queryBuf.append('*');
+        }
+        final String origQuery = queryBuf.toString();
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
-        context.addHighlightedQuery(query);
+        context.addHighlightedQuery(StringUtils.strip(query, "*"));
         return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
     }
 
