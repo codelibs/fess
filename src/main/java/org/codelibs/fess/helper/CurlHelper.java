@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -32,6 +34,8 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.Curl.Method;
 import org.codelibs.curl.CurlRequest;
+import org.codelibs.fesen.client.curl.FesenRequest;
+import org.codelibs.fesen.client.node.NodeManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
@@ -40,6 +44,8 @@ public class CurlHelper {
     private static final Logger logger = LogManager.getLogger(CurlHelper.class);
 
     private SSLSocketFactory sslSocketFactory;
+
+    private NodeManager nodeManager;
 
     @PostConstruct
     public void init() {
@@ -66,6 +72,9 @@ public class CurlHelper {
                 logger.warn("Failed to load {}", authorities, e);
             }
         }
+        final String[] hosts = split(ResourceUtil.getFesenHttpUrl(), ",")
+                .get(stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
+        nodeManager = new NodeManager(hosts);
     }
 
     public CurlRequest get(final String path) {
@@ -85,7 +94,7 @@ public class CurlHelper {
     }
 
     public CurlRequest request(final Method method, final String path) {
-        final CurlRequest request = new CurlRequest(method, ResourceUtil.getFesenHttpUrl() + path);
+        final CurlRequest request = new FesenRequest(new CurlRequest(method, null), nodeManager, path);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String username = fessConfig.getElasticsearchUsername();
         final String password = fessConfig.getElasticsearchPassword();
