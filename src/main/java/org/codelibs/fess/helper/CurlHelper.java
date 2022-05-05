@@ -76,6 +76,7 @@ public class CurlHelper {
         final String[] hosts = split(ResourceUtil.getFesenHttpUrl(), ",")
                 .get(stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
         nodeManager = new NodeManager(hosts, node -> get(node.getUrl("/")));
+        nodeManager.setHeartbeatInterval(fessConfig.getElasticsearchHeartbeatIntervalAsInteger().longValue());
     }
 
     public CurlRequest get(final String path) {

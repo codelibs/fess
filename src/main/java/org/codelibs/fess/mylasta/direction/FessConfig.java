@@ -40,6 +40,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String ELASTICSEARCH_PASSWORD = "elasticsearch.password";
 
+    /** The key of the configuration. e.g. 10000 */
+    String ELASTICSEARCH_heartbeat_interval = "elasticsearch.heartbeat_interval";
+
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORISM = "app.cipher.algorism";
 
@@ -1810,6 +1813,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getElasticsearchPasswordAsInteger();
+
+    /**
+     * Get the value for the key 'elasticsearch.heartbeat_interval'. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getElasticsearchHeartbeatInterval();
+
+    /**
+     * Get the value for the key 'elasticsearch.heartbeat_interval' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getElasticsearchHeartbeatIntervalAsInteger();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -7282,6 +7300,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.ELASTICSEARCH_PASSWORD);
         }
 
+        public String getElasticsearchHeartbeatInterval() {
+            return get(FessConfig.ELASTICSEARCH_heartbeat_interval);
+        }
+
+        public Integer getElasticsearchHeartbeatIntervalAsInteger() {
+            return getAsInteger(FessConfig.ELASTICSEARCH_heartbeat_interval);
+        }
+
         public String getAppCipherAlgorism() {
             return get(FessConfig.APP_CIPHER_ALGORISM);
         }
@@ -10139,6 +10165,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities, "");
             defaultMap.put(FessConfig.ELASTICSEARCH_USERNAME, "");
             defaultMap.put(FessConfig.ELASTICSEARCH_PASSWORD, "");
+            defaultMap.put(FessConfig.ELASTICSEARCH_heartbeat_interval, "10000");
             defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
