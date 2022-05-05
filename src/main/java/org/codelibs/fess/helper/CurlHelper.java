@@ -72,9 +72,10 @@ public class CurlHelper {
                 logger.warn("Failed to load {}", authorities, e);
             }
         }
+
         final String[] hosts = split(ResourceUtil.getFesenHttpUrl(), ",")
                 .get(stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
-        nodeManager = new NodeManager(hosts);
+        nodeManager = new NodeManager(hosts, node -> get(node.getUrl("/")));
     }
 
     public CurlRequest get(final String path) {
