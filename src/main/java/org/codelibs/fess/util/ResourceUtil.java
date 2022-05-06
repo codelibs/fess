@@ -43,7 +43,7 @@ public class ResourceUtil {
     }
 
     public static String getFesenHttpUrl() {
-        final String url = System.getProperty("fess.es.http_address");
+        final String url = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
         if (url != null) {
             return url;
         }

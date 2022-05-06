@@ -75,7 +75,7 @@ public class CurlHelper {
 
         final String[] hosts = split(ResourceUtil.getFesenHttpUrl(), ",")
                 .get(stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
-        nodeManager = new NodeManager(hosts, node -> get(node.getUrl("/")));
+        nodeManager = new NodeManager(hosts, node -> request(new CurlRequest(Method.GET, node.getUrl("/"))));
         nodeManager.setHeartbeatInterval(fessConfig.getElasticsearchHeartbeatIntervalAsInteger().longValue());
     }
 
@@ -96,7 +96,10 @@ public class CurlHelper {
     }
 
     public CurlRequest request(final Method method, final String path) {
-        final CurlRequest request = new FesenRequest(new CurlRequest(method, null), nodeManager, path);
+        return request(new FesenRequest(new CurlRequest(method, null), nodeManager, path));
+    }
+
+    protected CurlRequest request(final CurlRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String username = fessConfig.getElasticsearchUsername();
         final String password = fessConfig.getElasticsearchPassword();
