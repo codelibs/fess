@@ -21,11 +21,14 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.http.CookieProcessorBase;
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
@@ -146,6 +149,7 @@ public class FessBoot extends TomcatBoot {
         final Context context = (Context) server.getHost().findChild(contextPath);
         if (context != null) {
             context.setResources(new FessWebResourceRoot(context));
+            context.setCookieProcessor(new Rfc6265CookieProcessor());
         }
     }
 
@@ -175,7 +179,14 @@ public class FessBoot extends TomcatBoot {
                     connector.addSslHostConfig(sslHostConfig);
                 }
             });
-
+            doSetupServerConfig(logger, props, "sameSiteCookies", value -> {
+                for (final Container container : server.getHost().findChildren()) {
+                    if ((container instanceof final Context context)
+                            && (context.getCookieProcessor() instanceof final CookieProcessorBase cookieProcessor)) {
+                        cookieProcessor.setSameSiteCookies(value);
+                    }
+                }
+            });
         }
     }
 }
