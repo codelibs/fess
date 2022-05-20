@@ -278,6 +278,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
+        verifyForm(form);
         verifyToken(this::asEditHtml);
         createKuromojiItem(form, this::asEditHtml).ifPresent(entity -> {
             try {
@@ -298,6 +299,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
+        verifyForm(form);
         verifyToken(this::asEditHtml);
         createKuromojiItem(form, this::asEditHtml).ifPresent(entity -> {
             try {
@@ -381,6 +383,19 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, () -> asListHtml(dictId));
+        }
+    }
+
+    protected void verifyForm(final CreateForm form) {
+        if (form.token != null && form.token.split(" ").length > 1) {
+            throwValidationError(messages -> {
+                messages.addErrorsInvalidKuromojiToken("token", form.token);
+            }, this::asEditHtml);
+        }
+        if (form.segmentation != null && form.reading != null && form.segmentation.split(" ").length != form.reading.split(" ").length) {
+            throwValidationError(messages -> {
+                messages.addErrorsInvalidKuromojiSegmentation("segmentation", form.segmentation, form.reading);
+            }, this::asEditHtml);
         }
     }
 

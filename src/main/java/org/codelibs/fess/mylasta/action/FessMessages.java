@@ -293,6 +293,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upload the Mapping file. */
     public static final String ERRORS_failed_to_upload_mapping_file = "{errors.failed_to_upload_mapping_file}";
 
+    /** The key of the message: {0} is invalid. */
+    public static final String ERRORS_invalid_kuromoji_token = "{errors.invalid_kuromoji_token}";
+
+    /** The key of the message: The number of segmentations {0} does not the match number of readings {1}. */
+    public static final String ERRORS_invalid_kuromoji_segmentation = "{errors.invalid_kuromoji_segmentation}";
+
     /** The key of the message: "{1}" in "{0}" is invalid. */
     public static final String ERRORS_invalid_str_is_included = "{errors.invalid_str_is_included}";
 
@@ -1806,6 +1812,37 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUploadMappingFile(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_upload_mapping_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_kuromoji_token' with parameters.
+     * <pre>
+     * message: {0} is invalid.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidKuromojiToken(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_kuromoji_token, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_kuromoji_segmentation' with parameters.
+     * <pre>
+     * message: The number of segmentations {0} does not the match number of readings {1}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidKuromojiSegmentation(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_kuromoji_segmentation, arg0, arg1));
         return this;
     }
 
