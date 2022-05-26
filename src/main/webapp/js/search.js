@@ -260,4 +260,17 @@ $(function() {
     );
     loadImage(this, $(this).attr("data-src"), IMG_LOADING_MAX);
   });
+  
+  var clipboard = new ClipboardJS('.clipboard-copy');
+  clipboard.on('success', function(e) {
+    e.trigger.classList.remove('clipboard-copy');
+    e.trigger.classList.add('clipboard-copy-');
+    e.trigger.classList.add('clipboard-copy-copied');
+    setTimeout(function(){
+      e.trigger.classList.remove('clipboard-copy-copied');
+      e.trigger.classList.remove('clipboard-copy-');
+      e.trigger.classList.add('clipboard-copy');
+    },1200);
+    e.clearSelection();
+  });
 });

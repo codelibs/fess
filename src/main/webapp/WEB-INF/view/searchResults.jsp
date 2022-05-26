@@ -55,24 +55,29 @@
 					</c:if>
 					<div class="description">${doc.content_description}</div>
 				</div>
-				<div class="site text-truncate">
-					<cite>${f:h(doc.site_path)}</cite>
-					<c:if test="${doc.has_cache=='true'}">
-						<small class="d-none d-lg-inline-block"> <la:link
-								href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
-								class="cache">
-								<la:message key="labels.search_result_cache" />
-							</la:link>
-						</small>
-					</c:if>
-					<c:if test="${doc.similar_docs_count!=null&&doc.similar_docs_count>1}">
-						<small class="d-none d-lg-inline-block"> <la:link
-								href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
-								<la:message key="labels.search_result_similar"
-											arg0="${fe:formatFileSize(doc.similar_docs_count-1)}" />
-							</la:link>
-						</small>
-					</c:if>
+				<div class="site">
+					<div class="title-container">
+						<cite>${f:h(doc.site_path)}</cite>
+						<i class="clipboard-copy fa fa-copy" data-clipboard-text="${doc.url_link}"></i>
+					</div>
+					<div class="text-truncate">
+						<c:if test="${doc.has_cache=='true'}">
+							<small class="d-none d-lg-inline-block"> <la:link
+									href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
+									class="cache">
+									<la:message key="labels.search_result_cache" />
+								</la:link>
+							</small>
+						</c:if>
+						<c:if test="${doc.similar_docs_count!=null&&doc.similar_docs_count>1}">
+							<small class="d-none d-lg-inline-block"> <la:link
+									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
+									<la:message key="labels.search_result_similar"
+												arg0="${fe:formatFileSize(doc.similar_docs_count-1)}" />
+								</la:link>
+							</small>
+						</c:if>
+					</div>
 				</div>
 				<div class="more">
 					<a href="#result${s.index}"><la:message
@@ -227,3 +232,4 @@
 		</ul>
 	</nav>
 </div>
+<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
