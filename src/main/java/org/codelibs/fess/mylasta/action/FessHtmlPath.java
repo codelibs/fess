@@ -355,6 +355,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/storage/admin_storage.jsp */
     HtmlNext path_AdminStorage_AdminStorageJsp = new HtmlNext("/admin/storage/admin_storage.jsp");
 
+    /** The path of the HTML: /admin/storage/admin_storage_tag_edit.jsp */
+    HtmlNext path_AdminStorage_AdminStorageTagEditJsp = new HtmlNext("/admin/storage/admin_storage_tag_edit.jsp");
+
     /** The path of the HTML: /admin/suggest/admin_suggest.jsp */
     HtmlNext path_AdminSuggest_AdminSuggestJsp = new HtmlNext("/admin/suggest/admin_suggest.jsp");
 

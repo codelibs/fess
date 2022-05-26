@@ -434,6 +434,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Directory name is invalid. */
     public static final String ERRORS_storage_directory_name_is_invalid = "{errors.storage_directory_name_is_invalid}";
 
+    /** The key of the message: Failed to update tags for {0} */
+    public static final String ERRORS_storage_tags_update_failure = "{errors.storage_tags_update_failure}";
+
     /** The key of the message: Updated parameters. */
     public static final String SUCCESS_update_crawler_params = "{success.update_crawler_params}";
 
@@ -523,6 +526,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Logged out. */
     public static final String SUCCESS_sso_logout = "{success.sso_logout}";
+
+    /** The key of the message: Updated tags for {0}. */
+    public static final String SUCCESS_update_storage_tags = "{success.update_storage_tags}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -2507,6 +2513,21 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.storage_tags_update_failure' with parameters.
+     * <pre>
+     * message: Failed to update tags for {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsStorageTagsUpdateFailure(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_storage_tags_update_failure, arg0));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'success.update_crawler_params' with parameters.
      * <pre>
      * message: Updated parameters.
@@ -2932,6 +2953,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessSsoLogout(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_sso_logout));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.update_storage_tags' with parameters.
+     * <pre>
+     * message: Updated tags for {0}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUpdateStorageTags(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_update_storage_tags, arg0));
         return this;
     }
 

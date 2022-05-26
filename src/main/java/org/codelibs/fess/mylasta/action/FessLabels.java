@@ -3162,6 +3162,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Download */
     public static final String LABELS_storage_button_download = "{labels.storage_button_download}";
 
+    /** The key of the message: Tags */
+    public static final String LABELS_storage_button_tags = "{labels.storage_button_tags}";
+
+    /** The key of the message: Tag: */
+    public static final String LABELS_storage_title_tag = "{labels.storage_title_tag}";
+
+    /** The key of the message: Tag Key */
+    public static final String LABELS_storage_tag_key = "{labels.storage_tag_key}";
+
+    /** The key of the message: Tag Value */
+    public static final String LABELS_storage_tag_value = "{labels.storage_tag_value}";
+
     /** The key of the message: Your password needs to be updated. */
     public static final String LABELS_LOGIN_NEWPASSWORD = "{labels.login.newpassword}";
 

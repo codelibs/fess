@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +46,14 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
 import io.minio.GetObjectArgs;
+import io.minio.GetObjectTagsArgs;
 import io.minio.ListObjectsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
+import io.minio.SetObjectTagsArgs;
 import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
 
@@ -85,10 +88,7 @@ public class AdminStorageAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse list(final OptionalThing<String> id) {
         saveToken();
-        if (id.isPresent() && id.get() != null) {
-            return asListHtml(decodePath(id.get()));
-        }
-        return redirect(getClass());
+        return id.filter(StringUtil::isNotBlank).map(s -> asListHtml(decodePath(s))).orElse(redirect(getClass()));
     }
 
     @Execute
@@ -116,12 +116,12 @@ public class AdminStorageAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
-        final String[] values = decodeId(id);
-        if (StringUtil.isEmpty(values[1])) {
-            throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(values[0])));
+        final PathInfo pi = convertToItem(id);
+        if (StringUtil.isEmpty(pi.getName())) {
+            throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(pi.getPath())));
         }
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
-        final String name = values[1];
+        final String name = pi.getName();
         final String encodedName = URLEncoder.encode(name, Constants.UTF_8_CHARSET).replace("+", "%20");
         response.header("Content-Disposition", "attachment; filename=\"" + name + "\"; filename*=utf-8''" + encodedName);
         response.header("Pragma", "no-cache");
@@ -130,13 +130,13 @@ public class AdminStorageAction extends FessAdminAction {
         response.contentTypeOctetStream();
         return response.stream(out -> {
             try {
-                downloadObject(getObjectName(values[0], values[1]), out);
+                downloadObject(getObjectName(pi.getPath(), pi.getName()), out);
             } catch (final StorageException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to download {}", values[1], e);
+                    logger.debug("Failed to download {}", pi.getName(), e);
                 }
-                throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]),
-                        () -> asListHtml(encodeId(values[0])));
+                throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, pi.getName()),
+                        () -> asListHtml(encodeId(pi.getPath())));
             }
         });
     }
@@ -144,20 +144,20 @@ public class AdminStorageAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final String id) {
-        final String[] values = decodeId(id);
-        if (StringUtil.isEmpty(values[1])) {
-            throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(values[0])));
+        final PathInfo pi = convertToItem(id);
+        if (StringUtil.isEmpty(pi.getName())) {
+            throwValidationError(messages -> messages.addErrorsStorageFileNotFound(GLOBAL), () -> asListHtml(encodeId(pi.getPath())));
         }
-        final String objectName = getObjectName(values[0], values[1]);
+        final String objectName = getObjectName(pi.getPath(), pi.getName());
         try {
             deleteObject(objectName);
         } catch (final StorageException e) {
-            logger.debug("Failed to delete {}", values[1], e);
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]),
-                    () -> asListHtml(encodeId(values[0])));
+            logger.debug("Failed to delete {}", pi.getName(), e);
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, pi.getName()),
+                    () -> asListHtml(encodeId(pi.getPath())));
         }
-        saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
-        return redirectWith(getClass(), moreUrl("list/" + encodeId(values[0])));
+        saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, pi.getName()));
+        return redirectWith(getClass(), moreUrl("list/" + encodeId(pi.getPath())));
     }
 
     @Execute
@@ -168,6 +168,62 @@ public class AdminStorageAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsStorageDirectoryNameIsInvalid(GLOBAL), () -> asListHtml(form.path));
         }
         return redirectWith(getClass(), moreUrl("list/" + encodeId(getObjectName(form.path, form.name))));
+    }
+
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse editTags(final TagForm form) {
+        validate(form, messages -> {}, () -> asEditTagsHtml(form.path, form.name));
+        saveToken();
+        return asEditTagsHtml(form.path, form.name);
+    }
+
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse updateTags(final TagForm form) {
+        validate(form, messages -> {}, () -> asEditTagsHtml(form.path, form.name));
+        final String objectName = getObjectName(form.path, form.name);
+        try {
+            updateObjectTags(objectName, form.tags);
+        } catch (final StorageException e) {
+            logger.debug("Failed to update tags in {}", form.path, e);
+            throwValidationError(messages -> messages.addErrorsStorageTagsUpdateFailure(GLOBAL, objectName),
+                    () -> asEditTagsHtml(form.path, form.name));
+        }
+        saveInfo(messages -> messages.addSuccessUpdateStorageTags(GLOBAL, objectName));
+        return redirectWith(getClass(), moreUrl("list/" + encodeId(form.path)));
+    }
+
+    public static void updateObjectTags(final String objectName, final Map<String, String> tagItems) {
+        final Map<String, String> tags = new HashMap<>();
+        tagItems.keySet().stream().filter(s -> s.startsWith("name")).forEach(nameKey -> {
+            final String valueKey = nameKey.replace("name", "value");
+            final String name = tagItems.get(nameKey);
+            if (StringUtil.isNotBlank(name)) {
+                tags.put(name, tagItems.get(valueKey));
+            }
+        });
+        if (logger.isDebugEnabled()) {
+            logger.debug("tags: {} -> {}", tagItems, tags);
+        }
+        try {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final SetObjectTagsArgs args =
+                    SetObjectTagsArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).tags(tags).build();
+            createClient(fessConfig).setObjectTags(args);
+        } catch (final Exception e) {
+            throw new StorageException("Failed to update tags for " + objectName, e);
+        }
+    }
+
+    public static Map<String, String> getObjectTags(final String objectName) {
+        try {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final GetObjectTagsArgs args = GetObjectTagsArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).build();
+            return createClient(fessConfig).getObjectTags(args).get();
+        } catch (final Exception e) {
+            throw new StorageException("Failed to get tags from " + objectName, e);
+        }
     }
 
     public static void uploadObject(final String objectName, final MultipartFormFile uploadFile) {
@@ -214,7 +270,8 @@ public class AdminStorageAction extends FessAdminAction {
 
     public static List<Map<String, Object>> getFileItems(final String prefix) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final ArrayList<Map<String, Object>> list = new ArrayList<>();
+        final List<Map<String, Object>> list = new ArrayList<>();
+        final List<Map<String, Object>> fileList = new ArrayList<>();
         try {
             final MinioClient minioClient = createClient(fessConfig);
             final ListObjectsArgs args = ListObjectsArgs.builder().bucket(fessConfig.getStorageBucket())
@@ -225,15 +282,18 @@ public class AdminStorageAction extends FessAdminAction {
                 final Item item = result.get();
                 final String objectName = item.objectName();
                 map.put("id", encodeId(objectName));
+                map.put("path", prefix);
                 map.put("name", getName(objectName));
                 map.put("hashCode", item.hashCode());
                 map.put("size", item.size());
                 map.put("directory", item.isDir());
                 if (!item.isDir()) {
                     map.put("lastModified", item.lastModified());
+                    fileList.add(map);
+                } else {
+                    list.add(map);
                 }
-                list.add(map);
-                if (list.size() > fessConfig.getStorageMaxItemsInPageAsInteger()) {
+                if (list.size() + fileList.size() > fessConfig.getStorageMaxItemsInPageAsInteger()) {
                     break;
                 }
             }
@@ -256,6 +316,7 @@ public class AdminStorageAction extends FessAdminAction {
                 logger.debug("Failed to access {}", fessConfig.getStorageEndpoint(), e);
             }
         }
+        list.addAll(fileList);
         return list;
     }
 
@@ -268,25 +329,25 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     public static String decodePath(final String id) {
-        final String[] values = decodeId(id);
-        if (StringUtil.isEmpty(values[0]) && StringUtil.isEmpty(values[1])) {
+        final PathInfo pi = convertToItem(id);
+        if (StringUtil.isEmpty(pi.getPath()) && StringUtil.isEmpty(pi.getName())) {
             return StringUtil.EMPTY;
         }
-        if (StringUtil.isEmpty(values[0])) {
-            return values[1];
+        if (StringUtil.isEmpty(pi.getPath())) {
+            return pi.getName();
         }
-        return values[0] + "/" + values[1];
+        return pi.getPath() + "/" + pi.getName();
     }
 
-    public static String[] decodeId(final String id) {
-        final String value = urlDecode(urlDecode(id));
+    public static PathInfo convertToItem(final String id) {
+        final String value = decodeId(id);
         final String[] values = split(value, "/").get(stream -> stream.filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
         if (values.length == 0) {
             // invalid?
-            return new String[] { StringUtil.EMPTY, StringUtil.EMPTY };
+            return new PathInfo(StringUtil.EMPTY, StringUtil.EMPTY);
         }
         if (values.length == 1) {
-            return new String[] { StringUtil.EMPTY, values[0] };
+            return new PathInfo(StringUtil.EMPTY, values[0]);
         }
         final StringBuilder buf = new StringBuilder();
         for (int i = 0; i < values.length - 1; i++) {
@@ -295,7 +356,7 @@ public class AdminStorageAction extends FessAdminAction {
             }
             buf.append(values[i]);
         }
-        return new String[] { buf.toString(), values[values.length - 1] };
+        return new PathInfo(buf.toString(), values[values.length - 1]);
     }
 
     protected static String createParentId(final String prefix) {
@@ -311,7 +372,7 @@ public class AdminStorageAction extends FessAdminAction {
                 }
                 buf.append(values[i]);
             }
-            return urlEncode(buf.toString());
+            return encodeId(buf.toString());
         }
         return StringUtil.EMPTY;
     }
@@ -325,7 +386,7 @@ public class AdminStorageAction extends FessAdminAction {
             }
             buf.append(s);
             final Map<String, String> map = new HashMap<>();
-            map.put("id", urlEncode(buf.toString()));
+            map.put("id", encodeId(buf.toString()));
             map.put("name", s);
             list.add(map);
         }));
@@ -340,6 +401,7 @@ public class AdminStorageAction extends FessAdminAction {
         return getPathPrefix(path) + name;
     }
 
+    @Deprecated
     protected static String urlEncode(final String str) {
         if (str == null) {
             return StringUtil.EMPTY;
@@ -347,6 +409,7 @@ public class AdminStorageAction extends FessAdminAction {
         return URLEncoder.encode(str, Constants.UTF_8_CHARSET);
     }
 
+    @Deprecated
     protected static String urlDecode(final String str) {
         if (str == null) {
             return StringUtil.EMPTY;
@@ -355,18 +418,63 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     protected static String encodeId(final String objectName) {
-        return urlEncode(urlEncode(objectName));
+        if (objectName == null) {
+            return StringUtil.EMPTY;
+        }
+        return new String(Base64.getUrlEncoder().encode(objectName.getBytes(Constants.UTF_8_CHARSET)), Constants.UTF_8_CHARSET);
     }
 
-    private HtmlResponse asListHtml(final String prefix) {
+    protected static String decodeId(final String id) {
+        if (id == null) {
+            return StringUtil.EMPTY;
+        }
+        return new String(Base64.getUrlDecoder().decode(id.getBytes(Constants.UTF_8_CHARSET)), Constants.UTF_8_CHARSET);
+    }
+
+    private HtmlResponse asListHtml(final String path) {
         return asHtml(path_AdminStorage_AdminStorageJsp).useForm(ItemForm.class).renderWith(data -> {
             RenderDataUtil.register(data, "endpoint", fessConfig.getStorageEndpoint());
             RenderDataUtil.register(data, "bucket", fessConfig.getStorageBucket());
-            RenderDataUtil.register(data, "path", prefix);
-            RenderDataUtil.register(data, "pathItems", createPathItems(prefix));
-            RenderDataUtil.register(data, "parentId", createParentId(prefix));
-            RenderDataUtil.register(data, "fileItems", getFileItems(prefix));
+            RenderDataUtil.register(data, "path", path);
+            RenderDataUtil.register(data, "pathItems", createPathItems(path));
+            RenderDataUtil.register(data, "parentId", createParentId(path));
+            RenderDataUtil.register(data, "fileItems", getFileItems(path));
         });
     }
 
+    private HtmlResponse asEditTagsHtml(final String path, final String name) {
+        return asHtml(path_AdminStorage_AdminStorageTagEditJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "endpoint", fessConfig.getStorageEndpoint());
+            RenderDataUtil.register(data, "bucket", fessConfig.getStorageBucket());
+            RenderDataUtil.register(data, "pathItems", createPathItems(path));
+            RenderDataUtil.register(data, "parentId", encodeId(path));
+            RenderDataUtil.register(data, "path", path);
+            RenderDataUtil.register(data, "name", name);
+            final Map<String, String> tags = new HashMap<>();
+            getObjectTags(getObjectName(path, name)).entrySet().forEach(e -> {
+                int index = tags.size() / 2 + 1;
+                tags.put("name" + index, e.getKey());
+                tags.put("value" + index, e.getValue());
+            });
+            RenderDataUtil.register(data, "savedTags", tags);
+        });
+    }
+
+    public static class PathInfo {
+        private final String path;
+        private final String name;
+
+        public PathInfo(final String path, final String name) {
+            this.path = path;
+            this.name = name;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }

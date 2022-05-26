@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.app.web.api.admin.storage;
 
-import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.decodeId;
+import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.convertToItem;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.decodePath;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.deleteObject;
 import static org.codelibs.fess.app.web.admin.storage.AdminStorageAction.downloadObject;
@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.admin.storage.AdminStorageAction.PathInfo;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
@@ -62,18 +63,18 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     // GET /api/admin/storage/download/{id}/
     @Execute
     public StreamResponse get$download(final String id) {
-        final String[] values = decodeId(id);
-        if (StringUtil.isEmpty(values[1])) {
+        final PathInfo pi = convertToItem(id);
+        if (StringUtil.isEmpty(pi.getName())) {
             throwValidationErrorApi(messages -> messages.addErrorsStorageFileNotFound(GLOBAL));
         }
-        return asStream(values[1]).contentTypeOctetStream().stream(out -> {
+        return asStream(pi.getName()).contentTypeOctetStream().stream(out -> {
             try {
-                downloadObject(getObjectName(values[0], values[1]), out);
+                downloadObject(getObjectName(pi.getPath(), pi.getName()), out);
             } catch (final StorageException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to download {}", id, e);
                 }
-                throwValidationErrorApi(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, values[1]));
+                throwValidationErrorApi(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, pi.getName()));
             }
         });
     }
@@ -81,20 +82,20 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     // DELETE /api/admin/storage/delete/{id}/
     @Execute
     public JsonResponse<ApiResult> delete$delete(final String id) {
-        final String[] values = decodeId(id);
-        if (StringUtil.isEmpty(values[1])) {
+        final PathInfo pi = convertToItem(id);
+        if (StringUtil.isEmpty(pi.getName())) {
             throwValidationErrorApi(messages -> messages.addErrorsStorageAccessError(GLOBAL, "id is invalid"));
         }
-        final String objectName = getObjectName(values[0], values[1]);
+        final String objectName = getObjectName(pi.getPath(), pi.getName());
         try {
             deleteObject(objectName);
-            saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, values[1]));
+            saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, pi.getName()));
             return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to delete {}", id, e);
             }
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, values[1]));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, pi.getName()));
         }
         return null;
     }

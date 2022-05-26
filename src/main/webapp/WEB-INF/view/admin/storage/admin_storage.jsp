@@ -155,7 +155,7 @@
                                             </thead>
                                             <tbody>
                                             <c:if test="${not empty path and not empty parentId}">
-                                                <tr　data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/">
+                                                <tr data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/">
                                                     <td>..</td>
                                                     <td></td>
                                                     <td></td>
@@ -163,7 +163,7 @@
                                                 </tr>
                                             </c:if>
                                             <c:if test="${not empty path and empty parentId}">
-                                                <tr　data-href="${contextPath}/admin/storage/">
+                                                <tr data-href="${contextPath}/admin/storage/">
                                                     <td>..</td>
                                                     <td></td>
                                                     <td></td>
@@ -199,6 +199,13 @@
                                                             <la:message key="labels.storage_button_download"/>
                                                         </a>
                                                         <c:if test="${editable}">
+	                                                        <a class="btn btn-primary btn-xs" role="button" name="editTags"
+	                                                           href="${contextPath}/admin/storage/editTags?path=${f:u(data.path)}&name=${f:u(data.name)}"
+	                                                           value="<la:message key="labels.storage_button_tags" />"
+	                                                        >
+	                                                            <em class="fa fa-tags"></em>
+	                                                            <la:message key="labels.storage_button_tags"/>
+	                                                        </a>
                                                             <button type="button" class="btn btn-danger btn-xs"
                                                                     name="delete" data-toggle="modal"
                                                                     data-target="#confirmToDelete-${f:h(data.hashCode)}"

@@ -1076,7 +1076,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String SMB_ROLE_FROM_FILE = "smb.role.from.file";
 
-    /** The key of the configuration. e.g. 1,2,4:2 */
+    /** The key of the configuration. e.g. 1,2,4:2,5:1 */
     String SMB_AVAILABLE_SID_TYPES = "smb.available.sid.types";
 
     /** The key of the configuration. e.g. true */
@@ -5011,7 +5011,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'smb.available.sid.types'. <br>
-     * The value is, e.g. 1,2,4:2 <br>
+     * The value is, e.g. 1,2,4:2,5:1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSmbAvailableSidTypes();
@@ -10449,7 +10449,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_FACET_QUERIES,
                     "labels.facet_timestamp_title:labels.facet_timestamp_1day=timestamp:[now/d-1d TO *]\tlabels.facet_timestamp_1week=timestamp:[now/d-7d TO *]\tlabels.facet_timestamp_1month=timestamp:[now/d-1M TO *]\tlabels.facet_timestamp_1year=timestamp:[now/d-1y TO *]\nlabels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]\tlabels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]\tlabels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]\tlabels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]\tlabels.facet_contentLength_1m=content_length:[1000000 TO *]\nlabels.facet_filetype_title:labels.facet_filetype_html=filetype:html\tlabels.facet_filetype_word=filetype:word\tlabels.facet_filetype_excel=filetype:excel\tlabels.facet_filetype_powerpoint=filetype:powerpoint\tlabels.facet_filetype_odt=filetype:odt\tlabels.facet_filetype_ods=filetype:ods\tlabels.facet_filetype_odp=filetype:odp\tlabels.facet_filetype_pdf=filetype:pdf\tlabels.facet_filetype_txt=filetype:txt\tlabels.facet_filetype_others=filetype:others\n");
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
-            defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2,4:2");
+            defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2,4:2,5:1");
             defaultMap.put(FessConfig.FILE_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS,
