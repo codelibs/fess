@@ -719,6 +719,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Viewed ({0}) */
     public static final String LABELS_search_click_count = "{labels.search_click_count}";
 
+    /** The key of the message: {0} views */
+    public static final String LABELS_search_click_views = "{labels.search_click_views}";
+
     /** The key of the message: more.. */
     public static final String LABELS_search_result_more = "{labels.search_result_more}";
 

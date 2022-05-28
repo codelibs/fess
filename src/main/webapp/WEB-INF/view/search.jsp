@@ -150,6 +150,7 @@
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
 		src="${fe:url('/js/jquery-3.4.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/search.js')}"></script>

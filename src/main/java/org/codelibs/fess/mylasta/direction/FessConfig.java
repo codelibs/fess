@@ -301,7 +301,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0 */
     String CRAWLER_HTTP_thread_pool_SIZE = "crawler.http.thread_pool.size";
 
-    /** The key of the configuration. e.g. 50 */
+    /** The key of the configuration. e.g. 100 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
     /** The key of the configuration. e.g. UTF-8 */
@@ -600,7 +600,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 50 */
     String RESPONSE_MAX_TITLE_LENGTH = "response.max.title.length";
 
-    /** The key of the configuration. e.g. 50 */
+    /** The key of the configuration. e.g. 100 */
     String RESPONSE_MAX_SITE_PATH_LENGTH = "response.max.site.path.length";
 
     /** The key of the configuration. e.g. true */
@@ -2494,14 +2494,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentMaxSiteLength();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length' as {@link Integer}. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3490,14 +3490,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'response.max.site.path.length'. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseMaxSitePathLength();
 
     /**
      * Get the value for the key 'response.max.site.path.length' as {@link Integer}. <br>
-     * The value is, e.g. 50 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -10222,7 +10222,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.HTTP_FILEUPLOAD_THRESHOLD_SIZE, "262144");
             defaultMap.put(FessConfig.CRAWLER_DEFAULT_SCRIPT, "groovy");
             defaultMap.put(FessConfig.CRAWLER_HTTP_thread_pool_SIZE, "0");
-            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "50");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "100");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_USE_SITE_ENCODING_ON_ENGLISH, "false");
@@ -10323,7 +10323,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_FIELD_url_link, "url_link");
             defaultMap.put(FessConfig.RESPONSE_FIELD_site_path, "site_path");
             defaultMap.put(FessConfig.RESPONSE_MAX_TITLE_LENGTH, "50");
-            defaultMap.put(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH, "50");
+            defaultMap.put(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH, "100");
             defaultMap.put(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED, "true");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");

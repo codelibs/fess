@@ -55,82 +55,53 @@
 					</c:if>
 					<div class="description">${doc.content_description}</div>
 				</div>
-				<div class="site">
-					<div class="title-container">
-						<cite>${f:h(doc.site_path)}</cite>
-						<i class="clipboard-copy fa fa-copy" data-clipboard-text="${doc.url_link}"></i>
-					</div>
-					<div class="text-truncate">
-						<c:if test="${doc.has_cache=='true'}">
-							<small class="d-none d-lg-inline-block"> <la:link
-									href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
-									class="cache">
-									<la:message key="labels.search_result_cache" />
-								</la:link>
-							</small>
-						</c:if>
-						<c:if test="${doc.similar_docs_count!=null&&doc.similar_docs_count>1}">
-							<small class="d-none d-lg-inline-block"> <la:link
-									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
-									<la:message key="labels.search_result_similar"
-												arg0="${fe:formatFileSize(doc.similar_docs_count-1)}" />
-								</la:link>
-							</small>
-						</c:if>
-					</div>
+				<div class="site text-truncate">
+					<i class="far fa-copy url-copy" data-clipboard-text="${doc.url_link}"></i>
+					<cite>${f:h(doc.site_path)}</cite>
 				</div>
 				<div class="more">
 					<a href="#result${s.index}"><la:message
 							key="labels.search_result_more" /></a>
 				</div>
 				<div class="info">
-					<small> <c:if
-							test="${doc.created!=null && doc.created!=''}">
-							<c:set var="hasInfo" value="true" />
-							<la:message key="labels.search_result_created" />
-							<fmt:formatDate value="${fe:parseDate(doc.created)}"
-								type="BOTH" pattern="yyyy-MM-dd HH:mm" />
-						</c:if> <c:if
-							test="${doc.last_modified!=null && doc.last_modified!=''}">
-							<c:if test="${hasInfo}">
-								<div class="d-sm-none"></div>
-								<span class="d-none d-sm-inline">-</span>
-							</c:if>
-							<c:set var="hasInfo" value="true" />
-							<la:message key="labels.search_result_last_modified" />
-							<fmt:formatDate value="${fe:parseDate(doc.last_modified)}"
-								type="BOTH" pattern="yyyy-MM-dd HH:mm" />
-						</c:if> <c:if
-							test="${doc.content_length!=null && doc.content_length!=''}">
-							<c:if test="${hasInfo}">
-								<div class="d-sm-none"></div>
-								<span class="d-none d-sm-inline">-</span>
-							</c:if>
-							<c:set var="hasInfo" value="true" />
-							<la:message key="labels.search_result_size"
-								arg0="${fe:formatFileSize(doc.content_length)}" />
-						</c:if> <c:if test="${searchLogSupport}">
-							<c:if test="${hasInfo}">
-								<div class="d-sm-none"></div>
-								<span class="d-none d-sm-inline">-</span>
-							</c:if>
-							<c:set var="hasInfo" value="true" />
-							<la:message key="labels.search_click_count"
-								arg0="${f:h(doc.click_count)}" />
-						</c:if> <c:if test="${favoriteSupport}">
-							<c:if test="${hasInfo}">
-								<div class="d-sm-none"></div>
-								<span class="d-none d-sm-inline">-</span>
-							</c:if>
-							<c:set var="hasInfo" value="true" />
-							<a href="#${doc.doc_id}" class="favorite"><la:message
-									key="labels.search_result_favorite" />
-								(${f:h(doc.favorite_count)})</a>
-							<span class="favorited"><la:message
-									key="labels.search_result_favorited" /> <span
-								class="favorited-count">(${f:h(doc.favorite_count)})</span></span>
-						</c:if>
-					</small>
+					<fmt:formatDate value="${fe:parseDate(doc.last_modified)}" type="BOTH" pattern="yyyy-MM-dd HH:mm" />
+					<c:if test="${doc.last_modified==null || doc.last_modified==''}">
+						<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" pattern="yyyy-MM-dd HH:mm" />
+					</c:if>
+					<c:if test="${doc.content_length!=null && doc.content_length!=''}">
+						<div class="d-sm-none"></div>
+						<span class="d-none d-sm-inline">&nbsp;</span>
+						<la:message key="labels.search_result_size"
+							arg0="${fe:formatFileSize(doc.content_length)}" />
+					</c:if>
+					<c:if test="${searchLogSupport && doc.click_count!=null && doc.click_count>0}">
+						<div class="d-sm-none"></div>
+						<span class="d-none d-sm-inline">&nbsp;</span>
+						<la:message key="labels.search_click_views"
+							arg0="${f:h(doc.click_count)}" />
+					</c:if>
+					<c:if test="${doc.has_cache=='true'}">
+						<div class="d-sm-none"></div>
+						<span class="d-none d-sm-inline">&nbsp;</span>
+						<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
+								class="cache">
+							<la:message key="labels.search_result_cache" />
+						</la:link>
+					</c:if>
+					<c:if test="${doc.similar_docs_count!=null&&doc.similar_docs_count>1}">
+						<div class="d-sm-none"></div>
+						<span class="d-none d-sm-inline">&nbsp;</span>
+						<la:link href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(doc.similar_docs_hash))}${fe:facetQuery()}${fe:geoQuery()}">
+							<la:message key="labels.search_result_similar"
+										arg0="${fe:formatFileSize(doc.similar_docs_count-1)}" />
+						</la:link>
+					</c:if>
+					<c:if test="${favoriteSupport}">
+						<div class="d-sm-none"></div>
+						<span class="d-none d-sm-inline">&nbsp;</span>
+						<a href="#${doc.doc_id}" class="favorite"><i class="far fa-star"></i></a>
+						<span class="favorited"><i class="fas fa-star"></i></span>
+					</c:if>
 				</div>
 			</li>
 		</c:forEach>
@@ -232,4 +203,3 @@
 		</ul>
 	</nav>
 </div>
-<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
