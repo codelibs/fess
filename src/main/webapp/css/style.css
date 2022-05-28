@@ -128,8 +128,24 @@ legend{
 	display: none;
 }
 
+#result .info {
+	font-size: 80%;
+}
+
+#result .url-copy {
+	color: #007bff;
+}
+
+#result .url-copied {
+	color: #146ebe;
+}
+
 #result .favorited {
 	display: none;
+}
+
+#result .favorited i {
+	color: #fab005;
 }
 
 #result .thumbnail {
