@@ -265,14 +265,18 @@ $(function() {
   clipboard.on("success", function(e) {
     e.trigger.classList.remove("url-copy");
     e.trigger.classList.remove("far");
+    e.trigger.classList.remove("fa-copy");
     e.trigger.classList.add("url-copied");
     e.trigger.classList.add("fas");
+    e.trigger.classList.add("fa-check");
     setTimeout(function(){
       e.trigger.classList.remove("url-copied");
       e.trigger.classList.remove("fas");
+      e.trigger.classList.remove("fa-check");
       e.trigger.classList.add("url-copy");
       e.trigger.classList.add("far");
-    },3000);
+      e.trigger.classList.add("fa-copy");
+    },2000);
     e.clearSelection();
   });
 });
