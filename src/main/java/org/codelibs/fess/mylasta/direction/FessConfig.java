@@ -1112,6 +1112,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. __TEMPLATE__ */
     String FORM_ADMIN_DEFAULT_TEMPLATE_NAME = "form.admin.default.template.name";
 
+    /** The key of the configuration. e.g. true */
+    String OSDD_LINK_ENABLED = "osdd.link.enabled";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
@@ -5140,6 +5143,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getFormAdminDefaultTemplateName();
 
     /**
+     * Get the value for the key 'osdd.link.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOsddLinkEnabled();
+
+    /**
+     * Is the property for the key 'osdd.link.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isOsddLinkEnabled();
+
+    /**
      * Get the value for the key 'authentication.admin.users'. <br>
      * The value is, e.g. admin <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -8996,6 +9013,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME);
         }
 
+        public String getOsddLinkEnabled() {
+            return get(FessConfig.OSDD_LINK_ENABLED);
+        }
+
+        public boolean isOsddLinkEnabled() {
+            return is(FessConfig.OSDD_LINK_ENABLED);
+        }
+
         public String getAuthenticationAdminUsers() {
             return get(FessConfig.AUTHENTICATION_ADMIN_USERS);
         }
@@ -10463,6 +10488,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
+            defaultMap.put(FessConfig.OSDD_LINK_ENABLED, "true");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
             defaultMap.put(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS, "");

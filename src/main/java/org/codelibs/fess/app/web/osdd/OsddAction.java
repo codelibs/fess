@@ -42,7 +42,7 @@ public class OsddAction extends FessSearchAction {
         if (isLoginRequired()) {
             return redirectToLogin();
         }
-        return openSearchHelper.asStream();
+        return osddHelper.asStream();
     }
 
 }

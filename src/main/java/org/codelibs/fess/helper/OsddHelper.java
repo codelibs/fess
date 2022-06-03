@@ -35,8 +35,8 @@ import org.lastaflute.web.util.LaServletContextUtil;
  * @author shinsuke
  *
  */
-public class OpenSearchHelper {
-    private static final Logger logger = LogManager.getLogger(OpenSearchHelper.class);
+public class OsddHelper {
+    private static final Logger logger = LogManager.getLogger(OsddHelper.class);
 
     protected String osddPath;
 
@@ -51,15 +51,19 @@ public class OpenSearchHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        if (StringUtil.isNotBlank(osddPath)) {
-            final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
-            osddFile = new File(path);
-            if (!osddFile.isFile()) {
-                osddFile = null;
-                logger.warn("{} was not found.", path);
+        if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getOsddLinkEnabled())) {
+            if (StringUtil.isNotBlank(osddPath)) {
+                final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
+                osddFile = new File(path);
+                if (!osddFile.isFile()) {
+                    osddFile = null;
+                    logger.warn("{} was not found.", path);
+                }
+            } else {
+                logger.info("OSDD file is not found.");
             }
         } else {
-            logger.info("OSDD file is not found.");
+            logger.debug("OSDD is disabled.");
         }
     }
 

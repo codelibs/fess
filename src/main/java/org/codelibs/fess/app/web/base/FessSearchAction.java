@@ -34,7 +34,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.sso.SsoAction;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
-import org.codelibs.fess.helper.OpenSearchHelper;
+import org.codelibs.fess.helper.OsddHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
@@ -77,7 +77,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected UserInfoHelper userInfoHelper;
 
     @Resource
-    protected OpenSearchHelper openSearchHelper;
+    protected OsddHelper osddHelper;
 
     @Resource
     protected PopularWordHelper popularWordHelper;
@@ -121,7 +121,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         super.setupHtmlData(runtime);
         systemHelper.setupSearchHtmlData(this, runtime);
 
-        runtime.registerData("osddLink", openSearchHelper.hasOpenSearchFile());
+        runtime.registerData("osddLink", osddHelper.hasOpenSearchFile());
 
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH,
                 request.getLocale() == null ? Locale.ROOT : request.getLocale());

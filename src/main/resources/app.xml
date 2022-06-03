@@ -102,7 +102,7 @@
 			</arg>
 		</postConstruct>
 	</component>
-	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
+	<component name="osddHelper" class="org.codelibs.fess.helper.OsddHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
 		<property name="encoding">"UTF-8"</property>
 	</component>
