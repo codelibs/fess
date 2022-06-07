@@ -2913,7 +2913,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: All these words */
     public static final String LABELS_advance_search_must_queries = "{labels.advance_search_must_queries}";
 
-    /** The key of the message: This exact word or phrase */
+    /** The key of the message: Phrase search of these words */
     public static final String LABELS_advance_search_phrase_query = "{labels.advance_search_phrase_query}";
 
     /** The key of the message: Any of these words */
