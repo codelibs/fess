@@ -122,6 +122,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         systemHelper.setupSearchHtmlData(this, runtime);
 
         runtime.registerData("osddLink", osddHelper.hasOpenSearchFile());
+        runtime.registerData("clipboardCopyIcon", fessConfig.isClipboardCopyIconEnabled());
 
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH,
                 request.getLocale() == null ? Locale.ROOT : request.getLocale());

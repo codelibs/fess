@@ -56,7 +56,7 @@
 					<div class="description">${doc.content_description}</div>
 				</div>
 				<div class="site text-truncate">
-					<i class="far fa-copy url-copy" data-clipboard-text="${doc.url_link}"></i>
+					<c:if test="${clipboardCopyIcon}"><i class="far fa-copy url-copy" data-clipboard-text="${doc.url_link}"></i></c:if>
 					<cite>${f:h(doc.site_path)}</cite>
 				</div>
 				<div class="more">
