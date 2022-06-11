@@ -33,6 +33,7 @@ import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
@@ -41,6 +42,8 @@ public class DataIndexHelper {
     private static final Logger logger = LogManager.getLogger(DataIndexHelper.class);
 
     private static final String DELETE_OLD_DOCS = "delete_old_docs";
+
+    private static final String KEEP_EXPIRES_DOCS = "keep_expires_docs";
 
     protected long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
 
@@ -234,11 +237,16 @@ public class DataIndexHelper {
                 return;
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))
-                            .must(QueryBuilders.boolQuery().mustNot(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).gt("now"))
-                                    .mustNot(QueryBuilders.existsQuery(fessConfig.getIndexFieldExpires())))
-                            .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
+            final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()//
+                    .must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))//
+                    .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
+            if (!Constants.TRUE.equals(initParamMap.getAsString(KEEP_EXPIRES_DOCS))) {
+                final QueryBuilder expiresCheckQuery = QueryBuilders.boolQuery()//
+                        .mustNot(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).gt("now"))//
+                        .mustNot(QueryBuilders.existsQuery(fessConfig.getIndexFieldExpires()));
+                queryBuilder.must(expiresCheckQuery);
+            }
+
             try {
                 final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
