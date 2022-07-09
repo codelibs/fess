@@ -358,6 +358,24 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60 */
     String CRAWLER_SYSTEM_MONITOR_INTERVAL = "crawler.system.monitor.interval";
 
+    /** The key of the configuration. e.g. true */
+    String CRAWLER_HOTTHREAD_ignore_idle_threads = "crawler.hotthread.ignore_idle_threads";
+
+    /** The key of the configuration. e.g. 500ms */
+    String CRAWLER_HOTTHREAD_INTERVAL = "crawler.hotthread.interval";
+
+    /** The key of the configuration. e.g. 10 */
+    String CRAWLER_HOTTHREAD_SNAPSHOTS = "crawler.hotthread.snapshots";
+
+    /** The key of the configuration. e.g. 3 */
+    String CRAWLER_HOTTHREAD_THREADS = "crawler.hotthread.threads";
+
+    /** The key of the configuration. e.g. 30s */
+    String CRAWLER_HOTTHREAD_TIMEOUT = "crawler.hotthread.timeout";
+
+    /** The key of the configuration. e.g. cpu */
+    String CRAWLER_HOTTHREAD_TYPE = "crawler.hotthread.type";
+
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
@@ -2712,6 +2730,71 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerSystemMonitorIntervalAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.ignore_idle_threads'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHotthreadIgnoreIdleThreads();
+
+    /**
+     * Is the property for the key 'crawler.hotthread.ignore_idle_threads' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerHotthreadIgnoreIdleThreads();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.interval'. <br>
+     * The value is, e.g. 500ms <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHotthreadInterval();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.snapshots'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHotthreadSnapshots();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.snapshots' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerHotthreadSnapshotsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.threads'. <br>
+     * The value is, e.g. 3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHotthreadThreads();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.threads' as {@link Integer}. <br>
+     * The value is, e.g. 3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerHotthreadThreadsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.timeout'. <br>
+     * The value is, e.g. 30s <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHotthreadTimeout();
+
+    /**
+     * Get the value for the key 'crawler.hotthread.type'. <br>
+     * The value is, e.g. cpu <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerHotthreadType();
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
@@ -7766,6 +7849,42 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL);
         }
 
+        public String getCrawlerHotthreadIgnoreIdleThreads() {
+            return get(FessConfig.CRAWLER_HOTTHREAD_ignore_idle_threads);
+        }
+
+        public boolean isCrawlerHotthreadIgnoreIdleThreads() {
+            return is(FessConfig.CRAWLER_HOTTHREAD_ignore_idle_threads);
+        }
+
+        public String getCrawlerHotthreadInterval() {
+            return get(FessConfig.CRAWLER_HOTTHREAD_INTERVAL);
+        }
+
+        public String getCrawlerHotthreadSnapshots() {
+            return get(FessConfig.CRAWLER_HOTTHREAD_SNAPSHOTS);
+        }
+
+        public Integer getCrawlerHotthreadSnapshotsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_HOTTHREAD_SNAPSHOTS);
+        }
+
+        public String getCrawlerHotthreadThreads() {
+            return get(FessConfig.CRAWLER_HOTTHREAD_THREADS);
+        }
+
+        public Integer getCrawlerHotthreadThreadsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_HOTTHREAD_THREADS);
+        }
+
+        public String getCrawlerHotthreadTimeout() {
+            return get(FessConfig.CRAWLER_HOTTHREAD_TIMEOUT);
+        }
+
+        public String getCrawlerHotthreadType() {
+            return get(FessConfig.CRAWLER_HOTTHREAD_TYPE);
+        }
+
         public String getCrawlerMetadataContentExcludes() {
             return get(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES);
         }
@@ -10292,6 +10411,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
             defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404");
             defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");
+            defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_ignore_idle_threads, "true");
+            defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_INTERVAL, "500ms");
+            defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_SNAPSHOTS, "10");
+            defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_THREADS, "3");
+            defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_TIMEOUT, "30s");
+            defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_TYPE, "cpu");
             defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES,
                     "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*");
             defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING, "title=title:string\nTitle=title:string\n");

@@ -59,6 +59,7 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
+import org.codelibs.fess.timer.HotThreadMonitorTarget;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ThreadDumpUtil;
@@ -130,6 +131,9 @@ public class Crawler {
         @Option(name = "-e", aliases = "--expires", metaVar = "expires", usage = "Expires for documents")
         public String expires;
 
+        @Option(name = "-h", aliases = "--hotThread", metaVar = "hotThread", usage = "Interval for Hot Thread logging")
+        public Integer hotThread;
+
         protected Options() {
             // nothing
         }
@@ -168,7 +172,7 @@ public class Crawler {
         public String toString() {
             return "Options [sessionId=" + sessionId + ", name=" + name + ", webConfigIds=" + webConfigIds + ", fileConfigIds="
                     + fileConfigIds + ", dataConfigIds=" + dataConfigIds + ", propertiesPath=" + propertiesPath + ", expires=" + expires
-                    + "]";
+                    + ", hotThread=" + hotThread + "]";
         }
 
     }
@@ -212,6 +216,7 @@ public class Crawler {
         }
 
         TimeoutTask systemMonitorTask = null;
+        TimeoutTask hotThreadMonitorTask = null;
         Thread commandThread = null;
         int exitCode;
         try {
@@ -263,6 +268,10 @@ public class Crawler {
             systemMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
                     ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
 
+            if (options.hotThread != null) {
+                hotThreadMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new HotThreadMonitorTarget(), options.hotThread, true);
+            }
+
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
@@ -280,6 +289,9 @@ public class Crawler {
             }
             if (systemMonitorTask != null) {
                 systemMonitorTask.cancel();
+            }
+            if (hotThreadMonitorTask != null) {
+                hotThreadMonitorTask.cancel();
             }
             destroyContainer();
         }

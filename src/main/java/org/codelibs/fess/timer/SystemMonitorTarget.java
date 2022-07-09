@@ -19,13 +19,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.timer.TimeoutTarget;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
@@ -43,29 +41,8 @@ import org.opensearch.monitor.os.OsProbe;
 import org.opensearch.monitor.os.OsStats;
 import org.opensearch.monitor.process.ProcessProbe;
 
-public class SystemMonitorTarget implements TimeoutTarget {
+public class SystemMonitorTarget extends MonitorTarget {
     private static final Logger logger = LogManager.getLogger(SystemMonitorTarget.class);
-
-    protected StringBuilder append(final StringBuilder buf, final String key, final Supplier<Object> supplier) {
-        buf.append('"').append(key).append("\":");
-        try {
-            final Object value = supplier.get();
-            if (value == null) {
-                buf.append("null");
-            } else if ((value instanceof Integer) || (value instanceof Long)) {
-                buf.append((value));
-            } else if (value instanceof Short) {
-                buf.append(((Short) value).shortValue());
-            } else if (value instanceof double[]) {
-                buf.append(Arrays.toString((double[]) value));
-            } else {
-                buf.append('"').append(StringEscapeUtils.escapeJson(value.toString())).append('"');
-            }
-        } catch (final Exception e) {
-            buf.append("null");
-        }
-        return buf;
-    }
 
     @Override
     public void expired() {
@@ -79,7 +56,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
         appendJvmStats(buf);
         appendFesenStats(buf);
 
-        append(buf, "timestamp", System::currentTimeMillis);
+        appendTimestamp(buf);
         buf.append('}');
 
         logger.info(buf.toString());
@@ -189,7 +166,7 @@ public class SystemMonitorTarget implements TimeoutTarget {
                 stats = ((ByteArrayOutputStream) out).toString(Constants.UTF_8);
             }
         } catch (final Exception e) {
-            logger.debug("Failed to access Fesen stats.", e);
+            appendException(buf, e).append(',');
         }
         buf.append("\"elasticsearch\":").append(stats).append(',');
     }

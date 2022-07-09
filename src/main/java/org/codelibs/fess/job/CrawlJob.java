@@ -58,6 +58,8 @@ public class CrawlJob extends ExecJob {
 
     protected int documentExpires = -2;
 
+    protected int hotThreadInterval = -1;
+
     public CrawlJob namespace(final String namespace) {
         this.namespace = namespace;
         return this;
@@ -80,6 +82,11 @@ public class CrawlJob extends ExecJob {
 
     public CrawlJob dataConfigIds(final String[] dataConfigIds) {
         this.dataConfigIds = dataConfigIds;
+        return this;
+    }
+
+    public CrawlJob hotThread(final int hotThreadInterval) {
+        this.hotThreadInterval = hotThreadInterval;
         return this;
     }
 
@@ -321,6 +328,10 @@ public class CrawlJob extends ExecJob {
         if (documentExpires >= -1) {
             cmdList.add("-e");
             cmdList.add(Integer.toString(documentExpires));
+        }
+        if (hotThreadInterval > -1) {
+            cmdList.add("-h");
+            cmdList.add(Integer.toString(hotThreadInterval));
         }
 
         final File propFile = ComponentUtil.getSystemHelper().createTempFile(getExecuteType() + "_", ".properties");
