@@ -636,6 +636,32 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    public void flushConfigFiles(final Runnable callback) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        final String fesenType = fessConfig.getFesenType();
+        switch (fesenType) {
+        case Constants.FESEN_TYPE_CLOUD:
+        case Constants.FESEN_TYPE_AWS:
+            if (logger.isDebugEnabled()) {
+                logger.debug("Skipped configsync flush: {}", fesenType);
+            }
+            callback.run();
+            break;
+        default:
+            ComponentUtil.getCurlHelper().post("/_configsync/flush").execute(response -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Flushed config files: {} => {}", fesenType, response.getContentAsString());
+                }
+                callback.run();
+            }, e -> {
+                logger.warn("Failed to flush config files.", e);
+                callback.run();
+            });
+            break;
+        }
+    }
+
     protected String generateNewIndexName(final String configIndex) {
         return configIndex + "." + new SimpleDateFormat("yyyyMMdd").format(new Date());
     }

@@ -118,12 +118,14 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse reloadDocIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
-        searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
-            logger.info("Close {}", docIndex);
-            searchEngineClient.admin().indices().prepareOpen(docIndex).execute(
-                    ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open {}", docIndex, e)));
-        }, e -> logger.warn("Failed to close {}", docIndex, e)));
+        searchEngineClient.flushConfigFiles(() -> {
+            final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
+            searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
+                logger.info("Close {}", docIndex);
+                searchEngineClient.admin().indices().prepareOpen(docIndex).execute(
+                        ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open {}", docIndex, e)));
+            }, e -> logger.warn("Failed to close {}", docIndex, e)));
+        });
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
