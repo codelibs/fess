@@ -79,7 +79,7 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
     }
 
     protected void writeJsonResponse(final int status, final String body) {
-        final String callback = LaRequestUtil.getOptionalRequest().map(req -> req.getParameter("callback")).get();
+        final String callback = LaRequestUtil.getOptionalRequest().map(req -> req.getParameter("callback")).orElse(null);
         final boolean isJsonp = ComponentUtil.getFessConfig().isApiJsonpEnabled() && StringUtil.isNotBlank(callback);
 
         final StringBuilder buf = new StringBuilder(1000);

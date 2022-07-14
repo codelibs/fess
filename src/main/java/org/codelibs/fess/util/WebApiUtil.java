@@ -31,7 +31,7 @@ public final class WebApiUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T getObject(final String name) {
-        return LaRequestUtil.getOptionalRequest().map(req -> (T) req.getAttribute(name)).get();
+        return LaRequestUtil.getOptionalRequest().map(req -> (T) req.getAttribute(name)).orElse(null);
     }
 
     public static void setError(final int statusCode, final String message) {

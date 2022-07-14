@@ -286,7 +286,7 @@ public class FessFunctions {
                 request.setAttribute(key, query);
             }
             return query;
-        }).get();
+        }).orElse(null);
     }
 
     private static String createForm(final String key, final String prefix) {
@@ -314,7 +314,7 @@ public class FessFunctions {
                 request.setAttribute(key, query);
             }
             return query;
-        }).get();
+        }).orElse(null);
     }
 
     public static String base64(final String value) {

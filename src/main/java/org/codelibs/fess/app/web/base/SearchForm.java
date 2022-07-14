@@ -135,7 +135,7 @@ public class SearchForm extends SearchRequestParams {
 
     @Override
     public Object getAttribute(final String name) {
-        return LaRequestUtil.getOptionalRequest().map(req -> req.getAttribute(name)).get();
+        return LaRequestUtil.getOptionalRequest().map(req -> req.getAttribute(name)).orElse(null);
     }
 
     @Override

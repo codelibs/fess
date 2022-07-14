@@ -80,7 +80,7 @@ public class UserInfoHelper {
                 updateUserSessionId(userCode);
             }
             return userCode;
-        }).get();
+        }).orElse(null);
     }
 
     protected String getUserCodeFromUserBean(final HttpServletRequest request) {
