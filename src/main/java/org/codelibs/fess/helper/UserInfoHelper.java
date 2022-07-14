@@ -53,34 +53,34 @@ public class UserInfoHelper {
     protected boolean httpOnly = true;
 
     public String getUserCode() {
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-
-        String userCode = (String) request.getAttribute(Constants.USER_CODE);
-        if (StringUtil.isNotBlank(userCode)) {
-            return userCode;
-        }
-
-        userCode = getUserCodeFromRequest(request);
-        if (StringUtil.isNotBlank(userCode)) {
-            return userCode;
-        }
-
-        if (!request.isRequestedSessionIdValid()) {
-            return null;
-        }
-
-        userCode = getUserCodeFromCookie(request);
-        if (StringUtil.isBlank(userCode)) {
-            userCode = getUserCodeFromUserBean(request);
-            if (StringUtil.isBlank(userCode)) {
-                userCode = getId();
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            String userCode = (String) request.getAttribute(Constants.USER_CODE);
+            if (StringUtil.isNotBlank(userCode)) {
+                return userCode;
             }
-        }
 
-        if (StringUtil.isNotBlank(userCode)) {
-            updateUserSessionId(userCode);
-        }
-        return userCode;
+            userCode = getUserCodeFromRequest(request);
+            if (StringUtil.isNotBlank(userCode)) {
+                return userCode;
+            }
+
+            if (!request.isRequestedSessionIdValid()) {
+                return null;
+            }
+
+            userCode = getUserCodeFromCookie(request);
+            if (StringUtil.isBlank(userCode)) {
+                userCode = getUserCodeFromUserBean(request);
+                if (StringUtil.isBlank(userCode)) {
+                    userCode = getId();
+                }
+            }
+
+            if (StringUtil.isNotBlank(userCode)) {
+                updateUserSessionId(userCode);
+            }
+            return userCode;
+        }).get();
     }
 
     protected String getUserCodeFromUserBean(final HttpServletRequest request) {
@@ -135,8 +135,7 @@ public class UserInfoHelper {
     protected void updateUserSessionId(final String userCode) {
         ComponentUtil.getSearchLogHelper().getUserInfo(userCode);
 
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-        request.setAttribute(Constants.USER_CODE, userCode);
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(Constants.USER_CODE, userCode));
 
         updateCookie(userCode, cookieMaxAge);
     }
@@ -171,8 +170,7 @@ public class UserInfoHelper {
     }
 
     public void storeQueryId(final String queryId, final List<Map<String, Object>> documentItems) {
-        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
-        if (session != null) {
+        LaRequestUtil.getOptionalRequest().map(req -> req.getSession(false)).ifPresent(session -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
             final List<String> docIdList = new ArrayList<>();
@@ -187,19 +185,18 @@ public class UserInfoHelper {
                 final Map<String, String[]> resultDocIdsCache = getResultDocIdsCache(session);
                 resultDocIdsCache.put(queryId, docIdList.toArray(new String[docIdList.size()]));
             }
-        }
+        });
     }
 
     public String[] getResultDocIds(final String queryId) {
-        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
-        if (session != null) {
+        return LaRequestUtil.getOptionalRequest().map(req -> req.getSession(false)).map(session -> {
             final Map<String, String[]> resultUrlCache = getResultDocIdsCache(session);
             final String[] urls = resultUrlCache.get(queryId);
             if (urls != null) {
                 return urls;
             }
-        }
-        return StringUtil.EMPTY_STRINGS;
+            return StringUtil.EMPTY_STRINGS;
+        }).orElse(StringUtil.EMPTY_STRINGS);
     }
 
     private Map<String, String[]> getResultDocIdsCache(final HttpSession session) {

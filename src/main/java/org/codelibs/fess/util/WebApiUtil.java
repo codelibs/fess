@@ -26,26 +26,26 @@ public final class WebApiUtil {
     }
 
     public static void setObject(final String name, final Object value) {
-        LaRequestUtil.getRequest().setAttribute(name, value);
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(name, value));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T getObject(final String name) {
-        return (T) LaRequestUtil.getRequest().getAttribute(name);
+        return LaRequestUtil.getOptionalRequest().map(req -> (T) req.getAttribute(name)).get();
     }
 
     public static void setError(final int statusCode, final String message) {
-        LaRequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, message));
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, message)));
     }
 
     public static void setError(final int statusCode, final Exception e) {
-        LaRequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, e));
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, e)));
     }
 
     public static void validate() {
-        final WebApiException e = (WebApiException) LaRequestUtil.getRequest().getAttribute(WEB_API_EXCEPTION);
-        if (e != null) {
+        LaRequestUtil.getOptionalRequest().map(req -> (WebApiException) req.getAttribute(WEB_API_EXCEPTION)).ifPresent(e -> {
             throw e;
-        }
+        });
     }
 
 }

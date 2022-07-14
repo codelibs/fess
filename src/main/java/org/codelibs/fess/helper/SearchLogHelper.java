@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -135,47 +134,40 @@ public class SearchLogHelper {
             searchLog.setUser(user.getUserId());
         });
 
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-        searchLog.setClientIp(StringUtils.abbreviate(ComponentUtil.getViewHelper().getClientIp(request), 100));
-        searchLog.setReferer(StringUtils.abbreviate(request.getHeader("referer"), 1000));
-        searchLog.setUserAgent(StringUtils.abbreviate(request.getHeader("user-agent"), 255));
-        final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
-        if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
-        } else {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
-        }
-        final Object languages = request.getAttribute(Constants.REQUEST_LANGUAGES);
-        if (languages != null) {
-            searchLog.setLanguages(StringUtils.join((String[]) languages, ","));
-        } else {
-            searchLog.setLanguages(StringUtil.EMPTY);
-        }
-        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
-        if (StringUtil.isNotBlank(virtualHostKey)) {
-            searchLog.setVirtualHost(virtualHostKey);
-        } else {
-            searchLog.setVirtualHost(StringUtil.EMPTY);
-        }
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
+            searchLog.setClientIp(StringUtils.abbreviate(ComponentUtil.getViewHelper().getClientIp(req), 100));
+            searchLog.setReferer(StringUtils.abbreviate(req.getHeader("referer"), 1000));
+            searchLog.setUserAgent(StringUtils.abbreviate(req.getHeader("user-agent"), 255));
+            final Object accessType = req.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
+            if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
+            } else {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
+            }
+            final Object languages = req.getAttribute(Constants.REQUEST_LANGUAGES);
+            if (languages != null) {
+                searchLog.setLanguages(StringUtils.join((String[]) languages, ","));
+            } else {
+                searchLog.setLanguages(StringUtil.EMPTY);
+            }
 
-        @SuppressWarnings("unchecked")
-        final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
-        if (fieldLogMap != null) {
-            final int queryMaxLength = fessConfig.getQueryMaxLengthAsInteger();
-            for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
-                for (final String value : logEntry.getValue()) {
-                    searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
+            @SuppressWarnings("unchecked")
+            final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) req.getAttribute(Constants.FIELD_LOGS);
+            if (fieldLogMap != null) {
+                final int queryMaxLength = fessConfig.getQueryMaxLengthAsInteger();
+                for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
+                    for (final String value : logEntry.getValue()) {
+                        searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
+                    }
                 }
             }
-        }
 
-        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
             for (final String s : fessConfig.getSearchlogRequestHeadersAsArray()) {
                 final String key = s.replace('-', '_').toLowerCase(Locale.ENGLISH);
                 Collections.list(req.getHeaders(s)).stream().forEach(v -> {
@@ -183,6 +175,13 @@ public class SearchLogHelper {
                 });
             }
         });
+
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        if (StringUtil.isNotBlank(virtualHostKey)) {
+            searchLog.setVirtualHost(virtualHostKey);
+        } else {
+            searchLog.setVirtualHost(StringUtil.EMPTY);
+        }
 
         addDocumentsInResponse(queryResponseList, searchLog);
 

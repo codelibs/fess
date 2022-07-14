@@ -96,11 +96,7 @@ public abstract class BaseApiManager implements WebApiManager {
         buf.append("; charset=");
         final String enc;
         if (encoding == null) {
-            if (LaRequestUtil.getRequest().getCharacterEncoding() == null) {
-                enc = Constants.UTF_8;
-            } else {
-                enc = LaRequestUtil.getRequest().getCharacterEncoding();
-            }
+            enc = LaRequestUtil.getOptionalRequest().map(req -> req.getCharacterEncoding()).orElse(Constants.UTF_8);
         } else {
             enc = encoding;
         }

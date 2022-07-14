@@ -142,7 +142,7 @@ public class ListForm extends SearchRequestParams {
 
     @Override
     public Object getAttribute(final String name) {
-        return LaRequestUtil.getRequest().getAttribute(name);
+        return LaRequestUtil.getOptionalRequest().map(req -> req.getAttribute(name)).get();
     }
 
     @Override

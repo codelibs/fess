@@ -472,8 +472,7 @@ public class ViewHelper {
     }
 
     protected String appendPDFSearchWord(final Map<String, Object> document, final String url) {
-        final String queries = (String) LaRequestUtil.getRequest().getAttribute(Constants.REQUEST_QUERIES);
-        if (queries != null) {
+        return LaRequestUtil.getOptionalRequest().map(req -> (String) req.getAttribute(Constants.REQUEST_QUERIES)).map(queries -> {
             try {
                 final StringBuilder buf = new StringBuilder(url.length() + 100);
                 buf.append(url).append("#search=%22");
@@ -483,8 +482,8 @@ public class ViewHelper {
             } catch (final UnsupportedEncodingException e) {
                 logger.warn("Unsupported encoding.", e);
             }
-        }
-        return url;
+            return null;
+        }).filter(StringUtil::isNotBlank).orElse(url);
     }
 
     public String getPagePath(final String page) {

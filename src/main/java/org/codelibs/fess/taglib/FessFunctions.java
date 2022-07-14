@@ -100,24 +100,25 @@ public class FessFunctions {
     }
 
     public static Boolean labelExists(final String value) {
-        @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) LaRequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
-        if (labelValueMap != null) {
-            return labelValueMap.get(value) != null;
-        }
-        return false;
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            @SuppressWarnings("unchecked")
+            final Map<String, String> labelValueMap = (Map<String, String>) req.getAttribute(Constants.LABEL_VALUE_MAP);
+            if (labelValueMap != null) {
+                return labelValueMap.get(value) != null;
+            }
+            return false;
+        }).orElse(false);
     }
 
     public static String label(final String value) {
-        @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) LaRequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
-        if (labelValueMap != null) {
-            final String name = labelValueMap.get(value);
-            if (name != null) {
-                return name;
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            @SuppressWarnings("unchecked")
+            final Map<String, String> labelValueMap = (Map<String, String>) req.getAttribute(Constants.LABEL_VALUE_MAP);
+            if (labelValueMap != null) {
+                return labelValueMap.get(value);
             }
-        }
-        return value;
+            return null;
+        }).orElse(value);
     }
 
     public static Date date(final Long value) {
@@ -223,20 +224,21 @@ public class FessFunctions {
     }
 
     public static String pagingQuery(final String query) {
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-        @SuppressWarnings("unchecked")
-        final List<String> pagingQueryList = (List<String>) request.getAttribute(Constants.PAGING_QUERY_LIST);
-        if (pagingQueryList != null) {
-            final String prefix;
-            if (query != null) {
-                prefix = "ex_q=" + query.split(":")[0] + "%3A";
-            } else {
-                prefix = null;
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            @SuppressWarnings("unchecked")
+            final List<String> pagingQueryList = (List<String>) req.getAttribute(Constants.PAGING_QUERY_LIST);
+            if (pagingQueryList != null) {
+                final String prefix;
+                if (query != null) {
+                    prefix = "ex_q=" + query.split(":")[0] + "%3A";
+                } else {
+                    prefix = null;
+                }
+                return pagingQueryList.stream().filter(s -> prefix == null || !s.startsWith(prefix))
+                        .collect(Collectors.joining("&", "&", StringUtil.EMPTY));
             }
-            return pagingQueryList.stream().filter(s -> prefix == null || !s.startsWith(prefix))
-                    .collect(Collectors.joining("&", "&", StringUtil.EMPTY));
-        }
-        return StringUtil.EMPTY;
+            return null;
+        }).orElse(StringUtil.EMPTY);
     }
 
     public static String facetQuery() {
@@ -261,56 +263,58 @@ public class FessFunctions {
     }
 
     private static String createQuery(final String key, final String prefix) {
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-        String query = (String) request.getAttribute(key);
-        if (query == null) {
-            final StringBuilder buf = new StringBuilder(100);
-            final Enumeration<String> names = request.getParameterNames();
-            while (names.hasMoreElements()) {
-                final String name = names.nextElement();
-                if (name.startsWith(prefix)) {
-                    final String[] values = request.getParameterValues(name);
-                    if (values != null) {
-                        for (final String value : values) {
-                            buf.append('&');
-                            buf.append(LdiURLUtil.encode(name, Constants.UTF_8));
-                            buf.append('=');
-                            buf.append(LdiURLUtil.encode(value, Constants.UTF_8));
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            String query = (String) request.getAttribute(key);
+            if (query == null) {
+                final StringBuilder buf = new StringBuilder(100);
+                final Enumeration<String> names = request.getParameterNames();
+                while (names.hasMoreElements()) {
+                    final String name = names.nextElement();
+                    if (name.startsWith(prefix)) {
+                        final String[] values = request.getParameterValues(name);
+                        if (values != null) {
+                            for (final String value : values) {
+                                buf.append('&');
+                                buf.append(LdiURLUtil.encode(name, Constants.UTF_8));
+                                buf.append('=');
+                                buf.append(LdiURLUtil.encode(value, Constants.UTF_8));
+                            }
                         }
                     }
                 }
+                query = buf.toString();
+                request.setAttribute(key, query);
             }
-            query = buf.toString();
-            request.setAttribute(key, query);
-        }
-        return query;
+            return query;
+        }).get();
     }
 
     private static String createForm(final String key, final String prefix) {
-        final HttpServletRequest request = LaRequestUtil.getRequest();
-        String query = (String) request.getAttribute(key);
-        if (query == null) {
-            final StringBuilder buf = new StringBuilder(100);
-            final Enumeration<String> names = request.getParameterNames();
-            while (names.hasMoreElements()) {
-                final String name = names.nextElement();
-                if (name.startsWith(prefix)) {
-                    final String[] values = request.getParameterValues(name);
-                    if (values != null) {
-                        for (final String value : values) {
-                            buf.append("<input type=\"hidden\" name=\"");
-                            buf.append(StringEscapeUtils.escapeHtml4(name));
-                            buf.append("\" value=\"");
-                            buf.append(StringEscapeUtils.escapeHtml4(value));
-                            buf.append("\"/>");
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            String query = (String) request.getAttribute(key);
+            if (query == null) {
+                final StringBuilder buf = new StringBuilder(100);
+                final Enumeration<String> names = request.getParameterNames();
+                while (names.hasMoreElements()) {
+                    final String name = names.nextElement();
+                    if (name.startsWith(prefix)) {
+                        final String[] values = request.getParameterValues(name);
+                        if (values != null) {
+                            for (final String value : values) {
+                                buf.append("<input type=\"hidden\" name=\"");
+                                buf.append(StringEscapeUtils.escapeHtml4(name));
+                                buf.append("\" value=\"");
+                                buf.append(StringEscapeUtils.escapeHtml4(value));
+                                buf.append("\"/>");
+                            }
                         }
                     }
                 }
+                query = buf.toString();
+                request.setAttribute(key, query);
             }
-            query = buf.toString();
-            request.setAttribute(key, query);
-        }
-        return query;
+            return query;
+        }).get();
     }
 
     public static String base64(final String value) {
@@ -334,11 +338,8 @@ public class FessFunctions {
             final String msg = "The argument 'input' should start with slash '/': " + input;
             throw new IllegalArgumentException(msg);
         }
-        final String contextPath = LaRequestUtil.getRequest().getContextPath();
         final StringBuilder sb = new StringBuilder();
-        if (contextPath.length() > 1) {
-            sb.append(contextPath);
-        }
+        LaRequestUtil.getOptionalRequest().map(req -> req.getContextPath()).filter(s -> s.length() > 1).ifPresent(s -> sb.append(s));
         sb.append(input);
         if (input.indexOf('?') == -1) {
             try {
