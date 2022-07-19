@@ -906,7 +906,7 @@ public class SearchEngineClient implements Client {
 
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL:\n{}", searchRequestBuilder);
+                    logger.debug("Query DSL: {}", searchRequestBuilder);
                 }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
@@ -930,7 +930,7 @@ public class SearchEngineClient implements Client {
             String scrollId = null;
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL:\n{}", searchRequestBuilder);
+                    logger.debug("Query DSL: {}", searchRequestBuilder);
                 }
                 SearchResponse response = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
 
