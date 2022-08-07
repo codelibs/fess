@@ -677,28 +677,22 @@
             "ambiguities_resolved": false
         },
         "unigram_tokenizer": {
-          "type": "ngram_synonym",
-          "n": "1",
-          "synonyms_path": "${fess.dictionary.path}synonym.txt",
-          "dynamic_reload": true,
-          "expand": true,
-          "reload_interval": "1m"
+          "type": "ngram",
+          "min_gram": 1,
+          "max_gram": 1,
+          "token_chars": []
         },
         "unigram_search_tokenizer": {
-          "type": "ngram_synonym",
-          "n": "1",
-          "synonyms_path": "${fess.dictionary.path}synonym.txt",
-          "dynamic_reload": true,
-          "expand": false,
-          "reload_interval": "1m"
+          "type": "ngram",
+          "min_gram": 1,
+          "max_gram": 1,
+          "token_chars": []
         },
         "bigram_tokenizer": {
-          "type": "ngram_synonym",
-          "n": "2",
-          "synonyms_path": "${fess.dictionary.path}synonym.txt",
-          "dynamic_reload": true,
-          "expand": false,
-          "reload_interval": "1m"
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 2,
+          "token_chars": []
         }
       },
       "analyzer": {
@@ -1139,13 +1133,12 @@
           "char_filter": [
             "mapping_filter"
           ],
-          "tokenizer": "unigram_tokenizer",
+          "tokenizer": "standard",
           "filter": [
-            "disable_graph",
-            "alphanum_word_filter",
-            "cjk_bigram",
-            "lowercase",
             "asciifolding",
+            "alphanum_word_filter",
+            "lowercase",
+            "cjk_bigram",
             "stopword_en_filter",
             "english_keywords",
             "english_override",
@@ -1159,10 +1152,11 @@
           ],
           "tokenizer": "unigram_search_tokenizer",
           "filter": [
-            "disable_graph",
+            "asciifolding",
             "alphanum_word_filter",
-            "cjk_bigram",
             "lowercase",
+            "cjk_bigram",
+            "synonym_filter",
             "stopword_en_filter",
             "english_keywords",
             "english_override",
@@ -1181,11 +1175,12 @@
           "char_filter": [
             "mapping_ja_filter"
           ],
-          "tokenizer": "unigram_search_tokenizer",
+          "tokenizer": "standard",
           "filter": [
+            "asciifolding",
             "alphanum_word_filter",
-            "cjk_bigram",
             "lowercase",
+            "cjk_bigram",
             "stopword_en_filter",
             "english_keywords",
             "english_override",
