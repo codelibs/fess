@@ -1,25 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
 TMP_FILE=/tmp/fess-build.$$
 unzip target/releases/fess-*.zip 2>&1 > $TMP_FILE
 tail $TMP_FILE
 
 ./fess-*/bin/fess 2>&1 > $TMP_FILE &
-sleep 3
+
+pushd /tmp
+git clone https://github.com/codelibs/fess-testdata.git
+popd
+
 tail $TMP_FILE
 touch `ls -d ./fess-*`/logs/fess-crawler.log
 tail -f ./fess-*/logs/*.log &
 
 counter=0
 ret=1
-while [ $ret != 0 -a $counter != 60 ] ; do
+while [ $ret != 0 -a $counter != 180 ] ; do
   echo "Ping Fess... $counter"
-  curl -v 127.0.0.1:8080/json/?type=ping
-  #ret=$?
-  ret=1
-  sleep 5
-  counter=`expr $counter + 1`
+  curl -v "localhost:8080/json/?type=ping"
+  ret=$?
+  sleep 1
+  counter=$((counter + 1))
 done
 
-cd /tmp
-git clone https://github.com/codelibs/fess-testdata.git
