@@ -187,55 +187,66 @@ public class SuggestCreator {
     }
 
     private int create() {
-        if (!ComponentUtil.getFessConfig().isSuggestDocuments()) {
-            logger.info("Skip create suggest document.");
+        if (!ComponentUtil.getFessConfig().isSuggestDocuments() && !ComponentUtil.getFessConfig().isSuggestSearchLog()) {
+            logger.info("Skipped to create new suggest index.");
             return 0;
         }
 
-        logger.info("Start create suggest document.");
-
-        final AtomicInteger result = new AtomicInteger(1);
-        final CountDownLatch latch = new CountDownLatch(1);
-
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
 
-        logger.info("Create update index.");
+        logger.info("Creating new suggest index.");
         suggestHelper.suggester().createNextIndex();
 
-        logger.info("Store all bad words.");
+        logger.info("Storing all bad words.");
         suggestHelper.storeAllBadWords(true);
 
-        logger.info("Store all elevate words.");
+        logger.info("Storing all elevate words.");
         suggestHelper.storeAllElevateWords(true);
 
-        logger.info("Parse words from indexed documents.");
-        suggestHelper.indexFromDocuments(ret -> {
-            logger.info("Success index from documents.");
-            result.set(0);
-            latch.countDown();
-        }, t -> {
-            logger.error("Failed to update suggest index.", t);
-            latch.countDown();
-        });
+        final AtomicInteger exitCode = new AtomicInteger(0);
 
-        try {
-            latch.await();
-        } catch (final InterruptedException ignore) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Interrupted.", ignore);
+        if (ComponentUtil.getFessConfig().isSuggestDocuments()) {
+            final CountDownLatch latch = new CountDownLatch(1);
+
+            logger.info("Parsing words from indexed documents.");
+            suggestHelper.indexFromDocuments(ret -> {
+                logger.info("Success indexing from documents.");
+                latch.countDown();
+            }, t -> {
+                logger.error("Failed to update suggest index.", t);
+                exitCode.set(1);
+                latch.countDown();
+            });
+
+            try {
+                latch.await();
+            } catch (final InterruptedException ignore) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interrupted.", ignore);
+                }
+                exitCode.set(1);
             }
         }
 
-        logger.info("Store search logs.");
-        suggestHelper.storeSearchLog();
+        if (ComponentUtil.getFessConfig().isSuggestSearchLog()) {
+            logger.info("Parsing words from search logs.");
+            try {
+                suggestHelper.storeSearchLog();
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to update suggest index.", e);
+                }
+                exitCode.set(1);
+            }
+        }
 
-        logger.info("Switch indices.");
+        logger.info("Replacing new suggest index.");
         suggestHelper.suggester().switchIndex();
 
-        logger.info("Remove old indices.");
+        logger.info("Removing old indices.");
         suggestHelper.suggester().removeDisableIndices();
 
-        return result.get();
+        return exitCode.get();
     }
 
     private int purge(final LocalDateTime time) {
