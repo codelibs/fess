@@ -11,7 +11,7 @@ git clone https://github.com/codelibs/fess-testdata.git
 popd
 
 tail $TMP_FILE
-touch `ls -d ./fess-*`/logs/fess-crawler.log
+touch `ls -d ./fess-*/logs`/fess-crawler.log
 tail -f ./fess-*/logs/*.log &
 
 counter=0

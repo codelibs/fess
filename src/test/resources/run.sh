@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tail -f ./fess-*/logs/*.log &
+tail -f ./fess-*/logs/fess-crawler.log &
 
 mvn test -P integrationTests -Dtest.fess.url="http://127.0.0.1:8080" -Dtest.es.url="http://127.0.0.1:9201"
 ret=$?
