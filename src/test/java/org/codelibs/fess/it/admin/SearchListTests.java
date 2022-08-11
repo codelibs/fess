@@ -84,7 +84,7 @@ public class SearchListTests extends CrudTestBase {
     protected Map<String, Object> createSearchBody(final int size) {
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("size", size);
-        searchBody.put("q", NAME_PREFIX);
+        searchBody.put("q", NAME_PREFIX + "*");
         return searchBody;
     }
 
