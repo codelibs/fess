@@ -1150,7 +1150,7 @@
           "char_filter": [
             "mapping_filter"
           ],
-          "tokenizer": "unigram_search_tokenizer",
+          "tokenizer": "standard",
           "filter": [
             "asciifolding",
             "alphanum_word_filter",
