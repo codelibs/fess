@@ -276,7 +276,7 @@ public class CrawlJob extends ExecJob {
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
         cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
-        addSystemProperty(cmdList, "fess.log.name", "fess-" + getExecuteType(), "-" + getExecuteType());
+        addSystemProperty(cmdList, "fess.log.name", getLogName("fess"), getLogName(StringUtil.EMPTY));
         if (logLevel == null) {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {

@@ -157,7 +157,7 @@ public class SuggestJob extends ExecJob {
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
         cmdList.add("-Dfess.log.path=" + logFilePath);
-        addSystemProperty(cmdList, "fess.log.name", "fess-" + getExecuteType(), "-" + getExecuteType());
+        addSystemProperty(cmdList, "fess.log.name", getLogName("fess"), getLogName(StringUtil.EMPTY));
         if (logLevel == null) {
             addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {

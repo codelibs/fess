@@ -27,6 +27,7 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
@@ -48,6 +49,8 @@ public abstract class ExecJob {
     protected String logFilePath;
 
     protected String logLevel;
+
+    protected String logSuffix = StringUtil.EMPTY;
 
     protected List<String> jvmOptions = new ArrayList<>();
 
@@ -83,6 +86,11 @@ public abstract class ExecJob {
 
     public ExecJob logLevel(final String logLevel) {
         this.logLevel = logLevel;
+        return this;
+    }
+
+    public ExecJob logSuffix(final String logSuffix) {
+        this.logSuffix = logSuffix.trim().replaceAll("\\s", "_");
         return this;
     }
 
@@ -195,5 +203,12 @@ public abstract class ExecJob {
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    protected String getLogName(final String logPrefix) {
+        if (logSuffix.length() > 0) {
+            return logPrefix + "-" + getExecuteType() + "-" + logSuffix;
+        }
+        return logPrefix + "-" + getExecuteType();
     }
 }
