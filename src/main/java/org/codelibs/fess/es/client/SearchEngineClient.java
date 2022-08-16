@@ -919,6 +919,11 @@ public class SearchEngineClient implements Client {
         return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
     }
 
+    public long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
+            final BooleanFunction<Map<String, Object>> cursor) {
+        return scrollSearch(index, condition, getDefaultEntityCreator(), cursor);
+    }
+
     public <T> long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator, final BooleanFunction<T> cursor) {
         long count = 0;
@@ -1008,7 +1013,11 @@ public class SearchEngineClient implements Client {
     }
 
     public List<Map<String, Object>> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition) {
-        return getDocumentList(index, condition, (response, hit) -> {
+        return getDocumentList(index, condition, getDefaultEntityCreator());
+    }
+
+    protected EntityCreator<Map<String, Object>, SearchResponse, SearchHit> getDefaultEntityCreator() {
+        return (response, hit) -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final Map<String, Object> source = hit.getSourceAsMap();
             if (source != null) {
@@ -1024,7 +1033,7 @@ public class SearchEngineClient implements Client {
                 return docMap;
             }
             return null;
-        });
+        };
     }
 
     protected <T> List<T> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition,

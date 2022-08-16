@@ -189,16 +189,34 @@ public class IndexingHelper {
         final SearchResponse countResponse = searchEngineClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex())
                 .setQuery(queryBuilder).setSize(0).execute().actionGet(fessConfig.getIndexSearchTimeout());
         final long numFound = countResponse.getHits().getTotalHits().value;
-        // TODO max threshold
+        final long maxSearchDocSize = fessConfig.getIndexerMaxSearchDocSizeAsInteger().longValue();
+        final boolean exceeded = numFound > maxSearchDocSize;
+        if (exceeded) {
+            logger.warn("Max document size is exceeded({}>{}): {}", numFound, fessConfig.getIndexerMaxSearchDocSize(), queryBuilder);
+        }
 
-        return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
-            requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
-            if (fields != null) {
-                requestBuilder.setFetchSource(fields, null);
-            }
-            return true;
-        });
-
+        if (numFound > fessConfig.getIndexerMaxResultWindowSizeAsInteger().longValue()) {
+            final List<Map<String, Object>> entityList = new ArrayList<>(Long.valueOf(numFound).intValue());
+            searchEngineClient.scrollSearch(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+                requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
+                if (fields != null) {
+                    requestBuilder.setFetchSource(fields, null);
+                }
+                return true;
+            }, entity -> {
+                entityList.add(entity);
+                return entityList.size() <= (exceeded ? maxSearchDocSize : numFound);
+            });
+            return entityList;
+        } else {
+            return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+                requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
+                if (fields != null) {
+                    requestBuilder.setFetchSource(fields, null);
+                }
+                return true;
+            });
+        }
     }
 
     public long deleteBySessionId(final String sessionId) {
