@@ -18,10 +18,11 @@ package org.codelibs.fess.app.web.base.login;
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
@@ -46,8 +47,16 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         return (String) attributes.get("email");
     }
 
+    public String[] getUserGroups() {
+        String[] userGroups = (String[]) attributes.get("groups");
+        if (userGroups == null) {
+            userGroups = getDefaultGroupsAsArray();
+        }
+        return (userGroups);
+    }
+
     public OpenIdUser getUser() {
-        return new OpenIdUser(getUserId(), getDefaultGroupsAsArray(), getDefaultRolesAsArray());
+        return new OpenIdUser(getUserId(), getUserGroups(), getDefaultRolesAsArray());
     }
 
     protected static String[] getDefaultGroupsAsArray() {
