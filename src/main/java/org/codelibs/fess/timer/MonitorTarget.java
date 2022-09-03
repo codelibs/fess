@@ -65,7 +65,7 @@ public abstract class MonitorTarget implements TimeoutTarget {
             exception.printStackTrace(writer);
             writer.flush();
             append(buf, "exception", () -> StringEscapeUtils.escapeJson(new String(baos.toByteArray(), Constants.CHARSET_UTF_8)));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             append(buf, "exception", () -> StringEscapeUtils.escapeJson(e.getMessage()));
         }
         return buf;

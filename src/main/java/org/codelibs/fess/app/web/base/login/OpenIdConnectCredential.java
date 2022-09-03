@@ -18,11 +18,10 @@ package org.codelibs.fess.app.web.base.login;
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;

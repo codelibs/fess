@@ -452,7 +452,7 @@ public class AdminStorageAction extends FessAdminAction {
             RenderDataUtil.register(data, "name", name);
             final Map<String, String> tags = new HashMap<>();
             getObjectTags(getObjectName(path, name)).entrySet().forEach(e -> {
-                int index = tags.size() / 2 + 1;
+                final int index = tags.size() / 2 + 1;
                 tags.put("name" + index, e.getKey());
                 tags.put("value" + index, e.getValue());
             });

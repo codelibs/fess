@@ -339,7 +339,7 @@ public class FessFunctions {
             throw new IllegalArgumentException(msg);
         }
         final StringBuilder sb = new StringBuilder();
-        LaRequestUtil.getOptionalRequest().map(req -> req.getContextPath()).filter(s -> s.length() > 1).ifPresent(s -> sb.append(s));
+        LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getContextPath).filter(s -> s.length() > 1).ifPresent(s -> sb.append(s));
         sb.append(input);
         if (input.indexOf('?') == -1) {
             try {

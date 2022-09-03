@@ -208,15 +208,14 @@ public class IndexingHelper {
                 return entityList.size() <= (exceeded ? maxSearchDocSize : numFound);
             });
             return entityList;
-        } else {
-            return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
-                requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
-                if (fields != null) {
-                    requestBuilder.setFetchSource(fields, null);
-                }
-                return true;
-            });
         }
+        return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+            requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
+            if (fields != null) {
+                requestBuilder.setFetchSource(fields, null);
+            }
+            return true;
+        });
     }
 
     public long deleteBySessionId(final String sessionId) {

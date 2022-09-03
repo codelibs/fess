@@ -95,7 +95,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     @Override
     public void store(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
-        final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof StatsKeyObject sko ? sko : null;
+        final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof final StatsKeyObject sko ? sko : null;
         if (keyObj != null) {
             crawlerStatsHelper.runOnThread(keyObj);
         }
@@ -142,7 +142,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 return;
             }
 
-            final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof StatsKeyObject sko ? sko : null;
+            final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof final StatsKeyObject sko ? sko : null;
 
             final long maxAccessCount = getMaxAccessCount(paramMap, dataMap);
             long counter = 0;
@@ -206,7 +206,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final CrawlerClient client) {
         final long startTime = System.currentTimeMillis();
         final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
-        final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof StatsKeyObject sko ? sko : null;
+        final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof final StatsKeyObject sko ? sko : null;
         try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
             if (responseData.getRedirectLocation() != null) {
                 return responseData.getRedirectLocation();

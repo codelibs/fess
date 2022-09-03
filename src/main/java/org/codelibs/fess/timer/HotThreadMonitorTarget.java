@@ -52,7 +52,7 @@ public class HotThreadMonitorTarget extends MonitorTarget {
                             .setThreads(threads).setTimeout(timeout).setType(type).execute().actionGet(timeout);
             append(buf, "cluster_name", () -> response.getClusterName().value()).append(',');
             final String hotThreads = response.getNodesMap().entrySet().stream().map(e -> {
-                StringBuilder tempBuf = new StringBuilder();
+                final StringBuilder tempBuf = new StringBuilder();
                 append(tempBuf, StringEscapeUtils.escapeJson(e.getKey()), () -> StringEscapeUtils.escapeJson(e.getValue().getHotThreads()));
                 return tempBuf.toString();
             }).collect(Collectors.joining(","));

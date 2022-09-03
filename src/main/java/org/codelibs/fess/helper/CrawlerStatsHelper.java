@@ -59,7 +59,7 @@ public class CrawlerStatsHelper {
         statsCache = CacheBuilder.newBuilder().maximumSize(maxCacheSize).expireAfterWrite(cacheExpireAfterWrite, TimeUnit.MILLISECONDS)
                 .build(new CacheLoader<String, StatsObject>() {
                     @Override
-                    public StatsObject load(String key) {
+                    public StatsObject load(final String key) {
                         return new StatsObject();
                     }
                 });
@@ -74,17 +74,17 @@ public class CrawlerStatsHelper {
             final StatsObject data = e.getValue();
             final Long begin = data.remove(BEGIN_KEY);
             if (begin != null) {
-                printStats(e.getKey(), data, begin.longValue(), false);
+                printStats(e.getKey(), data, begin, false);
             }
         });
-        ;
+
     }
 
     public void begin(final Object keyObj) {
         getCacheKey(keyObj).ifPresent(key -> {
             try {
                 statsCache.get(key);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
                 buf.append('\t').append("action:begin");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
@@ -104,7 +104,7 @@ public class CrawlerStatsHelper {
                 if (data != null) {
                     data.put(escapeValue(action), System.currentTimeMillis());
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
                 buf.append('\t').append("action:record");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
@@ -121,10 +121,10 @@ public class CrawlerStatsHelper {
                     statsCache.invalidate(key);
                     final Long begin = data.remove(BEGIN_KEY);
                     if (begin != null) {
-                        printStats(keyObj, data, begin.longValue(), true);
+                        printStats(keyObj, data, begin, true);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
                 buf.append('\t').append("action:done");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
@@ -140,7 +140,7 @@ public class CrawlerStatsHelper {
                 if (data != null) {
                     statsCache.invalidate(key);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
                 buf.append('\t').append("action:done");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
@@ -166,7 +166,7 @@ public class CrawlerStatsHelper {
                 if (data != null) {
                     data.increment();
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
                 buf.append('\t').append("action:record");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
@@ -184,32 +184,34 @@ public class CrawlerStatsHelper {
     }
 
     protected String getUrl(final Object keyObj) {
-        if (keyObj instanceof UrlQueue<?> urlQueue) {
+        if (keyObj instanceof final UrlQueue<?> urlQueue) {
             return escapeValue(urlQueue.getUrl());
-        } else if (keyObj instanceof StatsKeyObject statsKey) {
+        }
+        if (keyObj instanceof final StatsKeyObject statsKey) {
             return escapeValue(statsKey.getUrl());
-        } else if (keyObj instanceof String key) {
+        } else if (keyObj instanceof final String key) {
             return escapeValue(key);
-        } else if (keyObj instanceof Number key) {
+        } else if (keyObj instanceof final Number key) {
             return key.toString();
         }
         return "-";
     }
 
     protected OptionalThing<String> getCacheKey(final Object keyObj) {
-        if (keyObj instanceof UrlQueue<?> urlQueue) {
+        if (keyObj instanceof final UrlQueue<?> urlQueue) {
             return OptionalThing.of(urlQueue.getId().toString());
-        } else if (keyObj instanceof StatsKeyObject statsKey) {
+        }
+        if (keyObj instanceof final StatsKeyObject statsKey) {
             return OptionalThing.of(statsKey.getId());
-        } else if (keyObj instanceof String key) {
+        } else if (keyObj instanceof final String key) {
             return OptionalThing.of(key);
-        } else if (keyObj instanceof Number key) {
+        } else if (keyObj instanceof final Number key) {
             return OptionalThing.of(key.toString());
         }
         return OptionalThing.empty();
     }
 
-    protected String escapeValue(String action) {
+    protected String escapeValue(final String action) {
         return action.replace('\t', ' ');
     }
 
@@ -217,15 +219,15 @@ public class CrawlerStatsHelper {
         statsLogger.info(buf.toString());
     }
 
-    public void setLoggerName(String loggerName) {
+    public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
     }
 
-    public void setMaxCacheSize(long maxCacheSize) {
+    public void setMaxCacheSize(final long maxCacheSize) {
         this.maxCacheSize = maxCacheSize;
     }
 
-    public void setCacheExpireAfterWrite(long cacheExpireAfterWrite) {
+    public void setCacheExpireAfterWrite(final long cacheExpireAfterWrite) {
         this.cacheExpireAfterWrite = cacheExpireAfterWrite;
     }
 

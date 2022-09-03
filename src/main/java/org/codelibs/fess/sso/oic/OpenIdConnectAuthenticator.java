@@ -16,7 +16,11 @@
 package org.codelibs.fess.sso.oic;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -197,11 +201,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                         attributes.put("exp", jsonParser.getText());
                         break;
                     case "groups":
-                        List<String> list = new ArrayList<String>();
+                        final List<String> list = new ArrayList<>();
                         while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
                             final String group = jsonParser.getText();
                             list.add(group);
-                            logger.debug(group);
+                        }
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("groups: {}", list);
                         }
                         attributes.put("groups", list.toArray(new String[list.size()]));
                         break;

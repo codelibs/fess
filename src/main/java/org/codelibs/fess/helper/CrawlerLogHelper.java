@@ -43,41 +43,41 @@ public class CrawlerLogHelper extends LogHelperImpl {
     }
 
     @Override
-    protected void processStartCrawling(Object... objs) {
+    protected void processStartCrawling(final Object... objs) {
         super.processStartCrawling(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().begin(urlQueue);
         }
     }
 
     @Override
-    protected void processCleanupCrawling(Object... objs) {
+    protected void processCleanupCrawling(final Object... objs) {
         super.processCleanupCrawling(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().done(urlQueue);
         }
     }
 
     @Override
-    protected void processProcessChildUrlByException(Object... objs) {
+    protected void processProcessChildUrlByException(final Object... objs) {
         super.processProcessChildUrlByException(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CHILD_URL);
         }
     }
 
     @Override
-    protected void processProcessChildUrlsByException(Object... objs) {
+    protected void processProcessChildUrlsByException(final Object... objs) {
         super.processProcessChildUrlsByException(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.CHILD_URLS);
         }
     }
 
     @Override
-    protected void processFinishedCrawling(Object... objs) {
+    protected void processFinishedCrawling(final Object... objs) {
         super.processFinishedCrawling(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.FINISHED);
         }
     }
@@ -119,7 +119,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         }
 
         super.processCrawlingAccessException(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
         }
     }
@@ -148,7 +148,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         }
 
         super.processCrawlingException(objs);
-        if (objs.length > 1 && objs[1] instanceof UrlQueue<?> urlQueue) {
+        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
         }
     }

@@ -39,7 +39,7 @@ public class DataStoreParams {
     }
 
     public String getAsString(final String key) {
-        if (params.get(key) instanceof String strValue) {
+        if (params.get(key) instanceof final String strValue) {
             return strValue;
         }
         final Object value = params.get(key);
