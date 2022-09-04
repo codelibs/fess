@@ -250,6 +250,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String API_JSON_RESPONSE_HEADERS = "api.json.response.headers";
 
+    /** The key of the configuration. e.g. false */
+    String API_JSON_RESPONSE_EXCEPTION_INCLUDED = "api.json.response.exception.included";
+
     /** The key of the configuration. e.g.  */
     String API_GSA_RESPONSE_HEADERS = "api.gsa.response.headers";
 
@@ -273,6 +276,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. false */
     String API_JSONP_ENABLED = "api.jsonp.enabled";
+
+    /** The key of the configuration. e.g. status,timed_out */
+    String API_PING_ES_FIELDS = "api.ping.es.fields";
 
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
@@ -2299,6 +2305,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getApiJsonResponseHeadersAsInteger();
 
     /**
+     * Get the value for the key 'api.json.response.exception.included'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiJsonResponseExceptionIncluded();
+
+    /**
+     * Is the property for the key 'api.json.response.exception.included' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isApiJsonResponseExceptionIncluded();
+
+    /**
      * Get the value for the key 'api.gsa.response.headers'. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2391,6 +2411,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiJsonpEnabled();
+
+    /**
+     * Get the value for the key 'api.ping.es.fields'. <br>
+     * The value is, e.g. status,timed_out <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiPingEsFields();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -7645,6 +7672,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.API_JSON_RESPONSE_HEADERS);
         }
 
+        public String getApiJsonResponseExceptionIncluded() {
+            return get(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED);
+        }
+
+        public boolean isApiJsonResponseExceptionIncluded() {
+            return is(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED);
+        }
+
         public String getApiGsaResponseHeaders() {
             return get(FessConfig.API_GSA_RESPONSE_HEADERS);
         }
@@ -7695,6 +7730,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isApiJsonpEnabled() {
             return is(FessConfig.API_JSONP_ENABLED);
+        }
+
+        public String getApiPingEsFields() {
+            return get(FessConfig.API_PING_ES_FIELDS);
         }
 
         public String getVirtualHostHeaders() {
@@ -10426,6 +10465,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_SEARCH_ACCEPT_REFERERS, "");
             defaultMap.put(FessConfig.API_SEARCH_SCROLL, "false");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED, "false");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
@@ -10434,6 +10474,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization, X-Requested-With");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
+            defaultMap.put(FessConfig.API_PING_ES_FIELDS, "status,timed_out");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");

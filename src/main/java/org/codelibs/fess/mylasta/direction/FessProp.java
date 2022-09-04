@@ -70,6 +70,8 @@ import org.opensearch.search.sort.SortOrder;
 
 public interface FessProp {
 
+    String API_PING_ES_FIELD_SET = "apiPingEsFieldSet";
+
     String QUERY_HIGHLIGHT_TERMINAL_CHARS = "queryHighlightTerminalChars";
 
     String QUERY_HIGHLIGHT_BOUNDARY_CHARS = "queryHighlightBoundaryChars";
@@ -2112,5 +2114,17 @@ public interface FessProp {
     default String[] getSearchlogRequestHeadersAsArray() {
         return split(getSearchlogRequestHeaders(), ",")
                 .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
+    }
+
+    String getApiPingEsFields();
+
+    default Set<String> getApiPingEsFieldSet() {
+        Set<String> value = (Set<String>) propMap.get(API_PING_ES_FIELD_SET);
+        if (value == null) {
+            value = split(getApiPingEsFields(), ",")
+                    .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toSet()));
+            propMap.put(API_PING_ES_FIELD_SET, value);
+        }
+        return value;
     }
 }

@@ -23,10 +23,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -36,6 +39,8 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public abstract class BaseJsonApiManager extends BaseApiManager {
+
+    private static final Logger logger = LogManager.getLogger(BaseJsonApiManager.class);
 
     protected String mimeType = "application/json";
 
@@ -57,13 +62,24 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         } else {
             sb.append(t.getMessage());
         }
-        final StringWriter sw = new StringWriter();
-        t.printStackTrace(new PrintWriter(sw));
-        sb.append(" [ ").append(sw.toString()).append(" ]");
-        try {
-            sw.close();
+        try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+            t.printStackTrace(pw);
+            pw.flush();
+            sb.append(" [ ").append(sw.toString()).append(" ]");
         } catch (final IOException ignore) {}
-        writeJsonResponse(status, body, sb.toString());
+        final String message;
+        if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getApiJsonResponseExceptionIncluded())) {
+            message = sb.toString();
+        } else {
+            final String errorCode = UUID.randomUUID().toString();
+            message = "error_code:" + errorCode;
+            if (logger.isDebugEnabled()) {
+                logger.debug("[{}] {}", errorCode, sb.toString().replace("\n", "\\n"));
+            } else {
+                logger.warn("[{}] {}", errorCode, t.getMessage());
+            }
+        }
+        writeJsonResponse(status, body, message);
     }
 
     protected void writeJsonResponse(final int status, final String body, final String errMsg) {
