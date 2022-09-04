@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,25 +57,28 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
             response.setHeader("WWW-Authenticate", "Bearer error=\"" + e.getType() + "\"");
         }
 
-        final StringBuilder sb = new StringBuilder();
-        if (StringUtil.isBlank(t.getMessage())) {
-            sb.append(t.getClass().getName());
-        } else {
-            sb.append(t.getMessage());
-        }
-        try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
-            t.printStackTrace(pw);
-            pw.flush();
-            sb.append(" [ ").append(sw.toString()).append(" ]");
-        } catch (final IOException ignore) {}
+        final Supplier<String> stacktraceString = () -> {
+            final StringBuilder sb = new StringBuilder();
+            if (StringUtil.isBlank(t.getMessage())) {
+                sb.append(t.getClass().getName());
+            } else {
+                sb.append(t.getMessage());
+            }
+            try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+                t.printStackTrace(pw);
+                pw.flush();
+                sb.append(" [ ").append(sw.toString()).append(" ]");
+            } catch (final IOException ignore) {}
+            return sb.toString();
+        };
         final String message;
         if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getApiJsonResponseExceptionIncluded())) {
-            message = sb.toString();
+            message = stacktraceString.get();
         } else {
             final String errorCode = UUID.randomUUID().toString();
             message = "error_code:" + errorCode;
             if (logger.isDebugEnabled()) {
-                logger.debug("[{}] {}", errorCode, sb.toString().replace("\n", "\\n"));
+                logger.debug("[{}] {}", errorCode, stacktraceString.get().replace("\n", "\\n"));
             } else {
                 logger.warn("[{}] {}", errorCode, t.getMessage());
             }

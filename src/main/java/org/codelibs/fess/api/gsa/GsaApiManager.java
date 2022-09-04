@@ -16,6 +16,8 @@
 package org.codelibs.fess.api.gsa;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -30,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -314,9 +318,30 @@ public class GsaApiManager extends BaseApiManager {
             }
         } catch (final Exception e) {
             status = 1;
-            errMsg = e.getMessage();
-            if (errMsg == null) {
-                errMsg = e.getClass().getName();
+            final Supplier<String> stacktraceString = () -> {
+                final StringBuilder sb = new StringBuilder();
+                if (StringUtil.isBlank(e.getMessage())) {
+                    sb.append(e.getClass().getName());
+                } else {
+                    sb.append(e.getMessage());
+                }
+                try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+                    e.printStackTrace(pw);
+                    pw.flush();
+                    sb.append(" [ ").append(sw.toString()).append(" ]");
+                } catch (final IOException ignore) {}
+                return sb.toString();
+            };
+            if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getApiGsaResponseExceptionIncluded())) {
+                errMsg = stacktraceString.get();
+            } else {
+                final String errorCode = UUID.randomUUID().toString();
+                errMsg = "error_code:" + errorCode;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[{}] {}", errorCode, stacktraceString.get().replace("\n", "\\n"));
+                } else {
+                    logger.warn("[{}] {}", errorCode, e.getMessage());
+                }
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a search request.", e);

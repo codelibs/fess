@@ -256,6 +256,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String API_GSA_RESPONSE_HEADERS = "api.gsa.response.headers";
 
+    /** The key of the configuration. e.g. false */
+    String API_GSA_RESPONSE_EXCEPTION_INCLUDED = "api.gsa.response.exception.included";
+
     /** The key of the configuration. e.g.  */
     String API_DASHBOARD_RESPONSE_HEADERS = "api.dashboard.response.headers";
 
@@ -2332,6 +2335,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getApiGsaResponseHeadersAsInteger();
+
+    /**
+     * Get the value for the key 'api.gsa.response.exception.included'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiGsaResponseExceptionIncluded();
+
+    /**
+     * Is the property for the key 'api.gsa.response.exception.included' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isApiGsaResponseExceptionIncluded();
 
     /**
      * Get the value for the key 'api.dashboard.response.headers'. <br>
@@ -7688,6 +7705,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.API_GSA_RESPONSE_HEADERS);
         }
 
+        public String getApiGsaResponseExceptionIncluded() {
+            return get(FessConfig.API_GSA_RESPONSE_EXCEPTION_INCLUDED);
+        }
+
+        public boolean isApiGsaResponseExceptionIncluded() {
+            return is(FessConfig.API_GSA_RESPONSE_EXCEPTION_INCLUDED);
+        }
+
         public String getApiDashboardResponseHeaders() {
             return get(FessConfig.API_DASHBOARD_RESPONSE_HEADERS);
         }
@@ -10467,6 +10492,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED, "false");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_GSA_RESPONSE_EXCEPTION_INCLUDED, "false");
             defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
             defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
