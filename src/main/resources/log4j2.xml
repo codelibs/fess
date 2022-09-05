@@ -80,6 +80,10 @@
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
+		<Logger name="org.opensearch.bootstrap" additivity="false" level="error">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="AppFile" />
+		</Logger>
 		<Logger name="fess.log.audit" additivity="false" level="info">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="AuditFile" />
