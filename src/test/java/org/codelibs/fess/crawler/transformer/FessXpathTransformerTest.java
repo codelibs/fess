@@ -270,8 +270,8 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final FessXpathTransformer transformer = new FessXpathTransformer();
 
         final Node pruneNode = transformer.processGoogleOffOn(document, new ValueHolder<>(true));
-        final String output = getXmlString(pruneNode).replaceAll(".*<BODY>", "").replaceAll("</BODY>.*", "");
-        assertEquals("foo1<!--googleoff: index--><A href=\"index.html\"></A><!--googleon: index-->foo5", output);
+        final String output = getXmlString(pruneNode).replaceAll(".*<BODY[^>]*>", "").replaceAll("</BODY>.*", "");
+        assertEquals("foo1<!--googleoff: index--><A href=\"index.html\"/><!--googleon: index-->foo5", output);
     }
 
     public void test_processXRobotsTags_no() throws Exception {
@@ -541,7 +541,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final javax.xml.transform.Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "no");
-        //        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 
         final StringWriter writer = new StringWriter();
         final StreamResult result = new StreamResult(writer);

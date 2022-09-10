@@ -33,11 +33,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathEvaluationResult;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathNodes;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.xpath.objects.XObject;
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -152,26 +153,20 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
             final String path = entry.getValue();
             try {
-                final XObject xObj = getXPathAPI().eval(document, path);
-                final int type = xObj.getType();
-                switch (type) {
-                case XObject.CLASS_BOOLEAN:
-                    final boolean b = xObj.bool();
-                    putResultDataBody(dataMap, entry.getKey(), Boolean.toString(b));
+                final XPathEvaluationResult<?> xObj = getXPathAPI().eval(document, path);
+                switch (xObj.type()) {
+                case BOOLEAN:
+                    final Boolean b = (Boolean) xObj.value();
+                    putResultDataBody(dataMap, entry.getKey(), b.toString());
                     break;
-                case XObject.CLASS_NUMBER:
-                    final double d = xObj.num();
-                    putResultDataBody(dataMap, entry.getKey(), Double.toString(d));
+                case NUMBER:
+                    final Number d = (Number) xObj.value();
+                    putResultDataBody(dataMap, entry.getKey(), d.toString());
                     break;
-                case XObject.CLASS_STRING:
-                    final String str = xObj.str();
+                case STRING:
+                    final String str = (String) xObj.value();
                     putResultDataBody(dataMap, entry.getKey(), str);
                     break;
-                case XObject.CLASS_NULL:
-                case XObject.CLASS_UNKNOWN:
-                case XObject.CLASS_NODESET:
-                case XObject.CLASS_RTREEFRAG:
-                case XObject.CLASS_UNRESOLVEDVARIABLE:
                 default:
                     final Boolean isPruned = fieldPrunedRuleMap.get(entry.getKey());
                     Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
@@ -181,7 +176,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
                     break;
                 }
-            } catch (final TransformerException e) {
+            } catch (final XPathExpressionException e) {
                 logger.warn("Could not parse a value of {}:{}", entry.getKey(), entry.getValue(), e);
             }
         }
@@ -248,7 +243,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     responseData.setNoFollow(true);
                 }
             }
-        } catch (final TransformerException e) {
+        } catch (final XPathExpressionException e) {
             logger.warn("Could not parse a value of {}", META_NAME_ROBOTS_CONTENT, e);
         }
 
@@ -576,14 +571,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected String getSingleNodeValue(final Document document, final String xpath, final boolean pruned) {
         StringBuilder buf = null;
-        NodeList list = null;
+        XPathNodes list = null;
         try {
             list = getXPathAPI().selectNodeList(document, xpath);
-            for (int i = 0; i < list.getLength(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 if (buf == null) {
                     buf = new StringBuilder(1000);
                 }
-                Node node = list.item(i).cloneNode(true);
+                Node node = list.get(i).cloneNode(true);
                 if (useGoogleOffOn) {
                     node = processGoogleOffOn(node, new ValueHolder<>(true));
                 }
@@ -684,12 +679,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getMultipleNodeValue(final Document document, final String xpath) {
-        NodeList nodeList = null;
+        XPathNodes nodeList = null;
         final StringBuilder buf = new StringBuilder(100);
         try {
             nodeList = getXPathAPI().selectNodeList(document, xpath);
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                final Node node = nodeList.item(i);
+            for (int i = 0; i < nodeList.size(); i++) {
+                final Node node = nodeList.get(i);
                 buf.append(node.getTextContent());
                 buf.append("\n");
             }
@@ -839,10 +834,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             }
 
-            final NodeList imgNodeList = getXPathAPI().selectNodeList(document, fessConfig.getThumbnailHtmlImageXpath());
+            final XPathNodes imgNodeList = getXPathAPI().selectNodeList(document, fessConfig.getThumbnailHtmlImageXpath());
             String firstThumbnailUrl = null;
-            for (int i = 0; i < imgNodeList.getLength(); i++) {
-                final Node imgNode = imgNodeList.item(i);
+            for (int i = 0; i < imgNodeList.size(); i++) {
+                final Node imgNode = imgNodeList.get(i);
                 if (logger.isDebugEnabled()) {
                     logger.debug("img tag: {}", imgNode);
                 }
