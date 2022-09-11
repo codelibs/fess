@@ -211,7 +211,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 4000 */
     String MAX_LOG_OUTPUT_LENGTH = "max.log.output.length";
 
-    /** The key of the configuration. e.g. 0 */
+    /** The key of the configuration. e.g. 50 */
     String ADAPTIVE_LOAD_CONTROL = "adaptive.load.control";
 
     /** The key of the configuration. e.g. js */
@@ -2164,14 +2164,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'adaptive.load.control'. <br>
-     * The value is, e.g. 0 <br>
+     * The value is, e.g. 50 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAdaptiveLoadControl();
 
     /**
      * Get the value for the key 'adaptive.load.control' as {@link Integer}. <br>
-     * The value is, e.g. 0 <br>
+     * The value is, e.g. 50 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -10476,7 +10476,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PATH_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.USE_OWN_TMP_DIR, "true");
             defaultMap.put(FessConfig.MAX_LOG_OUTPUT_LENGTH, "4000");
-            defaultMap.put(FessConfig.ADAPTIVE_LOAD_CONTROL, "0");
+            defaultMap.put(FessConfig.ADAPTIVE_LOAD_CONTROL, "50");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_JS_EXTENTIONS, "js");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_CSS_EXTENTIONS, "css");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS, "jpg,jpeg,gif,png,swf");
