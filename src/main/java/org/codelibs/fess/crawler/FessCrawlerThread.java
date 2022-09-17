@@ -15,9 +15,11 @@
  */
 package org.codelibs.fess.crawler;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,12 +27,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
@@ -40,6 +45,7 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.exception.ContentNotFoundException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -52,7 +58,12 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
 public class FessCrawlerThread extends CrawlerThread {
+
     private static final Logger logger = LogManager.getLogger(FessCrawlerThread.class);
+
+    protected static final String CRAWLER_CLIENTS = "crawlerClients";
+
+    protected ConcurrentHashMap<String, Pair<String, Pattern>> clientRuleCache = new ConcurrentHashMap<>();
 
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
@@ -256,5 +267,35 @@ public class FessCrawlerThread extends CrawlerThread {
             final String url = duplicateHostHelper.convert(childUrl);
             super.storeChildUrl(url, parentUrl, metaData, depth);
         }
+    }
+
+    @Override
+    protected CrawlerClient getClient(final String url) {
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(crawlerContext.getSessionId());
+        final Map<String, String> clientConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.CLIENT);
+        final String value = clientConfigMap.get(CRAWLER_CLIENTS);
+        return getClientRuleList(value).stream().map(e -> {
+            if (e.getSecond().matcher(url).matches()) {
+                return e.getFirst();
+            }
+            return null;
+        }).filter(StringUtil::isNotBlank).findFirst()//
+                .map(s -> clientFactory.getClient(s + ":" + url))//
+                .orElseGet(() -> clientFactory.getClient(url));
+    }
+
+    protected List<Pair<String, Pattern>> getClientRuleList(final String value) {
+        if (StringUtil.isBlank(value)) {
+            return Collections.emptyList();
+        }
+        return split(value, ",").get(stream -> stream.map(String::trim)//
+                .map(s -> clientRuleCache.computeIfAbsent(s, t -> {
+                    final String[] values = t.split(":", 2);
+                    if (values.length != 2) {
+                        return null;
+                    }
+                    return new Pair<>(values[0], Pattern.compile(values[1]));
+                })).toList());
     }
 }
