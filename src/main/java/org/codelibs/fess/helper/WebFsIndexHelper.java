@@ -420,6 +420,13 @@ public class WebFsIndexHelper {
                 }
             }
         }
+        crawlerList.forEach(crawler -> {
+            try {
+                crawler.close();
+            } catch (final Exception e) {
+                logger.warn("Failed to close the crawler.", e);
+            }
+        });
         crawlerList.clear();
         crawlerStatusList.clear();
 

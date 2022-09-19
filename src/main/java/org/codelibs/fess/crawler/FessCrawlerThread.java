@@ -275,7 +275,7 @@ public class FessCrawlerThread extends CrawlerThread {
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(crawlerContext.getSessionId());
         final Map<String, String> clientConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.CLIENT);
         final String value = clientConfigMap.get(CRAWLER_CLIENTS);
-        return getClientRuleList(value).stream().map(e -> {
+        final CrawlerClient client = getClientRuleList(value).stream().map(e -> {
             if (e.getSecond().matcher(url).matches()) {
                 return e.getFirst();
             }
@@ -283,6 +283,10 @@ public class FessCrawlerThread extends CrawlerThread {
         }).filter(StringUtil::isNotBlank).findFirst()//
                 .map(s -> clientFactory.getClient(s + ":" + url))//
                 .orElseGet(() -> clientFactory.getClient(url));
+        if (logger.isDebugEnabled()) {
+            logger.debug("CrawlerClient: {}", client.getClass().getCanonicalName());
+        }
+        return client;
     }
 
     protected List<Pair<String, Pattern>> getClientRuleList(final String value) {
