@@ -133,15 +133,10 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             return true;
         }
 
-        switch (mimeType) {
-        case "image/png":
-        case "image/gif":
-        case "image/jpeg":
-        case "image/bmp":
-            return true;
-        default:
-            return false;
-        }
+        return switch (mimeType) {
+        case "image/png", "image/gif", "image/jpeg", "image/bmp" -> true;
+        default -> false;
+        };
     }
 
     protected Result saveImage(final ImageInputStream input, final File outputFile) throws IOException {

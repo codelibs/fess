@@ -50,6 +50,8 @@ public class WebFsIndexHelper {
 
     private static final Logger logger = LogManager.getLogger(WebFsIndexHelper.class);
 
+    private static final String DISABLE_URL_ENCODE = "#DISABLE_URL_ENCODE";
+
     protected long maxAccessCount = Long.MAX_VALUE;
 
     protected long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
@@ -176,7 +178,7 @@ public class WebFsIndexHelper {
                     if (logger.isInfoEnabled()) {
                         logger.info("Included URL: {}", urlValue);
                     }
-                } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
+                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
                     urlEncodeDisabled.set(true);
                 }
             }));
@@ -196,7 +198,7 @@ public class WebFsIndexHelper {
                     if (logger.isInfoEnabled()) {
                         logger.info("Excluded URL: {}", urlValue);
                     }
-                } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
+                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
                     urlEncodeDisabled.set(true);
                 }
             }));
@@ -309,7 +311,7 @@ public class WebFsIndexHelper {
                     if (logger.isInfoEnabled()) {
                         logger.info("Included Path: {}", urlValue);
                     }
-                } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
+                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
                     urlEncodeDisabled.set(true);
                 }
             }));
@@ -329,7 +331,7 @@ public class WebFsIndexHelper {
                     if (logger.isInfoEnabled()) {
                         logger.info("Excluded Path: {}", urlValue);
                     }
-                } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
+                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
                     urlEncodeDisabled.set(true);
                 }
             }));

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -171,9 +170,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
     protected void mappingParameter(final HttpServletRequest request, final List<FileItem> items) {
         showFieldLoggingTitle();
-        final Iterator<FileItem> iter = items.iterator();
-        while (iter.hasNext()) {
-            final FileItem item = iter.next();
+        for (final FileItem item : items) {
             if (item.isFormField()) {
                 showFormFieldParameter(item);
                 addTextParameter(request, item);
@@ -235,9 +232,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                           =========
     @Override
     public void rollback() {
-        final Iterator<MultipartFormFile> iter = elementsFile.values().iterator();
-        while (iter.hasNext()) {
-            final MultipartFormFile formFile = iter.next();
+        for (final MultipartFormFile formFile : elementsFile.values()) {
             formFile.destroy();
         }
     }

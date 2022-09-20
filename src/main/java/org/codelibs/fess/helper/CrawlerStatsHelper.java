@@ -189,9 +189,11 @@ public class CrawlerStatsHelper {
         }
         if (keyObj instanceof final StatsKeyObject statsKey) {
             return escapeValue(statsKey.getUrl());
-        } else if (keyObj instanceof final String key) {
+        }
+        if (keyObj instanceof final String key) {
             return escapeValue(key);
-        } else if (keyObj instanceof final Number key) {
+        }
+        if (keyObj instanceof final Number key) {
             return key.toString();
         }
         return "-";
@@ -203,9 +205,11 @@ public class CrawlerStatsHelper {
         }
         if (keyObj instanceof final StatsKeyObject statsKey) {
             return OptionalThing.of(statsKey.getId());
-        } else if (keyObj instanceof final String key) {
+        }
+        if (keyObj instanceof final String key) {
             return OptionalThing.of(key);
-        } else if (keyObj instanceof final Number key) {
+        }
+        if (keyObj instanceof final Number key) {
             return OptionalThing.of(key.toString());
         }
         return OptionalThing.empty();

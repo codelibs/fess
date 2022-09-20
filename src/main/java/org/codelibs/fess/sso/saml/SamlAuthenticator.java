@@ -210,14 +210,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
     @Override
     public ActionResponse getResponse(final SsoResponseType responseType) {
-        switch (responseType) {
-        case METADATA:
-            return getMetadataResponse();
-        case LOGOUT:
-            return getLogoutResponse();
-        default:
-            return null;
-        }
+        return switch (responseType) {
+        case METADATA -> getMetadataResponse();
+        case LOGOUT -> getLogoutResponse();
+        default -> null;
+        };
     }
 
     protected ActionResponse getMetadataResponse() {

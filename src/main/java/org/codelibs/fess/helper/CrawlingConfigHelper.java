@@ -107,19 +107,21 @@ public class CrawlingConfigHelper {
                 if (id == null) {
                     return null;
                 }
-                switch (configType) {
-                case WEB:
+                return switch (configType) {
+                case WEB -> {
                     final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-                    return webConfigService.getWebConfig(id).get();
-                case FILE:
-                    final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-                    return fileConfigService.getFileConfig(id).get();
-                case DATA:
-                    final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
-                    return dataConfigService.getDataConfig(id).get();
-                default:
-                    return null;
+                    yield webConfigService.getWebConfig(id).get();
                 }
+                case FILE -> {
+                    final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
+                    yield fileConfigService.getFileConfig(id).get();
+                }
+                case DATA -> {
+                    final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
+                    yield dataConfigService.getDataConfig(id).get();
+                }
+                default -> null;
+                };
             });
         } catch (final ExecutionException e) {
             logger.warn("Failed to access a crawling config cache: {}", configId, e);
@@ -278,18 +280,20 @@ public class CrawlingConfigHelper {
     public OptionalEntity<CrawlingConfig> getDefaultConfig(final ConfigType configType) {
         final String name = ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName();
 
-        switch (configType) {
-        case WEB:
+        return switch (configType) {
+        case WEB -> {
             final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            return webConfigService.getWebConfigByName(name).map(o -> (CrawlingConfig) o);
-        case FILE:
-            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-            return fileConfigService.getFileConfigByName(name).map(o -> (CrawlingConfig) o);
-        case DATA:
-            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
-            return dataConfigService.getDataConfigByName(name).map(o -> (CrawlingConfig) o);
-        default:
-            return OptionalEntity.empty();
+            yield webConfigService.getWebConfigByName(name).map(o -> (CrawlingConfig) o);
         }
+        case FILE -> {
+            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
+            yield fileConfigService.getFileConfigByName(name).map(o -> (CrawlingConfig) o);
+        }
+        case DATA -> {
+            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
+            yield dataConfigService.getDataConfigByName(name).map(o -> (CrawlingConfig) o);
+        }
+        default -> OptionalEntity.empty();
+        };
     }
 }

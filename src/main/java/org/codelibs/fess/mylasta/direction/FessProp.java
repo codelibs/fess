@@ -334,13 +334,10 @@ public interface FessProp {
     }
 
     default boolean isResultCollapsed() {
-        switch (getFesenType()) {
-        case Constants.FESEN_TYPE_CLOUD:
-        case Constants.FESEN_TYPE_AWS:
-            return false;
-        default:
-            return getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
-        }
+        return switch (getFesenType()) {
+        case Constants.FESEN_TYPE_CLOUD, Constants.FESEN_TYPE_AWS -> false;
+        default -> getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
+        };
     }
 
     default void setLoginLinkEnabled(final boolean value) {
