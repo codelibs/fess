@@ -373,62 +373,70 @@ public class WebFsIndexHelper {
 
         int startedCrawlerNum = 0;
         int activeCrawlerNum = 0;
-        while (startedCrawlerNum < crawlerList.size()) {
-            // Force to stop crawl
-            if (systemHelper.isForceStop()) {
-                for (final Crawler crawler : crawlerList) {
-                    crawler.stop();
+        try {
+            while (startedCrawlerNum < crawlerList.size()) {
+                // Force to stop crawl
+                if (systemHelper.isForceStop()) {
+                    for (final Crawler crawler : crawlerList) {
+                        crawler.stop();
+                    }
+                    break;
                 }
-                break;
-            }
 
-            if (activeCrawlerNum < multiprocessCrawlingCount) {
-                // start crawling
-                crawlerList.get(startedCrawlerNum).execute();
-                crawlerStatusList.set(startedCrawlerNum, Constants.RUNNING);
-                startedCrawlerNum++;
-                activeCrawlerNum++;
+                if (activeCrawlerNum < multiprocessCrawlingCount) {
+                    // start crawling
+                    crawlerList.get(startedCrawlerNum).execute();
+                    crawlerStatusList.set(startedCrawlerNum, Constants.RUNNING);
+                    startedCrawlerNum++;
+                    activeCrawlerNum++;
+                    ThreadUtil.sleep(crawlingExecutionInterval);
+                    continue;
+                }
+
+                // check status
+                for (int i = 0; i < startedCrawlerNum; i++) {
+                    if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
+                            && Constants.RUNNING.equals(crawlerStatusList.get(i))) {
+                        crawlerList.get(i).awaitTermination();
+                        crawlerStatusList.set(i, Constants.DONE);
+                        final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
+                        indexUpdater.addFinishedSessionId(sid);
+                        activeCrawlerNum--;
+                    }
+                }
                 ThreadUtil.sleep(crawlingExecutionInterval);
-                continue;
             }
 
-            // check status
-            for (int i = 0; i < startedCrawlerNum; i++) {
-                if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
-                        && Constants.RUNNING.equals(crawlerStatusList.get(i))) {
-                    crawlerList.get(i).awaitTermination();
-                    crawlerStatusList.set(i, Constants.DONE);
-                    final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
-                    indexUpdater.addFinishedSessionId(sid);
-                    activeCrawlerNum--;
+            boolean finishedAll = false;
+            while (!finishedAll) {
+                finishedAll = true;
+                for (int i = 0; i < crawlerList.size(); i++) {
+                    final Crawler crawler = crawlerList.get(i);
+                    crawler.awaitTermination(crawlingExecutionInterval);
+                    if (crawler.getCrawlerContext().getStatus() == CrawlerStatus.DONE && !Constants.DONE.equals(crawlerStatusList.get(i))) {
+                        crawlerStatusList.set(i, Constants.DONE);
+                        final String sid = crawler.getCrawlerContext().getSessionId();
+                        indexUpdater.addFinishedSessionId(sid);
+                        try {
+                            crawler.close();
+                        } catch (final Exception e) {
+                            logger.warn("Failed to close the crawler.", e);
+                        }
+                    }
+                    if (!Constants.DONE.equals(crawlerStatusList.get(i))) {
+                        finishedAll = false;
+                    }
                 }
             }
-            ThreadUtil.sleep(crawlingExecutionInterval);
+        } finally {
+            crawlerList.forEach(crawler -> {
+                try {
+                    crawler.close();
+                } catch (final Exception e) {
+                    logger.warn("Failed to close the crawler.", e);
+                }
+            });
         }
-
-        boolean finishedAll = false;
-        while (!finishedAll) {
-            finishedAll = true;
-            for (int i = 0; i < crawlerList.size(); i++) {
-                crawlerList.get(i).awaitTermination(crawlingExecutionInterval);
-                if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
-                        && !Constants.DONE.equals(crawlerStatusList.get(i))) {
-                    crawlerStatusList.set(i, Constants.DONE);
-                    final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
-                    indexUpdater.addFinishedSessionId(sid);
-                }
-                if (!Constants.DONE.equals(crawlerStatusList.get(i))) {
-                    finishedAll = false;
-                }
-            }
-        }
-        crawlerList.forEach(crawler -> {
-            try {
-                crawler.close();
-            } catch (final Exception e) {
-                logger.warn("Failed to close the crawler.", e);
-            }
-        });
         crawlerList.clear();
         crawlerStatusList.clear();
 
