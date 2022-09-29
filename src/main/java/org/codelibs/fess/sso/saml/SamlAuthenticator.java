@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -53,6 +54,8 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 import com.onelogin.saml2.Auth;
+import com.onelogin.saml2.authn.AuthnRequestParams;
+import com.onelogin.saml2.logout.LogoutRequestParams;
 import com.onelogin.saml2.settings.Saml2Settings;
 import com.onelogin.saml2.settings.SettingsBuilder;
 
@@ -160,7 +163,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
                             return null;
                         }
 
-                        return new SamlCredential(auth);
+                        return createLoginCredential(request, response, auth);
                     } catch (final Exception e) {
                         logger.warn("Authentication is failed.", e);
                         return null;
@@ -170,7 +173,8 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
             try {
                 final Auth auth = new Auth(getSettings(), request, response);
-                final String loginUrl = auth.login(null, false, false, true, true);
+                final AuthnRequestParams authnRequestParams = new AuthnRequestParams(false, false, true);
+                final String loginUrl = auth.login(null, authnRequestParams, true);
                 request.getSession().setAttribute(SAML_STATE, UuidUtil.create());
                 return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(loginUrl));
             } catch (final Exception e) {
@@ -180,10 +184,17 @@ public class SamlAuthenticator implements SsoAuthenticator {
         }).orElseGet(() -> null);
     }
 
+    protected LoginCredential createLoginCredential(final HttpServletRequest request, final HttpServletResponse response, final Auth auth) {
+        final SamlCredential samlCredential = new SamlCredential(auth);
+        if (logger.isDebugEnabled()) {
+            logger.debug("SamlCredential: {}", samlCredential);
+        }
+        return samlCredential;
+    }
+
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
         resolver.resolve(SamlCredential.class, credential -> OptionalEntity.of(credential.getUser()));
-
     }
 
     @Override
@@ -197,8 +208,9 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 final SamlUser samlUser = (SamlUser) user.getFessUser();
                 try {
                     final Auth auth = new Auth(getSettings(), request, response);
-                    return auth.logout(null, samlUser.getName(), samlUser.getSessionIndex(), true, samlUser.getNameIdFormat(),
-                            samlUser.getNameidNameQualifier(), samlUser.getNameidSPNameQualifier());
+                    final LogoutRequestParams logoutRequestParams = new LogoutRequestParams(samlUser.getSessionIndex(), samlUser.getName(),
+                            samlUser.getNameIdFormat(), samlUser.getNameidNameQualifier(), samlUser.getNameidSPNameQualifier());
+                    return auth.logout(null, logoutRequestParams, true);
                 } catch (final Exception e) {
                     logger.warn("Failed to logout from IdP: {}", samlUser, e);
                 }
