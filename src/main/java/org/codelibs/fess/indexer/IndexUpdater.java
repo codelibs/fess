@@ -373,8 +373,8 @@ public class IndexUpdater extends Thread {
                     final long processingTime = System.currentTimeMillis() - startTime;
                     docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document({}, {}ms). The number of a document cache is {}.",
-                                MemoryUtil.byteCountToDisplaySize(contentSize), processingTime, docList.size());
+                        logger.debug("Added the document({}, {}ms). The number of a document cache is {} (size: {}).",
+                                MemoryUtil.byteCountToDisplaySize(contentSize), processingTime, docList.size(), docList.getContentSize());
                     }
 
                     if (docList.getContentSize() >= maxDocumentRequestSize) {
