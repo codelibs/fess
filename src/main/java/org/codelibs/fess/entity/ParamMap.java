@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds;
+package org.codelibs.fess.entity;
 
 import java.util.Collection;
 import java.util.Map;
@@ -32,6 +32,10 @@ public class ParamMap<K, V> implements Map<K, V> {
 
     public ParamMap(final Map<K, V> parent) {
         this.parent = parent;
+    }
+
+    public Map<K, V> getParent() {
+        return parent;
     }
 
     protected Object toCamelCase(final Object key) {

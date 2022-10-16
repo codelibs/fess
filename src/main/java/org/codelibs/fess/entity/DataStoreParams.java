@@ -23,11 +23,11 @@ public class DataStoreParams {
     protected final Map<String, Object> params;
 
     public DataStoreParams() {
-        params = new HashMap<>();
+        params = new ParamMap<>(new HashMap<>());
     }
 
     protected DataStoreParams(final Map<String, Object> params) {
-        this.params = new HashMap<>(params);
+        this.params = new ParamMap<>(new HashMap<>(getDataMap(params)));
     }
 
     public void put(final String key, final Object value) {
@@ -70,6 +70,14 @@ public class DataStoreParams {
     }
 
     public Map<String, Object> asMap() {
-        return new HashMap<>(params);
+        return new ParamMap<>(new HashMap<>(getDataMap(params)));
+    }
+
+    protected static Map<String, Object> getDataMap(final Map<String, Object> params) {
+        if (params instanceof ParamMap<String, Object> paramMap) {
+            return paramMap.getParent();
+        } else {
+            return params;
+        }
     }
 }

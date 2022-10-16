@@ -13,11 +13,12 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds;
+package org.codelibs.fess.entity;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.entity.ParamMap;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class ParamMapTest extends UnitFessTestCase {
