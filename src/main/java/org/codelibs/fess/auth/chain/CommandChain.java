@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.exception.InterruptedRuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.crawler.Constants;
@@ -147,7 +148,7 @@ public class CommandChain implements AuthenticationChain {
             if (mt != null && mt.isTeminated()) {
                 throw new CommandExecutionException("The command execution is timeout: " + String.join(" ", commands), e);
             }
-            throw new CommandExecutionException("Process terminated.", e);
+            throw new InterruptedRuntimeException(e);
         } catch (final Exception e) {
             throw new CommandExecutionException("Process terminated.", e);
         } finally {

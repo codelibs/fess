@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.exception.InterruptedRuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
@@ -351,7 +352,9 @@ public class SearchHelper {
                 throw new SearchEngineClientException(response.buildFailureMessage());
             }
             return true;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (final InterruptedException e) {
+            throw new InterruptedRuntimeException(e);
+        } catch (final ExecutionException e) {
             throw new SearchEngineClientException("Failed to update bulk data.", e);
         }
     }
