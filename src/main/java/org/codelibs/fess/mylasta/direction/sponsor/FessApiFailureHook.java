@@ -15,11 +15,21 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.api.ApiFailureHook;
 import org.lastaflute.web.api.ApiFailureResource;
@@ -31,6 +41,8 @@ import org.lastaflute.web.response.JsonResponse;
  * @author jflute
  */
 public class FessApiFailureHook implements ApiFailureHook { // #change_it for handling API failure
+
+    private static final Logger logger = LogManager.getLogger(FessApiFailureHook.class);
 
     // ===================================================================================
     //                                                                          Definition
@@ -82,10 +94,36 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
         if (!resource.getMessageList().isEmpty()) {
             return resource.getMessageList().stream().collect(Collectors.joining(" "));
         }
-        if (cause != null) {
-            return cause.getMessage();
-        }
-        return "Unknown error";
-    }
 
+        if (cause == null) {
+            return "Unknown error";
+        }
+
+        final Supplier<String> stacktraceString = () -> {
+            final StringBuilder sb = new StringBuilder();
+            if (StringUtil.isBlank(cause.getMessage())) {
+                sb.append(cause.getClass().getName());
+            } else {
+                sb.append(cause.getMessage());
+            }
+            try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+                cause.printStackTrace(pw);
+                pw.flush();
+                sb.append(" [ ").append(sw.toString()).append(" ]");
+            } catch (final IOException ignore) {}
+            return sb.toString();
+        };
+
+        if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getApiJsonResponseExceptionIncluded())) {
+            return stacktraceString.get();
+        }
+
+        final String errorCode = UUID.randomUUID().toString();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[{}] {}", errorCode, stacktraceString.get().replace("\n", "\\n"));
+        } else {
+            logger.warn("[{}] {}", errorCode, cause.getMessage());
+        }
+        return "error_code:" + errorCode;
+    }
 }
