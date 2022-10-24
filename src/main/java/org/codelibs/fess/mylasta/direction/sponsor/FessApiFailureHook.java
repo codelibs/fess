@@ -59,12 +59,12 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     //                                                                      ==============
     @Override
     public OptionalThing<ApiResponse> handleClientException(final ApiFailureResource resource, final RuntimeException cause) {
-        return OptionalThing.empty(); // means empty body (HTTP status will be automatically sent)
+        return OptionalThing.of(asJson(createFailureBean(Status.BAD_REQUEST, createMessage(resource, cause))));
     }
 
     @Override
     public OptionalThing<ApiResponse> handleServerException(final ApiFailureResource resource, final Throwable cause) {
-        return OptionalThing.empty(); // means empty body (HTTP status will be automatically sent)
+        return OptionalThing.of(asJson(createFailureBean(Status.SYSTEM_ERROR, createMessage(resource, cause))));
     }
 
     // ===================================================================================
@@ -78,7 +78,7 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
         return new ApiErrorResponse().message(message).status(status).result();
     }
 
-    protected String createMessage(final ApiFailureResource resource, final RuntimeException cause) {
+    protected String createMessage(final ApiFailureResource resource, final Throwable cause) {
         if (!resource.getMessageList().isEmpty()) {
             return resource.getMessageList().stream().collect(Collectors.joining(" "));
         }
