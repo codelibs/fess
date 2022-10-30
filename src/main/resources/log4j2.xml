@@ -14,21 +14,6 @@
 	</Properties>
 
 	<Appenders>
-		<Routing name="Console">
-			<Routes>
-				<Script name="RoutingInit" language="JavaScript"><![CDATA[
-					java.lang.System.getProperty("lasta.env") == null ? "Output" : "NoOutput";]]>
-				</Script>
-				<Route key="Output">
-					<Console name="OutputConsole" target="SYSTEM_OUT">
-						<PatternLayout pattern="${log.pattern}" />
-					</Console>
-				</Route>
-				<Route key="NoOutput">
-					<CountingNoOp name="DevNull" />
-				</Route>
-			</Routes>
-		</Routing>
 		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
 			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
 			<PatternLayout>
@@ -69,31 +54,25 @@
 
 	<Loggers>
 		<Logger name="org.codelibs" additivity="false" level="${log.level}">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<Logger name="org.dbflute" additivity="false" level="${log.level}">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<Logger name="org.lastaflute" additivity="false" level="${log.level}">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<Logger name="org.opensearch.bootstrap" additivity="false" level="error">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<Logger name="com.onelogin.saml2" level="off"/>
 		<Logger name="fess.log.audit" additivity="false" level="info">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AuditFile" />
 		</Logger>
 		<Logger name="fess.log.searchlog" additivity="false" level="info">
 			<AppenderRef ref="SearchLogFile" />
 		</Logger>
 		<Root level="${root.log.level}">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Root>
 	</Loggers>

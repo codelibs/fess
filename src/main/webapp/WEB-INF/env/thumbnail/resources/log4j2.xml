@@ -12,21 +12,6 @@
 	</Properties>
 
 	<Appenders>
-		<Routing name="Console">
-			<Routes>
-				<Script name="RoutingInit" language="JavaScript"><![CDATA[
-					java.lang.System.getProperty("lasta.env") == null ? "Output" : "NoOutput";]]>
-				</Script>
-				<Route key="Output">
-					<Console name="OutputConsole" target="SYSTEM_OUT">
-						<PatternLayout pattern="${log.pattern}" />
-					</Console>
-				</Route>
-				<Route key="NoOutput">
-					<CountingNoOp name="DevNull" />
-				</Route>
-			</Routes>
-		</Routing>
 		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
 			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
 			<PatternLayout>
@@ -43,11 +28,9 @@
 
 	<Loggers>
 		<Logger name="org.codelibs.fess" additivity="false" level="${log.level}">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<Root level="${root.log.level}">
-			<AppenderRef ref="Console" />
 			<AppenderRef ref="AppFile" />
 		</Root>
 	</Loggers>
