@@ -8,7 +8,7 @@ Fess Enterprise Search Server [![Tweet](https://img.shields.io/twitter/url/http/
 
 Fess is a very powerful and easily deployable Enterprise Search Server. You can quickly install and run Fess on any platform where you can run the Java Runtime Environment. Fess is provided under the [Apache License 2.0](LICENSE).
 
-Fess is based on [Elasticsearch](https://github.com/elastic/elasticsearch)/[OpenSearch](https://github.com/opensearch-project/OpenSearch), but knowledge/experience about Elasticsearch/OpenSearch is _not_ required. Fess provides an easy to use Administration GUI to configure the system via your browser.
+Fess is based on [OpenSearch](https://github.com/opensearch-project/OpenSearch)/[Elasticsearch](https://github.com/elastic/elasticsearch), but knowledge/experience about OpenSearch/Elasticsearch is _not_ required. Fess provides an easy to use Administration GUI to configure the system via your browser.
 Fess also contains a Crawler, which can crawl documents on a [web server](https://fess.codelibs.org/14.4/admin/webconfig-guide.html), [file system](https://fess.codelibs.org/14.4/admin/fileconfig-guide.html), or [Data Store](https://fess.codelibs.org/14.4/admin/dataconfig-guide.html) (such as a CSV or database). Many file formats are supported including (but not limited to): Microsoft Office, PDF, and zip.
 
 *[Fess Site Search](https://github.com/codelibs/fess-site-search)* is a free alternative to [Google Site Search](https://enterprise.google.com/search/products/gss.html). For more details, see the [FSS JS Generator documentation](https://fss-generator.codelibs.org/docs/manual).
@@ -114,7 +114,7 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
     
 2. Import the cloned repository as a [Maven](https://maven.apache.org/) project on [Eclipse](https://www.eclipse.org/eclipseide/) or another IDE.
 
-### Setup for Elasticsearch Plugins
+### Setup for OpenSearch Plugins
 
 Run antrun:run to download plugins into the plugins directory:
 
@@ -167,4 +167,5 @@ We welcome pull requests for your language.
 * [LastaFlute](https://github.com/lastaflute/lastaflute "LastaFlute"): Web Framework
 * [Lasta Job](https://github.com/lastaflute/lasta-job "Lasta Job"): Job Scheduler
 * [Fess Crawler](https://github.com/codelibs/fess-crawler "Fess Crawler"): Web Crawler
+* [OpenSearch](https://opensearch.org/ "OpenSearch"): Search Engine
 * [Elasticsearch](https://github.com/elastic/elasticsearch "Elasticsearch"): Search Engine
