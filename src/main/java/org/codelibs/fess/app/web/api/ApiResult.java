@@ -378,4 +378,17 @@ public class ApiResult {
         }
     }
 
+    public static class ApiStatsResponse extends ApiResponse {
+        protected Map<String, Object> stats;
+
+        public ApiStatsResponse stats(final Map<String, Object> stats) {
+            this.stats = stats;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
 }
