@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.api.admin.stats;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,21 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
         stats.put("os", getOsObj());
         stats.put("process", getProcessObj());
         stats.put("engine", getEngineObj());
+        stats.put("fs", getFsObj());
         return asJson(new ApiStatsResponse().stats(stats).status(ApiResult.Status.OK).result());
+    }
+
+    private FsObj[] getFsObj() {
+        return Arrays.stream(File.listRoots()).map(f -> {
+            final FsObj fsObj = new FsObj();
+            fsObj.path = f.getAbsolutePath();
+            fsObj.free = f.getFreeSpace();
+            fsObj.total = f.getTotalSpace();
+            fsObj.usable = f.getUsableSpace();
+            fsObj.used = fsObj.total - fsObj.usable;
+            fsObj.percent = (short) (100 * fsObj.used / fsObj.total);
+            return fsObj;
+        }).toArray(n -> new FsObj[n]);
     }
 
     private JvmObj getJvmObj() {
@@ -174,8 +189,16 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
         return engineObj;
     }
 
-    public static class EngineObj {
+    public static class FsObj {
+        public short percent;
+        public long used;
+        public String path;
+        public long free;
+        public long total;
+        public long usable;
+    }
 
+    public static class EngineObj {
         public String exception;
         public String status;
         public int numberOfInFlightFetch;
@@ -190,7 +213,6 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
         public int numberOfDataNodes;
         public int numberOfNodes;
         public String clusterName;
-
     }
 
     public static class JvmObj {
