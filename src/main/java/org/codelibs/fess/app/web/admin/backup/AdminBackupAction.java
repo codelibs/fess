@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -185,6 +186,7 @@ public class AdminBackupAction extends FessAdminAction {
 
     private void importBulk(final String fileName, final File tempFile) {
         final ObjectMapper mapper = new ObjectMapper();
+        final AtomicBoolean resetJobs = new AtomicBoolean(false);
         try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
             con.setDoOutput(true);
             try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
@@ -205,8 +207,13 @@ public class AdminBackupAction extends FessAdminAction {
                                     indexObj.remove("_type");
                                 }
                                 final String index = indexObj.get("_index");
-                                if (index != null && index.startsWith(".fess")) {
-                                    indexObj.put("_index", index.substring(1));
+                                if (index != null) {
+                                    if (index.startsWith(".fess")) {
+                                        indexObj.put("_index", index.substring(1));
+                                    }
+                                    if (index.endsWith("scheduled_job")) {
+                                        resetJobs.set(true);
+                                    }
                                 }
                                 bw.write(mapper.writeValueAsString(dataObj));
                             } else {
@@ -226,7 +233,7 @@ public class AdminBackupAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug("Bulk Response:\n{}", response.getContentAsString());
             }
-            systemHelper.reloadConfiguration();
+            systemHelper.reloadConfiguration(resetJobs.get());
         } catch (final Exception e) {
             logger.warn("Failed to process bulk file: {}", fileName, e);
         } finally {

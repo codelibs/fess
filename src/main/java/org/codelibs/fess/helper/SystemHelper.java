@@ -474,6 +474,10 @@ public class SystemHelper {
     }
 
     public void reloadConfiguration() {
+        reloadConfiguration(true);
+    }
+
+    public void reloadConfiguration(final boolean resetJobs) {
         ComponentUtil.getSearchEngineClient().refresh();
 
         ComponentUtil.getSuggestHelper().init();
@@ -486,7 +490,9 @@ public class SystemHelper {
         ComponentUtil.getKeyMatchHelper().update();
 
         ComponentUtil.getLdapManager().updateConfig();
-        ComponentUtil.getJobManager().reboot();
+        if (resetJobs) {
+            ComponentUtil.getJobManager().reboot();
+        }
         updateSystemProperties();
     }
 
