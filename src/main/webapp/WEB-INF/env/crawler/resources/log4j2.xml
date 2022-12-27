@@ -13,7 +13,7 @@
 	</Properties>
 
 	<Appenders>
-		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
+		<RollingFile name="AppRollingFile" fileName="${log.file.basedir}/${domain.name}.log"
 			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>${log.pattern}</Pattern>
@@ -25,6 +25,10 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
+		<Rewrite name="AppFile">
+			<AppenderRef ref="AppRollingFile" />
+			<ErrorToWarnRewritePolicy loggers="org.apache.fontbox,org.apache.pdfbox,org.apache.poi" />
+		</Rewrite>
 		<RollingFile name="StatsFile" fileName="${log.file.basedir}/fess-urls.log"
 			filePattern="${log.file.basedir}/fess-urls${backup.date.suffix}-%i.log.gz">
 			<PatternLayout>
