@@ -95,6 +95,8 @@ import org.opensearch.action.admin.indices.flush.FlushResponse;
 import org.opensearch.action.admin.indices.get.GetIndexResponse;
 import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.opensearch.action.admin.indices.refresh.RefreshResponse;
+import org.opensearch.action.admin.indices.segments.IndicesSegmentResponse;
+import org.opensearch.action.admin.indices.segments.PitSegmentsRequest;
 import org.opensearch.action.bulk.BulkItemResponse;
 import org.opensearch.action.bulk.BulkItemResponse.Failure;
 import org.opensearch.action.bulk.BulkRequest;
@@ -121,6 +123,12 @@ import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.ClearScrollRequest;
 import org.opensearch.action.search.ClearScrollRequestBuilder;
 import org.opensearch.action.search.ClearScrollResponse;
+import org.opensearch.action.search.CreatePitRequest;
+import org.opensearch.action.search.CreatePitResponse;
+import org.opensearch.action.search.DeletePitRequest;
+import org.opensearch.action.search.DeletePitResponse;
+import org.opensearch.action.search.GetAllPitNodesRequest;
+import org.opensearch.action.search.GetAllPitNodesResponse;
 import org.opensearch.action.search.MultiSearchRequest;
 import org.opensearch.action.search.MultiSearchRequestBuilder;
 import org.opensearch.action.search.MultiSearchResponse;
@@ -516,7 +524,7 @@ public class SearchEngineClient implements Client {
 
         final GetMappingsResponse getMappingsResponse =
                 client.admin().indices().prepareGetMappings(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
-        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings().get(indexName);
+        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
         if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
             final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
@@ -876,12 +884,12 @@ public class SearchEngineClient implements Client {
         }
     }
 
-    protected <T> T get(final String index, final String type, final String id, final SearchCondition<GetRequestBuilder> condition,
+    protected <T> T get(final String index, final String id, final SearchCondition<GetRequestBuilder> condition,
             final SearchResult<T, GetRequestBuilder, GetResponse> searchResult) {
         final long startTime = System.currentTimeMillis();
 
         GetResponse response = null;
-        final GetRequestBuilder requestBuilder = client.prepareGet(index, type, id);
+        final GetRequestBuilder requestBuilder = client.prepareGet(index, id);
         if (condition.build(requestBuilder)) {
             response = requestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
         }
@@ -1512,18 +1520,13 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public UpdateRequestBuilder prepareUpdate(final String index, final String type, final String id) {
-        return client.prepareUpdate(index, type, id);
+    public UpdateRequestBuilder prepareUpdate(final String index, final String id) {
+        return client.prepareUpdate(index, id);
     }
 
     @Override
-    public IndexRequestBuilder prepareIndex(final String index, final String type) {
-        return client.prepareIndex(index, type);
-    }
-
-    @Override
-    public IndexRequestBuilder prepareIndex(final String index, final String type, final String id) {
-        return client.prepareIndex(index, type, id);
+    public IndexRequestBuilder prepareIndex(final String index) {
+        return client.prepareIndex(index);
     }
 
     @Override
@@ -1542,8 +1545,8 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public DeleteRequestBuilder prepareDelete(final String index, final String type, final String id) {
-        return client.prepareDelete(index, type, id);
+    public DeleteRequestBuilder prepareDelete(final String index, final String id) {
+        return client.prepareDelete(index, id);
     }
 
     @Override
@@ -1577,8 +1580,8 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public GetRequestBuilder prepareGet(final String index, final String type, final String id) {
-        return client.prepareGet(index, type, id);
+    public GetRequestBuilder prepareGet(final String index, final String id) {
+        return client.prepareGet(index, id);
     }
 
     @Override
@@ -1642,8 +1645,8 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public ExplainRequestBuilder prepareExplain(final String index, final String type, final String id) {
-        return client.prepareExplain(index, type, id);
+    public ExplainRequestBuilder prepareExplain(final String index, final String id) {
+        return client.prepareExplain(index, id);
     }
 
     @Override
@@ -1692,8 +1695,8 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public TermVectorsRequestBuilder prepareTermVectors(final String index, final String type, final String id) {
-        return client.prepareTermVectors(index, type, id);
+    public TermVectorsRequestBuilder prepareTermVectors(final String index, final String id) {
+        return client.prepareTermVectors(index, id);
     }
 
     @Override
@@ -1772,7 +1775,27 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public BulkRequestBuilder prepareBulk(final String globalIndex, final String globalType) {
-        return client.prepareBulk(globalIndex, globalType);
+    public BulkRequestBuilder prepareBulk(final String globalIndex) {
+        return client.prepareBulk(globalIndex);
+    }
+
+    @Override
+    public void createPit(CreatePitRequest createPITRequest, ActionListener<CreatePitResponse> listener) {
+        client.createPit(createPITRequest, listener);
+    }
+
+    @Override
+    public void deletePits(DeletePitRequest deletePITRequest, ActionListener<DeletePitResponse> listener) {
+        client.deletePits(deletePITRequest, listener);
+    }
+
+    @Override
+    public void getAllPits(GetAllPitNodesRequest getAllPitNodesRequest, ActionListener<GetAllPitNodesResponse> listener) {
+        client.getAllPits(getAllPitNodesRequest, listener);
+    }
+
+    @Override
+    public void pitSegments(PitSegmentsRequest pitSegmentsRequest, ActionListener<IndicesSegmentResponse> listener) {
+        client.pitSegments(pitSegmentsRequest, listener);
     }
 }

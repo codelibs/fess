@@ -88,15 +88,15 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static boolean addMapping(final IndicesAdminClient indicesClient, final String index, final String type,
+    public static boolean addMapping(final IndicesAdminClient indicesClient, final String index, final String docType,
             final String indexResourcePath) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final GetMappingsResponse getMappingsResponse =
                 indicesClient.prepareGetMappings(index).execute().actionGet(fessConfig.getIndexIndicesTimeout());
-        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings().get(index);
-        if (indexMappings == null || !indexMappings.containsKey(type)) {
+        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
+        if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
-            final String mappingFile = indexResourcePath + "/" + type + ".json";
+            final String mappingFile = indexResourcePath + "/" + docType + ".json";
             try {
                 source = FileUtil.readUTF8(mappingFile);
             } catch (final Exception e) {
@@ -106,32 +106,31 @@ public final class UpgradeUtil {
                 final AcknowledgedResponse putMappingResponse = indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON)
                         .execute().actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
-                    logger.info("Created {}/{} mapping.", index, type);
+                    logger.info("Created {}/{} mapping.", index, docType);
                     return true;
                 }
-                logger.warn("Failed to create {}/{} mapping.", index, type);
+                logger.warn("Failed to create {}/{} mapping.", index, docType);
             } catch (final Exception e) {
-                logger.warn("Failed to create {}/{} mapping.", index, type, e);
+                logger.warn("Failed to create {}/{} mapping.", index, docType, e);
             }
         }
         return false;
     }
 
-    public static boolean addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String field,
+    public static boolean addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String field,
             final String source) {
-        final GetFieldMappingsResponse gfmResponse =
-                indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
-        final FieldMappingMetadata fieldMappings = gfmResponse.fieldMappings(index, type, field);
-        if (fieldMappings == null || fieldMappings.isNull()) {
+        final GetFieldMappingsResponse gfmResponse = indicesClient.prepareGetFieldMappings(index).setFields(field).execute().actionGet();
+        final FieldMappingMetadata fieldMappings = gfmResponse.fieldMappings(index, field);
+        if (fieldMappings == null) {
             try {
                 final AcknowledgedResponse pmResponse =
                         indicesClient.preparePutMapping(index).setSource(source, XContentType.JSON).execute().actionGet();
                 if (pmResponse.isAcknowledged()) {
                     return true;
                 }
-                logger.warn("Failed to add {} to {}/{}", field, index, type);
+                logger.warn("Failed to add {} to {}", field, index);
             } catch (final Exception e) {
-                logger.warn("Failed to add {} to {}/{} ", field, index, type, e);
+                logger.warn("Failed to add {} to {}", field, index, e);
             }
         }
         return false;

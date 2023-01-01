@@ -206,7 +206,7 @@ public class SuggestHelper {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         suggester.indexer().indexFromDocument(() -> {
             final ESSourceReader reader = new ESSourceReader(ComponentUtil.getSearchEngineClient(), suggester.settings(),
-                    fessConfig.getIndexDocumentSearchIndex(), "_doc"); // TODO remove type
+                    fessConfig.getIndexDocumentSearchIndex());
             reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
             reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
             reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
