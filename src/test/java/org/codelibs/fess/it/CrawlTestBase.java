@@ -38,8 +38,6 @@ public class CrawlTestBase extends ITBase {
 
     private static final String DOC_INDEX_NAME = "fess.search";
 
-    private static final String DOC_TYPE_NAME = "_doc";
-
     protected static void createJob(final Map<String, Object> requestBody) {
         checkMethodBase(requestBody).put("/api/admin/scheduler/setting").then().body("response.created", equalTo(true))
                 .body("response.status", equalTo(0));
@@ -181,7 +179,7 @@ public class CrawlTestBase extends ITBase {
     protected static void deleteDocuments(final String queryString) {
         List<String> docIds = new ArrayList<>();
         Response response = given().contentType("application/json").param("scroll", "1m").param("q", queryString)
-                .get(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/_search");
+                .get(getEsUrl() + "/" + DOC_INDEX_NAME + "/_search");
         JsonPath jsonPath = JsonPath.from(response.asString());
         String scrollId = jsonPath.getString("_scroll_id");
         while (true) {
@@ -198,7 +196,7 @@ public class CrawlTestBase extends ITBase {
         }
 
         for (String docId : docIds) {
-            given().contentType("application/json").delete(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + DOC_TYPE_NAME + "/" + docId);
+            given().contentType("application/json").delete(getEsUrl() + "/" + DOC_INDEX_NAME + "/" + docId);
         }
     }
 
