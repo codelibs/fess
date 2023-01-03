@@ -416,6 +416,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_DOCUMENT_HTML_DEFAULT_LANG = "crawler.document.html.default.lang";
 
     /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_INDEX_PATTERNS = "crawler.document.html.default.include.index.patterns";
+
+    /** The key of the configuration. e.g. (?i).*(css|js|jpeg|jpg|gif|png|bmp|wmv|xml|ico|exe) */
+    String CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_INDEX_PATTERNS = "crawler.document.html.default.exclude.index.patterns";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_SEARCH_PATTERNS = "crawler.document.html.default.include.search.patterns";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_SEARCH_PATTERNS = "crawler.document.html.default.exclude.search.patterns";
+
+    /** The key of the configuration. e.g.  */
     String CRAWLER_DOCUMENT_FILE_NAME_ENCODING = "crawler.document.file.name.encoding";
 
     /** The key of the configuration. e.g. No title. */
@@ -438,6 +450,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g.  */
     String CRAWLER_DOCUMENT_FILE_DEFAULT_LANG = "crawler.document.file.default.lang";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_INDEX_PATTERNS = "crawler.document.file.default.include.index.patterns";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_INDEX_PATTERNS = "crawler.document.file.default.exclude.index.patterns";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_SEARCH_PATTERNS = "crawler.document.file.default.include.search.patterns";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS = "crawler.document.file.default.exclude.search.patterns";
 
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_CACHE_ENABLED = "crawler.document.cache.enabled";
@@ -2931,6 +2955,58 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getCrawlerDocumentHtmlDefaultLangAsInteger();
 
     /**
+     * Get the value for the key 'crawler.document.html.default.include.index.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlDefaultIncludeIndexPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.include.index.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentHtmlDefaultIncludeIndexPatternsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.exclude.index.patterns'. <br>
+     * The value is, e.g. (?i).*(css|js|jpeg|jpg|gif|png|bmp|wmv|xml|ico|exe) <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlDefaultExcludeIndexPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.include.search.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlDefaultIncludeSearchPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.include.search.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentHtmlDefaultIncludeSearchPatternsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.exclude.search.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlDefaultExcludeSearchPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.html.default.exclude.search.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentHtmlDefaultExcludeSearchPatternsAsInteger();
+
+    /**
      * Get the value for the key 'crawler.document.file.name.encoding'. <br>
      * The value is, e.g.  <br>
      * comment: file
@@ -3040,6 +3116,66 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerDocumentFileDefaultLangAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.include.index.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileDefaultIncludeIndexPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.include.index.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileDefaultIncludeIndexPatternsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.exclude.index.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileDefaultExcludeIndexPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.exclude.index.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileDefaultExcludeIndexPatternsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.include.search.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileDefaultIncludeSearchPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.include.search.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileDefaultIncludeSearchPatternsAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.exclude.search.patterns'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileDefaultExcludeSearchPatterns();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.exclude.search.patterns' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileDefaultExcludeSearchPatternsAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.cache.enabled'. <br>
@@ -8031,6 +8167,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_LANG);
         }
 
+        public String getCrawlerDocumentHtmlDefaultIncludeIndexPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_INDEX_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentHtmlDefaultIncludeIndexPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_INDEX_PATTERNS);
+        }
+
+        public String getCrawlerDocumentHtmlDefaultExcludeIndexPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_INDEX_PATTERNS);
+        }
+
+        public String getCrawlerDocumentHtmlDefaultIncludeSearchPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_SEARCH_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentHtmlDefaultIncludeSearchPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_SEARCH_PATTERNS);
+        }
+
+        public String getCrawlerDocumentHtmlDefaultExcludeSearchPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_SEARCH_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentHtmlDefaultExcludeSearchPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_SEARCH_PATTERNS);
+        }
+
         public String getCrawlerDocumentFileNameEncoding() {
             return get(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING);
         }
@@ -8089,6 +8253,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getCrawlerDocumentFileDefaultLangAsInteger() {
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG);
+        }
+
+        public String getCrawlerDocumentFileDefaultIncludeIndexPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_INDEX_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentFileDefaultIncludeIndexPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_INDEX_PATTERNS);
+        }
+
+        public String getCrawlerDocumentFileDefaultExcludeIndexPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_INDEX_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentFileDefaultExcludeIndexPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_INDEX_PATTERNS);
+        }
+
+        public String getCrawlerDocumentFileDefaultIncludeSearchPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_SEARCH_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentFileDefaultIncludeSearchPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_SEARCH_PATTERNS);
+        }
+
+        public String getCrawlerDocumentFileDefaultExcludeSearchPatterns() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS);
+        }
+
+        public Integer getCrawlerDocumentFileDefaultExcludeSearchPatternsAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS);
         }
 
         public String getCrawlerDocumentCacheEnabled() {
@@ -10548,6 +10744,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS, "noscript,script,style,header,footer,nav,a[rel=nofollow]");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH, "120");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_LANG, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_INDEX_PATTERNS, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_INDEX_PATTERNS,
+                    "(?i).*(css|js|jpeg|jpg|gif|png|bmp|wmv|xml|ico|exe)");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_INCLUDE_SEARCH_PATTERNS, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_DEFAULT_EXCLUDE_SEARCH_PATTERNS, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL, "No title.");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT, "false");
@@ -10556,6 +10757,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_META_CONTENT, "true");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT, "true");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_INDEX_PATTERNS, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_INDEX_PATTERNS, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_SEARCH_PATTERNS, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLED, "true");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_MAX_SIZE, "2621440");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_SUPPORTED_MIMETYPES, "text/html");

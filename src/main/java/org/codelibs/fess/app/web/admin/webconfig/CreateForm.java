@@ -22,6 +22,7 @@ import javax.validation.constraints.Size;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
 import org.codelibs.fess.validation.UriType;
@@ -122,15 +123,20 @@ public class CreateForm {
 
     public void initialize() {
         crudMode = CrudMode.CREATE;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        includedUrls = fessConfig.getCrawlerDocumentHtmlDefaultIncludeIndexPatterns();
+        excludedUrls = fessConfig.getCrawlerDocumentHtmlDefaultExcludeIndexPatterns();
+        includedDocUrls = fessConfig.getCrawlerDocumentHtmlDefaultIncludeSearchPatterns();
+        excludedDocUrls = fessConfig.getCrawlerDocumentHtmlDefaultExcludeSearchPatterns();
         boost = 1.0f;
         if (StringUtil.isBlank(userAgent)) {
-            userAgent = ComponentUtil.getFessConfig().getUserAgentName();
+            userAgent = fessConfig.getUserAgentName();
         }
         numOfThread = Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB;
         intervalTime = Constants.DEFAULT_INTERVAL_TIME_FOR_WEB;
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-        permissions = ComponentUtil.getFessConfig().getSearchDefaultDisplayPermission();
+        permissions = fessConfig.getSearchDefaultDisplayPermission();
     }
 }

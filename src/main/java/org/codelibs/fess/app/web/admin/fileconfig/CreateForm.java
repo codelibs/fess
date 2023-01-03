@@ -21,6 +21,7 @@ import javax.validation.constraints.Size;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
 import org.codelibs.fess.validation.UriType;
@@ -116,12 +117,17 @@ public class CreateForm {
 
     public void initialize() {
         crudMode = CrudMode.CREATE;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        includedPaths = fessConfig.getCrawlerDocumentFileDefaultIncludeIndexPatterns();
+        excludedPaths = fessConfig.getCrawlerDocumentFileDefaultExcludeIndexPatterns();
+        includedDocPaths = fessConfig.getCrawlerDocumentFileDefaultIncludeSearchPatterns();
+        excludedDocPaths = fessConfig.getCrawlerDocumentFileDefaultExcludeSearchPatterns();
         boost = 1.0f;
         numOfThread = Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
         intervalTime = Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-        permissions = ComponentUtil.getFessConfig().getSearchDefaultDisplayPermission();
+        permissions = fessConfig.getSearchDefaultDisplayPermission();
     }
 }
