@@ -59,6 +59,12 @@ public class PhraseQueryCommand extends QueryCommand {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = terms[0].field();
         final String[] texts = stream(terms).get(stream -> stream.map(Term::text).toArray(n -> new String[n]));
+
+        return convertPhraseQuery(fessConfig, context, phraseQuery, boost, field, texts);
+    }
+
+    protected QueryBuilder convertPhraseQuery(final FessConfig fessConfig, final QueryContext context, final PhraseQuery phraseQuery,
+            final float boost, final String field, final String[] texts) {
         final String text = String.join(" ", texts);
 
         if (Constants.DEFAULT_FIELD.equals(field)) {
