@@ -30,8 +30,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -40,9 +38,11 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.QueryParseException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.score.QueryRescorer;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -158,7 +158,7 @@ public class QueryHelper {
             }
             // TODO options query
             context.accept(queryContext);
-        } catch (final ParseException e) {
+        } catch (final QueryParseException e) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                     "Invalid query: " + queryContext.getQueryString(), e);
         }

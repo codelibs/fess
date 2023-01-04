@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
@@ -80,6 +79,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.query.QueryProcessor;
+import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.thumbnail.ThumbnailManager;

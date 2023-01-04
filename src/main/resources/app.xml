@@ -41,13 +41,7 @@
 	</component>
 	<component name="queryStringBuilder" class="org.codelibs.fess.util.QueryStringBuilder" instance="prototype">
 	</component>
-	<component name="queryParser" class="org.apache.lucene.queryparser.ext.ExtendableQueryParser" instance="prototype">
-		<arg>org.codelibs.fess.Constants.DEFAULT_FIELD</arg>
-		<arg>
-			<component class="org.apache.lucene.analysis.core.WhitespaceAnalyzer"></component>
-		</arg>
-		<property name="allowLeadingWildcard">true</property>
-		<property name="defaultOperator">org.apache.lucene.queryparser.classic.QueryParser$Operator.AND</property>
+	<component name="queryParser" class="org.codelibs.fess.query.parser.QueryParser">
 	</component>
 	<component name="facetInfo" class="org.codelibs.fess.entity.FacetInfo">
 	</component>

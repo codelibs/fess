@@ -19,14 +19,11 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
-import org.apache.lucene.queryparser.classic.QueryParser.Operator;
-import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.BoolQueryBuilder;
@@ -50,9 +47,8 @@ public class TermQueryCommandTest extends UnitFessTestCase {
         queryFieldConfig.init();
         ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
 
-        ExtendableQueryParser queryParser = new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
-        queryParser.setAllowLeadingWildcard(true);
-        queryParser.setDefaultOperator(Operator.AND);
+        QueryParser queryParser = new QueryParser();
+        queryParser.init();
         ComponentUtil.register(queryParser, "queryParser");
 
         queryCommand = new TermQueryCommand();

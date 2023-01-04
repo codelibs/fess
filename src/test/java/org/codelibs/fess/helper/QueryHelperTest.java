@@ -21,9 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -41,6 +38,7 @@ import org.codelibs.fess.query.QueryProcessor;
 import org.codelibs.fess.query.TermQueryCommand;
 import org.codelibs.fess.query.TermRangeQueryCommand;
 import org.codelibs.fess.query.WildcardQueryCommand;
+import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.BoolQueryBuilder;
@@ -59,9 +57,8 @@ public class QueryHelperTest extends UnitFessTestCase {
         super.setUp();
         queryHelper = new QueryHelper() {
             protected QueryParser getQueryParser() {
-                ExtendableQueryParser queryParser = new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
-                queryParser.setAllowLeadingWildcard(true);
-                queryParser.setDefaultOperator(QueryParser.Operator.AND);
+                QueryParser queryParser = new QueryParser();
+                queryParser.init();
                 return queryParser;
             }
         };
