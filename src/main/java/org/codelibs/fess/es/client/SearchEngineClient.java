@@ -36,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -212,6 +213,10 @@ public class SearchEngineClient implements Client {
     protected int maxEsStatusRetry = 60;
 
     protected String clusterName = "fesen";
+
+    protected final List<UnaryOperator<String>> docSettingRewriteRuleList = new ArrayList<>();
+
+    protected final List<UnaryOperator<String>> docMappingRewriteRuleList = new ArrayList<>();
 
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
@@ -500,15 +505,23 @@ public class SearchEngineClient implements Client {
     protected String readIndexSetting(final String fesenType, final String indexConfigFile, final String numberOfShards,
             final String autoExpandReplicas) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String source = FileUtil.readUTF8(indexConfigFile);
+        String source = FileUtil.readUTF8(indexConfigFile);
         String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
         if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
             dictionaryPath = dictionaryPath + "/";
         }
-        return source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath)//
+        source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath)//
                 .replaceAll(Pattern.quote("${fess.index.codec}"), fessConfig.getIndexCodec())//
                 .replaceAll(Pattern.quote("${fess.index.number_of_shards}"), numberOfShards)//
                 .replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), autoExpandReplicas);
+        for (final UnaryOperator<String> rule : docSettingRewriteRuleList) {
+            source = rule.apply(source);
+        }
+        return source;
+    }
+
+    public void addDocumentSettingRewriteRule(final UnaryOperator<String> rule) {
+        docSettingRewriteRuleList.add(rule);
     }
 
     protected String getResourcePath(final String basePath, final String type, final String path) {
@@ -530,6 +543,11 @@ public class SearchEngineClient implements Client {
             final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
             try {
                 source = FileUtil.readUTF8(mappingFile);
+                if ("fess".equals(index)) {
+                    for (final UnaryOperator<String> rule : docMappingRewriteRuleList) {
+                        source = rule.apply(source);
+                    }
+                }
             } catch (final Exception e) {
                 logger.warn("{} is not found.", mappingFile, e);
             }
@@ -559,6 +577,10 @@ public class SearchEngineClient implements Client {
         } else if (logger.isDebugEnabled()) {
             logger.debug("{}/{} mapping exists.", indexName, docType);
         }
+    }
+
+    public void addDocumentMappingRewriteRule(final UnaryOperator<String> rule) {
+        docMappingRewriteRuleList.add(rule);
     }
 
     public boolean updateAlias(final String newIndex) {
