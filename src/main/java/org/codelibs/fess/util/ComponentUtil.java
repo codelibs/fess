@@ -541,7 +541,10 @@ public final class ComponentUtil {
     }
 
     public static boolean hasComponent(final String componentKey) {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(componentKey);
+        if (SingletonLaContainerFactory.getContainer().hasComponentDef(componentKey)) {
+            return true;
+        }
+        return componentMap.containsKey(componentKey);
     }
 
     public static boolean hasQueryParser() {
