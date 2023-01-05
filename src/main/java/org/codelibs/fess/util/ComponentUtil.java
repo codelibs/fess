@@ -544,6 +544,10 @@ public final class ComponentUtil {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(componentKey);
     }
 
+    public static boolean hasQueryParser() {
+        return hasComponent(QUERY_PARSER);
+    }
+
     public static boolean hasViewHelper() {
         return hasComponent(VIEW_HELPER);
     }
