@@ -74,10 +74,9 @@ public class DataStoreParams {
     }
 
     protected static Map<String, Object> getDataMap(final Map<String, Object> params) {
-        if (params instanceof ParamMap<String, Object> paramMap) {
+        if (params instanceof final ParamMap<String, Object> paramMap) {
             return paramMap.getParent();
-        } else {
-            return params;
         }
+        return params;
     }
 }

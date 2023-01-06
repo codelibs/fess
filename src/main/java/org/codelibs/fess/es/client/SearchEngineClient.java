@@ -1802,22 +1802,22 @@ public class SearchEngineClient implements Client {
     }
 
     @Override
-    public void createPit(CreatePitRequest createPITRequest, ActionListener<CreatePitResponse> listener) {
+    public void createPit(final CreatePitRequest createPITRequest, final ActionListener<CreatePitResponse> listener) {
         client.createPit(createPITRequest, listener);
     }
 
     @Override
-    public void deletePits(DeletePitRequest deletePITRequest, ActionListener<DeletePitResponse> listener) {
+    public void deletePits(final DeletePitRequest deletePITRequest, final ActionListener<DeletePitResponse> listener) {
         client.deletePits(deletePITRequest, listener);
     }
 
     @Override
-    public void getAllPits(GetAllPitNodesRequest getAllPitNodesRequest, ActionListener<GetAllPitNodesResponse> listener) {
+    public void getAllPits(final GetAllPitNodesRequest getAllPitNodesRequest, final ActionListener<GetAllPitNodesResponse> listener) {
         client.getAllPits(getAllPitNodesRequest, listener);
     }
 
     @Override
-    public void pitSegments(PitSegmentsRequest pitSegmentsRequest, ActionListener<IndicesSegmentResponse> listener) {
+    public void pitSegments(final PitSegmentsRequest pitSegmentsRequest, final ActionListener<IndicesSegmentResponse> listener) {
         client.pitSegments(pitSegmentsRequest, listener);
     }
 }

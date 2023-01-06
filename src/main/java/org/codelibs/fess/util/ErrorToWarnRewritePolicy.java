@@ -31,17 +31,17 @@ public class ErrorToWarnRewritePolicy implements RewritePolicy {
 
     private final String[] loggerNames;
 
-    public ErrorToWarnRewritePolicy(String[] loggerNames) {
+    public ErrorToWarnRewritePolicy(final String[] loggerNames) {
         this.loggerNames = loggerNames;
     }
 
     @Override
-    public LogEvent rewrite(LogEvent event) {
+    public LogEvent rewrite(final LogEvent event) {
         final String loggerName = event.getLoggerName();
         if (loggerName == null) {
             return event;
         }
-        for (String name : loggerNames) {
+        for (final String name : loggerNames) {
             if (loggerName.startsWith(name)) {
                 final Level sourceLevel = event.getLevel();
                 if (sourceLevel != Level.ERROR) {
@@ -55,7 +55,7 @@ public class ErrorToWarnRewritePolicy implements RewritePolicy {
 
     @PluginFactory
     public static ErrorToWarnRewritePolicy createPolicy(@PluginAttribute("loggers") final String loggerNamePrefix) {
-        String[] loggerNames = loggerNamePrefix != null
+        final String[] loggerNames = loggerNamePrefix != null
                 ? Arrays.stream(loggerNamePrefix.split(",")).map(String::trim).filter(s -> s.length() > 0).toArray(n -> new String[n])
                 : new String[0];
         return new ErrorToWarnRewritePolicy(loggerNames);
