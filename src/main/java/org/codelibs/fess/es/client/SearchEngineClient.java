@@ -55,6 +55,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fesen.client.HttpClient;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -717,8 +718,13 @@ public class SearchEngineClient implements Client {
                                 mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
                                 });
                         if (result.containsKey("index")) {
+                            String source = line;
+                            if ("fess_user.user".equals(configIndex)) {
+                                source = source.replace("${fess.index.initial_password}", ComponentUtil.getComponent(FessLoginAssist.class)
+                                        .encryptPassword(fessConfig.getIndexUserInitialPassword()));
+                            }
                             final IndexRequestBuilder requestBuilder = client.prepareIndex().setIndex(configIndex)
-                                    .setId(result.get("index").get("_id")).setSource(line, XContentType.JSON);
+                                    .setId(result.get("index").get("_id")).setSource(source, XContentType.JSON);
                             builder.add(requestBuilder);
                         }
                     }
