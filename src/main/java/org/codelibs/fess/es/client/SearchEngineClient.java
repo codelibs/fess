@@ -365,14 +365,14 @@ public class SearchEngineClient implements Client {
         final String[] hosts =
                 split(host, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
         final Builder builder = Settings.builder().putList("http.hosts", hosts).put("processors", fessConfig.availableProcessors())
-                .put("http.heartbeat_interval", fessConfig.getElasticsearchHeartbeatIntervalAsInteger().longValue());
-        final String username = fessConfig.getElasticsearchUsername();
-        final String password = fessConfig.getElasticsearchPassword();
+                .put("http.heartbeat_interval", fessConfig.getFesenHeartbeatInterval());
+        final String username = fessConfig.getFesenUsername();
+        final String password = fessConfig.getFesenPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
             builder.put(Constants.FESEN_USERNAME, username);
             builder.put(Constants.FESEN_PASSWORD, password);
         }
-        final String authorities = fessConfig.getElasticsearchHttpSslCertificateAuthorities();
+        final String authorities = fessConfig.getFesenHttpSslCertificateAuthorities();
         if (StringUtil.isNotBlank(authorities)) {
             builder.put("http.ssl.certificate_authorities", authorities);
         }

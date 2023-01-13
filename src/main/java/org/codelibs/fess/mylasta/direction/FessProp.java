@@ -2100,12 +2100,6 @@ public interface FessProp {
                 .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).anyMatch(s -> s.equals(password)));
     }
 
-    String getElasticsearchType();
-
-    default String getFesenType() {
-        return getElasticsearchType();
-    }
-
     String getSearchlogRequestHeaders();
 
     default String[] getSearchlogRequestHeadersAsArray() {
@@ -2123,5 +2117,73 @@ public interface FessProp {
             propMap.put(API_PING_ES_FIELD_SET, value);
         }
         return value;
+    }
+
+    String get(String propertyKey);
+
+    String getSearchEngineType();
+
+    default String getFesenType() {
+        final String value = getSearchEngineType();
+        if (value != null) {
+            return value;
+        }
+        return get("elasticsearch.type");
+    }
+
+    String getSearchEngineHttpUrl();
+
+    default String getFesenHttpUrl() {
+        final String value = getSearchEngineHttpUrl();
+        if (value != null) {
+            return value;
+        }
+        return get("elasticsearch.http.url");
+    }
+
+    String getSearchEngineHttpSslCertificateAuthorities();
+
+    default String getFesenHttpSslCertificateAuthorities() {
+        final String value = getSearchEngineHttpSslCertificateAuthorities();
+        if (value != null) {
+            return value;
+        }
+        return get("elasticsearch.http.ssl.certificate_authorities");
+    }
+
+    String getSearchEngineUsername();
+
+    default String getFesenUsername() {
+        final String value = getSearchEngineUsername();
+        if (value != null) {
+            return value;
+        }
+        return get("elasticsearch.username");
+    }
+
+    String getSearchEnginePassword();
+
+    default String getFesenPassword() {
+        final String value = getSearchEnginePassword();
+        if (value != null) {
+            return value;
+        }
+        return get("elasticsearch.password");
+    }
+
+    Integer getAsInteger(String propertyKey);
+
+    Integer getSearchEngineHeartbeatIntervalAsInteger();
+
+    default long getFesenHeartbeatInterval() {
+        Integer value = getSearchEngineHeartbeatIntervalAsInteger();
+        if (value != null) {
+            return value.longValue();
+        }
+        value = getAsInteger("elasticsearch.heartbeat_interval");
+        if (value != null) {
+            return value.longValue();
+        }
+        return 10000L;
     }
 }

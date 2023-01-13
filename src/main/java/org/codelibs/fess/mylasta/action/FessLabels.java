@@ -2865,7 +2865,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Version From */
     public static final String LABELS_target_version = "{labels.target_version}";
 
-    /** The key of the message: Request to elasticsearch */
+    /** The key of the message: Request to OpenSearch */
     public static final String LABELS_esreq_configuration = "{labels.esreq_configuration}";
 
     /** The key of the message: Request File */
@@ -2883,7 +2883,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Score: */
     public static final String LABELS_doc_score = "{labels.doc_score}";
 
-    /** The key of the message: Running as Development mode. For production use, please install a standalone elasticsearch server. */
+    /** The key of the message: Running as Development mode. For production use, please install a standalone OpenSearch server. */
     public static final String LABELS_development_mode_warning = "{labels.development_mode_warning}";
 
     /** The key of the message: Your system is out of support. See EOL page. */

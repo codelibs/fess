@@ -26,22 +26,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String DOMAIN_TITLE = "domain.title";
 
     /** The key of the configuration. e.g. default */
-    String ELASTICSEARCH_TYPE = "elasticsearch.type";
+    String search_engine_TYPE = "search_engine.type";
 
     /** The key of the configuration. e.g. http://localhost:9201 */
-    String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
+    String search_engine_HTTP_URL = "search_engine.http.url";
 
     /** The key of the configuration. e.g.  */
-    String ELASTICSEARCH_HTTP_SSL_certificate_authorities = "elasticsearch.http.ssl.certificate_authorities";
+    String search_engine_HTTP_SSL_certificate_authorities = "search_engine.http.ssl.certificate_authorities";
 
     /** The key of the configuration. e.g.  */
-    String ELASTICSEARCH_USERNAME = "elasticsearch.username";
+    String search_engine_USERNAME = "search_engine.username";
 
     /** The key of the configuration. e.g.  */
-    String ELASTICSEARCH_PASSWORD = "elasticsearch.password";
+    String search_engine_PASSWORD = "search_engine.password";
 
     /** The key of the configuration. e.g. 10000 */
-    String ELASTICSEARCH_heartbeat_interval = "elasticsearch.heartbeat_interval";
+    String search_engine_heartbeat_interval = "search_engine.heartbeat_interval";
 
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORISM = "app.cipher.algorism";
@@ -1822,79 +1822,79 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getDomainTitle();
 
     /**
-     * Get the value for the key 'elasticsearch.type'. <br>
+     * Get the value for the key 'search_engine.type'. <br>
      * The value is, e.g. default <br>
-     * comment: Elasticsearch
+     * comment: Search Engine
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchType();
+    String getSearchEngineType();
 
     /**
-     * Get the value for the key 'elasticsearch.http.url'. <br>
+     * Get the value for the key 'search_engine.http.url'. <br>
      * The value is, e.g. http://localhost:9201 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchHttpUrl();
+    String getSearchEngineHttpUrl();
 
     /**
-     * Get the value for the key 'elasticsearch.http.ssl.certificate_authorities'. <br>
+     * Get the value for the key 'search_engine.http.ssl.certificate_authorities'. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchHttpSslCertificateAuthorities();
+    String getSearchEngineHttpSslCertificateAuthorities();
 
     /**
-     * Get the value for the key 'elasticsearch.http.ssl.certificate_authorities' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getElasticsearchHttpSslCertificateAuthoritiesAsInteger();
-
-    /**
-     * Get the value for the key 'elasticsearch.username'. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getElasticsearchUsername();
-
-    /**
-     * Get the value for the key 'elasticsearch.username' as {@link Integer}. <br>
+     * Get the value for the key 'search_engine.http.ssl.certificate_authorities' as {@link Integer}. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getElasticsearchUsernameAsInteger();
+    Integer getSearchEngineHttpSslCertificateAuthoritiesAsInteger();
 
     /**
-     * Get the value for the key 'elasticsearch.password'. <br>
+     * Get the value for the key 'search_engine.username'. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchPassword();
+    String getSearchEngineUsername();
 
     /**
-     * Get the value for the key 'elasticsearch.password' as {@link Integer}. <br>
+     * Get the value for the key 'search_engine.username' as {@link Integer}. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getElasticsearchPasswordAsInteger();
+    Integer getSearchEngineUsernameAsInteger();
 
     /**
-     * Get the value for the key 'elasticsearch.heartbeat_interval'. <br>
+     * Get the value for the key 'search_engine.password'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSearchEnginePassword();
+
+    /**
+     * Get the value for the key 'search_engine.password' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSearchEnginePasswordAsInteger();
+
+    /**
+     * Get the value for the key 'search_engine.heartbeat_interval'. <br>
      * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchHeartbeatInterval();
+    String getSearchEngineHeartbeatInterval();
 
     /**
-     * Get the value for the key 'elasticsearch.heartbeat_interval' as {@link Integer}. <br>
+     * Get the value for the key 'search_engine.heartbeat_interval' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getElasticsearchHeartbeatIntervalAsInteger();
+    Integer getSearchEngineHeartbeatIntervalAsInteger();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -7613,44 +7613,44 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.DOMAIN_TITLE);
         }
 
-        public String getElasticsearchType() {
-            return get(FessConfig.ELASTICSEARCH_TYPE);
+        public String getSearchEngineType() {
+            return get(FessConfig.search_engine_TYPE);
         }
 
-        public String getElasticsearchHttpUrl() {
-            return get(FessConfig.ELASTICSEARCH_HTTP_URL);
+        public String getSearchEngineHttpUrl() {
+            return get(FessConfig.search_engine_HTTP_URL);
         }
 
-        public String getElasticsearchHttpSslCertificateAuthorities() {
-            return get(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities);
+        public String getSearchEngineHttpSslCertificateAuthorities() {
+            return get(FessConfig.search_engine_HTTP_SSL_certificate_authorities);
         }
 
-        public Integer getElasticsearchHttpSslCertificateAuthoritiesAsInteger() {
-            return getAsInteger(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities);
+        public Integer getSearchEngineHttpSslCertificateAuthoritiesAsInteger() {
+            return getAsInteger(FessConfig.search_engine_HTTP_SSL_certificate_authorities);
         }
 
-        public String getElasticsearchUsername() {
-            return get(FessConfig.ELASTICSEARCH_USERNAME);
+        public String getSearchEngineUsername() {
+            return get(FessConfig.search_engine_USERNAME);
         }
 
-        public Integer getElasticsearchUsernameAsInteger() {
-            return getAsInteger(FessConfig.ELASTICSEARCH_USERNAME);
+        public Integer getSearchEngineUsernameAsInteger() {
+            return getAsInteger(FessConfig.search_engine_USERNAME);
         }
 
-        public String getElasticsearchPassword() {
-            return get(FessConfig.ELASTICSEARCH_PASSWORD);
+        public String getSearchEnginePassword() {
+            return get(FessConfig.search_engine_PASSWORD);
         }
 
-        public Integer getElasticsearchPasswordAsInteger() {
-            return getAsInteger(FessConfig.ELASTICSEARCH_PASSWORD);
+        public Integer getSearchEnginePasswordAsInteger() {
+            return getAsInteger(FessConfig.search_engine_PASSWORD);
         }
 
-        public String getElasticsearchHeartbeatInterval() {
-            return get(FessConfig.ELASTICSEARCH_heartbeat_interval);
+        public String getSearchEngineHeartbeatInterval() {
+            return get(FessConfig.search_engine_heartbeat_interval);
         }
 
-        public Integer getElasticsearchHeartbeatIntervalAsInteger() {
-            return getAsInteger(FessConfig.ELASTICSEARCH_heartbeat_interval);
+        public Integer getSearchEngineHeartbeatIntervalAsInteger() {
+            return getAsInteger(FessConfig.search_engine_heartbeat_interval);
         }
 
         public String getAppCipherAlgorism() {
@@ -10657,12 +10657,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
             defaultMap.put(FessConfig.DOMAIN_TITLE, "Fess");
-            defaultMap.put(FessConfig.ELASTICSEARCH_TYPE, "default");
-            defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_URL, "http://localhost:9201");
-            defaultMap.put(FessConfig.ELASTICSEARCH_HTTP_SSL_certificate_authorities, "");
-            defaultMap.put(FessConfig.ELASTICSEARCH_USERNAME, "");
-            defaultMap.put(FessConfig.ELASTICSEARCH_PASSWORD, "");
-            defaultMap.put(FessConfig.ELASTICSEARCH_heartbeat_interval, "10000");
+            defaultMap.put(FessConfig.search_engine_TYPE, "default");
+            defaultMap.put(FessConfig.search_engine_HTTP_URL, "http://localhost:9201");
+            defaultMap.put(FessConfig.search_engine_HTTP_SSL_certificate_authorities, "");
+            defaultMap.put(FessConfig.search_engine_USERNAME, "");
+            defaultMap.put(FessConfig.search_engine_PASSWORD, "");
+            defaultMap.put(FessConfig.search_engine_heartbeat_interval, "10000");
             defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");

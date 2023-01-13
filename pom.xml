@@ -502,8 +502,8 @@
 							</paths>
 							<mapper>
 								<type>perm</type>
-								<user>elasticsearch</user>
-								<group>elasticsearch</group>
+								<user>opensearch</user>
+								<group>opensearch</group>
 							</mapper>
 						</data>
 						<!-- Add elasicsearch modules directory -->
@@ -757,8 +757,8 @@
 						<mapping>
 							<directory>${packaging.fess.dictionary.dir}</directory>
 							<filemode>755</filemode>
-							<username>elasticsearch</username>
-							<groupname>elasticsearch</groupname>
+							<username>opensearch</username>
+							<groupname>opensearch</groupname>
 						</mapping>
 						<!-- es/modules -->
 						<mapping>

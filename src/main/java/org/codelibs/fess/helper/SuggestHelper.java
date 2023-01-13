@@ -102,7 +102,7 @@ public class SuggestHelper {
                 .actionGet(fessConfig.getIndexHealthTimeout());
 
         final SuggestSettingsBuilder settingsBuilder = SuggestSettings.builder();
-        settingsBuilder.addInitialSettings("elasticsearch.type", fessConfig.getFesenType());
+        settingsBuilder.addInitialSettings("search_engine.type", fessConfig.getFesenType());
         settingsBuilder.bulkTimeout(fessConfig.getIndexBulkTimeout());
         settingsBuilder.clusterTimeout(fessConfig.getIndexHealthTimeout());
         settingsBuilder.indexTimeout(fessConfig.getIndexIndexTimeout());

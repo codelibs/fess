@@ -20,9 +20,9 @@ if [ "x$FESS_HEAP_SIZE" != "x" ]; then
     FESS_MAX_MEM=$FESS_HEAP_SIZE
 fi
 
-# External elasticsearch cluster
+# External opensearch cluster
 #ES_HTTP_URL=http://localhost:9200
-#FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
+#FESS_DICTIONARY_PATH=/var/lib/opensearch/config/
 
 # SSL truststore for certificate validation over https
 #FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks"
