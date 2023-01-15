@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.api.es;
+package org.codelibs.fess.api.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,14 +49,14 @@ import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.session.SessionManager;
 
-public class EsApiManager extends BaseApiManager {
+public class SearchEngineApiManager extends BaseApiManager {
     private static final String ADMIN_SERVER = "/admin/server_";
 
-    private static final Logger logger = LogManager.getLogger(EsApiManager.class);
+    private static final Logger logger = LogManager.getLogger(SearchEngineApiManager.class);
 
     protected String[] acceptedRoles = { "admin" };
 
-    public EsApiManager() {
+    public SearchEngineApiManager() {
         setPathPrefix(ADMIN_SERVER);
     }
 
@@ -84,7 +84,7 @@ public class EsApiManager extends BaseApiManager {
         }
 
         try {
-            getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
+            getSessionManager().getAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
                 final String servletPath = request.getServletPath();
                 final String pathPrefix = ADMIN_SERVER + token;
                 if (!servletPath.startsWith(pathPrefix)) {
@@ -199,12 +199,12 @@ public class EsApiManager extends BaseApiManager {
     }
 
     public String getServerPath() {
-        return getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).map(token -> ADMIN_SERVER + token)
+        return getSessionManager().getAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, String.class).map(token -> ADMIN_SERVER + token)
                 .orElseThrow(() -> new FessSystemException("Cannot create an access token."));
     }
 
     public void saveToken() {
-        getSessionManager().setAttribute(Constants.ES_API_ACCESS_TOKEN, UUID.randomUUID().toString().replace("-", ""));
+        getSessionManager().setAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, UUID.randomUUID().toString().replace("-", ""));
     }
 
     private SessionManager getSessionManager() {

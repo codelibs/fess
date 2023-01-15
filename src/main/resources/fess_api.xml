@@ -9,7 +9,7 @@
 
 	<component name="jsonApiManager" class="org.codelibs.fess.api.json.JsonApiManager">
 	</component>
-	<component name="esApiManager" class="org.codelibs.fess.api.es.EsApiManager">
+	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager">
 	</component>
 	<component name="suggestApiManager" class="org.codelibs.fess.api.suggest.SuggestApiManager">
 	</component>

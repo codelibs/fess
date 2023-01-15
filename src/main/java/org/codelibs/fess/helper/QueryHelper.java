@@ -255,7 +255,7 @@ public class QueryHelper {
     }
 
     protected SortBuilder<?> createFieldSortBuilder(final String field, final SortOrder order) {
-        if (QueryFieldConfig.SCORE_FIELD.equals(field) || QueryFieldConfig.ES_SCORE_FIELD.equals(field)) {
+        if (QueryFieldConfig.SCORE_FIELD.equals(field) || QueryFieldConfig.DOC_SCORE_FIELD.equals(field)) {
             return SortBuilders.scoreSort().order(order);
         }
         return SortBuilders.fieldSort(field).order(order);

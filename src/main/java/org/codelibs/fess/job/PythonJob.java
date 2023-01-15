@@ -36,6 +36,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
+import org.codelibs.fess.util.SystemUtil;
 
 public class PythonJob extends ExecJob {
     static final Logger logger = LogManager.getLogger(PythonJob.class);
@@ -116,7 +117,7 @@ public class PythonJob extends ExecJob {
                 pb.redirectErrorStream(true);
                 final Map<String, String> environment = pb.environment();
                 environment.put("SESSION_ID", sessionId);
-                environment.put("OPENSEARCH_URL", System.getProperty(Constants.FESS_ES_HTTP_ADDRESS));
+                environment.put("OPENSEARCH_URL", SystemUtil.getSearchEngineHttpAddress());
             });
 
             final InputStreamThread it = jobProcess.getInputStreamThread();

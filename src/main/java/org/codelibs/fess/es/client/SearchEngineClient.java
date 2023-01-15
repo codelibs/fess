@@ -73,6 +73,7 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
+import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.opensearch.runner.OpenSearchRunner;
 import org.codelibs.opensearch.runner.OpenSearchRunner.Configs;
 import org.dbflute.exception.IllegalBehaviorStateException;
@@ -259,7 +260,7 @@ public class SearchEngineClient implements Client {
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        String httpAddress = SystemUtil.getSearchEngineHttpAddress();
         if (StringUtil.isBlank(httpAddress) && (runner == null)) {
             switch (fessConfig.getFesenType()) {
             case Constants.FESEN_TYPE_CLOUD:
@@ -295,14 +296,14 @@ public class SearchEngineClient implements Client {
 
                 final int port = runner.node().settings().getAsInt("http.port", 9200);
                 httpAddress = "http://localhost:" + port;
-                logger.warn("Embedded Fesen is running. This configuration is not recommended for production use.");
+                logger.warn("Embedded OpenSearch is running. This configuration is not recommended for production use.");
                 break;
             }
         }
         client = createHttpClient(fessConfig, httpAddress);
 
         if (StringUtil.isNotBlank(httpAddress)) {
-            System.setProperty(Constants.FESS_ES_HTTP_ADDRESS, httpAddress);
+            System.setProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS, httpAddress);
         }
 
         waitForYellowStatus(fessConfig);
@@ -760,21 +761,20 @@ public class SearchEngineClient implements Client {
                 final RestStatus status = ((OpenSearchStatusException) cause).status();
                 switch (status) {
                 case UNAUTHORIZED:
-                    logger.warn("[{}] Unauthorized access: {}", i, System.getProperty(Constants.FESS_ES_HTTP_ADDRESS), cause);
+                    logger.warn("[{}] Unauthorized access: {}", i, SystemUtil.getSearchEngineHttpAddress(), cause);
                     break;
                 default:
-                    logger.debug("[{}][{}] Failed to access to Fesen ({})", i, status, System.getProperty(Constants.FESS_ES_HTTP_ADDRESS),
-                            cause);
+                    logger.debug("[{}][{}] Failed to access to Fesen ({})", i, status, SystemUtil.getSearchEngineHttpAddress(), cause);
                     break;
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("[{}] Failed to access to Fesen ({})", i, System.getProperty(Constants.FESS_ES_HTTP_ADDRESS), cause);
+                logger.debug("[{}] Failed to access to Fesen ({})", i, SystemUtil.getSearchEngineHttpAddress(), cause);
             }
             ThreadUtil.sleep(1000L);
         }
-        final String message = "Fesen (" + System.getProperty(Constants.FESS_ES_HTTP_ADDRESS)
-                + ") is not available. Check the state of your Fesen cluster (" + clusterName + ") in "
-                + (System.currentTimeMillis() - startTime) + "ms.";
+        final String message =
+                "Fesen (" + SystemUtil.getSearchEngineHttpAddress() + ") is not available. Check the state of your Fesen cluster ("
+                        + clusterName + ") in " + (System.currentTimeMillis() - startTime) + "ms.";
         throw new ContainerInitFailureException(message, cause);
     }
 

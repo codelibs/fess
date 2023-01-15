@@ -35,6 +35,7 @@ import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.SystemUtil;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -111,7 +112,7 @@ public class ThumbnailGenerator {
             }
         }
 
-        final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        final String httpAddress = SystemUtil.getSearchEngineHttpAddress();
         if (StringUtil.isNotBlank(httpAddress)) {
             System.setProperty(FesenClient.HTTP_ADDRESS, httpAddress);
         }

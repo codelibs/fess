@@ -87,7 +87,7 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfile.encoding=UTF-8
 
 REM Application Configuration
 set APP_NAME=fess
-set ES_HOME=%FESS_HOME%/es
+set SEARCH_ENGINE_HOME=%FESS_HOME%/es
 
 if NOT "%FESS_USE_GC_LOGGING%" == "" set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xlog:gc*,gc+age=trace,safepoint:file=%FESS_HOME%/logs/gc-%APP_NAME%.log:utctime,pid,tags:filecount=5,filesize=64m
 
@@ -95,7 +95,7 @@ set FESS_CLASSPATH=%FESS_HOME%\lib\classes
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Des-foreground=yes
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.home="%FESS_HOME%"
-set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.dir="%ES_HOME%"
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.dir="%SEARCH_ENGINE_HOME%"
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.context.path=/
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.port=8080
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.webapp.path=%FESS_HOME%\app
@@ -106,8 +106,8 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.level=warn
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlasta.env=web
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dtomcat.config.path=tomcat_config.properties
 
-REM External elasticsearch cluster
-REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.http_address=http://localhost:9200
-REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path=%ES_HOME%/config/
+REM External opensearch cluster
+REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.search_engine.http_address=http://localhost:9200
+REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path=%SEARCH_ENGINE_HOME%/config/
 
 set GROOVY_TURN_OFF_JAVA_WARNINGS=true

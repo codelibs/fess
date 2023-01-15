@@ -58,7 +58,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     //
     private static final Logger logger = LogManager.getLogger(AdminMaintenanceAction.class);
 
-    private static final String[] ES_CAT_NAMES =
+    private static final String[] CAT_NAMES =
             { "aliases", "allocation", "count", "fielddata", "health", "indices", "master", "nodeattrs", "nodes", "pending_tasks",
                     "plugins", "recovery", "repositories", "thread_pool", "shards", "segments", "snapshots", "templates" };
 
@@ -190,7 +190,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     protected void writeFesenCat(final ZipOutputStream zos, final String id) {
-        Arrays.stream(ES_CAT_NAMES).forEach(name -> {
+        Arrays.stream(CAT_NAMES).forEach(name -> {
             final ZipEntry entry = new ZipEntry(id + "/es_cat_" + name + ".txt");
             try {
                 zos.putNextEntry(entry);

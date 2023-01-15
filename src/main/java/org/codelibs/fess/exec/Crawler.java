@@ -62,6 +62,7 @@ import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.timer.HotThreadMonitorTarget;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.fess.util.ThreadDumpUtil;
 import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.kohsuke.args4j.CmdLineException;
@@ -210,7 +211,7 @@ public class Crawler {
 
         initializeProbes();
 
-        final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        final String httpAddress = SystemUtil.getSearchEngineHttpAddress();
         if (StringUtil.isNotBlank(httpAddress)) {
             System.setProperty(FesenClient.HTTP_ADDRESS, httpAddress);
         }

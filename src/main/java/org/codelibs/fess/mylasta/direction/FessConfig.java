@@ -281,7 +281,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String API_JSONP_ENABLED = "api.jsonp.enabled";
 
     /** The key of the configuration. e.g. status,timed_out */
-    String API_PING_ES_FIELDS = "api.ping.es.fields";
+    String API_PING_search_engine_FIELDS = "api.ping.search_engine.fields";
 
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
@@ -2458,11 +2458,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isApiJsonpEnabled();
 
     /**
-     * Get the value for the key 'api.ping.es.fields'. <br>
+     * Get the value for the key 'api.ping.search_engine.fields'. <br>
      * The value is, e.g. status,timed_out <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getApiPingEsFields();
+    String getApiPingSearchEngineFields();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -7905,8 +7905,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_JSONP_ENABLED);
         }
 
-        public String getApiPingEsFields() {
-            return get(FessConfig.API_PING_ES_FIELDS);
+        public String getApiPingSearchEngineFields() {
+            return get(FessConfig.API_PING_search_engine_FIELDS);
         }
 
         public String getVirtualHostHeaders() {
@@ -10712,7 +10712,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization, X-Requested-With");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
-            defaultMap.put(FessConfig.API_PING_ES_FIELDS, "status,timed_out");
+            defaultMap.put(FessConfig.API_PING_search_engine_FIELDS, "status,timed_out");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");

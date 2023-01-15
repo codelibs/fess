@@ -168,6 +168,6 @@ public class SystemMonitorTarget extends MonitorTarget {
         } catch (final Exception e) {
             appendException(buf, e).append(',');
         }
-        buf.append("\"elasticsearch\":").append(stats).append(',');
+        buf.append("\"search_engine\":").append(stats).append(',');
     }
 }

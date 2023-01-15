@@ -28,7 +28,7 @@ import io.restassured.specification.RequestSpecification;
 public class ITBase {
     private static final Logger logger = LogManager.getLogger(ITBase.class);
     public static final String DEFAULT_FESS_URL = "http://localhost:8080";
-    public static final String DEFAULT_ES_URL = "http://localhost:9200";
+    public static final String DEFAULT_SEARCH_ENGINE_URL = "http://localhost:9200";
     public static final String DEFAULT_TEST_TOKEN = "E44TjYrJQadtGBFFuECA0SBqqVtqj7lRGmhYep53ixNdvlRxnkhwqCVCpRoO";
     public static final String DEFAULT_TEST_TOKEN_ID = "testToken";
     private static final String TEST_TOKEN = "test.token";
@@ -70,7 +70,7 @@ public class ITBase {
     }
 
     public static String getEsUrl() {
-        return System.getProperty("test.es.url", DEFAULT_ES_URL);
+        return System.getProperty("test.search_engine.url", DEFAULT_SEARCH_ENGINE_URL);
     }
 
     protected static RequestSpecification checkMethodBase(final Map<String, Object> body) {

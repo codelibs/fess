@@ -35,7 +35,7 @@ public class SynonymFileTest extends UnitFessTestCase {
         FileUtil.writeBytes(file1.getAbsolutePath(),
                 "a1=>A1\nb1,b2 => B1\nc1 => C1, C2\nx1,X1\ny1, Y1, y2"
                         .getBytes(Constants.UTF_8));
-        // TODO set up elasticsearch and dictionaryManager
+        // TODO set up opensearch and dictionaryManager
         synonymFile = new SynonymFile("1", file1.getAbsolutePath(), new Date());
     }
 

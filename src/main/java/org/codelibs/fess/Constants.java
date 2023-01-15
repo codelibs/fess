@@ -306,7 +306,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String MATCHES_ALL_QUERY = "*:*";
 
+    @Deprecated
     public static final String FESS_ES_HTTP_ADDRESS = "fess.es.http_address";
+
+    public static final String FESS_SEARCH_ENGINE_HTTP_ADDRESS = "fess.search_engine.http_address";
 
     public static final int DEFAULT_PAGE_SIZE = 20;
 
@@ -340,7 +343,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String USER_INFO = "LoginInfo";
 
-    public static final String ES_API_ACCESS_TOKEN = "esApiAccessToken";
+    public static final String SEARCH_ENGINE_API_ACCESS_TOKEN = "searchEngineApiAccessToken";
 
     public static final String DEFAULT_FIELD = "_default";
 

@@ -155,10 +155,10 @@ public final class UpgradeUtil {
         return false;
     }
 
-    public static boolean addData(final Client fessEsClient, final String index, final String id, final String source) {
+    public static boolean addData(final Client client, final String index, final String id, final String source) {
         try {
             final IndexRequest indexRequest = new IndexRequest(index).id(id).source(source, XContentType.JSON);
-            fessEsClient.index(indexRequest).actionGet();
+            client.index(indexRequest).actionGet();
             return true;
         } catch (final Exception e) {
             logger.warn("Failed to add {} to {}", id, index, e);

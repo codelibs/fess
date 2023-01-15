@@ -2,8 +2,8 @@
 Description=Fess
 Documentation=http://fess.codelibs.org/
 Wants=network-online.target
-After=network-online.target elasticsearch.service
-Requires=elasticsearch.service
+After=network-online.target opensearch.service
+Requires=opensearch.service
 
 [Service]
 Environment=FESS_HOME=${packaging.fess.home.dir}

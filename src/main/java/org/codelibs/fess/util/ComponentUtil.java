@@ -139,7 +139,7 @@ public final class ComponentUtil {
 
     private static final String SUGGEST_HELPER = "suggestHelper";
 
-    private static final String FESS_ES_CLIENT = "fessEsClient";
+    private static final String SEARCH_ENGINE_CLIENT = "searchEngineClient";
 
     private static final String DICTIONARY_MANAGER = "dictionaryManager";
 
@@ -381,7 +381,7 @@ public final class ComponentUtil {
     }
 
     public static SearchEngineClient getSearchEngineClient() {
-        return getComponent(FESS_ES_CLIENT);
+        return getComponent(SEARCH_ENGINE_CLIENT);
     }
 
     public static FessConfig getFessConfig() {

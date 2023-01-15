@@ -21,7 +21,7 @@ if [ "x$FESS_HEAP_SIZE" != "x" ]; then
 fi
 
 # External opensearch cluster
-#ES_HTTP_URL=http://localhost:9200
+#SEARCH_ENGINE_HTTP_URL=http://localhost:9200
 #FESS_DICTIONARY_PATH=/var/lib/opensearch/config/
 
 # SSL truststore for certificate validation over https
@@ -83,8 +83,8 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfile.encoding=UTF-8"
 if [ "x$APP_NAME" = "x" ]; then
   APP_NAME=fess
 fi
-if [ "x$ES_HOME" = "x" ]; then
-  ES_HOME=$FESS_HOME/es
+if [ "x$SEARCH_ENGINE_HOME" = "x" ]; then
+  SEARCH_ENGINE_HOME=$FESS_HOME/es
 fi
 if [ "x$FESS_TEMP_PATH" = "x" ]; then
   FESS_TEMP_PATH=$FESS_HOME/temp
@@ -120,8 +120,8 @@ fi
 if [ "x$FESS_VAR_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.var.path=$FESS_VAR_PATH"
 fi
-if [ "x$ES_HTTP_URL" != "x" ]; then
-  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.http_address=$ES_HTTP_URL"
+if [ "x$SEARCH_ENGINE_HTTP_URL" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.search_engine.http_address=$SEARCH_ENGINE_HTTP_URL"
 fi
 if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.dictionary.path=$FESS_DICTIONARY_PATH"

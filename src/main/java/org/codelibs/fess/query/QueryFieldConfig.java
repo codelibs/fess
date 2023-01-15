@@ -41,7 +41,7 @@ public class QueryFieldConfig {
 
     public static final String SCORE_FIELD = "score";
 
-    public static final String ES_SCORE_FIELD = "_score";
+    public static final String DOC_SCORE_FIELD = "_score";
 
     public static final String SITE_FIELD = "site";
 

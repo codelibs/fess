@@ -43,6 +43,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.fess.util.SystemUtil;
 
 public class CrawlJob extends ExecJob {
 
@@ -252,9 +253,9 @@ public class CrawlJob extends ExecJob {
         cmdList.add(buf.toString());
 
         if (useLocalFesen) {
-            final String httpAddress = System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+            final String httpAddress = SystemUtil.getSearchEngineHttpAddress();
             if (StringUtil.isNotBlank(httpAddress)) {
-                cmdList.add("-D" + Constants.FESS_ES_HTTP_ADDRESS + "=" + httpAddress);
+                cmdList.add("-D" + Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS + "=" + httpAddress);
             }
         }
 

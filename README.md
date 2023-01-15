@@ -142,11 +142,11 @@ Run the `package` goal and then the release file will be created in target/relea
 
 Launch Fess Server and run the following command:
 
-    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201"
+    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
 
 To run a single test case, you can use:
 
-    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.es.url="http://localhost:9201" -Dtest=SearchApiTests
+    $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201" -Dtest=SearchApiTests
 
 ### Translate In Your Language
 
