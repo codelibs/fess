@@ -45,8 +45,8 @@
                             </div>
                             <div class="card-body">
                                 <div class="form-group row">
-                                    <label for="replaceAliases" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.replace_aliases"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.replace_aliases"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="replaceAliases"/>
                                         <div class="form-check">
@@ -58,8 +58,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="resetDictionaries" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.reset_dictionaries"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.reset_dictionaries"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resetDictionaries"/>
                                         <div class="form-check">

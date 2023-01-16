@@ -40,21 +40,21 @@
                                     <%-- System --%>
                                 <h4><la:message key="labels.general_menu_system"/></h4>
                                 <div class="form-group row">
-                                    <label for="webApiJson" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.web_api_json_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.web_api_json_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="webApiJson"/>
                                         <div class="form-check">
                                             <la:checkbox styleId="webApiJson" styleClass="form-check-input" property="webApiJson"/>
-                                            <label class="form-check-label">
+                                            <label for="webApiJson" class="form-check-label">
                                                  <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="loginRequired" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.login_required"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.login_required"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="loginRequired"/>
                                         <div class="form-check">
@@ -66,8 +66,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="loginLink" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.login_link"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.login_link"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="loginLink"/>
                                         <div class="form-check">
@@ -79,8 +79,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="resultCollapsed" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.result_collapsed"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.result_collapsed"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resultCollapsed"/>
                                         <div class="form-check">
@@ -92,8 +92,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="thumbnail" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.thumbnail"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.thumbnail"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="thumbnail"/>
                                         <div class="form-check">
@@ -141,8 +141,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="popularWord" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.popular_word_word_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.popular_word_word_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="popularWord"/>
                                         <div class="form-check">
@@ -163,9 +163,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="appendQueryParameter"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.append_query_param_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.append_query_param_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="appendQueryParameter"/>
                                         <div class="form-check">
@@ -197,8 +196,8 @@
                                     <%-- Crawler --%>
                                 <h4><la:message key="labels.general_menu_crawler"/></h4>
                                 <div class="form-group row">
-                                    <label for="incrementalCrawling" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.incremental_crawling"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.incremental_crawling"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="incrementalCrawling"/>
                                         <div class="form-check">
@@ -255,8 +254,8 @@
                                     <%-- Logging --%>
                                 <h4><la:message key="labels.general_menu_logging"/></h4>
                                 <div class="form-group row">
-                                    <label for="searchLog" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.search_log_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.search_log_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="searchLog"/>
                                         <div class="form-check">
@@ -268,8 +267,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="userInfo" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.user_info_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.user_info_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="userInfo"/>
                                         <div class="form-check">
@@ -281,8 +280,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="userFavorite" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.user_favorite_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.user_favorite_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="userFavorite"/>
                                         <div class="form-check">
@@ -355,8 +354,8 @@
                                     <%-- Suggest --%>
                                 <h4><la:message key="labels.general_menu_suggest"/></h4>
                                 <div class="form-group row">
-                                    <label for="suggestSearchLog" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.suggest_search_log_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.suggest_search_log_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="suggestSearchLog"/>
                                         <div class="form-check">
@@ -368,8 +367,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="suggestSearchLog" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.suggest_documents_enabled"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.suggest_documents_enabled"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="suggestDocuments"/>
                                         <div class="form-check">
@@ -416,7 +415,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="ldapSecurityPrincipal"
+                                    <label for="ldapAdminSecurityPrincipal"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_admin_security_principal"/></label>
                                     <div class="col-sm-9">
@@ -427,7 +426,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="ldapSecurityPrincipal"
+                                    <label for="ldapAdminSecurityCredentials"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.ldap_admin_security_credentials"/></label>
                                     <div class="col-sm-9">

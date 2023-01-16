@@ -95,8 +95,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="jobLogging" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.scheduledjob_jobLogging"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.scheduledjob_jobLogging"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="jobLogging"/>
                                         <div class="form-check">
@@ -108,8 +108,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="crawler" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.scheduledjob_crawler"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.scheduledjob_crawler"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="crawler"/>
                                         <div class="form-check">
@@ -121,8 +121,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="available" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.scheduledjob_status"/></label>
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.scheduledjob_status"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="available"/>
                                         <div class="form-check">
