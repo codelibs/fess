@@ -168,7 +168,7 @@ public class BsRelatedContentCB extends EsAbstractConditionBean {
     public static class HpSpecification {
         protected List<String> columnList = new ArrayList<>();
 
-        private void doColumn(String name) {
+        public void doColumn(String name) {
             columnList.add(name);
         }
 

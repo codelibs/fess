@@ -83,7 +83,7 @@ public class SuggestHelper {
 
     protected PopularWordHelper popularWordHelper = null;
 
-    public long searchStoreIntervalMinute = 1;
+    protected long searchStoreInterval = 1; // min
 
     @PostConstruct
     public void init() {
@@ -135,6 +135,17 @@ public class SuggestHelper {
             final String from = LocalDateTime.now().minusDays(fessConfig.getPurgeSuggestSearchLogDay()).format(DateTimeFormatter.ISO_DATE);
             cb.query().addQuery(QueryBuilders.rangeQuery("requestedAt").gte(from));
             cb.query().addOrderBy_RequestedAt_Asc();
+            cb.specify().columnAccessType();
+            cb.specify().columnUserSessionId();
+            cb.specify().columnHitCount();
+            cb.specify().columnClientIp();
+            cb.specify().columnSearchWord();
+            cb.specify().columnRequestedAt();
+            cb.specify().columnHitCount();
+            cb.specify().columnVirtualHost();
+            cb.specify().columnLanguages();
+            cb.specify().columnRoles();
+            cb.specify().doColumn("searchField.*");
         }, this::indexFromSearchLog);
     }
 
@@ -157,7 +168,7 @@ public class SuggestHelper {
 
             final LocalDateTime requestedAt = searchLog.getRequestedAt();
             if ((sessionId == null) || (duplicateSessionMap.containsKey(sessionId)
-                    && duplicateSessionMap.get(sessionId).plusMinutes(searchStoreIntervalMinute).isAfter(requestedAt))) {
+                    && duplicateSessionMap.get(sessionId).plusMinutes(searchStoreInterval).isAfter(requestedAt))) {
                 return;
             }
 
@@ -385,5 +396,9 @@ public class SuggestHelper {
         if (popularWordHelper != null) {
             popularWordHelper.clearCache();
         }
+    }
+
+    public void setSearchStoreInterval(long searchStoreInterval) {
+        this.searchStoreInterval = searchStoreInterval;
     }
 }
