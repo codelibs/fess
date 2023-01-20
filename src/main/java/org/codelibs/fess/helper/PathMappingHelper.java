@@ -67,6 +67,11 @@ public class PathMappingHelper extends AbstractConfigHelper {
                 cb.query().setProcessType_InScope(ptList);
                 cb.fetchFirst(ComponentUtil.getFessConfig().getPagePathMappingMaxFetchSizeAsInteger());
             });
+            if (logger.isDebugEnabled()) {
+                cachedPathMappingList.forEach(e -> {
+                    logger.debug("path mapping: {}: {} -> {}", e.getId(), e.getRegex(), e.getReplacement());
+                });
+            }
             return cachedPathMappingList.size();
         } catch (final ComponentNotFoundException e) {
             if (logger.isDebugEnabled()) {
@@ -179,6 +184,9 @@ public class PathMappingHelper extends AbstractConfigHelper {
             if (matchUserAgent(pathMapping)) {
                 newUrl = pathMapping.process(this, newUrl);
             }
+        }
+        if (logger.isDebugEnabled() && !StringUtil.equals(url, newUrl)) {
+            logger.debug("replace: {} -> {}", url, newUrl);
         }
         return newUrl;
     }
