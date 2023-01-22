@@ -1394,7 +1394,7 @@
 		<dependency>
 			<groupId>org.codelibs.fess</groupId>
 			<artifactId>fess-crawler-playwright</artifactId>
-			<version>${crawler.playwright.version}</version>
+			<version>14.6.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>args4j</groupId>
