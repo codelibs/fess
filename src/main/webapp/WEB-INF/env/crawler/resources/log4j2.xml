@@ -8,7 +8,7 @@
 		<Property name="log.pattern" value="%d [%t] %-5p %msg%n" />
 		<Property name="log.file.basedir" value="${sys:fess.log.path:-target/logs}" />
 		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
-		<Property name="backup.max.history" value="90" />
+		<Property name="backup.max.history" value="10" />
 		<Property name="stats.log.pattern" value="%msg%n" />
 	</Properties>
 
