@@ -77,7 +77,7 @@ public class ThumbnailManager {
 
     protected String imageExtention = "png";
 
-    protected int splitSize = 3;
+    protected int splitSize = 5;
 
     protected int thumbnailTaskQueueSize = 10000;
 
@@ -86,6 +86,8 @@ public class ThumbnailManager {
     protected long thumbnailTaskQueueTimeout = 10 * 1000L;
 
     protected long noImageExpired = 24 * 60 * 60 * 1000L; // 24 hours
+
+    protected int splitHashSize = 10;
 
     @PostConstruct
     public void init() {
@@ -299,13 +301,11 @@ public class ThumbnailManager {
 
     protected String getImageFilename(final String docid) {
         final StringBuilder buf = new StringBuilder(50);
-        for (int i = 0; i < docid.length(); i++) {
-            if (i > 0 && i % splitSize == 0) {
-                buf.append('/');
-            }
-            buf.append(docid.charAt(i));
+        for (int i = 0; i < docid.length(); i += splitSize) {
+            final int hash = docid.substring(i).hashCode() % splitHashSize;
+            buf.append('_').append(Integer.toString(hash)).append('/');
         }
-        buf.append('.').append(imageExtention);
+        buf.append(docid).append('.').append(imageExtention);
         return buf.toString();
     }
 
@@ -494,19 +494,21 @@ public class ThumbnailManager {
                 paths.filter(path -> path.toFile().getName().endsWith(imageExtention)).forEach(path -> {
                     final Path subPath = basePath.relativize(path);
                     final String docId = subPath.toString().replace("/", StringUtil.EMPTY).replace(suffix, StringUtil.EMPTY);
-                    final String filename = getImageFilename(docId);
-                    final Path newPath = basePath.resolve(filename);
-                    if (!path.equals(newPath)) {
-                        try {
+                    if (!docId.startsWith("_")) {
+                        final String filename = getImageFilename(docId);
+                        final Path newPath = basePath.resolve(filename);
+                        if (!path.equals(newPath)) {
                             try {
-                                Files.createDirectories(newPath.getParent());
-                            } catch (final FileAlreadyExistsException e) {
-                                // ignore
+                                try {
+                                    Files.createDirectories(newPath.getParent());
+                                } catch (final FileAlreadyExistsException e) {
+                                    // ignore
+                                }
+                                Files.move(path, newPath);
+                                logger.info("Move {} to {}", path, newPath);
+                            } catch (final IOException e) {
+                                logger.warn("Failed to move {}", path, e);
                             }
-                            Files.move(path, newPath);
-                            logger.info("Move {} to {}", path, newPath);
-                        } catch (final IOException e) {
-                            logger.warn("Failed to move {}", path, e);
                         }
                     }
                 });
@@ -534,6 +536,10 @@ public class ThumbnailManager {
 
     public void setNoImageExpired(final long noImageExpired) {
         this.noImageExpired = noImageExpired;
+    }
+
+    public void setSplitHashSize(int splitHashSize) {
+        this.splitHashSize = splitHashSize;
     }
 
 }
