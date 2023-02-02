@@ -77,7 +77,7 @@ public class ThumbnailManager {
 
     protected String imageExtention = "png";
 
-    protected int splitSize = 5;
+    protected int splitSize = 10;
 
     protected int thumbnailTaskQueueSize = 10000;
 
@@ -302,7 +302,10 @@ public class ThumbnailManager {
     protected String getImageFilename(final String docid) {
         final StringBuilder buf = new StringBuilder(50);
         for (int i = 0; i < docid.length(); i += splitSize) {
-            final int hash = docid.substring(i).hashCode() % splitHashSize;
+            int hash = docid.substring(i).hashCode() % splitHashSize;
+            if (hash < 0) {
+                hash *= -1;
+            }
             buf.append('_').append(Integer.toString(hash)).append('/');
         }
         buf.append(docid).append('.').append(imageExtention);
