@@ -6,10 +6,10 @@ Fess Enterprise Search Server [![Tweet](https://img.shields.io/twitter/url/http/
 
 ## Overview
 
-Fess est un serveur de moteur de recherche très puissant et facile à déployer en enterprise.
-Vous pouvez rapidement l'installer et l'éxécuter sur toute plateforme qui peut propose l'environment Java Runtime. Fess est distribué sous [License Apache 2.0](LICENSE).
+Fess est un serveur de moteur de recherche très puissant et facile à déployer en entreprise.
+Vous pouvez rapidement l'installer et l'exécuter sur toute plateforme qui propose l'environnement  Java Runtime. Fess est distribué sous [License Apache 2.0](LICENSE).
 
-Fess est basé sur  [OpenSearch](https://github.com/opensearch-project/OpenSearch)/[Elasticsearch](https://github.com/elastic/elasticsearch), mais il _ne_ requiert _PAS_ connaissance ou expérience avec les solutions OpenSearch et Elasticsearch. Fess fourni une interface d'administration simple pour configurer le systèmem via votre navigateur.
+Fess est basé sur  [OpenSearch](https://github.com/opensearch-project/OpenSearch)/[Elasticsearch](https://github.com/elastic/elasticsearch), mais il _ne_ requiert _PAS_ connaissance ou expérience avec les solutions OpenSearch et Elasticsearch. Fess fourni une interface d'administration simple pour configurer le système via votre navigateur.
 Fess comprend aussi un Crawler, qui peut explorer les documents d'un [serveur Web](https://fess.codelibs.org/14.6/admin/webconfig-guide.html), un [système de fichiers](https://fess.codelibs.org/14.6/admin/fileconfig-guide.html), ou un [Stockage de données](https://fess.codelibs.org/14.6/admin/dataconfig-guide.html) (tel qu'une base de donnée ou des CSV). Plusieurs formats de fichiers sont supportés tels que (mais pas uniquement): Microsoft Office, PDF, et zip.
 
 *[FEss Site Search](https://github.com/codelibs/fess-site-search)* est une alternative libre à [Google Site Search](https://enterprise.google.com/search/products/gss.html). Pour plus de détails, jetez un oeil à [FSS JS Generator documentation](https://fss-generator.codelibs.org/docs/manual).
@@ -28,7 +28,7 @@ Il y a 2 façons d'essayer Fess. La première est de télécharger et l'installe
 
 ### Télécharger, installer, lancer
 
-La dernière version de Fess est maintenant disponible et peut être téléchargée sur la [page des releases](https://github.com/codelibs/fess/releases "download"). 3 format vous sont proposés: deb, rpm, zip.
+La dernière version de Fess est maintenant disponible et peut être téléchargée sur la [page des releases](https://github.com/codelibs/fess/releases "download"). 3 formats vous sont proposés : deb, rpm, zip.
 
 Les commandes suivantes montre comment utiliser la version zip:
 
@@ -40,12 +40,12 @@ Pour plus de détails, consultez le [guide d'installation](https://fess.codelibs
 
 ### Docker
 
-Nous fournission des images docket sur [ghcr.io](https://github.com/orgs/codelibs/packages).
+Nous fournissions des images docker sur [ghcr.io](https://github.com/orgs/codelibs/packages).
 Nous proposons aussi un fichier Docker Compose (YAML) dans [ce repository](https://github.com/codelibs/docker-fess/tree/master/compose).
 
 ### Interfaces Web
 
-- Interface de recherche: http://localhost:8080/
+- Interface de recherche : http://localhost:8080/
 
 ![Interface de recherche](https://fess.codelibs.org/_images/fess_search_result1.png)
 
@@ -53,7 +53,7 @@ Nous proposons aussi un fichier Docker Compose (YAML) dans [ce repository](https
 
 ![Interface d'administration](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-Vous pouvez définir les cibles à indexer (Web, Fichiers, stockage de données) dans les pages de configuration dee l'exploration de l'interface d'administration, et lancer manuellement l'exploration sur la [page de planification](https://fess.codelibs.org/14.6/admin/scheduler-guide.html).
+Vous pouvez définir les cibles à indexer (Web, Fichiers, stockage de données) dans les pages de configuration de l'exploration de l'interface d'administration, et lancer manuellement l'exploration sur la [page de planification](https://fess.codelibs.org/14.6/admin/scheduler-guide.html).
 
 ## Migration depuis un autre moteur de recherche
 
@@ -104,11 +104,11 @@ Actuellement, Fess supporte l'exploration des [emplacements de stockage et APIs]
 
  - [Forum](https://github.com/nocode2k/fess-kr-forum)
 
-## Informatnion de Dévelopment
+## Information de Développement
 
 ### Récuperer le code Source
 
-1. Cloner le dépot Fess:
+1. Cloner le dépôt Fess:
     ```
     $ cd ~/workspace
     $ git clone https://github.com/codelibs/fess.git
@@ -118,13 +118,13 @@ Actuellement, Fess supporte l'exploration des [emplacements de stockage et APIs]
 
 ### Mettre en place les plugins OpenSearch
 
-Éxecuter antrun:run pour récuperer les plugins dans le répertoire des plugins :
+Exécuter antrun:run pour récupérer les plugins dans le répertoire des plugins :
 
     $ mvn antrun:run
 
 ### Éxecuter Fess
 
-Éxecuter ou debugger org.codelibs.fess.FessBoot dans votre IDE, et aller sur http://localhost:8080/
+Exécuter ou debugger org.codelibs.fess.FessBoot dans votre IDE, et aller sur http://localhost:8080/
 
 ### Construire le Package
 
@@ -146,7 +146,7 @@ Lancer le serveur Fess et éxécuter la commande suivante :
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
 
-Pour éxécuster un seul cas de test case, vous pouvez utiliser la commande suivante :
+Pour exécuter un seul cas de test case, vous pouvez utiliser la commande suivante :
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201" -Dtest=SearchApiTests
 
