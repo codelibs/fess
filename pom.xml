@@ -996,6 +996,11 @@
 			<artifactId>log4j-jul</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>co.elastic.logging</groupId>
+			<artifactId>log4j2-ecs-layout</artifactId>
+			<version>${log4j.ecs.version}</version>
+		</dependency>
 
 		<!-- opensearch -->
 		<dependency>

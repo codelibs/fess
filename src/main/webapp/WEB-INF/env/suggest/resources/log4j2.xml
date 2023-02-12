@@ -18,7 +18,7 @@
 			<!-- <PatternLayout>
 				<Pattern>${log.pattern}</Pattern>
 			</PatternLayout> -->
-			<EcsLayout serviceName="fess" eventDataset="thumbnail" />
+			<EcsLayout serviceName="fess" eventDataset="suggest" />
 			<Policies>
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="100 MB" />

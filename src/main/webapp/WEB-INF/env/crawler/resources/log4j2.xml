@@ -9,21 +9,28 @@
 		<Property name="log.file.basedir" value="${sys:fess.log.path:-target/logs}" />
 		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
 		<Property name="backup.max.history" value="10" />
+		<Property name="backup.max.age" value="90" />
 		<Property name="stats.log.pattern" value="%msg%n" />
 	</Properties>
 
 	<Appenders>
 		<RollingFile name="AppRollingFile" fileName="${log.file.basedir}/${domain.name}.log"
 			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
-			<PatternLayout>
+			<!-- <PatternLayout>
 				<Pattern>${log.pattern}</Pattern>
-			</PatternLayout>
+			</PatternLayout> -->
+			<EcsLayout serviceName="fess" eventDataset="crawler" />
 			<Policies>
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
 			<DefaultRolloverStrategy fileIndex="max" min="1"
-				max="${backup.max.history}" compressionLevel="9" />
+				max="${backup.max.history}" compressionLevel="9">
+				<Delete basePath="${log.file.basedir}">
+					<IfFileName glob="*.log.gz" />
+					<IfLastModified age="P${backup.max.age}D" />
+				</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 		<Rewrite name="AppFile">
 			<AppenderRef ref="AppRollingFile" />
@@ -39,7 +46,12 @@
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
 			<DefaultRolloverStrategy fileIndex="max" min="1"
-				max="${backup.max.history}" compressionLevel="9" />
+				max="${backup.max.history}" compressionLevel="9">
+				<Delete basePath="${log.file.basedir}">
+					<IfFileName glob="*.log.gz" />
+					<IfLastModified age="P${backup.max.age}D" />
+				</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 	</Appenders>
 
