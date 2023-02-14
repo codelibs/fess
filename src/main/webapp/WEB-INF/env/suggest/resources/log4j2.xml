@@ -15,10 +15,7 @@
 	<Appenders>
 		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
 			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
-			<!-- <PatternLayout>
-				<Pattern>${log.pattern}</Pattern>
-			</PatternLayout> -->
-			<EcsLayout serviceName="fess" eventDataset="suggest" />
+			<PatternLayout><Pattern>${log.pattern}</Pattern></PatternLayout><!-- <EcsLayout serviceName="fess" eventDataset="suggest" /> -->
 			<Policies>
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="100 MB" />
