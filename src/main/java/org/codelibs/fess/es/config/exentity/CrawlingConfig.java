@@ -128,6 +128,7 @@ public interface CrawlingConfig {
             public static final String CLEANUP_URL_FILTERS = "cleanup.urlFilters";
             public static final String JCIFS_PREFIX = "jcifs.";
             public static final String HTML_CANONICAL_XPATH = "html.canonical.xpath";
+            public static final String HTML_PRUNED_TAGS = "html.pruned.tags";
             public static final String PIPELINE = "pipeline";
             public static final String IGNORE_ROBOTS_TAGS = "ignore.robots.tags";
             public static final String SCRIPT_TYPE = "script.type";

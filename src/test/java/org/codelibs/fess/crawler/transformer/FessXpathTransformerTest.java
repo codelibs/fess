@@ -141,7 +141,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         transformer.init();
 
-        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true), null);
         assertEquals(getXmlString(document), getXmlString(pruneNode));
         ComponentUtil.setFessConfig(null);
     }
@@ -161,7 +161,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         transformer.init();
 
-        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true), null);
         final String docString = getXmlString(document);
         final String pnString = getXmlString(pruneNode);
         assertTrue(docString.contains("<SCRIPT>"));
@@ -190,7 +190,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         transformer.init();
 
-        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true), null);
         final String docString = getXmlString(document);
         final String pnString = getXmlString(pruneNode);
         assertTrue(docString.contains("<SCRIPT>"));
@@ -219,7 +219,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         transformer.init();
 
-        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true), null);
         final String docString = getXmlString(document);
         final String pnString = getXmlString(pruneNode);
         assertTrue(docString.contains("<DIV>"));
@@ -248,7 +248,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         transformer.init();
 
-        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true), null);
         final String docString = getXmlString(document);
         final String pnString = getXmlString(pruneNode);
         assertTrue(docString.contains("<DIV>"));
@@ -669,22 +669,22 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         String data = "<html><body>aaa<style>bbb</style>ccc</body></html>";
         Document document = getDocument(data);
-        String value = transformer.getSingleNodeValue(document, "//BODY", false);
+        String value = transformer.getSingleNodeValue(document, "//BODY", node -> node);
         assertEquals("aaa bbb ccc", value);
 
         data = "<html><body> aaa <p> bbb <b>ccc</b> </p> </body></html>";
         document = getDocument(data);
-        value = transformer.getSingleNodeValue(document, "//BODY", false);
+        value = transformer.getSingleNodeValue(document, "//BODY", node -> node);
         assertEquals("aaa bbb ccc", value);
 
         data = "<html><body> aaa <p> bbb <aaa>ccc</bbb> </p> </body></html>";
         document = getDocument(data);
-        value = transformer.getSingleNodeValue(document, "//BODY", false);
+        value = transformer.getSingleNodeValue(document, "//BODY", node -> node);
         assertEquals("aaa bbb ccc", value);
 
         data = "<html><body> aaa <p> bbb <!-- test -->ccc<!-- test --> </p> </body></html>";
         document = getDocument(data);
-        value = transformer.getSingleNodeValue(document, "//BODY", false);
+        value = transformer.getSingleNodeValue(document, "//BODY", node -> node);
         assertEquals("aaa bbb ccc", value);
     }
 
@@ -693,13 +693,13 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         final String data = "<html><head><meta name=\"keywords\" content=\"bbb\"></head><body>aaa</body></html>";
         final Document document = getDocument(data);
-        String value = transformer.getSingleNodeValue(document, "//BODY", false);
+        String value = transformer.getSingleNodeValue(document, "//BODY", node -> node);
         assertEquals("aaa", value);
 
-        value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content", false);
+        value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content", node -> node);
         assertEquals("bbb", value);
 
-        value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content|//BODY", false);
+        value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content|//BODY", node -> node);
         assertEquals("bbb aaa", value);
     }
 

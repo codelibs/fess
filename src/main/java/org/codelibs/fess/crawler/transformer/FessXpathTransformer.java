@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -107,6 +108,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected Map<String, Boolean> fieldPrunedRuleMap = new HashMap<>();
 
+    protected Map<String, PrunedTag[]> prunedTagsCache = new HashMap<>();
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -171,7 +174,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     final Boolean isPruned = fieldPrunedRuleMap.get(entry.getKey());
                     Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
                     if (value != null && isPruned != null && isPruned.booleanValue()) {
-                        value = pruneNode(value);
+                        value = pruneNode(value, getCrawlingConfig(responseData));
                     }
                     putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
                     break;
@@ -348,8 +351,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
-        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final CrawlingConfig crawlingConfig = getCrawlingConfig(responseData);
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
@@ -381,13 +383,15 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // lang
-        final String lang = systemHelper.normalizeHtmlLang(getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), true));
+        final String lang = systemHelper.normalizeHtmlLang(
+                getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), node -> pruneNode(node, crawlingConfig)));
         if (lang != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), lang);
         }
         // title
         // content
-        final String body = getSingleNodeValue(document, getContentXpath(fessConfig, xpathConfigMap), prunedContent);
+        final String body = getSingleNodeValue(document, getContentXpath(fessConfig, xpathConfigMap),
+                prunedContent ? node -> pruneNode(node, crawlingConfig) : node -> node);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(),
                 documentHelper.getContent(crawlingConfig, responseData, body, dataMap));
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
@@ -411,7 +415,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
         // digest
-        final String digest = getSingleNodeValue(document, getDigestXpath(fessConfig, xpathConfigMap), false);
+        final String digest = getSingleNodeValue(document, getDigestXpath(fessConfig, xpathConfigMap), node -> node);
         if (StringUtil.isNotBlank(digest)) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(), digest);
         } else {
@@ -488,7 +492,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);
         xpathConfigMap.entrySet().stream().filter(e -> !e.getKey().startsWith("default.")).forEach(e -> {
             final String key = e.getKey();
-            final String value = getSingleNodeValue(document, e.getValue(), true);
+            final String value = getSingleNodeValue(document, e.getValue(), node -> pruneNode(node, crawlingConfig));
             putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key), scriptType);
         });
         crawlingConfig.getConfigParameterMap(ConfigName.VALUE).entrySet().stream().forEach(e -> {
@@ -496,6 +500,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final String value = e.getValue();
             putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key), scriptType);
         });
+    }
+
+    protected CrawlingConfig getCrawlingConfig(final ResponseData responseData) {
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        return crawlingConfigHelper.get(responseData.getSessionId());
     }
 
     protected String getLangXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
@@ -531,7 +540,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         if (StringUtil.isBlank(xpath)) {
             return null;
         }
-        final String canonicalUrl = getSingleNodeValue(document, xpath, false);
+        final String canonicalUrl = getSingleNodeValue(document, xpath, node -> node);
         if (StringUtil.isBlank(canonicalUrl)) {
             return null;
         }
@@ -569,7 +578,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return value;
     }
 
-    protected String getSingleNodeValue(final Document document, final String xpath, final boolean pruned) {
+    protected String getSingleNodeValue(final Document document, final String xpath, final UnaryOperator<Node> pruneFunc) {
         StringBuilder buf = null;
         XPathNodes list = null;
         try {
@@ -582,9 +591,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 if (useGoogleOffOn) {
                     node = processGoogleOffOn(node, new ValueHolder<>(true));
                 }
-                if (pruned) {
-                    node = pruneNode(node);
-                }
+                node = pruneFunc.apply(node);
                 parseTextContent(node, buf);
             }
         } catch (final Exception e) {
@@ -645,13 +652,36 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return node;
     }
 
-    protected Node pruneNode(final Node node) {
+    protected Node pruneNode(final Node node, final CrawlingConfig crawlingConfig) {
+        PrunedTag[] prunedTags = null;
+        if (crawlingConfig != null) {
+            final String configId = crawlingConfig.getConfigId();
+            prunedTags = prunedTagsCache.get(configId);
+            if (prunedTags == null) {
+                final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+                final String value = configMap.get(CrawlingConfig.Param.Config.HTML_PRUNED_TAGS);
+                if (StringUtil.isNotBlank(value)) {
+                    prunedTags = PrunedTag.parse(value);
+                }
+                if (prunedTags == null) {
+                    prunedTags = fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+                }
+                prunedTagsCache.put(configId, prunedTags);
+            }
+        }
+        if (prunedTags == null) {
+            prunedTags = fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+        }
+        return pruneNodeByTags(node, prunedTags);
+    }
+
+    protected Node pruneNodeByTags(final Node node, final PrunedTag[] prunedTags) {
         final NodeList nodeList = node.getChildNodes();
         final List<Node> childNodeList = new ArrayList<>();
         final List<Node> removedNodeList = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node childNode = nodeList.item(i);
-            if (isPrunedTag(childNode)) {
+            if (isPrunedTag(childNode, prunedTags)) {
                 removedNodeList.add(childNode);
             } else {
                 childNodeList.add(childNode);
@@ -663,14 +693,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         for (final Node childNode : childNodeList) {
-            pruneNode(childNode);
+            pruneNodeByTags(childNode, prunedTags);
         }
 
         return node;
     }
 
-    protected boolean isPrunedTag(final Node node) {
-        for (final PrunedTag prunedTag : fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray()) {
+    protected boolean isPrunedTag(final Node node, final PrunedTag[] prunedTags) {
+        for (final PrunedTag prunedTag : prunedTags) {
             if (prunedTag.matches(node)) {
                 return true;
             }
