@@ -11,7 +11,7 @@
 		<Property name="backup.max.history" value="10" />
 		<Property name="backup.max.age" value="90" />
 		<Property name="backup.audit.max.age" value="360" />
-		<Property name="backup.searchlog.max.age" value="30" />
+		<Property name="backup.searchlog.max.age" value="90" />
 		<Property name="audit.log.pattern" value="%msg%n" />
 		<Property name="searchlog.log.pattern" value="%msg%n" />
 	</Properties>
