@@ -10,6 +10,8 @@
 		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
 		<Property name="backup.max.history" value="10" />
 		<Property name="backup.max.age" value="90" />
+		<Property name="backup.audit.max.age" value="360" />
+		<Property name="backup.searchlog.max.age" value="30" />
 		<Property name="audit.log.pattern" value="%msg%n" />
 		<Property name="searchlog.log.pattern" value="%msg%n" />
 	</Properties>
@@ -25,7 +27,7 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9">
 				<Delete basePath="${log.file.basedir}">
-					<IfFileName glob="*.log.gz" />
+					<IfFileName glob="${domain.name}*.log.gz" />
 					<IfLastModified age="P${backup.max.age}D" />
 				</Delete>
 			</DefaultRolloverStrategy>
@@ -40,7 +42,12 @@
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
 			<DefaultRolloverStrategy fileIndex="max" min="1"
-				max="${backup.max.history}" compressionLevel="9" />
+				max="${backup.max.history}" compressionLevel="9">
+				<Delete basePath="${log.file.basedir}">
+					<IfFileName glob="audit*.log.gz" />
+					<IfLastModified age="P${backup.audit.max.age}D" />
+				</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 		<RollingFile name="SearchLogFile" fileName="${log.file.basedir}/searchlog.log"
 			filePattern="${log.file.basedir}/searchlog${backup.date.suffix}-%i.log.gz">
@@ -52,7 +59,12 @@
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
 			<DefaultRolloverStrategy fileIndex="max" min="1"
-				max="${backup.max.history}" compressionLevel="9" />
+				max="${backup.max.history}" compressionLevel="9">
+				<Delete basePath="${log.file.basedir}">
+					<IfFileName glob="searchlog*.log.gz" />
+					<IfLastModified age="P${backup.searchlog.max.age}D" />
+				</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 	</Appenders>
 
