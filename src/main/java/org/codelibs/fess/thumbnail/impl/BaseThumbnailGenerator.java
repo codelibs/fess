@@ -76,12 +76,18 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     @Override
     public boolean isTarget(final Map<String, Object> docMap) {
-        if (!docMap.containsKey(ComponentUtil.getFessConfig().getIndexFieldThumbnail())) {
+        final String thumbnailFieldName = ComponentUtil.getFessConfig().getIndexFieldThumbnail();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[{}] thumbnail: {}", name, docMap.get(thumbnailFieldName));
+        }
+        if (!docMap.containsKey(thumbnailFieldName)) {
             return false;
         }
         for (final Map.Entry<String, String> entry : conditionMap.entrySet()) {
-            final Object value = docMap.get(entry.getKey());
-            if (value instanceof String && ((String) value).matches(entry.getValue())) {
+            if (docMap.get(entry.getKey()) instanceof String value && value.matches(entry.getValue())) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[{}] match {}:{}", entry.getKey(), name, value);
+                }
                 return true;
             }
         }
@@ -106,6 +112,9 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             if (path != null) {
                 stream(path.split(File.pathSeparator)).of(stream -> stream.map(String::trim).forEach(s -> pathList.add(s)));
             }
+            if (logger.isDebugEnabled()) {
+                logger.debug("search paths: {}", pathList);
+            }
             available = generatorList.stream().map(s -> {
                 if (s.startsWith("${path}")) {
                     for (final String p : pathList) {
@@ -113,12 +122,24 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                         if (f.exists()) {
                             final String filePath = f.getAbsolutePath();
                             filePathMap.put(s, filePath);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("generator path: {}", filePath);
+                            }
                             return filePath;
                         }
                     }
                 }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("generator path: {}", s);
+                }
                 return s;
-            }).allMatch(s -> new File(s).isFile());
+            }).allMatch(s -> {
+                final boolean found = new File(s).isFile();
+                if (found && logger.isDebugEnabled()) {
+                    logger.debug("{} is found.", s);
+                }
+                return found;
+            });
         } else {
             available = true;
         }

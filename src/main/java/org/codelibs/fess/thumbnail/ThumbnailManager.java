@@ -324,11 +324,13 @@ public class ThumbnailManager {
     }
 
     public void add(final ThumbnailGenerator generator) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("{} is available.", generator.getName());
-        }
         if (generator.isAvailable()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} is available.", generator.getName());
+            }
             generatorList.add(generator);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("{} is not available.", generator.getName());
         }
     }
 
