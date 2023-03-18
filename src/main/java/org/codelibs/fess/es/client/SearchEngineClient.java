@@ -948,6 +948,12 @@ public class SearchEngineClient implements Client {
             } catch (final SearchPhaseExecutionException e) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query: " + searchRequestBuilder, e);
+            } catch (final OpenSearchException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Cannot process {}", searchRequestBuilder, e);
+                }
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+                        "Failed query: " + searchRequestBuilder, e);
             }
         }
         final long execTime = System.currentTimeMillis() - startTime;

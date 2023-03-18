@@ -380,6 +380,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The given sort order ({0}) is not supported. */
     public static final String ERRORS_invalid_query_unsupported_sort_order = "{errors.invalid_query_unsupported_sort_order}";
 
+    /** The key of the message: The given query could not be processed. */
+    public static final String ERRORS_invalid_query_cannot_process = "{errors.invalid_query_cannot_process}";
+
     /** The key of the message: Invalid mode(expected value is {0}, but it's {1}). */
     public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
 
@@ -2242,6 +2245,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidQueryUnsupportedSortOrder(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_query_unsupported_sort_order, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_cannot_process' with parameters.
+     * <pre>
+     * message: The given query could not be processed.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryCannotProcess(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_query_cannot_process));
         return this;
     }
 
