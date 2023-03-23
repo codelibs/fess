@@ -6,10 +6,13 @@
 		<property name="settings">
 			{"http.cors.enabled":"true",
 			 "http.cors.allow-origin":"*",
+			 "discovery.type":"single-node",
+			 <!--
 			 "node.name":"search_engine",
 			 "discovery.seed_hosts":"search_engine",
 			 "cluster.initial_cluster_manager_nodes":"search_engine",
 			 "node.roles":"cluster_manager,data,ingest,ml",
+			 -->
 			 "indices.breaker.total.limit":"100%",
 			 "action.auto_create_index":"-*"}
 		</property>
