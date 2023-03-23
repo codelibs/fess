@@ -73,6 +73,7 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
+import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.opensearch.runner.OpenSearchRunner;
 import org.codelibs.opensearch.runner.OpenSearchRunner.Configs;
@@ -164,7 +165,10 @@ import org.opensearch.common.xcontent.XContentType;
 import org.opensearch.index.query.InnerHitBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.index.reindex.UpdateByQueryRequest;
 import org.opensearch.rest.RestStatus;
+import org.opensearch.script.Script;
+import org.opensearch.script.ScriptType;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
 import org.opensearch.search.aggregations.AggregationBuilders;
@@ -220,6 +224,8 @@ public class SearchEngineClient implements Client {
 
     protected final List<UnaryOperator<String>> docMappingRewriteRuleList = new ArrayList<>();
 
+    protected boolean usePipeline = false;
+
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
     }
@@ -243,6 +249,10 @@ public class SearchEngineClient implements Client {
 
     public boolean isEmbedded() {
         return this.runner != null;
+    }
+
+    public void usePipeline() {
+        this.usePipeline = true;
     }
 
     protected InetAddress getInetAddressByName(final String host) {
@@ -1090,12 +1100,40 @@ public class SearchEngineClient implements Client {
     }
 
     public boolean update(final String index, final String id, final String field, final Object value) {
+        // Using ingest pipelines with doc_as_upsert is not supported.
+        if (usePipeline) {
+            return updateByIdWithScript(index, id, field, value);
+        }
         try {
             final Result result = client.prepareUpdate().setIndex(index).setId(id).setDoc(field, value).execute()
                     .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout()).getResult();
             return result == Result.CREATED || result == Result.UPDATED;
         } catch (final OpenSearchException e) {
-            throw new SearchEngineClientException("Failed to set " + value + " to " + field + " for doc " + id, e);
+            throw new SearchEngineClientException("[" + index + "] Failed to set " + value + " to " + field + " for doc " + id, e);
+        }
+    }
+
+    protected boolean updateByIdWithScript(final String index, final String id, final String field, final Object value) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final UpdateByQueryRequest request = new UpdateByQueryRequest(index).setQuery(QueryBuilders.idsQuery().addIds(id))
+                .setScript(new Script(ScriptType.INLINE, "painless",
+                        "ctx._source[params.f]=params.v;" + ComponentUtil.getLanguageHelper().getReindexScriptSource(),
+                        Map.of("f", field, "v", value)));
+        try {
+            final String source = SearchEngineUtil.getXContentString(request, XContentType.JSON);
+            if (logger.isDebugEnabled()) {
+                logger.debug("update script by id: {}", source);
+            }
+            final String refresh = StringUtil.isNotBlank(fessConfig.getIndexReindexRefresh()) ? fessConfig.getIndexReindexRefresh() : null;
+            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/" + index + "/_update_by_query").param("refresh", refresh)
+                    .param("max_docs", "1").body(source).execute()) {
+                if (response.getHttpStatusCode() == 200) {
+                    return true;
+                }
+                return false;
+            }
+        } catch (final IOException e) {
+            throw new SearchEngineClientException("[" + index + "] Failed to set " + value + " to " + field + " for doc " + id, e);
         }
     }
 

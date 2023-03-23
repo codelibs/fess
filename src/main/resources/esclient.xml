@@ -6,8 +6,11 @@
 		<property name="settings">
 			{"http.cors.enabled":"true",
 			 "http.cors.allow-origin":"*",
+			 "node.name":"search_engine",
+			 "discovery.seed_hosts":"search_engine",
+			 "cluster.initial_cluster_manager_nodes":"search_engine",
+			 "node.roles":"cluster_manager,data,ingest,ml",
 			 "indices.breaker.total.limit":"100%",
-			 "discovery.type":"single-node",
 			 "action.auto_create_index":"-*"}
 		</property>
 		<!-- Dictionaries -->

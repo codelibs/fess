@@ -23,9 +23,11 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.es.client.SearchEngineClient;
+import org.lastaflute.di.exception.IORuntimeException;
 import org.opensearch.common.xcontent.ToXContent;
 import org.opensearch.common.xcontent.XContentBuilder;
 import org.opensearch.common.xcontent.XContentFactory;
+import org.opensearch.common.xcontent.XContentHelper;
 import org.opensearch.common.xcontent.XContentType;
 import org.opensearch.search.SearchHit;
 
@@ -56,6 +58,14 @@ public final class SearchEngineUtil {
         final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
         return client.<SearchHit> scrollSearch(index, searchRequestBuilder -> true, (searchResponse, hit) -> hit,
                 hit -> callback.apply(hit));
+    }
+
+    public static String getXContentString(final ToXContent xContent, final XContentType xContentType) {
+        try {
+            return XContentHelper.toXContent(xContent, xContentType, ToXContent.EMPTY_PARAMS, false).utf8ToString();
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     public interface XContentBuilderCallback {
