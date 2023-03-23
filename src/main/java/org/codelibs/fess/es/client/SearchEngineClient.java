@@ -1353,6 +1353,9 @@ public class SearchEngineClient implements Client {
         }
 
         protected void buildTrackTotalHits(final FessConfig fessConfig) {
+            if (isScroll) {
+                return;
+            }
             if (StringUtil.isNotBlank(trackTotalHits)) {
                 if (Constants.TRUE.equalsIgnoreCase(trackTotalHits) || Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
                     searchRequestBuilder.setTrackTotalHits(Boolean.parseBoolean(trackTotalHits));
