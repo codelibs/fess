@@ -1,0 +1,573 @@
+openapi: 3.0.3
+info:
+  title: Fess - OpenAPI 3.0
+  description: |-
+    This is a Fess Server based on the OpenAPI 3.0 specification.  
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: API Documentation for Fess
+  url: https://fess.codelibs.org/14.8/api/
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: search
+    description: Search operations
+  - name: popularword
+    description: Popular word operations
+  - name: monitor
+    description: Monitoring operations
+  - name: suggest
+    description: Suggest operations
+paths:
+  /json/search:
+    get:
+      tags:
+        - search
+      summary: Finds documents by query
+      description: Finds documents by search conditions
+      operationId: searchDocuments
+      parameters:
+        - name: q
+          in: query
+          description: Search words
+          required: false
+          schema:
+            type: string
+            example: Fess
+        - name: start
+          in: query
+          description: Start position
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: num
+          in: query
+          description: The number of returned documents as a search result
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            maximum: 100
+            exclusiveMaximum: false
+            default: 20
+            example: 20
+        - name: sort
+          in: query
+          description: Sorted field name
+          required: false
+          schema:
+            type: string
+            example: score
+        - name: fields.label
+          in: query
+          description: Filtered label name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [name]
+        - name: callback
+          in: query
+          description: Callback name for using JSONP
+          required: false
+          schema:
+            type: string
+        - name: facet.field
+          in: query
+          description: Facet field name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [label]
+        - name: facet.query
+          in: query
+          description: Facet query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["timestamp:[now/d-1d TO *]"]
+        - name: facet.size
+          in: query
+          description: Item size in facets returned by facet.field
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 10
+            example: 10
+        - name: facet.minDocCount
+          in: query
+          description: Minumum document size in facets
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: geo.location.point
+          in: query
+          description: Latitude and Longitude for Geo search
+          required: false
+          schema:
+            type: string
+            example: 35.0,139.0
+        - name: geo.location.distance
+          in: query
+          description: Distance for Geo search
+          required: false
+          schema:
+            type: string
+            example: 10km
+        - name: lang
+          in: query
+          description: Language
+          required: false
+          schema:
+            type: string
+            example: en
+        - name: preference
+          in: query
+          description: String to specify a shard for searching
+          required: false
+          schema:
+            type: string
+            example: abc
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: "14.8"
+                      status:
+                        type: integer
+                        example: 0
+                      q:
+                        type: string
+                        example: Fess
+                      query_id:
+                        type: string
+                        example: bd60f9579a494dfd8c03db7c8aa905b0
+                      exec_time:
+                        type: number
+                        example: 0.21
+                      query_time:
+                        type: integer
+                        format: int64
+                        example: 0
+                      page_size:
+                        type: integer
+                        example: 20
+                      page_number:
+                        type: integer
+                        example: 1
+                      record_count:
+                        type: integer
+                        format: int64
+                        example: 31625
+                      page_count:
+                        type: integer
+                        example: 1
+                      highlight_params:
+                        type: string
+                        example: "&hq=n2sm&hq=Fess"
+                      next_page:
+                        type: boolean
+                        example: true
+                      prev_page:
+                        type: boolean
+                        example: false
+                      start_record_number:
+                        type: integer
+                        example: 1
+                      end_record_number:
+                        type: integer
+                        example: 20
+                      page_numbers:
+                        type: array
+                        items:
+                          type: string
+                        example: ["1", "2", "3", "4", "5"]
+                      partial:
+                        type: boolean
+                        example: false
+                      search_query:
+                        type: string
+                        example: "(Fess OR n2sm)"
+                      requested_time:
+                        type: integer
+                        format: int64
+                        example: 1507822131845
+                      related_query:
+                        type: array
+                        items:
+                          type: string
+                        example: ["aaa"]
+                      related_contents:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            filetype:
+                              type: string
+                              example: html
+                            title:
+                              type: string
+                              example: "Open Source Enterprise Search Server: Fess — Fess 11.0 documentation"
+                            content_title:
+                              type: string
+                              example: "Open Source Enterprise Search Server: Fess — Fe..."
+                            digest:
+                              type: string
+                              example: "Docs » Open Source Enterprise Search Server: Fess Commercial Support Open Source Enterprise Search Server: Fess What is Fess ? Fess is very powerful and easily deployable Enterprise Search Server. ..."
+                            host:
+                              type: string
+                              format: hostname
+                              example: "fess.codelibs.org"
+                            last_modified:
+                              type: string
+                              format: date-time
+                              example: "2017-10-09T22:28:56.000Z"
+                            content_length:
+                              type: string
+                              example: "29624"
+                            timestamp:
+                              type: string
+                              format: date-time
+                              example: "2017-10-09T22:28:56.000Z"
+                            url_link:
+                              type: string
+                              example: "https://fess.codelibs.org/"
+                            created:
+                              type: string
+                              format: date-time
+                              example: "2017-10-10T15:00:48.609Z"
+                            site_path:
+                              type: string
+                              example: "fess.codelibs.org/"
+                            doc_id:
+                              type: string
+                              example: "e79fbfdfb09d4bffb58ec230c68f6f7e"
+                            url:
+                              type: string
+                              format: uri
+                              example: "https://fess.codelibs.org/"
+                            content_description:
+                              type: string
+                              example: "Enterprise Search Server: <strong>Fess</strong> Commercial Support Open...Search Server: <strong>Fess</strong> What is <strong>Fess</strong> ? <strong>Fess</strong> is very powerful...You can install and run <strong>Fess</strong> quickly on any platforms...Java runtime environment. <strong>Fess</strong> is provided under Apache...Apache license. Demo <strong>Fess</strong> is Elasticsearch-based search"
+                            site:
+                              type: string
+                              example: "fess.codelibs.org/"
+                            boost:
+                              type: string
+                              example: "10.0"
+                            mimetype:
+                              type: string
+                              example: "text/html"                        
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /json/label:
+    get:
+      tags:
+        - search
+      summary: List labels
+      description: Returns available labels
+      operationId: listLabels
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: "14.8"
+                      status:
+                        type: integer
+                        example: 0
+                      record_count:
+                        type: integer
+                        example: 9
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                              example: AWS
+                            value:
+                              type: string
+                              example: aws
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /json/popularword:
+    get:
+      tags:
+        - popularword
+      summary: List popular words
+      description: Returns available labels
+      operationId: listLPopularWords
+      parameters:
+        - name: seed
+          in: query
+          description: Random seed to return popular words
+          required: false
+          schema:
+            type: string
+            example: 123
+        - name: labels
+          in: query
+          description: Labels to fileter results
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [label]
+        - name: fields
+          in: query
+          description: Fields to find results
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [field]
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: "14.8"
+                      status:
+                        type: integer
+                        example: 0
+                      record_count:
+                        type: integer
+                        example: 9
+                      result:
+                        type: array
+                        items:
+                          type: string
+                        example: ["test"]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          
+  /json/ping:
+    get:
+      tags:
+        - monitor
+      summary: Check a server status
+      description: Returns status
+      operationId: ping
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: "14.8"
+                      status:
+                        type: integer
+                        example: 0
+                      message:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: green
+                          timed_out:
+                            type: boolean
+                            example: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /suggest:
+    get:
+      tags:
+        - suggest
+      summary: Finds suggest words
+      description: Returns words for suggest
+      operationId: findSuggestWords
+      parameters:
+        - name: query
+          in: query
+          description: Inputting characters for search
+          required: true
+          schema:
+            type: string
+            example: fe
+        - name: num
+          in: query
+          description: The number of suggest words
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            example: 10
+            default: 10
+        - name: tags
+          in: query
+          description: Tags to filter results
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "tag1,tag2"
+        - name: fields
+          in: query
+          description: Fields to find results
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "field1,field2"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: "14.8"
+                      status:
+                        type: integer
+                        example: 0
+                      result:
+                        type: object
+                        properties:
+                          took:
+                            type: string
+                            example: 18
+                          total:
+                            type: string
+                            example: 355
+                          num:
+                            type: string
+                            example: 10
+                          hits:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                text:
+                                  type: string
+                                  example: fess
+                                tags:
+                                  type: array
+                                  items:
+                                    type: string
+                                  example: [java, python]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        response:
+          type: object
+          properties:
+            version:
+              type: string
+              example: "14.8"
+            status:
+              type: integer
+              example: 1
+            message:
+              type: string
+              example: "error_code:bd6b0bd6-0144-40bc-9567-c5751dd8eecb"
+    
