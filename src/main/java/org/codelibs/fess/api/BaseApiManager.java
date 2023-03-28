@@ -35,7 +35,7 @@ public abstract class BaseApiManager implements WebApiManager {
     protected String pathPrefix;
 
     protected enum FormatType {
-        SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, OTHER, PING, SCROLL;
+        SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, PING, SCROLL, SUGGEST, OTHER;
     }
 
     public String getPathPrefix() {
@@ -51,6 +51,13 @@ public abstract class BaseApiManager implements WebApiManager {
         if (formatType != null) {
             return formatType;
         }
+
+        formatType = detectFormatType(request);
+        request.setAttribute(API_FORMAT_TYPE, formatType);
+        return formatType;
+    }
+
+    protected FormatType detectFormatType(final HttpServletRequest request) {
         String value = request.getParameter("type");
         if (value == null) {
             final String servletPath = request.getServletPath();
@@ -60,30 +67,30 @@ public abstract class BaseApiManager implements WebApiManager {
             }
         }
         if (value == null) {
-            formatType = FormatType.SEARCH;
+            return FormatType.SEARCH;
         } else {
             final String type = value.toUpperCase(Locale.ROOT);
             if (FormatType.SEARCH.name().equals(type)) {
-                formatType = FormatType.SEARCH;
+                return FormatType.SEARCH;
             } else if (FormatType.LABEL.name().equals(type)) {
-                formatType = FormatType.LABEL;
+                return FormatType.LABEL;
             } else if (FormatType.POPULARWORD.name().equals(type)) {
-                formatType = FormatType.POPULARWORD;
+                return FormatType.POPULARWORD;
             } else if (FormatType.FAVORITE.name().equals(type)) {
-                formatType = FormatType.FAVORITE;
+                return FormatType.FAVORITE;
             } else if (FormatType.FAVORITES.name().equals(type)) {
-                formatType = FormatType.FAVORITES;
+                return FormatType.FAVORITES;
             } else if (FormatType.PING.name().equals(type)) {
-                formatType = FormatType.PING;
+                return FormatType.PING;
             } else if (FormatType.SCROLL.name().equals(type)) {
-                formatType = FormatType.SCROLL;
+                return FormatType.SCROLL;
+            } else if (FormatType.SUGGEST.name().equals(type)) {
+                return FormatType.SUGGEST;
             } else {
                 // default
-                formatType = FormatType.OTHER;
+                return FormatType.OTHER;
             }
         }
-        request.setAttribute(API_FORMAT_TYPE, formatType);
-        return formatType;
     }
 
     protected void write(final String text, final String contentType, final String encoding) {

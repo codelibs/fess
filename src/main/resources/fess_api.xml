@@ -7,6 +7,8 @@
 	<component name="webApiManagerFactory" class="org.codelibs.fess.api.WebApiManagerFactory">
 	</component>
 
+	<component name="searchApiManager" class="org.codelibs.fess.api.json.SearchApiManager">
+	</component>
 	<component name="jsonApiManager" class="org.codelibs.fess.api.json.JsonApiManager">
 	</component>
 	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager">

@@ -33,7 +33,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.api.BaseJsonApiManager;
+import org.codelibs.fess.api.ClassicJsonApiManager;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -49,7 +49,8 @@ import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class SuggestApiManager extends BaseJsonApiManager {
+@Deprecated
+public class SuggestApiManager extends ClassicJsonApiManager {
     private static final Logger logger = LogManager.getLogger(SuggestApiManager.class);
 
     public SuggestApiManager() {

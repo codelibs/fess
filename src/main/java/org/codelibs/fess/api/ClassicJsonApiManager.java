@@ -39,9 +39,10 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
-public abstract class BaseJsonApiManager extends BaseApiManager {
+@Deprecated
+public abstract class ClassicJsonApiManager extends BaseApiManager {
 
-    private static final Logger logger = LogManager.getLogger(BaseJsonApiManager.class);
+    private static final Logger logger = LogManager.getLogger(ClassicJsonApiManager.class);
 
     protected String mimeType = "application/json";
 

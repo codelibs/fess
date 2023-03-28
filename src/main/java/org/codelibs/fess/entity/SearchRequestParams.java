@@ -94,11 +94,11 @@ public abstract class SearchRequestParams {
         return stream(values).get(stream -> stream.allMatch(StringUtil::isBlank));
     }
 
-    protected String[] simplifyArray(final String[] values) {
+    protected static String[] simplifyArray(final String[] values) {
         return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
-    protected String[] getParamValueArray(final HttpServletRequest request, final String param) {
+    public static String[] getParamValueArray(final HttpServletRequest request, final String param) {
         return simplifyArray(request.getParameterValues(param));
     }
 
