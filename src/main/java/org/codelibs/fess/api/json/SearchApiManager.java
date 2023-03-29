@@ -87,9 +87,15 @@ public class SearchApiManager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(SearchApiManager.class);
 
-    private static final String MESSAGE_FIELD = "message";
+    protected static final String MESSAGE_FIELD = "message";
 
-    private static final String RESULT_FIELD = "result";
+    protected static final String RESULT_FIELD = "result";
+
+    private static final String DOC_ID_FIELD = "doc_id";
+
+    protected static final String GET = "GET";
+
+    protected static final String POST = "POST";
 
     protected String mimeType = "application/json";
 
@@ -115,7 +121,10 @@ public class SearchApiManager extends BaseApiManager {
         }
         final String type = value.toLowerCase(Locale.ROOT);
         if ("documents".equals(type)) {
-            // return FormatType.FAVORITE;
+            if (values.length > 5 && "favorite".equals(values[5])) {
+                request.setAttribute(DOC_ID_FIELD, values[4]);
+                return FormatType.FAVORITE;
+            }
             // return FormatType.SCROLL;
             return FormatType.SEARCH;
         } else if ("labels".equals(type)) {
@@ -128,6 +137,8 @@ public class SearchApiManager extends BaseApiManager {
             return FormatType.PING;
         } else if ("suggest-words".equals(type)) {
             return FormatType.SUGGEST;
+        } else if ("scroll".equals(type)) {
+            return FormatType.SCROLL;
         } else {
             // default
             return FormatType.OTHER;
@@ -179,8 +190,22 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    protected boolean acceptHttpMethod(final HttpServletRequest request, final String... methods) {
+        final String method = request.getMethod();
+        for (String m : methods) {
+            if (m.equals(method)) {
+                return true;
+            }
+        }
+        writeJsonResponse(HttpServletResponse.SC_METHOD_NOT_ALLOWED, escapeJsonKeyValue(MESSAGE_FIELD, method + " is not allowed."));
+        return false;
+    }
+
     protected void processScrollSearchRequest(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
         final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -231,12 +256,12 @@ public class SearchApiManager extends BaseApiManager {
             }
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a search request.", e);
+                logger.debug("Failed to process a scroll request.", e);
             }
             writeJsonResponse(HttpServletResponse.SC_BAD_REQUEST, e);
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a search request.", e);
+                logger.debug("Failed to process a scroll request.", e);
             }
             writeJsonResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
@@ -244,6 +269,10 @@ public class SearchApiManager extends BaseApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
+
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         try {
             final PingResponse pingResponse = searchEngineClient.ping();
@@ -258,6 +287,10 @@ public class SearchApiManager extends BaseApiManager {
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
+
         final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
@@ -461,6 +494,10 @@ public class SearchApiManager extends BaseApiManager {
     }
 
     protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
+
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
 
         final StringBuilder buf = new StringBuilder(255);
@@ -499,6 +536,10 @@ public class SearchApiManager extends BaseApiManager {
 
     protected void processPopularWordRequest(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
+
         if (!ComponentUtil.getFessConfig().isWebApiPopularWord()) {
             writeJsonResponse(HttpServletResponse.SC_BAD_REQUEST, escapeJsonKeyValue(MESSAGE_FIELD, "Unsupported operation."));
             return;
@@ -545,6 +586,10 @@ public class SearchApiManager extends BaseApiManager {
     }
 
     protected void processFavoriteRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (!acceptHttpMethod(request, POST)) {
+            return;
+        }
+
         if (!ComponentUtil.getFessConfig().isUserFavorite()) {
             writeJsonResponse(HttpServletResponse.SC_BAD_REQUEST, escapeJsonKeyValue(MESSAGE_FIELD, "Unsupported operation."));
             return;
@@ -557,7 +602,11 @@ public class SearchApiManager extends BaseApiManager {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         try {
-            final String docId = request.getParameter("docId");
+            final Object docIdObj = request.getAttribute(DOC_ID_FIELD);
+            if (docIdObj == null) {
+                throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, "docId is empty.");
+            }
+            final String docId = docIdObj.toString();
             final String queryId = request.getParameter("queryId");
 
             final String[] docIds = userInfoHelper.getResultDocIds(URLDecoder.decode(queryId, Constants.UTF_8));
@@ -630,6 +679,10 @@ public class SearchApiManager extends BaseApiManager {
     }
 
     protected void processFavoritesRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
+
         if (!ComponentUtil.getFessConfig().isUserFavorite()) {
             writeJsonResponse(HttpServletResponse.SC_BAD_REQUEST, escapeJsonKeyValue(MESSAGE_FIELD, "Unsupported operation."));
             return;
@@ -676,14 +729,14 @@ public class SearchApiManager extends BaseApiManager {
             }
 
             final StringBuilder buf = new StringBuilder(255);
-            buf.append("\"num\":").append(docIdList.size());
-            buf.append(", \"doc_ids\":[");
+            buf.append("\"record_count\":").append(docIdList.size());
+            buf.append(", \"data\":[");
             if (!docIdList.isEmpty()) {
                 for (int i = 0; i < docIdList.size(); i++) {
                     if (i > 0) {
                         buf.append(',');
                     }
-                    buf.append(escapeJson(docIdList.get(i)));
+                    buf.append('{').append(escapeJsonKeyValue(DOC_ID_FIELD, docIdList.get(i))).append('}');
                 }
             }
             buf.append(']');
@@ -704,6 +757,10 @@ public class SearchApiManager extends BaseApiManager {
 
     protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
+        if (!acceptHttpMethod(request, GET)) {
+            return;
+        }
+
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isAcceptedSearchReferer(request.getHeader("referer"))) {
             writeJsonResponse(HttpServletResponse.SC_BAD_REQUEST, escapeJsonKeyValue(MESSAGE_FIELD, "Referer is invalid."));

@@ -93,8 +93,8 @@ $(function() {
         actionUrl,
         docId;
     if (values.length === 2 && $queryId.length > 0) {
-      actionUrl = contextPath + "/json";
       docId = values[1];
+      actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
       $.ajax({
         dataType: "json",
         cache: false,
@@ -102,19 +102,13 @@ $(function() {
         timeoutNumber: 10000,
         url: actionUrl,
         data: {
-          type: "favorite",
-          docId: docId,
           queryId: $queryId.val()
         }
       })
         .done(function(data) {
           var $favorited,
               $favoritedCount;
-          if (
-            data.response.status === 0 &&
-            typeof data.response.result !== "undefined" &&
-            data.response.result === "ok"
-          ) {
+          if (data.result === "created") {
             $favorited = $favorite.siblings(".favorited");
             $favoritedCount = $(".favorited-count", $favorited);
             $favoritedCount.css("display", "none");
@@ -136,25 +130,20 @@ $(function() {
     $.ajax({
       dataType: "json",
       cache: false,
-      type: "post",
+      type: "get",
       timeoutNumber: 10000,
-      url: contextPath + "/json",
+      url: contextPath + "/api/v1/favorites",
       data: {
-        type: "favorites",
         queryId: $queryId.val()
       }
     })
       .done(function(data) {
         var docIds,
             i;
-        if (
-          data.response.status === 0 &&
-          typeof data.response.num !== "undefined" &&
-          data.response.num > 0
-        ) {
-          docIds = data.response.doc_ids;
+        if (data.record_count > 0) {
+          docIds = data.data;
           for (i = 0; i < docIds.length; i++) {
-            docIds[i] = "#" + docIds[i];
+            docIds[i] = "#" + docIds[i].doc_id;
           }
           $favorites.each(function(index) {
             var $favorite = $(this),

@@ -335,6 +335,91 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /favorites:
+    get:
+      tags:
+        - favorite
+      summary: List favorites
+      description: Returns favorited document IDs
+      operationId: listFavorites
+      parameters:
+        - name: queryId
+          in: query
+          description: Query ID where the document is contained
+          required: true
+          schema:
+            type: string
+            example: queryid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record_count:
+                    type: integer
+                    example: 9
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        doc_id:
+                          type: string
+                          example: "e79fbfdfb09d4bffb58ec230c68f6f7e"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /documents/{docId}/favorite:
+    post:
+      tags:
+        - favorite
+      summary: Set a favorite mark
+      description: Set a favorite mark to the document
+      operationId: setFavorite
+      parameters:
+        - name: docId
+          in: path
+          description: Document ID to be favorited
+          required: true
+          schema:
+            type: string
+            example: documentid
+        - name: queryId
+          in: query
+          description: Query ID where the document is contained
+          required: true
+          schema:
+            type: string
+            example: queryid
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /popular-words:
     get:
       tags:
