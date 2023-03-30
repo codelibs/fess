@@ -109,8 +109,8 @@
               dataType: "json",
               cache: false,
               data: {
-                query: $textArea.val(),
-                fields: settingAjaxInfo.fn,
+                q: $textArea.val(),
+                field: settingAjaxInfo.fn,
                 num: settingAjaxInfo.num * 2,
                 lang: settingAjaxInfo.lang
               },
@@ -126,12 +126,12 @@
           },
 
           createAutoCompleteList: function(obj) {
-            if (obj.response.status !== 0) {
+            if (typeof obj.record_count === "undefined") {
               $boxElement.css("display", "none");
               return;
             }
 
-            var hits = obj.response.result.hits,
+            var hits = obj.data,
                 suggestor = this,
                 reslist,
                 $olEle,

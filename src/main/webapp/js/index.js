@@ -37,8 +37,8 @@ $(function() {
   if (typeof $.fn.suggestor === "function") {
     $("#contentQuery").suggestor({
       ajaxinfo: {
-        url: contextPath + "/suggest",
-        fn: "_default,content,title",
+        url: contextPath + "/api/v1/suggest-words",
+        fn: ["_default", "content", "title"],
         num: 10,
         lang: $("#langSearchOption").val()
       },

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Fess - OpenAPI 3.0
+  title: Fess - User API
   description: |-
     This is a Fess Server based on the OpenAPI 3.0 specification.  
   license:
@@ -8,7 +8,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 14.8.0
 externalDocs:
-  description: API Documentation for Fess
+  description: API Documentation
   url: https://fess.codelibs.org/14.8/api/
 servers:
   - url: http://localhost:8080/api/v1
@@ -21,6 +21,8 @@ tags:
     description: Monitoring operations
   - name: suggest
     description: Suggest operations
+  - name: favorite
+    description: Favorite operations
 paths:
   /documents:
     get:
@@ -597,14 +599,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  took:
+                  query_time:
                     type: integer
                     format: int64
                     example: 18
-                  total:
+                  record_count:
                     type: integer
                     example: 355
-                  num:
+                  page_size:
                     type: integer
                     example: 10
                   data:
@@ -615,7 +617,7 @@ paths:
                         text:
                           type: string
                           example: fess
-                        field:
+                        labels:
                           type: array
                           items:
                             type: string
