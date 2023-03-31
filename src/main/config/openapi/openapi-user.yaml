@@ -229,7 +229,7 @@ paths:
                     items:
                       type: string
                     example: []
-                  result:
+                  data:
                     type: array
                     items:
                       type: object

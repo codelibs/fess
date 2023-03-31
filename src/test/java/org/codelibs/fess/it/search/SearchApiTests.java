@@ -39,7 +39,7 @@ import io.restassured.response.Response;
 
 /**
  * Integration Tests which need an execution of crawler
- * - /json
+ * - /api/v1/documents
  * */
 @Tag("it")
 public class SearchApiTests extends CrawlTestBase {
@@ -128,9 +128,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             assertTrue(doc.entrySet().stream().anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(query.toLowerCase())),
                     doc.toString());
@@ -143,9 +143,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             for (String keyword : query.split(" ")) {
                 assertTrue(doc.entrySet().stream()
@@ -160,9 +160,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             for (String keyword : query.split(" ")) {
                 if (keyword.equals("AND")) {
@@ -180,15 +180,15 @@ public class SearchApiTests extends CrawlTestBase {
 
         Map<String, String> andParams = new HashMap<>();
         andParams.put("q", query.replace("OR", "AND"));
-        String andResponse = checkMethodBase(new HashMap<>()).params(andParams).get("/json").asString();
-        int andRecordCount = JsonPath.from(andResponse).getInt("response.record_count");
+        String andResponse = checkMethodBase(new HashMap<>()).params(andParams).get("/api/v1/documents").asString();
+        int andRecordCount = JsonPath.from(andResponse).getInt("record_count");
 
         Map<String, String> params = new HashMap<>();
         params.put("q", query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > andRecordCount);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > andRecordCount);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             boolean match = false;
             for (String keyword : query.split(" ")) {
@@ -211,9 +211,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             String[] keywords = query.split(" ");
             assertTrue(doc.entrySet().stream()
@@ -228,9 +228,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("fields.label", TEST_LABEL);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             assertTrue(doc.get("url").toString().toLowerCase().contains(TEST_LABEL), doc.toString());
         }
@@ -242,9 +242,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             String[] fieldAndValue = query.split(":");
             assertTrue(doc.get("content_description").toString().toLowerCase().contains(fieldAndValue[1]), doc.toString());
@@ -258,9 +258,9 @@ public class SearchApiTests extends CrawlTestBase {
         params.put("q", "*");
         params.put("sort", sortField + ".asc");
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 10);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 10);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         int prevVal = 0;
         for (Map<String, Object> doc : docs) {
             int sortValue = Integer.parseInt(doc.get(sortField).toString());
@@ -278,29 +278,29 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", field + ":" + query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        int recordCount = JsonPath.from(response).getInt("response.record_count");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        int recordCount = JsonPath.from(response).getInt("record_count");
         assertTrue(recordCount > 0);
 
         Map<String, String> wcParams1 = new HashMap<>();
         wcParams1.put("q", field + ":" + wcQuery1);
         wcParams1.put("num", "100");
-        String wcResponse1 = checkMethodBase(new HashMap<>()).params(wcParams1).get("/json").asString();
-        int wcRecordCount1 = JsonPath.from(wcResponse1).getInt("response.record_count");
+        String wcResponse1 = checkMethodBase(new HashMap<>()).params(wcParams1).get("/api/v1/documents").asString();
+        int wcRecordCount1 = JsonPath.from(wcResponse1).getInt("record_count");
         assertEquals(recordCount, wcRecordCount1);
 
         Map<String, String> wcParams2 = new HashMap<>();
         wcParams2.put("q", field + ":" + wcQuery2);
         wcParams2.put("num", "100");
-        String wcResponse2 = checkMethodBase(new HashMap<>()).params(wcParams2).get("/json").asString();
-        int wcRecordCount2 = JsonPath.from(wcResponse2).getInt("response.record_count");
+        String wcResponse2 = checkMethodBase(new HashMap<>()).params(wcParams2).get("/api/v1/documents").asString();
+        int wcRecordCount2 = JsonPath.from(wcResponse2).getInt("record_count");
         assertEquals(recordCount, wcRecordCount2);
 
-        List<Map<String, Object>> docs1 = JsonPath.from(wcResponse1).getList("response.result");
+        List<Map<String, Object>> docs1 = JsonPath.from(wcResponse1).getList("data");
         for (Map<String, Object> doc : docs1) {
             assertTrue(doc.get(field).toString().toLowerCase().contains(query), doc.toString());
         }
-        List<Map<String, Object>> docs2 = JsonPath.from(wcResponse2).getList("response.result");
+        List<Map<String, Object>> docs2 = JsonPath.from(wcResponse2).getList("data");
         for (Map<String, Object> doc : docs2) {
             assertTrue(doc.get(field).toString().toLowerCase().contains(query), doc.toString());
         }
@@ -314,9 +314,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", field + ":[" + from + " TO " + to + "]");
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             int value = Integer.parseInt(doc.get(field).toString());
             assertTrue(value >= from);
@@ -332,9 +332,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", field + ":" + query1 + "^1000 OR " + field + ":" + query2);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         boolean switchFlg = false;
         for (Map<String, Object> doc : docs) {
             if (!switchFlg) {
@@ -355,15 +355,15 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", field + ":" + query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        int recordCount = JsonPath.from(response).getInt("response.record_count");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        int recordCount = JsonPath.from(response).getInt("record_count");
         assertTrue(recordCount > 0);
 
         Map<String, String> fuzzyParams1 = new HashMap<>();
         fuzzyParams1.put("q", field + ":" + query + "~");
         fuzzyParams1.put("num", "100");
-        String fuzzyResponse1 = checkMethodBase(new HashMap<>()).params(fuzzyParams1).get("/json").asString();
-        int wcRecordCount1 = JsonPath.from(fuzzyResponse1).getInt("response.record_count");
+        String fuzzyResponse1 = checkMethodBase(new HashMap<>()).params(fuzzyParams1).get("/api/v1/documents").asString();
+        int wcRecordCount1 = JsonPath.from(fuzzyResponse1).getInt("record_count");
         assertTrue(recordCount < wcRecordCount1);
     }
 
@@ -373,9 +373,9 @@ public class SearchApiTests extends CrawlTestBase {
         Map<String, String> params = new HashMap<>();
         params.put("q", "inurl:" + query);
         params.put("num", "100");
-        String response = checkMethodBase(new HashMap<>()).params(params).get("/json").asString();
-        assertTrue(JsonPath.from(response).getInt("response.record_count") > 0);
-        List<Map<String, Object>> docs = JsonPath.from(response).getList("response.result");
+        String response = checkMethodBase(new HashMap<>()).params(params).get("/api/v1/documents").asString();
+        assertTrue(JsonPath.from(response).getInt("record_count") > 0);
+        List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             assertTrue(doc.get("url").toString().toLowerCase().contains(query), doc.toString());
         }
