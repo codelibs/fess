@@ -325,6 +325,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_APPEND_DATA = "crawler.document.append.data";
 
+    /** The key of the configuration. e.g. false */
+    String CRAWLER_DOCUMENT_APPEND_FILENAME = "crawler.document.append.filename";
+
     /** The key of the configuration. e.g. 20 */
     String CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE = "crawler.document.max.alphanum.term.size";
 
@@ -1164,7 +1167,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. org.codelibs,org.dbflute,org.lastaflute */
     String LOGGING_APP_PACKAGES = "logging.app.packages";
 
-    /** The key of the configuration. e.g. 4000 */
+    /** The key of the configuration. e.g. 10000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
 
     /** The key of the configuration. e.g. false */
@@ -2650,6 +2653,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentAppendData();
+
+    /**
+     * Get the value for the key 'crawler.document.append.filename'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentAppendFilename();
+
+    /**
+     * Is the property for the key 'crawler.document.append.filename' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentAppendFilename();
 
     /**
      * Get the value for the key 'crawler.document.max.alphanum.term.size'. <br>
@@ -5422,14 +5439,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
-     * The value is, e.g. 4000 <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFormAdminMaxInputSize();
 
     /**
      * Get the value for the key 'form.admin.max.input.size' as {@link Integer}. <br>
-     * The value is, e.g. 4000 <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -8007,6 +8024,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerDocumentAppendData() {
             return is(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA);
+        }
+
+        public String getCrawlerDocumentAppendFilename() {
+            return get(FessConfig.CRAWLER_DOCUMENT_APPEND_FILENAME);
+        }
+
+        public boolean isCrawlerDocumentAppendFilename() {
+            return is(FessConfig.CRAWLER_DOCUMENT_APPEND_FILENAME);
         }
 
         public String getCrawlerDocumentMaxAlphanumTermSize() {
@@ -10727,6 +10752,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_USE_SITE_ENCODING_ON_ENGLISH, "false");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA, "true");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_APPEND_FILENAME, "false");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE, "20");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE, "10");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED, "false");
@@ -10978,7 +11004,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
             defaultMap.put(FessConfig.LOGGING_SEARCH_USE_LOGFILE, "true");
             defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
-            defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "4000");
+            defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
             defaultMap.put(FessConfig.OSDD_LINK_ENABLED, "true");

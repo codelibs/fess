@@ -213,6 +213,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             }
             buf.append(contentMeta);
         }
+        final String fileName = getFileName(url, urlEncoding);
+        if (StringUtil.isNotBlank(fileName) && fessConfig.isCrawlerDocumentAppendFilename()) {
+            buf.append(' ').append(fileName);
+        }
         final String bodyBase = buf.toString().trim();
         responseData.addMetaData(Extractor.class.getSimpleName(), extractor);
         final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
@@ -232,7 +236,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(),
                 documentHelper.getDigest(responseData, bodyBase, dataMap, fessConfig.getCrawlerDocumentFileMaxDigestLengthAsInteger()));
         // title
-        final String fileName = getFileName(url, urlEncoding);
         if (!hasTitle(dataMap)) {
             final String titleField = fessConfig.getIndexFieldTitle();
             dataMap.remove(titleField);

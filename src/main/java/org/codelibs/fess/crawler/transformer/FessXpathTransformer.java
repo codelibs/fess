@@ -392,8 +392,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         // content
         final String body = getSingleNodeValue(document, getContentXpath(fessConfig, xpathConfigMap),
                 prunedContent ? node -> pruneNode(node, crawlingConfig) : node -> node);
-        putResultDataBody(dataMap, fessConfig.getIndexFieldContent(),
-                documentHelper.getContent(crawlingConfig, responseData, body, dataMap));
+        final String fileName = getFileName(url, urlEncoding);
+        putResultDataContent(dataMap, responseData, fessConfig, crawlingConfig, documentHelper, body, fileName);
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
                 || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
@@ -429,7 +429,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         // site
         putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSite(url, urlEncoding));
         // filename
-        final String fileName = getFileName(url, urlEncoding);
         if (StringUtil.isNotBlank(fileName)) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldFilename(), fileName);
         }
@@ -500,6 +499,16 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final String value = e.getValue();
             putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key), scriptType);
         });
+    }
+
+    protected void putResultDataContent(final Map<String, Object> dataMap, final ResponseData responseData, final FessConfig fessConfig,
+            final CrawlingConfig crawlingConfig, final DocumentHelper documentHelper, final String body, final String fileName) {
+        final String content = documentHelper.getContent(crawlingConfig, responseData, body, dataMap);
+        if (StringUtil.isNotBlank(fileName) && fessConfig.isCrawlerDocumentAppendFilename()) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), content + " " + fileName);
+        } else {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), content);
+        }
     }
 
     protected CrawlingConfig getCrawlingConfig(final ResponseData responseData) {
