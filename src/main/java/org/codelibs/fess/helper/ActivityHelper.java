@@ -19,12 +19,14 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -46,113 +48,120 @@ public class ActivityHelper {
 
     protected String permissionSeparator = "|";
 
+    protected boolean useEcsFormat = false;
+
+    protected String ecsVersion = "1.2.0";
+
+    protected String ecsServiceName = "fess";
+
+    protected String ecsEventDataset = "app";
+
     @PostConstruct
     public void init() {
         logger = LogManager.getLogger(loggerName);
+        final String logFormat = ComponentUtil.getFessConfig().getAppAuditLogFormat();
+        if (StringUtil.isBlank(logFormat)) {
+            useEcsFormat = "docker".equals(System.getenv("FESS_APP_TYPE"));
+        } else if ("ecs".equals(logFormat)) {
+            useEcsFormat = true;
+        }
     }
 
     public void login(final OptionalThing<FessUserBean> user) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("action:");
-        buf.append(Action.LOGIN);
-        buf.append('\t');
-        buf.append("user:");
-        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
-        buf.append('\t');
-        buf.append("permissions:");
-        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
-                .filter(StringUtil::isNotBlank).orElse("-"));
-        log(buf);
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.LOGIN.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("permissions",
+                user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                        .filter(StringUtil::isNotBlank).orElse("-"));
+        log(valueMap);
     }
 
     public void loginFailure(final OptionalThing<LoginCredential> credential) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("action:");
-        buf.append(Action.LOGIN_FAILURE);
-        credential.map(c -> {
-            final StringBuilder buffer = new StringBuilder(100);
-            buffer.append('\t');
-            buffer.append("class:");
-            buffer.append(c.getClass().getSimpleName());
-            if (c instanceof FessCredential) {
-                buffer.append('\t');
-                buffer.append("user:");
-                buffer.append(((FessCredential) c).getUserId());
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.LOGIN_FAILURE.name());
+        credential.ifPresent(c -> {
+            valueMap.put("class", c.getClass().getSimpleName());
+            if (c instanceof FessCredential fessCredential) {
+                valueMap.put("user", fessCredential.getUserId());
             }
-            return buffer.toString();
-        }).ifPresent(buf::append);
-        log(buf);
+        });
+        log(valueMap);
     }
 
     public void logout(final OptionalThing<FessUserBean> user) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("action:");
-        buf.append(Action.LOGOUT);
-        buf.append('\t');
-        buf.append("user:");
-        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
-        buf.append('\t');
-        buf.append("permissions:");
-        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
-                .filter(StringUtil::isNotBlank).orElse("-"));
-        log(buf);
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.LOGOUT.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("permissions",
+                user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                        .filter(StringUtil::isNotBlank).orElse("-"));
+        log(valueMap);
     }
 
     public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("action:");
-        buf.append(Action.ACCESS);
-        buf.append('\t');
-        buf.append("user:");
-        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
-        buf.append('\t');
-        buf.append("path:");
-        buf.append(path);
-        buf.append('\t');
-        buf.append("execute:");
-        buf.append(execute);
-        log(buf);
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.ACCESS.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("path", path);
+        valueMap.put("execute", execute);
+        log(valueMap);
     }
 
     public void permissionChanged(final OptionalThing<FessUserBean> user) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("action:");
-        buf.append(Action.UPDATE_PERMISSION);
-        buf.append('\t');
-        buf.append("user:");
-        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
-        buf.append('\t');
-        buf.append("permissions:");
-        buf.append(user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
-                .filter(StringUtil::isNotBlank).orElse("-"));
-        log(buf);
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.UPDATE_PERMISSION.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("permissions",
+                user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
+                        .filter(StringUtil::isNotBlank).orElse("-"));
+        log(valueMap);
     }
 
     public void print(final String action, final OptionalThing<FessUserBean> user, final Map<String, String> params) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("action:");
-        buf.append(action.replace('\t', '_').toUpperCase(Locale.ENGLISH));
-        buf.append('\t');
-        buf.append("user:");
-        buf.append(user.map(FessUserBean::getUserId).orElse("-"));
-        params.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).map(s -> s.replace('\t', '_')).sorted().forEach(s -> {
-            buf.append('\t');
-            buf.append(s);
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", action.replace('\t', '_').toUpperCase(Locale.ENGLISH));
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        params.entrySet().stream().sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey())).forEach(e -> {
+            valueMap.put(e.getKey(), e.getValue().replace('\t', '_'));
         });
-        log(buf);
+        log(valueMap);
     }
 
-    protected void log(final StringBuilder buf) {
-        buf.append('\t');
-        buf.append("ip:");
-        buf.append(getClientIp());
-        buf.append('\t');
-        buf.append("time:");
-        buf.append(DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now()));
-        logger.info(buf.toString());
+    protected void log(final Map<String, String> valueMap) {
+        valueMap.put("ip", getClientIp());
+        valueMap.put("time", DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now()));
+        if (useEcsFormat) {
+            printByEcs(valueMap);
+        } else {
+            printByLtsv(valueMap);
+        }
     }
 
-    protected static String getClientIp() {
+    protected void printByLtsv(final Map<String, String> valueMap) {
+        printLog(valueMap.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.joining("\t")));
+    }
+
+    protected void printByEcs(final Map<String, String> valueMap) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("{\"@timestamp\":\"").append(valueMap.remove("time")).append('"');
+        buf.append(",\"log.level\":\"INFO\"");
+        buf.append(",\"ecs.version\":\"").append(ecsVersion).append('"');
+        buf.append(",\"service.name\":\"").append(ecsServiceName).append('"');
+        buf.append(",\"event.dataset\":\"").append(ecsEventDataset).append('"');
+        buf.append(",\"process.thread.name\":\"").append(StringEscapeUtils.escapeJson(Thread.currentThread().getName())).append('"');
+        buf.append(",\"log.logger\":\"").append(StringEscapeUtils.escapeJson(this.getClass().getName())).append('"');
+        valueMap.entrySet().stream().forEach(e -> buf.append(",\"labels.").append(e.getKey()).append("\":\"")
+                .append(StringEscapeUtils.escapeJson(e.getValue())).append('"'));
+        buf.append('}');
+        printLog(buf.toString());
+    }
+
+    protected void printLog(final String message) {
+        logger.info(message);
+    }
+
+    protected String getClientIp() {
         return LaRequestUtil.getOptionalRequest().map(req -> ComponentUtil.getViewHelper().getClientIp(req)).orElse("-");
     }
 
@@ -166,5 +175,17 @@ public class ActivityHelper {
 
     public void setPermissionSeparator(final String permissionSeparator) {
         this.permissionSeparator = permissionSeparator;
+    }
+
+    public void setEcsVersion(String ecsVersion) {
+        this.ecsVersion = ecsVersion;
+    }
+
+    public void setEcsServiceName(String ecsServiceName) {
+        this.ecsServiceName = ecsServiceName;
+    }
+
+    public void setEcsEventDataset(String ecsEventDataset) {
+        this.ecsEventDataset = ecsEventDataset;
     }
 }
