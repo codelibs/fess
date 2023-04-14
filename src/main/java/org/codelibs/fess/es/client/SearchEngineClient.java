@@ -1182,7 +1182,7 @@ public class SearchEngineClient implements Client {
         }
     }
 
-    public void addAll(final String index, final List<Map<String, Object>> docList,
+    public String[] addAll(final String index, final List<Map<String, Object>> docList,
             final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
@@ -1210,6 +1210,8 @@ public class SearchEngineClient implements Client {
             }
             throw new SearchEngineClientException(response.buildFailureMessage());
         }
+
+        return Arrays.stream(response.getItems()).map(res -> res.getId()).toArray(n -> new String[n]);
     }
 
     public static class SearchConditionBuilder {
