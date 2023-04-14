@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
 
 public abstract class SearchRequestParams {
 
@@ -136,5 +137,9 @@ public abstract class SearchRequestParams {
 
     public enum SearchRequestType {
         SEARCH, ADMIN_SEARCH, JSON, GSA, SUGGEST;
+    }
+
+    public String[] getResponseFields() {
+        return ComponentUtil.getQueryFieldConfig().getResponseFields();
     }
 }

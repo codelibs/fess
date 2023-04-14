@@ -161,7 +161,6 @@ public class SearchHelper {
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
         final int pageSize = params.getPageSize();
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.REQUEST_PAGE_SIZE, pageSize);
@@ -170,7 +169,7 @@ public class SearchHelper {
             queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(params.getStartPosition()).size(pageSize)
                     .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
-                    .similarDocHash(params.getSimilarDocHash()).responseFields(queryFieldConfig.getResponseFields())
+                    .similarDocHash(params.getSimilarDocHash()).responseFields(params.getResponseFields())
                     .searchRequestType(params.getType()).trackTotalHits(params.getTrackTotalHits()).build();
         }, (searchRequestBuilder, execTime, searchResponse) -> {
             searchResponse.ifPresent(r -> {
