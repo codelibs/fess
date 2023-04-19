@@ -127,22 +127,27 @@ public class SearchApiManager extends BaseApiManager {
             }
             // return FormatType.SCROLL;
             return FormatType.SEARCH;
-        } else if ("labels".equals(type)) {
-            return FormatType.LABEL;
-        } else if ("popular-words".equals(type)) {
-            return FormatType.POPULARWORD;
-        } else if ("favorites".equals(type)) {
-            return FormatType.FAVORITES;
-        } else if ("health".equals(type)) {
-            return FormatType.PING;
-        } else if ("suggest-words".equals(type)) {
-            return FormatType.SUGGEST;
-        } else if ("scroll".equals(type)) {
-            return FormatType.SCROLL;
-        } else {
-            // default
-            return FormatType.OTHER;
         }
+        if ("labels".equals(type)) {
+            return FormatType.LABEL;
+        }
+        if ("popular-words".equals(type)) {
+            return FormatType.POPULARWORD;
+        }
+        if ("favorites".equals(type)) {
+            return FormatType.FAVORITES;
+        }
+        if ("health".equals(type)) {
+            return FormatType.PING;
+        }
+        if ("suggest-words".equals(type)) {
+            return FormatType.SUGGEST;
+        }
+        if ("scroll".equals(type)) {
+            return FormatType.SCROLL;
+        }
+        // default
+        return FormatType.OTHER;
     }
 
     @Override
@@ -192,7 +197,7 @@ public class SearchApiManager extends BaseApiManager {
 
     protected boolean acceptHttpMethod(final HttpServletRequest request, final String... methods) {
         final String method = request.getMethod();
-        for (String m : methods) {
+        for (final String m : methods) {
             if (m.equals(method)) {
                 return true;
             }

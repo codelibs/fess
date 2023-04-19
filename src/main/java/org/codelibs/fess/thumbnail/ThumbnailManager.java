@@ -543,7 +543,7 @@ public class ThumbnailManager {
         this.noImageExpired = noImageExpired;
     }
 
-    public void setSplitHashSize(int splitHashSize) {
+    public void setSplitHashSize(final int splitHashSize) {
         this.splitHashSize = splitHashSize;
     }
 

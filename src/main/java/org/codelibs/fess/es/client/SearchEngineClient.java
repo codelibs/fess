@@ -1211,7 +1211,7 @@ public class SearchEngineClient implements Client {
             throw new SearchEngineClientException(response.buildFailureMessage());
         }
 
-        return Arrays.stream(response.getItems()).map(res -> res.getId()).toArray(n -> new String[n]);
+        return Arrays.stream(response.getItems()).map(BulkItemResponse::getId).toArray(n -> new String[n]);
     }
 
     public static class SearchConditionBuilder {

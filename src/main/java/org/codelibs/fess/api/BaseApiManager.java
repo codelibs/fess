@@ -68,29 +68,35 @@ public abstract class BaseApiManager implements WebApiManager {
         }
         if (value == null) {
             return FormatType.SEARCH;
-        } else {
-            final String type = value.toUpperCase(Locale.ROOT);
-            if (FormatType.SEARCH.name().equals(type)) {
-                return FormatType.SEARCH;
-            } else if (FormatType.LABEL.name().equals(type)) {
-                return FormatType.LABEL;
-            } else if (FormatType.POPULARWORD.name().equals(type)) {
-                return FormatType.POPULARWORD;
-            } else if (FormatType.FAVORITE.name().equals(type)) {
-                return FormatType.FAVORITE;
-            } else if (FormatType.FAVORITES.name().equals(type)) {
-                return FormatType.FAVORITES;
-            } else if (FormatType.PING.name().equals(type)) {
-                return FormatType.PING;
-            } else if (FormatType.SCROLL.name().equals(type)) {
-                return FormatType.SCROLL;
-            } else if (FormatType.SUGGEST.name().equals(type)) {
-                return FormatType.SUGGEST;
-            } else {
-                // default
-                return FormatType.OTHER;
-            }
         }
+        final String type = value.toUpperCase(Locale.ROOT);
+        if (FormatType.SEARCH.name().equals(type)) {
+            return FormatType.SEARCH;
+        }
+        if (FormatType.LABEL.name().equals(type)) {
+            return FormatType.LABEL;
+        }
+        if (FormatType.POPULARWORD.name().equals(type)) {
+            return FormatType.POPULARWORD;
+        }
+        if (FormatType.FAVORITE.name().equals(type)) {
+            return FormatType.FAVORITE;
+        }
+        if (FormatType.FAVORITES.name().equals(type)) {
+            return FormatType.FAVORITES;
+        }
+        if (FormatType.PING.name().equals(type)) {
+            return FormatType.PING;
+        }
+        if (FormatType.SCROLL.name().equals(type)) {
+            return FormatType.SCROLL;
+        }
+        if (FormatType.SUGGEST.name().equals(type)) {
+            return FormatType.SUGGEST;
+        }
+
+        // default
+        return FormatType.OTHER;
     }
 
     protected void write(final String text, final String contentType, final String encoding) {

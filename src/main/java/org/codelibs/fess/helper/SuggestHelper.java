@@ -398,7 +398,7 @@ public class SuggestHelper {
         }
     }
 
-    public void setSearchStoreInterval(long searchStoreInterval) {
+    public void setSearchStoreInterval(final long searchStoreInterval) {
         this.searchStoreInterval = searchStoreInterval;
     }
 }

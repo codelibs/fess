@@ -63,7 +63,7 @@ public final class SearchEngineUtil {
     public static String getXContentString(final ToXContent xContent, final XContentType xContentType) {
         try {
             return XContentHelper.toXContent(xContent, xContentType, ToXContent.EMPTY_PARAMS, false).utf8ToString();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
     }

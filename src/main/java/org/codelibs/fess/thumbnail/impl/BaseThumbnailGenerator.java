@@ -84,7 +84,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             return false;
         }
         for (final Map.Entry<String, String> entry : conditionMap.entrySet()) {
-            if (docMap.get(entry.getKey()) instanceof String value && value.matches(entry.getValue())) {
+            if (docMap.get(entry.getKey()) instanceof final String value && value.matches(entry.getValue())) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("[{}] match {}:{}", entry.getKey(), name, value);
                 }

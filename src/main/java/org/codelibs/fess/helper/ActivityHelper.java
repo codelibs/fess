@@ -82,7 +82,7 @@ public class ActivityHelper {
         valueMap.put("action", Action.LOGIN_FAILURE.name());
         credential.ifPresent(c -> {
             valueMap.put("class", c.getClass().getSimpleName());
-            if (c instanceof FessCredential fessCredential) {
+            if (c instanceof final FessCredential fessCredential) {
                 valueMap.put("user", fessCredential.getUserId());
             }
         });
@@ -177,15 +177,15 @@ public class ActivityHelper {
         this.permissionSeparator = permissionSeparator;
     }
 
-    public void setEcsVersion(String ecsVersion) {
+    public void setEcsVersion(final String ecsVersion) {
         this.ecsVersion = ecsVersion;
     }
 
-    public void setEcsServiceName(String ecsServiceName) {
+    public void setEcsServiceName(final String ecsServiceName) {
         this.ecsServiceName = ecsServiceName;
     }
 
-    public void setEcsEventDataset(String ecsEventDataset) {
+    public void setEcsEventDataset(final String ecsEventDataset) {
         this.ecsEventDataset = ecsEventDataset;
     }
 }
