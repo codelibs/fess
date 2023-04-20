@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -122,7 +123,8 @@ public class ActivityHelper {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", action.replace('\t', '_').toUpperCase(Locale.ENGLISH));
         valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
-        params.entrySet().stream().sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey())).forEach(e -> {
+        final Comparator<Map.Entry<String, String>> c = Comparator.comparing(Map.Entry::getKey);
+        params.entrySet().stream().sorted(c).forEach(e -> {
             valueMap.put(e.getKey(), e.getValue().replace('\t', '_'));
         });
         log(valueMap);
