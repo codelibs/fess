@@ -299,6 +299,56 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /documents/all:
+    get:
+      tags:
+        - search
+      summary: Finds all documents by query
+      description: Finds all documents by search conditions
+      operationId: searchAllDocuments
+      parameters:
+        - name: q
+          in: query
+          description: Search words
+          required: false
+          schema:
+            type: string
+            example: Fess
+        - name: num
+          in: query
+          description: The number of returned documents as a search result
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            maximum: 100
+            exclusiveMaximum: false
+            default: 20
+            example: 20
+        - name: sort
+          in: query
+          description: Sorted field name
+          required: false
+          schema:
+            type: string
+            example: score
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/x-ndjson:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /labels:
     get:
       tags:
