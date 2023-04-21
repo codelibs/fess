@@ -16,13 +16,11 @@
 package org.codelibs.fess.dict;
 
 import java.io.File;
-import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.dict.synonym.SynonymCreator;
-import org.codelibs.fess.dict.synonym.SynonymFile;
+import org.codelibs.fess.dict.mapping.CharMappingCreator;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class DictionaryManagerTest extends UnitFessTestCase {
@@ -46,15 +44,25 @@ public class DictionaryManagerTest extends UnitFessTestCase {
         FileUtils.deleteDirectory(testDir);
     }
 
+    public void test_init() {
+        final DictionaryManager dictionaryManager = new DictionaryManager();
+        dictionaryManager.init();
+        assertEquals(0, dictionaryManager.creatorList.size());
+
+        dictionaryManager.addCreator(new CharMappingCreator());
+        dictionaryManager.init();
+        assertEquals(1, dictionaryManager.creatorList.size());
+    }
+
+    /*
     public void test_storeSynonymFiles() throws Exception {
         final DictionaryManager dictionaryManager = new DictionaryManager();
         final SynonymCreator synonymCreator = new SynonymCreator();
         final SynonymFile synonymFile = (SynonymFile) synonymCreator.create(file1.getPath(), new Date());
-        // TODO
-        // dictionaryManager.store(synonymFile, file1);
-        // final DictionaryFile<? extends DictionaryItem>[] synonymFiles = dictionaryManager.getDictionaryFiles();
-        // assertEquals(1, synonymFiles.length);
-        assertTrue(true);
+        dictionaryManager.store(synonymFile, file1);
+        final DictionaryFile<? extends DictionaryItem>[] synonymFiles = dictionaryManager.getDictionaryFiles();
+        assertEquals(1, synonymFiles.length);
     }
+    */
 
 }
