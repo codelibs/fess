@@ -139,7 +139,7 @@ public class LdapManager {
             try (DirContextHolder holder = getDirContext(() -> env)) {
                 final DirContext context = holder.get();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Logged in as Bind DN.", context);
+                    logger.debug("Logged in as Bind DN. {}", context);
                 }
                 isBind = true;
             } catch (final Exception e) {
@@ -186,7 +186,7 @@ public class LdapManager {
                 return OptionalEntity.empty();
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Logged in.", context);
+                logger.debug("Logged in. {}", context);
             }
             return OptionalEntity.of(ldapUser);
         } catch (final Exception e) {

@@ -15,13 +15,15 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -38,6 +40,8 @@ import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
 public class FailureUrlService {
+
+    private static final Logger logger = LogManager.getLogger(FailureUrlService.class);
 
     @Resource
     protected FailureUrlBhv failureUrlBhv;
@@ -149,7 +153,7 @@ public class FailureUrlService {
         });
 
         failureUrl.setErrorName(errorName);
-        failureUrl.setErrorLog(StringUtils.abbreviate(getStackTrace(e), 4000));
+        failureUrl.setErrorLog(getStackTrace(e));
         failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         failureUrl.setThreadName(Thread.currentThread().getName());
 
@@ -160,9 +164,13 @@ public class FailureUrlService {
 
     private String getStackTrace(final Throwable t) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final StringBuilderWriter sw = new StringBuilderWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        t.printStackTrace(pw);
-        return systemHelper.abbreviateLongText(sw.toString());
+        try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+            t.printStackTrace(pw);
+            pw.flush();
+            return systemHelper.abbreviateLongText(sw.toString());
+        } catch (final IOException e) {
+            logger.warn("Failed to print the stack trace {}", t.getMessage(), e);
+        }
+        return StringUtil.EMPTY;
     }
 }

@@ -556,14 +556,14 @@ public class SearchLogService {
     }
 
     public void deleteSearchLog(final Object e) {
-        if (e instanceof ClickLog) {
-            clickLogBhv.delete((ClickLog) e);
-        } else if (e instanceof FavoriteLog) {
-            favoriteLogBhv.delete((FavoriteLog) e);
-        } else if (e instanceof UserInfo) {
-            userInfoBhv.delete((UserInfo) e);
-        } else if (e instanceof SearchLog) {
-            searchLogBhv.delete((SearchLog) e);
+        if (e instanceof final ClickLog clickLog) {
+            clickLogBhv.delete(clickLog);
+        } else if (e instanceof final FavoriteLog favoriteLog) {
+            favoriteLogBhv.delete(favoriteLog);
+        } else if (e instanceof final UserInfo userInfo) {
+            userInfoBhv.delete(userInfo);
+        } else if (e instanceof final SearchLog searchLog) {
+            searchLogBhv.delete(searchLog);
         } else {
             throw new FessSystemException("Unknown log entity: " + e);
         }

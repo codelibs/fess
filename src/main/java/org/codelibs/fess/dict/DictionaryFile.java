@@ -38,7 +38,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
 
     protected Date timestamp;
 
-    public DictionaryFile(final String id, final String path, final Date timestamp) {
+    protected DictionaryFile(final String id, final String path, final Date timestamp) {
         this.id = id;
         this.path = path;
         this.timestamp = timestamp;

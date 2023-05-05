@@ -377,7 +377,9 @@ public class Crawler {
                 }
                 buf.append(entry.getKey()).append('=').append(entry.getValue());
             }
-            logger.info("[CRAWL INFO] {}", buf.toString());
+            if (logger.isInfoEnabled()) {
+                logger.info("[CRAWL INFO] {}", buf);
+            }
 
             // notification
             try {
