@@ -317,10 +317,12 @@ public class QueryHelperTest extends UnitFessTestCase {
                 "{\"timestamp\":{\"order\":\"desc\"}}{\"last_modified\":{\"order\":\"desc\"}}", //
                 buildQuery("sort:timestamp.desc sort:last_modified.desc"));
 
-        assertQueryContext(query, Map.of(), //
-                Set.of(), //
-                "{\"timestamp\":{\"order\":\"asc\"}}", //
-                buildQuery("sort:timestamp.xxx"));
+        try {
+            buildQuery("sort:timestamp.xxx");
+            fail();
+        } catch (InvalidQueryException e) {
+            // ok
+        }
 
         try {
             buildQuery("sort:aaa");

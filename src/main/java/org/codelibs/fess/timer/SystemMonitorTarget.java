@@ -59,7 +59,9 @@ public class SystemMonitorTarget extends MonitorTarget {
         appendTimestamp(buf);
         buf.append('}');
 
-        logger.info(buf.toString());
+        if (logger.isInfoEnabled()) {
+            logger.info(buf.toString());
+        }
     }
 
     private void appendJvmStats(final StringBuilder buf) {

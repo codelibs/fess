@@ -124,7 +124,8 @@ public class SearchApiManager extends BaseApiManager {
             if (values.length > 5 && "favorite".equals(values[5])) {
                 request.setAttribute(DOC_ID_FIELD, values[4]);
                 return FormatType.FAVORITE;
-            } else if (values.length > 4 && "all".equals(values[4])) {
+            }
+            if (values.length > 4 && "all".equals(values[4])) {
                 return FormatType.SCROLL;
             }
             return FormatType.SEARCH;

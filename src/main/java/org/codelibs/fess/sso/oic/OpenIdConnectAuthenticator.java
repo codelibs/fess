@@ -211,6 +211,8 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                         }
                         attributes.put("groups", list.toArray(new String[list.size()]));
                         break;
+                    default:
+                        break;
                     }
                 }
             }

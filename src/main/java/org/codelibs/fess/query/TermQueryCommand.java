@@ -138,10 +138,13 @@ public class TermQueryCommand extends QueryCommand {
                         messages -> messages.addErrorsInvalidQueryUnsupportedSortField(UserMessages.GLOBAL_PROPERTY_KEY, sortField),
                         "Unsupported sort field: " + termQuery);
             }
-            SortOrder sortOrder;
+            final SortOrder sortOrder;
             if (values.length == 2) {
-                sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
-                if (sortOrder == null) {
+                if (SortOrder.DESC.toString().equalsIgnoreCase(values[1])) {
+                    sortOrder = SortOrder.DESC;
+                } else if (SortOrder.ASC.toString().equalsIgnoreCase(values[1])) {
+                    sortOrder = SortOrder.ASC;
+                } else {
                     throw new InvalidQueryException(
                             messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(UserMessages.GLOBAL_PROPERTY_KEY, values[1]),
                             "Invalid sort order: " + termQuery);

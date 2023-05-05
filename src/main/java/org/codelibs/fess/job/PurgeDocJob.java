@@ -39,7 +39,7 @@ public class PurgeDocJob {
             searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), queryBuilder);
 
         } catch (final Exception e) {
-            logger.error("Could not delete expired documents: {}", queryBuilder.toString(), e);
+            logger.error("Could not delete expired documents: {}", queryBuilder, e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 

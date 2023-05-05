@@ -30,7 +30,7 @@ public abstract class DictionaryCreator {
     @Resource
     protected DictionaryManager dictionaryManager;
 
-    public DictionaryCreator(final String pattern) {
+    protected DictionaryCreator(final String pattern) {
         this.pattern = Pattern.compile(pattern);
     }
 

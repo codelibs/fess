@@ -51,7 +51,10 @@ public class FessWebResourceRoot extends StandardRoot {
                         }
                     }
                 } catch (final Exception e) {
-                    logger.log(Level.WARNING, "Failed to read " + possibleJar, e);
+                    logger.log(Level.WARNING, e, () -> {
+                        final String canonicalPath = possibleJar.getCanonicalPath();
+                        return "Failed to read " + canonicalPath;
+                    });
                 }
             }
         }

@@ -64,7 +64,9 @@ public class HotThreadMonitorTarget extends MonitorTarget {
         appendTimestamp(buf);
         buf.append('}');
 
-        logger.info(buf.toString());
+        if (logger.isInfoEnabled()) {
+            logger.info(buf.toString());
+        }
     }
 
 }
