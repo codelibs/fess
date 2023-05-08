@@ -390,9 +390,13 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     @Override
     public Integer getTimeToLive() {
-        final String value = getHandlerParameterMap().get("timeToLive");
+        String value = getHandlerParameterMap().get("time_to_live");
         if (StringUtil.isBlank(value)) {
-            return null;
+            value = getHandlerParameterMap().get("timeToLive"); // TODO remove
+            if (StringUtil.isBlank(value)) {
+                return null;
+            }
+            logger.warn("timeToLive is deprecated. Please use time_to_live.");
         }
         try {
             return Integer.parseInt(value);
