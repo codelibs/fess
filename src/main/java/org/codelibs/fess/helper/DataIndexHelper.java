@@ -240,7 +240,7 @@ public class DataIndexHelper {
             final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()//
                     .must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))//
                     .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
-            if (!Constants.TRUE.equals(initParamMap.getAsString(KEEP_EXPIRES_DOCS))) {
+            if (!Constants.FALSE.equals(initParamMap.getAsString(KEEP_EXPIRES_DOCS))) {
                 final QueryBuilder expiresCheckQuery = QueryBuilders.boolQuery()//
                         .mustNot(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).gt("now"))//
                         .mustNot(QueryBuilders.existsQuery(fessConfig.getIndexFieldExpires()));
