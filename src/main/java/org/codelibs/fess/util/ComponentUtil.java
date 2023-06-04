@@ -27,6 +27,7 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.auth.AuthenticationManager;
+import org.codelibs.fess.cors.CorsHandlerFactory;
 import org.codelibs.fess.crawler.client.CrawlerClientCreator;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.EsAccessResult;
@@ -210,6 +211,8 @@ public final class ComponentUtil {
     private static final String RELATED_QUERY_HELPER = "relatedQueryHelper";
 
     private static final String CRAWLER_STATS_HELPER = "crawlerStatsHelper";
+
+    private static final String CORS_HANDLER_FACTORY = "corsHandlerFactory";
 
     private static IndexingHelper indexingHelper;
 
@@ -510,6 +513,10 @@ public final class ComponentUtil {
 
     public static CrawlerStatsHelper getCrawlerStatsHelper() {
         return getComponent(CRAWLER_STATS_HELPER);
+    }
+
+    public static CorsHandlerFactory getCorsHandlerFactory() {
+        return getComponent(CORS_HANDLER_FACTORY);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

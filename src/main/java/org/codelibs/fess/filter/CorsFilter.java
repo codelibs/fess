@@ -28,7 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.cors.CorsHandler;
+import org.codelibs.fess.cors.CorsHandlerFactory;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class CorsFilter implements Filter {
@@ -37,66 +38,31 @@ public class CorsFilter implements Filter {
 
     protected static final String OPTIONS = "OPTIONS";
 
-    protected static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-
-    protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
-
-    protected static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-
-    protected static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
-
-    protected static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
-    protected static final String WILDCARD = "*";
-
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) request;
         final String origin = httpRequest.getHeader("Origin");
-        if (StringUtil.isBlank(origin)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("HTTP Request: {}", httpRequest.getMethod());
-        }
-
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-
-        final String allowOrigin = getAllowOrigin(fessConfig, origin);
-        if (StringUtil.isNotBlank(allowOrigin)) {
+        if (StringUtil.isNotBlank(origin)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("allowOrigin: {}", allowOrigin);
+                logger.debug("HTTP Request: {}", httpRequest.getMethod());
             }
-            final HttpServletResponse httpResponse = (HttpServletResponse) response;
-            httpResponse.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, allowOrigin);
-            httpResponse.addHeader(ACCESS_CONTROL_ALLOW_METHODS, fessConfig.getApiCorsAllowMethods());
-            httpResponse.addHeader(ACCESS_CONTROL_ALLOW_HEADERS, fessConfig.getApiCorsAllowHeaders());
-            httpResponse.addHeader(ACCESS_CONTROL_MAX_AGE, fessConfig.getApiCorsMaxAge());
-            httpResponse.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, fessConfig.getApiCorsAllowCredentials());
+            final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
+            final CorsHandler handler = factory.get(origin);
+            if (handler != null) {
+                handler.process(origin, request, response);
 
-            if (OPTIONS.equals(httpRequest.getMethod())) {
-                httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
-                return;
+                if (OPTIONS.equals(httpRequest.getMethod())) {
+                    final HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
+                    return;
+                }
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("No CorsHandler for {}", origin);
             }
         }
 
         chain.doFilter(request, response);
-    }
-
-    protected String getAllowOrigin(final FessConfig fessConfig, final String origin) {
-        final String allowOrigin = fessConfig.getApiCorsAllowOrigin();
-        if (StringUtil.isBlank(allowOrigin)) {
-            return StringUtil.EMPTY;
-        }
-
-        if (WILDCARD.equals(allowOrigin)) {
-            return allowOrigin;
-        }
-
-        return fessConfig.getApiCorsAllowOriginList().stream().filter(s -> s.equals(origin)).findFirst().orElse(StringUtil.EMPTY);
     }
 
 }
