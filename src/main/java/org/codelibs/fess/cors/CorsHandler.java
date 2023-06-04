@@ -20,6 +20,18 @@ import javax.servlet.ServletResponse;
 
 public abstract class CorsHandler {
 
+    protected static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+
+    protected static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+
+    protected static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+
+    protected static final String ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK = "Access-Control-Allow-Private-Network";
+
+    protected static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+
+    protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
+
     public abstract void process(String origin, ServletRequest request, ServletResponse response);
 
 }

@@ -25,16 +25,6 @@ import org.codelibs.fess.util.ComponentUtil;
 
 public class DefaultCorsHandler extends CorsHandler {
 
-    protected static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-
-    protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
-
-    protected static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-
-    protected static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
-
-    protected static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
     @PostConstruct
     public void register() {
         final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
