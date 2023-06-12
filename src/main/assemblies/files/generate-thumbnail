@@ -3,7 +3,7 @@
 cmd_type=$1
 url=$2
 output_file=$3
-image_size=100x100!
+image_size=100x100
 target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
 
 check_command() {
@@ -30,28 +30,28 @@ if [[ x"${cmd_type}" = "xmsoffice" ]] ; then
     exit 1
   fi
   tmp_png_prefix=/tmp/thumbnail.png.$$
-  pdftoppm -png -l 1 ${tmp_pdf_file} ${tmp_png_prefix}
-  tmp_png_file="${tmp_png_prefix}-1.png"
-  rm ${tmp_pdf_file}
+  pdftoppm -png -singlefile ${tmp_pdf_file} ${tmp_png_prefix}
+  tmp_png_file="${tmp_png_prefix}.png"
+  rm -f ${tmp_pdf_file}
   if [[ ! -f ${tmp_png_file} ]] ; then
     echo "pdftoppm does not work."
     exit 1
   fi
   convert -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
-  rm ${tmp_png_prefix}*png
+  rm -f ${tmp_png_prefix}*png
 elif [[ x"${cmd_type}" = "xpdf" ]] ; then
   check_command convert
   check_command pdftoppm
   target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
   tmp_png_prefix=/tmp/thumbnail.png.$$
-  pdftoppm -png -l 1 "${target_file}" ${tmp_png_prefix}
-  tmp_png_file="${tmp_png_prefix}-1.png"
+  pdftoppm -png -singlefile "${target_file}" ${tmp_png_prefix}
+  tmp_png_file="${tmp_png_prefix}.png"
   if [[ ! -f ${tmp_png_file} ]] ; then
     echo "pdftoppm does not work."
     exit 1
   fi
   convert -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
-  rm ${tmp_png_prefix}*png
+  rm -f ${tmp_png_prefix}*png
 elif [[ x"${cmd_type}" = "xps" ]] ; then
   check_command convert
   check_command pdftoppm
@@ -64,15 +64,15 @@ elif [[ x"${cmd_type}" = "xps" ]] ; then
     exit 1
   fi
   tmp_png_prefix=/tmp/thumbnail.png.$$
-  pdftoppm -png -l 1 ${tmp_pdf_file} ${tmp_png_prefix}
-  tmp_png_file="${tmp_png_prefix}-1.png"
-  rm ${tmp_pdf_file}
+  pdftoppm -png -singlefile ${tmp_pdf_file} ${tmp_png_prefix}
+  tmp_png_file="${tmp_png_prefix}.png"
+  rm -f ${tmp_pdf_file}
   if [[ ! -f ${tmp_png_file} ]] ; then
     echo "pdftoppm does not work."
     exit 1
   fi
   convert -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
-  rm ${tmp_png_prefix}*png
+  rm -f ${tmp_png_prefix}*png
 elif [[ x"${cmd_type}" = "ximage" ]] ; then
   check_command convert
   target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
