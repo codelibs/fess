@@ -15,9 +15,7 @@
  */
 package org.codelibs.fess.util;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 
@@ -25,13 +23,13 @@ public class QueryResponseListTest extends UnitFessTestCase {
     public void test_calculatePageInfo_page0() {
         QueryResponseList qrList;
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 0;
             }
         };
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(0, qrList.getAllRecordCount());
@@ -45,14 +43,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
     public void test_calculatePageInfo_page1() {
         QueryResponseList qrList;
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 10;
             }
         };
         qrList.allRecordCount = 10;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(10, qrList.getAllRecordCount());
@@ -62,14 +60,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(10, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 20;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(20, qrList.getAllRecordCount());
@@ -79,14 +77,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(20, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 21;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(21, qrList.getAllRecordCount());
@@ -96,14 +94,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(20, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 40;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(40, qrList.getAllRecordCount());
@@ -113,14 +111,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(20, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 41;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(41, qrList.getAllRecordCount());
@@ -134,14 +132,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
     public void test_calculatePageInfo_page2() {
         QueryResponseList qrList;
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 1;
             }
         };
         qrList.allRecordCount = 21;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(2, qrList.getCurrentPageNumber());
         assertEquals(21, qrList.getAllRecordCount());
@@ -151,14 +149,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(21, qrList.getCurrentStartRecordNumber());
         assertEquals(21, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 40;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(2, qrList.getCurrentPageNumber());
         assertEquals(40, qrList.getAllRecordCount());
@@ -168,14 +166,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(21, qrList.getCurrentStartRecordNumber());
         assertEquals(40, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 41;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(2, qrList.getCurrentPageNumber());
         assertEquals(41, qrList.getAllRecordCount());
@@ -185,14 +183,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(21, qrList.getCurrentStartRecordNumber());
         assertEquals(40, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 61;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(2, qrList.getCurrentPageNumber());
         assertEquals(61, qrList.getAllRecordCount());
@@ -207,26 +205,26 @@ public class QueryResponseListTest extends UnitFessTestCase {
         QueryResponseList qrList;
         List<String> pnList;
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 20;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         pnList = qrList.getPageNumberList();
         assertEquals(1, pnList.size());
         assertEquals("1", pnList.get(0));
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 61;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         pnList = qrList.getPageNumberList();
         assertEquals(4, pnList.size());
         assertEquals("1", pnList.get(0));
@@ -234,14 +232,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("3", pnList.get(2));
         assertEquals("4", pnList.get(3));
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 200;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         pnList = qrList.getPageNumberList();
         assertEquals(6, pnList.size());
         assertEquals("1", pnList.get(0));
@@ -251,27 +249,27 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("5", pnList.get(4));
         assertEquals("6", pnList.get(5));
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 1;
             }
         };
         qrList.allRecordCount = 21;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         pnList = qrList.getPageNumberList();
         assertEquals(2, pnList.size());
         assertEquals("1", pnList.get(0));
         assertEquals("2", pnList.get(1));
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 61;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         pnList = qrList.getPageNumberList();
         assertEquals(4, pnList.size());
         assertEquals("1", pnList.get(0));
@@ -279,14 +277,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("3", pnList.get(2));
         assertEquals("4", pnList.get(3));
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 20;
             }
         };
         qrList.allRecordCount = 200;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         pnList = qrList.getPageNumberList();
         assertEquals(7, pnList.size());
         assertEquals("1", pnList.get(0));
@@ -302,13 +300,13 @@ public class QueryResponseListTest extends UnitFessTestCase {
     public void test_calculatePageInfo_collapse() {
         QueryResponseList qrList;
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 0;
             }
         };
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(0, qrList.getAllRecordCount());
@@ -318,14 +316,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, qrList.getCurrentStartRecordNumber());
         assertEquals(0, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 10;
             }
         };
         qrList.allRecordCount = 20;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(20, qrList.getAllRecordCount());
@@ -335,14 +333,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(20, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 10;
             }
         };
         qrList.allRecordCount = 21;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(21, qrList.getAllRecordCount());
@@ -352,14 +350,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(20, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 0, 20, 0) {
             @Override
             public int size() {
                 return 21;
             }
         };
         qrList.allRecordCount = 41;
-        qrList.calculatePageInfo(0, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(1, qrList.getCurrentPageNumber());
         assertEquals(41, qrList.getAllRecordCount());
@@ -369,14 +367,14 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentStartRecordNumber());
         assertEquals(20, qrList.getCurrentEndRecordNumber());
 
-        qrList = new QueryResponseList(new ArrayList<Map<String, Object>>()) {
+        qrList = new QueryResponseList(null, 20, 20, 0) {
             @Override
             public int size() {
                 return 1;
             }
         };
         qrList.allRecordCount = 41;
-        qrList.calculatePageInfo(20, 20);
+        qrList.calculatePageInfo();
         assertEquals(20, qrList.getPageSize());
         assertEquals(2, qrList.getCurrentPageNumber());
         assertEquals(41, qrList.getAllRecordCount());

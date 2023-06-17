@@ -48,6 +48,9 @@ public class ListForm extends SearchRequestParams {
     public Integer start;
 
     @ValidateTypeFailure
+    public Integer offset;
+
+    @ValidateTypeFailure
     public Integer pn;
 
     @ValidateTypeFailure
@@ -89,6 +92,14 @@ public class ListForm extends SearchRequestParams {
             start = ComponentUtil.getFessConfig().getPagingSearchPageStartAsInteger();
         }
         return start;
+    }
+
+    @Override
+    public int getOffset() {
+        if (offset == null) {
+            offset = 0;
+        }
+        return offset;
     }
 
     @Override

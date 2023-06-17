@@ -17,35 +17,21 @@ package org.codelibs.fess.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codelibs.core.stream.StreamUtil;
-import org.codelibs.fess.Constants;
-import org.codelibs.fess.helper.QueryHelper;
-import org.codelibs.fess.helper.ViewHelper;
-import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.dbflute.optional.OptionalEntity;
-import org.opensearch.action.search.SearchResponse;
-import org.opensearch.common.document.DocumentField;
-import org.opensearch.search.SearchHit;
-import org.opensearch.search.SearchHits;
-import org.opensearch.search.aggregations.Aggregations;
-import org.opensearch.search.fetch.subphase.highlight.HighlightField;
-
 public class QueryResponseList implements List<Map<String, Object>> {
-
-    private static final Logger logger = LogManager.getLogger(QueryResponseList.class);
 
     protected final List<Map<String, Object>> parent;
 
+    protected final int start;
+
+    protected final int offset;
+
     /** The value of current page number. */
-    protected int pageSize;
+    protected final int pageSize;
 
     /** The value of current page number. */
     protected int currentPageNumber;
@@ -76,127 +62,36 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     protected long queryTime;
 
-    public QueryResponseList() {
-        parent = new ArrayList<>();
-    }
-
     // for testing
-    protected QueryResponseList(final List<Map<String, Object>> parent) {
-        this.parent = parent;
+    protected QueryResponseList(final List<Map<String, Object>> documentList, final int start, final int pageSize, final int offset) {
+        this.parent = documentList;
+        this.offset = offset;
+        this.start = start;
+        this.pageSize = pageSize;
     }
 
-    public void init(final OptionalEntity<SearchResponse> searchResponseOpt, final int start, final int pageSize) {
-        searchResponseOpt.ifPresent(searchResponse -> {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final SearchHits searchHits = searchResponse.getHits();
-            allRecordCount = searchHits.getTotalHits().value;
-            allRecordCountRelation = searchHits.getTotalHits().relation.toString();
-            queryTime = searchResponse.getTook().millis();
-
-            if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
-                partialResults = true;
-            }
-
-            // build highlighting fields
-            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-            final String hlPrefix = queryHelper.getHighlightPrefix();
-            for (final SearchHit searchHit : searchHits.getHits()) {
-                final Map<String, Object> docMap = parseSearchHit(fessConfig, hlPrefix, searchHit);
-
-                if (fessConfig.isResultCollapsed()) {
-                    final Map<String, SearchHits> innerHits = searchHit.getInnerHits();
-                    if (innerHits != null) {
-                        final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
-                        if (innerSearchHits != null) {
-                            final long totalHits = innerSearchHits.getTotalHits().value;
-                            if (totalHits > 1) {
-                                docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
-                                final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
-                                if (bitsField != null && !bitsField.getValues().isEmpty()) {
-                                    docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
-                                }
-                                docMap.put(fessConfig.getQueryCollapseInnerHitsName(), StreamUtil.stream(innerSearchHits.getHits())
-                                        .get(stream -> stream.map(v -> parseSearchHit(fessConfig, hlPrefix, v)).toArray(n -> new Map[n])));
-                            }
-                        }
-                    }
-                }
-
-                parent.add(docMap);
-            }
-
-            // facet
-            final Aggregations aggregations = searchResponse.getAggregations();
-            if (aggregations != null) {
-                facetResponse = new FacetResponse(aggregations);
-            }
-
-        });
-
+    public QueryResponseList(final List<Map<String, Object>> documentList, final long allRecordCount, final String allRecordCountRelation,
+            final long queryTime, final boolean partialResults, final FacetResponse facetResponse, final int start, final int pageSize,
+            final int offset) {
+        this(documentList, start, pageSize, offset);
+        this.allRecordCount = allRecordCount;
+        this.allRecordCountRelation = allRecordCountRelation;
+        this.queryTime = queryTime;
+        this.partialResults = partialResults;
+        this.facetResponse = facetResponse;
         if (pageSize > 0) {
-            calculatePageInfo(start, pageSize);
+            calculatePageInfo();
         }
     }
 
-    protected Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
-        final Map<String, Object> docMap = new HashMap<>(32);
-        if (searchHit.getSourceAsMap() == null) {
-            searchHit.getFields().forEach((key, value) -> {
-                docMap.put(key, value.getValue());
-            });
-        } else {
-            docMap.putAll(searchHit.getSourceAsMap());
+    protected void calculatePageInfo() {
+        int startWithOffset = start - offset;
+        if (startWithOffset < 0) {
+            startWithOffset = 0;
         }
-
-        final ViewHelper viewHelper = ComponentUtil.getViewHelper();
-
-        final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
-        try {
-            if (highlightFields != null) {
-                highlightFields.values().stream().forEach(highlightField -> {
-                    final String text = viewHelper.createHighlightText(highlightField);
-                    if (text != null) {
-                        docMap.put(hlPrefix + highlightField.getName(), text);
-                    }
-                });
-                if (Constants.TEXT_FRAGMENT_TYPE_HIGHLIGHT.equals(fessConfig.getQueryHighlightTextFragmentType())) {
-                    docMap.put(Constants.TEXT_FRAGMENTS,
-                            viewHelper.createTextFragmentsByHighlight(highlightFields.values().toArray(n -> new HighlightField[n])));
-                }
-            }
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Could not create a highlighting value: {}", docMap, e);
-            }
-        }
-
-        if (Constants.TEXT_FRAGMENT_TYPE_QUERY.equals(fessConfig.getQueryHighlightTextFragmentType())) {
-            docMap.put(Constants.TEXT_FRAGMENTS, viewHelper.createTextFragmentsByQuery());
-        }
-
-        // ContentTitle
-        if (viewHelper != null) {
-            docMap.put(fessConfig.getResponseFieldContentTitle(), viewHelper.getContentTitle(docMap));
-            docMap.put(fessConfig.getResponseFieldContentDescription(), viewHelper.getContentDescription(docMap));
-            docMap.put(fessConfig.getResponseFieldUrlLink(), viewHelper.getUrlLink(docMap));
-            docMap.put(fessConfig.getResponseFieldSitePath(), viewHelper.getSitePath(docMap));
-        }
-
-        if (!docMap.containsKey(Constants.SCORE)) {
-            docMap.put(Constants.SCORE, searchHit.getScore());
-        }
-
-        if (!docMap.containsKey(fessConfig.getIndexFieldId())) {
-            docMap.put(fessConfig.getIndexFieldId(), searchHit.getId());
-        }
-        return docMap;
-    }
-
-    protected void calculatePageInfo(final int start, final int size) {
-        pageSize = size;
         allPageCount = (int) ((allRecordCount - 1) / pageSize) + 1;
-        existPrevPage = start > 0;
-        existNextPage = start < (long) (allPageCount - 1) * (long) pageSize;
+        existPrevPage = startWithOffset > 0;
+        existNextPage = startWithOffset < (long) (allPageCount - 1) * (long) pageSize;
         currentPageNumber = start / pageSize + 1;
         if (existNextPage && size() < pageSize) {
             // collapsing
@@ -347,6 +242,14 @@ public class QueryResponseList implements List<Map<String, Object>> {
         return parent.toArray(a);
     }
 
+    public int getStart() {
+        return start;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
     public int getPageSize() {
         return pageSize;
     }
@@ -413,6 +316,16 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     public long getQueryTime() {
         return queryTime;
+    }
+
+    @Override
+    public String toString() {
+        return "QueryResponseList [parent=" + parent + ", start=" + start + ", offset=" + offset + ", pageSize=" + pageSize
+                + ", currentPageNumber=" + currentPageNumber + ", allRecordCount=" + allRecordCount + ", allRecordCountRelation="
+                + allRecordCountRelation + ", allPageCount=" + allPageCount + ", existNextPage=" + existNextPage + ", existPrevPage="
+                + existPrevPage + ", currentStartRecordNumber=" + currentStartRecordNumber + ", currentEndRecordNumber="
+                + currentEndRecordNumber + ", pageNumberList=" + pageNumberList + ", searchQuery=" + searchQuery + ", execTime=" + execTime
+                + ", facetResponse=" + facetResponse + ", partialResults=" + partialResults + ", queryTime=" + queryTime + "]";
     }
 
 }

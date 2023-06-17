@@ -94,4 +94,9 @@ public class FacetResponse {
         return fieldList;
     }
 
+    @Override
+    public String toString() {
+        return "FacetResponse [queryCountMap=" + queryCountMap + ", fieldList=" + fieldList + "]";
+    }
+
 }

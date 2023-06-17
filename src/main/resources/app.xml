@@ -7,15 +7,16 @@
 	<include path="lasta_job.xml"/>
 
 	<include path="fess.xml"/>
-	<include path="fess_ldap.xml"/>
 	<include path="fess_api.xml"/>
 	<include path="fess_cors.xml"/>
 	<include path="fess_dict.xml"/>
 	<include path="fess_job.xml"/>
-	<include path="fess_thumbnail.xml"/>
-	<include path="fess_sso.xml"/>
-	<include path="fess_score.xml"/>
+	<include path="fess_ldap.xml"/>
 	<include path="fess_query.xml"/>
+	<include path="fess_rankfusion.xml"/>
+	<include path="fess_score.xml"/>
+	<include path="fess_sso.xml"/>
+	<include path="fess_thumbnail.xml"/>
 
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
@@ -102,8 +103,6 @@
 		<property name="encoding">"UTF-8"</property>
 	</component>
 	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
-	</component>
-	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
 	</component>
 	<component name="gsaConfigParser" class="org.codelibs.fess.util.GsaConfigParser" instance="prototype">
 	</component>

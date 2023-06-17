@@ -159,33 +159,7 @@ public class SearchHelper {
 
     protected List<Map<String, Object>> searchInternal(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        final int pageSize = params.getPageSize();
-        LaRequestUtil.getOptionalRequest().ifPresent(request -> {
-            request.setAttribute(Constants.REQUEST_PAGE_SIZE, pageSize);
-        });
-        return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
-            queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
-            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(params.getStartPosition()).size(pageSize)
-                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
-                    .similarDocHash(params.getSimilarDocHash()).responseFields(params.getResponseFields())
-                    .searchRequestType(params.getType()).trackTotalHits(params.getTrackTotalHits()).build();
-        }, (searchRequestBuilder, execTime, searchResponse) -> {
-            searchResponse.ifPresent(r -> {
-                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
-                    // partial results
-                    final StringBuilder buf = new StringBuilder(1000);
-                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
-                            .append(",\"request\":").append(searchRequestBuilder.toString())//
-                            .append(",\"response\":").append(r.toString()).append('}');
-                    logger.warn(buf.toString());
-                }
-            });
-            final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
-            queryResponseList.init(searchResponse, params.getStartPosition(), params.getPageSize());
-            return queryResponseList;
-        });
+        return ComponentUtil.getRankFusionProcessor().search(query, params, userBean);
     }
 
     public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,

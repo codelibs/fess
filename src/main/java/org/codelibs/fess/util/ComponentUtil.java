@@ -81,6 +81,7 @@ import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.query.QueryProcessor;
 import org.codelibs.fess.query.parser.QueryParser;
+import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
@@ -196,8 +197,6 @@ public final class ComponentUtil {
 
     private static final String CRAWLER_PROPERTIES = "systemProperties";
 
-    private static final String QUERY_RESPONSE_LIST = "queryResponseList";
-
     private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
 
     private static final String KEY_MATCH_HELPER = "keyMatchHelper";
@@ -213,6 +212,8 @@ public final class ComponentUtil {
     private static final String CRAWLER_STATS_HELPER = "crawlerStatsHelper";
 
     private static final String CORS_HANDLER_FACTORY = "corsHandlerFactory";
+
+    private static final String RANK_FUSION_PROCESSOR = "rankFusionProcessor";
 
     private static IndexingHelper indexingHelper;
 
@@ -245,10 +246,6 @@ public final class ComponentUtil {
 
     public static CachedCipher getCipher(final String cipherName) {
         return getComponent(cipherName);
-    }
-
-    public static QueryResponseList getQueryResponseList() {
-        return getComponent(QUERY_RESPONSE_LIST);
     }
 
     public static DynamicProperties getSystemProperties() {
@@ -517,6 +514,10 @@ public final class ComponentUtil {
 
     public static CorsHandlerFactory getCorsHandlerFactory() {
         return getComponent(CORS_HANDLER_FACTORY);
+    }
+
+    public static RankFusionProcessor getRankFusionProcessor() {
+        return getComponent(RANK_FUSION_PROCESSOR);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

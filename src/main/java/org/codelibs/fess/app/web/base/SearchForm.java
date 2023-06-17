@@ -56,6 +56,9 @@ public class SearchForm extends SearchRequestParams {
     public Integer start;
 
     @ValidateTypeFailure
+    public Integer offset;
+
+    @ValidateTypeFailure
     public Integer pn;
 
     @Size(max = 1000)
@@ -68,11 +71,18 @@ public class SearchForm extends SearchRequestParams {
 
     @Override
     public int getStartPosition() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (start == null) {
-            start = fessConfig.getPagingSearchPageStartAsInteger();
+            start = ComponentUtil.getFessConfig().getPagingSearchPageStartAsInteger();
         }
         return start;
+    }
+
+    @Override
+    public int getOffset() {
+        if (offset == null) {
+            offset = 0;
+        }
+        return offset;
     }
 
     @Override

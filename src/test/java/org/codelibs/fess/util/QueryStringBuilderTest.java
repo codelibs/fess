@@ -132,6 +132,11 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
             }
 
             @Override
+            public int getOffset() {
+                return 0;
+            }
+
+            @Override
             public int getPageSize() {
                 return 0;
             }

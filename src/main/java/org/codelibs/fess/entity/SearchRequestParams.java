@@ -63,6 +63,8 @@ public abstract class SearchRequestParams {
 
     public abstract int getPageSize();
 
+    public abstract int getOffset();
+
     public abstract String[] getExtraQueries();
 
     public abstract Object getAttribute(String name);

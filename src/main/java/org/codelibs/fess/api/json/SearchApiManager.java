@@ -848,6 +848,8 @@ public class SearchApiManager extends BaseApiManager {
 
         private int startPosition = -1;
 
+        private int offset = -1;
+
         private int pageSize = -1;
 
         protected JsonRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
@@ -933,6 +935,25 @@ public class SearchApiManager extends BaseApiManager {
                 }
             }
             return startPosition;
+        }
+
+        @Override
+        public int getOffset() {
+            if (offset != -1) {
+                return offset;
+            }
+
+            final String value = request.getParameter("offset");
+            if (StringUtil.isBlank(value)) {
+                offset = 0;
+            } else {
+                try {
+                    offset = Integer.parseInt(value);
+                } catch (final NumberFormatException e) {
+                    offset = 0;
+                }
+            }
+            return offset;
         }
 
         @Override
@@ -1068,6 +1089,11 @@ public class SearchApiManager extends BaseApiManager {
 
         @Override
         public int getStartPosition() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getOffset() {
             throw new UnsupportedOperationException();
         }
 

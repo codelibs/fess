@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.entity;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +23,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -43,7 +42,7 @@ public class GeoInfo {
         final String[] geoFields = fessConfig.getQueryGeoFieldsAsArray();
         final Map<String, List<QueryBuilder>> geoMap = new HashMap<>();
 
-        stream(request.getParameterMap())
+        StreamUtil.stream(request.getParameterMap())
                 .of(stream -> stream.filter(e -> e.getKey().startsWith("geo.") && e.getKey().endsWith(".point")).forEach(e -> {
                     final String key = e.getKey();
                     for (final String geoField : geoFields) {
@@ -51,7 +50,7 @@ public class GeoInfo {
                             final String distanceKey = key.replaceFirst(".point$", ".distance");
                             final String distance = request.getParameter(distanceKey);
                             if (StringUtil.isNotBlank(distance)) {
-                                stream(e.getValue()).of(s -> s.forEach(pt -> {
+                                StreamUtil.stream(e.getValue()).of(s -> s.forEach(pt -> {
                                     List<QueryBuilder> list = geoMap.get(geoField);
                                     if (list == null) {
                                         list = new ArrayList<>();
@@ -95,7 +94,7 @@ public class GeoInfo {
             builder = queryBuilders[0];
         } else if (queryBuilders.length > 1) {
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            stream(queryBuilders).of(stream -> stream.forEach(boolQuery::must));
+            StreamUtil.stream(queryBuilders).of(stream -> stream.forEach(boolQuery::must));
             builder = boolQuery;
         }
 

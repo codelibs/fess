@@ -18,6 +18,7 @@ package org.codelibs.fess.es.client;
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.opensearch.runner.OpenSearchRunner.newConfigs;
+import static org.opensearch.action.ActionListener.wrap;
 
 import java.io.File;
 import java.io.IOException;
@@ -918,7 +919,7 @@ public class SearchEngineClient implements Client {
     protected void deleteScrollContext(final String scrollId) {
         if (scrollId != null) {
             client.prepareClearScroll().addScrollId(scrollId)
-                    .execute(ActionListener.wrap(res -> {}, e -> logger.warn("Failed to clear the scroll context.", e)));
+                    .execute(wrap(res -> {}, e -> logger.warn("Failed to clear the scroll context.", e)));
         }
     }
 
