@@ -49,6 +49,16 @@ paths:
             exclusiveMinimum: false
             default: 0
             example: 0
+        - name: offset
+          in: query
+          description: Offset from a start position
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
         - name: num
           in: query
           description: The number of returned documents as a search result

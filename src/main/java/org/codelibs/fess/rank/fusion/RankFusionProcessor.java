@@ -42,6 +42,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
 
@@ -87,14 +88,18 @@ public class RankFusionProcessor implements AutoCloseable {
 
     public List<Map<String, Object>> search(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
-        final int pageSize = params.getPageSize();
         if (searchers.length == 1) {
-            final SearchResult searchResult = searchers[0].search(query, params, userBean);
-            return new QueryResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
-                    searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
-                    searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
+            return searchWithMainSearcher(query, params, userBean);
         }
+        return searchWithMultipleSearchers(query, params, userBean);
+    }
 
+    protected List<Map<String, Object>> searchWithMultipleSearchers(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Send {} to the searchers.", query);
+        }
+        final int pageSize = params.getPageSize();
         final int startPosition = params.getStartPosition();
         if (startPosition * 2 >= windowSize) {
             int offset = params.getOffset();
@@ -107,13 +112,16 @@ public class RankFusionProcessor implements AutoCloseable {
             if (start < 0) {
                 start = 0;
             }
+            if (logger.isDebugEnabled()) {
+                logger.debug("start:{} -> start:{} with offset:{}.", startPosition, start, offset);
+            }
             final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, start, pageSize);
             final SearchResult searchResult = searchers[0].search(query, reqParams, userBean);
             long allRecordCount = searchResult.getAllRecordCount();
             if (Relation.EQUAL_TO.toString().equals(searchResult.getAllRecordCountRelation())) {
                 allRecordCount += offset;
             }
-            return new QueryResponseList(searchResult.getDocumentList(), allRecordCount, searchResult.getAllRecordCountRelation(),
+            return createResponseList(searchResult.getDocumentList(), allRecordCount, searchResult.getAllRecordCountRelation(),
                     searchResult.getQueryTime(), searchResult.isPartialResults(), searchResult.getFacetResponse(),
                     params.getStartPosition(), pageSize, offset);
         }
@@ -121,6 +129,9 @@ public class RankFusionProcessor implements AutoCloseable {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int rankConstant = fessConfig.getRankFusionRankConstantAsInteger();
         final int size = windowSize / searchers.length;
+        if (logger.isDebugEnabled()) {
+            logger.debug("The searcher window size is {} and a rank constant is {}.", size, rankConstant);
+        }
         final List<Future<SearchResult>> resultList = new ArrayList<>();
         for (int i = 0; i < searchers.length; i++) {
             final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, 0, i == 0 ? windowSize : size);
@@ -144,6 +155,9 @@ public class RankFusionProcessor implements AutoCloseable {
         final Set<Object> mainIdSet = new HashSet<>();
         for (int i = 0; i < results.length; i++) {
             final List<Map<String, Object>> docList = results[i].getDocumentList();
+            if (logger.isDebugEnabled()) {
+                logger.debug("[{}] {} docs / {} docs.", i, docList.size(), results[i].getAllRecordCount());
+            }
             for (int j = 0; j < docList.size(); j++) {
                 final Map<String, Object> doc = docList.get(j);
                 if (doc.get(idField) instanceof final String id) {
@@ -171,14 +185,36 @@ public class RankFusionProcessor implements AutoCloseable {
                 offset++;
             }
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("The offset is {} and the fused docs is {}.", offset, docs.size());
+        }
         final SearchResult mainResult = results[0];
         long allRecordCount = mainResult.getAllRecordCount();
         if (Relation.EQUAL_TO.toString().equals(mainResult.getAllRecordCountRelation())) {
             allRecordCount += offset;
         }
-        return new QueryResponseList(docs.subList(startPosition, startPosition + pageSize), allRecordCount,
+        return createResponseList(docs.subList(startPosition, startPosition + pageSize), allRecordCount,
                 mainResult.getAllRecordCountRelation(), mainResult.getQueryTime(), mainResult.isPartialResults(),
                 mainResult.getFacetResponse(), startPosition, pageSize, offset);
+    }
+
+    protected List<Map<String, Object>> searchWithMainSearcher(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Send {} to the main searcher.", query);
+        }
+        final int pageSize = params.getPageSize();
+        final SearchResult searchResult = searchers[0].search(query, params, userBean);
+        return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
+                searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
+                searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
+    }
+
+    protected QueryResponseList createResponseList(final List<Map<String, Object>> documentList, final long allRecordCount,
+            final String allRecordCountRelation, final long queryTime, final boolean partialResults, final FacetResponse facetResponse,
+            final int start, final int pageSize, final int offset) {
+        return new QueryResponseList(documentList, allRecordCount, allRecordCountRelation, queryTime, partialResults, facetResponse, start,
+                pageSize, offset);
     }
 
     protected float toFloat(final Object value) {
