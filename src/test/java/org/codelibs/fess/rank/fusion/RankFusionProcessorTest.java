@@ -95,7 +95,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
-    public void test_1searcher10_1000docs_100size() throws Exception {
+    public void test_1searcher10_45_45_1000docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;
         int pageSize = 100;
@@ -191,7 +191,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
             if (rankFusionProcessor.search(query, new TestSearchRequestParams(1000, pageSize, offset),
                     OptionalThing.empty()) instanceof QueryResponseList list) {
-                assertEquals(pageSize, list.size());
+                assertEquals(offset, list.size());
                 assertEquals(allRecordCount + offset, list.getAllRecordCount());
                 assertEquals(11, list.getAllPageCount());
                 assertEquals(1045, list.getCurrentEndRecordNumber());
@@ -202,6 +202,249 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
                 assertEquals(1000, list.getStart());
                 assertEquals("955", list.get(0).get(ID_FIELD));
                 assertEquals("999", list.get(44).get(ID_FIELD));
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher0_0docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 0;
+        int pageSize = 100;
+        int offset = 0;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 0));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(0, list.size());
+                assertEquals(0, list.getAllRecordCount());
+                assertEquals(1, list.getAllPageCount());
+                assertEquals(0, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(0, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher0_10docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 10;
+        int pageSize = 100;
+        int offset = 0;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 0));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(10, list.size());
+                assertEquals(10, list.getAllRecordCount());
+                assertEquals(1, list.getAllPageCount());
+                assertEquals(10, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher0_1000docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 1000;
+        int pageSize = 100;
+        int offset = 0;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 0));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(pageSize, list.size());
+                assertEquals(1000, list.getAllRecordCount());
+                assertEquals(10, list.getAllPageCount());
+                assertEquals(100, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher10_0docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 0;
+        int pageSize = 100;
+        int offset = 10;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(10, 0, 0));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(10, list.size());
+                assertEquals(10, list.getAllRecordCount());
+                assertEquals(1, list.getAllPageCount());
+                assertEquals(10, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher10_10docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 10;
+        int pageSize = 100;
+        int offset = 0;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(10, 0, 0));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(10, list.size());
+                assertEquals(10, list.getAllRecordCount());
+                assertEquals(1, list.getAllPageCount());
+                assertEquals(10, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher10_1000docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 1000;
+        int pageSize = 100;
+        int offset = 0;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(10, 0, 0));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(pageSize, list.size());
+                assertEquals(1000, list.getAllRecordCount());
+                assertEquals(10, list.getAllPageCount());
+                assertEquals(100, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher1000_0docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 0;
+        int pageSize = 100;
+        int offset = 100;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 1000));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(pageSize, list.size());
+                assertEquals(100, list.getAllRecordCount());
+                assertEquals(1, list.getAllPageCount());
+                assertEquals(100, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher1000_10docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 10;
+        int pageSize = 100;
+        int offset = 90;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 1000));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(pageSize, list.size());
+                assertEquals(100, list.getAllRecordCount());
+                assertEquals(1, list.getAllPageCount());
+                assertEquals(100, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
+            } else {
+                fail();
+            }
+        }
+    }
+
+    public void test_1searcher1000_1000docs_100size() throws Exception {
+        String query = "*";
+        int allRecordCount = 1000;
+        int pageSize = 100;
+        int offset = 50;
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 1000));
+            rankFusionProcessor.init();
+
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
+                    OptionalThing.empty()) instanceof QueryResponseList list) {
+                assertEquals(pageSize, list.size());
+                assertEquals(1050, list.getAllRecordCount());
+                assertEquals(11, list.getAllPageCount());
+                assertEquals(100, list.getCurrentEndRecordNumber());
+                assertEquals(1, list.getCurrentPageNumber());
+                assertEquals(1, list.getCurrentStartRecordNumber());
+                assertEquals(offset, list.getOffset());
+                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getStart());
             } else {
                 fail();
             }
@@ -221,7 +464,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
             int start = params.getStartPosition();
             int size = params.getPageSize();
             SearchResultBuilder builder = SearchResult.create();
-            for (int i = start; i < start + size; i++) {
+            for (int i = start; i < start + size && i < allRecordCount; i++) {
                 Map<String, Object> doc = new HashMap<>();
                 doc.put(ID_FIELD, Integer.toString(i));
                 doc.put("score", 1.0f / (i + 1));

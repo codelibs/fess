@@ -69,6 +69,13 @@ public class SearchResult {
         return new SearchResultBuilder();
     }
 
+    @Override
+    public String toString() {
+        return "SearchResult [documentList=" + documentList + ", allRecordCount=" + allRecordCount + ", allRecordCountRelation="
+                + allRecordCountRelation + ", queryTime=" + queryTime + ", partialResults=" + partialResults + ", facetResponse="
+                + facetResponse + "]";
+    }
+
     static class SearchResultBuilder {
 
         private long allRecordCount;

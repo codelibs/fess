@@ -180,7 +180,7 @@ public class RankFusionProcessor implements AutoCloseable {
         final var docs = scoreDocMap.values().stream()
                 .sorted((e1, e2) -> Float.compare(toFloat(e2.get(scoreField)), toFloat(e1.get(scoreField)))).toList();
         int offset = 0;
-        for (int i = 0; i < windowSize / 2; i++) {
+        for (int i = 0; i < windowSize / 2 && i < docs.size(); i++) {
             if (!mainIdSet.contains(docs.get(i).get(idField))) {
                 offset++;
             }
@@ -193,9 +193,24 @@ public class RankFusionProcessor implements AutoCloseable {
         if (Relation.EQUAL_TO.toString().equals(mainResult.getAllRecordCountRelation())) {
             allRecordCount += offset;
         }
-        return createResponseList(docs.subList(startPosition, startPosition + pageSize), allRecordCount,
-                mainResult.getAllRecordCountRelation(), mainResult.getQueryTime(), mainResult.isPartialResults(),
-                mainResult.getFacetResponse(), startPosition, pageSize, offset);
+        return createResponseList(extractList(docs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
+                mainResult.getQueryTime(), mainResult.isPartialResults(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
+    }
+
+    protected List<Map<String, Object>> extractList(final List<Map<String, Object>> docs, final int pageSize, final int startPosition) {
+        final int size = docs.size();
+        if (size == 0) {
+            return docs; // empty
+        }
+        int fromIndex = startPosition;
+        if (fromIndex >= size) {
+            fromIndex = size - 1;
+        }
+        int toIndex = startPosition + pageSize;
+        if (toIndex >= size) {
+            toIndex = size;
+        }
+        return docs.subList(fromIndex, toIndex);
     }
 
     protected List<Map<String, Object>> searchWithMainSearcher(final String query, final SearchRequestParams params,
