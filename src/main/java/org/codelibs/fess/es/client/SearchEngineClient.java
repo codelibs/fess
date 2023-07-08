@@ -1228,6 +1228,7 @@ public class SearchEngineClient implements Client {
         protected SearchRequestType searchRequestType = SearchRequestType.SEARCH;
         protected boolean isScroll = false;
         protected String trackTotalHits = null;
+        protected Float minScore = null;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
             return new SearchConditionBuilder(searchRequestBuilder);
@@ -1307,6 +1308,11 @@ public class SearchEngineClient implements Client {
             return this;
         }
 
+        public SearchConditionBuilder minScore(final Float minScore) {
+            this.minScore = minScore;
+            return this;
+        }
+
         public boolean build() {
             if (StringUtil.isBlank(query)) {
                 return false;
@@ -1325,6 +1331,7 @@ public class SearchEngineClient implements Client {
             searchRequestBuilder.setFrom(offset).setSize(size);
 
             buildTrackTotalHits(fessConfig);
+            buildMinScore(fessConfig);
 
             if (responseFields != null) {
                 searchRequestBuilder.setFetchSource(responseFields, null);
@@ -1353,6 +1360,12 @@ public class SearchEngineClient implements Client {
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
             return true;
+        }
+
+        protected void buildMinScore(final FessConfig fessConfig) {
+            if (minScore != null) {
+                searchRequestBuilder.setMinScore(minScore);
+            }
         }
 
         protected void buildTrackTotalHits(final FessConfig fessConfig) {

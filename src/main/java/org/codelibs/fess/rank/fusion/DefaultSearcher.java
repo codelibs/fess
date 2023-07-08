@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.es.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.es.client.SearchEngineClient.SearchConditionBuilder;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -33,6 +34,7 @@ import org.codelibs.fess.util.FacetResponse;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.opensearch.action.search.SearchRequestBuilder;
 import org.opensearch.action.search.SearchResponse;
 import org.opensearch.common.document.DocumentField;
 import org.opensearch.search.SearchHit;
@@ -107,26 +109,32 @@ public class DefaultSearcher extends RankFusionSearcher {
     protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int pageSize = params.getPageSize();
-        return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+        return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(),
+                createSearchCondition(query, params, userBean), (searchRequestBuilder, execTime, searchResponse) -> {
+                    searchResponse.ifPresent(r -> {
+                        if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
+                            // partial results
+                            final StringBuilder buf = new StringBuilder(1000);
+                            buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
+                                    .append(",\"request\":").append(searchRequestBuilder.toString())//
+                                    .append(",\"response\":").append(r.toString()).append('}');
+                            logger.warn(buf.toString());
+                        }
+                    });
+                    return searchResponse;
+                });
+    }
+
+    protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean) {
+        return searchRequestBuilder -> {
             ComponentUtil.getQueryHelper().processSearchPreference(searchRequestBuilder, userBean, query);
-            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(params.getStartPosition()).size(pageSize)
-                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo()).highlightInfo(params.getHighlightInfo())
-                    .similarDocHash(params.getSimilarDocHash()).responseFields(params.getResponseFields())
-                    .searchRequestType(params.getType()).trackTotalHits(params.getTrackTotalHits()).build();
-        }, (searchRequestBuilder, execTime, searchResponse) -> {
-            searchResponse.ifPresent(r -> {
-                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
-                    // partial results
-                    final StringBuilder buf = new StringBuilder(1000);
-                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
-                            .append(",\"request\":").append(searchRequestBuilder.toString())//
-                            .append(",\"response\":").append(r.toString()).append('}');
-                    logger.warn(buf.toString());
-                }
-            });
-            return searchResponse;
-        });
+            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(params.getStartPosition())
+                    .size(params.getPageSize()).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
+                    .highlightInfo(params.getHighlightInfo()).similarDocHash(params.getSimilarDocHash())
+                    .responseFields(params.getResponseFields()).searchRequestType(params.getType())
+                    .trackTotalHits(params.getTrackTotalHits()).minScore(params.getMinScore()).build();
+        };
     }
 
     protected Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {

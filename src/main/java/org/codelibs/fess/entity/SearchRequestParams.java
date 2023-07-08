@@ -79,6 +79,10 @@ public abstract class SearchRequestParams {
         return null;
     }
 
+    public Float getMinScore() {
+        return null;
+    }
+
     public boolean hasConditionQuery() {
         final Map<String, String[]> conditions = getConditions();
         return !isEmptyArray(conditions.get(AS_Q))//
