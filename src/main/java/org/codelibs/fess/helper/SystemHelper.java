@@ -44,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -120,6 +121,8 @@ public class SystemHelper {
 
     private long systemCpuCheckInterval = 1000L;
 
+    protected Map<String, Supplier<String>> updateConfigListenerMap = new HashMap<>();
+
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -163,6 +166,12 @@ public class SystemHelper {
         ComponentUtil.doInitProcesses(Runnable::run);
 
         parseProjectProperties();
+
+        updateConfigListenerMap.put("Label", () -> Integer.toString(ComponentUtil.getLabelTypeHelper().load()));
+        updateConfigListenerMap.put("PathMapping", () -> Integer.toString(ComponentUtil.getPathMappingHelper().load()));
+        updateConfigListenerMap.put("RelatedContent", () -> Integer.toString(ComponentUtil.getRelatedContentHelper().load()));
+        updateConfigListenerMap.put("RelatedQuery", () -> Integer.toString(ComponentUtil.getRelatedQueryHelper().load()));
+        updateConfigListenerMap.put("KeyMatch", () -> Integer.toString(ComponentUtil.getKeyMatchHelper().load()));
     }
 
     protected void parseProjectProperties() {
@@ -522,12 +531,21 @@ public class SystemHelper {
 
     public String updateConfiguration() {
         final StringBuilder buf = new StringBuilder();
-        buf.append("Label: ").append(ComponentUtil.getLabelTypeHelper().load()).append("\n");
-        buf.append("PathMapping: ").append(ComponentUtil.getPathMappingHelper().load()).append("\n");
-        buf.append("RelatedContent: ").append(ComponentUtil.getRelatedContentHelper().load()).append("\n");
-        buf.append("RelatedQuery: ").append(ComponentUtil.getRelatedQueryHelper().load()).append("\n");
-        buf.append("KeyMatch: ").append(ComponentUtil.getKeyMatchHelper().load()).append("\n");
+        updateConfigListenerMap.entrySet().stream().forEach(e -> {
+            buf.append(e.getKey()).append(": ");
+            try {
+                buf.append(e.getValue().get());
+            } catch (Exception ex) {
+                logger.warn("Failed to process {} task.", e.getKey(), ex);
+                buf.append(ex.getMessage());
+            }
+            buf.append('\n');
+        });
         return buf.toString();
+    }
+
+    public void addUpdateConfigListener(final String name, final Supplier<String> listener) {
+        updateConfigListenerMap.put(name, listener);
     }
 
     public boolean isChangedClusterState(final int status) {
