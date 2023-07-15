@@ -106,27 +106,32 @@ public class GoAction extends FessSearchAction {
             }
         }
 
+        final String targetUrl = pathMappingHelper.replaceUrl(url);
+
         String hash;
         if (StringUtil.isNotBlank(form.hash)) {
             final String value = URLUtil.decode(form.hash, Constants.UTF_8);
-            final StringBuilder buf = new StringBuilder(value.length() + 100);
-            for (final char c : value.toCharArray()) {
-                if (CharUtil.isUrlChar(c) || c == ' ') {
-                    buf.append(c);
-                } else {
-                    try {
-                        buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
-                    } catch (final UnsupportedEncodingException e) {
-                        // NOP
+            if (targetUrl.indexOf('#') == -1) {
+                final StringBuilder buf = new StringBuilder(value.length() + 100);
+                for (final char c : value.toCharArray()) {
+                    if (CharUtil.isUrlChar(c) || c == ' ') {
+                        buf.append(c);
+                    } else {
+                        try {
+                            buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                        } catch (final UnsupportedEncodingException e) {
+                            // NOP
+                        }
                     }
                 }
+                hash = buf.toString();
+            } else {
+                hash = StringUtil.EMPTY;
             }
-            hash = buf.toString();
         } else {
             hash = StringUtil.EMPTY;
         }
 
-        final String targetUrl = pathMappingHelper.replaceUrl(url);
         if (!isFileSystemPath(targetUrl)) {
             return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
         }
