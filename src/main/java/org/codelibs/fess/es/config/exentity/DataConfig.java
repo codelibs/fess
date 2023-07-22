@@ -51,6 +51,7 @@ import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsDataConfig;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ParameterUtil;
 
 /**
@@ -83,6 +84,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     protected Map<String, String> handlerScriptMap;
 
     protected CrawlerClientFactory crawlerClientFactory = null;
+
+    protected Map<ConfigName, Map<String, String>> configParameterMap;
 
     public DataConfig() {
         setBoost(1.0f);
@@ -368,7 +371,15 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
-        return Collections.emptyMap();
+        if (configParameterMap == null) {
+            configParameterMap = ParameterUtil.createConfigParameterMap(getHandlerParameter());
+        }
+
+        final Map<String, String> configMap = configParameterMap.get(name);
+        if (configMap == null) {
+            return Collections.emptyMap();
+        }
+        return configMap;
     }
 
     @Override
