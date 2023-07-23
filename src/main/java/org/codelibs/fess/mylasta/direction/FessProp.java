@@ -719,6 +719,10 @@ public interface FessProp {
                 .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
+    default boolean isAzureAdUseDomainServices() {
+        return Constants.TRUE.equalsIgnoreCase(getSystemProperty("aad.use.ds", "true"));
+    }
+
     //
     // fess_*.properties
     //

@@ -404,18 +404,19 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                         logger.warn("id is empty: {}", memberOf);
                     }
                     final String[] names = fessConfig.getAzureAdPermissionFields();
+                    final boolean useDomainServices = fessConfig.isAzureAdUseDomainServices();
                     for (final String name : names) {
                         final String value = (String) memberOf.get(name);
                         if (StringUtil.isNotBlank(value)) {
                             if (memberType.contains("group")) {
-                                groupList.add(value);
+                                addGroupOrRoleName(groupList, value, useDomainServices);
                             } else if (memberType.contains("role")) {
-                                roleList.add(value);
+                                addGroupOrRoleName(roleList, value, useDomainServices);
                             } else {
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("unknown @odata.type: {}", memberOf);
                                 }
-                                groupList.add(value);
+                                addGroupOrRoleName(groupList, value, useDomainServices);
                             }
                         } else if (logger.isDebugEnabled()) {
                             logger.debug("{} is empty: {}", name, memberOf);
@@ -431,6 +432,16 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             }
         } catch (final IOException e) {
             logger.warn("Failed to access groups/roles in AzureAD.", e);
+        }
+    }
+
+    protected void addGroupOrRoleName(List<String> list, String value, boolean useDomainServices) {
+        list.add(value);
+        if (useDomainServices && value.indexOf('@') >= 0) {
+            String[] values = value.split("@");
+            if (values.length > 1) {
+                list.add(values[0]);
+            }
         }
     }
 
