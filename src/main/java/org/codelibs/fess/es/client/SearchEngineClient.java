@@ -157,7 +157,6 @@ import org.opensearch.action.update.UpdateResponse;
 import org.opensearch.client.AdminClient;
 import org.opensearch.client.Client;
 import org.opensearch.cluster.metadata.MappingMetadata;
-import org.opensearch.common.collect.ImmutableOpenMap;
 import org.opensearch.common.document.DocumentField;
 import org.opensearch.common.settings.Settings;
 import org.opensearch.common.settings.Settings.Builder;
@@ -550,7 +549,7 @@ public class SearchEngineClient implements Client {
 
         final GetMappingsResponse getMappingsResponse =
                 client.admin().indices().prepareGetMappings(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
-        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
+        final Map<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
         if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
             final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");

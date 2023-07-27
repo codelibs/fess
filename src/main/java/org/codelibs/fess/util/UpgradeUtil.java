@@ -16,6 +16,7 @@
 package org.codelibs.fess.util;
 
 import java.io.File;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +36,6 @@ import org.opensearch.action.support.master.AcknowledgedResponse;
 import org.opensearch.client.Client;
 import org.opensearch.client.IndicesAdminClient;
 import org.opensearch.cluster.metadata.MappingMetadata;
-import org.opensearch.common.collect.ImmutableOpenMap;
 import org.opensearch.common.xcontent.XContentType;
 
 public final class UpgradeUtil {
@@ -93,7 +93,7 @@ public final class UpgradeUtil {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final GetMappingsResponse getMappingsResponse =
                 indicesClient.prepareGetMappings(index).execute().actionGet(fessConfig.getIndexIndicesTimeout());
-        final ImmutableOpenMap<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
+        final Map<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
         if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
             final String mappingFile = indexResourcePath + "/" + docType + ".json";
