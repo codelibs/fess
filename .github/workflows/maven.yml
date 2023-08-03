@@ -43,7 +43,7 @@ jobs:
     - name: Download Plugins with Maven
       run: mvn -B antrun:run --file pom.xml
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B source:jar javadoc:jar package --file pom.xml
     - name: Run Fess
       run: bash src/test/resources/before_script.sh
     - name: Run Integration Test
