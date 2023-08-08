@@ -19,9 +19,11 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -147,11 +149,14 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final long maxAccessCount = getMaxAccessCount(paramMap, dataMap);
             long counter = 0;
             final Deque<String> urlQueue = new LinkedList<>();
+            final Set<String> processedUrls = new HashSet<>();
             urlQueue.offer(url);
             while (!urlQueue.isEmpty() && (maxAccessCount < 0 || counter < maxAccessCount)) {
+                counter++;
                 final Map<String, Object> localDataMap =
                         dataMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 String processingUrl = urlQueue.poll();
+                processedUrls.add(processingUrl);
                 if (deleteUrlList.contains(processingUrl)) {
                     deleteDocuments(); // delete before indexing
                 }
@@ -165,7 +170,6 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                         if (processingUrl == null) {
                             break;
                         }
-                        counter++;
                         localDataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
                         crawlerStatsHelper.record(keyObj, StatsAction.REDIRECTED);
                     }
@@ -176,7 +180,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     crawlerStatsHelper.record(keyObj, StatsAction.ACCESS_EXCEPTION);
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
-                        ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(urlQueue::offer);
+                        ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(s -> {
+                            if (!processedUrls.contains(s)&&!urlQueue.contains(s)) {
+                                urlQueue.offer(s);
+                            }
+                        });
                     } else if (maxAccessCount != 1L) {
                         throw e;
                     } else {
