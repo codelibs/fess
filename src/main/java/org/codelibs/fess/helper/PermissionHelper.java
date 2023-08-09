@@ -15,13 +15,16 @@
  */
 package org.codelibs.fess.helper;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
-
+import java.io.IOException;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -32,6 +35,7 @@ import org.codelibs.fess.crawler.client.fs.FileSystemClient;
 import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -203,12 +207,41 @@ public class PermissionHelper {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isFileRoleFromFile() && responseData.getUrl().startsWith("file:")) {
-            final String owner = (String) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_USER);
-            if (owner != null) {
-                roleTypeList.add(systemHelper.getSearchRoleByUser(owner));
+            final Map<String, Object> metaDataMap = responseData.getMetaDataMap();
+            final Object fileAttributeView = metaDataMap.get(FileSystemClient.FILE_ATTRIBUTE_VIEW);
+            try {
+                if (fileAttributeView instanceof AclFileAttributeView aclFileAttributeView) {
+                    aclFileAttributeView.getAcl().stream().forEach(acl -> {
+                        final UserPrincipal principal = acl.principal();
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Principal: [{}] {}", principal.getClass().getName(), principal);
+                        }
+                        if (principal instanceof GroupPrincipal groupPrincipal) {
+                            roleTypeList.add(systemHelper.getSearchRoleByGroup(groupPrincipal.getName()));
+                        } else if (principal != null) {
+                            roleTypeList.add(systemHelper.getSearchRoleByUser(principal.getName()));
+                        }
+                    });
+                } else if (fileAttributeView instanceof PosixFileAttributeView posixFileAttributeView) {
+                    final PosixFileAttributes attributes = posixFileAttributeView.readAttributes();
+                    final UserPrincipal userPrincipal = attributes.owner();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Principal: [{}] {}", userPrincipal.getClass().getName(), userPrincipal);
+                    }
+                    if (userPrincipal != null) {
+                        roleTypeList.add(systemHelper.getSearchRoleByUser(userPrincipal.getName()));
+                    }
+                    final GroupPrincipal groupPrincipal = attributes.group();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Principal: [{}] {}", groupPrincipal.getClass().getName(), groupPrincipal);
+                    }
+                    if (groupPrincipal != null) {
+                        roleTypeList.add(systemHelper.getSearchRoleByGroup(groupPrincipal.getName()));
+                    }
+                }
+            } catch (IOException e) {
+                throw new CrawlingAccessException("Failed to access permission info", e);
             }
-            final String[] groups = (String[]) responseData.getMetaDataMap().get(FileSystemClient.FS_FILE_GROUPS);
-            roleTypeList.addAll(stream(groups).get(stream -> stream.map(systemHelper::getSearchRoleByGroup).collect(Collectors.toList())));
             if (logger.isDebugEnabled()) {
                 logger.debug("fileUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
             }
