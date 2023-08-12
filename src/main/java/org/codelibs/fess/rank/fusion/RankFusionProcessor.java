@@ -70,6 +70,7 @@ public class RankFusionProcessor implements AutoCloseable {
         }
     }
 
+    @Override
     @PreDestroy
     public void close() throws Exception {
         if (executorService != null) {
@@ -163,8 +164,8 @@ public class RankFusionProcessor implements AutoCloseable {
                 if (doc.get(idField) instanceof final String id) {
                     final float score = 1.0f / (rankConstant + j);
                     if (scoreDocMap.containsKey(id)) {
-                        Map<String, Object> baseDoc = scoreDocMap.get(id);
-                        float oldScore = toFloat(baseDoc.get(scoreField));
+                        final Map<String, Object> baseDoc = scoreDocMap.get(id);
+                        final float oldScore = toFloat(baseDoc.get(scoreField));
                         baseDoc.put(scoreField, oldScore + score);
                     } else {
                         doc.put(scoreField, Float.valueOf(score));

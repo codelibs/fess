@@ -535,7 +535,7 @@ public class SystemHelper {
             buf.append(e.getKey()).append(": ");
             try {
                 buf.append(e.getValue().get());
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 logger.warn("Failed to process {} task.", e.getKey(), ex);
                 buf.append(ex.getMessage());
             }

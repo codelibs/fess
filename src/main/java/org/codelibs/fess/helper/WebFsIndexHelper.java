@@ -60,7 +60,7 @@ public class WebFsIndexHelper {
 
     protected int crawlerPriority = Thread.NORM_PRIORITY;
 
-    protected final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<Crawler>());
+    protected final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<>());
 
     public void crawl(final String sessionId, final List<String> webConfigIdList, final List<String> fileConfigIdList) {
         final boolean runAll = webConfigIdList == null && fileConfigIdList == null;

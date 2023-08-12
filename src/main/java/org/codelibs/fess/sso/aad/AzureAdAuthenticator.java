@@ -435,10 +435,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         }
     }
 
-    protected void addGroupOrRoleName(List<String> list, String value, boolean useDomainServices) {
+    protected void addGroupOrRoleName(final List<String> list, final String value, final boolean useDomainServices) {
         list.add(value);
         if (useDomainServices && value.indexOf('@') >= 0) {
-            String[] values = value.split("@");
+            final String[] values = value.split("@");
             if (values.length > 1) {
                 list.add(values[0]);
             }

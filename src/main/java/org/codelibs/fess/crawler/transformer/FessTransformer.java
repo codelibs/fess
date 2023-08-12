@@ -36,7 +36,7 @@ import org.codelibs.fess.util.ComponentUtil;
 
 public interface FessTransformer {
 
-    Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
+    Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<>(1000));
 
     FessConfig getFessConfig();
 

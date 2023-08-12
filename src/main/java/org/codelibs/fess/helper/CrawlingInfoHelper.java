@@ -98,7 +98,7 @@ public class CrawlingInfoHelper {
 
     public synchronized void putToInfoMap(final String key, final String value) {
         if (infoMap == null) {
-            infoMap = Collections.synchronizedMap(new LinkedHashMap<String, String>());
+            infoMap = Collections.synchronizedMap(new LinkedHashMap<>());
         }
         logger.debug("infoMap: {}={} => {}", key, value, infoMap);
         infoMap.put(key, value);

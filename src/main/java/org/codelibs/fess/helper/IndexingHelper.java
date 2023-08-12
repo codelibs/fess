@@ -55,8 +55,8 @@ public class IndexingHelper {
                 docList.stream().forEach(doc -> {
                     if (!thumbnailManager.offer(doc)) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Removing {} from {}", doc.get(fessConfig.getIndexFieldThumbnail()),
-                                    doc.get(fessConfig.getIndexFieldUrl()));
+                            logger.debug("Removing {}={} from doc[{}]", fessConfig.getIndexFieldThumbnail(),
+                                    doc.get(fessConfig.getIndexFieldThumbnail()), doc.get(fessConfig.getIndexFieldUrl()));
                         }
                         doc.remove(fessConfig.getIndexFieldThumbnail());
                     }

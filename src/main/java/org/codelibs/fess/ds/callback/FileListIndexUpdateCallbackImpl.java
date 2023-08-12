@@ -90,7 +90,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         if (logger.isDebugEnabled()) {
             logger.debug("Executor Thread Pool: {}", nThreads);
         }
-        return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(nThreads),
+        return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(nThreads),
                 new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
@@ -181,7 +181,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         ((ChildUrlsException) cause).getChildUrlList().stream().map(RequestData::getUrl).forEach(s -> {
-                            if (!processedUrls.contains(s)&&!urlQueue.contains(s)) {
+                            if (!processedUrls.contains(s) && !urlQueue.contains(s)) {
                                 urlQueue.offer(s);
                             }
                         });

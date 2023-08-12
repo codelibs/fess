@@ -49,7 +49,7 @@ public class DataIndexHelper {
 
     protected int crawlerPriority = Thread.NORM_PRIORITY;
 
-    protected final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<DataCrawlingThread>());
+    protected final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<>());
 
     public void crawl(final String sessionId) {
         final List<DataConfig> configList = ComponentUtil.getCrawlingConfigHelper().getAllDataConfigList();

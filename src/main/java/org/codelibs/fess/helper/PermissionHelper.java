@@ -210,19 +210,19 @@ public class PermissionHelper {
             final Map<String, Object> metaDataMap = responseData.getMetaDataMap();
             final Object fileAttributeView = metaDataMap.get(FileSystemClient.FILE_ATTRIBUTE_VIEW);
             try {
-                if (fileAttributeView instanceof AclFileAttributeView aclFileAttributeView) {
+                if (fileAttributeView instanceof final AclFileAttributeView aclFileAttributeView) {
                     aclFileAttributeView.getAcl().stream().forEach(acl -> {
                         final UserPrincipal principal = acl.principal();
                         if (logger.isDebugEnabled()) {
                             logger.debug("Principal: [{}] {}", principal.getClass().getName(), principal);
                         }
-                        if (principal instanceof GroupPrincipal groupPrincipal) {
+                        if (principal instanceof final GroupPrincipal groupPrincipal) {
                             roleTypeList.add(systemHelper.getSearchRoleByGroup(groupPrincipal.getName()));
                         } else if (principal != null) {
                             roleTypeList.add(systemHelper.getSearchRoleByUser(principal.getName()));
                         }
                     });
-                } else if (fileAttributeView instanceof PosixFileAttributeView posixFileAttributeView) {
+                } else if (fileAttributeView instanceof final PosixFileAttributeView posixFileAttributeView) {
                     final PosixFileAttributes attributes = posixFileAttributeView.readAttributes();
                     final UserPrincipal userPrincipal = attributes.owner();
                     if (logger.isDebugEnabled()) {
@@ -239,7 +239,7 @@ public class PermissionHelper {
                         roleTypeList.add(systemHelper.getSearchRoleByGroup(groupPrincipal.getName()));
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new CrawlingAccessException("Failed to access permission info", e);
             }
             if (logger.isDebugEnabled()) {
