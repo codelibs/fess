@@ -118,7 +118,7 @@
         }
       },
       {
-        "lang_et": {
+        "lang_eu": {
           "match": "*_eu",
           "mapping": {
             "type": "text",
