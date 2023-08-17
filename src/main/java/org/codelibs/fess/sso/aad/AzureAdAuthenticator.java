@@ -408,6 +408,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     for (final String name : names) {
                         final String value = (String) memberOf.get(name);
                         if (StringUtil.isNotBlank(value)) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("{} is a member of {}", name, value);
+                            }
                             if (memberType.contains("group")) {
                                 addGroupOrRoleName(groupList, value, useDomainServices);
                             } else if (memberType.contains("role")) {
