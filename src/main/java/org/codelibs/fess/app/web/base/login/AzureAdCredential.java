@@ -20,6 +20,8 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
@@ -31,6 +33,8 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.UserInfo;
 
 public class AzureAdCredential implements LoginCredential, FessCredential {
+
+    private static final Logger logger = LogManager.getLogger(AzureAdCredential.class);
 
     private final AuthenticationResult authResult;
 
@@ -90,8 +94,19 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
                 final UserInfo userInfo = authResult.getUserInfo();
-                permissionSet.add(systemHelper.getSearchRoleByUser(userInfo.getUniqueId()));
-                permissionSet.add(systemHelper.getSearchRoleByUser(userInfo.getDisplayableId()));
+                final String uniqueId = userInfo.getUniqueId();
+                final String displayableId = userInfo.getDisplayableId();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("uniqueId:{} displayableId:{}", uniqueId, displayableId);
+                }
+                permissionSet.add(systemHelper.getSearchRoleByUser(uniqueId));
+                permissionSet.add(systemHelper.getSearchRoleByUser(displayableId));
+                if (ComponentUtil.getFessConfig().isAzureAdUseDomainServices() && displayableId.indexOf('@') >= 0) {
+                    final String[] values = displayableId.split("@");
+                    if (values.length > 1) {
+                        permissionSet.add(systemHelper.getSearchRoleByUser(values[0]));
+                    }
+                }
                 stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
                 stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
                 permissions = permissionSet.stream().filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]);
