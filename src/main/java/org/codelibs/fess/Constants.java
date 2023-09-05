@@ -37,6 +37,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SCORE = "score";
 
+    public static final String SEARCHER = "searcher";
+
     public static final String ON = "on";
 
     public static final String READY = "ready";

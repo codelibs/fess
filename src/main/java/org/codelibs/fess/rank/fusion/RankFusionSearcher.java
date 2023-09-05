@@ -15,11 +15,22 @@
  */
 package org.codelibs.fess.rank.fusion;
 
+import java.util.Locale;
+
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.dbflute.optional.OptionalThing;
 
 public abstract class RankFusionSearcher {
+    protected String name;
+
+    public String getName() {
+        if (name == null) {
+            name = StringUtil.decamelize(this.getClass().getSimpleName().replace("Searcher", StringUtil.EMPTY)).toLowerCase(Locale.ENGLISH);
+        }
+        return name;
+    }
 
     protected abstract SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean);
 

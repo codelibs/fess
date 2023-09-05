@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.collection.ArrayUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -30,6 +31,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -188,6 +190,14 @@ public class DefaultSearcher extends RankFusionSearcher {
         if (!docMap.containsKey(fessConfig.getIndexFieldId())) {
             docMap.put(fessConfig.getIndexFieldId(), searchHit.getId());
         }
+
+        final String[] searchers = DocumentUtil.getValue(docMap, Constants.SEARCHER, String[].class);
+        if (searchers != null) {
+            docMap.put(Constants.SEARCHER, ArrayUtil.add(searchers, getName()));
+        } else {
+            docMap.put(Constants.SEARCHER, new String[] { getName() });
+        }
+
         return docMap;
     }
 
