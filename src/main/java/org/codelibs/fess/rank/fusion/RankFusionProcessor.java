@@ -35,6 +35,8 @@ import javax.annotation.PreDestroy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits.Relation;
+import org.codelibs.core.collection.ArrayUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -42,6 +44,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
@@ -167,6 +170,15 @@ public class RankFusionProcessor implements AutoCloseable {
                         final Map<String, Object> baseDoc = scoreDocMap.get(id);
                         final float oldScore = toFloat(baseDoc.get(scoreField));
                         baseDoc.put(scoreField, oldScore + score);
+                        final String[] searchers = DocumentUtil.getValue(doc, Constants.SEARCHER, String[].class);
+                        if (searchers != null) {
+                            final String[] baseSearchers = DocumentUtil.getValue(baseDoc, Constants.SEARCHER, String[].class);
+                            if (baseSearchers != null) {
+                                baseDoc.put(Constants.SEARCHER, ArrayUtil.addAll(baseSearchers, searchers));
+                            } else {
+                                baseDoc.put(Constants.SEARCHER, searchers);
+                            }
+                        }
                     } else {
                         doc.put(scoreField, Float.valueOf(score));
                         scoreDocMap.put(id, doc);
