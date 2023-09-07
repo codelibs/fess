@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +50,10 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.di.core.ExternalContext;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 
 public class RankFusionProcessor implements AutoCloseable {
 
@@ -130,6 +136,9 @@ public class RankFusionProcessor implements AutoCloseable {
                     params.getStartPosition(), pageSize, offset);
         }
 
+        final ExternalContext externalContext = SingletonLaContainerFactory.getExternalContext();
+        final OptionalThing<HttpServletRequest> requestOpt = LaRequestUtil.getOptionalRequest();
+        final OptionalThing<HttpServletResponse> responseOpt = LaResponseUtil.getOptionalResponse();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int rankConstant = fessConfig.getRankFusionRankConstantAsInteger();
         final int size = windowSize / searchers.length;
@@ -140,7 +149,20 @@ public class RankFusionProcessor implements AutoCloseable {
         for (int i = 0; i < searchers.length; i++) {
             final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, 0, i == 0 ? windowSize : size);
             final RankFusionSearcher searcher = searchers[i];
-            resultList.add(executorService.submit(() -> searcher.search(query, reqParams, userBean)));
+            resultList.add(executorService.submit(() -> {
+                try {
+                    if (externalContext != null) {
+                        requestOpt.ifPresent(externalContext::setRequest);
+                        responseOpt.ifPresent(externalContext::setResponse);
+                    }
+                    return searcher.search(query, reqParams, userBean);
+                } finally {
+                    if (externalContext != null) {
+                        externalContext.setRequest(null);
+                        externalContext.setResponse(null);
+                    }
+                }
+            }));
         }
         final SearchResult[] results = resultList.stream().map(f -> {
             try {
@@ -348,6 +370,41 @@ public class RankFusionProcessor implements AutoCloseable {
         @Override
         public String getSimilarDocHash() {
             return parent.getSimilarDocHash();
+        }
+
+        @Override
+        public String getTrackTotalHits() {
+            return parent.getTrackTotalHits();
+        }
+
+        @Override
+        public Float getMinScore() {
+            return parent.getMinScore();
+        }
+
+        @Override
+        public boolean hasConditionQuery() {
+            return parent.hasConditionQuery();
+        }
+
+        @Override
+        public String[] getResponseFields() {
+            return parent.getResponseFields();
+        }
+
+        @Override
+        public int hashCode() {
+            return parent.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return parent.equals(obj);
+        }
+
+        @Override
+        public String toString() {
+            return parent.toString();
         }
     }
 
