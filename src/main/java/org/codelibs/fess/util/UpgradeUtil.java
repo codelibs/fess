@@ -25,7 +25,6 @@ import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.opensearch.action.ActionListener;
 import org.opensearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.opensearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.opensearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetadata;
@@ -37,6 +36,7 @@ import org.opensearch.client.Client;
 import org.opensearch.client.IndicesAdminClient;
 import org.opensearch.cluster.metadata.MappingMetadata;
 import org.opensearch.common.xcontent.XContentType;
+import org.opensearch.core.action.ActionListener;
 
 public final class UpgradeUtil {
     private static final Logger logger = LogManager.getLogger(UpgradeUtil.class);

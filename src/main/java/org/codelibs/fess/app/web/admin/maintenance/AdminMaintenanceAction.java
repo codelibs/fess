@@ -47,7 +47,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.opensearch.action.ActionListener;
+import org.opensearch.core.action.ActionListener;
 
 public class AdminMaintenanceAction extends FessAdminAction {
 

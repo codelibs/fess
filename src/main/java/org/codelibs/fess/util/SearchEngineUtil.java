@@ -24,11 +24,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.lastaflute.di.exception.IORuntimeException;
-import org.opensearch.common.xcontent.XContentFactory;
-import org.opensearch.common.xcontent.XContentHelper;
-import org.opensearch.common.xcontent.XContentType;
+import org.opensearch.core.xcontent.MediaType;
 import org.opensearch.core.xcontent.ToXContent;
 import org.opensearch.core.xcontent.XContentBuilder;
+import org.opensearch.core.xcontent.XContentHelper;
 import org.opensearch.search.SearchHit;
 
 public final class SearchEngineUtil {
@@ -38,8 +37,8 @@ public final class SearchEngineUtil {
     private SearchEngineUtil() {
     }
 
-    public static OutputStream getXContentBuilderOutputStream(final XContentBuilderCallback func, final XContentType xContentType) {
-        try (final XContentBuilder builder = func.apply(XContentFactory.contentBuilder(xContentType), ToXContent.EMPTY_PARAMS)) {
+    public static OutputStream getXContentBuilderOutputStream(final XContentBuilderCallback func, final MediaType mediaType) {
+        try (final XContentBuilder builder = func.apply(mediaType.contentBuilder(), ToXContent.EMPTY_PARAMS)) {
             builder.flush();
             return builder.getOutputStream();
         } catch (final IOException e) {
@@ -50,8 +49,8 @@ public final class SearchEngineUtil {
         }
     }
 
-    public static OutputStream getXContentOutputStream(final ToXContent xContent, final XContentType xContentType) {
-        return getXContentBuilderOutputStream((builder, params) -> xContent.toXContent(builder, params), xContentType);
+    public static OutputStream getXContentOutputStream(final ToXContent xContent, final MediaType mediaType) {
+        return getXContentBuilderOutputStream((builder, params) -> xContent.toXContent(builder, params), mediaType);
     }
 
     public static long scroll(final String index, final Function<SearchHit, Boolean> callback) {
@@ -60,9 +59,9 @@ public final class SearchEngineUtil {
                 hit -> callback.apply(hit));
     }
 
-    public static String getXContentString(final ToXContent xContent, final XContentType xContentType) {
+    public static String getXContentString(final ToXContent xContent, final MediaType mediaType) {
         try {
-            return XContentHelper.toXContent(xContent, xContentType, ToXContent.EMPTY_PARAMS, false).utf8ToString();
+            return XContentHelper.toXContent(xContent, mediaType, ToXContent.EMPTY_PARAMS, false).utf8ToString();
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }

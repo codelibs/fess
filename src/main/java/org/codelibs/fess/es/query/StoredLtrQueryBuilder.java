@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.common.io.stream.NamedWriteable;
-import org.opensearch.common.io.stream.StreamOutput;
 import org.opensearch.core.ParseField;
+import org.opensearch.core.common.io.stream.NamedWriteable;
+import org.opensearch.core.common.io.stream.StreamOutput;
 import org.opensearch.core.xcontent.ObjectParser;
 import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
