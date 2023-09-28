@@ -1095,6 +1095,10 @@
 					<groupId>org.opensearch.plugin</groupId>
 					<artifactId>analysis-common</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.opensearch.plugin</groupId>
+					<artifactId>opensearch-scripting-painless-spi</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
