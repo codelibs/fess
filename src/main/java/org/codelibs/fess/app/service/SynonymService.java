@@ -52,7 +52,7 @@ public class SynonymService {
     }
 
     public OptionalEntity<SynonymFile> getSynonymFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof SynonymFile)
+        return dictionaryManager.getDictionaryFile(dictId).filter(SynonymFile.class::isInstance)
                 .map(file -> OptionalEntity.of((SynonymFile) file)).orElse(OptionalEntity.empty());
     }
 

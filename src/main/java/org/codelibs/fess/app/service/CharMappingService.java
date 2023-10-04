@@ -53,7 +53,7 @@ public class CharMappingService {
     }
 
     public OptionalEntity<CharMappingFile> getCharMappingFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof CharMappingFile)
+        return dictionaryManager.getDictionaryFile(dictId).filter(CharMappingFile.class::isInstance)
                 .map(file -> OptionalEntity.of((CharMappingFile) file)).orElse(OptionalEntity.empty());
     }
 

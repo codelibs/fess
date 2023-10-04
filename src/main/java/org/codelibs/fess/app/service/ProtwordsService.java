@@ -53,7 +53,7 @@ public class ProtwordsService {
     }
 
     public OptionalEntity<ProtwordsFile> getProtwordsFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof ProtwordsFile)
+        return dictionaryManager.getDictionaryFile(dictId).filter(ProtwordsFile.class::isInstance)
                 .map(file -> OptionalEntity.of((ProtwordsFile) file)).orElse(OptionalEntity.empty());
     }
 

@@ -53,7 +53,7 @@ public class StopwordsService {
     }
 
     public OptionalEntity<StopwordsFile> getStopwordsFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof StopwordsFile)
+        return dictionaryManager.getDictionaryFile(dictId).filter(StopwordsFile.class::isInstance)
                 .map(file -> OptionalEntity.of((StopwordsFile) file)).orElse(OptionalEntity.empty());
     }
 

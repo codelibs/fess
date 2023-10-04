@@ -53,7 +53,7 @@ public class StemmerOverrideService {
     }
 
     public OptionalEntity<StemmerOverrideFile> getStemmerOverrideFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof StemmerOverrideFile)
+        return dictionaryManager.getDictionaryFile(dictId).filter(StemmerOverrideFile.class::isInstance)
                 .map(file -> OptionalEntity.of((StemmerOverrideFile) file)).orElse(OptionalEntity.empty());
     }
 
