@@ -376,7 +376,8 @@ public class PluginHelper {
     }
 
     public enum ArtifactType {
-        DATA_STORE("fess-ds"), THEME("fess-theme"), INGEST("fess-ingest"), SCRIPT("fess-script"), WEBAPP("fess-webapp"), UNKNOWN("jar");
+        DATA_STORE("fess-ds"), THEME("fess-theme"), INGEST("fess-ingest"), SCRIPT("fess-script"), WEBAPP("fess-webapp"), THUMBNAIL(
+                "fess-thumbnail"), UNKNOWN("jar");
 
         private final String id;
 
@@ -403,6 +404,9 @@ public class PluginHelper {
             }
             if (name.startsWith(WEBAPP.getId())) {
                 return WEBAPP;
+            }
+            if (name.startsWith(THUMBNAIL.getId())) {
+                return THUMBNAIL;
             }
             return UNKNOWN;
         }
