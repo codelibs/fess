@@ -32,6 +32,7 @@ import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 
@@ -57,6 +58,19 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             baseDir = new File(System.getProperty("java.io.tmpdir"));
         }
         destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
+        updateProperties();
+    }
+
+    protected void updateProperties() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String commandTimeoutStr = fessConfig.getSystemProperty("thumbnail.command.timeout");
+        if (commandTimeoutStr != null) {
+            commandTimeout = Long.valueOf(commandTimeoutStr);
+        }
+        final String commandDestroyTimeoutStr = fessConfig.getSystemProperty("thumbnail.command.destroy.timeout");
+        if (commandDestroyTimeoutStr != null) {
+            commandDestroyTimeout = Long.valueOf(commandDestroyTimeoutStr);
+        }
     }
 
     @Override
