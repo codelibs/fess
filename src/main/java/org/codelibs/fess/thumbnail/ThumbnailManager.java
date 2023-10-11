@@ -134,7 +134,7 @@ public class ThumbnailManager {
                         }
                     }
                 } catch (final InterruptedException e) {
-                    if (logger.isDebugEnabled()) {
+                    if (generating && logger.isDebugEnabled()) {
                         logger.debug("Interupted task.", e);
                     }
                 } catch (final Exception e) {
