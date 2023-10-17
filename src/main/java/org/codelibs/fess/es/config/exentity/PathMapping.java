@@ -38,7 +38,7 @@ public class PathMapping extends BsPathMapping {
 
     protected Pattern regexPattern;
 
-    protected BiFunction<String, Matcher, String> pathMapper;
+    protected BiFunction<String, Matcher, String> pathMapperFunc;
 
     public String getId() {
         return asDocMeta().id();
@@ -62,14 +62,14 @@ public class PathMapping extends BsPathMapping {
         }
         final Matcher matcher = regexPattern.matcher(input);
         if (matcher.find()) {
-            if (pathMapper == null) {
+            if (pathMapperFunc == null) {
                 final String replacement = StringUtil.isNotBlank(getReplacement()) ? getReplacement() : StringUtil.EMPTY;
-                pathMapper = pathMappingHelper.createPathMatcher(matcher, replacement);
+                pathMapperFunc = pathMappingHelper.createPathMatcher(matcher, replacement);
             }
             try {
-                return pathMapper.apply(input, matcher);
+                return pathMapperFunc.apply(input, matcher);
             } catch (final Exception e) {
-                logger.warn("Failed to apply {}", pathMapper, e);
+                logger.warn("Failed to apply {} to {}.", regexPattern.pattern(), input, e);
             }
         }
         return input;
