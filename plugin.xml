@@ -17,8 +17,8 @@
 			<param name="plugin.groupId" value="org/codelibs/opensearch" />
 			<param name="plugin.name.prefix" value="opensearch-" />
 			<param name="plugin.name" value="analysis-extension" />
-			<param name="plugin.version" value="2.10.0" />
-			<param name="plugin.zip.version" value="2.10.0" />
+			<param name="plugin.version" value="2.11.0" />
+			<param name="plugin.zip.version" value="2.11.0" />
 		</antcall>
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
@@ -26,8 +26,8 @@
 			<param name="plugin.groupId" value="org/codelibs/opensearch" />
 			<param name="plugin.name.prefix" value="opensearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="2.10.0" />
-			<param name="plugin.zip.version" value="2.10.0" />
+			<param name="plugin.version" value="2.11.0" />
+			<param name="plugin.zip.version" value="2.11.0" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
@@ -35,8 +35,8 @@
 			<param name="plugin.groupId" value="org/codelibs/opensearch" />
 			<param name="plugin.name.prefix" value="opensearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="2.10.0" />
-			<param name="plugin.zip.version" value="2.10.0" />
+			<param name="plugin.version" value="2.11.0" />
+			<param name="plugin.zip.version" value="2.11.0" />
 		</antcall>
 		<!-- minhash -->
 		<antcall target="install.plugin">
@@ -44,8 +44,8 @@
 			<param name="plugin.groupId" value="org/codelibs/opensearch" />
 			<param name="plugin.name.prefix" value="opensearch-" />
 			<param name="plugin.name" value="minhash" />
-			<param name="plugin.version" value="2.10.0" />
-			<param name="plugin.zip.version" value="2.10.0" />
+			<param name="plugin.version" value="2.11.0" />
+			<param name="plugin.zip.version" value="2.11.0" />
 		</antcall>
 
 		<antcall target="remove.jars" />
