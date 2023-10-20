@@ -164,7 +164,12 @@ public class TermQueryCommand extends QueryCommand {
         final BoolQueryBuilder boolQuery =
                 buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
-        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength) {
+
+        // Do not add fuzzy queries if the single-word query is surrounded by double quotes
+        final String exactWordMatchLookupRegex = ".*\"" + text + "\".*";
+        final boolean queryIsExactMatch = context.getQueryString().matches(exactWordMatchLookupRegex);
+
+        if (!queryIsExactMatch && fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength) {
             boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)
                     .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())
                     .prefixLength(fessConfig.getQueryBoostFuzzyTitlePrefixLengthAsInteger())

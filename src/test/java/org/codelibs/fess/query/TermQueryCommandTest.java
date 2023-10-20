@@ -83,6 +83,14 @@ public class TermQueryCommandTest extends UnitFessTestCase {
                 "{\"prefix\":{\"site\":{\"value\":\"aaa\",\"boost\":1.0}}}", //
                 "site:aaa");
 
+        // assertion for fuzzy search
+        assertQueryBuilder(BoolQueryBuilder.class,
+                "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"helloworld\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"helloworld\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"helloworld\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"helloworld\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
+                "helloworld");
+        assertQueryBuilder(BoolQueryBuilder.class,
+                "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"helloworld\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"helloworld\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
+                "\"helloworld\"");
+
         assertQueryBuilder("{\"timestamp\":{\"order\":\"asc\"}}", "sort:timestamp");
         assertQueryBuilder("{\"timestamp\":{\"order\":\"asc\"}}", "sort:timestamp.asc");
         assertQueryBuilder("{\"timestamp\":{\"order\":\"desc\"}}", "sort:timestamp.desc");
