@@ -121,34 +121,36 @@ public class PluginHelper {
         while (matcher.find()) {
             final String name = matcher.group(1);
             final String pluginUrl = url + (url.endsWith("/") ? name + "/" : "/" + name + "/");
-            final String pluginMetaContent = getRepositoryContent(pluginUrl + "maven-metadata.xml");
-            try (final InputStream is = new ByteArrayInputStream(pluginMetaContent.getBytes(Constants.UTF_8_CHARSET))) {
-                final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setFeature(Constants.FEATURE_SECURE_PROCESSING, true);
-                factory.setFeature(Constants.FEATURE_EXTERNAL_GENERAL_ENTITIES, false);
-                factory.setFeature(Constants.FEATURE_EXTERNAL_PARAMETER_ENTITIES, false);
-                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, StringUtil.EMPTY);
-                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, StringUtil.EMPTY);
-                final DocumentBuilder builder = factory.newDocumentBuilder();
-                final Document document = builder.parse(is);
-                final NodeList nodeList = document.getElementsByTagName("version");
-                for (int i = 0; i < nodeList.getLength(); i++) {
-                    final String version = nodeList.item(i).getTextContent();
-                    if (isTargetPluginVersion(version)) {
-                        if (version.endsWith("SNAPSHOT")) {
-                            final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
-                            if (StringUtil.isNotBlank(snapshotVersion)) {
-                                final String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
-                                list.add(
-                                        new Artifact(name, actualVersion, pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
-                            } else if (logger.isDebugEnabled()) {
-                                logger.debug("Snapshot name is not found: {}/{}", name, version);
+            try {
+                final String pluginMetaContent = getRepositoryContent(pluginUrl + "maven-metadata.xml");
+                try (final InputStream is = new ByteArrayInputStream(pluginMetaContent.getBytes(Constants.UTF_8_CHARSET))) {
+                    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    factory.setFeature(Constants.FEATURE_SECURE_PROCESSING, true);
+                    factory.setFeature(Constants.FEATURE_EXTERNAL_GENERAL_ENTITIES, false);
+                    factory.setFeature(Constants.FEATURE_EXTERNAL_PARAMETER_ENTITIES, false);
+                    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, StringUtil.EMPTY);
+                    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, StringUtil.EMPTY);
+                    final DocumentBuilder builder = factory.newDocumentBuilder();
+                    final Document document = builder.parse(is);
+                    final NodeList nodeList = document.getElementsByTagName("version");
+                    for (int i = 0; i < nodeList.getLength(); i++) {
+                        final String version = nodeList.item(i).getTextContent();
+                        if (isTargetPluginVersion(version)) {
+                            if (version.endsWith("SNAPSHOT")) {
+                                final String snapshotVersion = getSnapshotActualVersion(builder, pluginUrl, version);
+                                if (StringUtil.isNotBlank(snapshotVersion)) {
+                                    final String actualVersion = version.replace("SNAPSHOT", snapshotVersion);
+                                    list.add(new Artifact(name, actualVersion,
+                                            pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
+                                } else if (logger.isDebugEnabled()) {
+                                    logger.debug("Snapshot name is not found: {}/{}", name, version);
+                                }
+                            } else {
+                                list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
                             }
-                        } else {
-                            list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
+                        } else if (logger.isDebugEnabled()) {
+                            logger.debug("{}:{} is ignored.", name, version);
                         }
-                    } else if (logger.isDebugEnabled()) {
-                        logger.debug("{}:{} is ignored.", name, version);
                     }
                 }
             } catch (final Exception e) {

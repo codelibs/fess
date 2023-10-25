@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.lastaflute.di.exception.IORuntimeException;
 
 public class PluginHelperTest extends UnitFessTestCase {
     private PluginHelper pluginHelper;
@@ -44,20 +46,20 @@ public class PluginHelperTest extends UnitFessTestCase {
                 if (url.contains("plugin/repo1")) {
                     try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
                         return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
-                    } catch (Exception e) {
-                        return "";
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
                     }
                 } else if (url.contains("plugin/repo2")) {
                     try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
                         return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
-                    } catch (Exception e) {
-                        return "";
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
                     }
                 } else if (url.contains("plugin/repo.yaml")) {
                     try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
                         return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
-                    } catch (Exception e) {
-                        return "";
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
                     }
                 }
                 throw new FessSystemException("unknown");
