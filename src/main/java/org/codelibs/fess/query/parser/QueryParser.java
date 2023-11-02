@@ -25,7 +25,10 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser.Operator;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
+import org.apache.lucene.queryparser.ext.Extensions.Pair;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.QueryParseException;
 
@@ -53,7 +56,7 @@ public class QueryParser {
     }
 
     protected org.apache.lucene.queryparser.classic.QueryParser createQueryParser() {
-        final ExtendableQueryParser parser = new ExtendableQueryParser(defaultField, analyzer);
+        final LuceneQueryParser parser = new LuceneQueryParser(defaultField, analyzer);
         parser.setAllowLeadingWildcard(allowLeadingWildcard);
         parser.setDefaultOperator(defaultOperator);
         return parser;
@@ -108,5 +111,44 @@ public class QueryParser {
 
     public interface FilterChain {
         Query parse(final String query);
+    }
+
+    protected static class LuceneQueryParser extends org.apache.lucene.queryparser.classic.QueryParser {
+
+        private final String defaultField;
+
+        /**
+         * Creates a new {@link ExtendableQueryParser} instance
+         *
+         * @param f the default query field
+         * @param a the analyzer used to find terms in a query string
+         */
+        public LuceneQueryParser(final String f, final Analyzer a) {
+            super(f, a);
+            this.defaultField = f;
+        }
+
+        @Override
+        protected Query getFieldQuery(final String field, final String queryText, boolean quoted) throws ParseException {
+            final org.apache.lucene.search.Query query = super.getFieldQuery(field, queryText, quoted);
+            if (quoted && query instanceof TermQuery termQuery) {
+                final Pair<String, String> splitField = splitField(defaultField, field);
+                if (defaultField.equals(splitField.cur)) {
+                    final PhraseQuery.Builder builder = new PhraseQuery.Builder();
+                    builder.add(termQuery.getTerm());
+                    return builder.build();
+                }
+            }
+            return query;
+        }
+
+        protected Pair<String, String> splitField(String defaultField, String field) {
+            int indexOf = field.indexOf(':');
+            if (indexOf < 0)
+                return new Pair<>(field, null);
+            final String indexField = indexOf == 0 ? defaultField : field.substring(0, indexOf);
+            final String extensionKey = field.substring(indexOf + 1);
+            return new Pair<>(indexField, extensionKey);
+        }
     }
 }

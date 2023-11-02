@@ -234,7 +234,9 @@ public class QueryHelperTest extends UnitFessTestCase {
                 Map.of("_default", List.of("aaa:bbb")), //
                 Set.of("aaa:bbb"), //
                 buildQuery("aaa\\:bbb"));
-        assertQueryContext(buildQuery("aaa\\:bbb").getQueryBuilder().toString().replaceAll("\\s", ""), buildQuery("\"aaa\\:bbb\""));
+        assertQueryContext(
+                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                buildQuery("\"aaa\\:bbb\""));
 
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
