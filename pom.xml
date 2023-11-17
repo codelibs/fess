@@ -902,7 +902,7 @@
 	</build>
 	<repositories>
 		<repository>
-			<id>snapshots-repo</id>
+			<id>snapshots.oss.sonatype.org</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
 				<enabled>false</enabled>
