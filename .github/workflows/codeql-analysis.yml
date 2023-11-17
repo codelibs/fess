@@ -81,15 +81,6 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - name: Checkout fess-parent
-      uses: actions/checkout@v2
-      with:
-        repository: codelibs/fess-parent
-        path: fess-parent
-    - name: Install fess-parent
-      run: |
-        cd fess-parent
-        mvn install
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 

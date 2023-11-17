@@ -31,15 +31,6 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: Checkout fess-parent
-      uses: actions/checkout@v2
-      with:
-        repository: codelibs/fess-parent
-        path: fess-parent
-    - name: Install fess-parent
-      run: |
-        cd fess-parent
-        mvn install
     - name: Download Plugins with Maven
       run: mvn -B antrun:run --file pom.xml
     - name: Build with Maven
