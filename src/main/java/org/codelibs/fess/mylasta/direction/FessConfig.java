@@ -673,6 +673,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String RESPONSE_HIGHLIGHT_content_title_ENABLED = "response.highlight.content_title.enabled";
 
+    /** The key of the configuration. e.g. application/pdf,text/plain */
+    String RESPONSE_INLINE_MIMETYPES = "response.inline.mimetypes";
+
     /** The key of the configuration. e.g. fess.search */
     String INDEX_DOCUMENT_SEARCH_INDEX = "index.document.search.index";
 
@@ -3880,6 +3883,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isResponseHighlightContentTitleEnabled();
+
+    /**
+     * Get the value for the key 'response.inline.mimetypes'. <br>
+     * The value is, e.g. application/pdf,text/plain <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseInlineMimetypes();
 
     /**
      * Get the value for the key 'index.document.search.index'. <br>
@@ -8774,6 +8784,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED);
         }
 
+        public String getResponseInlineMimetypes() {
+            return get(FessConfig.RESPONSE_INLINE_MIMETYPES);
+        }
+
         public String getIndexDocumentSearchIndex() {
             return get(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX);
         }
@@ -10990,6 +11004,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_MAX_TITLE_LENGTH, "50");
             defaultMap.put(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH, "100");
             defaultMap.put(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED, "true");
+            defaultMap.put(FessConfig.RESPONSE_INLINE_MIMETYPES, "application/pdf,text/plain");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX, "fess");
