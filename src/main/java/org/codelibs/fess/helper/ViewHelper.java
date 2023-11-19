@@ -83,7 +83,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.opensearch.core.common.text.Text;
 import org.opensearch.search.fetch.subphase.highlight.HighlightField;
@@ -211,6 +210,9 @@ public class ViewHelper {
         textFragmentPrefixLength = fessConfig.getQueryHighlightTextFragmentPrefixLengthAsInteger();
         textFragmentSuffixLength = fessConfig.getQueryHighlightTextFragmentSuffixLengthAsInteger();
         textFragmentSize = fessConfig.getQueryHighlightTextFragmentSizeAsInteger();
+
+        split(fessConfig.getResponseInlineMimetypes(), ",")
+                .of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(inlineMimeTypeSet::add));
     }
 
     public String getContentTitle(final Map<String, Object> document) {
@@ -759,7 +761,7 @@ public class ViewHelper {
             return;
         }
         if (mimeType.startsWith("text/")) {
-            final String charset = LaResponseUtil.getResponse().getCharacterEncoding();
+            final String charset = responseData.getCharSet();
             if (charset != null) {
                 response.contentType(mimeType + "; charset=" + charset);
                 return;

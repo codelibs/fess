@@ -56,9 +56,6 @@
 		</postConstruct>
 	</component>
 	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
-		<postConstruct name="addInlineMimeType">
-			<arg>"application/pdf"</arg>
-		</postConstruct>
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
