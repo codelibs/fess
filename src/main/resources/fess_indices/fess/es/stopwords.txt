@@ -1,4 +1,4 @@
-﻿# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/spanish_stop.txt
+# https://github.com/apache/lucene-solr/blob/master/lucene/analysis/common/src/resources/org/apache/lucene/analysis/snowball/spanish_stop.txt
 de
 la
 que
