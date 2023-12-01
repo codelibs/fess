@@ -745,7 +745,16 @@ public class ViewHelper {
             }
 
             final String encodedName = URLEncoder.encode(name, Constants.UTF_8).replace("+", "%20");
-            response.header(CONTENT_DISPOSITION, contentDispositionType + "; filename=\"" + name + "\"; filename*=utf-8''" + encodedName);
+            final String contentDispositionValue;
+            if (name.equals(encodedName)) {
+                contentDispositionValue = contentDispositionType + "; filename=\"" + name + "\"";
+            } else {
+                contentDispositionValue = contentDispositionType + "; filename*=utf-8''" + encodedName;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("ResponseHeader: {}: {}", CONTENT_DISPOSITION, contentDispositionValue);
+            }
+            response.header(CONTENT_DISPOSITION, contentDispositionValue);
         } catch (final Exception e) {
             logger.warn("Failed to write a filename: {}", responseData, e);
         }
