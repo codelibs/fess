@@ -121,8 +121,7 @@ public class IndexingHelper {
         }
         if (!docIdList.isEmpty()) {
             searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
-                    QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
-
+                    QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIdList.stream().toArray(n -> new String[n])));
         }
     }
 
@@ -145,7 +144,7 @@ public class IndexingHelper {
     public long deleteDocumentsByDocId(final SearchEngineClient searchEngineClient, final List<String> docIdList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
-                QueryBuilders.idsQuery().addIds(docIdList.stream().toArray(n -> new String[n])));
+                QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIdList.stream().toArray(n -> new String[n])));
     }
 
     public long deleteDocumentByQuery(final SearchEngineClient searchEngineClient, final QueryBuilder queryBuilder) {
